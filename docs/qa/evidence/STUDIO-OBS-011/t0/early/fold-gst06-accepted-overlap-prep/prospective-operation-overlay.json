@@ -1,0 +1,521 @@
+{
+  "status": "CONTINGENT_38_OPERATION_OVERLAY_NOT_ATOMIC_SOURCE_READY",
+  "atUtc": "2026-10-19T11:23:56.090727+00:00",
+  "originalAtomicManifestSha256": "d857284d9cf38d78572cd43f40914db1997edf6edcfad196305b068094508593",
+  "originalOperationCount": 37,
+  "prospectiveOperationCount": 38,
+  "prospectiveEdits": 33,
+  "prospectiveDeletes": 4,
+  "prospectiveAdds": 1,
+  "overlapsRebased": 2,
+  "newLifecycleOperation": 1,
+  "unchangedOriginalOperationRecords": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "operation": "edit",
+      "preimageSha256": "4eb8933ac540773c9526109076e412396cfc9e6163e36cd1e3bf777f039b2f24",
+      "candidateSha256": "abea933dbeb42d41403629a293007f952064621751ee1ade98389a8460c36f60",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__dispatch__HttpRunnerDispatchClient.java.patch",
+      "patchSha256": "5e2b635494faf4587e0487d5d0ef47cc0244c02f12dd81be881802b304eac682",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "operation": "edit",
+      "preimageSha256": "b110f81571abf182f88254053792fdefa2554f792d871cd3b674925d47a6aa08",
+      "candidateSha256": "18e55d0bf7123e1178bec58d145ce7099bc3506a5ad139c3dbca1dd484e7a4a7",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchService.java.patch",
+      "patchSha256": "3aa28f55ea1360bcb8d994a1de282c0cbd74263d7f04a1df97174636ba6b5030",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "operation": "delete",
+      "preimageSha256": "9823a4d4c907fdb4a7b64449cc8a727b2de9b1160897058f5a6823590f42987d",
+      "candidateSha256": null,
+      "preimageMode": "0o644",
+      "candidateMode": null,
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__bridge__GuidedRunnerClient.java.patch",
+      "patchSha256": "d2f27803cf56b16b3b30093257b2070b42c8900d608731848428568b14538f1f",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "operation": "edit",
+      "preimageSha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+      "candidateSha256": "4cdc120830ebea83cac9a93f5d3c89b60166cf8ae834746fb2de536d4f5065e2",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPlanPublisher.java.patch",
+      "patchSha256": "14514e7e2d86fe931cadadd26dc54b1f2fc3d0c5afdd4b7bae3d24b4ac7c2639",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java",
+      "operation": "delete",
+      "preimageSha256": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e",
+      "candidateSha256": null,
+      "preimageMode": "0o644",
+      "candidateMode": null,
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationAuthorization.java.patch",
+      "patchSha256": "4adde97989c6791bbae9602e2f0d60d83183b550189b72a25b89c99255d64f49",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "operation": "edit",
+      "preimageSha256": "0a6e7299e32c6aeeda9f1d91fdb3ee8d886964e3e72114c50f47156ce2c04575",
+      "candidateSha256": "ac2043acdb7a75e7facd1bd45f023bcb0e3ebfd64fc6413fbcede81410906b83",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationConfiguration.java.patch",
+      "patchSha256": "5cc3762bcb018eaaee6f01d0bae7c722352a8103a7d59daf03fffaf3201ca8a3",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "operation": "edit",
+      "preimageSha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8",
+      "candidateSha256": "c3564b01efb0641a4d4d7bb90b45df7fa2797d3c5ae3e836fcdac576bbe18c9f",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationResultProjector.java.patch",
+      "patchSha256": "575d4535aad93f403bd102c9b45320e5cee74abf889092493a4f4ed086988f4a",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+      "operation": "edit",
+      "preimageSha256": "340eb5b7e8af6482aef63ebf0ea387f4d1650ae3cfe073fad117a5dfb79fdbaf",
+      "candidateSha256": "386bcdc33645aad940814d62ce0d06f5fcaf621c086db65a075d17ac005849e4",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__publication__ObservedReplayAuthorizer.java.patch",
+      "patchSha256": "1d089027d72e8664561912b04ab304ac09011ac2902c4fd6f8f319f528ed705f",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "operation": "edit",
+      "preimageSha256": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871",
+      "candidateSha256": "b70d3122822f83acbdbcaa2e7a0bab4a2c913a967432153b095650cf5339fad1",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__publication__ObservedReplayConfiguration.java.patch",
+      "patchSha256": "0101ec397e8d884f9153f0f1c5f4afd088cc5132f795f61758ea86389ebfca49",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "operation": "delete",
+      "preimageSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+      "candidateSha256": null,
+      "preimageMode": "0o644",
+      "candidateMode": null,
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__publication__ObservedValidationClient.java.patch",
+      "patchSha256": "bf2614e2828534952233417dba5d5735f9bf64f0625cc6ad3374046ad063cf29",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "operation": "edit",
+      "preimageSha256": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660",
+      "candidateSha256": "dca229b97a65fc31aae67a357cc09c99b165d34ef06059f117f8fb1b647a5f10",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__session__GuidedSessionConfiguration.java.patch",
+      "patchSha256": "4c10f529a01531f3837b795e69cdc0136dabd03408ea0b010ea3ff7f0d97ac41",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+      "operation": "edit",
+      "preimageSha256": "36b4b3c9d517fe4579bbf6f0f0dfae595c55084135e1aeda1a68f898212a68da",
+      "candidateSha256": "bfccc4e83b259f5bd34f9ad3336ed65fa3252fb542550de034e183de42953a50",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__session__README.md.patch",
+      "patchSha256": "bc254f131f0e09f50c16feb0ea733a6302e8d5ba741a75c9472f4d6142c4a73c",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchTestAccess.java",
+      "operation": "add",
+      "preimageSha256": null,
+      "candidateSha256": "2e6509a98e7c31da25e60d9f0b0509a600f52b069e794bca31c2651997f7e1cb",
+      "preimageMode": null,
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__dispatch__DispatchTestAccess.java.patch",
+      "patchSha256": "fa62732e58bc731bf75858976cc9a057a6652847793b4e7f8fa4d495be5cb515",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java",
+      "operation": "edit",
+      "preimageSha256": "3467a465c5e3cc430275bed877a1d1923dcff60df26b9f2531418f5964cf6da3",
+      "candidateSha256": "f9d39f9ed283187576b0e265fb2d1f169abc76d59f0ea1ddb3fba96de727b6f1",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__dispatch__RunnerTlsClientCertIT.java.patch",
+      "patchSha256": "f0fcf45725084d5c975a4576878c9ee32babb645277e3f6d70cceddd49b470f8",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "operation": "edit",
+      "preimageSha256": "4bafbc3c281a4d7f87312a11840facf8538819de76d0938e28498721352eff07",
+      "candidateSha256": "2e5d98fc8fb701c069efd041c8a83dcb89f61c5beebc651603ba8be912c2242f",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedBridgeIntegrationTest.java.patch",
+      "patchSha256": "910a8ee2010fc4fd6237cd8fba2efd2723b81ce2944c022e68f371dbc85d5f8f",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "operation": "edit",
+      "preimageSha256": "1c5091bf059b4098960f50ce4b244f35b7866ca99c6c086392c36b7f11a2d51f",
+      "candidateSha256": "75c35dc791836aa5a46d359a848a23e3f1cf3b8bae5ddb28adf6d472f6a1f1ff",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedBridgePlannedIT.java.patch",
+      "patchSha256": "cd7c91a40b3cb3dc16be629b217d87e7b96292784c6c7e3689aa2653a13aeac9",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java",
+      "operation": "edit",
+      "preimageSha256": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416",
+      "candidateSha256": "c2f32ec312cd30c6f48ab78fbd4a2a690b928a4b4af06f109e9c076fda94d25f",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchContextDeadlineTest.java.patch",
+      "patchSha256": "fc989aade4a9c269df344286ac0b5e5c1894373d86ee0155e1db070471e76497",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextRefusalTest.java",
+      "operation": "edit",
+      "preimageSha256": "594a90d0b11e9203054e485fae52cef28c80796179ed67a58375f586ef4e6681",
+      "candidateSha256": "1403a3c4467e2c7630bc0d8f78cf0d7c69a203440e469109a78ea6ad8769e51f",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchContextRefusalTest.java.patch",
+      "patchSha256": "8c29fa40f715a82dc8636f0658213bcaa6f0e10c85de62c507965bf048724618",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java",
+      "operation": "edit",
+      "preimageSha256": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+      "candidateSha256": "19f09dd1d3d45dc6d55231de7feecb10e9db77b98f3f7e9db5cc40760d6e0d43",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchStopKeyTest.java.patch",
+      "patchSha256": "c3b7aa2ea7b994f8eda859c1255966a103cffc3cabe67e861b71d1097133cbc4",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java",
+      "operation": "edit",
+      "preimageSha256": "7efd8bb612de9f9673f2489c8e08e90b44dcf544c144ab201ced442bc7132bfa",
+      "candidateSha256": "42f7323d9af5da04c18b99770e7b482e5034e46918e5f4d2cdaa09ec1233546c",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedOwnedBufferBoundaryTest.java.patch",
+      "patchSha256": "b7ba0ecb2028a866ff47b89b2c413a2ab198ee9262a9eae611add16f46935230",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java",
+      "operation": "edit",
+      "preimageSha256": "98144848bbc5c41db604cd6ed5c1bc6e889737c2c62b9c3f2d652b5e368e47f8",
+      "candidateSha256": "7851c0ca5dc081b123e90398da87caf30653716f6bdc31f73f30a4ec9a969f2d",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedRunnerContextRefusalTest.java.patch",
+      "patchSha256": "a298a147f213ea3189a58a3fcc4dd621e58bdf87c687d995fa8701c430bb768c",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java",
+      "operation": "edit",
+      "preimageSha256": "a1d66073ec6e2d1f72bf2f564136f5db1ceee8c1186c9505581b5109f57dd8af",
+      "candidateSha256": "86df833069d4aac0123a48222ab5b532550e30482546cf85a3716e4414d79152",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedSecretByteBodyTest.java.patch",
+      "patchSha256": "bf86cf8e4fd3b5d119223fbf2af726c08364904377b89c47325db258b4ba6cee",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java",
+      "operation": "delete",
+      "preimageSha256": "25cd088252ce9a4e0437448d6645a58738ff7b9f9fc069c3883bc26f30aa73b5",
+      "candidateSha256": null,
+      "preimageMode": "0o644",
+      "candidateMode": null,
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationAuthorizationIT.java.patch",
+      "patchSha256": "5042dba7e2adba8b15162f0407c6590f6850a050256f56121635c63e08fead76",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "operation": "edit",
+      "preimageSha256": "98aec4f908d92c89a5d50155e35702eb8b8e3c98270d82655f212b328ca0e42c",
+      "candidateSha256": "83c7c738fb00ad0a9c7de72cec6da14510dbc76f140c136563e31b0341c60aec",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationReplayIT.java.patch",
+      "patchSha256": "31af27e4128a3bd7d7f465f4600abe54454c0f3f38c6af666339f134c75d2bfc",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "operation": "edit",
+      "preimageSha256": "94f4a7bde4ffc5928f5bd98659e03d592a931edfbe976db50d32c9c4fc63d447",
+      "candidateSha256": "13f8c9b55bc08224b904bcdcf7ef70518cba15028db37c07554b5cccd050deeb",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedAdmissionSecurityIT.java.patch",
+      "patchSha256": "a45485c10ac9f47fc15b9b3f01b4276e30b9d9f1f4b52a8727b4ed7fffe5bd1d",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "operation": "edit",
+      "preimageSha256": "f85bf21c5efc68a213ce0ac418b2ebd3f4884610513d4a1a68eded71f0c85205",
+      "candidateSha256": "ebb3d0e9bb9a3584bb3066763256a0b59d4dcbdc7e6c0464f77e65d812f16d61",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedArtifactLowererTest.java.patch",
+      "patchSha256": "9bd2eeb961ed85893b65d6b13aa1be2ef0fb9e08f554d9c4cebd23cf99e6996e",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java",
+      "operation": "edit",
+      "preimageSha256": "cc9407be238952b82562707a32290fb73004cef988722aef9984739677a0ff21",
+      "candidateSha256": "17599a87f05eb04cd7263a4d84bdae18981759cb6c186a49f9e156768acc765e",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedGrantClockIT.java.patch",
+      "patchSha256": "c938c630ff16a15f2a00a548564f4e5868f8dd4db6fefd2fdb6fbba4a02b2353",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java",
+      "operation": "edit",
+      "preimageSha256": "40e83b12314d9656575270ca7c827490d16b383312778104faf8a35f2674974b",
+      "candidateSha256": "480f5f9ba3cab2b7bcd45d6463c7cd48806f719ef9741888b11afe1df79db17f",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedProfileDriftTest.java.patch",
+      "patchSha256": "4b6f040ad134c0ebc556dc28b333bffbdb3b77aed664d12039a202a07b1d32c9",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "operation": "edit",
+      "preimageSha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+      "candidateSha256": "1bce395fb2204ac1f5ea11175d96288b2e72a4b72dc9030c1a739c324a361af4",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__publication__PublicationGrantClockIT.java.patch",
+      "patchSha256": "7e74b0da39bd032f2989f02e405c09c08f6644668203909df5d94586fc235d7d",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "operation": "edit",
+      "preimageSha256": "da5fb5916e21f3cb149ab4c46a1d6484e37168cbf92c7b51f0e814477b1c273a",
+      "candidateSha256": "6d64b45946771f392a89467290b7c0b0cb94d2abe2afa1b38fbcdf3c13a9a5f5",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedEvidencePendingAppendJoinedIT.java.patch",
+      "patchSha256": "b393f0aa6ab9a761f24e426e8f4d1cb5caf9673fcafaf67f9b886dc355768af1",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "operation": "edit",
+      "preimageSha256": "389389d2413f5090bcd985309b06a614c93869d31ed98e1672bbe2237d0f5174",
+      "candidateSha256": "7cc652e8ca50c488307a62206ea2d58db3c2a6cc850e8ff0c690e3d425ca785b",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__translation__GuidedFocusMutationJoinedIT.java.patch",
+      "patchSha256": "87bfdaef771c82562232b4277c180a2bb98e52b3889b1b64b36e77f22876f3a7",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "operation": "edit",
+      "preimageSha256": "cf44fc4c52706ff56370204af17281045b3b794ded792fb4c8022886b599c1eb",
+      "candidateSha256": "f430d0fe9646f5ff4b8f916861f64f9920faead685e665e98a97ab22a102880d",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__translation__GuidedPlanningIntegrationTest.java.patch",
+      "patchSha256": "a0f637bc71d3145aa79c2587a749fd7ba7d84706d4963390585a3d1430da6eae",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSuffixMaterializationTest.java",
+      "operation": "edit",
+      "preimageSha256": "710ccd98a04751a574940d8f5e5517005692c37b7750f950dc3f50e7fc6718cb",
+      "candidateSha256": "d7f6aa200bf5ef8ba761c1ab3f8985fbf4097e1bce87d5ea3410a9a0b85743da",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__translation__GuidedSuffixMaterializationTest.java.patch",
+      "patchSha256": "219e402f55191ae64e18b3e6425dba10538ebb391907eb9a3546939d4b92eec7",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+      "operation": "edit",
+      "preimageSha256": "16aaebe6db8386b06aedbc58b347bb57b3ff937989afa49db0eb8f4b4d99a588",
+      "candidateSha256": "940554cdb7499eac57d8eb0dbe36341336e2943e826abb8e2c7fa81eced15aea",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "studio-runner__test__fixtures-tier__guidedCloseBound.test.ts.patch",
+      "patchSha256": "a66c716c491d765257bd5ee14a9c744033d8c384e55330ee2c159b1a30db7310",
+      "ownership": "PROPOSED_TS_METADATA_ONLY"
+    },
+    {
+      "path": "studio-runner/test/guided/runtime.test.ts",
+      "operation": "edit",
+      "preimageSha256": "ad6ad7e20730e1dd775d15301450738ed227964057ab6edfeca36fd1307bc629",
+      "candidateSha256": "53169404baaf3d8e2e52e87fdabd42f73e07566422a7017e74fb064720ae37ea",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "studio-runner__test__guided__runtime.test.ts.patch",
+      "patchSha256": "c3058ecb59555f96019e3ec8d2549cd4808f0204df80cb41dd4ca36daea06fec",
+      "ownership": "PROPOSED_TS_METADATA_ONLY"
+    }
+  ],
+  "overlapAndLifecyclePreviews": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "operation": "edit",
+      "preimageSha256": "0a9cd30bf501089b5cbc17922e1f9809efd5f176c83f42359ad4ba0105a8ac59",
+      "candidateSha256": "2f21ba4efd84f709af196deabe2c364efe93118f3cd03b47a2dbe69fffd5af79",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedSessionIT.java.patch",
+      "patchSha256": "84697d7d8dac5dfb0fcf207ccc806a5945cd5893c95658e3c45d15937a04735c",
+      "restorePatch": "patches/restore__backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedSessionIT.java.patch",
+      "restorePatchSha256": "b77e7f511513eed06cc529ce973b0f9feeac1e7f4555965142b310d0ae8b5fc7",
+      "typePortMapping": [
+        {
+          "before": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+          "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+          "replacements": 1
+        },
+        {
+          "before": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorization",
+          "after": "com.citi.put.checks.studio.dispatch.DispatchAuthorization",
+          "replacements": 1
+        },
+        {
+          "before": "com.citi.put.checks.studio.guided.publication.ObservedValidationClient",
+          "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+          "replacements": 1
+        },
+        {
+          "before": "GuidedPublicationAuthorization",
+          "after": "DispatchAuthorization",
+          "replacements": 1
+        },
+        {
+          "before": "ObservedValidationClient",
+          "after": "HttpRunnerDispatchClient",
+          "replacements": 1
+        }
+      ],
+      "wholeFileExactAfterDeclaredTypeMap": true,
+      "originalAtomicOperation": {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+        "operation": "edit",
+        "preimageSha256": "7e58a455aa98d5f036cda36f109d4a0fcd49b90b8e769a7799f8ddafcfb84804",
+        "candidateSha256": "b490f2aba25e69319b80b1541d966b16b5304af8d58ddb980895d6b716c3f8fd",
+        "preimageMode": "0o644",
+        "candidateMode": "0o644",
+        "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedSessionIT.java.patch",
+        "patchSha256": "0594ed703b36687bf3418df02cce300d03474ede5edffa6b629047ca41df7293",
+        "ownership": "v7 exact FOLD-final"
+      },
+      "ownership": "Prospective FOLD-final after acceptedGST06; Life38thop rootae6; allotherprerequisites stillpending",
+      "runtimeVerified": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "operation": "edit",
+      "preimageSha256": "353bc8ebcf75d373203c58b016ead65648661cfdf47fa950d6230ac238ac7aa5",
+      "candidateSha256": "a2ebfa6a3a785798f8fe96efb471be98b0b6fa20df70a8d0f4914ffc09d2ccdb",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedLifecycleReasonIT.java.patch",
+      "patchSha256": "8b7ea849814c387abadcaea519523e16d9dab487e5895ea59770746a30eaf5c1",
+      "restorePatch": "patches/restore__backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedLifecycleReasonIT.java.patch",
+      "restorePatchSha256": "9864f2ffb5316039fc4d58ae59ce66d349341f34dbacaae4988304b73d5c2a5d",
+      "typePortMapping": [
+        {
+          "before": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+          "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+          "replacements": 1
+        }
+      ],
+      "wholeFileExactAfterDeclaredTypeMap": true,
+      "originalAtomicOperation": null,
+      "ownership": "Prospective FOLD-final after acceptedGST06; Life38thop rootae6; allotherprerequisites stillpending",
+      "runtimeVerified": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "operation": "edit",
+      "preimageSha256": "5317d3805950e562da4530433fcfdf660b1744e3b17cf58c5fa3f047b2176b15",
+      "candidateSha256": "2f373b55df7802e79db582e9db5ead71ae1e5d4ed84a90cbfc677f9436beb7e4",
+      "preimageMode": "0o644",
+      "candidateMode": "0o644",
+      "patch": "patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedServiceTransportFaultIT.java.patch",
+      "patchSha256": "5708324611976a60de7b8bbe04ec718d2baa146fc0000d19ca9e6dd6c3b91ffe",
+      "restorePatch": "patches/restore__backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedServiceTransportFaultIT.java.patch",
+      "restorePatchSha256": "5a1df9fadcbfb6be0304f7164f63011acabf9ac244f3416333711eeb7e69a123",
+      "typePortMapping": [
+        {
+          "before": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+          "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+          "replacements": 2
+        },
+        {
+          "before": "GuidedRunnerClient",
+          "after": "HttpRunnerDispatchClient",
+          "replacements": 6
+        }
+      ],
+      "wholeFileExactAfterDeclaredTypeMap": true,
+      "originalAtomicOperation": {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+        "operation": "edit",
+        "preimageSha256": "c8d6a2ca64fcd79ffd94bec8f454ffe1b3ccb2ae18282e2cce46f41d51cf8aea",
+        "candidateSha256": "01d280ca1456d526f91928c6fd0e72a80da61ab93ee2e67fcb849b76314c0a5a",
+        "preimageMode": "0o644",
+        "candidateMode": "0o644",
+        "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedServiceTransportFaultIT.java.patch",
+        "patchSha256": "fccef3a194eca2fc47dc5f4d19e011a424ba822ad6a120d50dcea09b06db39a0",
+        "ownership": "v7 exact FOLD-final"
+      },
+      "ownership": "Prospective FOLD-final after acceptedGST06; Life38thop rootae6; allotherprerequisites stillpending",
+      "runtimeVerified": false
+    }
+  ],
+  "acceptedGstSourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+  "acceptedGstRootAdoptionSha256": "797ca4ea70e0e530bdd533bbb43168a2c04d6abc7bd92158ddfdf333591e3d4a",
+  "lifecycleOwnerRootAdoptionSha256": "ae6b7a7a7395d2f0a8a3f2db723a6f07f0d159b4374540683a2a31b5d0039693",
+  "oldGst05PreviewSupersededForThesePreimagesOnly": true,
+  "remaining": "ActualGS-M/ITS/IR-B4/LEFT/MERGE inputrebases/fullatomicrecomposition+AriaQuinnreview/alloriginalFOLDgates/fiveLifeactualfullclass onfoldedtree. Noactualapply/noIRclock/noC8credit.",
+  "sourceOrNativeReleased": false
+}

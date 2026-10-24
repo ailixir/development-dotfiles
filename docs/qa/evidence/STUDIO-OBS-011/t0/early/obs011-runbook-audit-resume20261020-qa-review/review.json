@@ -1,0 +1,113 @@
+{
+  "kind": "INDEPENDENT_FULL_RUNBOOK_PUBLIC_SOURCE_AUDIT_REVIEW",
+  "decision": "CHANGES_REQUESTED_DOCS_ONLY",
+  "subject": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs011-runbook-audit-resume20261020",
+  "subjectManifestSha256": "8b445844b7e1a9f089d622e65f5e58a7e449365671b567118702d72ed1e4189f",
+  "mandatoryFindings": [
+    {
+      "id": "DOC-RB-01",
+      "severity": "MEDIUM",
+      "section": "5; related dispatcher instructions in6/12(a)",
+      "previewLine": 287,
+      "issue": "The new operative sentence says STUDIO_DISPATCHER_ENABLED=false disables both schedulers, but the captured worker profile defines studio.execution.dispatcher.enabled=true literally. The alias is referenced only by the lower packaged application.yml property; rendering the alias into the worker environment is not proof that the worker profile consumes it.",
+      "sourceEvidence": [
+        {
+          "path": "backend/src/main/resources/application-worker.yml",
+          "line": 23,
+          "sha256": "bf0c42d16bfdfbb1f7d5f7a5d9206f6ce98fe58e4c3bddd0f5bfff64160c3a65"
+        },
+        {
+          "path": "backend/src/main/resources/application.yml",
+          "line": 360,
+          "sha256": "271fac527d075f996173e6cf1ef52d409d4416d3d6a46114fc541097b3a25f75"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/_helpers.tpl",
+          "line": 574,
+          "sha256": "976cc0e8cd9a97240fa18651481172d89354fbd59b8131bb47437973ad45962f"
+        },
+        {
+          "path": "helm-chart/put-checks/templates/deployment.yaml",
+          "line": 524,
+          "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchScheduler.java",
+          "line": 35,
+          "sha256": "68c044e2066c5903fa40888477eab9cfe3ff732473c53fb14d1cecca01af0f07"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/StudioRecoveryScheduler.java",
+          "line": 22,
+          "sha256": "7cd30d7888a553197c610e07396b620fabdefe73a61d2bae376ee04a60f219c3"
+        }
+      ],
+      "impact": "An operator can mistake a rendered alias for an effective stop or diagnose a healthy active worker as unable to dispatch/reap. This is a source-configuration inference, not an inspected process result.",
+      "smallestCorrection": "State that effective studio.execution.dispatcher.enabled=false disables the scheduler beans. Distinguish the chart-rendered STUDIO_DISPATCHER_ENABLED alias from that effective property; disclose the literal worker-profile override and require effective-property verification. Do not prescribe a new code/config fix or claim deployed behavior. Reconcile the section5 audit row accordingly."
+    },
+    {
+      "id": "DOC-RB-02",
+      "severity": "MEDIUM",
+      "section": "12(a)",
+      "previewLine": 783,
+      "issue": "The retained operative rollback warning still says turning off the dispatcher leaves queued work until its deadline. When the effective dispatcher property is false, StudioRecoveryScheduler is also disabled, so passage of the deadline does not itself close rows. This contradicts the newly corrected sections5/6.",
+      "sourceEvidence": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/StudioRecoveryScheduler.java",
+          "line": 22,
+          "sha256": "7cd30d7888a553197c610e07396b620fabdefe73a61d2bae376ee04a60f219c3"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/PendingReaper.java",
+          "line": 65,
+          "sha256": "4f643583b8739682a3482f13396d47b461fc41f2b67fddcfcde583abf3d8caff"
+        }
+      ],
+      "impact": "Rollback instructions imply automatic deadline closure even after the component that performs it has been disabled.",
+      "smallestCorrection": "Replace \u201cuntil its deadline\u201d with \u201cuntil a scheduler resumes and performs closure/reaping\u201d; retain the instruction to leave the dispatcher enabled while engaging the execution kill switch. No source change."
+    },
+    {
+      "id": "DOC-RB-03",
+      "severity": "MEDIUM",
+      "section": "9.1",
+      "previewLine": 573,
+      "issue": "The retained current security statement says any of the three bypasses makes Studio authorization use whatever identity the caller wrote in a header. Only identity-headers accepts X-User-* input. With that flag closed, core-service returns a fixed administrative identity; csi-read augments an already resolved identity only for CSI GETs and does not authenticate Studio writes from headers.",
+      "sourceEvidence": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/security/BffSessionAuthenticationFilter.java",
+          "line": 110,
+          "sha256": "316e55bd24f1df49d6e61e4459ae82351fc3b4d9ae9a005bf6b55835603eb6a9"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/security/BffSessionAuthenticationFilter.java",
+          "line": 165,
+          "sha256": "316e55bd24f1df49d6e61e4459ae82351fc3b4d9ae9a005bf6b55835603eb6a9"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/config/IdentityBypassProperties.java",
+          "line": 43,
+          "sha256": "d78ca84409399fffc35bf824d882c507340032d41663f7782b0fe4d01168d5e1"
+        }
+      ],
+      "impact": "The audited runbook collapses three distinct authorization effects and contradicts its own corrected section9 table and warning.",
+      "smallestCorrection": "Qualify the header-identity statement specifically to identity-headers; describe the fixed core-service admin bypass and CSI-GET-only role augmentation separately or refer to the already-correct section9 table. Preserve ED-02 and its real-identity proof gap. No authorization change."
+    }
+  ],
+  "reviewReportSha256": "855ab5dbaef3c953394052ee32b3f5ed11fd178cff0fb5818cf2070c54668de3",
+  "checksSha256": "42083bf3fffd35b5f36a5df4bd1a74e8199a59aecf4211d67050bbc8737fa0a2",
+  "conditions": [
+    "Documentation review only. No patch application, integration/source-window/lease authority, storycredit, lifecycle transition, fresh-baseline credit or runtime approval.",
+    "All three mandatory factual corrections must be prepared in a new sealed docs-only revision and independently re-reviewed; preserve this subject and earlier packets.",
+    "Full requested section coverage was reviewed, but C-OBS009-3/F2 documentary acceptance remains pending these corrections. This does not invalidate the earlier bounded approval of the five unaffected documentation patches.",
+    "The current studio.gateway.* protection gap is explicitly disclosed and remains unresolved. Separate architecture triage owns product/source placement; this review requests no product fix and treats neither old studio.compile.gateway.* guards nor environment entries as effective gateway-integrity proof.",
+    "Keep all external gates open: ED-02 identity/Vault/secret-use policy and linked tickets; ED-03/SPK-03 storage/IAM/lifecycle/consistency; ED-04/SPK-05 CNI/destinations; ED-05/SPK-04 current image/sandbox/PID; ED-06/SPK-02 proxy/cookie/media/reconnect/CSRF; section14 provisioning/sizing/PKCS12/JDK/cert-manager and release proof.",
+    "The model string and global/us/eu location advice are inherited platform-approval inputs, not verified provider availability/compatibility or an actual approval. Real endpoint, model/location, identity, allowlists, quota and release scenarios remain environment-owner proof.",
+    "Fresh backend check --rerun-tasks plus JaCoCo before011 credit and full affected final suites remain owed. Retain original tests/assertions/skips/timeouts and010 Live surface. C8/GST infrastructure stays parked and lean-deferred work stays deferred.",
+    "Root retains integration/lifecycle ownership. No staging, commit, push, deployment, signal, held-resource cleanup or external contact. No accessibility/skill/governance scope expansion. USD500 shared ceiling retained; actual aggregate spend unavailable."
+  ],
+  "fullC_OBS009_3F2DocumentaryAcceptance": false,
+  "storyCredit": false,
+  "freshBaselineCredit": false,
+  "runtimeIntegrationAuthority": false,
+  "onlyWriteDirectory": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs011-runbook-audit-resume20261020-qa-review"
+}

@@ -1,0 +1,71 @@
+{
+  "nativeExit": 0,
+  "outcome": "PASS_NONREPRODUCTION_ONLY",
+  "counts": {
+    "discovered": 4,
+    "executedPass": 1,
+    "failed": 0,
+    "nameFilterOmissions": 3
+  },
+  "cases": [
+    {
+      "ancestorTitles": [],
+      "fullName": "uses actual mTLS and native focus for guided secret ownership: revoked",
+      "title": "uses actual mTLS and native focus for guided secret ownership: revoked",
+      "status": "skipped",
+      "durationMs": null
+    },
+    {
+      "ancestorTitles": [],
+      "fullName": "uses actual mTLS and native focus for guided secret ownership: slow-grant",
+      "title": "uses actual mTLS and native focus for guided secret ownership: slow-grant",
+      "status": "skipped",
+      "durationMs": null
+    },
+    {
+      "ancestorTitles": [],
+      "fullName": "uses actual mTLS and native focus for guided secret ownership: lost-body-late-grant",
+      "title": "uses actual mTLS and native focus for guided secret ownership: lost-body-late-grant",
+      "status": "passed",
+      "durationMs": 4583.668083
+    },
+    {
+      "ancestorTitles": [],
+      "fullName": "uses actual mTLS and native focus for guided secret ownership: hard-expiry",
+      "title": "uses actual mTLS and native focus for guided secret ownership: hard-expiry",
+      "status": "skipped",
+      "durationMs": null
+    }
+  ],
+  "reportFresh": true,
+  "vitestReportSha256": "e482f6463285e5bf8a9c58a3c388ad2e552269a1dd9203b8d5c08d80a6d4e2ee",
+  "rawLogSha256": "c5acb0bb392ac5559c2a8284fd0c9bbbb54c360d18d0823e1b018928ec2b2813",
+  "closedWitnessSha256": "288bfb8a85440668a56e223c9f9c7236cc9386166bcbfac287c7ee6e1a096d70",
+  "allClosedWitnessSchemaValidated": true,
+  "closedRecordCount": 40,
+  "events": {
+    "schedule-enter": 5,
+    "schedule-return": 5,
+    "request-claim-enter": 4,
+    "claim-port-enter": 4,
+    "request-claim-sync-return": 4,
+    "complete-ack": 3,
+    "grant-validated": 3,
+    "claim-abort-event": 1,
+    "stop-entry": 2,
+    "invalidate-enter": 2,
+    "invalidate-return": 2,
+    "runtime-stop-enter": 2,
+    "runtime-post-stop-observer": 2,
+    "claim-rejected": 1
+  },
+  "allRequestedObservableEventKindsPresent": true,
+  "exactInternalInstantsRemainUnknown": true,
+  "originalCleanupComplete": true,
+  "mocksRestored": true,
+  "ownedCaffeinateReleased": true,
+  "originalFailureRetained": true,
+  "historicalCauseClaim": false,
+  "wholeFixtureGateCredit": false,
+  "readerNote": "Filtered cases omit duration; first metadata reader KeyError corrected to preserve absent value as null. No test/native rerun."
+}

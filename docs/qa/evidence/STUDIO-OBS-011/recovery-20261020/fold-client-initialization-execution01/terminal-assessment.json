@@ -1,0 +1,52 @@
+{
+  "status": "STOP_NATIVE_FAILURE_NO_RETRY",
+  "sourceApplication": "EXACT_ONE_FILE_APPLIED",
+  "static": {
+    "exit": 0,
+    "elapsedSeconds": 24.26,
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true
+  },
+  "focused": {
+    "outerExit": 1,
+    "exit": 1,
+    "gradleExit": 1,
+    "counts": {
+      "total": 98,
+      "passed": 93,
+      "failed": 5,
+      "errors": 0,
+      "skipped": 0
+    },
+    "elapsedSeconds": 6195.35,
+    "exactCounter98": true,
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "taskCollectionComplete": true,
+    "taskCollectionErrors": []
+  },
+  "sourceDigest": "c61fd2150bc28759511dfc5bf51d6be1f1f39bec3b0605277447dd149b8924a6",
+  "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "distFiles": 238,
+  "all1812ExistingSourceManifestInputsRehashedEqual": true,
+  "sourceBindingRecheckedAtUTC": "2026-10-20T21:21:03.743037+00:00",
+  "ReplayUnchanged": true,
+  "onlyClientChangedFromApplicationBefore": true,
+  "runtimeSession": 44836,
+  "runtimeTerminal": true,
+  "gradleLockReleased": true,
+  "heavyLaneReleased": true,
+  "newRuntimeAfterFailure": false,
+  "retryOrFollowupSourceEdit": false,
+  "formatterUsed": false,
+  "gatePass": false,
+  "unrunGates": [
+    "No retry or additional focused/helper controls authorized in this unit",
+    "No complete474/unchanged83/mutant or LEFT/FOLD02 rerun",
+    "Final fully composed Replay pair4/5 and wholecheck6 remain held",
+    "009 four-file integration, RT seven-file integration, final runner/build/image and FE final work held/outside this unit"
+  ],
+  "noLifecycleReleaseOrProductionCredit": true
+}

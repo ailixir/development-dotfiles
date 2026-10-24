@@ -1,0 +1,11 @@
+--- a/studio-runner/test/helpers/bootstrapProcessTreeObservation.ts
++++ b/studio-runner/test/helpers/bootstrapProcessTreeObservation.ts
+@@ -56,7 +56,7 @@
+     if (state === undefined || command === undefined || !Number.isInteger(pid) || pid < 0 || pid > MAX_PID ||
+         !Number.isInteger(ppid) || ppid < 0 || ppid > MAX_PID || (pid === 0 && ppid !== 0) ||
+         (pid > 0 && pid === ppid) || seen.has(pid) || !/^[RSDITtUWZX][+<>AELNSlsVWX]*$/u.test(state) ||
+-        command.trim() === '' || Array.from(command).some(character=>{const code=character.charCodeAt(0);return code<=0x1f||code===0x7f;})) throw new Error('BOOTSTRAP_PROCESS_TABLE_INVALID');
++        command.trim() === '' || /[\u0000-\u001f\u007f]/u.test(command)) throw new Error('BOOTSTRAP_PROCESS_TABLE_INVALID');
+     seen.add(pid);
+     // Preserve the complete trailing command, including spaces; suffixes are state flags, not a liveness substitute.
+     rows.push({ pid, ppid, state, command });

@@ -1,0 +1,40 @@
+{
+  "kind": "ROOT_AUTHORIZED_SINGLE_CURRENT_PUBLIC_XML_CLOSED_ENUM_PROJECTION",
+  "authorizedBy": "root",
+  "atUtc": "2026-10-19T14:58:55.101158+00:00",
+  "terminalIndexSha256": "f3d5b283f86fe0196d570f0a04002c758a292689203ddb93a6fe1a4c8d62ebcb",
+  "preservedPublicManifestSha256": "2ad6a83e6b269ea1c981204d5a33624632e555e5ad8b50892fad4654a1747aec",
+  "publicXmlFact": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-c8-check01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+    "sha256": "66039c03edf051ddf5e5748a89f4ee88b433728e2250b1365eaa3267fbd891b9",
+    "bytes": 1729774,
+    "mtimeNs": 1792419120218708970,
+    "mode": "0o600",
+    "task": "test"
+  },
+  "selectedClass": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+  "selectedSourceMethod": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+  "sourceAssertionLine": 32322,
+  "allowedExpectedState": "FINALIZING",
+  "allowedActualStates": [
+    "CREATED",
+    "QUEUED",
+    "BOOTSTRAPPING",
+    "LEARNING",
+    "FINALIZING",
+    "PUBLISHED",
+    "SUCCEEDED",
+    "PUBLICATION_CONFLICT",
+    "FAILED",
+    "UNKNOWN_OUTCOME",
+    "CANCELLED",
+    "EXPIRED"
+  ],
+  "fields": [
+    "selectedFailureUnique:boolean",
+    "expectedState:FINALIZING_or_UNKNOWN",
+    "observedState:allowlisted_enum_or_UNKNOWN"
+  ],
+  "inspection": "Inspect selected public failure message attribute only; ignore failure text/system-out/system-err/other messages. No free text/identifiers/parameters/payload exported. No TEMP/private state, locator/join/provider/model/OS/native action. Unmatched result UNKNOWN; no fallback search.",
+  "authorityScope": "Read-only typed evidence, no source fix or cause/stage inference/C8/release credit"
+}

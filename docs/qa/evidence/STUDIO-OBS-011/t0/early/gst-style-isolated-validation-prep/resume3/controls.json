@@ -1,0 +1,72 @@
+{
+  "kind": "CLOSED_PROTOCOL_SCHEMAS_SOURCE_ONLY",
+  "decision": {
+    "keys": [
+      "unit",
+      "phase",
+      "principal",
+      "sequence",
+      "previousReceipt",
+      "planSha256",
+      "approvalSha256"
+    ],
+    "principal": "root",
+    "sequence": "strict-int prior+1",
+    "previousReceipt": "exactactualrawSHA ornullforfirst",
+    "unit": "exactprospectivelabel",
+    "phase": "one named operation only",
+    "raw": "externalSHA over same verified bytes; portcustody owed"
+  },
+  "permit": {
+    "keys": [
+      "unit",
+      "principal",
+      "finalReceipt",
+      "issued",
+      "expires",
+      "exitStatus"
+    ],
+    "principal": "root",
+    "exitStatus": "strictint0",
+    "issuedExpires": "strictintegers exactly60seconds, sameadmittedclockdomain, PREandPOST"
+  },
+  "caps": {
+    "prepare": 1,
+    "format": 1,
+    "verify": 1,
+    "regression": 1,
+    "archive": 1,
+    "final": 1,
+    "gate": 1,
+    "postclose": 1
+  },
+  "nativeCapsConsumedIncludingSetupFailure": true,
+  "separateStatuses": [
+    "final",
+    "gate"
+  ],
+  "runtimeControlsPresent": false,
+  "pathExistence": "UNOBSERVED_UNALLOCATED",
+  "archiveQaFinalPermitWrapperPostclose": "ALL_OWED",
+  "source02": {
+    "frozenPermit": "Scalar tuple includes same externalrawpin; no reread/refresh/substitution",
+    "clock": "strictint admittedtime, nondecreasing and valid PRE/POST/fullfinalproof/publicationcompletion",
+    "closingStates": "GATE_OK/CLOSED_RESOURCE_ONLY published only after owned finalR observation; no provisional success",
+    "formattedAdoption": "typedreceipt/history;acceptedprojectandpendingreviewcommitonlyonsuccess;failurestickyHOLD",
+    "finalObservationClosedKeys": [
+      "source",
+      "ownershipComplete",
+      "completionQualified"
+    ],
+    "publicationGuardRequiredForAcceptedGate": true
+  },
+  "source03": {
+    "clockConsumer": "ALLdirectPortclockcallscentralizedin_admitted_time",
+    "firstGateAdmission": "originalverifiedscalarpermit/rawpin boundbeforefirst_gates read",
+    "retention": "append each actually consumed activegatefact before validation; no reset atbind/failure",
+    "failure": "strictinteger unknown/outside originalinterval/reversed latchHOLD; samepermit/cap1;latercleanreadings cannotreopen",
+    "noNewTimeDomainOrGetter": true,
+    "noUnobservedIntervalClaim": true,
+    "publicationFinalSourceAdoption": "source02correctionsunchanged"
+  }
+}

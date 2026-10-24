@@ -1,0 +1,133 @@
+{
+  "kind": "ROOT_ONE_UNIT_OPERATIONAL_DUAL_EXCEPTION_FOR_QUALIFIED_FAILED_RESOURCE_ONLY",
+  "authorizedBy": "root",
+  "atUtc": "2026-10-19T16:36:03.739633+00:00",
+  "unit": "obs011-t0-c8-check01",
+  "originalSession": 19501,
+  "originalWrapper": {
+    "pid": 45226,
+    "start": "Mon Oct 19 09:03:46 2026"
+  },
+  "originalShell": {
+    "pid": 45227,
+    "start": "Mon Oct 19 09:03:46 2026"
+  },
+  "originalReleaseSha256": "9f347db3774a785a0b732392b2711976476ac4ae8743fcad839026c121fc3511",
+  "activeLockSha256": "a938fadcc56ddb8b8e86b80cb2a50589c558cb8a135e934c7443d2508b827b24",
+  "terminalIndexSha256": "f3d5b283f86fe0196d570f0a04002c758a292689203ddb93a6fe1a4c8d62ebcb",
+  "implementationPacketSha256": "e0cdc50f6970e595d3c1095b9b182e116d60663b0eb37d3c4793b56a8b2ada11",
+  "exactIndependentCodeReviews": {
+    "architectureCode": {
+      "manifestPath": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume4-code-review/manifest.json",
+      "manifestSha256": "7c59e190497531d8dfa1f1f86dde3c9ccfa7d826327088e9aefeec47e7f7cc0d",
+      "reviewPath": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume4-code-review/review.md",
+      "reviewSha256": "61b7c088a5cf56ae0d710f00451bc4f84ab741bdfb444536770a75ba8d96b6f7",
+      "membersVerified": 13
+    },
+    "qaCode": {
+      "manifestPath": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-failed-resource-resume4-code-review/manifest.json",
+      "manifestSha256": "5a59c67521fef9255e2b005d4dc4c2737d75a17bc5c2f377864d477978fd9178",
+      "reviewPath": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-failed-resource-resume4-code-review/review.md",
+      "reviewSha256": "83dab62867db7ee80a5192fe75153ab8ed5048922145633e658fac0e19ffc293",
+      "membersVerified": 5
+    }
+  },
+  "actualQaManifestSha256": "c58fac633ab3003e7c1ca07f38aa884776d86887602e984353307c23feda852e",
+  "terminalDesignManifestSha256": "2250bd3c5f20cde5682d0d20959c76a28de44b09ed953192f10d2308d96f9c5a",
+  "terminalDesignQaManifestSha256": "815738c59684e12628eb26cf8aa18726666d97e4047e93c5cb140bc12acbaf21",
+  "explicitClosingEntrypointException": {
+    "authorized": true,
+    "onlyFunction": "c8_failed_resource_exit",
+    "purpose": "Supersede the original required closing-entrypoint rule for this ONE qualified failed-resource closing operation only. Original readonly exit/GST/code/release stay immutable HARD HOLD. No naked builtin/EOF/exec/alias/child-shell/PATH redirection. Final builtin exit1 only inside exact new readonly guard after new gate0."
+  },
+  "explicitFailedBuildZeroException": {
+    "authorized": true,
+    "compileState": "NOT_STARTED",
+    "basis": "Zero source writes and exact retained f9c source permit resource/lease disposition with original full BUILD FAILED/no standalonecompile0/bytecode guarantee retained. No passing build or C8 acceptance is claimed; no extra compile is necessary/authorized."
+  },
+  "expectedWrapperExit": 1,
+  "maximumNewGuardedClosingOperations": 1,
+  "newNativeOrCompilerOrDiagnosticOrSignalOrCleanupCallsAuthorized": 0,
+  "installationAuthorized": {
+    "namespace": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01/failed-resource-disposition01",
+    "directoryMode": 448,
+    "fileMode": 384,
+    "members": [
+      "predicates.py",
+      "failed_resource.py",
+      "guard-failed-resource.bash",
+      "retained-contract.json",
+      "input-pins.json"
+    ],
+    "onlyReviewedCustodyClassMayAssistInstallation": true
+  },
+  "orderedReadOnlyAndGuardedActionsAuthorized": [
+    "source/inspect distinct readonly new guard and exact configured launch; preserve old bindings",
+    "newactualmissing-readiness denial1; separateactualstatus1",
+    "newjournaledheld-proof0; separateactualstatus0/inspection",
+    "rootadmission separate with exactactualtrace/hash/launchattestation",
+    "standalonefinal0; separateactualstatus0/readinessinspection",
+    "rootpermit ONLYafter inspectedactualfinal0 in separate rootdecision",
+    "distinctguardedexit1 within60s with freshpre/postchecks and newgate0 only",
+    "actualwrapper1 separately captured",
+    "separateouterpostclose0/status/inspection; independentactualQA/rootdisposition"
+  ],
+  "currentUncertaintyDisposition": "Any current source/mode/inherited/client/listener/holder/FD/inode/kernel/pin/census/utility error HOLD. No generic qualification/retry/refresh bypass. Fresh current facts OWED by actual protocol; old0234 is not readiness.",
+  "sourceLease": {
+    "exclusiveRead": true,
+    "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+    "productWriters": [],
+    "wholeSourceModes": true,
+    "main506ReplayDist238HelmAuxProtected": true
+  },
+  "retainedNegativeEvidence": "2774=2762PASS/1FAIL/11SKIP, fixed9 unchanged,22evidence/fivevalidation errors, test+checkstyleTestFAILED, no currentcoverage. Native/collector/phase all1 remain.",
+  "permanentQualifications": [
+    "C8_CHECK01_OWNED_IDENTITY_OBSERVATION_GAP_TRUE",
+    "145_HISTORICAL_UNKNOWN_IDENTITIES",
+    "CHECK01_OPERATIONAL_FULL_FINGERPRINT_UNPROVEN",
+    "ROOT0234_MIDDLE_CENSUS_NOT_INDEPENDENTLY_ANCHORED_NO_ACTUAL_EMPTY_PROVED",
+    "UNRECORDED_FORK_ABSENCE_AND_GLOBAL_QUIET_UNPROVEN",
+    "FULLCHECK03_OWNED_IDENTITY_OBSERVATION_GAP",
+    "GST03_FORMAT_IDENTITY_GAP",
+    "GST03_PREMATURE_UNLOCK_INTERVAL"
+  ],
+  "pythonRoles": {
+    "launch": {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+      "sha256": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095"
+    },
+    "reported": {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+      "sha256": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095"
+    },
+    "process": {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+      "sha256": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7"
+    },
+    "observedArgument": {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+      "sha256": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7"
+    }
+  },
+  "observationExecutables": {
+    "/bin/ps": {
+      "path": "/bin/ps",
+      "sha256": "f2211a1d7ff5e5c2e034df4acf450e30ffeec4e5ed632f21948d7181a1c493b6"
+    },
+    "/usr/sbin/lsof": {
+      "path": "/usr/sbin/lsof",
+      "sha256": "8a76f446149b77c31d9b769ef7b0b2d4fa3550805303103b081886c5d8d68de4"
+    },
+    "git": {
+      "path": "/opt/homebrew/Cellar/git/2.43.2/bin/git",
+      "sha256": "5c9b91ebbfb0e2b6d759a082d3b9d18886d52e2fee333cd245b00561db632d8c"
+    }
+  },
+  "externalSelfToolRoleFactSha256": "af267068488221426368742557d1955b5817abc8ac081ad9d04661fc306ce67e",
+  "lockWrapperSha256": "2846314e3ab12926bff6eb458d7058c406b983092fb40b1fb5c2fa087c2366df",
+  "actualRuntimeInstalled": false,
+  "actualGuardSetupOrAdmission": false,
+  "finalReadinessOrPermitIssued": false,
+  "ordinaryRoute": "IMMUTABLE_HARD_HOLD",
+  "C8MainLaneIrLifecycleSourceReleaseOrCredit": false
+}

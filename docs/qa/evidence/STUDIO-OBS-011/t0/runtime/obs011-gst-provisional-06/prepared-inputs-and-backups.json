@@ -1,0 +1,36 @@
+{
+  "atUtc": "2026-10-19T10:44:06.154316+00:00",
+  "status": "PREPARED_ONLY_NO_SOURCE_OR_NATIVE_RELEASE",
+  "label": "obs011-gst-provisional-06",
+  "backups": [
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "backup": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/source-original-backups/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "sha256": "4d47ad6f8d67bfd3278b0d3f3930085e90f190d0ea500875272082eb97a7754e",
+      "mode": "0o644"
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "backup": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/source-original-backups/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "sha256": "8e5e4473c54e3884008ca63a3c87888ba6dcca514b5165f9dc40f8f20991613b",
+      "mode": "0o644"
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "backup": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/source-original-backups/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "sha256": "97162010003856cdc7f55f411e286a70f381a664c78c2e5b5cde7d5415784db9",
+      "mode": "0o644"
+    }
+  ],
+  "phaseKeeperSha256": "e4a64776e712409867990ce7b848a2db7fbfe84f42ddafe26c499512a30cc3a1",
+  "phaseKeeperDelta": "Only fixed U05 to U06 destination; exact algorithms unchanged. Every result/flags and dependent transition remain separate inspected model decisions.",
+  "guardBytesExactToSealedPreparation": true,
+  "freshBoundGuardAdmissionTestRequired": true,
+  "previousUnitClosedSha256": "ddbf393be29f1b62912fe081676573b55d76c75fcf44f3da266a40c40887ae0d",
+  "previousClosedAndSemanticDesignRootAdoptionSha256": "9f65eba05258ff63a283749b5712b0dcc5a81f2651f7112c80e0d82edc37d645",
+  "semanticProvenancePrototypeAndExactNewReviewPending": true,
+  "sourceWriterReleased": false,
+  "nativeCommandReleased": false,
+  "IRClockOrCallsStarted": false,
+  "credit": false
+}

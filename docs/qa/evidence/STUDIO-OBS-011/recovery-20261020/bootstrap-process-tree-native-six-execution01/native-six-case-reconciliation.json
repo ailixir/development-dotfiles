@@ -1,0 +1,104 @@
+{
+  "rawReportSha256": "ddf697a2d814dd2b44f8502534fa3eff32f6d595f1b20c4769ae92ef6cb6f0cb",
+  "rawLogSha256": "5b4b88a0262cc3c3e4251b79a09a0cbfd1e849d00e485bbd77a213b6ddc95b63",
+  "rawExit": 1,
+  "physicalResultFiles": 1,
+  "reportedSuiteCounts": {
+    "numTotalTestSuites": 1,
+    "numPassedTestSuites": 0,
+    "numFailedTestSuites": 1,
+    "numPendingTestSuites": 0,
+    "numTotalTests": 6,
+    "numPassedTests": 5,
+    "numFailedTests": 1,
+    "numPendingTests": 0,
+    "numTodoTests": 0
+  },
+  "identitiesAndOrderExact": true,
+  "filterOmissions": 0,
+  "counts": {
+    "passed": 5,
+    "failed": 1
+  },
+  "orderedCases": [
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled no-app Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled no-app Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed",
+      "failureType": "NONE",
+      "sourceErrorEnum": "NONE",
+      "projectFrames": []
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled captured-unpublished Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled captured-unpublished Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed",
+      "failureType": "NONE",
+      "sourceErrorEnum": "NONE",
+      "projectFrames": []
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled committed-before-ready Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled committed-before-ready Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed",
+      "failureType": "NONE",
+      "sourceErrorEnum": "NONE",
+      "projectFrames": []
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled committed-before-ready-orderly Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled committed-before-ready-orderly Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "failed",
+      "failureType": "Error",
+      "sourceErrorEnum": "BOOTSTRAP_PROCESS_TABLE_INVALID",
+      "projectFrames": [
+        {
+          "file": "test/helpers/bootstrapProcessTreeObservation.ts",
+          "line": 59,
+          "column": 147
+        },
+        {
+          "file": "test/helpers/bootstrapProcessTreeObservation.ts",
+          "line": 77,
+          "column": 17
+        },
+        {
+          "file": "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+          "line": 48,
+          "column": 117
+        }
+      ]
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled ready-sent-dropped Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled ready-sent-dropped Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed",
+      "failureType": "NONE",
+      "sourceErrorEnum": "NONE",
+      "projectFrames": []
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled ready-received-stop Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled ready-received-stop Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed",
+      "failureType": "NONE",
+      "sourceErrorEnum": "NONE",
+      "projectFrames": []
+    }
+  ],
+  "unhandledBannerPresent": false,
+  "gate": "FAIL",
+  "failureBodiesExported": false
+}

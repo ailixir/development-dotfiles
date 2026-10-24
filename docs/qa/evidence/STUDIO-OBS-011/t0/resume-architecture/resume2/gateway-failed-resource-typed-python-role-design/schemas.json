@@ -1,0 +1,482 @@
+{
+  "kind": "PROSPECTIVE_TYPED_FIELD_AND_CLIENT_SCHEMA_DESIGN_NOT_IMPLEMENTED_VALIDATOR",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schemas": {
+    "selfTextDigest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "SELF_REPORTED_TEXT_DIGEST"
+        },
+        "status": {
+          "const": "COMPLETE"
+        },
+        "encoding": {
+          "const": "STRICT_UTF8"
+        },
+        "normalization": {
+          "const": "NONE"
+        },
+        "utf8Bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "textSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "kind",
+        "status",
+        "encoding",
+        "normalization",
+        "utf8Bytes",
+        "textSha256"
+      ]
+    },
+    "physicalFileWitness": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "mode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4095
+        },
+        "dev": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ino": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "uid": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mtimeNs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ctimeNs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "acquisition": {
+          "const": "SAME_BUFFER_NOFOLLOW_FD"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "mode",
+        "dev",
+        "ino",
+        "uid",
+        "bytes",
+        "mtimeNs",
+        "ctimeNs",
+        "acquisition"
+      ]
+    },
+    "typedPriorActor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pid": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "ppid": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "SUCCESSFUL_HELD_PARENT_SETUP_HELPER",
+            "FAILED_PROVISIONAL_CLIENT",
+            "PROVISIONAL_WAITED_UTILITY",
+            "SELF_ROLE04_METADATA_ONLY",
+            "SELF_TEXT05_METADATA_ONLY",
+            "EXTERNAL_ROOT_CODE_CONTROL_INDEX_READER",
+            "EXTERNAL_ROOT_INSTALL_CONTROL_AUTHOR",
+            "EXTERNAL_ROOT_SETUP_CONTROL_AUTHOR",
+            "FUTURE_ACTUAL_SETUP_OR_CONTROL_ACTOR"
+          ]
+        },
+        "start": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "argvHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fullFingerprint": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "commHash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "executableHash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "executableFileHash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "commHash",
+                "executableHash",
+                "executableFileHash"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "completionKind": {
+          "enum": [
+            "SEPARATE_FOREGROUND_STATUS",
+            "OBSERVED_DIRECT_UTILITY_WAIT",
+            "ACTUAL_EXTERNAL_TOOL_EXIT",
+            "UNKNOWN"
+          ]
+        },
+        "actualStatus": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": -2147483648,
+              "maximum": 2147483647
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "directWaitClaimed": {
+          "type": "boolean"
+        },
+        "qualified": {
+          "const": false
+        },
+        "evidencePins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "minItems": 1
+        },
+        "requiredNumericAbsence": {
+          "const": true
+        }
+      },
+      "required": [
+        "pid",
+        "ppid",
+        "kind",
+        "start",
+        "argvHash",
+        "fullFingerprint",
+        "completionKind",
+        "actualStatus",
+        "directWaitClaimed",
+        "qualified",
+        "evidencePins",
+        "requiredNumericAbsence"
+      ]
+    },
+    "qualifiedTypedClient": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "FAILED_RESOURCE_TYPED_CLIENT_V1"
+        },
+        "authoritySha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "typedRoleContractSha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "ownerDecisionPins": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "Aria": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "Quinn": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "Aria",
+            "Quinn",
+            "root"
+          ]
+        },
+        "pid": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "ppid": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "start": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "argvHash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "requestedLaunch": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "proofKind": {
+              "const": "ROOT_PARENT_REQUESTED_LAUNCH_ATTESTATION"
+            }
+          },
+          "required": [
+            "path",
+            "sha256",
+            "proofKind"
+          ]
+        },
+        "selfText": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "reported": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "SELF_REPORTED_TEXT_DIGEST"
+                },
+                "status": {
+                  "const": "COMPLETE"
+                },
+                "encoding": {
+                  "const": "STRICT_UTF8"
+                },
+                "normalization": {
+                  "const": "NONE"
+                },
+                "utf8Bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 4096
+                },
+                "textSha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "status",
+                "encoding",
+                "normalization",
+                "utf8Bytes",
+                "textSha256"
+              ]
+            },
+            "origArgv0": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "SELF_REPORTED_TEXT_DIGEST"
+                },
+                "status": {
+                  "const": "COMPLETE"
+                },
+                "encoding": {
+                  "const": "STRICT_UTF8"
+                },
+                "normalization": {
+                  "const": "NONE"
+                },
+                "utf8Bytes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 4096
+                },
+                "textSha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "required": [
+                "kind",
+                "status",
+                "encoding",
+                "normalization",
+                "utf8Bytes",
+                "textSha256"
+              ]
+            }
+          },
+          "required": [
+            "reported",
+            "origArgv0"
+          ]
+        },
+        "physicalProcessFingerprint": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "commHash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "executableHash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "executableFileHash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "processRolePath": {
+              "type": "string"
+            },
+            "physicalWitnessSetSha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "psBeforeAfterQualified": {
+              "const": true
+            },
+            "twoLsofMappingsQualified": {
+              "const": true
+            }
+          },
+          "required": [
+            "commHash",
+            "executableHash",
+            "executableFileHash",
+            "processRolePath",
+            "physicalWitnessSetSha256",
+            "psBeforeAfterQualified",
+            "twoLsofMappingsQualified"
+          ]
+        },
+        "origArgv0CanonicalAppLiteralSatisfied": {
+          "const": true
+        },
+        "legacyReportedCanonicalPredicateSatisfied": {
+          "const": false
+        },
+        "oldAndNewPredicatesEquivalent": {
+          "const": false
+        },
+        "parentBinaryFingerprintClaimed": {
+          "const": false
+        },
+        "identityComplete": {
+          "const": true
+        }
+      },
+      "required": [
+        "kind",
+        "authoritySha256",
+        "typedRoleContractSha256",
+        "ownerDecisionPins",
+        "pid",
+        "ppid",
+        "start",
+        "argvHash",
+        "requestedLaunch",
+        "selfText",
+        "physicalProcessFingerprint",
+        "origArgv0CanonicalAppLiteralSatisfied",
+        "legacyReportedCanonicalPredicateSatisfied",
+        "oldAndNewPredicatesEquivalent",
+        "parentBinaryFingerprintClaimed",
+        "identityComplete"
+      ]
+    }
+  },
+  "semanticRulesBeyondFieldSchema": [
+    "Reject Python bool-as-int at runtime; require exact builtin types before comparisons. ClosedJSONschema alone isnotimplementation.",
+    "Require exact contractreported44/SHA6ca8... andorig124/SHA246e..., not merelyvalidshape. ExactdigestANDbytecount; origrawliteralAPP stillrequired inmemory. RoleOTHERneveridentity.",
+    "Require exactseven pathkeys/hashes andactualexecutablemodes; noaliases/eighthopaque path/rootauthoredmodes. Fullwitnessmetadata sameconsumedFD; allphysicalprocess checksindependent.",
+    "Requestedlaunch/source/owner pins andclientPID/start/argv image samples must actuallybindsamereviewedinvocation; Booleanmarkers cannotserveasactualevidence.",
+    "Historicalactor classes retainactualstatuses independently; successfulsetup exact0, failedclientouter1, utilitydirectwait0, externaltool0/foreground0 notdirectwait. Null remainsunknown.",
+    "Fieldshape changes requiresynchronizedallreaders/history/receipts/controls; oldsource04reportedphysicalobjects cannotparse asnewtypedselfText.",
+    "Allreadonly/externalfirstread/rawSHA/SAMEbufferchecks andallphase/archive/cap/history predicates remainrequired. Invalid,partial,missingorunknown -> HOLD."
+  ],
+  "noRuntimeImplementationOrAuthority": true
+}

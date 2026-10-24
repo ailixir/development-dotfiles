@@ -1,0 +1,210 @@
+{
+  "status": "CLOSED_NATIVE_COUNTER_AND_RECEIPT_FRESHNESS_QUALIFIED_FINAL_WHOLE_PENDING",
+  "collector": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+    "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+    "bytes": 1156707
+  },
+  "expected": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-case-reconciliation-preparation/backend-expected-identities.json",
+    "sha256": "dc2d66e3ad0f7464332c804ec6e82dc0bc888e1d8b2aa1a507109d126d34090d",
+    "bytes": 685013
+  },
+  "skipPolicy": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/approved-skips.json",
+    "sha256": "6bd2a808a40a707397757b3ff4f1a78e5eff8ee37666c7b26271582b14457cac",
+    "bytes": 1910
+  },
+  "counter": {
+    "fullTaskClassNameStatusCounterExact": true,
+    "total": 2792,
+    "distinct": 2768,
+    "statusCounts": {
+      "PASS": 2783,
+      "SKIP": 9
+    },
+    "taskCounts": {
+      "test": 2728,
+      "guidedIncrementalTest": 62,
+      "crossReplicaTest": 2
+    },
+    "duplicateMultiplicities": {
+      "2": 16,
+      "3": 4
+    },
+    "exactHistoricalSkipMultiset": true
+  },
+  "originalRun": {
+    "started": "2026-10-21T07:25:49.893121+00:00",
+    "elapsedSeconds": 6407.02,
+    "command": [
+      "caffeinate",
+      "-i",
+      "./gradlew",
+      "--continue",
+      "check",
+      "--rerun-tasks",
+      "--no-daemon"
+    ],
+    "exit": 0,
+    "gradleExit": 0,
+    "taskCollectionComplete": true
+  },
+  "freshReceipts": {
+    "test": {
+      "cases": 2728,
+      "xml": 334,
+      "htmlTotal": 386,
+      "generatedHtmlFresh": 383,
+      "staticAssetsNotRequiredFresh": 3,
+      "exec": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/jacoco/test.exec",
+        "sha256": "5a4a4ebbf6311ff1ffebe6a44f370fee1aace3f17871d79f49d410474672921d",
+        "bytes": 26638381,
+        "mtimeNs": 1792571355716605572,
+        "mode": "0o644",
+        "task": "test",
+        "nonempty": true
+      },
+      "collectorTaskResult": {
+        "counts": {
+          "total": 2728,
+          "passed": 2719,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 9
+        },
+        "freshXmlFiles": 334,
+        "freshHtmlIndex": true,
+        "freshExec": true,
+        "execRequired": true,
+        "joinCasesPresent": true,
+        "freshJoinCohorts": 1
+      }
+    },
+    "guidedIncrementalTest": {
+      "cases": 62,
+      "xml": 1,
+      "htmlTotal": 6,
+      "generatedHtmlFresh": 3,
+      "staticAssetsNotRequiredFresh": 3,
+      "exec": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/guidedIncrementalTest/jacoco/guidedIncrementalTest.exec",
+        "sha256": "e6e0bfbb4296b1697c8dafc88d4c455f9c19abd5be454e2355cf2eca62e895a3",
+        "bytes": 1001455,
+        "mtimeNs": 1792573939350393519,
+        "mode": "0o644",
+        "task": "guidedIncrementalTest",
+        "nonempty": true
+      },
+      "collectorTaskResult": {
+        "counts": {
+          "total": 62,
+          "passed": 62,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "freshXmlFiles": 1,
+        "freshHtmlIndex": true,
+        "freshExec": true,
+        "execRequired": true,
+        "joinCasesPresent": true,
+        "freshJoinCohorts": 1
+      }
+    },
+    "crossReplicaTest": {
+      "cases": 2,
+      "xml": 1,
+      "htmlTotal": 6,
+      "generatedHtmlFresh": 3,
+      "staticAssetsNotRequiredFresh": 3,
+      "exec": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/crossReplicaTest/jacoco/crossReplicaTest.exec",
+        "sha256": "5b095564ac0bdf6be4866dcc7c398bf7349e1859be1a36e15ab2617a170edb8c",
+        "bytes": 907517,
+        "mtimeNs": 1792567596285407690,
+        "mode": "0o644",
+        "task": "crossReplicaTest",
+        "nonempty": true
+      },
+      "collectorTaskResult": {
+        "counts": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "freshXmlFiles": 1,
+        "freshHtmlIndex": true,
+        "freshExec": true,
+        "execRequired": true,
+        "joinCasesPresent": false,
+        "freshJoinCohorts": 0
+      }
+    }
+  },
+  "sourceAndInputs": {
+    "sameCaptured1814SourceRows": true,
+    "sameCaptured238DistRows": true,
+    "fullCatalogBeforeAfterExact": true,
+    "capturedGuardsAllTrue": true,
+    "currentProductReads": false
+  },
+  "closedReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/6-native-wait.json",
+      "sha256": "777a301ff3154e6d36b155f29ef84201d8c64ee485e3d33028749b7165783ee4",
+      "bytes": 99
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/6-terminal.json",
+      "sha256": "15955d85afd41f7489d06e18206535117adcb66cdb92478bce0372d1b6829e74",
+      "bytes": 390
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/whole-terminal.json",
+      "sha256": "fbea32abbd63b81efac4c8cd639701b8685b48565eb6b157f3a07655c9a41030",
+      "bytes": 394
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/owned-inhibitor-reaped.json",
+      "sha256": "f51d42af2a7e221644196d00136a47d9ecf818d8452c55bff44a513e893f3668",
+      "bytes": 149
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/after6-source.json",
+      "sha256": "8ca7895641d2609eb71f9c425549cccfd3ae1041d85586f90aa22f33400544e9",
+      "bytes": 360050
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/after6-full-catalog.json",
+      "sha256": "1c032f45fa57f754083a5c4793c641d1b9df499f34d87a0c1e51eedbbae8cc85",
+      "bytes": 5740233
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/after6-guard.json",
+      "sha256": "2f13e12ad74011ccabe124ed30c099adb376a8eb87614737de8bb03ee3b8b6f0",
+      "bytes": 585
+    }
+  ],
+  "inhibitor": {
+    "pid": 76116,
+    "waitExit": -15,
+    "heldThroughNativeAndPostguards": true,
+    "gradleJvmPidsNotRetained": true,
+    "numericGlobalAbsenceClaim": false
+  },
+  "opaqueOriginalLeavesReRead": false,
+  "rawJUnitOrCohortOrLogBodyRead": false,
+  "pending": [
+    "archived public merged coverage complete inventory/session/floor assessment",
+    "separate required closed cohort/flag/budget/audit proof beyond collector presence metadata",
+    "root producer pin",
+    "root closed ledger capture"
+  ],
+  "wholeVerdict": "PENDING",
+  "diagnostics": "SEPARATE_UNBOUND",
+  "lifecycleAuthority": false
+}

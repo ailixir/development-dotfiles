@@ -1,0 +1,55 @@
+// PROPOSAL ONLY. Append as a new case in guided-start-deadline.test.ts.
+// Existing imports/config/cleanup/afterEach are reused. No implementation-only API.
+// Deliberately controlled regression; not a reproduction of either historical failure.
+it('hands an absolute startup timeout to the caller before pending teardown when the wall sample is still before its deadline', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'guided-d4-timeout-origin-'));
+  cleanup.push(() => rm(root, { recursive: true, force: true }));
+  vi.stubEnv('TMPDIR', root);
+  const heldWallNow = Date.now();
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+  vi.spyOn(Date, 'now').mockReturnValue(heldWallNow);
+
+  let rejectLaunch: (error: Error) => void = () => undefined;
+  let entered: () => void = () => undefined;
+  const launchEntered = new Promise<void>(resolve => { entered = resolve; });
+  const pending = new Promise<Awaited<ReturnType<typeof chromium.launchPersistentContext>>>((_resolve, reject) => { rejectLaunch = reject; });
+  vi.spyOn(chromium, 'launchPersistentContext').mockImplementation(() => { entered(); return pending; });
+  let replied = false;
+  const launching = launchGuidedBrowser(config, 'd4-timeout-origin', () => undefined, undefined, {
+    deadlineEpochMs: heldWallNow + 1_000,
+    signal: new AbortController().signal,
+  }).then(value => { replied = true; return value; }, (error: unknown) => { replied = true; return error; });
+
+  try {
+    await launchEntered;
+    await vi.advanceTimersByTimeAsync(1_000);
+    await new Promise<void>(resolve => { setImmediate(resolve); });
+    // Required old-behavior assertion-red: false, because catch is awaiting
+    // teardown while this deliberately pending launch has not settled.
+    expect(replied).toBe(true);
+
+    const failure = await launching;
+    expect(failure).toBeInstanceOf(GuidedLaunchFailure);
+    expect(failure).toMatchObject({ message: 'CONTEXT_LOST', cause: { message: 'TIMEOUT' }, phase: 'PROCESS' });
+    expect((await readdir(root)).filter(name => name.startsWith('checks-guided-'))).toHaveLength(1);
+    let closed = false;
+    const closing = (failure as GuidedLaunchFailure).close().then(() => { closed = true; });
+    await new Promise<void>(resolve => { setImmediate(resolve); });
+    expect(closed).toBe(false);
+    rejectLaunch(new Error('controlled launch settled'));
+    await closing;
+    await (failure as GuidedLaunchFailure).close();
+    expect(await readdir(root)).toEqual([]);
+  } finally {
+    // The red path must settle the original launch/teardown, never abandon it.
+    rejectLaunch(new Error('controlled regression cleanup'));
+    try {
+      const result = await launching;
+      if (result instanceof GuidedLaunchFailure) await result.close();
+    } finally {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    }
+  }
+});
+

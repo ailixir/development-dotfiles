@@ -1,0 +1,29 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "result": "REVIEWER_HARNESS_FAILURE",
+      "detail": "AST extraction initially returned functions bound to a separate globals dictionary; author harness fake os updates did not reach those functions. The first synthetic Custody construction opened real filesystem root / and attempted missing /repo; FileNotFoundError then constructor cleanup closed the retained descriptor. No enumeration, body read, write, private data read, process/census/lock/native operation, runtime import or main occurred. This unintended filesystem attempt was disclosed to root immediately. No packet defect inferred."
+    },
+    {
+      "attempt": 2,
+      "result": "PASS_164_AUTHOR_CHECKS_PLUS_7_INDEPENDENT_CASES",
+      "correction": "Compile actual definitions directly into the exact harness dictionary and install denied proxies for all real OS/fcntl/subprocess calls. All intended observations are explicit in-memory fakes. Sealed outputs are not overwritten; result writes/prints stripped in memory. Standalone legacy harness retains its harmless summary print."
+    },
+    {
+      "attempt": 3,
+      "result": "PASS_2_SUPPLEMENTAL_PAIRED_CASES",
+      "detail": "Extracted actual custody/validation definitions plus in-memory FakeOS. Both name predicates tested; synthetic linked intermediate member reaches body only after global predicate overwrite."
+    }
+  ],
+  "scopeDeviationDisclosed": true,
+  "actualOperationalProcessLockNativePrivateActions": 0,
+  "unintendedFilesystemAttempt": {
+    "existingRootDirectoryOpen": 1,
+    "missingRepoDirectoryOpenAttempt": 1,
+    "directoryEnumeration": 0,
+    "bodyReads": 0,
+    "writes": 0
+  },
+  "correctedReplaysActualRuntimeImportMainOsProcessNativeActions": 0
+}

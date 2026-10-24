@@ -1,0 +1,102 @@
+{
+  "createdAt": "2026-10-19T01:34:22.859274+00:00",
+  "entryPoint": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume3/receipt.md",
+  "author": "Morgan / PM",
+  "status": "CORRECTED_PACKAGE_READY_FOR_INDEPENDENT_REREVIEW",
+  "isQualityVerdict": false,
+  "isProductAcceptance": false,
+  "isStoryCompletion": false,
+  "isReleaseReady": false,
+  "applied": false,
+  "independentRereview": "PENDING",
+  "writeRoot": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume3",
+  "originalResume2Preserved": true,
+  "sourceOrActualTargetsEdited": false,
+  "runtimeTestsOrBuilds": false,
+  "formattersOrDockerOrProviderCalls": false,
+  "processSignalsOrRestarts": false,
+  "gitWrites": false,
+  "externalContact": false,
+  "budget": {
+    "declaredUSD": 500,
+    "actualSpend": "unavailable"
+  },
+  "counts": {
+    "RBR": 19,
+    "story010Obligations": 21,
+    "story010Classification": {
+      "local": 3,
+      "laneDependent": 9,
+      "external": 9
+    },
+    "globalExternalObligations": 21,
+    "separateStoryCarries": 5,
+    "stagingGroups": 14,
+    "originalStagingACs": 33,
+    "releaseRows": 70,
+    "patchTargets": 5,
+    "boundInputs": 123,
+    "staticChecks": 33,
+    "eventualTargetRelativeLinks": 11,
+    "realParticipants": 0,
+    "unassignedSlots": 5,
+    "blankNotRunDenominatorRows": 12,
+    "preservedResume2Files": 30
+  },
+  "reviewFindings": {
+    "DOC-010-01": "ACCEPTED_AND_CORRECTED",
+    "DOC-010-02": "ACCEPTED_AND_CORRECTED",
+    "rejected": []
+  },
+  "pmAC24Decision": {
+    "id": "PM-010-AC24-CARRIER-20261018",
+    "carrier": "STUDIO-OBS-008",
+    "scope": "Existing AC-6 only; no new work or criterion",
+    "remaining": "Independent review and PO/register-owner application after freeze opens"
+  },
+  "manifest": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume3/manifest.json",
+  "manifestSha256": "8fc20f7853aa198ee6ac54251a6230ebbb8f13ad6905317a5724bf291baff4e0",
+  "combinedPatch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume3/patches/all-documentation.patch",
+    "sha256": "7609c49f830f707efbbf7b2027388edec02d1af2dcd06bca22c5e8cc833db8f2"
+  },
+  "checks": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume3/static-checks.json",
+  "checksSha256": "b725db20c7a8d5876fe86c6df015212bcb00dad1c61467cf155fc1130e8c95cd",
+  "runnerSection14": {
+    "path": "docs/runbooks/studio-runner.md",
+    "section": "14",
+    "sectionBytes": 12392,
+    "sectionSha256": "4d83b3594c7cab2daa4a4505df1088dbc43c74e55ee4e6f1e9c552ff07880e66",
+    "wholeFileSnapshotSha256": "8971ca6b0f5f08b3b35041abe960065d1b6f4fdf4e5fa3b9557a30dd9c16223b",
+    "wholeFileCurrentSha256": "8971ca6b0f5f08b3b35041abe960065d1b6f4fdf4e5fa3b9557a30dd9c16223b",
+    "wholeFileUnchanged": true
+  },
+  "remainingExternalInputs": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume3/external-inputs.md",
+  "nextActions": [
+    "Independent PM/QA re-review of corrected exact package; no self-approval.",
+    "Root reconciles original B1/baseline gates and opens quoted inputs before accepted T2 application.",
+    "PO/register owner applies accepted AC-24 carrier placement without old criterion pass or lifecycle changes.",
+    "Actual OI-25 remains owed until accepted runbook application.",
+    "Formal pilot/T3/T4 retains 009 Done/D-C, post-Done Live-list remeasurement/PM acceptance, real authorized users/access/probes/remediation and all applicable external gates."
+  ],
+  "rootOwnedProvenanceInputRefresh": {
+    "createdAt": "2026-10-19T01:35:03.267238+00:00",
+    "mutator": "root coordinator, not this worker",
+    "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/RESUME-HANDOFF-20261018-CODEX.md",
+    "beforeSha256": "604260c53e752257f3ea53d61b2a15d5b536ff61924be53c340cd595e39729a7",
+    "afterSha256": "7965d55220905ada4ca1670c941f65360c596697f6970f39b096fcaa94c17212",
+    "prependedBytes": 525,
+    "prependedSha256": "93b449b910cc1cdd99920b33f4c2c0265b5ebd80b0073322f65e19854801c78b",
+    "originalContentSha256": "604260c53e752257f3ea53d61b2a15d5b536ff61924be53c340cd595e39729a7",
+    "originalPausedContentBytePreserved": true,
+    "reason": "Root explicitly notified this worker that a current-resume pointer banner was prepended; root checked outside B1 source capture and 20 quoted inputs. Current resume3 binding is refreshed for this root-owned provenance change only.",
+    "resume2HistoricalManifestAndArtifacts": "Preserved byte-for-byte; historical handoff input hash intentionally remains the old captured hash.",
+    "patchAndPreviewChanges": false,
+    "affectedChecksRerun": [
+      "Current manifest input hashes",
+      "Pure prepend / original content hash",
+      "Reviewed resume2 artifact preservation"
+    ],
+    "unaffectedStaticChecks": "Prior exact patch reconstruction/applicability, previews, links/anchors, section14 and content/package checks remain bound to unchanged artifacts; no runtime test/build rerun."
+  }
+}

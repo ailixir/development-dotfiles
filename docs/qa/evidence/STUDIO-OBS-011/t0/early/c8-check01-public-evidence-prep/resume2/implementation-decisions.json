@@ -1,0 +1,19 @@
+{
+  "status": "SOURCE_ONLY_IMPLEMENTATION_DECISIONS_BEFORE_CODE",
+  "story": "STUDIO-OBS-011",
+  "authority": "exact assigned runtime-effects-boundary and task; no new source/runtime authority",
+  "decisions": [
+    "Keep prior unit_policy/public_contract/Java/guard/schema byte-exact. Add public_observation_unit.py and runtime-root-release.template.json; original release template remains historical.",
+    "Explicit System object is the only syscall boundary. Main constructs real System only after exact CLI and canonical installation; tests use mandatory injected fake System and globally blocked real calls.",
+    "Retained ancestor custody for source/code/data/runtime/lock, same consumed bytes verified before every immutable code/AST/JSON load; fresh current source/binary/census facts are never substituted with cached hashes.",
+    "Derive releaseSha256 in memory from the separately supplied verified raw release hash, never a JSON self-hash. Root release serializes releaseSha256=null.",
+    "Extract only reviewed ownership core functions from exact a1e7 bytes. Sole AST delta is stdin=DEVNULL on core Popen. Inject bound observation/lock/durable-journal/sink globals; preserve first census/sticky/unknown/BaseException drain function bodies.",
+    "No timeout signals: observation Popen.communicate and wait complete without a timeout; core wait timeouts are polls with no terminate/kill. Native captured stdout+stderr share exclusive0600 retained sink, no stream text emitted.",
+    "Selected metadata reads exact class XML only and bounded newly created test/runUUID/cohortUUID metadata-only cohort.json plus guard-tally.json; no sibling private-body reads. Original cohort finalizer and private hooks unchanged. Failed metadata becomes sticky HOLD without retry.",
+    "Source stage uses exclusive fixed lease and backup, verified exact pre/post bytes and current file identity through retained source parent; no fallback. Source transform is f9=>candidate=>f9, requiring all other source/modes/dist/aux exact before and after.",
+    "Each CLI invocation registers fully bound Python client and utilities with immutable journal; postclose uses exact PID/start reuse qualification and actual outer tool return for current-client discharge.",
+    "Root setup/negative/status/held admission, stage/native/restore/compile/collect decisions, actual QA/root disposition, readiness inspection, separate permit, actual wrapper result, and independent postclose QA remain literal future unbound inputs. No source/main/IR/C8/lifecycle credit."
+  ],
+  "actualEffectsAuthorized": false,
+  "actualEffectsPerformed": 0
+}

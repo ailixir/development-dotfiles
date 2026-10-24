@@ -1,0 +1,42 @@
+{
+  "kind": "MINIMAL_PREVIEW_CORRECTION_DELTA_NOT_AN_APPLICATION_PATCH",
+  "startingPreviewSha256": "cad5c63af1018379a0ebd8a35a8d7014b87ca5124780ebdd7e23bf3187af816e",
+  "correctedPreviewSha256": "edef74f59e9f1e52f8b1195e90ef99ff900cc35cfb92e1ac1909da7a5e5f3c0c",
+  "changes": [
+    {
+      "finding": "successor-audit-link",
+      "before": "obs011-runbook-audit-resume20261020/audit.md",
+      "after": "obs011-runbook-audit-resume20261020b/audit.md"
+    },
+    {
+      "finding": "DOC-RB-01",
+      "before": "**Check the worker dispatcher setting first.** `STUDIO_DISPATCHER_ENABLED=false` disables both\n`StudioDispatchScheduler` and `StudioRecoveryScheduler`; accepted work can remain `QUEUED` with no\nbrowser, and scheduled reaping also stops. The chart sets the API dispatcher to literal `false`\nand the worker's from `studioExecution.dispatcherEnabled` (default `true`). Packaged\n`application.yml` defaults it to `false`, while an absent bound value/scheduler condition defaults\nto enabled. This discrepancy remains recorded for @architect; inspect effective configuration.\n`kubectl get deploy -o yaml` is a read-only deployment inspection example, not a check run here.",
+      "after": "**Check the effective worker dispatcher property first.** Effective\n`studio.execution.dispatcher.enabled=false` disables both `StudioDispatchScheduler` and\n`StudioRecoveryScheduler`; accepted work can remain `QUEUED` with no browser and no scheduled\nreaping. An absent property enables these conditional scheduler beans.\n\nThe chart renders the **alias** `STUDIO_DISPATCHER_ENABLED`: literal `false` on the API and\n`studioExecution.dispatcherEnabled` (default `true`) on the worker. Packaged `application.yml`\nuses `${STUDIO_DISPATCHER_ENABLED:false}`, but `application-worker.yml` overrides that lower\nproperty with literal `studio.execution.dispatcher.enabled: true`. A rendered alias of `false`\ntherefore does **not** establish that the worker's effective property is false. This is a source-\nconfiguration inference, not an inspected process result; verify the effective property before\nusing it to diagnose dispatch or recovery. `kubectl get deploy -o yaml` shows deployment inputs,\nnot the effective Spring property; it is an unrun read-only inspection example. The profile/alias\ndiscrepancy remains recorded for @architect; no configuration fix is prescribed here."
+    },
+    {
+      "finding": "DOC-RB-01",
+      "before": "- **queued undispatched work is closed explicitly**, not left to a deadline: the dispatcher's next\n  pass selects `QUEUED` and `CLAIMED` rows and closes them with `DISPATCH_DISABLED`. The closure is",
+      "after": "- **queued undispatched work is closed explicitly**, with the effective dispatcher property\n  enabled: the dispatcher's next pass selects `QUEUED` and `CLAIMED` rows and closes them with\n  `DISPATCH_DISABLED`. The closure is"
+    },
+    {
+      "finding": "DOC-RB-01",
+      "before": "- **reads and recovery stay up.** `GET /api/v1/studio/executions/{id}` is unaffected.",
+      "after": "- **reads stay up.** `GET /api/v1/studio/executions/{id}` is unaffected; scheduled recovery\n  requires the effective dispatcher property to remain enabled (\u00a75)."
+    },
+    {
+      "finding": "DOC-RB-01 / DOC-RB-02",
+      "before": "**The kill switch and the dispatcher are two separate keys on purpose.** Turning the dispatcher off\n*as well* disables its closure scheduler and the recovery scheduler, leaving queued work\nwithout either scheduled closure or reaping until a scheduler resumes \u2014 the opposite of what the switch promises. The chart asserts that moving one does not\nmove the other.",
+      "after": "**The kill switch and the dispatcher are two separate keys on purpose.** Engage the execution\nkill switch while leaving effective `studio.execution.dispatcher.enabled` enabled. If that\neffective property is false, both scheduler beans are disabled: queued work remains until a\nscheduler resumes and performs closure/reaping. Passing a deadline alone does not close a row.\nThe chart renders separate switch and dispatcher inputs; its dispatcher alias alone does not\nprove the effective property (\u00a75)."
+    },
+    {
+      "finding": "DOC-RB-03",
+      "before": "`BffSessionAuthenticationFilter` resolved \u2014 which, with any of the three bypasses above open, is\nwhatever the caller wrote in a header. 10.30's own tests run with the `identity-headers` bypass open,",
+      "after": "`BffSessionAuthenticationFilter` resolved. Only the `identity-headers` bypass trusts caller-\nsupplied `X-User-*` identity. The core-service bypass returns a fixed administrative identity;\n`csi-read` only augments an already resolved identity for CSI GETs, not Studio writes (\u00a79).\n10.30's own tests run with the `identity-headers` bypass open,"
+    },
+    {
+      "finding": "DOC-RB-01 / DOC-RB-02",
+      "before": "**Do not turn the dispatcher off as well.** \u00a76 is explicit: the two keys are separate on purpose, and\nturning the dispatcher off leaves the queued work the kill switch promised to close sitting in the\nledger until its deadline.",
+      "after": "**Keep the effective dispatcher property enabled while engaging the execution kill switch.**\n\u00a7\u00a75\u20136 distinguish that property from the rendered dispatcher alias. If effective\n`studio.execution.dispatcher.enabled` is false, queued work remains in the ledger until a\nscheduler resumes and performs closure/reaping; passing its deadline alone does not close it."
+    }
+  ]
+}

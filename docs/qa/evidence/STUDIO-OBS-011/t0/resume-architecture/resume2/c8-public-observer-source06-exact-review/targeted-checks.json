@@ -1,0 +1,465 @@
+{
+  "count": 61,
+  "checks": [
+    {
+      "name": "registered before fstat clean-parent 0",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat clean-parent 1",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat clean-parent 2",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat clean-parent 3",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat clean-parent 4",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat clean-parent 5",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat clean-parent 6",
+      "pass": true
+    },
+    {
+      "name": "actual constructor acquisition retained or closed clean-parent",
+      "pass": true
+    },
+    {
+      "name": "no unsafe duplicate directory close clean-parent",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat root-fstat-unknown 0",
+      "pass": true
+    },
+    {
+      "name": "actual constructor acquisition retained or closed root-fstat-unknown",
+      "pass": true
+    },
+    {
+      "name": "no unsafe duplicate directory close root-fstat-unknown",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat child-fstat-unknown 0",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat child-fstat-unknown 1",
+      "pass": true
+    },
+    {
+      "name": "actual constructor acquisition retained or closed child-fstat-unknown",
+      "pass": true
+    },
+    {
+      "name": "no unsafe duplicate directory close child-fstat-unknown",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat validation-close-unknown 0",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat validation-close-unknown 1",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat validation-close-unknown 2",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat validation-close-unknown 3",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat validation-close-unknown 4",
+      "pass": true
+    },
+    {
+      "name": "registered before fstat validation-close-unknown 5",
+      "pass": true
+    },
+    {
+      "name": "actual constructor acquisition retained or closed validation-close-unknown",
+      "pass": true
+    },
+    {
+      "name": "no unsafe duplicate directory close validation-close-unknown",
+      "pass": true
+    },
+    {
+      "name": "failed constructor actual strong reference validation-close-unknown",
+      "pass": true
+    },
+    {
+      "name": "actual handle and closer retained False",
+      "pass": true
+    },
+    {
+      "name": "one attempted close, precise terminal token False",
+      "pass": true
+    },
+    {
+      "name": "confirmed close clears owner view",
+      "pass": true
+    },
+    {
+      "name": "actual handle and closer retained True",
+      "pass": true
+    },
+    {
+      "name": "one attempted close, precise terminal token True",
+      "pass": true
+    },
+    {
+      "name": "numeric FD reuse never repairs old unknown",
+      "pass": true
+    },
+    {
+      "name": "only initialized caller directory borrowed DIRECTORY",
+      "pass": true
+    },
+    {
+      "name": "failed/unreturned constructor never borrowed DIRECTORY",
+      "pass": true
+    },
+    {
+      "name": "unknown caller token never borrowed DIRECTORY",
+      "pass": true
+    },
+    {
+      "name": "only initialized caller directory borrowed FILE",
+      "pass": true
+    },
+    {
+      "name": "failed/unreturned constructor never borrowed FILE",
+      "pass": true
+    },
+    {
+      "name": "unknown caller token never borrowed FILE",
+      "pass": true
+    },
+    {
+      "name": "actual load/main rejects partial setup False",
+      "pass": true
+    },
+    {
+      "name": "first caller preserved only while second acquisition unknown False",
+      "pass": true
+    },
+    {
+      "name": "actual load/main rejects partial setup True",
+      "pass": true
+    },
+    {
+      "name": "first caller preserved only while second acquisition unknown True",
+      "pass": true
+    },
+    {
+      "name": "bootstrap control and failed owner strongly retained",
+      "pass": true
+    },
+    {
+      "name": "bootstrap denies before interpretation (0, 'valid')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap every acquisition closes once (0, 'valid')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap precise partial close record (0, 'valid')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap denies before interpretation (0, 'wrong-sha')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap every acquisition closes once (0, 'wrong-sha')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap precise partial close record (0, 'wrong-sha')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap denies before interpretation (0, 'one-close-unknown')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap every acquisition closes once (0, 'one-close-unknown')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap precise partial close record (0, 'one-close-unknown')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap denies before interpretation (1, 'valid')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap every acquisition closes once (1, 'valid')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap precise partial close record (1, 'valid')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap denies before interpretation (1, 'wrong-sha')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap every acquisition closes once (1, 'wrong-sha')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap precise partial close record (1, 'wrong-sha')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap denies before interpretation (1, 'one-close-unknown')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap every acquisition closes once (1, 'one-close-unknown')",
+      "pass": true
+    },
+    {
+      "name": "bootstrap precise partial close record (1, 'one-close-unknown')",
+      "pass": true
+    },
+    {
+      "name": "zero real boundary calls",
+      "pass": true
+    }
+  ],
+  "caseCount": 16,
+  "cases": [
+    {
+      "case": "clean-parent",
+      "failed": false,
+      "blockers": false,
+      "ledger": [
+        {
+          "number": 1,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        },
+        {
+          "number": 2,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        },
+        {
+          "number": 3,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        }
+      ]
+    },
+    {
+      "case": "root-fstat-unknown",
+      "failed": true,
+      "blockers": false,
+      "ledger": [
+        {
+          "number": 1,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        }
+      ]
+    },
+    {
+      "case": "child-fstat-unknown",
+      "failed": true,
+      "blockers": false,
+      "ledger": [
+        {
+          "number": 1,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        },
+        {
+          "number": 2,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        }
+      ]
+    },
+    {
+      "case": "validation-close-unknown",
+      "failed": true,
+      "blockers": true,
+      "ledger": [
+        {
+          "number": 1,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        },
+        {
+          "number": 2,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        },
+        {
+          "number": 3,
+          "kind": "DIRECTORY",
+          "state": "UNKNOWN"
+        }
+      ]
+    },
+    {
+      "case": "transferred-confirmed",
+      "ledger": [
+        {
+          "number": 1,
+          "kind": "FILE",
+          "state": "CLOSED"
+        }
+      ],
+      "closeCalls": [
+        41
+      ]
+    },
+    {
+      "case": "transferred-unknown",
+      "ledger": [
+        {
+          "number": 1,
+          "kind": "FILE",
+          "state": "UNKNOWN"
+        },
+        {
+          "number": 2,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        }
+      ],
+      "closeCalls": [
+        41,
+        41
+      ]
+    },
+    {
+      "case": "borrow-DIRECTORY",
+      "unknownClear": false
+    },
+    {
+      "case": "borrow-FILE",
+      "unknownClear": false
+    },
+    {
+      "case": "load-clean-rejection",
+      "firstControlClosed": true,
+      "ledger": [
+        {
+          "number": 1,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        }
+      ]
+    },
+    {
+      "case": "load-unknown-constructor",
+      "firstControlClosed": false,
+      "ledger": [
+        {
+          "number": 1,
+          "kind": "DIRECTORY",
+          "state": "OPEN"
+        },
+        {
+          "number": 2,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        },
+        {
+          "number": 3,
+          "kind": "DIRECTORY",
+          "state": "CLOSED"
+        },
+        {
+          "number": 4,
+          "kind": "DIRECTORY",
+          "state": "UNKNOWN"
+        }
+      ]
+    },
+    {
+      "case": "bootstrap-valid",
+      "optimization": 0,
+      "adapterExecutionIntercepted": true,
+      "states": [
+        "CLOSED",
+        "CLOSED",
+        "CLOSED"
+      ]
+    },
+    {
+      "case": "bootstrap-wrong-sha",
+      "optimization": 0,
+      "adapterExecutionIntercepted": true,
+      "states": [
+        "CLOSED",
+        "CLOSED",
+        "CLOSED"
+      ]
+    },
+    {
+      "case": "bootstrap-one-close-unknown",
+      "optimization": 0,
+      "adapterExecutionIntercepted": true,
+      "states": [
+        "CLOSED",
+        "UNKNOWN",
+        "CLOSED"
+      ]
+    },
+    {
+      "case": "bootstrap-valid",
+      "optimization": 1,
+      "adapterExecutionIntercepted": true,
+      "states": [
+        "CLOSED",
+        "CLOSED",
+        "CLOSED"
+      ]
+    },
+    {
+      "case": "bootstrap-wrong-sha",
+      "optimization": 1,
+      "adapterExecutionIntercepted": true,
+      "states": [
+        "CLOSED",
+        "CLOSED",
+        "CLOSED"
+      ]
+    },
+    {
+      "case": "bootstrap-one-close-unknown",
+      "optimization": 1,
+      "adapterExecutionIntercepted": true,
+      "states": [
+        "CLOSED",
+        "UNKNOWN",
+        "CLOSED"
+      ]
+    }
+  ],
+  "realBoundaryCalls": [],
+  "actualActions": 0,
+  "limitations": "Actual methods and literal loader over fake resources; synthetic factories; intercepted adapter execution; no actual FD/thread/platform/native qualification."
+}

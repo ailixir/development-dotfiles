@@ -1,0 +1,150 @@
+{
+  "kind": "SOURCE07_SINGLE_INITIAL_AUTHORIZATION_AFFECTED_FAKE_COMPOSITION",
+  "passed": 24,
+  "checks": [
+    {
+      "id": "INITIAL_PURE_HELPER_BINDER_SAME_BUFFER",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_missing_DENIES",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_missing_BEFORE_MUTATION",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_raw_sha_DENIES",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_raw_sha_BEFORE_MUTATION",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_scope_DENIES",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_scope_BEFORE_MUTATION",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_trace_DENIES",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_trace_BEFORE_MUTATION",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_self_DENIES",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_self_BEFORE_MUTATION",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_conflict_DENIES",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_conflict_BEFORE_MUTATION",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_caller_map_DENIES",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_caller_map_BEFORE_MUTATION",
+      "passed": true
+    },
+    {
+      "id": "SAME_NAMESPACE_CONCRETE_SYSTEM_FAKE",
+      "passed": true
+    },
+    {
+      "id": "ACTUAL_QUOTED_INSTALL_LOADER_ZERO",
+      "passed": true
+    },
+    {
+      "id": "FIRST_IMMUTABLE_COMPLETE_AUTH_HAS_ALL_ORIGINAL_ACTORS",
+      "passed": true
+    },
+    {
+      "id": "ORIGINAL_TRACE_AND_EXTERNAL_RAW_SCOPE_PINS_RETAINED",
+      "passed": true
+    },
+    {
+      "id": "INSTALLER_STAYS_PENDING_NULL",
+      "passed": true
+    },
+    {
+      "id": "NONZERO_EXTERNAL_STATUS_NOT_DIRECT_WAIT",
+      "passed": true
+    },
+    {
+      "id": "SOURCE_PRODUCED_FIRST_INSTALL_STATE_COMPLETE",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_ROWS_DERIVED_CARRIER_NOT_OUTSIDE_RESIDENCY",
+      "passed": true
+    },
+    {
+      "id": "CONSUMER_RECHECK_MISSING_INITIAL_ACTOR_DENIES",
+      "passed": true
+    }
+  ],
+  "failure": {
+    "type": "AssertionError",
+    "args": [
+      "DERIVED_STATE_RAW_MISMATCH_PREWRITE_DENIES"
+    ]
+  },
+  "diagnostics": [
+    {
+      "installLoaderStatus": 0,
+      "primary": null,
+      "cleanup": []
+    }
+  ],
+  "operatorSteps": [
+    {
+      "step": 1,
+      "kind": "initial_facts",
+      "sourceHelperSha256": "7e833f19263328126fa8757a1268f91214a4a49a90931b7d370b4da63404624a"
+    },
+    {
+      "step": 2,
+      "kind": "author_request",
+      "sourceHelperSha256": "7e833f19263328126fa8757a1268f91214a4a49a90931b7d370b4da63404624a"
+    }
+  ],
+  "sourceHashes": {
+    "failed_gateway.py": "0b8c4b40a64a62fabe52fbfcb45749306861011c161352d888dd508ca41db168",
+    "custody.py": "e81ae1a019c78161863700bfe34f9abb71d9fb9040e464a7b3eaa5c73c8bddda",
+    "protocol.py": "2f61b59aeaeee23c4ac800ba7fdb9429338d5f3e885540cdd709abceb7b5ea29",
+    "entry.py": "3d110c53d0cf376ae3dfb81077b2dd4a7f936cd3ead9153b78126fff8f7f267d",
+    "contract.json": "0f3ab0ca490a348485b32c0e27fd2de097d94ab0d983d5296bed8ca08b8d24e5",
+    "guard-failed-red.bash": "00eaf7dc0795287f30398ee47545f813089338d7f637c9a3a30ba6c7d8046e35",
+    "factory.py": "14ff47ee0d10b9b2cd93ff066778a73ff46a3d4eb756382e4111ffec5c9bc793",
+    "installer.py": "bcc44fa126c1535ffe8f9d674591b6da0ab7504bd857e5a15da5812d1df393d6",
+    "install-cli.py": "8d45661fe93ae8ceb72126778fa9e3b73af14e0ff16b0aaf4cb8022a4367401a",
+    "control-author.py": "406ed04082d5a6b7b0b6a50ed6e73e64877df6a48002ab6256bb47f0c0aa1689",
+    "control-author-cli.py": "dbdf81703832ec7eb0bfcf2fc5fc10bcc028f0a029349518e647ca9b2aa4d76b",
+    "control-author-loader.bash": "fbd8205820b7a13b812bb2a318ad893c81e710a8c38180031c0ed632df75082c",
+    "operator-completion.js": "7e833f19263328126fa8757a1268f91214a4a49a90931b7d370b4da63404624a",
+    "install-loader.bash": "347bd56afcd86321fc16cc60ccd0ef0828af7d8f82d7a6156faf8cb09392a9d2"
+  },
+  "fixtureSourceSha256": "62e416a589b6d9b65ff8ec0e6ff99b5f4c9b345970b37f3db2d67557b681d3cf",
+  "persistentDenyAuditUnchanged": true,
+  "actualTargetEffects": 0,
+  "realBoundaryCalls": [],
+  "old39or13Replayed": false,
+  "actualBashBuiltinExecuted": false,
+  "parentSchedulingIntervalProved": false
+}

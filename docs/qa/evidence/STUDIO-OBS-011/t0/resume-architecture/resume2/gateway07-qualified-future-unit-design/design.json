@@ -1,0 +1,528 @@
+{
+  "kind": "GATEWAY07_OWNING_ARIA_PREPARATION_QUALIFICATION_AND_ONE_FUTURE_BLUEPRINT",
+  "status": "CONDITIONAL_PREPARATION_QUALIFIED",
+  "mandatoryDesignFindings": [],
+  "mandatoryDesignFindingCount": 0,
+  "qualification": {
+    "independentOfContractAuthor": true,
+    "contractManifestSha256": "afa4c05198bf1e9002a4df7a679ec64fd53710db3734a58a4e072b2b34fbf84d",
+    "contractSha256": "368f601ba77fd64b51c7e82e7f8ab531509703bd848fdcb75c029efde81c36ef",
+    "owningQaManifestSha256": "5459b53ec579817239a58e1c26eedde815ab07e880f7d98278ec4da8619da255",
+    "rootPreparationSha256": "6174658cfa28c4ef38a1028315e3d0427bae5b272e55231da8336ce1b812da84",
+    "scope": "ONE_INACTIVE_GATEWAY07_DESIGN_AND_PROSPECTIVE_CODE_PREPARATION_SCOPE_AFTER_NEW_ROOT_BINDING",
+    "implementationAuthorizedHere": false,
+    "operationalNamedGateAmendedHere": false,
+    "platformOrNativeProfileQualifiedHere": false,
+    "legacyOrdinaryGateSatisfied": false,
+    "intervalCaptureClaimed": false,
+    "historicalRepairAllowed": false,
+    "selfManifestPin": "SUPPLIED_EXTERNALLY_BY_LATER_ROOT_NO_RECIPROCAL_HASH"
+  },
+  "newUnit": {
+    "label": "obs009-gateway80-offtree04-20261019",
+    "workspace": "/private/tmp/obs009-gateway80-offtree04-20261019",
+    "runtime": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree04-20261019",
+    "pathExistenceObserved": false,
+    "sourceGeneration": "resume7",
+    "freshHoldOnly": true,
+    "priorGatewayFailedResourceProperClosePostcloseQaRootRequired": true,
+    "old03HoldHReleaseReportCandidateReuse": false,
+    "sourceBaseDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+    "mainCount": 506,
+    "sourceCount": 1808,
+    "distCount": 238,
+    "helmCount": 22
+  },
+  "nativeProfile": {
+    "staticSubject06ManifestSha256": "e2e3340b48628c76884d6b243dd69134052e8e2ff3d25f5ab09d94f4e9150585",
+    "businessCaseMapSha256": "5b987de3b8a709d8f0724c6515e2a9b60e6c701a2bdc47000396d3bb358e3065",
+    "oldCases": 15,
+    "newCases": 80,
+    "allCases": 95,
+    "redCases": 48,
+    "redExplicitlyFiltered": 47,
+    "redNativeExit": 1,
+    "greenPass": 95,
+    "greenFailErrorSkipTodo": 0,
+    "greenNativeExit": 0,
+    "phaseIds": [
+      "prepare",
+      "red",
+      "install-fixed",
+      "green",
+      "archive"
+    ],
+    "phases": [
+      {
+        "id": "red",
+        "helper": "original",
+        "argv": [
+          "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+          "./node_modules/vitest/vitest.mjs",
+          "run",
+          "--config",
+          "vitest.gateway80.config.mjs",
+          "--configLoader",
+          "native",
+          "test/deployment/integrations.test.ts",
+          "--testNamePattern=(backend|worker) rejects (flat|nested|relaxed)",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=../red-vitest.json"
+        ],
+        "maximumSeconds": 300,
+        "expectedProcessExit": 1,
+        "expectedSelectedTests": 48,
+        "expectedSelectedFailures": 48,
+        "expectedExplicitlyFilteredTests": 47,
+        "expectedPassingSelectedTests": 0,
+        "expectedSourcePredictedTemplateCalls": 48,
+        "admissionToNext": "Root inspects terminal red receipt before next phase: all 48 identities fail at expected ok=false assertion with actual ok=true; no missing prerequisite, collection/parse, signal, spawn or timeout failure. Filtering 47 tests is intentional selection and never pass credit. Unexpected result stops this unit; no retry."
+      },
+      {
+        "id": "green",
+        "helper": "fixed",
+        "argv": [
+          "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+          "./node_modules/vitest/vitest.mjs",
+          "run",
+          "--config",
+          "vitest.gateway80.config.mjs",
+          "--configLoader",
+          "native",
+          "test/deployment/integrations.test.ts",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=../green-vitest.json"
+        ],
+        "maximumSeconds": 300,
+        "expectedProcessExit": 0,
+        "expectedTests": 95,
+        "expectedPass": 95,
+        "expectedFailErrorSkipTodo": 0,
+        "existingTests": 15,
+        "newTests": 80,
+        "expectedSourcePredictedTemplateCalls": 112,
+        "newCaseGroups": {
+          "currentRefusals": 48,
+          "legacyRefusals": 14,
+          "allowedTuning": 2,
+          "tokenDeletionCounterfactuals": 8,
+          "wholeManifestEquality": 8
+        },
+        "admissionToClose": "Root independently reconciles exact testcase identities, both phases, all original/new assertions and final source/owned-resource state. A green summary alone cannot discharge missing/partial collection."
+      }
+    ],
+    "nativeArgvBankFixtureConfigEnvUmaskOracleUnchanged": true,
+    "parentUmask": "077",
+    "childUmask": "022",
+    "maximumAcceptanceSeconds": 300,
+    "deadlineSet": "MONOTONIC_BEFORE_POPEN_UNREFRESHED",
+    "launcherBarrierPreloadWorkerPatchGlobalSettingSelected": false,
+    "newNamedDescendantImagePolicy": "EXACT_SOURCE_APPROVED_INITIAL_NODE24_AND_CHILD_NODE_HELM_NATIVE_DEPENDENCY_OBJECTS_FROM_FRESH_TOOL_DEPENDENCY_TUPLE_REQUIRED_NOT_A_BASENAME_OR_ANY_HASH_RULE",
+    "currentImagePolicyCompleteOrQualified": false
+  },
+  "freshCapture": {
+    "rootProposedHolderLocation": "NEW_NAMED_ROOT_CONTROL_OUTSIDE_E",
+    "rootProposalFields": [
+      "NEW_LABEL_W_E",
+      "NEW_WRAPPER_SHELL_PID_HIGHRES_BIRTH_UID_LEGACY_START_ARGV_PARENT",
+      "LOCK_PATH_DEV_INODE",
+      "SOURCE07_MANIFEST_AND_OWNER_PINS",
+      "PLATFORM_CERTIFICATE",
+      "INHERITED_BASELINE_PATH_HASH",
+      "SOURCE_TOOL_DEPENDENCY_EXPECTATIONS",
+      "EXISTING_ANCESTOR_CUSTODY",
+      "AUTHORIZED_FALSE_NO_NATIVE_PHASE",
+      "MAXIMUM_CAPTURES_INTEGER1"
+    ],
+    "readonlySameNewShellCapConsumedBeforePython": true,
+    "preC4FailureConsumesCapNoEOutput": true,
+    "pendingHolder": "EXACT_AUTHORIZED_CONSTRUCTION_AND_HASHED_IN_MEMORY_SERIALIZED_BUFFER_NO_PHYSICAL_FILE_FACTS",
+    "pendingDoesNotProveModeUidDevInodeOfH": true,
+    "pendingContextRead": "EXPLICIT_PENDING_H_ACCESSOR_NOT_FAKE_FILE_READ_OR_LSTAT",
+    "pendingCore": "VERIFIED_AST_DEFINITIONS_RECEIVE_HOLDER_VALUE_EXPLICITLY",
+    "pendingCustody": "EXISTING_ANCESTORS_AND_TOOL_DEP_ROOTS_ONLY_NO_E_OR_H_FACT",
+    "freshC4": [
+      "NEW_WRAPPER_SHELL_HIGHRES_BIRTH_UID_START_ARGV_DIRECTPARENT",
+      "CURRENT_OBSERVER_IMAGE_AND_DIRECT_NEW_SHELL_PARENT",
+      "SAME_LOCK_PATH_DEV_INODE_OPENED_FD",
+      "STRICT_ASSOCIATED_LSOF_P_F_I_N",
+      "KERNEL_HELD",
+      "ALREADY077",
+      "ANCHESTRAL_CUSTODY",
+      "E_W_ABSENT_NONLINK"
+    ],
+    "firstMutationAfterC4": "EXCLUSIVE_E_MKDIR0700_THROUGH_BOUND_PARENT_FD_THEN_H0600_SAME_PENDING_BYTES_FSYNC",
+    "physicalHQualification": "ONLY_AFTER_CREATION_NOFOLLOW_REGULAR_UID_MODE600_BYTES_DEVINO_CUSTODY_AND_CONTROLLER_RECHECK",
+    "markerAndBufferedUtilityPublication": "AFTER_REAL_E_H_QUALIFICATION_ONLY",
+    "candidate": "FRESH_NEW_BIRTH_IMAGE_BASELINE_NOT_OLD30; PENDING_BYTES_THEN_EXCLUSIVE_PUBLISH",
+    "sourceToolsDepsBeforeAfterFresh": true,
+    "captureOutputAuthorized": false,
+    "stopForSeparateActualStatusInspectionNewRootRelease": true,
+    "partialOutputFailure": "HOLD_NEW_EXACT_DISPOSITION_NO_RETRY_RESET_DELETE_BACKFILL",
+    "acyclicTrust": [
+      "EXTERNAL_SOURCE_MANIFEST_OWNER_PLATFORM_SHA",
+      "ROOT_PROPOSAL_SHA",
+      "CONSTRUCTED_H_BINDING_PROPOSAL",
+      "CANDIDATE_AND_FACTS_HASH_BIND_H",
+      "NEW_RELEASE_HASH_BIND_FACTS",
+      "LATER_DECISIONS_ADOPTION_PERMIT_WRAPPER_HASHES"
+    ],
+    "preC4ObservationScope": "ONLY_ROOT_PROPOSED_CONTROLLERS_CURRENT_OBSERVER_AND_EXACT_LOCK_SCOPED_QUERIES_NO_GLOBAL_CANDIDATE_CENSUS_OR_NATIVE",
+    "candidateLedgerStarts": "AFTER_REAL_E_H_PUBLICATION_BEFORE_FIRST_GLOBAL_CANDIDATE_DETAIL_CALL"
+  },
+  "identity": {
+    "key": [
+      "pid",
+      "kernelStartSeconds",
+      "kernelStartMicroseconds"
+    ],
+    "initialRequired": [
+      "pid",
+      "ppid",
+      "uid",
+      "kernelStartSeconds",
+      "kernelStartMicroseconds",
+      "expectedParentKey",
+      "processImage",
+      "mappedExecutableObject",
+      "executableFileSha256",
+      "sourceAuthorizedArgvSha256",
+      "cwd",
+      "environmentSha256",
+      "popenHandleId",
+      "launchSequence"
+    ],
+    "requestedArgvAuthority": "STRUCTURED_POPEN_REVIEWED_ARGV_CWD_ENV_UMASK_TOOL_SOURCE_PROFILE_HASHES",
+    "displayArgvComm": "SAMPLED_DIAGNOSTIC_HASHES_NOT_AUTHORITY_OR_BINARY_PROOF",
+    "initialFastExitOrIncompleteMappedBinding": "HARD_HOLD_NEVER_RESCUED_BY_WAIT_REPORT_OR_ABSENCE",
+    "initialBeforeAfter": "CHILD_BIRTH_UID_PPID_PARENT_BIRTH_PROCESS_IMAGE_MAPPED_MAIN_OBJECT_OPENED_FD_OBJECT_AND_SAME_EXECUTABLE_BYTES",
+    "stableSameBirthWrongImageOrUnauthorizedExec": "HARD_STICKY_HOLD_EVEN_IF_LATER_ABSENT",
+    "tornObservation": "PENDING_RETAINED_UNCERTAINTY_NOT_CAUSE_DIAGNOSIS"
+  },
+  "platform": {
+    "selectedFamily": "READ_ONLY_DARWIN_LIBPROC_ADAPTER_PLUS_NOFOLLOW_OPENED_IMAGE_FD",
+    "requiredOutputs": [
+      "BSD_HIGHRES_BIRTH_UID_PARENT",
+      "PROCESS_IMAGE_PATH",
+      "UNAMBIGUOUS_EXECUTABLE_MAIN_MAPPING_VNODE_OBJECT",
+      "MATCH_OPENED_IMAGE_DEV_INODE_TYPE_MODE_BYTES",
+      "BEFORE_AFTER_BIRTH_PARENT_IMAGE_STABILITY"
+    ],
+    "exactApiSelectorsStructLayoutsSizesMappingSelectionPermissionsProviderIdentity": "UNQUALIFIED_MANDATORY_INPUT",
+    "sharedCacheOrdinaryFileAssumption": false,
+    "fallbackToPsLstartCommArgvBasename": false,
+    "qualificationMode": "SEPARATELY_AUTHORIZED_CAPABILITY_ONLY_EXACT_SOURCE_CASES_NOT_A_HIDDEN_GATEWAY_BUSINESS_RUN",
+    "minimumActualEvidence": [
+      "PINNED_SOURCE_ABI_PROVIDER_OS_BUILD_ARCH_STRUCT_BYTECOUNTS_ERRORS",
+      "CURRENT_CONTROLLER_CLIENT_BIRTH_UID_PARENT_IMAGE_OBJECT",
+      "POSITIVELY_OWNED_DIRECT_CHILD_BIRTH_IMAGE_AND_REALWAIT_JOIN",
+      "ACCURATE_ABSENCE_SHORTREAD_AND_UNAVAILABLE_OR_MISMATCH_OBJECT_DENIAL"
+    ],
+    "actualQualificationNow": false,
+    "certificateMustMatchFutureExactHostAdapterAndNamedProfile": true
+  },
+  "ledger": {
+    "persistCandidateAndParentEdgeBeforeDetail": true,
+    "unreadableBirthKey": "ENCOUNTER_EVENT_ID_BIRTH_NULL_NO_IMPLICIT_LATER_IDENTITY_MERGE",
+    "ownership": "DIRECT_AUTHORIZED_SPAWN_OR_VALIDATED_PARENT_CHILD_BIRTH_EDGE",
+    "knownJavaUnknownAndAllExecutableOwnedSticky": true,
+    "segment": "EXCLUSIVE_NOFOLLOW0600_APPEND_JSONL_HASH_CHAIN_FSYNC_BEFORE_DETAILS",
+    "maxRecords": 131072,
+    "maxBytes": 67108864,
+    "overflowOrAppendFailure": "HOLD_NO_HIDDEN_BUDGET",
+    "rewriteSeekTruncateOrHistoryClear": false,
+    "currentDerivedStateDoesNotRewriteEvents": true,
+    "freeze": "CLOSE_EXACT_SHA_BYTES_SEQUENCE_RANGE_PER_PHASE_AND_EACH_FINAL_GATE_POSTCLOSE_OPERATION",
+    "sameSecondPidReuseRequiresDifferentHighResBirth": true,
+    "intervalCaptureClaimed": false,
+    "historicalIdentityUncertainty": "TRUE_WHEN_ANY_PAST_IDENTITY_FACT_REMAINS_UNPROVED_NEVER_CLEAR_BY_CURRENT_RECOVERY",
+    "directPopenPidEncounterPersistedBeforeInitialBirthImageQuery": true,
+    "appendFailureAfterPopen": "HARD_HOLD_REAL_DIRECTWAIT_AND_CONSERVATIVE_DRAIN_NO_ACCEPTANCE_OR_CLEANUP"
+  },
+  "reobservation": {
+    "maxAttemptsPerEpisode": 3,
+    "minimumSeparationMillis": 250,
+    "maximumWindowMillis": 5000,
+    "withinOriginalPhaseDeadline": true,
+    "ordinarySamplingMillis": 250,
+    "episodeResetForTextChangeMissingTableOrNewLoop": false,
+    "afterExhaustion": "NO_MORE_DETAIL_RETRIES; ANY_STILL_PRESENT_UNRESOLVED_AT_ACCEPTANCE_BOUNDARY_HOLD; FAILED_BOUNDARY_NOT_DISCARDED",
+    "goneUnpaired": "NO_LONGER_SEEN_AT_BOUNDARY_WITH_HISTORICAL_UNCERTAINTY_NOT_OLD_IDENTITY_TERMINAL_PROOF",
+    "initialOrStableWrongImageRescue": false,
+    "nativeRetryOrAcceptanceDeadlineRefresh": false
+  },
+  "currentBoundaries": {
+    "count": 2,
+    "independentFreshCensusCommKernelSamples": true,
+    "minimumSeparationMillis": 250,
+    "scope": [
+      "recorded owned keys including historical JAVA/UNKNOWN",
+      "currently observed transitive ancestry from validated roots",
+      "fresh current exact W/P/E/config/fixture markers",
+      "pre-unit inherited and unrelated candidate bindings",
+      "kernel/image hints and any prior unresolved sampled candidates"
+    ],
+    "hardHold": [
+      "INITIAL_BINDING_FAILED",
+      "STABLE_SAME_BIRTH_UNEXPECTED_IMAGE_OR_EXEC",
+      "CURRENT_UNRESOLVED",
+      "ANY_LIVE_OWNED_ANY_IMAGE_CLASS",
+      "INHERITED_MISMATCH",
+      "INCOMPLETE_OBSERVATION_UTILITY_OR_NATIVE_WAIT",
+      "SOURCE_CUSTODY_REPORT_ARCHIVE_DRIFT",
+      "ORIGINAL_ACCEPTANCE_DEADLINE_EXCEEDED"
+    ],
+    "protectInheritedLegacyContinuityWithFreshAugmentation": true,
+    "unrelatedNeverOwnedOrGloballyWaited": true,
+    "allHiddenReparentedOrBetweenSampleProcessesClaimed": false
+  },
+  "utilitiesAndClients": {
+    "canonicalBinaryCommandWaitJournals": true,
+    "communicateMaximumSeconds": 15,
+    "preC4Sink": "IN_MEMORY_ONLY_CLOSED_TYPED_TOOL_FAILURE_OUTPUT",
+    "partialOrLaunchFailure": "RETAIN_UNKNOWN_NO_FABRICATED_TERMINALITY",
+    "currentCensusUtilityException": "EXACT_CURRENT_POPEN_SNAPSHOT_BIRTH_ARGV_BINARY_AND_CONFIRMED_WAIT_ONLY_NO_SUBTREE",
+    "oldPriorClients": "ACTUAL_COMPLETION_AND_FRESH_ABSENT_OR_REUSED_JOINS",
+    "currentObserverDischarge": "SEPARATELY_CAPTURED_ACTUAL_TOOL_COMPLETION",
+    "signalsCleanupSynthetic124GlobalWait": false
+  },
+  "functionMap": [
+    {
+      "existing": "capture-admission.py continuation/existing_hold/main",
+      "new": "capture-fresh07.py capture_fresh and PendingHolder",
+      "responsibility": "Replace consumed-H-only branch with new absent-E/W proposal; cap1-before-child; no old PIDs/H/continuation/roothelper; C4 before mkdir E or any H/marker/error/utility output"
+    },
+    {
+      "existing": "capture-admission.py prepare_proposal/candidate/pending_boundary/version",
+      "new": "read-only pending proposal then real custody/capture stage",
+      "responsibility": "No directory_fact(E)/physicalH assumptions precreation; fresh tools/deps/source and new birth/image candidate buffer; authorizedfalse stop and separate release"
+    },
+    {
+      "existing": "verified-inputs.py anchored_raw/verified/record/bind_controls",
+      "new": "verified07.py verified own+external buffers and entry controls",
+      "responsibility": "Reuse no-follow same-consumed-buffer semantics, explicit per-entry external hashes and no conflicts; fresh observations stay uncached"
+    },
+    {
+      "existing": "verified-inputs.py package_buffers/load_driver/load_functions/entry plus all entry_read_bytes/trusted_leaf/bootstrap_entry",
+      "new": "new07 exact loader/bootstrap",
+      "responsibility": "No hardcoded06 EXPECTED or module fallback; exact own/external source roles and static banks, new held-proof entry sealed; no entire historical packet duplication"
+    },
+    {
+      "existing": "run-private.py core/complete_table/held",
+      "new": "explicit holder context + qualify_controller_lock + materialized holder read",
+      "responsibility": "Pending buffer supports genuinely absent H; fresh UID/high-resolution controller/client births/parent/argv/FD/kernel; lstart display only for new keys, inherited legacy continuity retained"
+    },
+    {
+      "existing": "run-private.py setup_custody/guard_directory/guard_leaf/anchored_parent",
+      "new": "pending ancestor custody and materialized E/W custody modes",
+      "responsibility": "Distinct physical states; only existing ancestors before C4, exclusive E0700/H0600 afterwards; source aliases remain explicit"
+    },
+    {
+      "existing": "run-private.py no_signal_process/observation_binary/bind_observation_client/publish_observations/observation_history/observe_capture",
+      "new": "07 client/utility journals with buffered pre-C4 mode",
+      "responsibility": "Bound binary/argv/directwait/partialUNKNOWN, current exact census-utility accounting, cap15s/no signals; no recursive observer chain or PID/subtree exemption"
+    },
+    {
+      "existing": "run-private.py worker_candidates/boundary plus CORE identity/update_owned/pending_owned/drain predicates",
+      "new": "qualified-observer07.py birth/image adapter + append-only candidate/edge ledger + current join",
+      "responsibility": "Never mutate a1e7; persist candidate before details; true high-resolution keys; preserve JAVA/UNKNOWN/history; current owned all-image drain; explicit changed limited predicate"
+    },
+    {
+      "existing": "run-private.py run_native",
+      "new": "direct spawn/strong initial binding/actual wait/new qualified result",
+      "responsibility": "Separate source-authorized argv from display; original300s from before Popen; max3/250ms/5s episodes; append never clear; stable wrong image or failed initial hardHOLD; two complete current boundaries and exact report"
+    },
+    {
+      "existing": "run-private.py make_copy/install_fixed/safe_new_copy",
+      "new": "stage_native_inputs07 and exact original-to-fixed installer",
+      "responsibility": "Write executed code from same verified bank bytes; unchanged original/fixed bank/profile/fixture/modes; only separately decided fixed install after qualified red"
+    },
+    {
+      "existing": "run-private.py chart_guard/guards/inventory/workspace_guard/safe_archive_tree/archive",
+      "new": "explicit static-input getters and new-root binding, unchanged source/archive semantics",
+      "responsibility": "1808/main506/Replay/dist238/Helm22/aux/tools/deps fresh; complete W linkENTRY and22fixed chart archive; no mutable source cache or target traversal"
+    },
+    {
+      "existing": "contracts.py assess/transition_allowed and run-private.py main receipt gate",
+      "new": "reuse literal report assessor + transition_allowed07 and qualified receipt gate",
+      "responsibility": "Unchanged95/48 business report; new protocol/status/owner pins and false flags required; historical sampling uncertainty may qualify only under named new ruling; hard current failures reject"
+    },
+    {
+      "existing": "final-controls.py final_facts/produce_final",
+      "new": "qualified final tuple + frozen ledgers + two new boundaries + exclusive final0",
+      "responsibility": "Require exact actualQA/root adoption/history, source/reports/archive equalities; close new segment before readiness; no refresh or ordinary-status claim"
+    },
+    {
+      "existing": "final-controls.py close_check/guard-exit.bash/exit-gate.py",
+      "new": "07 guard/gate and exact positive permit entry",
+      "responsibility": "Negative1/status/SAMEholder before prepare; positive exactrelease/permitSHA, literalflags/owners, immutable tuple + fresh invariant checks,60s prepost; no volatile ledger-equality fiction"
+    },
+    {
+      "existing": "postclose.py/verified-inputs.py postclose branch",
+      "new": "07 outer postclose with two new current boundaries/closed segment",
+      "responsibility": "Actualwrapper0 chain; originalcontrollers/owned/priorclients absentorreused, locksameinodefree, source/inherited/archive fresh; own completion actualtool status"
+    },
+    {
+      "existing": "receipt-schema/final-readiness/schema scope/check-map/archive-and-close/templates",
+      "new": "small07 schemas/templates/predicate map",
+      "responsibility": "Newqualifiedstatus, exact protocol/claimSet/ownerpins/history/ledger/currentState/birth/image/spawnWait; flagsfalse; no oldreceipt/report/holder masquerade"
+    }
+  ],
+  "qualifiedReceipt": {
+    "status": "TERMINAL_QUALIFIED_LOCAL_ONLY",
+    "disposition": "VALID_NATIVE_RESULT_WITH_SAMPLED_RESOURCE_CLOSURE",
+    "acceptedTrueRequiresNewNamedRuling": true,
+    "legacyOrdinaryGateSatisfied": false,
+    "intervalCaptureClaimed": false,
+    "fields": [
+      "protocol",
+      "claimSet",
+      "ownerRulingPins",
+      "sourceAuthorizedArgvSha256",
+      "initialChildBinding",
+      "spawnWaitRecords",
+      "frozenLedgerSegments",
+      "currentCandidateStates",
+      "historicalIdentityUncertainty",
+      "currentBoundaryProofs",
+      "currentUnresolved",
+      "ownedLive",
+      "inheritedMatches",
+      "utilityClientJournals",
+      "nativeExit",
+      "collectorExit",
+      "phaseExit",
+      "reportPins",
+      "acceptanceDecisionPins"
+    ],
+    "old06ReceiptAcceptedByBooleanOnly": false,
+    "hardFailureStatus": "HOLD_ACCEPTED_FALSE",
+    "legacySamplingFlagsEraseOrReclassify": false
+  },
+  "entryInterfaces": {
+    "capture": [
+      "MANIFEST_SHA",
+      "ROOT_PROPOSAL_PATH",
+      "ROOT_PROPOSAL_SHA",
+      "READONLY_SAME_SHELL_CONSUMED_TOKEN"
+    ],
+    "phase": [
+      "PHASE",
+      "RELEASE_PATH",
+      "RELEASE_SHA",
+      "DECISION_SHA"
+    ],
+    "heldProof": [
+      "RELEASE_SHA",
+      "SEPARATE_NEGATIVE_STATUS_ATTESTATION_SHA"
+    ],
+    "final": [
+      "RELEASE_SHA",
+      "ACTUAL_QA_ROOT_ADOPTION_SHA"
+    ],
+    "gate": [
+      "RELEASE_SHA",
+      "0",
+      "PERMIT_SHA"
+    ],
+    "postclose": [
+      "RELEASE_SHA",
+      "ACTUAL_WRAPPER_RESULT_SHA"
+    ],
+    "allCodeIncludedInNewSourceManifest": true,
+    "rootControlPinsForEveryEntry": "COMPLETE_EXPLICIT_MAP_VERIFIED_BEFORE_SAME_BUFFER_PARSE_NO_IMPORT_PATH_FALLBACK"
+  },
+  "finalGateProtocol": {
+    "guardSetupInspectedNegative1SeparateStatusHeldProofBeforePrepare": true,
+    "fiveSeparateRootDecisionsConsumedMarkers": true,
+    "independentActualQaRootLimitedClaimAdoptionRequired": true,
+    "standaloneFinal0ActualStatusAndInspection": true,
+    "permitSeparateAfterInspection": true,
+    "freshnessSeconds": 60,
+    "beforeAndAfterGateChecks": true,
+    "immutableNativeSourceArchivePhaseOwnerTupleExact": true,
+    "freshCurrentInvariantChecks": "TWO_NEW_BOUNDARIES_WITH_OWN_NEW_SEGMENTS_NO_VOLATILE_JOURNAL_ID_EQUALITY_FICTION",
+    "finalAndGateSegmentsIndependentlyBound": true,
+    "actualGuardedWrapperExit": 0,
+    "separateOuterPostcloseRequired": true,
+    "cleanupCreditRefreshRetry": false
+  },
+  "ownerAmendmentMap": [
+    {
+      "owner": "Aria+Quinn+root",
+      "subject": "NEW_GATEWAY07_NATIVE_AND_PHASE_GATE_ONLY",
+      "old": "RUN_NATIVE_NO_STICKY_SAMPLING_GAP_TERMINAL; MAIN_TERMINAL_AND_EMPTYFLAGS",
+      "new": "NEW_QUALIFIED_LOCAL_STATUS_WITH_RETAINED_HISTORY_PLUS_STRICT_CURRENT_AND_INITIAL_IMAGE_HOLDS",
+      "issuedOperationallyNow": false
+    },
+    {
+      "owner": "Aria+Quinn+root",
+      "subject": "NEW_GATEWAY07_TRANSITION_FINAL_AND_ACTUAL_QA",
+      "old": "TERMINAL_ACCEPTED_LOCAL_ONLY_AND_NO_HISTORICAL_CANDIDATE_GAP",
+      "new": "EXACT_NEW_PROTOCOL_FALSE_FLAGS_OWNER_PINS_FROZEN_LEDGER_AND_QUALIFIED_CURRENT_EVIDENCE",
+      "issuedOperationallyNow": false
+    },
+    {
+      "owner": "Aria+Quinn+root",
+      "subject": "NEW_GATEWAY07_CLOSE_PREDICATE",
+      "old": "ORDINARY_FINAL_FACTS_BYTE_EQUALITY",
+      "new": "IMMUTABLE_RESULT_SOURCE_ARCHIVE_OWNER_TUPLE_EQUAL_PLUS_FRESH_CURRENT_INVARIANTS_AND_DISTINCT_SEGMENT_PINS_60S_PREPOST",
+      "issuedOperationallyNow": false
+    },
+    {
+      "owner": "Quinn+root_with_AriaScopeOrder",
+      "subject": "C8_GST_STYLE_JAVA_SOURCEWINDOW_ROOT731_T0_IR",
+      "old": "EXISTING_ADOPTED_GATES",
+      "new": "UNCHANGED_REQUIRES_SEPARATE_NAMED_CONSUMER_ADAPTATION_OR_SOURCE_EXCEPTION",
+      "issuedOperationallyNow": false
+    }
+  ],
+  "minimumFutureFakeTests": [
+    "POSITIVE_DIRECT_WAIT",
+    "POSITIVE_TRANSIENT_SAMPLE",
+    "POSITIVE_GONE_WITH_UNKNOWN_HISTORY",
+    "ADVERSE_INITIAL_EXIT",
+    "ADVERSE_SAME_SECOND_REUSE",
+    "ADVERSE_IMAGE_CHANGE",
+    "ADVERSE_CURRENT_UNKNOWN",
+    "ADVERSE_LOST_CHILD",
+    "ADVERSE_UTILITY_OR_CENSUS",
+    "ADVERSE_INHERITED",
+    "ADVERSE_ARTIFACT_OR_GATE",
+    "ADVERSE_SCOPE_CREDIT",
+    "PENDING_E_H_NONEXISTENT_NO_STAT_MODE_FICTION",
+    "EVERY_PRE_C4_FAILURE_ZERO_E_WRITES_CAP1_CONSUMED",
+    "EXCLUSIVE_REAL_H_PUBLICATION_PARTIAL_FAILURE_RETAINED",
+    "WHOLE_FIVE_PHASE_POSITIVE_ALL_REAL_FUNCTION_BOUNDARIES_FAKED",
+    "ALL_CODE_CONTROL_BANK_BUFFER_SUBSTITUTION_DENIED",
+    "LEDGER_PERSISTS_BEFORE_EVERY_FALLIBLE_DETAIL_AND_CAP_DENIAL",
+    "NONRESETTING_EPISODE_AND_UNREFRESHED_DEADLINE",
+    "CLAIM_FLAGS_ACTUAL_BOOLEANS_OWNER_MAP_AND_OLD_RECEIPT_DENIAL",
+    "FROZEN_FINAL_AND_FRESH_GATE_LEDGER_PROJECTION_EQUALITY_RULE",
+    "SIXTY_SECOND_FRESHNESS_PRE_AND_POST_DENIAL"
+  ],
+  "verificationNow": {
+    "namedSourceMetadataHashChecksOnly": true,
+    "contractPayloads": 3,
+    "qaPayloads": 4,
+    "existingQa171AttributedNotReplayed": true,
+    "harnessFunctionsTestsOrProbesRun": 0,
+    "optionalNineSoftwareTextsRead": 0,
+    "currentE_W_NDiscovery": false,
+    "currentOsProcessApiKernelLockToolNativeOrPrivateBaselineReadStatHash": false
+  },
+  "authority": {
+    "implementation": false,
+    "actualNativeProfileOrAttempt": false,
+    "currentFailedResourceScopeChanged": false,
+    "sourceWindowOrLease": false,
+    "platformQualification": false,
+    "readinessPermitClosingCleanup": false,
+    "IRClockStarted": false,
+    "C8MainLaneLifecycleCredit": false
+  },
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

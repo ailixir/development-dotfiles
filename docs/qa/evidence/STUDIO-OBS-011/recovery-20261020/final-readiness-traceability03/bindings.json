@@ -1,0 +1,510 @@
+{
+  "kind": "BOUNDED_FINAL_READINESS_TRACEABILITY_AND_REFERENCE_INDEX",
+  "createdUtc": "2026-10-21T03:01:11.073123+00:00",
+  "actor": "independent architect/readiness analyst",
+  "scope": "closed retained metadata/public docs only; no current actual source/runtime/private walk",
+  "test001": {
+    "status": "HISTORICAL_P7_SINGLE_AND_GENUINE_REVERSE_EVIDENCE_MAPPED_FINAL_APPLICABILITY_BRIDGE_REQUIRED",
+    "runs": [
+      {
+        "label": "obs011-recovery-20261020-itr-test001-single01",
+        "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single01-results.json",
+        "resultSha256": "7613de3b81081fb49a6a99e3fe6660832c121ea9331391e53a88911ff4d83f52",
+        "recordedNativeArgv": [
+          "caffeinate",
+          "-i",
+          "./gradlew",
+          "test",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+          "--continue",
+          "--rerun-tasks",
+          "--no-daemon"
+        ],
+        "cwd": "backend",
+        "launcherArgvReconstructedFromAcceptedCommandTemplate": [
+          "python3",
+          ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+          "python3",
+          ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+          "obs011-recovery-20261020-itr-test001-single01",
+          "--test-tasks",
+          "test",
+          "--require-exec-tasks",
+          "test",
+          "--",
+          "test",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+          "--continue",
+          "--rerun-tasks",
+          "--no-daemon"
+        ],
+        "launcherProvenance": "template reconstruction; recorded native argv independently retained",
+        "resultProjection": {
+          "exit": 0,
+          "gradleExit": 0,
+          "elapsedSeconds": 64.27,
+          "counts": {
+            "total": 1,
+            "passed": 1,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "distStable": true,
+          "testInputStable": true,
+          "taskCollectionComplete": true,
+          "requiredFreshExecTasks": [
+            "test"
+          ],
+          "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+          "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1"
+        },
+        "inputs": {
+          "before": {
+            "catalogDigest": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+            "replaySha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+            "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+            "metadataPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single01-before.json",
+            "metadataSha256": "d55451b180f3482e6b1acbcb29e6615c0744bca914251132572f03367d6ce4f8"
+          },
+          "after": {
+            "catalogDigest": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+            "replaySha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+            "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+            "metadataPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single01-after.json",
+            "metadataSha256": "cd6515eb44c9f77d3d41b2ea0eed02e2c94a3388a3d68773dfacfbcd257651a4"
+          }
+        },
+        "gateCredit": false,
+        "fullClassSlotCost": 0
+      },
+      {
+        "label": "obs011-recovery-20261020-itr-test001-single02",
+        "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single02-results.json",
+        "resultSha256": "2b068e6bb8d841198613a5095a752a12d9346f8fa50e69130edfdbf414a15dc0",
+        "recordedNativeArgv": [
+          "caffeinate",
+          "-i",
+          "./gradlew",
+          "test",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+          "--continue",
+          "--rerun-tasks",
+          "--no-daemon"
+        ],
+        "cwd": "backend",
+        "launcherArgvReconstructedFromAcceptedCommandTemplate": [
+          "python3",
+          ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+          "python3",
+          ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+          "obs011-recovery-20261020-itr-test001-single02",
+          "--test-tasks",
+          "test",
+          "--require-exec-tasks",
+          "test",
+          "--",
+          "test",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+          "--continue",
+          "--rerun-tasks",
+          "--no-daemon"
+        ],
+        "launcherProvenance": "template reconstruction; recorded native argv independently retained",
+        "resultProjection": {
+          "exit": 0,
+          "gradleExit": 0,
+          "elapsedSeconds": 45.34,
+          "counts": {
+            "total": 1,
+            "passed": 1,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "distStable": true,
+          "testInputStable": true,
+          "taskCollectionComplete": true,
+          "requiredFreshExecTasks": [
+            "test"
+          ],
+          "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+          "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1"
+        },
+        "inputs": {
+          "before": {
+            "catalogDigest": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+            "replaySha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+            "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+            "metadataPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single02-before.json",
+            "metadataSha256": "ab4dadf55df45f18f2b5ff82daa746e8ddec5b8a064b37a4deb108ea48fdf3be"
+          },
+          "after": {
+            "catalogDigest": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+            "replaySha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+            "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+            "metadataPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single02-after.json",
+            "metadataSha256": "c5fca4e29421f819dacc683284e876dea75135235b9c583a5dc75fbf8ec8a36c"
+          }
+        },
+        "gateCredit": false,
+        "fullClassSlotCost": 0
+      },
+      {
+        "label": "obs011-recovery-20261020-itr-test001-reverse01",
+        "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-reverse01-results.json",
+        "resultSha256": "2c79b30df638ac91e0531bfe387274bb5f31a78ae58c0b264ff75c3f7c065861",
+        "recordedNativeArgv": [
+          "caffeinate",
+          "-i",
+          "./gradlew",
+          "test",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.queuedAndPreReadyRefusals",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+          "--continue",
+          "--rerun-tasks",
+          "--no-daemon"
+        ],
+        "cwd": "backend",
+        "launcherArgvReconstructedFromAcceptedCommandTemplate": [
+          "python3",
+          ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+          "python3",
+          ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+          "obs011-recovery-20261020-itr-test001-reverse01",
+          "--test-tasks",
+          "test",
+          "--require-exec-tasks",
+          "test",
+          "--",
+          "test",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.queuedAndPreReadyRefusals",
+          "--tests",
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+          "--continue",
+          "--rerun-tasks",
+          "--no-daemon"
+        ],
+        "launcherProvenance": "template reconstruction; recorded native argv independently retained",
+        "resultProjection": {
+          "exit": 0,
+          "gradleExit": 0,
+          "elapsedSeconds": 108.15,
+          "counts": {
+            "total": 4,
+            "passed": 4,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "distStable": true,
+          "testInputStable": true,
+          "taskCollectionComplete": true,
+          "requiredFreshExecTasks": [
+            "test"
+          ],
+          "testInputDigestBefore": "bb78eacbf8eabf9f60bb432c49d00e37dfd0e5eb54f01d6f06cfd0ea575b52c1",
+          "testInputDigestAfter": "bb78eacbf8eabf9f60bb432c49d00e37dfd0e5eb54f01d6f06cfd0ea575b52c1"
+        },
+        "inputs": {
+          "before": {
+            "catalogDigest": "bb78eacbf8eabf9f60bb432c49d00e37dfd0e5eb54f01d6f06cfd0ea575b52c1",
+            "replaySha256": "c441abc23e67760b892998f96d26edd093b60f641ec85618a68d147281ddcad7",
+            "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+            "metadataPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-reverse01-before.json",
+            "metadataSha256": "03d5c02d1cf7530dd76a68556ebcea2d96ca12be1da23e86d7a4a83f3c73ff4b"
+          },
+          "after": {
+            "catalogDigest": "bb78eacbf8eabf9f60bb432c49d00e37dfd0e5eb54f01d6f06cfd0ea575b52c1",
+            "replaySha256": "c441abc23e67760b892998f96d26edd093b60f641ec85618a68d147281ddcad7",
+            "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+            "metadataPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-reverse01-after.json",
+            "metadataSha256": "de2befca6c9f3abfaeac3182c5657d29ff316aaf786bc0d354e719a72184c678"
+          }
+        },
+        "gateCredit": false,
+        "fullClassSlotCost": 0
+      }
+    ],
+    "reverseActualInvocations": [
+      {
+        "method": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+        "invocationOrdinal": 1,
+        "variant": "singleton",
+        "variantOrdinal": 0,
+        "passed": true,
+        "afterEachComplete": true
+      },
+      {
+        "method": "queuedAndPreReadyRefusals",
+        "invocationOrdinal": 2,
+        "variant": "singleton",
+        "variantOrdinal": 0,
+        "passed": true,
+        "afterEachComplete": true
+      },
+      {
+        "method": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+        "invocationOrdinal": 3,
+        "variant": "singleton",
+        "variantOrdinal": 0,
+        "passed": true,
+        "afterEachComplete": true
+      },
+      {
+        "method": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+        "invocationOrdinal": 4,
+        "variant": "singleton",
+        "variantOrdinal": 0,
+        "passed": true,
+        "afterEachComplete": true
+      }
+    ],
+    "canonicalRestoredCompileExit": 0,
+    "slot3Status": "FAIL_NO_TEST001_FULL_GREEN_BATON",
+    "slot3RawExit": 1,
+    "slot3ReaderExit": 2,
+    "laterB1B4Focused13PassDoNotIncludeP7OrReverseSet": true,
+    "missingFact": "exact accepted applicability/source-helper-caller bridge from e10 through C6/B1-B4/FOLD/formatting and final runtime/build tuple; original evidence is present, not presumed absent",
+    "additionalRunAuthorized": false
+  },
+  "schedule": {
+    "floorUtc": "2026-10-20T04:35:27.361777Z",
+    "cutoffUtc": "2026-10-22T04:35:27.361777Z",
+    "exactHistoricalEarliestAnchor": "UNKNOWN",
+    "earlierQualifyingFactTightens": true,
+    "slotsConsumed": 3,
+    "remainingSlots": [
+      4,
+      5,
+      6
+    ],
+    "successfulWholeBaselineSeconds": 6468.83,
+    "successfulWholeUsedAsConservativeProxyPerEachFinalInvocation": true,
+    "finalPairDuration": "UNKNOWN",
+    "replayPlanningAllowanceMultiplier": 1.5,
+    "replayReservedSeconds": 29109.734999999997,
+    "otherDiscretionaryReservationSeconds": 12600,
+    "totalReservedSeconds": 41709.735,
+    "reservationIsMeasuredBound": false,
+    "latestStartForReservationArithmeticOnlyUtc": "2026-10-21T17:00:17.626777+00:00",
+    "secondsUntilCutoffAtCreation": 92056.288654,
+    "slackBeyondReservationAtCreationSeconds": 50346.553654,
+    "unknownDurations": [
+      "custody/application/delta QA/guards",
+      "complete configured actual build",
+      "final coverage/collection",
+      "Linux image",
+      "corrected D2",
+      "singleTransportoldREDfixedGREEN",
+      "finalbinding/TEST001bridge",
+      "finalpair",
+      "independentT5/closure"
+    ],
+    "beforeSlot4": "all mutation/prerequisite exits complete; rebind remaining budget from actual elapsed receipts; preserve all remaining calls plus collection/QA; no runtime/source/build between4and5"
+  },
+  "finalRunnerForecastSuppliedByRoot": {
+    "preparation": "actual-runner-final-gates-preparation01",
+    "forecastShaPrefix": "60b90b14",
+    "total": 2717,
+    "pass": 2692,
+    "originalSkips": 25,
+    "originalCaseRows": 2676,
+    "originalDistinctIdentities": 2672,
+    "newDisjointCases": 41,
+    "compareBy": "Counter/multiplicity and per-file order, not unique case names",
+    "outcome": "UNEXECUTED_FORECAST"
+  },
+  "external": {
+    "existingRegisterPath": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+    "existingRegisterSha256": "b1ffca82d97e2db125c90133df8575c1d571bc59904bcb0a94a5931e4e10ecb5",
+    "indexLocation": "readiness.md external handback table",
+    "namedExternalIndividuals": "UNASSIGNED",
+    "expectedDeliveries": "UNKNOWN",
+    "sharedUsdCeiling": 500,
+    "aggregateSpend": "UNKNOWN",
+    "headroom": "UNKNOWN",
+    "realProviderAdmission": false,
+    "contactPerformed": false,
+    "registerModified": false,
+    "recommendation": "one coordinator-owned approved-reference packet; prioritize actualU13,ED01/staging; no raw secrets"
+  },
+  "sourceReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-application.json",
+      "sha256": "294a2bd60c8385aaf08a48754320856dcd5889927c2ed5be462e4facb15edacc"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-focused-handoff.json",
+      "sha256": "17102aa9169aeb31816ce8c8043a05c4018150bbf1e7cd583b5ca3bd97b824ba"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-independence-progress.json",
+      "sha256": "60692ed923e5df99b9086ecc0be0a2c23ae6f9504530529e7841c0917c515545"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-controls-progress.json",
+      "sha256": "0ad0947da201ec1336231d27d175db424a167d5546464c3f7feb88651da1291e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-reverse-ordinals.json",
+      "sha256": "100e583aa8782366040829c0426a6cf39e008521ac95967d32b4daaae3c9e4a4"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-full-slot3/terminal-assessment.json",
+      "sha256": "52e714e459c87abb6357e97c163aee6c60a8def2a7bca9281312b4f159bc5da9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/original-four-diagnostics.json",
+      "sha256": "e320d73e4db222df6fa9bdad43d3500a0b1903242fd0f5ca5b57f70e0b266d3c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/terminal-assessment.json",
+      "sha256": "63c19786b56a2fff0c42ee3e5b882bb700be2a2e1f7696e00ce92a5f04f223ab"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/reader-input-baton.json",
+      "sha256": "5f110f67ce8f2f6d20ac1cfceee21bc9cd908202e7f1c477d32bf30d3e366f26"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/original-ir-clock-binding/ruling.md",
+      "sha256": "98e853ead97d7f90659c857463499e98e800902cf6c3cddbe350d2049aac6ed8"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/astra-three-story-plan-review-current03/review.md",
+      "sha256": "337077b2cd85c4f8d4b82eb2193750b9410beb154ac6f280b6eefdff766b0cbe"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/lean-ir-plan.md",
+      "sha256": "508800acbe9f6a4bc3ec52c7b43c43518a93b32f32ae8d66bc9ad34ae93e5e35"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+      "sha256": "b1ffca82d97e2db125c90133df8575c1d571bc59904bcb0a94a5931e4e10ecb5"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/ae01-ack-request-draft.md",
+      "sha256": "c5be91ad96d9c6677b44d43dbbd5da918d20f65fdedddcb66e32609c3811cf15"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/future-commands.json",
+      "sha256": "35255ce4134a4dde9fdc8da1cf8c80cf7608d75948648a29c92bb4b8936b5218"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/itr-test001-focused-go-task.txt",
+      "sha256": "ce175a80c691c4372b002f74453541968e68508522091c301c9d61da3cd8ea14"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/itr-test001-focused-go-context.txt",
+      "sha256": "43d4da57b0b77f3c4d38da7bb200bbbc89dff0ea9e1df871a8f867afb8f21d1b"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/itr-test001-slot3-go-task.txt",
+      "sha256": "526ac6baecd9d9ecd7df4c253425ab280cf8b27514faeae6ac810d9ae6a5a87c"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/itr-test001-slot3-go-context.txt",
+      "sha256": "dfe01ddf0b838e5847a19b8d7bcf4aebfe1f525b4c998fa2f7e9e217cd3ef717"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/final-readiness-traceability03-task.txt",
+      "sha256": "2801e3a90533fab9e802aacfce2cc463c6f089aab5c7882366da158e1e655ab7"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/final-readiness-traceability03-context.txt",
+      "sha256": "259cd250eb087c13b4b073dbb0aae31c49d9af6ba017aa685c678bd417de0128"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single01-results.json",
+      "sha256": "7613de3b81081fb49a6a99e3fe6660832c121ea9331391e53a88911ff4d83f52"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single01-before.json",
+      "sha256": "d55451b180f3482e6b1acbcb29e6615c0744bca914251132572f03367d6ce4f8"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single01-after.json",
+      "sha256": "cd6515eb44c9f77d3d41b2ea0eed02e2c94a3388a3d68773dfacfbcd257651a4"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single02-results.json",
+      "sha256": "2b068e6bb8d841198613a5095a752a12d9346f8fa50e69130edfdbf414a15dc0"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single02-before.json",
+      "sha256": "ab4dadf55df45f18f2b5ff82daa746e8ddec5b8a064b37a4deb108ea48fdf3be"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-single02-after.json",
+      "sha256": "c5fca4e29421f819dacc683284e876dea75135235b9c583a5dc75fbf8ec8a36c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-reverse01-results.json",
+      "sha256": "2c79b30df638ac91e0531bfe387274bb5f31a78ae58c0b264ff75c3f7c065861"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-reverse01-before.json",
+      "sha256": "03d5c02d1cf7530dd76a68556ebcea2d96ca12be1da23e86d7a4a83f3c73ff4b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-reverse01-after.json",
+      "sha256": "de2befca6c9f3abfaeac3182c5657d29ff316aaf786bc0d354e719a72184c678"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-before01-results.json",
+      "sha256": "24569b84cf570bd4b8156b7b9fee6237fedb1b0ae7a0cb2b9868c4613ae2db2e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-b4-deployment01-results.json",
+      "sha256": "4bb203a6f1c2b1514c12cbaddc92434efde46bdb2835273157b3fd92d47612c9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-b5-pins01-results.json",
+      "sha256": "cba729b331d5db1019824082f0cbceb509c9ce44b0413ac58ff37a4f8957860f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-b6-contracts01-results.json",
+      "sha256": "41942947f750cdbf7995447522b2cb25f374e9af89ee60057d1119540732b927"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-b6-codegen01-results.json",
+      "sha256": "fb688cf009db102e0185fac6da102b088b6fcc9565cd402e556bddbe48b0720e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-phase2-execution01/unit-terminal.json",
+      "sha256": "5135fe4fc03d24bd461f840d996dc8d69a700462997437fc548f147595dcef2e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-execution01/types01-terminal.json",
+      "sha256": "9f9df64ee8e2c82c5673c44f98dcaa323f4bb823b2f2cd06a0238d8c052a34be"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-execution01/lint01-terminal.json",
+      "sha256": "ab36eeea943de29054ffccb77937d27c4b5a4326e3adc534ff105a479c927ebe"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-execution01/emit-after01-terminal.json",
+      "sha256": "2731cba8f3cdfccdba93d422dfa496be4b44dfd2217d13c0f0d7dcb9824407c3"
+    }
+  ],
+  "noExecutionOrLifecycleApproval": true,
+  "storiesRemain": "InProgress"
+}

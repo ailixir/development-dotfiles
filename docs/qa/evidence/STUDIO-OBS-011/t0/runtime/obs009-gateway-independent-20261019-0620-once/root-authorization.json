@@ -1,0 +1,33 @@
+{
+  "atUtc": "2026-10-19T06:18:27.234053+00:00",
+  "decisionId": "ROOT-009-PRIVATE-40-RENDERS-20261019",
+  "authorized": true,
+  "scope": "Exactly2 reviewed private scratch counterfactual cases/40 realHelmtemplate calls. Original source/chart/backendbuildoutputs held. No product apply/lane/C8/fulltier/lifecycle credit; no automaticretry.",
+  "package": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2",
+  "manifestSha256": "06107221f5863414867f79831e69758253252ff1d991663db460200882a80d54",
+  "reviewSha256": "97aeb6a9a8769faedbb6446ee8d992f7b9e59b546a03dcb52eeff93f0fb14047",
+  "originalPublicAdoptionSha256": "105a50ecf9dfab04cd832021e77960a3478d7678170c598053c21d6d000a9d70",
+  "node": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+  "nodeSha256": "9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a",
+  "helm": "/opt/homebrew/bin/helm",
+  "helmSha256": "87c4f99aa4edc63a5536838123680bece0e63c51019e515b122ba27f6276a3c9",
+  "dependencies": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules",
+  "scratch": "/private/tmp/obs009-gateway-independent-20261019-0620-once",
+  "runCommand": [
+    "node",
+    "./node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.gateway-independent.config.ts",
+    "test/deployment/gateway-independent-mutants.test.ts",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=../vitest.json"
+  ],
+  "maximumSeconds": 300,
+  "singleHeavyUnitUnderSharedLock": true,
+  "automaticRetry": false,
+  "productSourceWrites": false,
+  "independentRuntimeReview": "OWED",
+  "preparationCorrection": "Initial root membership check omitted sealed external receipt.md; corrected by actual membership, no launch or writes before correction."
+}

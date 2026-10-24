@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "kind": "INDEPENDENT_SOURCE03_EXACT_ARCHITECTURE_REVIEW",
+  "reviewer": "Aria",
+  "verdict": "HOLD",
+  "subjectManifestSha256": "53d3d2fddc2022a4e58de136adf75b5bfe4e971b919b604ea38476848508fcad",
+  "files": [
+    {
+      "path": "boundary03_checks.py.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "boundary03_checks.py.stdout",
+      "sha256": "cc3c177f14c350cc1bc605f3572ef301f06f2b86c01df208e46e9e685839858b",
+      "bytes": 9290,
+      "mode": 420
+    },
+    {
+      "path": "checks.json",
+      "sha256": "6cb0890bbf29b6fc5cd631623bbedf2002b459b69c30e3b18664f88c1a9622aa",
+      "bytes": 1689,
+      "mode": 420
+    },
+    {
+      "path": "findings.json",
+      "sha256": "6745086ce52f095ffcae67eeb3ba07b1def55ea0f27ab5df9631a566fa589003",
+      "bytes": 2394,
+      "mode": 420
+    },
+    {
+      "path": "independent.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "independent.stdout",
+      "sha256": "44a1b6c9f3ba570aedfea7c84690d68e5daf204b5f46d6e93880e5b707865b3e",
+      "bytes": 3971,
+      "mode": 420
+    },
+    {
+      "path": "pins.json",
+      "sha256": "b3ffb7eb69d6d384c74a65046469ffe03f518eefff96b9bf36ca3b33bc2a4aa3",
+      "bytes": 41819,
+      "mode": 420
+    },
+    {
+      "path": "pure_checks.py.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "pure_checks.py.stdout",
+      "sha256": "9762527912851cdebc5ced85c4d766795b760d511b012e5ad8342ac82c3eae6d",
+      "bytes": 19766,
+      "mode": 420
+    },
+    {
+      "path": "replay_guarded.py",
+      "sha256": "fa3c85ab54e11b2b23da664be9cccda3f46fd4982a0b3cdfdb2a8d6ff62238c2",
+      "bytes": 5174,
+      "mode": 420
+    },
+    {
+      "path": "review.md",
+      "sha256": "3333c79513882c936248763d67a4970ccb467546d37ade5b8c214c2a8857ae9d",
+      "bytes": 7155,
+      "mode": 420
+    },
+    {
+      "path": "runtime_adapter_checks.py.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "runtime_adapter_checks.py.stdout",
+      "sha256": "642c8b413f1fb394e6dd33b2fab6eb25cf756389a418bcb54662c35b6e7875e6",
+      "bytes": 11531,
+      "mode": 420
+    }
+  ],
+  "memberCount": 13,
+  "mandatoryFindings": 1,
+  "guardedAuthorChecksReplayed": 536,
+  "independentIntegrationChecks": 3,
+  "actualRealBoundaryCalls": 0,
+  "executionReleased": false,
+  "C8MainSourceIRLaneLifecycleCredit": false,
+  "manifestSelfExcluded": true
+}

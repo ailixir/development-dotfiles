@@ -1,0 +1,1056 @@
+{
+  "at": "2026-10-19T01:02:47.513389+00:00",
+  "source": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+  "sourceSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+  "sourceMtime": 1792371723.232104,
+  "suite": {
+    "tests": "47",
+    "failures": "15",
+    "errors": "0",
+    "skipped": "0",
+    "timestamp": "2026-10-19T00:27:12"
+  },
+  "scope": "Fresh default-task XML only; full B1 receipt/cohort/coverage still pending",
+  "failures": [
+    {
+      "name": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks()",
+      "type": "java.lang.AssertionError",
+      "messageLength": 155,
+      "expectedUnknownActualFailed": true,
+      "frames": [
+        [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.awaitState",
+          "GuidedPublicationReplayIT.java",
+          "19249"
+        ],
+        [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.p8C6Run",
+          "GuidedPublicationReplayIT.java",
+          "26012"
+        ],
+        [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.lambda$p8C6Case$543",
+          "GuidedPublicationReplayIT.java",
+          "25710"
+        ],
+        [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.p3Case",
+          "GuidedPublicationReplayIT.java",
+          "24056"
+        ],
+        [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.p8C6Case",
+          "GuidedPublicationReplayIT.java",
+          "25710"
+        ],
+        [
+          "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualGuidedReleasedValueInjectedFailureRedactsProducedSinks",
+          "GuidedPublicationReplayIT.java",
+          "20849"
+        ],
+        [
+          "org.junit.platform.commons.util.ReflectionUtils.invokeMethod",
+          "ReflectionUtils.java",
+          "728"
+        ],
+        [
+          "org.junit.jupiter.engine.execution.MethodInvocation.proceed",
+          "MethodInvocation.java",
+          "60"
+        ],
+        [
+          "org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed",
+          "InvocationInterceptorChain.java",
+          "131"
+        ],
+        [
+          "org.junit.jupiter.engine.extension.TimeoutExtension.intercept",
+          "TimeoutExtension.java",
+          "156"
+        ],
+        [
+          "org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod",
+          "TimeoutExtension.java",
+          "147"
+        ],
+        [
+          "org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod",
+          "TimeoutExtension.java",
+          "86"
+        ]
+      ],
+      "suppressedExceptionTypes": [
+        "java.lang.IllegalStateException",
+        "org.opentest4j.AssertionFailedError",
+        "org.opentest4j.AssertionFailedError",
+        "java.lang.IllegalStateException"
+      ]
+    },
+    {
+      "name": "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "actualSecretControlWindowLossBeforeReadyReachesTerminalError()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "incrementalSecretPrefixPreservesEveryVaultFaultOracle()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 165,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    },
+    {
+      "name": "executionError",
+      "type": "org.opentest4j.AssertionFailedError",
+      "messageLength": 136,
+      "expectedUnknownActualFailed": false,
+      "frames": [
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses",
+          "JUnitPlatformTestClassProcessor.java",
+          "124"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000",
+          "JUnitPlatformTestClassProcessor.java",
+          "99"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop",
+          "JUnitPlatformTestClassProcessor.java",
+          "94"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop",
+          "SuiteTestClassProcessor.java",
+          "63"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "36"
+        ],
+        [
+          "org.gradle.internal.dispatch.ReflectionDispatch.dispatch",
+          "ReflectionDispatch.java",
+          "24"
+        ],
+        [
+          "org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch",
+          "ContextClassLoaderDispatch.java",
+          "33"
+        ],
+        [
+          "org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke",
+          "ProxyDispatchAdapter.java",
+          "92"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run",
+          "TestWorker.java",
+          "200"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName",
+          "TestWorker.java",
+          "132"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "103"
+        ],
+        [
+          "org.gradle.api.internal.tasks.testing.worker.TestWorker.execute",
+          "TestWorker.java",
+          "63"
+        ]
+      ],
+      "suppressedExceptionTypes": []
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+      // IT-R POLL 6: exact original transitions; one old interval owed at most.
+      final var itrRead006_deadline = deadline;
+      class ItrState006 { String teardown; boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
+      final var itr006 = new ItrState006();
+      
+      java.util.concurrent.Callable<Boolean> itrPoll006 = () -> {
+        if (itr006.firstException != null) throw itr006.firstException;
+        if (itr006.firstError != null) throw itr006.firstError;
+        if (itr006.terminal) return true;
+        try {
+        if (itr006.intervalOwed) {
+          if (Thread.interrupted()) throw new InterruptedException();
+          if (Clock.nanoTime() < itr006.owedUntil) return false;
+          itr006.intervalOwed = false;
+        }
+        if (!itr006.firstIteration && !(Clock.nanoTime() < itrRead006_deadline)) { itr006.terminal = true; return true; }
+        itr006.firstIteration = false;
+        itr006.teardown =
+                sessions.transaction(
+                    () -> sessions.lock(owned.getKey()).progress().path("teardownStatus").asText());
+            if (itr006.teardown.equals("CONFIRMED")) {
+              itr006.terminal = true; return true;
+            }
+            itr006.intervalOwed = true; Clock.startElapsed(); itr006.owedUntil = Clock.nanoTime() + Duration.ofMillis(30).toNanos();
+        return false;
+        } catch (Exception itrFailure006) {
+          if (itr006.firstException == null && itr006.firstError == null) {
+            itr006.firstException = itrFailure006; itr006.terminal = true;
+          }
+          throw itr006.firstException;
+        } catch (Error itrFailure006) {
+          if (itr006.firstException == null && itr006.firstError == null) {
+            itr006.firstError = itrFailure006; itr006.terminal = true;
+          }
+          throw itr006.firstError;
+        }
+      };
+      try {
+        while (!itr006.terminal) {
+          // First invocation is manual. Reentry serves only the original pending transition.
+          boolean itrDone006 = itrPoll006.call();
+          if (itrDone006) break;
+          if (Thread.interrupted()) throw new InterruptedException();
+          if (noAwaitGap) { Clock.advance(1_000_000_000L); noAwaitGap = false; }
+long itrNow006 = Clock.nanoTime();
+          long itrRemaining006 = itrRead006_deadline - itrNow006;
+          long itrOwed006 = itr006.intervalOwed ? itr006.owedUntil - itrNow006 : 0;
+          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
+          long itrBound006 = Math.max(itrRemaining006, itrOwed006); if (itrBound006 <= 0) noAwaitPathObserved = true;
+          if (itrBound006 > 0) {
+            final boolean[] itrFirstTick006 = {true};
+            try {
+              final long probeChainStarted006 = System.nanoTime();
+org.awaitility.Awaitility.await("ReplayIT POLL 6")
+                  .atMost(Duration.ofNanos(itrBound006))
+                  .pollInterval(Duration.ofMillis(30)).pollDelay(Duration.ZERO)
+                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
+                  .until(() -> {
+                    try {
+                    if (itr006.firstException != null) throw itr006.firstException;
+                    if (itr006.firstError != null) throw itr006.firstError;
+                    if (itr006.terminal) return true;
+                    if (Thread.interrupted()) throw new InterruptedException();
+                    if (itrFirstTick006[0]) {
+                      itrFirstTick006[0] = false;
+                      probeIntervalEntered.countDown(); return false; // Cached tick: no second immediate condition/read/effect.
+                    }
+                    boolean itrObserved006; try { itrObserved006 = itrPoll006.call(); } finally { if (scenario.startsWith("LATE_")) { lateCallbackEntered = true; lateCompletionBeyondBound = System.nanoTime() - probeChainStarted006 > itrBound006; } }
+                    if (!itrObserved006 && Thread.interrupted()) throw new InterruptedException();
+                    return itrObserved006;
+                    } catch (Exception itrFailure006) {
+                      if (itr006.firstException == null && itr006.firstError == null) {
+            itr006.firstException = itrFailure006; itr006.terminal = true;
+          }
+                      if (itr006.firstError != null) throw itr006.firstError;
+                      throw itr006.firstException;
+                    } catch (Error itrFailure006) {
+                      if (itr006.firstException == null && itr006.firstError == null) {
+            itr006.firstError = itrFailure006; itr006.terminal = true;
+          }
+                      if (itr006.firstException != null) throw itr006.firstException;
+                      throw itr006.firstError;
+                    }
+                  });
+            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout006) {
+              if (itr006.firstException != null) throw itr006.firstException;
+              if (itr006.firstError != null) throw itr006.firstError;
+              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
+            }
+          }
+          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
+        }
+      } catch (Exception itrFailure006) {
+        if (itr006.firstException == null && itr006.firstError == null) {
+            itr006.firstException = itrFailure006; itr006.terminal = true;
+          }
+        if (itr006.firstError != null) throw itr006.firstError;
+        throw itr006.firstException;
+      } catch (Error itrFailure006) {
+        if (itr006.firstException == null && itr006.firstError == null) {
+            itr006.firstError = itrFailure006; itr006.terminal = true;
+          }
+        if (itr006.firstException != null) throw itr006.firstException;
+        throw itr006.firstError;
+      } finally {
+        teardown = itr006.teardown;
+      }
+      
+    }

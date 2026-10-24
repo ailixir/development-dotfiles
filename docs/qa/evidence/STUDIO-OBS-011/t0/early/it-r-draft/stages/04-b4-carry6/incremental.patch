@@ -1,0 +1,564 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -954,10 +954,85 @@
+           Integer.parseInt(builder.environment().getOrDefault("OBS007_ORDINARY_POOL_SIZE", "0"));
+       root.readinessNonceHash =
+           GuidedContracts.hash(com.fasterxml.jackson.databind.node.TextNode.valueOf(nonce));
+-      while (!Files.exists(ready) && System.nanoTime() < until) {
+-        verifyOwnedRoot(root);
+-        Thread.sleep(20);
+-      }
++      {
++      // IT-R POLL 3: original body/state, direct same-thread Awaitility.
++      final var itrRead003_ready = ready; final var itrRead003_until = until; final var itrRead003_root = root;
++      class ItrState003 { boolean firstIteration = true; boolean firstAwait = true; boolean terminal; Exception firstException; Error firstError; }
++      final var itr003 = new ItrState003();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll003 = () -> {
++        if (itr003.firstException != null) throw itr003.firstException;
++        if (itr003.firstError != null) throw itr003.firstError;
++        if (itr003.terminal) return true;
++        try {
++        if (!(!Files.exists(itrRead003_ready) && System.nanoTime() < itrRead003_until)) { itr003.terminal = true; return true; }
++        
++        itr003.firstIteration = false;
++        verifyOwnedRoot(itrRead003_root);
++        return false;
++        } catch (Exception itrFailure003) {
++          if (itr003.firstException == null && itr003.firstError == null) {
++            itr003.firstException = itrFailure003; itr003.terminal = true;
++          }
++          throw itrFailure003;
++        } catch (Error itrFailure003) {
++          if (itr003.firstException == null && itr003.firstError == null) {
++            itr003.firstError = itrFailure003; itr003.terminal = true;
++          }
++          throw itrFailure003;
++        }
++      };
++      try {
++        boolean itrDone003 = itrPoll003.call();
++        if (!itrDone003 && Thread.interrupted()) throw new InterruptedException();
++        long itrRemaining003 = itrRead003_until - System.nanoTime();
++        if (!itrDone003 && itrRemaining003 > 0) {
++          org.awaitility.Awaitility.await("ReplayIT POLL 3")
++              .atMost(Duration.ofNanos(itrRemaining003))
++              .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++              .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++              .until(() -> {
++                try {
++                if (itr003.firstException != null) throw itr003.firstException;
++                if (itr003.firstError != null) throw itr003.firstError;
++                if (itr003.terminal) return true;
++                if (Thread.interrupted()) throw new InterruptedException();
++                if (itr003.firstAwait) {
++                  itr003.firstAwait = false;
++                  if (Thread.interrupted()) throw new InterruptedException();
++                  return false;
++                }
++                boolean itrObserved003 = itrPoll003.call();
++                if (!itrObserved003 && Thread.interrupted()) throw new InterruptedException();
++                return itrObserved003;
++                } catch (Exception itrFailure003) {
++                  if (itr003.firstException == null && itr003.firstError == null) {
++                    itr003.firstException = itrFailure003; itr003.terminal = true;
++                  }
++                  throw itrFailure003;
++                } catch (Error itrFailure003) {
++                  if (itr003.firstException == null && itr003.firstError == null) {
++                    itr003.firstError = itrFailure003; itr003.terminal = true;
++                  }
++                  throw itrFailure003;
++                }
++              });
++        } else if (!itrDone003 && Thread.interrupted()) {
++          throw new InterruptedException();
++        }
++      } catch (org.awaitility.core.ConditionTimeoutException itrTimeout003) {
++        if (itr003.firstException != null) throw itr003.firstException;
++        if (itr003.firstError != null) throw itr003.firstError;
++        if (!itr003.terminal) {
++        if (Thread.interrupted()) throw new InterruptedException();
++        // Original last-value/fall-through or mapped assertion remains the timeout contract.
++        
++        }
++      } finally {
++        
++      }
++      
++    }
+       verifyOwnedRoot(root);
+       assertThat(Files.exists(ready)).as("candidate-owned post-listen marker").isTrue();
+       JsonNode marker = C.parse(Files.readString(ready));
+@@ -2304,15 +2379,91 @@
+               0);
+       long fixtureDeadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+       String fixtureAnnouncement = "";
+-      while (fixtureAnnouncement.isBlank() && System.nanoTime() < fixtureDeadline) {
++      {
++      // IT-R POLL 5: original body/state, direct same-thread Awaitility.
++      final var itrRead005_fixtureDeadline = fixtureDeadline;
++      class ItrState005 { String fixtureAnnouncement; boolean firstIteration = true; boolean firstAwait = true; boolean terminal; Exception firstException; Error firstError; }
++      final var itr005 = new ItrState005();
++      itr005.fixtureAnnouncement = fixtureAnnouncement;
++      java.util.concurrent.Callable<Boolean> itrPoll005 = () -> {
++        if (itr005.firstException != null) throw itr005.firstException;
++        if (itr005.firstError != null) throw itr005.firstError;
++        if (itr005.terminal) return true;
++        try {
++        if (!(itr005.fixtureAnnouncement.isBlank() && System.nanoTime() < itrRead005_fixtureDeadline)) { itr005.terminal = true; return true; }
++        
++        itr005.firstIteration = false;
+         if (!SECRET_FIXTURE.isAlive()) {
+           throw new IllegalStateException("Secret fixture exited before readiness");
+         }
+-        fixtureAnnouncement = Files.readString(TEMP.resolve("secret-fixture-origin.json")).strip();
+-        if (fixtureAnnouncement.isBlank()) {
+-          Thread.sleep(20);
+-        }
+-      }
++        itr005.fixtureAnnouncement = Files.readString(TEMP.resolve("secret-fixture-origin.json")).strip();
++        if (itr005.fixtureAnnouncement.isBlank()) {
++          
++        }
++        if (!(itr005.fixtureAnnouncement.isBlank() && System.nanoTime() < itrRead005_fixtureDeadline)) { itr005.terminal = true; return true; } return false;
++        } catch (Exception itrFailure005) {
++          if (itr005.firstException == null && itr005.firstError == null) {
++            itr005.firstException = itrFailure005; itr005.terminal = true;
++          }
++          throw itrFailure005;
++        } catch (Error itrFailure005) {
++          if (itr005.firstException == null && itr005.firstError == null) {
++            itr005.firstError = itrFailure005; itr005.terminal = true;
++          }
++          throw itrFailure005;
++        }
++      };
++      try {
++        boolean itrDone005 = itrPoll005.call();
++        if (!itrDone005 && Thread.interrupted()) throw new InterruptedException();
++        long itrRemaining005 = itrRead005_fixtureDeadline - System.nanoTime();
++        if (!itrDone005 && itrRemaining005 > 0) {
++          org.awaitility.Awaitility.await("ReplayIT POLL 5")
++              .atMost(Duration.ofNanos(itrRemaining005))
++              .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++              .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++              .until(() -> {
++                try {
++                if (itr005.firstException != null) throw itr005.firstException;
++                if (itr005.firstError != null) throw itr005.firstError;
++                if (itr005.terminal) return true;
++                if (Thread.interrupted()) throw new InterruptedException();
++                if (itr005.firstAwait) {
++                  itr005.firstAwait = false;
++                  if (Thread.interrupted()) throw new InterruptedException();
++                  return false;
++                }
++                boolean itrObserved005 = itrPoll005.call();
++                if (!itrObserved005 && Thread.interrupted()) throw new InterruptedException();
++                return itrObserved005;
++                } catch (Exception itrFailure005) {
++                  if (itr005.firstException == null && itr005.firstError == null) {
++                    itr005.firstException = itrFailure005; itr005.terminal = true;
++                  }
++                  throw itrFailure005;
++                } catch (Error itrFailure005) {
++                  if (itr005.firstException == null && itr005.firstError == null) {
++                    itr005.firstError = itrFailure005; itr005.terminal = true;
++                  }
++                  throw itrFailure005;
++                }
++              });
++        } else if (!itrDone005 && Thread.interrupted()) {
++          throw new InterruptedException();
++        }
++      } catch (org.awaitility.core.ConditionTimeoutException itrTimeout005) {
++        if (itr005.firstException != null) throw itr005.firstException;
++        if (itr005.firstError != null) throw itr005.firstError;
++        if (!itr005.terminal) {
++        if (Thread.interrupted()) throw new InterruptedException();
++        // Original last-value/fall-through or mapped assertion remains the timeout contract.
++        
++        }
++      } finally {
++        fixtureAnnouncement = itr005.fixtureAnnouncement;
++      }
++      
++    }
+       if (fixtureAnnouncement.isBlank()) {
+         throw new IllegalStateException("Secret fixture readiness deadline");
+       }
+@@ -24786,10 +24937,86 @@
+       cut.stopIssued = true;
+       p6Signal("-STOP", Long.toString(cut.parent.pid()));
+       long stoppedBy = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+-      while (System.nanoTime() < stoppedBy
+-          && !p6Status(cut.parent.toHandle()).state().startsWith("T")) {
+-        Thread.sleep(10);
+-      }
++      {
++      // IT-R POLL 64: original body/state, direct same-thread Awaitility.
++      final var itrRead064_cut = cut; final var itrRead064_stoppedBy = stoppedBy;
++      class ItrState064 { boolean firstIteration = true; boolean firstAwait = true; boolean terminal; Exception firstException; Error firstError; }
++      final var itr064 = new ItrState064();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll064 = () -> {
++        if (itr064.firstException != null) throw itr064.firstException;
++        if (itr064.firstError != null) throw itr064.firstError;
++        if (itr064.terminal) return true;
++        try {
++        if (!(System.nanoTime() < itrRead064_stoppedBy
++          && !p6Status(itrRead064_cut.parent.toHandle()).state().startsWith("T"))) { itr064.terminal = true; return true; }
++        
++        itr064.firstIteration = false;
++        
++        return false;
++        } catch (Exception itrFailure064) {
++          if (itr064.firstException == null && itr064.firstError == null) {
++            itr064.firstException = itrFailure064; itr064.terminal = true;
++          }
++          throw itrFailure064;
++        } catch (Error itrFailure064) {
++          if (itr064.firstException == null && itr064.firstError == null) {
++            itr064.firstError = itrFailure064; itr064.terminal = true;
++          }
++          throw itrFailure064;
++        }
++      };
++      try {
++        boolean itrDone064 = itrPoll064.call();
++        if (!itrDone064 && Thread.interrupted()) throw new InterruptedException();
++        long itrRemaining064 = itrRead064_stoppedBy - System.nanoTime();
++        if (!itrDone064 && itrRemaining064 > 0) {
++          org.awaitility.Awaitility.await("ReplayIT POLL 64")
++              .atMost(Duration.ofNanos(itrRemaining064))
++              .pollInterval(Duration.ofMillis(10)).pollDelay(Duration.ZERO)
++              .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++              .until(() -> {
++                try {
++                if (itr064.firstException != null) throw itr064.firstException;
++                if (itr064.firstError != null) throw itr064.firstError;
++                if (itr064.terminal) return true;
++                if (Thread.interrupted()) throw new InterruptedException();
++                if (itr064.firstAwait) {
++                  itr064.firstAwait = false;
++                  if (Thread.interrupted()) throw new InterruptedException();
++                  return false;
++                }
++                boolean itrObserved064 = itrPoll064.call();
++                if (!itrObserved064 && Thread.interrupted()) throw new InterruptedException();
++                return itrObserved064;
++                } catch (Exception itrFailure064) {
++                  if (itr064.firstException == null && itr064.firstError == null) {
++                    itr064.firstException = itrFailure064; itr064.terminal = true;
++                  }
++                  throw itrFailure064;
++                } catch (Error itrFailure064) {
++                  if (itr064.firstException == null && itr064.firstError == null) {
++                    itr064.firstError = itrFailure064; itr064.terminal = true;
++                  }
++                  throw itrFailure064;
++                }
++              });
++        } else if (!itrDone064 && Thread.interrupted()) {
++          throw new InterruptedException();
++        }
++      } catch (org.awaitility.core.ConditionTimeoutException itrTimeout064) {
++        if (itr064.firstException != null) throw itr064.firstException;
++        if (itr064.firstError != null) throw itr064.firstError;
++        if (!itr064.terminal) {
++        if (Thread.interrupted()) throw new InterruptedException();
++        // Original last-value/fall-through or mapped assertion remains the timeout contract.
++        
++        }
++      } finally {
++        
++      }
++      
++    }
+       p6SameProcess(cut.parent.toHandle(), cut.parentStarted);
+       assertThat(p6Status(cut.parent.toHandle()).state().startsWith("T"))
+           .as("own parent actually STOPPED before child cut")
+@@ -25206,8 +25433,21 @@
+ 
+   private static void p6AwaitProcesses(List<P6OwnedPid> owned, boolean gone) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+-    do {
+-      boolean complete = true;
++    {
++      // IT-R POLL 66: original body/state, direct same-thread Awaitility.
++      final var itrRead066_deadline = deadline;
++      class ItrState066 { boolean methodReturned; boolean firstIteration = true; boolean firstAwait = true; boolean terminal; Exception firstException; Error firstError; }
++      final var itr066 = new ItrState066();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll066 = () -> {
++        if (itr066.firstException != null) throw itr066.firstException;
++        if (itr066.firstError != null) throw itr066.firstError;
++        if (itr066.terminal) return true;
++        try {
++        if (!itr066.firstIteration && !(System.nanoTime() < itrRead066_deadline)) { itr066.terminal = true; return true; }
++        
++        itr066.firstIteration = false;
++        boolean complete = true;
+       for (P6OwnedPid pid : owned) {
+         if (pid.handle().isAlive()) {
+           var started = pid.handle().info().startInstant();
+@@ -25226,10 +25466,72 @@
+         }
+       }
+       if (complete) {
+-        return;
+-      }
+-      Thread.sleep(20);
+-    } while (System.nanoTime() < deadline);
++        itr066.methodReturned = true; itr066.terminal = true; return true;
++      }
++        return false;
++        } catch (Exception itrFailure066) {
++          if (itr066.firstException == null && itr066.firstError == null) {
++            itr066.firstException = itrFailure066; itr066.terminal = true;
++          }
++          throw itrFailure066;
++        } catch (Error itrFailure066) {
++          if (itr066.firstException == null && itr066.firstError == null) {
++            itr066.firstError = itrFailure066; itr066.terminal = true;
++          }
++          throw itrFailure066;
++        }
++      };
++      try {
++        boolean itrDone066 = itrPoll066.call();
++        if (!itrDone066 && Thread.interrupted()) throw new InterruptedException();
++        long itrRemaining066 = itrRead066_deadline - System.nanoTime();
++        if (!itrDone066 && itrRemaining066 > 0) {
++          org.awaitility.Awaitility.await("ReplayIT POLL 66")
++              .atMost(Duration.ofNanos(itrRemaining066))
++              .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++              .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++              .until(() -> {
++                try {
++                if (itr066.firstException != null) throw itr066.firstException;
++                if (itr066.firstError != null) throw itr066.firstError;
++                if (itr066.terminal) return true;
++                if (Thread.interrupted()) throw new InterruptedException();
++                if (itr066.firstAwait) {
++                  itr066.firstAwait = false;
++                  if (Thread.interrupted()) throw new InterruptedException();
++                  return false;
++                }
++                boolean itrObserved066 = itrPoll066.call();
++                if (!itrObserved066 && Thread.interrupted()) throw new InterruptedException();
++                return itrObserved066;
++                } catch (Exception itrFailure066) {
++                  if (itr066.firstException == null && itr066.firstError == null) {
++                    itr066.firstException = itrFailure066; itr066.terminal = true;
++                  }
++                  throw itrFailure066;
++                } catch (Error itrFailure066) {
++                  if (itr066.firstException == null && itr066.firstError == null) {
++                    itr066.firstError = itrFailure066; itr066.terminal = true;
++                  }
++                  throw itrFailure066;
++                }
++              });
++        } else if (!itrDone066 && Thread.interrupted()) {
++          throw new InterruptedException();
++        }
++      } catch (org.awaitility.core.ConditionTimeoutException itrTimeout066) {
++        if (itr066.firstException != null) throw itr066.firstException;
++        if (itr066.firstError != null) throw itr066.firstError;
++        if (!itr066.terminal) {
++        if (Thread.interrupted()) throw new InterruptedException();
++        // Original last-value/fall-through or mapped assertion remains the timeout contract.
++        
++        }
++      } finally {
++        
++      }
++      if (itr066.methodReturned) return;
++    }
+     throw new IllegalStateException(
+         gone
+             ? "Owned processes not genuinely reaped"
+@@ -25821,10 +26123,86 @@
+       stopped = true;
+       p6Signal("-STOP", Long.toString(parent.pid()));
+       long stoppedBy = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+-      while (System.nanoTime() < stoppedBy
+-          && !p6Status(parent.toHandle()).state().startsWith("T")) {
+-        Thread.sleep(10);
+-      }
++      {
++      // IT-R POLL 70: original body/state, direct same-thread Awaitility.
++      final var itrRead070_parent = parent; final var itrRead070_stoppedBy = stoppedBy;
++      class ItrState070 { boolean firstIteration = true; boolean firstAwait = true; boolean terminal; Exception firstException; Error firstError; }
++      final var itr070 = new ItrState070();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll070 = () -> {
++        if (itr070.firstException != null) throw itr070.firstException;
++        if (itr070.firstError != null) throw itr070.firstError;
++        if (itr070.terminal) return true;
++        try {
++        if (!(System.nanoTime() < itrRead070_stoppedBy
++          && !p6Status(itrRead070_parent.toHandle()).state().startsWith("T"))) { itr070.terminal = true; return true; }
++        
++        itr070.firstIteration = false;
++        
++        return false;
++        } catch (Exception itrFailure070) {
++          if (itr070.firstException == null && itr070.firstError == null) {
++            itr070.firstException = itrFailure070; itr070.terminal = true;
++          }
++          throw itrFailure070;
++        } catch (Error itrFailure070) {
++          if (itr070.firstException == null && itr070.firstError == null) {
++            itr070.firstError = itrFailure070; itr070.terminal = true;
++          }
++          throw itrFailure070;
++        }
++      };
++      try {
++        boolean itrDone070 = itrPoll070.call();
++        if (!itrDone070 && Thread.interrupted()) throw new InterruptedException();
++        long itrRemaining070 = itrRead070_stoppedBy - System.nanoTime();
++        if (!itrDone070 && itrRemaining070 > 0) {
++          org.awaitility.Awaitility.await("ReplayIT POLL 70")
++              .atMost(Duration.ofNanos(itrRemaining070))
++              .pollInterval(Duration.ofMillis(10)).pollDelay(Duration.ZERO)
++              .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++              .until(() -> {
++                try {
++                if (itr070.firstException != null) throw itr070.firstException;
++                if (itr070.firstError != null) throw itr070.firstError;
++                if (itr070.terminal) return true;
++                if (Thread.interrupted()) throw new InterruptedException();
++                if (itr070.firstAwait) {
++                  itr070.firstAwait = false;
++                  if (Thread.interrupted()) throw new InterruptedException();
++                  return false;
++                }
++                boolean itrObserved070 = itrPoll070.call();
++                if (!itrObserved070 && Thread.interrupted()) throw new InterruptedException();
++                return itrObserved070;
++                } catch (Exception itrFailure070) {
++                  if (itr070.firstException == null && itr070.firstError == null) {
++                    itr070.firstException = itrFailure070; itr070.terminal = true;
++                  }
++                  throw itrFailure070;
++                } catch (Error itrFailure070) {
++                  if (itr070.firstException == null && itr070.firstError == null) {
++                    itr070.firstError = itrFailure070; itr070.terminal = true;
++                  }
++                  throw itrFailure070;
++                }
++              });
++        } else if (!itrDone070 && Thread.interrupted()) {
++          throw new InterruptedException();
++        }
++      } catch (org.awaitility.core.ConditionTimeoutException itrTimeout070) {
++        if (itr070.firstException != null) throw itr070.firstException;
++        if (itr070.firstError != null) throw itr070.firstError;
++        if (!itr070.terminal) {
++        if (Thread.interrupted()) throw new InterruptedException();
++        // Original last-value/fall-through or mapped assertion remains the timeout contract.
++        
++        }
++      } finally {
++        
++      }
++      
++    }
+       assertThat(p6Status(parent.toHandle()).state().startsWith("T"))
+           .as("own ordinary parent actually STOPPED")
+           .isTrue();
+@@ -39065,10 +39443,86 @@
+                     ? RunnerProcessHarness.GUIDED_MINIMUM_GRACE
+                     : Duration.ofSeconds(30))
+                 .toNanos();
+-    while ((process.isAlive()
+-            || root.descendants.stream().anyMatch(child -> child.handle().isAlive()))
+-        && System.nanoTime() < deadline) {
+-      Thread.sleep(30);
++    {
++      // IT-R POLL 94: original body/state, direct same-thread Awaitility.
++      final var itrRead094_root = root; final var itrRead094_deadline = deadline;
++      class ItrState094 { boolean firstIteration = true; boolean firstAwait = true; boolean terminal; Exception firstException; Error firstError; }
++      final var itr094 = new ItrState094();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll094 = () -> {
++        if (itr094.firstException != null) throw itr094.firstException;
++        if (itr094.firstError != null) throw itr094.firstError;
++        if (itr094.terminal) return true;
++        try {
++        if (!((process.isAlive()
++            || itrRead094_root.descendants.stream().anyMatch(child -> child.handle().isAlive()))
++        && System.nanoTime() < itrRead094_deadline)) { itr094.terminal = true; return true; }
++        
++        itr094.firstIteration = false;
++        
++        return false;
++        } catch (Exception itrFailure094) {
++          if (itr094.firstException == null && itr094.firstError == null) {
++            itr094.firstException = itrFailure094; itr094.terminal = true;
++          }
++          throw itrFailure094;
++        } catch (Error itrFailure094) {
++          if (itr094.firstException == null && itr094.firstError == null) {
++            itr094.firstError = itrFailure094; itr094.terminal = true;
++          }
++          throw itrFailure094;
++        }
++      };
++      try {
++        boolean itrDone094 = itrPoll094.call();
++        if (!itrDone094 && Thread.interrupted()) throw new InterruptedException();
++        long itrRemaining094 = itrRead094_deadline - System.nanoTime();
++        if (!itrDone094 && itrRemaining094 > 0) {
++          org.awaitility.Awaitility.await("ReplayIT POLL 94")
++              .atMost(Duration.ofNanos(itrRemaining094))
++              .pollInterval(Duration.ofMillis(30)).pollDelay(Duration.ZERO)
++              .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++              .until(() -> {
++                try {
++                if (itr094.firstException != null) throw itr094.firstException;
++                if (itr094.firstError != null) throw itr094.firstError;
++                if (itr094.terminal) return true;
++                if (Thread.interrupted()) throw new InterruptedException();
++                if (itr094.firstAwait) {
++                  itr094.firstAwait = false;
++                  if (Thread.interrupted()) throw new InterruptedException();
++                  return false;
++                }
++                boolean itrObserved094 = itrPoll094.call();
++                if (!itrObserved094 && Thread.interrupted()) throw new InterruptedException();
++                return itrObserved094;
++                } catch (Exception itrFailure094) {
++                  if (itr094.firstException == null && itr094.firstError == null) {
++                    itr094.firstException = itrFailure094; itr094.terminal = true;
++                  }
++                  throw itrFailure094;
++                } catch (Error itrFailure094) {
++                  if (itr094.firstException == null && itr094.firstError == null) {
++                    itr094.firstError = itrFailure094; itr094.terminal = true;
++                  }
++                  throw itrFailure094;
++                }
++              });
++        } else if (!itrDone094 && Thread.interrupted()) {
++          throw new InterruptedException();
++        }
++      } catch (org.awaitility.core.ConditionTimeoutException itrTimeout094) {
++        if (itr094.firstException != null) throw itr094.firstException;
++        if (itr094.firstError != null) throw itr094.firstError;
++        if (!itr094.terminal) {
++        if (Thread.interrupted()) throw new InterruptedException();
++        // Original last-value/fall-through or mapped assertion remains the timeout contract.
++        
++        }
++      } finally {
++        
++      }
++      
+     }
+     if (process.isAlive()
+         || root.descendants.stream().anyMatch(child -> child.handle().isAlive())) {

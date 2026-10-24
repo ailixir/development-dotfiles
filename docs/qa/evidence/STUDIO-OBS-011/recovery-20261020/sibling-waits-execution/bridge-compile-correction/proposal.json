@@ -1,0 +1,39 @@
+{
+  "atUtc": "2026-10-20T15:26:01.618831+00:00",
+  "status": "OFFTREE_CORRECTION_PROPOSAL_NOT_APPLIED_OR_COMPILED",
+  "finding": "GS-T2-MISSED-MULTILINE-AWAIT",
+  "failedCompile": {
+    "label": "obs011-recovery-20261020-gst2-compile01",
+    "resultSha256": "de93f3d22a71826ef449e1e89233c409b4b6dee396e1c3a9312f9d7ace730535",
+    "exit": 1,
+    "elapsedSeconds": 6.9,
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true,
+    "runtimeTestcases": 0,
+    "diagnostic": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java:1217 cannot find symbol await(BooleanSupplier,int)"
+  },
+  "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+  "preimageSha256": "1c5091bf059b4098960f50ce4b244f35b7866ca99c6c086392c36b7f11a2d51f",
+  "proposedSha256": "94c040c2e6124bc82fc1a90e267fafe1b3b5821cabbcd68f208b5056c697438c",
+  "patchSha256": "680125d794827923bf0662ad6d34032a4eced331e7830365bc0741d7b0b16792",
+  "recommendation": "Convert only the one omitted multiline original helper call using the already-reviewed same-class local BridgePoll3 algorithm, with sole local class/alias/condition substitutions. Preserve5s absolute deadline,25ms interval, same-thread polling/interrupt/terminal/error logic, original SQL and separate final fresh assertion. No new shared helper or test. Requires root/independent review because delivered site count honestly increases14to15bridge/26to27total; existing234/IRQ probes remain qualified for their original26sites only.",
+  "originalCall": "    await(\n        () ->\n            jdbc.queryForObject(\n                    \"SELECT state FROM studio_guided_sessions WHERE session_id=?\", String.class, id)\n                .equals(\"UNKNOWN_OUTCOME\"),\n        5000);",
+  "template": {
+    "id": "GuidedBridgePlannedIT-3",
+    "replacementSha256": "7a4ec2663f638438efaa0e4acebb33e7488a2d6b9584f988bd75357eae3e5d5d"
+  },
+  "candidateReplacement": "    {\n      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);\n      class BridgePollProducerRollback {\n        Throwable failure;\n        boolean terminal;\n        boolean slept;\n        boolean initialAwaitTick = true;\n    \n        boolean step() {\n          if (terminal) {\n            return true;\n          }\n          try {\n            if (slept && Thread.interrupted()) {\n              throw new InterruptedException();\n            }\n            if (!(!(jdbc.queryForObject(\n                    \"SELECT state FROM studio_guided_sessions WHERE session_id=?\", String.class, id)\n                .equals(\"UNKNOWN_OUTCOME\"))\n                && System.nanoTime() < bridgeDeadline)) {\n              terminal = true;\n              return true;\n            }\n            if (Thread.interrupted()) {\n              throw new InterruptedException();\n            }\n            slept = true;\n            return false;\n          } catch (Throwable caught) {\n            failure = caught;\n            terminal = true;\n            return true;\n          }\n        }\n      }\n      var bridgePoll = new BridgePollProducerRollback();\n      if (!bridgePoll.step()) {\n        try {\n          org.awaitility.Awaitility.await()\n              .alias(\"GuidedBridgePlannedIT: producer rollback unknown outcome\")\n              .pollInSameThread()\n              .dontCatchUncaughtExceptions()\n              .pollDelay(Duration.ZERO)\n              .pollInterval(Duration.ofMillis(25))\n              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))\n              .until(\n                  () -> {\n                    if (bridgePoll.initialAwaitTick) {\n                      bridgePoll.initialAwaitTick = false;\n                      return false;\n                    }\n                    return bridgePoll.step();\n                  });\n        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {\n          if (!bridgePoll.terminal) {\n            bridgePoll.step();\n          }\n        }\n      }\n      if (bridgePoll.failure instanceof Exception exception) {\n        throw exception;\n      }\n      if (bridgePoll.failure instanceof Error error) {\n        throw error;\n      }\n      assertThat(jdbc.queryForObject(\n                    \"SELECT state FROM studio_guided_sessions WHERE session_id=?\", String.class, id)\n                .equals(\"UNKNOWN_OUTCOME\")).isTrue();\n    }",
+  "scopeImpact": {
+    "additionalBridgeConvertedSites": 1,
+    "nativeMethodCount": 26,
+    "nativeIdentityChanges": 0,
+    "itsSourceChanges": 0,
+    "deadlineMillis": 5000,
+    "intervalMillis": 25,
+    "newDependencies": 0,
+    "newTests": 0,
+    "newSharedHelpers": 0
+  },
+  "stagedState": "Threeexactbridgecandidates remain applied; sixIT-S files unapplied; noactivejob/heldlock; nofollow-on runtime."
+}

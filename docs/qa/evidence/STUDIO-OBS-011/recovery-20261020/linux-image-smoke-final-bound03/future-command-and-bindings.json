@@ -1,0 +1,60 @@
+{
+  "kind": "UNEXECUTED_D2_CORRECTED_SUCCESSOR_FUTURE_ARGV",
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "env": {
+    "PATHPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin"
+  },
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-final-linux-d2-smoke01",
+    "bash",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-final-bound03/future-smoke.sh",
+    "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "obs011-d2-final-01",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/d2-execution01"
+  ],
+  "inputBindings": "bindings.json finalBindings must all contain reviewed literals; command placeholder must be replaced with exactly measuredImmutableImageId. Do not invoke while any placeholder/null remains.",
+  "requiredPreconditions": [
+    "Root review of this unexecuted smoke adapter and exact dependency successor hashes",
+    "Sole runtime lane released by gateway and assigned by root; no actual source/dist/build/config writer during collector",
+    "Accepted final image build and image-pins zero failures/zero notAsserted receipt",
+    "Existing final complete deployment722/0fail/0skip on identical immutable image ID; do not repeat already-passing tier",
+    "Fresh collector label, evidence directory and all named container/volume names absent",
+    "Local daemon and exact cached immutable image available; no build/pull/retag/network-provider operation",
+    "Physical open-lid/on-AC readiness maintained for local native execution"
+  ],
+  "filesystemShape": {
+    "root": "read-only",
+    "defaultUser": "pwuser, actual uid=gid=1001",
+    "pid1": "--init, production node PID>1",
+    "tmp": "fresh exact-owned named volume mounted at /tmp (disk-backed emptyDir surrogate)",
+    "journal": "fresh exact-owned named volume /journal, private child /journal/data",
+    "tls": "fresh exact-owned named volume root:1001 files0440, mounted /tls:ro",
+    "fixture": "read-only bind /smoke/fixture.mjs",
+    "network": "production runner --network none; controller companion --network container:<positive runner>; loopback only, no host port",
+    "positiveEnvironment": "fresh private env file from public TLS fixture and real signed worker token; no TMPDIR/debug keys"
+  },
+  "observations": [
+    "exact Linux image ID/CMD/no-entrypoint/pwuser before and after",
+    "real default process UID/GID, production node>1, core soft/hard0",
+    "probe health0; assign200 OWNED fence1; authenticated claim202; context200; one bootstrap initialBlank",
+    "two nonempty journals/two owner markers; one live checks-recording directory; Linux proc-fd directory handle; key0440/gid1001/readable",
+    "/app and /tls write attempts refused EROFS",
+    "no-init raw exit78/exact LAUNCH_TREE/no started; debug raw exit78/exact DEBUG_ENV/no started",
+    "active-session docker stop -t30 -> draining then drained guidedClosed true, actual exit0 and elapsed<30s",
+    "exactly one real STORED recording callback and no rejected/failed fixture event",
+    "post-drain active recording allocation count0; companion exit0; exact owned containers and volumes removed",
+    "collector source/testInput/dist stable; no full Replay credit/no cause or deployed-provider claim",
+    "One live non-stopped/non-zombie browser leader owned by production main at immediate pre-stop snapshot",
+    "No lifecycle or recording in pre-stop fixture log; complete later callback cohort has exactlyone each and arrival strictly after actual runner.draining timestamp",
+    "Both negative containers exit in bounded90 polling window; if running at bound, miss recorded and cleanup invoked, no retry"
+  ],
+  "failurePolicy": "Any setup/schema/auth/compiler-free image/production browser/filesystem/drain failure stops, records command/raw exit/public closed facts and exact owned cleanup. No retry, callback/auth bypass, token-lifetime or timer change, no source repair. Do not treat short-lived companion as Kubernetes one-container proof.",
+  "historicalPreservation": "G9 old14 assertions, missing step6, old residue image and all prior failed evidence remain immutable.",
+  "bindingAndReviewState": "Nine fields measured; scripts byte-exact; root must inspect accepted receipts/dependency succession and separately release. Fresh evidence destination bound; all resource/label freshness guards remain mandatory.",
+  "corrections": {
+    "D2-QA-01": "Negatives finish before positive/container/context creation. Zero pre-stop lifecycle/recording, fresh live owned browser/recording check immediately before stop. Actual production draining timestamp required, one CONTEXT_LOST lifecycle and one STORED recording must have arrival timestamps strictly later; reject same-ms ambiguity or expired assignment at draining.",
+    "D2-QA-02": "Detached same two owned negatives; at most90 one-second exit polls. Missed exit bound is failure with exit unknown/null, never expected78. EXIT exact-owned cleanup runs without waiting for serving main."
+  }
+}

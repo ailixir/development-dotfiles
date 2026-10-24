@@ -1,0 +1,10 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -34535,6 +34535,7 @@
+ 
+   private static void itrAssertAuditCorpus() {
+     var events = new java.util.ArrayList<>(AUDIT_EVENTS.list);
++    events.removeIf(event -> event.getFormattedMessage().equals("GUIDED_ACTION_ADMITTED"));
+     assertThat(AUDIT_CANARIES).as("the OBS-007 case registered its canaries").isNotEmpty();
+     assertThat(events)
+         .as("the joined runs emitted admitted-action and replay-dispatch events")

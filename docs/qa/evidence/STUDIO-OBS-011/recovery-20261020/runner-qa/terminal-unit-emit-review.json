@@ -1,0 +1,68 @@
+{
+  "kind": "INDEPENDENT_TERMINAL_UNIT_AND_EMIT_ARTIFACT_REVIEW",
+  "unit02": {
+    "files": 117,
+    "orderedNamesAndStatusesEqualBaselineMinusOnlyFourApprovedPointers": true,
+    "passed": 2643,
+    "skipped": 25,
+    "failed": 0,
+    "reportSha256": "0d8046f3a51af81013afe067f35218e44201ac3a94fa8a0a5ee90ef7cc896ce9"
+  },
+  "completeEmitInventories": {
+    "allbefore": {
+      "digest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "files": 238
+    },
+    "allafter": {
+      "digest": "f726d3f41a06809fc88a41415809ed8e415ef565ef42b323cd282135060375ac",
+      "files": 238
+    },
+    "jsbefore": {
+      "digest": "2663025dfd0610bd0ca420f6bb98f2b76c518876f26f61ab7dbc026533b9226b",
+      "files": 78
+    },
+    "jsafter": {
+      "digest": "9972902bc4fb5609d2fba69ae1391c5e774828102f51407c46a40a1ddad4994c",
+      "files": 78
+    }
+  },
+  "changedPaths": [
+    "guided/contracts.js",
+    "guided/contracts.js.map",
+    "guided/diagnostics.js",
+    "guided/diagnostics.js.map",
+    "guided/evidence.js",
+    "guided/evidence.js.map",
+    "guided/json.js.map",
+    "guided/transport.js",
+    "guided/transport.js.map",
+    "run/guidedBrowser.d.ts",
+    "run/guidedBrowser.js",
+    "run/guidedBrowser.js.map"
+  ],
+  "membershipIdentical": true,
+  "everyDirectDiffIndependentlyReconstructed": true,
+  "mapsOnlyMappingsFieldChanged": [
+    "guided/contracts.js.map",
+    "guided/diagnostics.js.map",
+    "guided/evidence.js.map",
+    "guided/json.js.map",
+    "guided/transport.js.map",
+    "run/guidedBrowser.js.map"
+  ],
+  "exactJavadocOnlyArtifacts": [
+    "run/guidedBrowser.d.ts",
+    "run/guidedBrowser.js"
+  ],
+  "otherFourJsDiffs": {
+    "completeDiffsReadByReviewer": true,
+    "compactNonWhitespaceByteSequencesEqual": true,
+    "limit": "Whitespace compaction alone is not a parser/token proof; actual source AST/token equality and the reviewed exact emitted diff hunks remain the basis for semantic assessment."
+  },
+  "comparisonSha256": "9818a15415d28e9661eba7700ff9c425cfd01f6994120c51cd4c36242eef2273",
+  "comparatorRawExit": 1,
+  "rootWrittenDispositionReviewed": false,
+  "fixturesReviewed": false,
+  "copybackVerdictPending": true,
+  "reviewerRuntimeExecuted": false
+}

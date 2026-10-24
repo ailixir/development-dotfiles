@@ -1,0 +1,437 @@
+{
+  "kind": "INDEPENDENT_SOURCE_ONLY_TEXT_RECONSTRUCTION",
+  "productWrites": false,
+  "runtimeExecuted": false,
+  "sourceLanguageParsersExecuted": false,
+  "packets": [
+    {
+      "directory": "left-required-current",
+      "manifestSha256": "974048f2a76ef4714a0c3efc5e61b7cfea1827b2054609892486729728982b85",
+      "patchSha256": "5735402e8d1d48a1df3c4f1587d7f3027bd1e1db7594d5826620adb13eb3548a",
+      "files": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+          "beforeSha256": "bb207af39e66f2681d9096ccdf6c61d8b4297c5ab0a0d02d03a1b5ba3d08731a",
+          "afterSha256": "002afb1bbb3d2215f0e20159a5ce09ccb80bf68fffec81693bf457ebd0f3eff9",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+          "beforeSha256": "970e028452274874b6e55f15c8e7b2e4b06740405d14529c0222b94f60eb32fe",
+          "afterSha256": "b3dd35d3ee7d1245c99bc3367f61dde76ff4cbc0db2b56c02aa005d48b6eda2c",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+          "beforeSha256": "7e994ec1bcc7542f7cab05e7e8f448d542713ef90940fe018bf424864b993ebd",
+          "afterSha256": "c8e3cdf13223bedae3610d31177a4d02d4ef1355d82ddede26b7f1814ea29dda",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+          "beforeSha256": "88ddd68e15fba59505e2856305f91fb5acfdc17c00af64b329e2a9bb01a8a52a",
+          "afterSha256": "cb809a2d19ee6301f031e70f7b9de75f8e8c15dee1881022915f80f903c0984b",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAlreadyExistsException.java",
+          "beforeSha256": "90592f2c96dbf603276c3324ace67fcc3a78d7ca05c2d49410838a29308f8246",
+          "afterSha256": "d622e30b10450d0c9a94479f102fc542235a7ebda05f2a068d595e30ce5e1034",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+          "beforeSha256": "526d8792b6c0b7f7b806d4d4577b4934757b230cd18b82515b75f911123f3ea2",
+          "afterSha256": "506739779151b0f9f4d86b23fe7c3e0d93ec9cfd5b22101bf273105a8a1aa5bf",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java",
+          "beforeSha256": "6f925d7b56ae14d4230ccea9fd42b33b531df94c8176ec4db782c25eb0229188",
+          "afterSha256": "ff92e39dd4fd90434061943c6500d6779ddbefea6a5148b68773c7cd9f2f5f8c",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+          "beforeSha256": "c9b8019dfc341633b8647fdce492814b31682a9ed2d5fd61a8516384ffafbfab",
+          "afterSha256": "238e8d9ef4b8f83e4f662e8dfe019b6f4c91d0180b4b5ec935e41c8c072c0efd",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "backend/src/main/resources/application.yml",
+          "beforeSha256": "271fac527d075f996173e6cf1ef52d409d4416d3d6a46114fc541097b3a25f75",
+          "afterSha256": "79e7b20e47f105bca8c79866507f4e8ab0449831cac591d55705690a7c510b61",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "backend/build.gradle.kts",
+          "beforeSha256": "fee7af874cc0875d8dd299f8f9e1a0739ae79347ba0b0de665c81931045cbe74",
+          "afterSha256": "a3ab3bdbb31bc1f71028d3c913029234fd736921ecb7295fd92a908fd4159c27",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        }
+      ]
+    },
+    {
+      "directory": "frontend-required-current",
+      "manifestSha256": "8a415142c1f94d9cebe10faa538d5cd09f4ef78340e33bea082b92876d3946dd",
+      "patchSha256": "465af063c294fae20b90132e57594fbfe4af74ad19ceff57ed085d7fcdacb610",
+      "files": [
+        {
+          "path": "frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts",
+          "beforeSha256": "e385d1513965d06fe8921282074a415a1518445a74b240d3801b18f8a1f8e68c",
+          "afterSha256": "a84d582bf96493541c8af966deb8e23acce6acc7957832fb309b7ed06c29d356",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "frontend/src/components/studio/runs/RunDetailsDrawer.tsx",
+          "beforeSha256": "b26404272dc673a51076d7fba806ffe534d76c399125aea00dd2f4eed760dd9d",
+          "afterSha256": "932d40e0a32a9bad7a10509e5fb621b84998295937a9a47b2c8f3a6c4cc2b456",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx",
+          "beforeSha256": "039b0c6028b4e79bf195c109ccdaf1032a5d9086afbd4bf08838ca7b2cff9e1a",
+          "afterSha256": "b058c43309e5e3007e2e8b8159e4ed95e3bc91f92b4f9aee7410813681fec135",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        }
+      ]
+    },
+    {
+      "directory": "documentation-required-current",
+      "manifestSha256": "69c79d602959f6d4d8eab9c12fb6b063613af585a1f2d128dd647b0e9f27d042",
+      "patchSha256": "fb47bc8901669132dab14fd6b125d008886a0855d567350f71544290f51b46ea",
+      "files": [
+        {
+          "path": "docs/runbooks/studio-inference-rollout.md",
+          "beforeSha256": "28f789258453fcfdec2af56f4580046d8cd4f8350cb5b5ef1e1586f61c3d6e4f",
+          "afterSha256": "10ab0f1361689a2737c8dff3c339a6e58a2f55b57c327daf2ac445e7f6c891f9",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md",
+          "beforeSha256": "3f0d3a53f113d5bb17855cb60e38d1081d2f1dbccd824e1cec0d56702e91221d",
+          "afterSha256": "44b2a365837be747fe56315234d3870a9b0181245de1a1377c19fb56f5e210ea",
+          "exactCurrentPreimage": true,
+          "strictPatchReconstruction": true,
+          "inheritedReviewedBytes": true
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "coverage": "Only two absent-production-package80% rules removed; real global70%/four75% floors and all other bytes/wiring exact.",
+    "deletedSymbolMatchesBefore": {
+      "isCanonical": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+          "line": 26
+        }
+      ],
+      "allocationIds": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+          "line": 69
+        }
+      ],
+      "isApiAssigned": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+          "line": 95
+        }
+      ],
+      "providerName": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+          "line": 249
+        }
+      ],
+      "getSecretName": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAlreadyExistsException.java",
+          "line": 20
+        }
+      ],
+      "pollIntervalOrDefault": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+          "line": 160
+        }
+      ],
+      "readIntervalOrDefault": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+          "line": 212
+        }
+      ],
+      "updateAuthoring": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+          "line": 391
+        }
+      ]
+    },
+    "constructors": [
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+        "line": 282,
+        "text": "new Dispatcher("
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+        "line": 290,
+        "text": "new Sse("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/EvidenceRetentionTest.java",
+        "line": 59,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+        "line": 53,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+        "line": 94,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+        "line": 393,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+        "line": 443,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/InternalBodyContractConformanceTest.java",
+        "line": 271,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/JobBodyLeakTest.java",
+        "line": 111,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/ObservedTerminalSettlementIT.java",
+        "line": 92,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/ObservedTerminalSettlementIT.java",
+        "line": 127,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java",
+        "line": 732,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatchMetricsTest.java",
+        "line": 156,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherAuthorizationRecheckTest.java",
+        "line": 86,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java",
+        "line": 596,
+        "text": "new com.citi.put.checks.studio.StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioDispatcherFailureIT.java",
+        "line": 721,
+        "text": "new com.citi.put.checks.studio.StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java",
+        "line": 56,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java",
+        "line": 192,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java",
+        "line": 222,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java",
+        "line": 243,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java",
+        "line": 252,
+        "text": "new StudioExecutionProperties.Dispatcher("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+        "line": 270,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceTest.java",
+        "line": 106,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedReadEntryProtocolIT.java",
+        "line": 255,
+        "text": "new com.citi.put.checks.studio.StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java",
+        "line": 137,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendIT.java",
+        "line": 173,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+        "line": 446,
+        "text": "new StudioExecutionProperties("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/storage/StudioLocalSchedulingTest.java",
+        "line": 25,
+        "text": "new StudioExecutionProperties("
+      }
+    ],
+    "outerConfigurationAndCompatibilityConstructorUnchanged": true,
+    "approvedRcoLiteralsOnly": true,
+    "inventoryWholeOriginalBytePrefixRetained": true,
+    "deferredF2FilesAreNotPatchTargets": true
+  },
+  "protectedReadOnlyCurrentPins": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "sha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad"
+    },
+    {
+      "path": "docs/qa/accessibility/axe-results.json",
+      "sha256": "9d3853da76e71a4b0c69a90ac3a5863345bdbb78076da9df09c6044a99a45934"
+    },
+    {
+      "path": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+      "sha256": "cf00ca4d9f6b75484d73e3f3e081f27fd9da63fd97d0ae8ed51f3a376cf79cc6"
+    },
+    {
+      "path": "frontend/src/components/studio/guided/guidedNarratives.ts",
+      "sha256": "f8f68c01be22401e8a578bd80a39b5fae42f41ec2da680f6c8ac3b6a1b62b0e7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java",
+      "sha256": "2178e6099b492978166c38b25a0b3893caf966bc070631d0c8eee1e8fc36de0f"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+      "sha256": "2ad3d7cb00d52813e05d692d0a21d5c6d22d9e5be9904bf9ad5918e489f932e4"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "sha256": "9b8b38e4bd7bb2c04d8a222e3baa228bd0a4b622028bc8250227a01d05fc0abd"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java",
+      "sha256": "58bc1a01c84cfe1b58f0de9a7ffa44f956108ea3a254a698b3c8fdf4197bc854"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "sha256": "14f748837bfd3f16c8c01c86574f80b0b72d5a3f1840c62e6f20623a847b4c42"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+      "sha256": "dfbb264f4a061a1afcf5be59a940905ebde558d2da79783979d458a744049637"
+    }
+  ],
+  "reviewInputPins": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/left-drafts/review.md",
+      "sha256": "ec6e8645291f8c1521aea5c023ffcaef3410513fc1b519b8b48401667c06dbb5"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/left-drafts-rereview/review.md",
+      "sha256": "a1cbc749ccb1010d5c80585c4277db789cf555dad6fc439204f08b1405d11125"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/fe-rt-drafts/review.md",
+      "sha256": "5a9249f6bb89a429c2097dc2904cb9abb21a15df12de35bdb15cc618135c609a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/engineering-doc/review.md",
+      "sha256": "524f32ad2aaa9c4d45bdcd689ae68337eeea12d57b8f5437d657b4754ee81063"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/engineering-doc-rereview/review.md",
+      "sha256": "0adae79aea4dbf7eb165702777ad8007241b38b577bf55e8fe70bb76750828cb"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/R-CO/cosign.md",
+      "sha256": "48fe6e6fd409c4b0cd10a31b2f29d512353f863d6b0ae02cc9df7d7cc0f1d101"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/t0-proposal.md",
+      "sha256": "dc9c1376e7908a5a338f281e7bddc76c8e3b3a2a7f9f1c7942e922eaf3495f94"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/qa-cosign.md",
+      "sha256": "f84e852c745a491dae0c06ca844a12221cb44250ea35e832139ade8fa8f2fc00"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/po-ratification.md",
+      "sha256": "a729e4359c928f5e9402cf45670bcf5883e1987d8ebc0b651cc6056b7976623a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md",
+      "sha256": "659287bb94c9f558fdf0a880061ef582da0e6280c15f76ccd36c855338d458fb"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/implementation-window-release.json",
+      "sha256": "42b9fb4f01445d59b081944ab83f7ccc2192c31841f907b6a9dbe4fef756f037"
+    }
+  ],
+  "sourceOnlyVerdict": "CLEAN"
+}

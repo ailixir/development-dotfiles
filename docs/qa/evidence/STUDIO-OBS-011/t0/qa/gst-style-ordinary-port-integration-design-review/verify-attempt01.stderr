@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gst-style-ordinary-port-integration-design-review/verify.py", line 18, in <module>
+    p=Path(packet['manifest']['path']);doc=json.loads(bound(p,packet['manifest']));rows=doc.get('files',doc.get('members'));check('COMPLETE_PACKET_'+str(p),len(rows)==packet['payloadCount'] and rows==packet['completePayloads'])
+                                                                                                                                                                                                        ~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'completePayloads'

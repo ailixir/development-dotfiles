@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-19T18:19:48.639815+00:00",
+  "kind": "ACTUAL_RED_FAILED_OWNERSHIP_PURE_REPORT_ASSESSMENT_ONLY",
+  "phaseCommandTool": "fee3a5",
+  "promptTool": "435c9f",
+  "actualPhaseSeparateStatus": 1,
+  "phaseSeparateStatusTool": "638fae",
+  "redReceiptSha256": "5ac31b177304af0e138aecf13a6d03660d7bb363298da870140fbb02a5d575b5",
+  "redReportSha256": "470b5e0a667a3d53959c29a94a65e81fefdc226ab719ffbf41c1678574f3ab83",
+  "actualNativeExit": 1,
+  "actualCollectorStatus": 1,
+  "nativeTimedOut": false,
+  "phaseAccepted": false,
+  "phaseFailureCode": "NATIVE_OWNERSHIP_HOLD",
+  "nativeStickyFlags": [
+    "OWNED_IDENTITY_RACE_OR_INCOMPLETE",
+    "RESIDENT_REPARENTED_OR_UNKNOWN_CANDIDATE"
+  ],
+  "nativeOwnedIdentities": [
+    {
+      "pid": 72935,
+      "ppid": 72085,
+      "start": "Mon Oct 19 14:17:33 2026",
+      "argvHash": "648b972856f6f1514288f2a676e0c99fc3748ab317928e96db93bc1a10a140fd",
+      "projectMarkerCandidate": false,
+      "nodeCandidateHint": true,
+      "identityComplete": true,
+      "commHash": "b3f75b5bd120e2fde1b522522e8df71788796d96a0efbb17bb17fd183b98a126",
+      "executableHash": "b3f75b5bd120e2fde1b522522e8df71788796d96a0efbb17bb17fd183b98a126",
+      "executableFileHash": "9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a"
+    },
+    {
+      "pid": 72989,
+      "ppid": 72935,
+      "start": "Mon Oct 19 14:17:33 2026",
+      "argvHash": "7c5718aa967afce77174c4f3c1aa9529cea39b3cd8bbe517d9c8b0755fe4a9cb",
+      "projectMarkerCandidate": false,
+      "identityComplete": true,
+      "commHash": "10183bacdaf98a234fd6cf1fbefc988ee3bbe99d61ca0cf80d24557494eb5184",
+      "executableHash": "10183bacdaf98a234fd6cf1fbefc988ee3bbe99d61ca0cf80d24557494eb5184",
+      "executableFileHash": "10b6243df618d374bb2d5c9cfbe7052e1405f6aa4e53a6164f11a91b9f2e1384"
+    }
+  ],
+  "candidateObservationUnknowns": [
+    [
+      {
+        "pid": 72935,
+        "start": "Mon Oct 19 14:17:33 2026",
+        "classification": "UNKNOWN_IDENTITY_OR_SNAPSHOT"
+      }
+    ],
+    [
+      {
+        "pid": 72972,
+        "start": "Mon Oct 19 14:17:33 2026",
+        "classification": "UNKNOWN_TABLE_NODE_MISSING_FROM_COMM"
+      },
+      {
+        "pid": 72989,
+        "start": "Mon Oct 19 14:17:33 2026",
+        "classification": "UNKNOWN_TABLE_NODE_MISSING_FROM_COMM"
+      },
+      {
+        "pid": 72935,
+        "start": "Mon Oct 19 14:17:33 2026",
+        "classification": "UNKNOWN_TABLE_NODE_MISSING_FROM_COMM"
+      },
+      {
+        "pid": 73492,
+        "classification": "UNKNOWN_COMM_NODE_MISSING_FROM_TABLE"
+      }
+    ],
+    []
+  ],
+  "pureClosedReportAssessment": {
+    "qualification": "EXPECTED_RED_48_INTENDED_ASSERTIONS",
+    "nativeExit": 1,
+    "nativeSuccess": false,
+    "counts": {
+      "skipped": 47,
+      "failed": 48
+    },
+    "all95IdentitiesReconciled": true,
+    "actualRenderFrameCount": null,
+    "actualRenderFrameCountClaimed": false,
+    "credit": false
+  },
+  "assessmentDoesNotQualifyFailedPhase": true,
+  "exactUnderlyingObservationCause": "UNKNOWN; no new diagnostics authorized. Recordedclassesonly. No assumption about normaltitlechange/shortlivedforkcause.",
+  "postSourceAndPostResources": "NOT produced by failedphase, fresh source/resources owed beforequalifiedfailedresourceclose",
+  "fixedHelperInstallOrGreenOrArchive": "NOT_STARTED_NOT_AUTHORIZED",
+  "retryOrResetOrNormalCloseAuthorized": false,
+  "sourceWrites": false,
+  "C8MainSourceIRLaneLifecycleCredit": false
+}

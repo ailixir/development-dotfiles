@@ -1,0 +1,68 @@
+{
+  "path": "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts",
+  "edits": [
+    {
+      "name": "fixture-only-private-class-import",
+      "beforeText": "import {GuidedRuntime} from '../../src/guided/runtime.js';",
+      "afterText": "import {GuidedRuntime} from '../../src/guided/runtime.js';\nimport {GuidedOwnership} from '../../src/guided/ownership.js';"
+    },
+    {
+      "name": "closed-reason-type-only",
+      "beforeText": "BridgeLifecycle,CommandsClaim}",
+      "afterText": "BridgeLifecycle,CommandsClaim,BridgeStop}"
+    },
+    {
+      "name": "bounded-case-local-closed-memory-records",
+      "beforeText": "it.each(modes)('uses actual mTLS and native focus for guided secret ownership: %s',async mode=>{\n",
+      "afterText": "it.each(modes)('uses actual mTLS and native focus for guided secret ownership: %s',async mode=>{\n  // Disposable observation only: no timer, budget, policy, assertion or product-source change.\n  type TimingScalar=number|boolean|BridgeStop['reason']|null;\n  const timingFields={\n    'schedule-enter':['nextRenewalWallMs','secretContext'],\n    'schedule-return':['nextRenewalWallMs','secretContext'],\n    'request-claim-enter':['initial','nextRenewalWallMs','secretContext'],\n    'request-claim-sync-return':['initial'],\n    'grant-validated':['initial','stopped'],\n    'invalidate-enter':['stopped'],\n    'invalidate-return':['stopped'],\n    'stop-entry':['reason','alreadyStopped'],\n    'runtime-stop-enter':['reason','stopped'],\n    'runtime-post-stop-observer':['reason','stopped','observedMonoMs','observedWallMs'],\n    'claim-port-enter':['timeoutMs','aborted'],\n    'claim-abort-event':['timeoutMs','aborted'],\n    'complete-ack':['lastAckT0MonoMs','focusSeen'],\n    'claim-rejected':['timeoutMs'],\n  } as const;\n  type TimingEvent=keyof typeof timingFields;\n  const timingRows:{event:TimingEvent;monoMs:number;wallMs:number;observerEndMonoMs:number;fields:Readonly<Record<string,TimingScalar>>}[]=[];\n  const timingReasons=new Set<string>(['CANCELLED','EXPIRED','UNKNOWN_OUTCOME','LEASE_LOST','CONTEXT_LOST','REVOKED']);\n  const timingAbortListeners:{signal:AbortSignal;listener:()=>void}[]=[];\n  let timingOverflow=false,timingIncomplete=false,timingCleanupComplete=false,timingMocksRestored=false;\n  const observeTiming=(event:TimingEvent,fields:Readonly<Record<string,TimingScalar>>):void=>{\n    try{\n      const monoMs=performance.now(),wallMs=Date.now();\n      if(timingRows.length>=64){timingOverflow=true;return;}\n      const allowed:readonly string[]=timingFields[event];\n      if(Object.keys(fields).length!==allowed.length||Object.entries(fields).some(([key,value])=>!allowed.includes(key)||!(value===null||typeof value==='boolean'||typeof value==='number'&&Number.isFinite(value)||typeof value==='string'&&key==='reason'&&timingReasons.has(value)))){timingIncomplete=true;return;}\n      const row={event,monoMs,wallMs,observerEndMonoMs:0,fields};timingRows.push(row);row.observerEndMonoMs=performance.now();\n    }catch{timingIncomplete=true;}\n  };\n  type TimingEntry={readonly stopped:boolean;readonly nextRenewal?:number;readonly runtime:GuidedRuntime|null};\n  type TimingOwnership={\n    schedule(entry:TimingEntry):void;\n    requestClaim(entry:TimingEntry,initial:boolean):Promise<unknown>;\n    checkGrant(entry:TimingEntry,value:unknown,initial:boolean):unknown;\n    invalidate(entry:TimingEntry):void;\n    stopEntry(entry:TimingEntry,reason:BridgeStop['reason']):Promise<void>;\n  };\n  const timingPrototype=GuidedOwnership.prototype as unknown as TimingOwnership;\n"
+    },
+    {
+      "name": "existing-runtime-stop-entry-observer",
+      "beforeText": "    const pending=actualStop.call(this,reason);",
+      "afterText": "    observeTiming('runtime-stop-enter',{reason,stopped:(this as unknown as {readonly stopped:boolean}).stopped});\n    const pending=actualStop.call(this,reason);"
+    },
+    {
+      "name": "existing-post-stop-observer-stays-in-place",
+      "beforeText": "if(this.currentIdentity.sessionId===context.sessionId&&!this.accepting){authorityStoppedAt??=performance.now();authorityStoppedWallMs??=Date.now();stopReason??=reason;}",
+      "afterText": "if(this.currentIdentity.sessionId===context.sessionId&&!this.accepting){authorityStoppedAt??=performance.now();authorityStoppedWallMs??=Date.now();stopReason??=reason;observeTiming('runtime-post-stop-observer',{reason,stopped:(this as unknown as {readonly stopped:boolean}).stopped,observedMonoMs:authorityStoppedAt,observedWallMs:authorityStoppedWallMs});}"
+    },
+    {
+      "name": "observe-actual-incoming-claim-signal-only",
+      "beforeText": "    const fact={started:performance.now(),timeoutMs:timeout,key};claimFacts.push(fact);",
+      "afterText": "    const fact={started:performance.now(),timeoutMs:timeout,key};claimFacts.push(fact);\n    observeTiming('claim-port-enter',{timeoutMs:timeout,aborted:signal.aborted});\n    try{const listener=():void=>{observeTiming('claim-abort-event',{timeoutMs:timeout,aborted:signal.aborted});};signal.addEventListener('abort',listener,{once:true});timingAbortListeners.push({signal,listener});}catch{timingIncomplete=true;}"
+    },
+    {
+      "name": "complete-response-after-original-t0-sample",
+      "beforeText": "t0=performance.now();return acknowledged;}",
+      "afterText": "t0=performance.now();observeTiming('complete-ack',{lastAckT0MonoMs:t0??null,focusSeen:focusAt!==undefined});return acknowledged;}"
+    },
+    {
+      "name": "adapter-failure-without-error-payload",
+      "beforeText": "    catch(error){Object.assign(fact,{failed:performance.now()});throw error;}",
+      "afterText": "    catch(error){Object.assign(fact,{failed:performance.now()});observeTiming('claim-rejected',{timeoutMs:timeout});throw error;}"
+    },
+    {
+      "name": "transparent-prototype-witnesses-inside-existing-cleanup-try",
+      "beforeText": "  try{\n    expect((await post(address.port,path+'/assign'",
+      "afterText": "  try{\n    // Each descriptor wrapper calls the original once, with the same receiver/arguments and exact return value/promise.\n    try{\n      const original=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'schedule')?.value as TimingOwnership['schedule']|undefined;\n      if(typeof original!=='function')timingIncomplete=true;\n      else vi.spyOn(timingPrototype,'schedule').mockImplementation(function(this:GuidedOwnership,entry){\n        observeTiming('schedule-enter',{nextRenewalWallMs:entry.nextRenewal??null,secretContext:entry.runtime?.hasSecretInputs===true});\n        const returned=original.call(this,entry);\n        observeTiming('schedule-return',{nextRenewalWallMs:entry.nextRenewal??null,secretContext:entry.runtime?.hasSecretInputs===true});return returned;\n      });\n      const request=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'requestClaim')?.value as TimingOwnership['requestClaim']|undefined;\n      if(typeof request!=='function')timingIncomplete=true;\n      else vi.spyOn(timingPrototype,'requestClaim').mockImplementation(function(this:GuidedOwnership,entry,initial){\n        observeTiming('request-claim-enter',{initial,nextRenewalWallMs:entry.nextRenewal??null,secretContext:entry.runtime?.hasSecretInputs===true});\n        const returned=request.call(this,entry,initial);observeTiming('request-claim-sync-return',{initial});return returned;\n      });\n      const checked=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'checkGrant')?.value as TimingOwnership['checkGrant']|undefined;\n      if(typeof checked!=='function')timingIncomplete=true;\n      else vi.spyOn(timingPrototype,'checkGrant').mockImplementation(function(this:GuidedOwnership,entry,value,initial){\n        const returned=checked.call(this,entry,value,initial);observeTiming('grant-validated',{initial,stopped:entry.stopped});return returned;\n      });\n      const invalidated=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'invalidate')?.value as TimingOwnership['invalidate']|undefined;\n      if(typeof invalidated!=='function')timingIncomplete=true;\n      else vi.spyOn(timingPrototype,'invalidate').mockImplementation(function(this:GuidedOwnership,entry){\n        observeTiming('invalidate-enter',{stopped:entry.stopped});const returned=invalidated.call(this,entry);observeTiming('invalidate-return',{stopped:entry.stopped});return returned;\n      });\n      const stopped=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'stopEntry')?.value as TimingOwnership['stopEntry']|undefined;\n      if(typeof stopped!=='function')timingIncomplete=true;\n      else vi.spyOn(timingPrototype,'stopEntry').mockImplementation(function(this:GuidedOwnership,entry,reason){\n        observeTiming('stop-entry',{reason,alreadyStopped:entry.stopped});return stopped.call(this,entry,reason);\n      });\n    }catch{timingIncomplete=true;}\n    expect((await post(address.port,path+'/assign'"
+    },
+    {
+      "name": "guaranteed-diagnostic-finalization-wrapper",
+      "beforeText": "  }finally{\n    await app.close();",
+      "afterText": "  }finally{\n    try{\n    await app.close();"
+    },
+    {
+      "name": "track-original-mock-restoration",
+      "beforeText": "vi.restoreAllMocks();await fixture.close();await rm(directory,{recursive:true,force:true});",
+      "afterText": "vi.restoreAllMocks();timingMocksRestored=true;await fixture.close();await rm(directory,{recursive:true,force:true});\n    timingCleanupComplete=true;"
+    },
+    {
+      "name": "single-closed-flush-after-original-cleanup-attempt",
+      "beforeText": "  }\n},45000);",
+      "afterText": "    }finally{\n      for(const {signal,listener} of timingAbortListeners){try{signal.removeEventListener('abort',listener);}catch{timingIncomplete=true;}}\n      if(!timingMocksRestored){try{vi.restoreAllMocks();timingMocksRestored=true;}catch{timingIncomplete=true;}}\n      // A missing/failed flush is incomplete diagnostic evidence, never a replacement test error.\n      try{await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution-2/ownership-timing-diagnostic.json'),JSON.stringify({schemaVersion:1,selectedCaseWasLostBodyLateGrant:mode==='lost-body-late-grant',capacity:64,overflow:timingOverflow,instrumentationFailed:timingIncomplete,originalCleanupComplete:timingCleanupComplete,mocksRestored:timingMocksRestored,records:timingRows},null,2)+'\\n');}catch{/* Missing closed output invalidates the diagnostic; preserve the original test result. */}\n    }\n  }\n},45000);"
+    }
+  ],
+  "inverseReconstructsExactBefore": true,
+  "productRuntimeOrOwnershipEdited": false,
+  "compilerParserTestsExecuted": false
+}

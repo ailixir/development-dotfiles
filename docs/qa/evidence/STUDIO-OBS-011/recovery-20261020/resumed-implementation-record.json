@@ -1,0 +1,1677 @@
+{
+  "kind": "USER_AUTHORIZED_LOCAL_IMPLEMENTATION_RESUMED",
+  "atUtc": "2026-10-20T04:41:01.447085+00:00",
+  "authorization": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/user-authorization.md",
+    "sha256": "f460e8b139d21fb0daf777a8b2df848671d535b20b73b28af5e4e72f3a2dee14",
+    "bytes": 663
+  },
+  "architectureReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/architecture-review.json",
+    "sha256": "5b20262275dc46134d2512293e010dec66a4fbbe56f0eca6edb93840e84d2965",
+    "bytes": 3207
+  },
+  "qaReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/qa-review.json",
+    "sha256": "1454dc944cbef30364ebc48cf1e5c59921b9d70d5b75fcfa13c875ca7b6afd5b",
+    "bytes": 2637
+  },
+  "actualRecovery": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/recovery-result.json",
+    "sha256": "bbb8778e9040703e977ade1887298a0ae3da1502c4fdca65900af628b73b1c7f",
+    "bytes": 1795
+  },
+  "oldRun": "FAILED_UNCREDITED_ABANDONED",
+  "oldOuterExitStatus": null,
+  "oldGuardedClosureClaimed": false,
+  "original29815RestorationNoLongerRequiredForAbandonment": true,
+  "administrativeFreezeSupersededByUserRecoveryDecision": true,
+  "localImplementationAndFreshChecksAuthorized": true,
+  "productOrReleaseCriteriaWaived": false,
+  "originalEvidenceAndLockInodePreserved": true,
+  "documentationIntegration": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/documentation-integration.json",
+    "sha256": "779cf8940885d7dbe2dc753468c314bfec1258915524980a6a75c65e507cddb1",
+    "bytes": 4314
+  },
+  "postRecoveryPreGatewaySource": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/post-recovery-source.json",
+    "sha256": "a17cf743484d2f58ab6402e11fc1b30b50a0f3208d982ab9324e36e6c012b6f6",
+    "bytes": 358884
+  },
+  "activeSourceOwnership": {},
+  "singleHeavyLane": "IDLE physicalawake-hostsetup pending; no runtime",
+  "otherWorker": "ITRsource-onlypower/failureassessment59plan",
+  "freshBackendCheckJacocoBefore011CreditOwed": false,
+  "allStoriesComplete": false,
+  "external21": "Inputs requested in compact three-category async question; do not invent answers.",
+  "updatedAtUtc": "2026-10-21T05:07:50.967010+00:00",
+  "rootDecisions": [
+    {
+      "atUtc": "2026-10-20T05:02:19.973396+00:00",
+      "decision": "ADOPT_EXISTING_BOUNDED_OWED_INTERVAL_CONVENTION",
+      "architectureRuling": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/fold-final-meta-review/wait-bound-disposition.md",
+        "sha256": "949b33764ce375b90489bb39e83f9133bd6802c66d31146fe323453f6eddd3c5"
+      },
+      "exactB4SourceSha256": "98aec4f908d92c89a5d50155e35702eb8b8e3c98270d82655f212b328ca0e42c",
+      "meaning": "Framework bound may cover only max(original semantic deadline remaining, already-entered one original interval remaining). Original semantic deadline and native transition ordering remain unchanged; no new post-expiry iteration is authorized.",
+      "conditions": "Existing53 paired comparisons plus actual interval-edge/native/order/cohort/privacy/timing/final gates remain mandatory and unexecuted. Type-only final composition must preserve these blocks exactly. No green or timing-equivalence claim.",
+      "authority": "Current user authorizes pending-story implementation; existing architecture ruling expressly delegates this narrow convention selection to root. No product or release criterion changed."
+    },
+    {
+      "atUtc": "2026-10-21T00:31:11.380978+00:00",
+      "decision": "ADOPT_EARLIER_CONSERVATIVE_OPERATIONAL_CUTOFF_NO_CLOCK_RESET",
+      "rulingSha256": "98e853ead97d7f90659c857463499e98e800902cf6c3cddbe350d2049aac6ed8",
+      "manifestSha256": "a7ff24afbb43aba91a34a85e6d0e753998c9398c8f11379bec6f76998541db41",
+      "historicalExactApplyAnchor": "UNKNOWN",
+      "deliberatelyEarlierOperationalFloorUtc": "2026-10-20T04:35:27.361777+00:00",
+      "operationalCutoffUtc": "2026-10-22T04:35:27.361777+00:00",
+      "earlierQualifyingEvidenceAlwaysControls": true,
+      "noExtensionResetPauseOrAdditionalAttempt": true,
+      "remainingSlots": [
+        4,
+        5,
+        6
+      ],
+      "rootAuthority": "Existing scheduling authority; less time charged than no later cutoffs, not fabricated historic precision."
+    }
+  ],
+  "actualStyleCorrection": {
+    "receipt": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/checkstyle-switch-layout-correction.json",
+    "staticPassReceipt": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-style03-results.json",
+    "staticPassReceiptSha256": "352a8255e6fa8eb9821215ae5b189fa907d821b4d3ca58e668e4826af4aaefea",
+    "testCasesNotRunByStaticGate": true
+  },
+  "frontendMinimalExecution": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/frontend-minimal-execution.json",
+    "sha256": "aef33f2fdc1fca0227a6dbbb202e93197892215189879b10aeeb2864cb92e6ae"
+  },
+  "completedWholeCheck01": {
+    "assessment": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/check01-assessment.json",
+    "exit": 1,
+    "soleFailedTask": "checkstyleTest",
+    "all2774CaseOutcomes": "2765PASS+9approvedSKIP",
+    "noFunctionalFailures": true
+  },
+  "fullClassLedger": {
+    "actual": [
+      {
+        "slot": 1,
+        "label": "obs011-recovery-20261020-check01",
+        "status": "FAILED_CHECKSTYLE; functionalcases0fail; no11credit"
+      },
+      {
+        "slot": 2,
+        "label": "obs011-lean-ir-before01",
+        "status": "PASS",
+        "soleContingency": true,
+        "terminalToolSession": 9520,
+        "assessment": "recovery-20261020/baseline-retry-assessment.json"
+      },
+      {
+        "slot": 3,
+        "label": "obs011-lean-ir-test001-01",
+        "status": "FAIL_DEFAULT_C6_DESCENDANT_RELEASE_UNCONFIRMED_PLUS14_STICKY_PRECONDITION_FAILURES",
+        "chargedAtUtc": "2026-10-20T16:46:35.478399+00:00",
+        "canonicalReplaySha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+        "sourceDigest": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+        "profile": "test original4000 + guidedIncrementalTest incremental2048",
+        "expectedCaseCounts": {
+          "test": 46,
+          "guidedIncrementalTest": 62
+        },
+        "skipAllowance": 0,
+        "noRetryAuthorized": true,
+        "originalApplyClockUnchanged": true,
+        "toolSession": 9778,
+        "launchedAtUtc": "2026-10-20T16:46:40.343689+00:00",
+        "terminalAtUtc": "2026-10-20T17:47:12.899000+00:00",
+        "rawExit": 1,
+        "counts": {
+          "total": 108,
+          "passed": 93,
+          "failed": 15,
+          "errors": 0,
+          "skipped": 0
+        },
+        "taskCounts": {
+          "test": {
+            "total": 46,
+            "passed": 31,
+            "failed": 15,
+            "errors": 0,
+            "skipped": 0
+          },
+          "guidedIncrementalTest": {
+            "total": 62,
+            "passed": 62,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "sourceStable": true,
+        "distStable": true,
+        "testInputStable": true,
+        "terminalToolSession": 9778,
+        "canonicalReaderExit": 2,
+        "assessment": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-full-slot3/terminal-assessment.json",
+        "assessmentSha256": "52e714e459c87abb6357e97c163aee6c60a8def2a7bca9281312b4f159bc5da9",
+        "fullGreenBaton": false,
+        "noRetryLaunched": true
+      },
+      {
+        "slot": 4,
+        "label": "obs011-lean-ir-final01",
+        "status": "PAIR_SLOT_TERMINAL_PASS",
+        "chargedAtUtc": "2026-10-21T05:09:10.194850+00:00",
+        "driverPid": 69472,
+        "admissionSha256": "e5b7db3c1d6a6c5cedb4739155af2a2278cada1ca08292e43bf3378360d54ea3",
+        "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+        "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+        "clock": {
+          "atUtc": "2026-10-21T05:09:10.193969+00:00",
+          "cutoffUtc": "2026-10-22T04:35:27.361777+00:00",
+          "remainingSeconds": 84377.167813,
+          "reservedTailSeconds": 32709.735,
+          "planningAllowanceNotRuntimeTimeout": true
+        },
+        "collectorPid": 69560,
+        "launchedAtUtc": "2026-10-21T05:09:10.198821+00:00",
+        "rawOuterExit": 0,
+        "nativeWaitAtUtc": "2026-10-21T06:10:59.097071+00:00",
+        "rawTaskedExit": 0,
+        "rawGradleExit": 0,
+        "resultSha256": "d7a059784339f29206885bc7d434670ee79ab7133c240b22812c97ef857b58f7",
+        "readerExit": 0,
+        "reader": {
+          "candidateSha256": "5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8",
+          "exactCaseCount": 108,
+          "auditFinalHashes": {
+            "test": "6b12bd49c47207f44ef9e3645bde974495e6f799cad1926cbff267abff38abed",
+            "guidedIncrementalTest": "ee4e92c637f6495ef413f2872480a864b23723535ba4389877c58fb196fa22f2"
+          },
+          "cohortHashes": {
+            "test": "caf1f90daf09bf664f72bf3ae3d101a93075c6b9bcff5a5903613007c7a5fbe1",
+            "guidedIncrementalTest": "e534ae365db950c632ea9da3cc86cac5686467414659f4f90c1a801282af6404"
+          },
+          "reconciled": true,
+          "notQaVerdict": true,
+          "batonRequiresSecondConsecutiveIdenticalGreen": true
+        },
+        "endedAtUtc": "2026-10-21T06:10:59.187625+00:00",
+        "postguardsPassed": true
+      },
+      {
+        "slot": 5,
+        "label": "obs011-lean-ir-final02",
+        "status": "PAIR_SLOT_TERMINAL_PASS",
+        "chargedAtUtc": "2026-10-21T06:11:01.982557+00:00",
+        "driverPid": 69472,
+        "admissionSha256": "e5b7db3c1d6a6c5cedb4739155af2a2278cada1ca08292e43bf3378360d54ea3",
+        "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+        "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+        "clock": {
+          "atUtc": "2026-10-21T06:11:01.979299+00:00",
+          "cutoffUtc": "2026-10-22T04:35:27.361777+00:00",
+          "remainingSeconds": 80665.382483,
+          "reservedTailSeconds": 23006.49,
+          "planningAllowanceNotRuntimeTimeout": true
+        },
+        "collectorPid": 62717,
+        "launchedAtUtc": "2026-10-21T06:11:01.986069+00:00",
+        "rawOuterExit": 0,
+        "nativeWaitAtUtc": "2026-10-21T07:12:56.388617+00:00",
+        "rawTaskedExit": 0,
+        "rawGradleExit": 0,
+        "resultSha256": "6a255df21d864c5c21084ba6ea7b126ef8ce130a886d958f2d9db903bac27542",
+        "readerExit": 0,
+        "reader": {
+          "candidateSha256": "5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8",
+          "exactCaseCount": 108,
+          "auditFinalHashes": {
+            "test": "bffb9385f0d574466253f506922204ae58039720931b630f84c41c2ef6f8801c",
+            "guidedIncrementalTest": "4ea2321bce3c2d60ae171ebd44c39683773edbde487cf00f60e00676c1b617be"
+          },
+          "cohortHashes": {
+            "test": "49f13a46a742373282ef30b57626c7fb7e016a3b82e7d5955aab087db1b3c538",
+            "guidedIncrementalTest": "0eb859e66b993e78b5d8c7bf3601ebb9391ff881c35081532c58319adce63ae6"
+          },
+          "reconciled": true,
+          "notQaVerdict": true,
+          "batonRequiresSecondConsecutiveIdenticalGreen": true
+        },
+        "endedAtUtc": "2026-10-21T07:12:56.480464+00:00",
+        "postguardsPassed": true
+      },
+      {
+        "slot": 6,
+        "label": "obs011-lean-ir-integrated01",
+        "status": "WHOLE_SLOT_NATIVE_PASS_PENDING_ACCEPTANCE",
+        "chargedAtUtc": "2026-10-21T07:25:49.670772+00:00",
+        "driverPid": 76095,
+        "admissionSha256": "ee78a65c34cd5805c27ee05084263a3d663ac5db4bfbb25b3925b4f18731775f",
+        "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+        "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+        "clock": {
+          "atUtc": "2026-10-21T07:25:49.669939+00:00",
+          "cutoffUtc": "2026-10-22T04:35:27.361777+00:00",
+          "remainingSeconds": 76177.691844,
+          "reservedTailSeconds": 13303.245,
+          "planningAllowanceNotRuntimeTimeout": true
+        },
+        "collectorPid": 76243,
+        "launchedAtUtc": "2026-10-21T07:25:49.675448+00:00",
+        "rawOuterExit": 0,
+        "nativeWaitAtUtc": "2026-10-21T09:12:38.032893+00:00",
+        "rawTaskedExit": 0,
+        "rawGradleExit": 0,
+        "resultSha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+        "counts": {
+          "total": 2792,
+          "passed": 2783,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 9
+        },
+        "nativeCollectionComplete": true,
+        "pairReaderRun": false,
+        "wholeAcceptancePendingSeparateAssessment": true,
+        "endedAtUtc": "2026-10-21T09:12:38.051759+00:00",
+        "postguardsPassed": true
+      }
+    ],
+    "remainingPlanned": [
+      "slots4/5 fully composed consecutive identical B4 pair, also FOLD class-alone proof",
+      "slot6 final integrated whole check"
+    ],
+    "maximum": 6,
+    "timeboxNotReset": true,
+    "noUncountedFoldf04": true,
+    "proofGapAfterSlot3": "TEST001-only full green not obtained. Remaining planned4/5finalpair and6wholecheck unchanged; no replacement/retry call or cap/timebox extension authorized."
+  },
+  "latestCheckpoint": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair05-root-release-checkpoint.json",
+    "sha256": "d2f16472e45d3fdf894b08b03aa689e37ee4071ac761a8d984876c5a2e002564"
+  },
+  "statusOnlyNotAuthority": true,
+  "recoveryCheckpointHistory": [
+    {
+      "atUtc": "2026-10-21T01:13:15.301163+00:00",
+      "state": "V2_PURE_ALL_SIX_COLLECTORS_EXPECTED_OUTCOMES_PASS_SEAL_AND_QA_PENDING_BENCHMARK_INTERVAL_FIX_PARALLEL",
+      "heavyOwner": null,
+      "toolSession": null,
+      "liveSessionPolicy": "Gateway all6v2purecollectors terminal/currentmetadata sealingonly; renewalQA independentv2executionaudit onimmutableoutputs. Benchmarkauthor source-onlyC2intervalcorrection. No native/build/actualsourcewriter.",
+      "sourceFreeze": "Actual3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f/Replay5d8/actual238D698/privateRTafter238E19 frozen. No actualRT7copyback/configuredbuild yet. All test/native sessions terminal; no retry/sourcefix.",
+      "lastCompletedSourceDigest": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+      "actualDistDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "sibling": "175 native PASS (bridge26+IT-S88+61); root nine-file hash verification complete. Fifteen bridge plus twelve IT-S waits; original26 probe coverage qualified, addedsite source-isomorphic only.",
+      "originalDiagnostics": "All four terminal rawexit1: P7 capture-close corpus coupling, Orders2/3 prior-publication body assertions plus separate AfterAll corpus failures. No workflow cause/gate credit, no fullslot cost. Receipt e320d73e4db222df6fa9bdad43d3500a0b1903242fd0f5ca5b57f70e0b266d3c.",
+      "rt": "Actual seven RT files and dist NOT merged. Both full-fixture failures retained and gate held; no third unchanged full-tier retry.",
+      "rtDiagnostic": "Single observed diagnostic02 terminalPASS1case/6filteromissions/9complete numeric records: timer/catch+1ms, no await, scratch1 before disposal. Non-reproduction only.",
+      "runnerPreparation": "Architecture383c24c3c1500bb93eea2d154e45c62f2b7cdac29b709147dafb61a755f33d34 CLEAN_SOURCE_FOR_CONTROLLED_RED; sourcecandidateheldoriginalbindings.",
+      "finalFold": "fold-final-current manifest b25715ad81a400a76a4cb25693808a6fcf69486aba7493e0d3ed0117657ad1f5:38ops/142exact hunks prospective only; wait for actualB4 incoming.",
+      "fullClassBudget": {
+        "attemptsCharged": 3,
+        "maximum": 6,
+        "slot3": "TERMINALFAIL93PASS15FAIL108cases0SKIP; retainedrawfailure/reader2",
+        "remainingAfterCurrent": [
+          "4/5fullycomposedidenticalB4pair",
+          "6finalintegratedwholecheck"
+        ],
+        "timeboxNotReset": true
+      },
+      "external": "Approved staging/model/config references and coordinator for five consenting users requested, unanswered; no fabricated observations or acceptance.",
+      "next": "Finish v2pureproducerseal+independentREADY; then rootnewscoped6nativeGOonlywithfreshguard/context/preflight/prospectiveresourcelimitation+AC/lid/inhibitor. Native taskdraft savedunreleased. BenchmarkintervalfixsourceQAparallel/outside011gate; actualRT7+repaircopyback/build/unitcoverage/image/G9/Replay4,5,6stillowed.",
+      "allStoriesComplete": false,
+      "lastCanonicalReplaySha256": "ab429398f750bb493982be321bea550f16823d5b5a58111a1a3d180bff2ece1c",
+      "lastCanonicalSourceDigest": "88dd7947d36447519c51361c0b77bc3b91db91a213d02f023515ceb67a9003d5",
+      "currentReplayControlCandidateShaPrefix": null,
+      "test001": "Allfocusedproofs complete:16positivecollectors19PASS, correctedforceTrue strictreader0/exacttwoAssertionErrors/bodyPASS/AfterEachcomplete/allunaffectedflags/retention0. Invalidoldnegativepreserved. Canonicale10 restored/compile0/full5fe0/D698. Correctedreceipt e27d612df6a22ad2a78e9f43332ea3ab896ad611f77d7e40a9a1e6c6c59331d4. Fullslot3newlycharged/launched, no terminalcredit yet.",
+      "requiredCleanup": "Independent QA CLEAN all15targets: LEFT10manifest974048f2a76ef4714a0c3efc5e61b7cfea1827b2054609892486729728982b85; FE3manifest8a415142c1f94d9cebe10faa538d5cd09f4ef78340e33bea082b92876d3946dd; DOC2manifest69c79d602959f6d4d8eab9c12fb6b063613af585a1f2d128dd647b0e9f27d042. Actualnotapplied. Reviewa15410f3b29c583bec3ace1fc9a61b239b17f19dbbdef4c267cdc6b8b2af6547.",
+      "cleanupScope": "F2data5/F1/optionalJavadoc/narrative/auditdraft excluded; actualWCAGguardunchanged. R-Jvacuouscompile80%rule deletions required since012B, real70/75% floors/taskwiring protected. Actual28constructors includes addedunchangedFOLD outercall. TF3locallyreleased (StudioServicec9b8019 exactaccepted413/413); TOTAL_TIMEOUT_MESSAGE is ratifiedK/KEEP; R-AI keeptracked/nothingremoved so archivefirstnottriggered.",
+      "irCorrectionPrep": "Candidate94b9db694ee543a9f9cd5e341021acdcdce8f936d49a68c8d63607ad7feb45cc/manifest2cf8e5d2d62009f79e870acfc4db8c2a95e78d3c856c89f1fd791a1f01637a4c, independentQA65dffbd3937afa28f92032a18cc421e56ef87724b0ef841992ff7fdbc3b70b7d CLEAN. OnlythrowsException+existingstartWorkers realsetup beyondoldforcegate; allreaderchecksbyteidentical. GOaftergatewayhandback, fresh ...force-true-worker01, live51932.",
+      "runnerRuntime": "Gatewaytargeted009proofterminal8collectors andfinalreceipt b983c3fa241619be3848b3c8d82ac91513ec33f455bce25c670e7693a931e5cd/results c676185859b5a5a471025861cc7a04f4b9456bac7d9606391775d4d33ab0f6a3/manifest c1f42f11ff6e9c74d615a47a9684cce67e8e32d23b9d5848bfb056ca13f011ce/applicationbinding a8ece9d9f506d574ddd9ad1b629bb6541ee7b2d8911b4feb68dc916ec4fd852f. PrivateD9ef/5changedcompiledpaths; actual0094beforepins/RT7+18/D698stillold. Required_cleanup_qa independentexecutionreview active, noactualapplicationyet.",
+      "liveLabel": "obs011-recovery-20261020-fold-init-focused01",
+      "additionalReadiness": "runner_failure_architecture source-only AE/FMcurrentreadiness review active toconfirm realremaininglocal009code/proofgaps vsalreadyimplemented/credited, noSCapprovalfabrication ornewframework.",
+      "runnerIndependentQa": "READY_FOR_ROOT_INTEGRATION_OF_NARROW009_FIX; execution-qa/review.md SHA9b38855a1157bc8d9bff60109b6870ebcbd75ad189448f91c78da48e10dca97c, no mandatoryfindings. Integrateonly4 source/testfiles from execution01/validated-four-file-application-binding.json(a8ece9d9...) after9778terminal. Actualbuild/finalT5+RTsuccessorrebase stillowed; nohistoricalcause/releasecredit.",
+      "aeFmReadiness": "Complete source/evidence review ae-fm-current-readiness/findings.md SHAa910db07fbd6b0f0678870193197ee06c97476eca2eff2e06222e5b535c33954. FM3runnerhashes exactcreditedOFM; freshB2/B3 cover68unit/31native; currentJoinedIT389389d...2/2inacceptedITS02. NoFMrewrite/newlocalimplementation. AE genuinelyabsent at runtime8ce999...start239/append281, but A10 forbids writing/proving AEcode before actualU13SCack. U13stillNOTSATISFIED/requestdraftnotsent. ExistingFEkey preserved, noAEpatch/tests. AE/FMnot011startconditions andRTexclusionsretainruntime/ownership/collector. EventualAErequiresitsownapprovedsource/integratedproof; no invented011externalgate.",
+      "defaultPartition": "Actual freshXML46total/31PASS/15FAIL/0SKIP. FirstactualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending (C6kind3): IllegalStateException p8C6Run26067 residualreleaseunconfirmed, suppressedNoSuchElementException ownedCommandHash662->verifyOwnedDescendant910->p8KillRefusedWhileAlive25557;14laterBeforeEachcleanupUnconfirmed3773 guardfails. Not corpus-only, not assigned toTEST001/009timeout. Raw failure retained.",
+      "failureFacts": "itr-execution/test001-full-slot3/default-task-failure-sites.json; defaultXMLSHA212358b566a82314538c6fffa307cf37c7df7c229e5285e11f23690c7270be88. No rawprivatefailuremessage exported.",
+      "incrementalProgress": "All62 incremental afterEachmarkers and108total selectedafterEachmarkers present. Originalfinalincrementalnative drain/corpusscans/teardown stillrunning9778. No bodyPASS/cohortcomplete/terminalclaim inferred.",
+      "firstFailureArchitecture": "runner_failure_architecture source-onlyanalysisactive under slot3-first-failure-architecture/. Existingp8helperalreadyhandlesdead/X/Z, p6Statusalreadyhandlespsnonzero+freshdead. Closedmetadata doesnotidentifylive nonterminal vsunavailablefallback. Sourcepossiblegap: childcanexitafterinitialalive/nonterminalpssnapshotbeforehelperreturnsfalsewithoutfreshliveness; controlledcounterexamplecandidateonly, nohistoricalcause or repairselected. PreserveallPID/start/command/ancestry/signal/liveunknownrefusal/stickycleanup/firstError/deadlines; no source/runtimeintervention.",
+      "finalRunnerPlan": "Source-onlyready runner-final-current-plan/plan.md SHA92a06d49505bdfaf3a4eba25b2098330c7fdad7b9205c74fd1b9f9eb5c9d27c7, commands.json SHAc8fe254a8de221f0e265096bf0406ccfa4b6ea67c90b3e6a61d7b453a0c1292b, manifest SHA70907ed451f72cf3df65f5090079ec31b3a2f0d793cbeb0b3e4bca679c89d442. 32prospectivecommands noexecution. Freshactualrootcatalog/successorseed requiredaftercomposition; oldS011/493admissionhelpers preserved/invalidfornewbase. BothprivateRTtrees canonicalTSC+existingruntime-versionwriter normalizeaccepted009launcher stamp beforeemit/fullproofs. Exactactualbuildusesrun-runner-build.py after7sourcecopyback; source+buildInputstable, actualhoststampmeasuredno private/imageDcopy.",
+      "imagePlan": "No.dockerignore exists; useminimalboundtar ofDockerfileCOPYpublicinputs (no dist/node_modules/tests/evidence); preverifycacheddefaultFROM, --pull=false --network=none onlyapprovedsyntaxfrontendfetch, noautopullmissingbase/no oldf8retag. Freshimage measuredactualID. Existingrequire-imagechecker insidefreshimageROpublicpinview, neveroverwritehostMacruntime-stamp withLinuximageJSON. Complete722deploymentafterfreshbuild; nointernal/liveapprovalclaim.",
+      "releaseCounterexample": "Originalslot3-release-observation-fix manifestf38a2d3b... redbc3b/green309fe remainsUNREADYhistory: independentC6-QA-01 reviewa69472c20e9fbde3f69ac443fb59935b51144739f63f6772568c52c6cc7fb4c3 foundsupportsingletonneedsactualworkerlogs forunconditionalsinkscan. Do notexecuteoldfuturecommands.",
+      "eligibleReleaseFix": "Corrected slot3-release-observation-fix/resume2 manifestbc280c8e012258bcfd9d3c64ba01aebc852b10019bba7b50600b41cbf297e118: redcd1c81f9c5ace7b107a314c0f4baf9c6cb5dadacf9576a1213ee8e9455eb95e3, greenab429398f750bb493982be321bea550f16823d5b5a58111a1a3d180bff2ece1c. BothdeclthrowException+existingitrEnsureClassFixtures entry, realfirstboot/retainlive/noimplicitrestart, nolearning/canaries. NeutralprivateJDKlazySupplierseam+same9controlledblocks inexistingOrder19, noJUnit/profile/casedelta. Greenonlypost-successful-nonterminalstatus freshisAlive; unknown/live refusal andallPID/start/command/ancestry/kill/status/C6release/stickylogicbyteunchanged. Originalactuale10unmodified.",
+      "eligibleReleaseFixQa": "C6-QA-01closed SOURCE_CLEAN_FOR_CONTROLLED_RED, resume2/qa-review/review.md SHAf3af4b270bf72a3d0521fc1cc419c665983b15ca8ee35680aa3f632d6d3bca60. No runtimecredit/historicalcauseclaim. Plannedred20888 expectedtrueactualfalse; alloldassertions/73source@Test/35variants/21DELIBERATEsleepspreserved.",
+      "nextRuntimeGoPreparedNotDispatched": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/slot3-release-fix-r2-runtime-{task,context}.txt exactsaved/actualpreflight011develop500safeexit0; NOTdispatchedbefore9778terminal/reader/lockhandback. GOsequenceoneexistinglock: verifyoldresourcefacts/currente10, redapply+compile+1supportgenuinered/cleanAfterAll; onlyvalidred permitsgreen1line+compile+same1supportgreen(all9controls); thenONEoriginalaffectedC6kind3 methodnative. No retry/fullclass. Invalidredrestoree10+compile. Keepgreenonlycontrolledproofvalid, preserveallfailures/nohistoricalcauseclaim. RootmustsendEXACTsavedtask+newline+context bytes viafollowup toitr_execution afteroriginalcollectorhandback.",
+      "queuedGoStatus": "Exactpreviouslysaved/preflighted C6resume2runtime-task/context DISPATCHEDafteroriginalhandback. ActiveunderoneGradlelock. Verify compile->singlecleannamedred20888; invalidrestoree10+compile/no retry. Onlyvalidredpermitsab42one-linegreen+compile+sameone supportgreen(all9controls)->ONEaffectednativeC6kind3. No fullclass orlatercomposition authorized.",
+      "slot3Terminal": "3576.97s terminalexit1, exact108identities/35variants/default31PASS15FAIL/incremental62PASS/0SKIP0ERROR. BothfreshXMLexecHTML/taskcollections/cohorts complete, all108AfterEachcomplete/allclosed audit/privacy/model/budget/response/drain/finalscanflags true/retention0 and2finalboundaries; these DO NOT override15failedbodies/Order39notrun. NO fullgreenbaton; reader2. Canonicale10/global5fe0/D698 exactstablebefore/after. Assessment52e714e459c87abb6357e97c163aee6c60a8def2a7bca9281312b4f159bc5da9. Ledgerterminalslot3charged, remaining4/5pair+6wholecheck.",
+      "originalResourceFacts": "BeforefreshC6work actualaudit:2freshcleanupreceipts331roots cleanupFailureCount0/rootAlive0/descendantAlive0. Existing6904lifecycle rows/5667distinctidentities correlatedreadonlyOSfacts:5665PIDsabsent,2reusedPIDs differentstarts/executables, zeromatchingoriginalidentities. TransientrootPIDpresenceabsentonfollowup. No signals/privatebodies. Evidence c6-observation-resume2-execution/original-resource-*.json.",
+      "c6Terminal": "Controlledred1namedFAIL, greensupport1PASS/allcontrols, originalaffectednative1PASS/0SKIP, bothcompile0/freshXMLexec/completeAfterEachcohort/retention0. Assessmentc6b67514821f8fb6b34f9fdc06c383f94d770b153699b260250fb032215b3d06; sourceab429398/global88dd7947/D698. OnlyReplaychanged/all1814othersstable; controlledproofnotoldslot3cause/fullclassgreen.",
+      "irStages": "B1compile0/3PASS;B2compile0/3PASS;B3compile0/4PASS;B4compile0/focuseddefaultcrashreaper+pre-readystop/incrementalprefixlive. Original600s crashwait held, nofullclass.",
+      "finalFoldSuccessor": "SourceCLEANd2ca2f6485721bb4f030ada707242f33e6f59770d14d739773c8000ee4dfeb68; QA04b2cb5dbd0dde2d249be2f51e1c088ba3227d7ef86e4fa39ab79d5de7d18431.48LEFT/FOLD disjoint/38ops142hunks37otherssame. Actualapplicationnotyet.",
+      "freshRunnerSeedHelper": "prepare-current-sandbox.py SHA4b0d186af5b427fcc250cedfa3b02ec91a7857921c5bafdb2b2245313d1573ac sourceCLEANreview7d96f5d64728ca287a8fd1fbb3ff78df390853540780829d61564d23398c8a2a. Notexecuted/catalogunmeasured/sandboxnotcreated. Accepted0094/FOLD2/7/18literalpins andsameCOPYprofile; freshcatalogonly afterfinalcomposition.",
+      "nextPreparedTask": "final-compose-application-runtime task/context exactsaved/preflightsafe JSON and DISPATCHEDtogatewayafterB4handoff. All53beforechecks thenLEFT10/FOLD38/FE3/DOC2, exactafter, formatcheck/conditionalownedformatter/compile-static/LEFT02+FOLD01-03. No0094/RT7/fullFE/fullReplay/image yet.",
+      "caseProjection": "QApreparingexactnamedbaseline/add/drop/relocationreconciliation. Provisionalbackend2792=2774+11newGSM+7netFOLD, uncredited/unverified; runnerunitFOLDapprovedone displayedtitlerename recorded in approved-title-port-correction.json, notextraadd/drop. Finalfullnamesstillowed.",
+      "safeLivePhase": "At18:17:45UTC existingafterEachmarkers0 indefaulttask; firstselectedcrash/reaper notthroughAfterEach. No pre-readystop/incrementalcompletions; incrementalnotstarted. Markers cannotdistinguishbodyfromcleanup. Same57995 live, nointervention.",
+      "casePreparation": "Final-case-reconciliation-preparation manifest3fd31c42500b15431a5e024bacd09c0f79c2aadf5749b48c98d1cbff3aa8f6d0 exactCountermaps expectedbackend2792/2783PASS9sameSKIP/tasks2728/62/2; runnerunit2670=2645PASS25SKIP/fixtures307=298PASS9SKIP/deployment722/FE1388. Predictionsnotresults; oneapprovedunitdisplayedtitleport andpendingimage-derivedtitlemapped.",
+      "rootMutationDisposition": "Rootqualifiedexisting5foldmutationadoption842ab9c82b8aeb835cabb644af4f2c8e7b6231ec260a1e9e46477ed198b6c25c; nofreshmutantrunclaim/no repeatedmatrix, ordinaryfinalcomposedassertions/postformatlogicbindingrequired.",
+      "irStagesTerminal": "Assessment63c19786b56a2fff0c42ee3e5b882bb700be2a2e1f7696e00ce92a5f04f223ab; fourcompiles0/fourfocusedcollectors13PASS0SKIP/default8incremental5. FreshXMLexecHTML/exactselectedmultisets/cohortsAfterEachallcomplete/allrequiredflagstrue/retention0. OnlyReplaychanged/all1814othersstable/D698. Preserved2712assertchains/74annotatedmethods/10textblocks/C6helpersupport/21DELIBsleeps;74POLLrows73sitesconverted. Nofullclasscredit, slot3failurepreserved.",
+      "currentReplayFullHash": "abb4773016aa3499b76cf1aae3ac0da0f0b820ac4df19fb66887188c7dfe53f4",
+      "currentSourceDigest": "8761c67c340fadce2c9f6d7188726671ca81e36b00d979a196d4cb8ec9aa54e7",
+      "runnerNextPreparedNotDispatched": "runner-final-composed-phase1 task/context saved/actual009and011developpreflightssafe0. Onlydispatchaftergateway53andallbackendfocused/staticterminalhandback: applyaccepted0094, freshcurrentcatalog/seedhelper7d96QA, AST/map/types/lint/bothTSC+stamp/fullcompare, STOPforrootexactfull-digestwrittenacceptance. No unit/fixtures/copyback/build/imageuntilseparatelyrouted.",
+      "formatRelease": "root-scoped-format-release.json SHAd72e6a0dcf04f8dc4a59aa9ae0263f9285f3ad0fec5c63b32a5f526b15a19f05, preview6cb7ebfd633944e8ee5ea3ae3957d17a2f7a4a064fc5f52e16f70f7d2639d3aa/patch e36064cf3491a588c1f82581c6493cf21ee8017e2cdda354820bcae6583d7679.38filepreviewpuretextproofclean/nonimportnonwhitespace+literal/assertions/textblocks/testannotations/sleeps identical; only6unusedimports/5files removed. ExistingformatterONEapply, exactpreviewmatchesrequired. PendingactualpostformatReplay5a39eb26expectednotyetcredit.",
+      "readerPreparation": "final-replay-reader-preparation manifest a8ecc301bded4772078500bbe4163835c33a4e172028ac363d38d44a352bf616; reader825f9151/casesfda33efa unchangedcopies/stage04 candidateSHAUNBOUND. BindonlyliteralactualformattedSHA later. Pair4/5readerexact108two-task; cannotuseforwhole6hard3task2792/9skip. Whole6 raw3taskreceipt +separateCounter2792/multiplicities9exactskip/freshmergedcoverage/task/cohortassessment. No newreaderflags/code/derivedmisleadingreceipt.",
+      "qualifiedMutationCarry": "Root842ab9c8 adoptsactual5oldkills/restores/greenswithQAqualifications, nofreshmatrix. m1/m2targetliteralmainunchanged; m5pass-throughformatted014471->3c14perexactpreview soonlyformatqualifiedcarry, notoldhashclaim. m3/m4publisherpreformat4cdc->83aeafterfmtsemanticfoldqual. OrdinaryfinalClock/worker/client/wiringgatesrequired.",
+      "static01": "compileJava/compileTestJava/spotlessJavaCheck/checkstyleMain PASSED; logconfirms spotbugsMainalsoran, solefailedcheckstyleTest.1636errors/11testfiles: NeedBraces1325(allif),Indentation194,LocalFinalVariableName113,WhitespaceAround4(twoemptyfixturelambdas). Detailedclosedpublicdiagnostics archived. Nofocusedteststarted.",
+      "style11Authorization": "Exactsaved/preflighted final-compose-checkstyle11 task/context sentgateway. Mechanicalifbraces/camelaliases/introducedwrapperlayout/twoemptylambda commentonly. Syntaxaware sourceproofpreservebranchbindings/conditions/order/deadlines/firstError/interrupt/cases/assertions/literals/C6/21DELIBsleeps/GSMfreshfixtures. No rule/suppression/policy edits. Cleanroutinecandidate mayapplywithoutanotherpermission, configuredformatterthenfresh integratedstatic02 beforefocusedgates. No extra53pairs/IRQ/mutants/fullclasses.",
+      "nextFocusedPredictions": "ExistingqueuedLEFT02=42/FOLD01=84/FOLD02=172/FOLD03=170 expectedPASSidentities; preparedCounterfileonly, allUNSTARTED. Freshactualoutcomes/sourceStable/retention requiredafterstaticgreen.",
+      "currentBoundary": "composition53-execution01/current-boundary.json SHA0c986920ca2347253b4e33260904f754aecf10122b7c5915dfec5e93d457b608 beforestylefix.53integrationand38formatcomplete; 64postformatbindingssupplementhistoricprotectedpins, allsourcepreservationclean.",
+      "styleEditorFinding": "Firstofftreecandidategenerationstoppedbeforeactualwrites: siblingBridgePoll wrapperslackIT-Rcomment and repeatedbridgeDeadline declarations share enclosingmethods. Flattenwouldcollide; sourceunchanged, findingretained.",
+      "styleSuccessorGo": "Saved/preflighted final-style11-scope-label task/context SENTgateway. Preserve everyintroducedwrapper scope; useonlygloballyuniqueunreferencedJava statementlabels fordiagnosedblocklayout. No newpredicate/loop/catch orchangedbreak/continue. Keep1325structuralifbraces/113ASTaliascamelrenames/2emptylambda commentonly. Adjustsourceeditor blockrecognitionbydiagnosedASTpositionsactualbefore spans, notIT-Rmarkerassumption. Exactpreservation/ledgersbeforeactualapply, existingformatter/static02thenqueuedfocusedonly.",
+      "independentStyleQa": "Existing11candidateSOURCE_CLEANindependentreplayed3072UTF16edits/sourcebranch/scope/literal/assertionproof. CurrentQAreviewfinishesactualcaptured1a588boundary; do not inferstylepass or requireoldcurrenthashaftersuccessor. A separatelypreflighted9successor source-onlyreview stilltoroute oncecurrentreviewfinishes.",
+      "style11Proof": "Sealedcandidate445a00da prefix/preservation4e8eca94 prefix/patche7fc15bd prefix. JDKproofpreservesbranchassociation/jumps/97wrapperswithnewunreferencedlabels;1325diagnosedthenbodybraces/113aliases+210refs/2no-opcomments. Actualformattednormalizedproofretains allnon-import tokens/alpha/bracing/labels, literal+textblockbytes/assertionorder/2712Replaychains/74methods/35variants/21DELIBsleeps andGSMfreshfixtures. No rule/config/test/reader/deadlinechanges.",
+      "static02": "All1325NeedBraces/113LocalFinalVariableName/4emptylambdaWhitespaceAround fixed. Remaining194Indentation=97introducedwrapperbracepairs/9files. GJFlabelseparateline bracesameindent vs unchangedCheckstylebraceAdjustment2 incompatible. LabelssemanticallycleanSOURCE_CLEAN, stylisticgatefailed; keepbothfacts/rawfailures.",
+      "scopeAlphaSuccessorGo": "Exactsaved/preflighted final-style09-scope-alpha task/context SENTgateway. Chooseconservative38directgenerateddecl/ref alpha-renames: IntegrationbridgeDeadline/bridgePoll7each, Planned8each, EvidenceAppenditsPoll2, TransportitsPoll6. Globallyfreshsite-indexed names/ASTboundrefs/nooutsidecaptures; no parent-scope minimizationneeded. Retainallotherunique local/type names, removeonly97 addedunusedlabels andtheir97introducedwrapperpairs; allinnercontrol/resource/sync scopes/calls/jumps/predicates/deadlines/firstError/interrupt/assertions/literals/C6/GSM preserved. No newloop/if/catch/config/reader/testmatrix. Ownpreservationclean permitsroutineactualapply+formatter+static03 thenqueuedfocused.",
+      "scopeAlphaProof": "style-correction02/candidate-manifest.json SHA35303a0be963af70087d1c9ca0945b83756a36f67100ce0d125b292994c32c06; preservation32280ad5prefix/patch83dc433cprefix. Exactly97introducedunusedlabels+wrapperpairsremoved,38generatedlocals+220ASTrefs globallyfresh alpha-renames, no typesrenamed. Alloldbindings/branches/jumps/literals/textblocks/assertionvalues/order/2712Replaychains/74methods/35variants/21DELIBsleeps retained; normalizedactualformattedproofclean. post-style-bindings.json captured.",
+      "independentScopeAlphaQa": "required_cleanup_qa reviewingexactsealedcandidate+editor/UTF16ledger/bindingproof anddeclaredactualpostformatterboundary, source/evidenceonly. Previous11SOURCE_CLEAN7531708f held ashistoricalnotstylepass; static01andstatic02rawfailuresretained.",
+      "static03": "Resolvedall1636initialand194remainingstylefindings; soleLineLengthReplay1422SQLquotedfragment121vs120. No testsstarted/raw1preserved/source2866stable.",
+      "sqlSplitAuthorization": "Exactpreflighted final-sql-line-style task/context GOsent. One declaredconstantsegmentationonly: decodedSQL/call/parameter/orderidentical. Rootexplicitqualifiesnewliteral-tokenbytesdiffer, nofalseallrawbytesunchangedclaim. NoLineLength/config/suppression/rulechange.",
+      "sqlSplitProof": "Candidate47dec771prefix; completeoutside-splitbytesidentical,2712assertions/21sleepsunchanged. JDKparse-onlyvector12630maximalconstantstring values/order identical hash a4e004c0prefix. ActualSQLsplitReplayonlyapplied; configuredformatterthenintegratedstatic04 beforequeuedLEFT/FOLDtests.",
+      "qaStatus": "Nine-scope-alpha semanticreview finishingcaptured041dfboundary, independentexact549UTF16edits/38decls+220refs/97wrappers proofclean. LaterSQLsegmentationrootseparatevalueproof supplements oldreview; avoidfalseoldcurrenthashrequirements. No native/runtimegatecreditfromsourceproof.",
+      "static04": "TERMINAL0 integratedcompileJava/compileTestJava/checkstyleMain/checkstyleTest/spotlessJavaCheck/spotbugsMain. Allpriorrawstylefailuresretained; finalReplayonlyformatterchild0outer0/unchangedsource. SQLsplitmaximalconstantvector12630 decodedvalues/order equal; outsideexactsplitbytesunchanged.",
+      "scopeAlphaQa": "SOURCE_CLEAN9files/38vars220refs/97introducedwrapperremovals/exact9formatted, sourcebinding041dfstage, nosemantic/bindingissue. Review0906e61a145f5119f8691e81bf59a3a71b3385bd067857230032bf6a2cdd72f1. LaterSQLsegmentationseparaterootvalueproof/static04pass, notfalseallraw-literalbytesunchangedclaim.",
+      "left02": "TERMINALPASS42/42,0FAIL/error/SKIP,4fullclasses/freshXMLHTMLexec/exactCountermatchessealedprojection/source+testInput+diststable. HonestJOINcohort0(noscopedsubjects), no artificialcohortcredit.",
+      "focusedQueue": "LEFT42PASS+FOLD0190PASS+FOLD02172PASS=304actualPASS; FOLD03expected170current, nofuturecredit. CorrectFOLD01nested6metadataretained/global2792projectionunchanged.",
+      "fold01": "TERMINAL90PASS/0FAIL/error/SKIP,7selectedtoproots+4nestedXMLclasses=11XML/freshHTMLexec/exactsealedCounter/stableinputs. Earlier84forecastomitted6nestedTLS/API/workercontextcases viaexacttopclassnamefilter. Correctcompleteclassfilterincludesexistingdollar descendantsfromsame2792projection; globalexpectationsunchanged, oldforecastretained/correctedmetadataarchived/no rerun.",
+      "fold02": "TERMINAL172PASS/0FAIL/error/SKIP,10XMLclasses/freshHTMLexec/exactCounter/source-testInput-diststable, honestJOINsubjects/cohorts0. No subsetrerun.",
+      "retiredBuildOutputs": "Read-only checkverifiedall4retired .class outputsabsent, no manualoutputcleanup/clean used.",
+      "fold03Failure": "Actual170cases83PASS87FAIL0ERROR0SKIP/taskCollectionCompletetrue/source-testInput-diststable. PriorLEFT42+FOLD0190+FOLD02172=304PASS unchanged. No partialgreenforFOLD03; rawfailurepreserved. AuthoronlyextractspubliccaseIDs/throwabletypes/projectframelocations, no privatefailuremessages/capturebodyreads/dumps.",
+      "compositionTerminal": "composition53-execution01/manifest.json SHAea4c5b73c73dcaf335fab31d3095616205fd433d35d7e5ba0c87930af924d103; terminalassessment3d5c3626prefix/receipt6025fb5cprefix/final65bindings7dccc7e7prefix.474exactfocusedcases387PASS87FAIL0SKIP. Static04PASS. LEFT42/FOLD0190/FOLD02172PASS; FOLD03170=83PASS87FAIL, no retry; freshallXMLexecHTML/source-testInput-diststable.",
+      "fold03RootFacts": "foldf03-missing-bean-facts.json publicallowlistedfacts:5initialSpringbootstrapmissingStudioRunnerTls+82contextthresholdcascades. Failedroots BridgeIntegration10,Planned16,EvidenceAppend2,Planning57,Focus2=87; Session44/Transport39PASS=83. ThrowabletypesIllegalStateException87(initialUnsatisfiedDependency8/NoSuchBean5). No privatefailuremessage/capturebodyreads/dumps.",
+      "architectureTask": "Saved/preflighted fold-client-initializer-architecture task/context FOLLOWUPsentitr_execution withaiox-architectrole. SourcecurrentHttpRunnerDispatchClient678bbe3214c5975128623a62eae3ccedc73b8aa068c353783fa94ea01e46852a @AutowiredinitializeOperations eagerlyrequiresTLSandcouldoverwriteexplicitfixtures. Source-onlydesign/oneboundedcandidate/allconstructorcallsites/proofplan, noactualpatch/runtime.",
+      "constructorDirection": "Architectfindsnewmandatory6argSpringconstructor morecomplete thaninitiallazyProvider/fieldguard suggestion (guardmissesexplicit3argplainHTTP/run-onlySpringfactories). NewSpringconstructorcoulddelegateunchangedpublic4argTLSconstructor andexistinginitializer, removeold4arg/method@Autowired; everyexplicit3/4/7/validation/guidedfactorykeepswiring, deployedTLS/Contracts/Env stillhardrequired,sameTLSidentity. Checkingcallsites beforecandidate/seal/rootGO. No optionalTLS/denyallfakebeans/testweakeningallowed.",
+      "constructorFixPacket": "fold-client-initialization-fix manifesta6c20c9977826a98ae0b08ab0edc726eaff6350c8e74c6d2c90a7b5fd35833ad, beforeclient678bbe3214c5975128623a62eae3ccedc73b8aa068c353783fa94ea01e46852a, candidate072ce61b3c0f94d94076ef18c7acd170a4331e53d0968a132c08c85f15628c9c, forward6d318343prefix. Newsolemandatory6arg@Autowiredctor delegatesoldpublic4argTLSctor+unchangedpackageinitializer; removeold4arg/helper@Autowired. All5existingctors/signatures/body/helperbody/deploymentTLS/explicitfactoryconfigs unchanged, no providerheuristics/fakeTLSbeans/optionalguards/testrules.",
+      "constructorFixQa": "SOURCE_CLEANreview378e93e6bfa7fda94a4ef1489849975cbfa0681f0616d5197a7b46c1b074f514, QAmanifest2e66e000669aa50c6b479d7d7a50b8061412e9ae225a2f025a90028f8257c61f. Exactforwardinverse/three-editreconstruction/12inputs9artifacts rehashed, no sourcefinding/runtimecredit.",
+      "constructorRegression98": "Rootsuccessor root-runtime-plan98.json SHA5aeca272f7a0a12efa30459507be7ac0e732c377d21c341b12f0ba2a5cd706bb preservesimmutablearchitect97plan and addsoneexistingDeReadyCarryForwardTest.ordinaryAcceptanceReadinessAndRealHttpDispatchCallNeitherProvider. Exact98Counter issubsetglobal2792:87oldfailed+10changedTLS/role/driftpriorPASS+1managedplain3arglocalHTTP/zerocountinggateway. No newJUnit/globalcountdelta, noAE/U13/realprovideradmission. Wholeprior83unaffectedpassnotrerun, no474repeat/mutants/fullReplay.",
+      "runtimeGoFiles": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/fold-client-init-apply-runtime-{task,context,preflight}.txt/json saved/exactsafe0/scannerthreats[] anddispatchedtogatewayafterQA. StaticargvcompileTestJava/dependencycompileMain/mainstyle/Spotless/Spotbugs thenexact98structuredargv preservesnestedDollarFQNs. AnyunexpectednativefailureSTOP/no retry. SourceReplay5d8/D698 held; onlyglobal/clienthashmaychange.",
+      "initializerStatic": "TERMINALPASS0, source-testInput-diststable; compileMainviaTestcompiledependency/mainCheckstyle/Spotless/Spotbugs executedpassed. Candidatealreadyformatted/noformatterneededorrun. No source/proof waiver.",
+      "initializerNative98": "RUNNING onlyexactrootplan98/genuine87oldfailedbodies+10affectedSpringcontrols+oneplainHTTPDeReady localdispatch. No newJUnit/globalcountdelta/noexternalproviders/U13admission. No futurecredit untilterminalexact98Counter/0SKIP/freshoutputs/ownedcleanup.",
+      "initializerExecutionTerminal": "fold-client-initialization-execution01 receipt3c0cade3a59ea7a0d4f507e73dad73361595e70ab2aadf5653883b8a3b1b9850/manifestb3fe226eddb979e44bde70c140df70bf28cbf92bd5a9d1ffe3fc44e247c917b3. Onefileexact072/staticPASS; native98 exact93PASS5FAIL0ERROR0SKIP/11freshXMLHTMLexec/taskComplete/all1812source+238diststable. Sourcec61fd215/Replay5d8/D698. Qualifiedunion470PASS5FAILNOT475green; allold47487fail retained.",
+      "remainingFiveFailures": "Planning scannerRecoveryvariants[2]materialized967.855s,[3]allocation0.818s,[4]next1.020s AssertionFailedError; FocusMutationbothGuidedSessionException(firstfill1070.956s/second1.485s). OnlypublicIDs/types/projectframes exported in closed-failure-diagnostics.json, no privatefailuremessages/captures read/dumped. No codechange/retry afterterminal.",
+      "hostPowerEvidence": "native-host-suspension/power-events.json SHAe5337779b02a3311a961213b1c51a3859782f4a4b905bfd8519bfb89ee3e1914:30closedOSfacts, ClamshellSleep15:31:30-0400duringnativejob19:22UTC, repeatedbatteryDarkWake/maintenancecycles~16minapartuntil17:19:52-0400. Originalcollectorwall6195.35s; longfailedcases967/1070s correlatewithhostpauses, historicalcausenotproved. Rawpmsetlogonlyhashednotstored/exported.",
+      "hostCurrentFacts": "current-host-facts.json at21:28UTC lidClosedfalse/powerBATTERY; rawhardware/batteryvaluesnotexported. UserasyncquestionaskedMacopen+pluggeduntilvalidationfinishesRecommendedorusealways-onhost; unanswered. Idle-sleepcaffeinatedoesnotresolveuserlidclosureconfirmation; no assumptionfromelapsedtime.",
+      "awakeControlPreparation": {
+        "manifestSha256": "8c5605dfaa1b1742c91fb558854683559f7427d5b6f5dd4b51a0a5dc0785b7af",
+        "expectedRows": 59,
+        "classCounts": {
+          "Planning": 57,
+          "Focus": 2
+        },
+        "runtimeLaunched": true,
+        "rootArtifactAndInputHashesVerified": true,
+        "physicalHostConfirmation": "USER_READY_CONFIRMED_LIVE_AC_LID_OPEN",
+        "sourceDistChanged": false
+      },
+      "blockedAudit": {
+        "sameConditionConsecutiveGoalTurnsAtLeast": 3,
+        "previousGoalTurn": "NO_PROGRESS",
+        "currentHostPowerSource": "BATTERY",
+        "currentLidClosed": false,
+        "physicalConfirmationReceived": false,
+        "pendingLiveRuntime": false,
+        "independentSourcePreparationComplete": true,
+        "requiredNextInput": "Keep Mac open and on power until validation finishes, then reply Ready; alternatively provide an actual always-on test host.",
+        "resolvedBy": "User Ready and live AC/lid-open verification at21:53UTC; new59 collector session31410 launched21:55:30UTC."
+      },
+      "awake59Terminal": {
+        "receiptSha256": "484b90eb81cc8249403720d9a51cb7e656c33950f002985102a4ccf2e355917f",
+        "manifestSha256": "0d5397fd79a8d9743dfc65218df503cdb26a358ab53717d73a62db907f59be05",
+        "counts": {
+          "passed": 59,
+          "failed": 0,
+          "skipped": 0
+        },
+        "noObservedSleep": true,
+        "ownedCleanupConfirmed": true,
+        "rootCounterAndArtifactHashesVerified": true
+      },
+      "runnerPhase1Current": {
+        "freshCatalogSha256": "e1a989972cd9a63e8dbae513447d213248ca508241d891a3cdcd5ed0ca924394",
+        "copyProfileFiles": 13993,
+        "seedReceiptSha256": "69172920259a53b8db48642f20cfb945f02ddd8cbeed79dcf3db5e6776f48109",
+        "astSixFiles": "PASS",
+        "deferredNameMap": "PASS",
+        "typesSession": 67848,
+        "stopAt": "COMPLETE_EMIT_COMPARISON_ROOT_MEASURED_DIGEST_DISPOSITION"
+      },
+      "astraHighReview": {
+        "status": "CONCERNS_ADOPTED",
+        "path": "astra-three-story-plan-review/review.md",
+        "decisions": [
+          "Continue runner phase1",
+          "Separate local011 exit from external009/010 closure",
+          "Resolve named evidence/carry dispositions before finalpair",
+          "Map Linux init/PID1/drain/guidedassign smoke before finalpair",
+          "AE excluded absent actualU13; later changes need own affectedintegrated proof",
+          "Protect slots4/5/6 and original clock; no blanketreruns"
+        ]
+      },
+      "runnerEmitDisposition": {
+        "path": "runner-final-current-plan/root-measured-emit-disposition-afterawake.json",
+        "sha256": "53875338f0b7f3acf7e26bfff69e5382496e88e83fcd382fae9ab10e9d288e79",
+        "before": "4d312c7ddb683fd0518b3288cb3f9f3703d9b7ba10524e0c5fb519f2057ea14f",
+        "after": "52bc5a05cdd348c5f62c6bc181210c79f765d15d82dee0abcf01861f6e75cef7",
+        "fullInventoryRootVerified": true,
+        "rawCompareExit": 1
+      },
+      "runnerPhase1Terminal": {
+        "receiptSha256": "3078d379afc34a0e2d462b63a5069933dc20341c7252dddbe3dcc1415ef66065",
+        "manifestSha256": "34b3f7cfc676073ccc70fc275568ed8d4808c580e3ff90c05adf9d9419163642",
+        "eightFreshChecks": "PASS0",
+        "actualSource": "c3c3c9aa6d79a993438d0500c598a5372b34f5134de8a554d991e117f2d6805c",
+        "actualDist": "D698"
+      },
+      "runnerGeneratedCacheDisposition": {
+        "path": "runner-final-current-plan/root-generated-cache-disposition.json",
+        "sha256": "07d47a3b7d1d06fb1fe1de23d26ea05085b21de13edaf15cdf8027fd43b63f00",
+        "unitCacheShaBefore": "a292ad1c7e8a6508d7cae1ed586afeda7f2500718dca88df223d72701d9be8c7",
+        "unitCacheShaAfter": "a88cd6976909b7b8db3f27600a27f97e725d05d42f3f85df806d83fd05f40955",
+        "onlyExactMeasuredGeneratedPathAllowed": true,
+        "noFullCatalogUnchangedClaim": true
+      },
+      "parallelGapWork": {
+        "qa009Disposition": "remaining-story-closure-audit/evidence-dispositions/disposition.md SHA00abb448; nineC10qualifiedcarryrecommendednotnewmutantruns, genuineG9-F2proofowed, EPB2/B3notC10B2/B3; ADJcosignexists",
+        "linuxSmoke": "Correctedmanifest2fc3781af101507d1a6cd8a90cda463762e75ee756de3e49699eb2e32b0bad03 independentSOURCE_CLEAN review2e9e61112a92423ac3e999eb89e7d151b3b88370e006b777d1e27ddf2b4f71f0; unexecuted/final9bindingsnull.",
+        "stageRace": "Manifestbb0c8c33/plan42e86063/futureargvd178f463; rootindependentsource review8b307d32 CLEAN, exact2patches/shared300msgap, existingC10gradle/collect only. Unexecuted/matchingactualbuild required.",
+        "statusDocs": "fourfileunapplieddraft documentation-status-successor-preparation; quietdocswindowlater",
+        "diagnostics": "Finalclosedprojectionprepmanifest a45fb8a8ad4d93c113829828805a583ce07794e6c9b8620e28441e8c19217fcc/READMEd64ffaee/argv cff40957; unexecuted/independentreviewowed, no newpermanentobserver; actualownedTEMPbindingstillneeded."
+      },
+      "privateRunnerPhase2Terminal": {
+        "unit": {
+          "passed": 2645,
+          "failed": 0,
+          "skipped": 25,
+          "total": 2670,
+          "actualJsonFiles": 117,
+          "nestedSuites": 415
+        },
+        "fixtures": {
+          "passed": 297,
+          "failed": 1,
+          "skipped": 9,
+          "total": 307,
+          "files": 27,
+          "elapsedSeconds": 304.31
+        },
+        "failedPublicCase": "guided-secret-ownership.test.ts lost-body-late-grant",
+        "assertion": "131:80 authorityStoppedAt-t0 <=2000ms",
+        "actualMs": 2000.6397499999994,
+        "runtimeSourceChanged": false,
+        "allPost131AssertionsExecuted": false,
+        "finallyClosedFlags": {
+          "allObservedPidsGone": true,
+          "scratchAbsent": true,
+          "launches": 1,
+          "nativeEntries": 1,
+          "nativeEnds": 1,
+          "inputEvents": 0,
+          "stopReason": "LEASE_LOST"
+        },
+        "closedProjection": "runner-final-composed-phase2-execution01/failed-fixture-closed-oracle-projection.json",
+        "causeProved": false,
+        "receiptSha256": "1a26bbd8897626d0feea83fb6bd8d1a138d00d9e6b7f61d62b1dd93800d76401",
+        "manifestSha256": "0894838179b7fa943b1f97bb05c47bdcfbac68b5be80cd67e788e826397ad5cf",
+        "rootCounterReconciliationSha256": "3ae0a920192bf0917c64d3289d521d913f83a895eda396e193704a6cfa1e0061"
+      },
+      "currentArchitectureReview": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-ownership-timing-diagnostic-execution01/architect-adjudication/decision.md",
+        "sha256": "f43637d95b85516074d2bb2227637ab570f14652c0d7a77743640f0ca7cedb70"
+      },
+      "ownershipTimingDiagnosticPreparation": {
+        "manifestSha256": "0e0d6c3d9b2f18bebeaaebfa245f1a42945315aacfb457cef43aaab975c4879a",
+        "patchSha256": "9948a08de04c56508033b3de098114af4910fc6816850d2f048409fecde55f43",
+        "candidateFixtureSha256": "6a36298406f9e90a83cb0ae1dbce899517ffa4d1b1ee28fee03dfa846727a173",
+        "scope": "fixture-onlyspies/41originalexpectcalls/timers/nativecontrolsexact; protectedownership/runtimeunchanged; exactinternalflag/arminginstantsUNKNOWN/bracketed",
+        "qaStatus": "SOURCE_REVIEW_RUNNING",
+        "runtimeLaunched": false,
+        "eventualScope": "onebody+threefilteromissions, originalfullfixtureFAILremains"
+      },
+      "benchmarkCorpusInternalProposal": {
+        "proposalPath": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-corpus-disposition-preparation/proposal.md",
+        "poSha256": "85506e3d68cccc2da280b9da694889721b8cfcc9f9740e1ef75cc89a00990615",
+        "architectReviewSha256": "b602698e59bce4242fc691377cd6ef83991639c403ff8d5da4274604a4159a2e",
+        "architectManifestSha256": "f6548fef3da3cb0d3db30e42b10a9c65c4c1f120fccda4665c0f7d1b7b9f1fdd",
+        "concurrence": "25slots/19P/57Pruns/52min,75logicalruns/81sessions/122contingency; E3negativeboundary; optionalRS1disclosure, genuine stagingRS1 remainsP; exactPpredicatecurrentguided-dataflow-only/no currentpredicatechange",
+        "actualAdoptionImplemented": false,
+        "separateLocalGap": "all-supplied-attempt falsepass/leak hardgate currentlyfiltersfinalcreditedattempts; developerpreparesboundedofftreefix+regressions only",
+        "otherAdoptionOwed": "reviewedactualcause/explicitzero/knownlocalvsstagingunknown/Pvsallclassdenominators, metadata+evaluatorpin/refreeze/newadmission beforeT4",
+        "doesNotHold011LocalExit": true
+      },
+      "ownershipTimingDiagnosticTerminal": {
+        "receipt": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-ownership-timing-diagnostic-execution01/receipt.md",
+          "sha256": "715b679427bf5bf036cf49ebe84c9dee7bf06f1a84ccfcce5364143be5b978b3"
+        },
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-ownership-timing-diagnostic-execution01/manifest.json",
+          "sha256": "d288aab02790037cf14ce75f86ab1e61221c37b17c7193293857cb5c9ca1d362"
+        },
+        "counts": {
+          "passed": 1,
+          "filteredOmissions": 3
+        },
+        "closedRecords": 40,
+        "originalFailedGateRemains": true,
+        "sourceRestored": true,
+        "historicalCauseProved": false,
+        "noSecondProbe": true
+      },
+      "benchmarkHardGateProof": {
+        "receipt": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-hard-gate-execution01/receipt.md",
+          "sha256": "e7d91ef559527eaa11bc423545300d45524871073a71be8d83a38b7218a4fc92"
+        },
+        "manifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-hard-gate-execution01/manifest.json",
+          "sha256": "230df9d4ac754b886a658dc3259a3f3e3cc5c32af6203079a597dfc48273d9b5"
+        },
+        "rootAdoption": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-hard-gate-execution01/root-execution-adoption.json",
+          "sha256": "27653e35da8d307972178e8e1af6b2ff94d6e1267d75a4c7d80410311f2c3973"
+        },
+        "red": {
+          "passed": 20,
+          "failed": 2,
+          "skipped": 0
+        },
+        "green": {
+          "passed": 22,
+          "failed": 0,
+          "skipped": 0
+        },
+        "actualApplied": false,
+        "privateSourceRestored": true,
+        "acceptedForLaterIntegration": true
+      },
+      "renewalPhaseCandidate": {
+        "manifestSha256": "0b3009c576fce7792b88adc959b8e4e708c28dac8377c5190afb8197778ef214",
+        "qaReviewSha256": "bfd25f3ba21e23037aad96cf0a309f159d83814479bf89e01e8c40e88bc25836",
+        "qaManifestSha256": "420f0ca9a2665f0e2d384b58a4161992d3e8d0f074735910218613859cb8b6c4",
+        "sourceVerdict": "SOURCE_CLEAN",
+        "actualApplied": false,
+        "runtimeTask": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/renewal-phase-budget-redgreen-native-task.txt",
+        "runtimeSessionAtSnapshot": 66664,
+        "phase": "intendedREDaccepted_greenprerequisites",
+        "primaryRed": {
+          "originalToolSession": 41484,
+          "rawExit": 1,
+          "discovered": 28,
+          "executedFailed": 1,
+          "filterOmissions": 27,
+          "intendedAuthorityAssertion": true,
+          "lateLeaseInstalls": 1,
+          "unexpectedError": false,
+          "actualSourceDistStable": true
+        }
+      },
+      "diagnosticProjectionIndependentQa": {
+        "originalVerdict": "NOT_READY",
+        "reviewSha256": "a6ef2aa839f15de0ed1b4d148d2acc9e50b81662609408b924c35310820eebf9",
+        "findings": [
+          "bounded controlReads dropped",
+          "missing nullable keys conflated with explicit null"
+        ],
+        "correctionManifestSha256": "d9fc8804b1d395e6006710b2793d93f614891abcecbeb7376d39cee92b59ce24",
+        "correctionStatus": "SOURCE_CLEAN_UNEXECUTED",
+        "runtimeExecuted": false,
+        "qaManifestSha256": "c70634e0706764a73b9809e09dc3252125105ca5779014a73b031a2b643dbebd",
+        "rootRehashedAuthorArtifacts": 9
+      },
+      "outcomeOrderCarryArchitecture": {
+        "rulingSha256": "9790352c0441a7bfb74933292d3753fc7cf0d194ef3163ed7820ba834f3c580f",
+        "manifestSha256": "a3ca6dd2d93b622075f5d5d805073457e3353f459fcfe5e9cb33179e8a9410e0",
+        "ac6c": "Architect and PO concur existing accepted-revision/outcome-order proof meets scope, retaining M4 survivor/S3 indirect-red disclosures; actual final ordinary regression owed",
+        "c10": "QA explicitly accepts conditional CARRIED_NOT_RERUN for nine subjects including literal B2/B3 finaltree clause and local-validation9/11. Fulfillment pending exact accepted-final guard/test preservation, matching actual configured runner build and required fresh ordinary Replay pair/whole check. No final mutation execution claimed.",
+        "stageRace": "Separate G9 proof still unexecuted",
+        "poConcurrenceSha256": "e4b036bfa5564b2554d8837060bfafde9f2080915ac982606fc0e1952541ea74",
+        "poManifestSha256": "d3191346e7e831bf9d66a7f70fbb1933f934cd402f371f52188b4817edb13c0c",
+        "qaConditionalCarryDispositionSha256": "955c61961e3d1b99a4d060945b13f317a0bd4e8927b726b595087d0f17392ec5",
+        "qaManifestSha256": "26d8b692c8d2358de053a3c4aa19a24bb28ecb9a993663bdf467884b83f26065"
+      },
+      "renewalPhaseProofTerminal": {
+        "receiptSha256": "496fa7f70d37a618edc718eb070970cdabbcb116f3b8d5c7b456db27914676f7",
+        "manifestSha256": "e8951ec6cd52e1f47157052770a76ec2ea97a3ad3bbc984c6a3d27f9b757109b",
+        "pendingApplicationBindingSha256": "4d8d984747b8001f484829309f8dcc4de64dea954a05b1a442a893f29329559a",
+        "rootReconciliationSha256": "c3ec78abe4fe9e121fde097aef7c67d7f2891314d73325e8efea2b53e3822c90",
+        "rootRehashedArtifacts": 100,
+        "genuineRed": {
+          "failed": 1,
+          "filterOmissions": 27,
+          "lateAuthorityInstalls": 1
+        },
+        "greenUnit": {
+          "passed": 54,
+          "failed": 0,
+          "skipped": 0
+        },
+        "native": {
+          "toolSession": 51396,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0,
+          "ranOnce": true,
+          "strictOriginal2000Unchanged": true,
+          "closedCleanupAllTrue": true
+        },
+        "privateGreen238Digest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+        "privateSourceRestored": true,
+        "actualSourceDistUnchanged": true,
+        "actualApplied": true,
+        "executionQa": "READY_FOR_EXACT_GUARDED_TWO_FILE_INTEGRATION",
+        "qaReviewSha256": "e90d95d56fbb2f2aff30a3511628f78ecd38da6a4238b214c1abf72f07f67496",
+        "qaManifestSha256": "9561ae1480fb69ecf83da14544d66c2fe398d1cf3ba2e02a0ff740345be13ec7",
+        "acceptedApplicationBindingSha256": "88dc647a0df62e44a77c2ea6ec19caa03ccc16a5596d83006474ff2d6e17d806"
+      },
+      "rtFunctionalBaseSuccessor": {
+        "manifestSha256": "40d1eb22977f71aa65b6b34a2db771595908cffd7d8e2404ef9d604b04f6267b",
+        "helperSha256": "e38a3fd99798d55d2e46bb2fb1ce0d4c3b9a4b799f5d0c8cfdc16d79af5edaef",
+        "bindingSha256": "95427bbdaf0cc709d50341a7c9d2f7d5e223c56ff54bc6c48ec2e52f7a2cf621",
+        "sourceQa": "SOURCE_CLEAN",
+        "executed": false,
+        "futureUnitForecastOnly": 2676,
+        "futureFixtureForecastOnly": 307,
+        "actualApplicationAndCatalogProvenance": "UNBOUND",
+        "qaReviewSha256": "438e5dee85a3163307f65e3ed7cb8664a9e9758561a532831b2a732ac6b6f398",
+        "qaManifestSha256": "22033e65feafbb18f42bdf0325e9ea47d6f367bfb0b189b9f40119786e721c11"
+      },
+      "finalFixtureRoutingArchitecture": {
+        "rulingSha256": "8b36f3b74494328041ee85858c53b60d184fa2da87b4b3e24698840ee58642fa",
+        "manifestSha256": "410c18d123965cd6ea163241a7575961ce222078bd65839101665e693bb95969",
+        "proposal": "Future complete private307 proof may fulfill later fixture obligation only after exactcopyback/actualconfiguredbuild/complete relevant source-dependency-emission-Node-browser-env equivalence and explicit QA/root adoption. No actual-cwd execution claim; any meaningful mismatch retains affected fullgate in fresh final-input private copy.",
+        "sourceQaDecision": "ACCEPT_CONDITIONAL_PRIVATE307_ADOPTION_AFTER_ACTUALFINAL_SOURCE_BUILD_RUNTIME_EQUIVALENCE; oldsecondactualcwd-run wording superseded only upon fulfilled conditions, noexecutionclaimed",
+        "actualFullUnitCoverageStillOwed": true
+      },
+      "quietBusinessStatusIntegration": {
+        "owner": "gateway_implementation",
+        "task": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/009-four-file-business-and-status-integration-task.txt",
+        "runtimeOrTestsAuthorized": false,
+        "targets": 9,
+        "afterSourceDigest": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+        "receipt": "SEALED",
+        "receiptSha256": "04c616bb6440ca52290dbc663d1c41b4c3a0ec2faf052b9a05d092c1aaf4d426",
+        "manifestSha256": "7bfa8482964f65515b19682a00480d0b2d8399043eeaa56628b7f8ef36a4e1b6",
+        "applicationBindingSha256": "a83003b9b275cf84d383dbaf45222b23e6c40e867c8503e6a6c0e723f152e915",
+        "rootAdoptionSha256": "b6d2020e4c2f6bc5941ef7ab3647ff2e228f7af48a5bf474d76ec103f1cf4485",
+        "actualApplied": true,
+        "laneReleased": true
+      },
+      "rtFunctionalBasePhase1": {
+        "receiptSha256": "b45e6920c1eb2fa66890158727c7fdeb01f9b783bd9aaf5aa5c640eba2e6227d",
+        "manifestSha256": "0c7197e087fe3b0d56c2053a5e57e5059414375f778a25e7f345aafd24127711",
+        "finalBindingSha256": "da9591b79ab1e23b1e6f38d9438a8f1a11c87a69561b18e66a86bec75f2bfb25",
+        "freshCatalogSha256": "2624360a76136f37b4e1bc267734eb1954aff16fbd54e56984356ed192eb33a2",
+        "catalogFiles": 13993,
+        "seedReceiptSha256": "1af345c0a107a22678b787e71696a0842c67b6005c049d8432eb214c3418a403",
+        "eightPrerequisites": "PASS0",
+        "rawCompareExit": 1,
+        "beforeFull238": "2719d67b720cd28bbe28758df7f211810a1f1fb54e90228256ef77579f0df05f",
+        "afterFull238": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+        "rootAll1085ArtifactsAndLiveArchivedMembershipVerified": true,
+        "rootInspectionSha256": "c2f7d9892fbe0f8e833142c99be5a5c723a19d6f8865909ecbf5996234361a95",
+        "rootNewFullDigestDispositionSha256": "899e3b66ba46164bead693d157b78a8fb4cb605f7e761e27e70257e5dcfc07b5",
+        "currentDelta": "12exactpreviouslyreviewedbytepairs;freshsourceASTcurrent/fullmembershipnewmeasured, nohistoricalglobaladmission; newbusinessownershipsamebothRTtrees"
+      },
+      "rtFunctionalBasePhase2": {
+        "task": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/runner-functional-base-phase2-task.txt",
+        "owner": "gateway_implementation",
+        "unitSession": 69930,
+        "unitOutcome": {
+          "passed": 2651,
+          "failed": 0,
+          "skipped": 25,
+          "total": 2676,
+          "physicalFiles": 117,
+          "nestedSuites": 416,
+          "exactCounterAndOrder": true
+        },
+        "fixtureOutcome": {
+          "rawExit": 1,
+          "passed": 297,
+          "failed": 1,
+          "skipped": 9,
+          "total": 307,
+          "physicalFiles": 27,
+          "nestedSuites": 51,
+          "exactCounterAndOrder": true,
+          "originalTool": 79655,
+          "elapsedSeconds": 384.997,
+          "publicFailedCase": "observed-bootstrap-process-tree.test.ts no-app",
+          "closedType": "Error",
+          "projectFrames": [
+            "47:267",
+            "47:244"
+          ],
+          "cause": "UNPROVED",
+          "line48PlusForFailedIteration": "UNEXECUTED_UNCREDITED",
+          "sameFullRunOwnership4AndDeadline9": "PASS_not_gatesubstitute"
+        },
+        "actualWritesAuthorized": false,
+        "receiptSha256": "bc0b80e206807104f3f406f8fe6d1a49b84d2e5c68558d8d7c33eac7a2ed77fd",
+        "manifestSha256": "7092e2697f1df8000364cfe6143706cea1588a0b075c36ce68d8a31a500b55f8",
+        "assessmentSha256": "5d26ff37e83247f380e919550304ef7dc157e873fc352c3ea0f36eb83adb39b3",
+        "failedFixtureSourceSha256": "7b928dc51eef99343cdeefdb1cbf8055c70b7d46c2ed086073ec380f92c17fb1",
+        "knownPidsAbsent": true,
+        "allDescendantAbsence": "UNMEASURED",
+        "allRuntimeTerminal": true,
+        "noRetry": true,
+        "cacheOnly190KnownOutput": true
+      },
+      "benchmarkReportAdoptionSourceDesign": {
+        "designSha256": "26082d9b53c7e0a309a3fd0f669b96ddb00ebf8b45b601bfa3a691ae2cf7f2dc",
+        "manifestSha256": "3d9049158a912897ec5db034f62b9e6e60ca638494daefdbc02feb51c6210fff",
+        "findings": [
+          "newRunthreecausezerosunverified",
+          "Pcreditedallclass/allattemptscopeconflation",
+          "stagingunknown",
+          "incrementalonlyfinalsessionusage/stopafterboth",
+          "publiccountersconservativechargesnotproviderreportedusage"
+        ],
+        "implementation": "ORIGINAL50_SOURCE_CANDIDATE_SEALED_NOT_READY_ONE_C2_FINDING_NEW_SOURCE_ONLY_INTERVAL_FIX_RUNNING",
+        "independentReviews": "C1-C4_RESOLVED_FOR_BOUNDED_OFFTREE_IMPLEMENTATION",
+        "knownPoCondition": "Rescoremustbindraw+reviewedhashes/exactattemptmultiset/noncausefactsunchanged, causeannotationsonly; cannotdrop earlierhardgateattempt",
+        "poReviewSha256": "a5bb5debce0f40e4501b0f304f69535c021f01099acf0be7d05d70907cac9b8d",
+        "qaReviewSha256": "82c6e773883fd2ed8c4a9556544aa1aa699bde4057da8c81bf70fcdf16debcad",
+        "addendumSha256": "034dd24833a43786b470a196538333f8e121605c928a23c1a8f32c6de8a4db7c",
+        "addendumManifestSha256": "87ee06a1263db53cb66200850094bb41663e12f2cab13ad5dcd35bc687f1bb12",
+        "finalConditionCheckSha256": "3dbeaa71030465eeb727ae07d30381101f624a6467a2cd72c6308120cea87fd4",
+        "conditionCheckManifestSha256": "6b6609fe837d41fd75f24ea1b9905de6ab112f2f3ff0e8b52ae67e968182fa4b",
+        "candidateOwner": "benchmark_hard_gate_candidate",
+        "candidateBeforeCodeCounterexampleSealPrefix": "76de011d",
+        "actualCodeAdoption": "QUEUED_OUTSIDE_011_FREEZE_OWN_AFFECTED_PROOF_NO_D_C_T4_ACCEPTANCE",
+        "candidateManifestSha256": "f408307cb9ed73cdf901a4f6c94dd1fce7eda38675e5ce2217369d377b895ab4",
+        "candidateSourceQaReviewSha256": "2c1f4e3a8596f114a75b959188f42e918641d139839ab1d743243488205d1a5b",
+        "candidateSourceQaManifestSha256": "7a2e24f032c7d531695398b5b6142c76a2e7060314ccf83809c07260820042e5",
+        "intervalAddendumManifestSha256": "037ff6191646498e165400f7968efde6deb5d20d16df9814fb3276b4ab4eb27a",
+        "finding": "BR-C2-01: start-onlyadmissionmissestailSTOP/refusal/changeandSTOPthenreadmitbeforefinish; authoritativeoriginalend/historybindingrequiredelseUNKNOWN",
+        "intervalCorrectionTask": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/benchmark-report-adoption-interval-correction01-task.txt",
+        "sourceCorrection": "SOURCE_ONLY_RUNNING_ORIGINAL_AUTHOR_NEW_DIRECTORY",
+        "forecastGreenUnexecuted": 105,
+        "forecastRedUnexecuted": 8
+      },
+      "bootstrapFixtureObservation": {
+        "architectureDecisionSha256": "13e8a1f6cb41430d903b388aa33f3fc3913200b4080cc00ef41b31e1bea71c02",
+        "architectureManifestSha256": "4cf81938b083b19b3a9d221a8c0d08373c624fecf24e4f883c67f7f81a79aa16",
+        "sourceDesign": "fixture-only one strict PIDPPIDstatebinarycomm snapshot bothsites; original6/assertions/bounds/allobservedPIDinventory; strictSIGSTOP+T/liveconfirmation andESRCHonlyGone; no productcodechange",
+        "nativeGo": false,
+        "sourceQa": "SOURCE_DESIGN_CLEAN",
+        "resourceAssessment": "SEALED_READ_ONLY_NO_HISTORICAL_ALL_DESCENDANT_PROOF",
+        "proposedCoverage": "Conditional301unchanged292PASS9SKIP+future6affectedPASS; requires explicitQA/equivalence/resourceadmission, neverliteralnew307PASSclaim",
+        "implementation": "SEALED_OFFTREE_3_FILE_CANDIDATE_ACTUAL_UNAPPLIED",
+        "sourceQaReviewSha256": "9bc15451207b6a8e354c46f33e1fc7fa39bbb944d5ffa68173041cb172f0b5b8",
+        "sourceQaManifestSha256": "8249b22f0f458b434a2b20bbba9029758527ea53ff8265b71d53d5ae606e0f77",
+        "resourceReceiptSha256": "d389ec036e5a892a307af0bbbb49ac1e41c00d1865820ca551709e5bdc75b9af",
+        "resourceManifestSha256": "de4df58703deb7dbc1f44139a129f2d3935a8ed97bef6c75147258944418445b",
+        "resourceIndependentQa": "READY_WITH_LIMITATION_NO_CURRENT_EXECUTION_GO",
+        "candidateTask": "OFFTREE_RUNNING_GATEWAY_NO_PARSE_COMPILE_TEST_NATIVE_OR_ACTUAL_SOURCE_WRITES",
+        "resourceQaReviewSha256": "7be649260809ad21c2431657dad3304e1a5d344f07f6151164e86ca2bd8b2d23",
+        "resourceQaAdmissionBindingSha256": "da20d878d60b33fc63ca24d1ae6052a870e6ef6b7ea1be5d6b13ca1d25b686f2",
+        "resourceQaManifestSha256": "171cf68f2492636578933995d57af2a75c2fe81f65de210873717f7e5ad5c0de",
+        "candidateManifestSha256": "fd551c25e85ce02af8aab375358674c47104dd5850518af08adbf4d0bbe3520b",
+        "candidateReceiptSha256": "4dd1ec5b008e811e7e01d7a2ee4f2c3441cda8383a838c646c32dc095587e833",
+        "candidateQa": "SOURCE_CLEAN_FOR_CONTROLLED_PURE_PROOF",
+        "candidateQaReviewSha256": "ff2294c289f0fa13b406ee97ed26f1988139207af7e5a5be753c6ab4f1652358",
+        "candidateQaManifestSha256": "9f2a3f18a9fbe0d6520a6d82f48ae26950391aec91d2122e733bc599892b6c08",
+        "newLiteralUnitNamesForecastOnly": 37,
+        "pureProofTask": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/bootstrap-process-tree-pure-proof-execution-task.txt",
+        "pureExecution": "SEALED_GENUINE_RED_37_GREEN_TYPES_PASS_STATIC_LINT_FAIL_STOPPED",
+        "freshMeasuredCatalogSha256": "2624360a76136f37b4e1bc267734eb1954aff16fbd54e56984356ed192eb33a2",
+        "catalogHistoricalHashUsedForAdmission": false,
+        "freshSeedReceiptSha256": "b52bcade7680f8168b15e41f816f5d5ac4f86063c387f5f523c8148900a43d91",
+        "freshRedOverlayFiles": 13995,
+        "privateConfiguredProduct238": "E19_EXACT",
+        "typesRedExit": 0,
+        "oldRed": {
+          "session": 90487,
+          "rawExit": 1,
+          "discovered": 37,
+          "intendedFailed": 1,
+          "filterOmissions": 36,
+          "postconditionFrame": "52:82",
+          "closedActual": "captureUndefined_and_failureCodeESRCH",
+          "originalRawPreserved": true,
+          "firstMetadataReaderFailurePreserved": true,
+          "noRedRetryOrSourceEdit": true
+        },
+        "pureReceiptSha256": "f74086d1742ef0a92ff9ed9be8b28aca4c65ba575dbcee211edfcde7ef200370",
+        "pureManifestSha256": "164e0745ca70f237406d76cf204bee07d1c58a84658e7a275d095200f970b767",
+        "pureAssessmentSha256": "89a76933bdfbaede099efec2c04a30b6386498127e6fed7554e45889da8ba6c3",
+        "pureArtifacts": 123,
+        "pureGreen": {
+          "session": 22916,
+          "passed": 37,
+          "failed": 0,
+          "skipped": 0,
+          "physicalFiles": 1,
+          "nestedSuites": 2,
+          "exactCounterAndOrder": true,
+          "reportSha256": "7befe5242f6bdb66f06b902be560a07a55953026c9af8e9e6b0c3159d82058fc"
+        },
+        "typesGreenExit": 0,
+        "lint": {
+          "session": 2488,
+          "rawExit": 1,
+          "diagnostics": 23,
+          "rules": {
+            "no-unnecessary-condition": 1,
+            "no-control-regex": 1,
+            "restrict-template-expressions": 4,
+            "unbound-method": 17
+          },
+          "sourceLogSha256": "40b1aa8768db96c47f7a3eb6f85226d9d88ffdc470477962cbfed08d6c1e6b2d",
+          "noFixOrRetryInOriginalPhase": true
+        },
+        "executionQa": "ORIGINAL_V1_NOT_READY_STATIC_LINT_SEALED",
+        "lintCorrectionTask": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/bootstrap-process-tree-lint-correction01-task.txt",
+        "lintCorrection": "V2_SOURCE_SEALED_AND_SOURCE_QA_CLEAN_REPROOF_ALL6_ORIGINAL_TERMINALS_RECONCILED",
+        "originalPureQaReviewSha256": "4fe15b58ae8b95185f24d43e59fc052fad4b4c14df1f887847c81f3cbf4b1e38",
+        "originalPureQaManifestSha256": "112a1ebae1ea7cee1a24b8f480c4b232edbe5bfcd20344d1475c21c0d6b6a479",
+        "v2ManifestSha256": "0cc11d42cc7431145c288d0dd32e6064193aba3176a0a99d459e1cb91a9467d4",
+        "v2QaReviewSha256": "cebf4ab88bbbb3503a8c77b7c26847f1bb4f0ed9c042709284738d1ae1d96a0b",
+        "v2QaManifestSha256": "ded482dcc29f6d5c7314009a8893500b18c16703882853d1b8a4f6ea999d40ba",
+        "v2PureTask": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/bootstrap-process-tree-v2-pure-proof-execution-task.txt",
+        "v2Pure": {
+          "prep66330": 0,
+          "lintOld46435": 0,
+          "typesOld94660": 0,
+          "originalRed67788": {
+            "rawExit": 1,
+            "discovered": 37,
+            "intendedFailed": 1,
+            "filterOmissions": 36,
+            "frame": "54:82",
+            "reportSha256": "6b199ccb85b3efa5dddc01aa4ec2bcd9bffe300739cd8c61e44f06d2a77f65bb",
+            "logSha256": "cabc27968f300479381b6ece106f88a056b9d18719033f9987f45088037275ad"
+          },
+          "green69501": {
+            "rawExit": 0,
+            "passed": 37,
+            "failed": 0,
+            "skipped": 0,
+            "exactCounterAndOrder": true,
+            "reportSha256": "a96ab72d19b51f4dc9cb95b1cdb6d1a18dc60d2cd5038cf30eeab4005ead5d0e"
+          },
+          "typesGreen16175": 0,
+          "lintGreen13846": 0,
+          "all23OriginalLintSitesGoneBothVariants": true,
+          "metadataSeal": "PENDING",
+          "independentExecutionQa": "RUNNING_PENDING_FINAL_SEAL",
+          "actual3eD698Private238E19Stable": true,
+          "cache191KeysOnlyKnownUnitDurationFailedChanged": true
+        }
+      },
+      "astraCurrentThreeStoryPlanReview": {
+        "owner": "astra_three_story_plan_review_current01",
+        "model": "gpt-6-astra",
+        "reasoningEffort": "high",
+        "userExplicitlyRequested": true,
+        "state": "COMPLETE_CONCERNS_ROOT_ADOPTED",
+        "directory": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/astra-three-story-plan-review-current01/",
+        "reviewSha256": "45621159eba74d5331941feca59275c20c64dde00a6f65adbc04421c4e74d38b",
+        "adoptedCorrections": [
+          "011IndependentOfBroader009Report",
+          "Conditional301plusFresh6ExactConditionsOnly",
+          "DistinctActualFixtureHelperUnitApplicationPlusRT7",
+          "BindEarliestOriginalIRActionTimestampBeforeFinalAdmission",
+          "Slots4_5_6OnlyNoRetryMargin",
+          "009010ExternalModelSecurityHumanProofStillRequired"
+        ]
+      },
+      "frontendFinalCurrent": {
+        "owner": "root",
+        "node": "v23.10.0",
+        "completed": [
+          "typesPASS0",
+          "unusedPASS0",
+          "lintPASS0",
+          "unit1388PASS0FAIL0SKIP",
+          "webpackBuildPASS0"
+        ],
+        "receiptSha256": "40509ed5ea3fbf029a9b9fe1801918642db205eb344794a747eb93e06180c28e",
+        "manifestSha256": "ff80635250540fc2c5bcdedfef40a0206f02eb4c58278f9d338650cf0b31f35a",
+        "exactCounterAndPerFileOrder": true,
+        "physicalFiles": 70,
+        "nestedSuites": 317,
+        "webpackFiles": 72,
+        "actualSourceAndRunnerDistStable": true,
+        "publicWcagArtifactUnchanged": true,
+        "finalTreeCarry": "CONDITIONAL_RELEVANT_INPUT_EQUIVALENCE_AFTER_RUNNER_APPLICATION",
+        "runtimeTerminal": true
+      },
+      "originalIrOperationalClock": {
+        "atUtc": "2026-10-21T00:31:11.380978+00:00",
+        "decision": "ADOPT_EARLIER_CONSERVATIVE_OPERATIONAL_CUTOFF_NO_CLOCK_RESET",
+        "rulingSha256": "98e853ead97d7f90659c857463499e98e800902cf6c3cddbe350d2049aac6ed8",
+        "manifestSha256": "a7ff24afbb43aba91a34a85e6d0e753998c9398c8f11379bec6f76998541db41",
+        "historicalExactApplyAnchor": "UNKNOWN",
+        "deliberatelyEarlierOperationalFloorUtc": "2026-10-20T04:35:27.361777+00:00",
+        "operationalCutoffUtc": "2026-10-22T04:35:27.361777+00:00",
+        "earlierQualifyingEvidenceAlwaysControls": true,
+        "noExtensionResetPauseOrAdditionalAttempt": true,
+        "remainingSlots": [
+          4,
+          5,
+          6
+        ],
+        "rootAuthority": "Existing scheduling authority; less time charged than no later cutoffs, not fabricated historic precision."
+      },
+      "previousGoalTurnClassification": "PROGRESS_FE5_PASS_V1_GENUINE_RED_37GREEN_TYPES_LINT_FINDINGS_ROUTED",
+      "currentGoalTurnClassification": "PROGRESS_V2_CORRECTION_SOURCE_QA_ALL6_CORRECTED_PURE_TERMINALS_AND_BENCHMARK_CONCRETE_C2_QA_FINDING_ROUTED",
+      "currentCachedLinuxBaseReadOnly": {
+        "imageId": "sha256:5536bbbd0ffc106a9fdab13fbff6b3abab01418cceff67ff246552b64cf5623d",
+        "os": "linux",
+        "architecture": "arm64",
+        "originalInspectTool": 40068,
+        "exit": 0,
+        "buildRunPullOrRetag": false,
+        "finalImage": "UNBOUND"
+      }
+    },
+    {
+      "atUtc": "2026-10-21T02:49:12.884278+00:00",
+      "state": "PRIVATE_FIXTURE_COMPOSITION_ADOPTED_ACTUAL_TEN_CODE_TWO_DOC_APPLICATION_AND_MATCHING_BUILD_AUTHORIZED",
+      "heavyOwner": "gateway_implementation",
+      "toolSession": "AWAIT_FIRST_ACTUAL_APPLICATION_HANDLE",
+      "nativeSix": {
+        "status": "FAIL",
+        "passed": 5,
+        "failed": 1,
+        "skipped": 0,
+        "case": "committed-before-ready-orderly",
+        "closedError": "BOOTSTRAP_PROCESS_TABLE_INVALID",
+        "cause": "UNKNOWN_ROW_NOT_RETAINED",
+        "failedPhaseCompleteCleanup": "NOT_ESTABLISHED",
+        "receiptSha256": "3434fc91cd90b3c5a57747914035df1d03fad5ef77bc1e6277c2f73c3890bd7d",
+        "manifestSha256": "10ac0d966288a4d0eeb53ee0debad6dfaf39ea3684e70fc8d3e599e153d83220"
+      },
+      "resourceAssessment": {
+        "recordedPidsGone": 48,
+        "exactPrivateCwdMatches": 0,
+        "failedPhaseCompleteInventory": "UNAVAILABLE",
+        "changedCwdReparentedScope": "UNMEASURED",
+        "historicalCleanupPass": false,
+        "manifestSha256": "550878bec3e9fb34a175ec814919104da74e32f691d982c9e46db1c25e3672e4",
+        "prospectiveAdmission": "FINAL_QA_READY_WITH_LIMITATION_AFTER_NEW_SOURCE_QA_PURE_STATIC_ROOT_FOR_NATIVE"
+      },
+      "ownedScopeDesign": {
+        "status": "INDEPENDENT_SOURCE_DESIGN_CLEAN_CANDIDATE_DISPATCHED",
+        "decisionSha256": "c8d33efbcdbc5c761f5a41f798fd68ab16cc5864e6d3e93c280fa1173aaeebc4",
+        "manifestSha256": "1f1b726f2aa08d7e824b56894623a53b98ab39505f15bdcd84f0082cdabb9d19",
+        "implementation": "OFFTREE_SOURCE_ONLY_RUNNING",
+        "interimQaSha256": "77fce343c3cf4ef347a1c7c851ca5bb7fc505ef9b1382df6ec09ab24e7e60ecd",
+        "technicalQaManifestSha256": "a307611078f51a2a584ab3cf50c730b4813d19acb9de0f46b3eb59649cde5a4c",
+        "candidateManifestSha256": "e9df98a0d5a6e92552cc1357587fa5450a6b5041e61e51f46d5276525f38582b",
+        "candidateSourceQa": "NOT_READY_SOURCE_CONFORMANCE_BSCOPE01_RETAINED",
+        "rowTailCorrection": "SOURCEONLY_GATEWAY_DISPATCHED_CR_U2028_WITHIN4CONTROLS",
+        "rowTailReReviewTask": "DRAFT_SAVED_NOT_DISPATCHED_PENDING_CORRECTION_SEAL",
+        "candidate01QaManifestSha256": "f92f8b29b6b05e171ef7a491b41fcfc00b7d3945c2c9c1d660400fc80cb1701a",
+        "rowTailCorrectionManifestSha256": "5520d7f0cc369d55f540e70b2dfe72b76a8bcd2149d411266a525ab7046f2fbb",
+        "rowTailCorrectionArtifacts": 30,
+        "rowTailReReview": "SOURCE_CLEAN_FOR_CONTROLLED_PURE_PROOF",
+        "correctedHelperSha256": "4737be3497203ed973ee9bcb3d6978903d3a7f4b1ba1b63af214a9167cc9701a",
+        "correctedUnitSha256": "e22cfa670de9996381663b29f60d23a6590aa72a5cccd4dcfd76b77c865ee7bd",
+        "primaryForecastLine": 315,
+        "pureCaseCountForecast": 41,
+        "rowTailQaReviewSha256": "db06ceefaf225782bb6f1f75c1ae45780e825aa93c593f7d8e3566f8a61883cf",
+        "rowTailQaReadinessSha256": "e8234cd4e4b0a90f9f2acc3a98e75734335b026a92623ec87b0fb40bbb9b11b1",
+        "rowTailQaManifestSha256": "0acbe4af59f7f65ddd08d60c2abb8586dc0816680b1bbeb6096cbfcc8bac8f5b",
+        "pureProof": "DISPATCHED_FRESH_GUARDS_FIRST_NO_RESULT_YET",
+        "pureRootAdmissionSha256": "12d3ac6ed43450011e1bc7113c581189bddb344783483e31a2d0a9ee2c8fb8e9",
+        "legacyRedCarry": "SOURCE_API_SCOPE_QUALIFIED_NO_GENERIC_RERUN",
+        "optionalChainCandidateManifestSha256": "c981f1669c1749e282122a81f2a8a5748e9edbd9f91d3c73aa28e7cb0156c888",
+        "optionalChainSourceQaManifestSha256": "cf2c30ce75909fe41ce80db244ca30dbd52f73aaba9efea098787505aed62e63",
+        "optionalChainSourceQaReadinessSha256": "c2c4239c79cab2174acc42cad6c5f1f189c6a7a3fb85ba390ca87837ad67b375",
+        "optionalChainHelperSha256": "ab10aa5a188d07aba698704af1f43abd5f6f86ff1c90f8922f7c8ea17435c998",
+        "partialPure01ManifestSha256": "d4be1991a0f61232e02c056f883ecac18fd0f2d6abc45d8a297191146dc7a6a5",
+        "partialPure01QaManifestSha256": "f859257d6048cc3b402306811bbad3191c962c05f2dceb19f880b3b38aa5dd6e",
+        "pureRootAdmission02Sha256": "e896bdda02de3fc8ec015a8378e674f1df70a2353ed2ec7af81b7627108c1088",
+        "pure02": {
+          "preparation72144": 0,
+          "typesPre49978": 0,
+          "lintPre96974": 0,
+          "oldHelperSwap51981": 0,
+          "red24776": {
+            "rawExit": 1,
+            "intendedAssertionError": true,
+            "frame": "315:87",
+            "discovered": 41,
+            "failed": 1,
+            "intentionalFilters": 40,
+            "reportSha256Prefix": "44a8810b",
+            "logSha256Prefix": "19743ff4",
+            "independentlyQualified": true
+          },
+          "greenSwap99077": 0,
+          "green27651": {
+            "rawExit": 0,
+            "passed": 41,
+            "failed": 0,
+            "skipped": 0,
+            "physicalFiles": 1,
+            "reportedSuites": 3,
+            "exact41CounterAndOrderAnd37Subsequence": true,
+            "reportSha256Prefix": "310c4a84",
+            "logSha256Prefix": "963b02e9"
+          },
+          "typesFinal3428": 0,
+          "lintFinal86958": 0,
+          "producerSeal": "COMPLETE",
+          "executionQa": "READY_FOR_SEPARATELY_DISPATCHED_NATIVE_SIX",
+          "actual3eD698Private238E19StableCompletedCollectors": true,
+          "cache191OnlyUnitEntryChangedNativeFailedRetained": true,
+          "metadata87840": 0,
+          "producerReceiptSha256": "de04e60485ed3c919efece506aa8652bc8eda16e95d1e0a512a0ca761218d52c",
+          "producerManifestSha256": "24b7b9d8807983f7065e5e149771546667595af844f050a9cc0828a8388b844c",
+          "producerArtifacts": 117,
+          "rootRehashedAllProducerArtifacts": true,
+          "executionQaReviewSha256": "043d798392ec0977f977f2faa8d29965f94bc29fde5317b52d432f31f4bbe503",
+          "executionQaReadinessPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-owned-scope-pure-proof-execution02/execution-qa/readiness.json",
+          "executionQaReadinessSha256": "6a52f276a01bbbc14e8d99eaf65690a4c1d7cb08eaf37d635fc9999973da38c5",
+          "executionQaManifestSha256": "f2518946225faf58ff177264156ae75510769d320d0dfade3f1ec00495410aae"
+        }
+      },
+      "benchmarkReport": {
+        "sourceQa": "CLEAN",
+        "privateProof": "STOP_LINT3_NO_RED_GREEN_SOURCEONLY_CORRECTION_DISPATCHED",
+        "proofPreparationManifestSha256": "e5b069410211d10f31a44a1c68e41c773ed46216022dc874a2f2127941808648",
+        "actualAdoption": false,
+        "gateFor011": false,
+        "rootConditionalAdmissionSha256": "f10481f8d7ec9672c56ae9fab9f232880019e74ad972e276836d53242a10aa98",
+        "initialPreparation": {
+          "handle": 50424,
+          "rawExit": 1,
+          "stage": "CACHE_READER_PRE_COPY",
+          "cause": "RESULTS_LIST_NOT_OBJECT_VALUES",
+          "manifestSha256": "37dd1408d938be3071acc680cad883d076f752232dada2a48a86bd82df685482",
+          "artifactCount": 8,
+          "rootRehashed": true,
+          "copyStaticTestsNotExecuted": true
+        },
+        "correctedPreparation": {
+          "handle": 56883,
+          "rawExit": 0,
+          "phase": "COPY_COMPLETE",
+          "sourceSelectedMembers": 13995,
+          "sourceCatalogSha256": "7360b12da87b164cb7c8fd244fc7645d0c066793de658d6fc8a529e9f9774bed",
+          "seedReceiptSha256": "a2ce2318a68421852d19310467ec5c99e40279b6062b5390bdb3db8c68c3783c",
+          "productDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+          "failedNativeCacheRetained": true,
+          "nativeBaseAndActualStableThroughCopy": true
+        },
+        "copyCompleteRootVerifiedSha256": "35b600ee7e2bb80d2b22d356e910a5688a354e9f02cbedd98c7c7c7449f0b6a7",
+        "types": {
+          "handle": 58734,
+          "rawExit": 0,
+          "cacheDelta": 0
+        },
+        "lint": {
+          "handle": 36144,
+          "rawExit": 1,
+          "errors": 3,
+          "projectionSha256": "d0a57c29a5a176bd0504a45fc0f1447fa687eb8c66d10c37c25591da2c205935"
+        },
+        "closure": {
+          "handle": 32007,
+          "rawExit": 0,
+          "ownTenSourcesRestored": true,
+          "actualAndNativeBaseStable": true
+        },
+        "execution02ManifestSha256": "9676b7d5efd1fc3809ff66ef9c0c3a78faa3b2ba6c43cea70698491fa44da9da",
+        "execution02RootRehashedArtifacts": 63,
+        "lintCorrection": "ALL3_FIXED_IN_CANDIDATE_UNEXECUTED",
+        "lintCorrectionManifestSha256": "7de7fbe32a9948ffa91f83881efe247c552ec366f17421d005900d5a34d751cd",
+        "lintCorrectionArtifacts": 74,
+        "lintCorrectionSourceQa": "CLEAN_FOR_CAUSE_SUPPORTED_STATIC_SEMANTIC_REPROOF",
+        "lintCorrectionQaReviewSha256": "e5d3ab3bdcba76eab508ef7b2ec78ea9a29d6b7e12239d0b8ad3dad95b1c8e2f",
+        "lintCorrectionQaManifestSha256": "457f8df3e7c080ba5435f0a314eb76370ef4dd3b7e9e31f5ee9420c4acfafbcf",
+        "correctedReproof": "FRESH_GUARDS10035_ACTIVE_NO_STATIC_COLLECTOR_YET",
+        "proof03ManifestSha256": "a8e3125b491ec4805e0f04b056b72bd797db701e5f710ee09d297af2da532708",
+        "proof03": "FRESHGUARDS64318_PASS_PRE_OVERLAY_STAGEac13e8_FAIL_NO_COLLECTOR_OR_SOURCE_WRITES",
+        "reusedCopyGuardCorrection": "SOURCEONLY_BENCHMARK_WORKER_RUNNING_PARENT_COPYREF_PLUS_OWN_FRESHGUARDS",
+        "reusedCopyGuardCorrectionManifestSha256": "9c2de7f668c2f38b84e30a0f93406eb630214e5ea351d6485b4c9e7636790c32",
+        "reusedCopyGuardRootRehashedArtifacts": 15,
+        "reusedCopyGuardConcreteRootReview": "ACCEPTED_PARENT_COPY_REF_PLUS_CURRENT_OWN_FACTS",
+        "proof04RootAdmissionSha256": "566c5361edfa0b33311db40a4da39e3a5d5d4258e0751bf631ec5d80ee671472",
+        "proof04ExecutionBindingSha256": "300ed6761bfc7e596c59bd1baf13504622a8f71f3f66c057008eeb4bf96cf2e1",
+        "proof04AllEightCommands": "INDEPENDENTLY_QUALIFIED_RAW0_0_1_1_0_0_0_0",
+        "proof04Green": "105PASS0FAIL0SKIP_4FILES_86OLD_PLUS19",
+        "proof04MetadataFailure": "InlineSyntaxError616600_DEPENDENT_GUARD4b0f1d_preserved_no_tests_repeated",
+        "proof04MetadataCompletion": "ExplicitmetadataASThelper0_strict105qualification_thenoriginal3CLI0",
+        "proof04Freeze": "2026-10-21T02:40:57.969Z_digestb49f6d8ad81b156f61f4e7d3330edf17ad764f2fd4b4412c480764888d7e2506",
+        "proof04Restoration93082": 0,
+        "proof04SourceQuiet": "RELEASED_TO_GATEWAY_ACTUAL_WRITER",
+        "proof04FinalProducerSeal": "PENDING_ONLY_CAPTURED_METADATA_NO_ACTUAL_R_READ",
+        "proof04ExecutionQa": "ALL8_AND_RESTORATION_QUALIFIED_FINAL_HOLD_PRODUCER_SEAL"
+      },
+      "experts": {
+        "gateway_implementation": "EXCLUSIVE_ACTUAL_APPLICATION_AND_CONFIGURED_BUILD",
+        "benchmark_hard_gate_candidate": "PRODUCER_SEAL_ONLY_CAPTURED_METADATA_NO_ACTUALRREAD",
+        "benchmark_report_candidate_qa": "FINAL_BENCHMARK_QA_ONLY_CAPTURED_METADATA",
+        "renewal_phase_independent_qa": "NATIVE_QA_PASS_COMPLETE_AVAILABLE"
+      },
+      "sourceFreeze": "Gatewayexclusiveactual12pathwriterNOWauthorized; old3e/D698 predecessor, NEWsourceandbuildoutputmustbemeasured. Sourcefrozenafterapplicationthroughmatchingconfiguredbuild; allotheractorscapturedmetadataonly.",
+      "qualified301plusFresh6": "ROOT_ACCEPTED_PRIVATE_307COVERED_298PASS9ORIGINALSKIP_TWO_INVOCATIONS_ACTUAL_EQUIVALENCE_OWED",
+      "originalReplay": {
+        "charged": 3,
+        "maximum": 6,
+        "remaining": [
+          4,
+          5,
+          6
+        ],
+        "operationalCutoffUtc": "2026-10-22T04:35:27.361777Z",
+        "resetOrExtension": false
+      },
+      "allStoriesComplete": false,
+      "stories": "009_010_011_InProgress",
+      "next": "Gatewayactualcode0/docs0/honestnewsourcecapture/configuredbuildonce; verify238E19+sourceinputstable beforeactualfinalunitcoverage/image/G9/backend/Replay. BenchmarkfinalsealQAdoesnotgate011.",
+      "astraCurrent02": {
+        "atUtc": "2026-10-21T01:38:21.994595+00:00",
+        "reviewSha256": "62e61b6dd4c76147c40b4e432277a611481f0ad06e7895ce710cec9313eeef35",
+        "verdict": "CONCERNS",
+        "rootDisposition": "ADOPT_TARGETED_PLAN_CORRECTIONS",
+        "model": "gpt-6-astra",
+        "reasoningEffort": "high",
+        "userExplicitlyRequested": true,
+        "actions": [
+          "TwoFileScopedSuccessorAndAllSixFreshPassesRequired",
+          "ExplicitProspectiveResourceLimitationNoHistoricalCleanupClaim",
+          "FreshBenchmarkCopyBeforeItsFrozenSourceMutates",
+          "011PrioritySingleHeavyLane",
+          "Broader009ReportNot011Gate",
+          "NoReplayClockResetOrExtraAttempt",
+          "OneCoordinatorOwnedExternalReferenceHandback"
+        ],
+        "sourceApproval": false,
+        "resourceAdmission": false,
+        "nativeGo": false,
+        "allStoriesInProgress": true
+      },
+      "currentGoalTurnClassification": "PROGRESS_SIX_NATIVE_PASS_COMPOSITION_QA_ADOPTED_BENCHMARK105_GREEN_AND_ALL8_QUALIFIED_ACTUAL_COPYBACK_BUILD_AUTHORIZED",
+      "previousGoalTurnClassification": "PROGRESS_PRIVATE_COPY_TYPEPASS_SOURCE_BUG_AND_LINT_CAUSES_ISOLATED",
+      "native02": {
+        "originalTool": 81714,
+        "driverPid": 72979,
+        "nativePid": 73200,
+        "inhibitorPid": 73199,
+        "rawNativeExit": 0,
+        "driverExit": 0,
+        "nativeElapsedSeconds": 30.485922,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "typedLeafReads": 12,
+        "repeatedLeafReads": 0,
+        "allInventoryJoinsAccepted": true,
+        "producerManifestSha256": "0825e201b68a2770f61e5948007a6e2c8d36cd18fed0b8435298eb34ad8b4c91",
+        "producerArtifacts": 36,
+        "producerAllRootRehashed": true,
+        "qaManifestSha256": "a5fbe073244958c7c8a14491b7ea293f9f5306c1d2364a8d1c80c90e6b59b333",
+        "qaReadinessSha256": "d7b264aa018b0169ccb00a01f38978842719b1eaa35e5870d3cc1fd0a2a9f6fc",
+        "rootCompositionAdoptionSha256": "0ae96f8ae3e47a9a7590fedb4c14d7caa7eb0bfbe1b2e807c8263cfce73a30ab",
+        "metadataWriterError": "NameError_retained_persistedOnlyCompletion0",
+        "lostSignal0Results": "3_UNRETAINED_NO_CREDIT",
+        "wrapperClosure": "OriginalPopenWaitsAndToolTerminalOnly",
+        "inhibitorHeld": "Nativeplusdriveraftercapture_fullsnapshot_cache_CLI_browser_host; postdriverprojectionafterrelease/no continuousawakeclaim"
+      },
+      "actualApplication": {
+        "state": "AUTHORIZED_FRESH_GUARDS_AND_ACTUAL_OUTCOMES_PENDING",
+        "rootAdmissionSha256": "518c65f7d05f557053dc73fe5a268645161f02141a5db85c736fe9beec1865fc",
+        "preparationManifestSha256": "c0735f8d27ad324620aa3c590447b7981dd5a83c93349bc783ccd22bd0f93091",
+        "codePaths": 10,
+        "separateStoryDocPaths": 2,
+        "applyScriptSha256": "b7f0aa174a192107a52e8b36339d0d32bbb10d4ef0bbca6d1042a122f180287c",
+        "actualBeforeSource": "3e1812",
+        "actualBeforeDist": "D698238",
+        "actualAfterSource": "MUST_MEASURE",
+        "expectedConfiguredBuildProduct": "238E19",
+        "actualBinSymlinks": 21,
+        "staleContext23": "DISPROVED_BY_NATIVE_BEFORE_AFTER_CURRENT21_NO_DRIFT",
+        "noMoreRuntimeOrTestsAuthorized": true
+      }
+    },
+    {
+      "kind": "ASTRA_HIGH_CURRENT03_PLAN_REVIEW_RUNNING_ACTUAL_APPLICATION_GUARD_STOP_BENCHMARK_QA_ACCEPTED",
+      "atUtc": "2026-10-21T02:53:27.889551+00:00",
+      "allStoriesComplete": false,
+      "stories": {
+        "009": "InProgress",
+        "010": "InProgress",
+        "011": "InProgress"
+      },
+      "heavyLaneOwner": null,
+      "actualApplication": {
+        "status": "STOPPED_BEFORE_SOURCE_MUTATION_OR_BUILD",
+        "sourceWrites": 0,
+        "configuredBuildInvocations": 0,
+        "freshActualSourceCaptureReached": false,
+        "stopManifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/preflight-stop-manifest.json",
+          "sha256": "8cf236f9cc9c524705cf3e805220de1fec262d7096bf12e5d99d7e76e16c7a93"
+        },
+        "reason": "SINGLE_QA_OWNED_PRODUCER_MANIFEST_ENTRY_SUPERSEDED_BY_ACCEPTED_FINAL_QA_SEAL",
+        "producerOtherArtifactsVerified": 35,
+        "overlapPath": "execution-qa/binding-checks.json",
+        "historicalExpectedSha256": "405c03cbefc56cb5747a883ad0eae515a0baa546ee949aaa8704e3af551f5dfd",
+        "currentFinalQaSha256": "5d111f5f538c16271a02abef61f8e47829b00ac5aab1f160bfbe0f9ae519e089",
+        "retryOrGuardWaiverAuthorizedByThisCheckpoint": false
+      },
+      "benchmark": {
+        "status": "ROOT_ACCEPTS_INDEPENDENT_LOCAL_PRIVATE_PROOF_READY_FOR_SEPARATE_ACTUAL_ADOPTION_WINDOW",
+        "producer": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-execution04/manifest.json",
+          "sha256": "1482bd77f54c70e7bff77d1b9bf35f0bf48356928d84f18927537f936800a5bc"
+        },
+        "qa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-execution04/execution-qa/manifest.json",
+          "sha256": "b6b036f9b68d3e104eebd12433eb05eb925f04c32e28fcc690708a77f356d169"
+        },
+        "rootRehashedProducerArtifacts": 142,
+        "rootRehashedQaArtifacts": 6,
+        "currentActualSourceReadAfterRelease": false,
+        "actualAdoptionOrProviderOr011OrLifecycleAcceptance": false
+      },
+      "astra": {
+        "agent": "/root/astra_three_story_plan_review_current03",
+        "model": "gpt-6-astra",
+        "reasoningEffort": "high",
+        "status": "RUNNING",
+        "intent": {
+          "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/astra-three-story-plan-review-current03-task.txt",
+          "sha256": "d3adc58f63ebcafe9886d6a942303b75d54db42fcf2c736d17c20b29b26ce13c"
+        },
+        "context": {
+          "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/astra-three-story-plan-review-current03-context.txt",
+          "sha256": "75bc13745d3dfc7f11a0b7f664f86ea6e3427bc9cd2523ec73a1cb05014e2ca4"
+        },
+        "preflight": {
+          "exit": 0,
+          "safe": true,
+          "threats": []
+        }
+      }
+    },
+    {
+      "kind": "ASTRA_HIGH_CURRENT03_PLAN_REVIEW_COMPLETED_AND_ADOPTED_ACTUAL_APPLICATION_HELD_FOR_EXACT_OWNERSHIP_SUCCESSOR",
+      "atUtc": "2026-10-21T02:56:17.312491+00:00",
+      "allStoriesComplete": false,
+      "stories": {
+        "009": "InProgress",
+        "010": "InProgress",
+        "011": "InProgress"
+      },
+      "heavyLaneOwner": null,
+      "actualApplication": {
+        "status": "STOPPED_BEFORE_SOURCE_MUTATION_OR_BUILD",
+        "sourceWrites": 0,
+        "configuredBuildInvocations": 0,
+        "freshActualSourceCaptureReached": false,
+        "stopManifest": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/preflight-stop-manifest.json",
+          "sha256": "8cf236f9cc9c524705cf3e805220de1fec262d7096bf12e5d99d7e76e16c7a93"
+        },
+        "reason": "SINGLE_QA_OWNED_PRODUCER_MANIFEST_ENTRY_SUPERSEDED_BY_ACCEPTED_FINAL_QA_SEAL",
+        "producerOtherArtifactsVerified": 35,
+        "overlapPath": "execution-qa/binding-checks.json",
+        "historicalExpectedSha256": "405c03cbefc56cb5747a883ad0eae515a0baa546ee949aaa8704e3af551f5dfd",
+        "currentFinalQaSha256": "5d111f5f538c16271a02abef61f8e47829b00ac5aab1f160bfbe0f9ae519e089",
+        "retryOrGuardWaiverAuthorizedByThisCheckpoint": false
+      },
+      "benchmark": {
+        "status": "ROOT_ACCEPTS_INDEPENDENT_LOCAL_PRIVATE_PROOF_READY_FOR_SEPARATE_ACTUAL_ADOPTION_WINDOW",
+        "producer": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-execution04/manifest.json",
+          "sha256": "1482bd77f54c70e7bff77d1b9bf35f0bf48356928d84f18927537f936800a5bc"
+        },
+        "qa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-execution04/execution-qa/manifest.json",
+          "sha256": "b6b036f9b68d3e104eebd12433eb05eb925f04c32e28fcc690708a77f356d169"
+        },
+        "rootRehashedProducerArtifacts": 142,
+        "rootRehashedQaArtifacts": 6,
+        "currentActualSourceReadAfterRelease": false,
+        "actualAdoptionOrProviderOr011OrLifecycleAcceptance": false
+      },
+      "astra": {
+        "agent": "/root/astra_three_story_plan_review_current03",
+        "model": "gpt-6-astra",
+        "reasoningEffort": "high",
+        "status": "COMPLETED_CONCERNS_ADOPTED",
+        "intent": {
+          "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/astra-three-story-plan-review-current03-task.txt",
+          "sha256": "d3adc58f63ebcafe9886d6a942303b75d54db42fcf2c736d17c20b29b26ce13c"
+        },
+        "context": {
+          "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/astra-three-story-plan-review-current03-context.txt",
+          "sha256": "75bc13745d3dfc7f11a0b7f664f86ea6e3427bc9cd2523ec73a1cb05014e2ca4"
+        },
+        "preflight": {
+          "exit": 0,
+          "safe": true,
+          "threats": []
+        },
+        "review": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/astra-three-story-plan-review-current03/review.md",
+          "sha256": "337077b2cd85c4f8d4b82eb2193750b9410beb154ac6f280b6eefdff766b0cbe"
+        },
+        "rootAdoption": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/astra-three-story-plan-review-current03/root-adoption.json",
+          "sha256": "887accd14670e7ae0207282d9e1af198788e678ce05d546740d19149c826c644"
+        }
+      },
+      "ownershipSuccessorQa": {
+        "status": "PASS_SEALED_ROOT_REHASHED_ACCEPTED_FOR_BOUNDED_PROSPECTIVE_SUCCESSOR_ONLY",
+        "owner": "benchmark_report_candidate_qa",
+        "manifest": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/native-six02-cross-owner-seal-qa01/manifest.json",
+        "manifestSha256": "3cef386471ce0c3f960db84fd5ab7295422e54a8aaf2f57070a49f1cdf6c76ae",
+        "runtimeAuthority": false,
+        "nextStep": "Separately review exact consumer guard delta and root release; then fresh actual input/preimage guards and original bounded application/build."
+      }
+    },
+    {
+      "kind": "ACTUAL_APPLICATION02_AND_MATCHING_CONFIGURED_BUILD_RELEASED_AFTER_EXACT_SINGLETON_GUARD_QA",
+      "atUtc": "2026-10-21T03:06:30.146053+00:00",
+      "allStoriesComplete": false,
+      "stories": {
+        "009": "InProgress",
+        "010": "InProgress",
+        "011": "InProgress"
+      },
+      "rootAdmission": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-root-admission02.json",
+        "sha256": "71b55bf4b75aa304edbfb63893f81289b3e68555022822ca81bd6d8cd16d81a0"
+      },
+      "guardQaManifest": "0c4e68f8edd09e1f99868653968a4098d706ee4f3100ea832e6a73f6832c2ef2",
+      "guardSha256": "8671e22132d92dd88617655b9f5bf254fe9fcdb43e58eb7668b334153ccd22b2",
+      "heavyOwner": "gateway_implementation",
+      "toolSession": "AWAIT_FIRST_ORIGINAL_APPLICATION02_HANDLE",
+      "actualApplicationResult": "NOT_YET_REPORTED_DO_NOT_ASSUME_SUCCESS_OR_CURRENT_3e",
+      "authorizedScope": {
+        "codePaths": 10,
+        "appendOnlyStoryDocs": 2,
+        "matchingActualConfiguredBuildInvocations": 1,
+        "furtherTestsNativeBackendReplayImage": false
+      },
+      "oldGuardStopAndAllHistoricalSeals": "PRESERVED",
+      "nativeProducerRule": "Exact35plusonefinalQAownedSuccessorOnly_not36currentEqual",
+      "runtimeOutput": "rt-bootstrap-actual-application02",
+      "applyReceiptRouting": "Newunusedoriginal01code/documentationpaths_originalb7scriptunchanged_02referenceshashes",
+      "readiness": {
+        "manifest": "cf13020e13f92166e05f414fc7ba117cefc316164c3d2e5c02e7c77cb286af67",
+        "P7SinglesAndReverse": "RETAINED_PASS_FOUND_NOT_NEW_RUNTIME",
+        "finalSourceApplicability": "ARCHITECT_TRACING_SELECTED_PUBLIC_JAVA_DISJOINT_FROM_TS_DOC_WRITER",
+        "planningReservationSeconds": 41709.735,
+        "cutoffUtc": "2026-10-22T04:35:27.361777Z",
+        "upperBoundOrGuarantee": false
+      },
+      "benchmark": "PRIVATE105_ALL8_RESTORATION_QA_ACCEPTED_ACTUAL_ADOPTION_AFTER011FREEZE",
+      "nextAfterAcceptedBuild": "Finalactualrunnercoverage/static/contracts/pins_thenimage/deployment/D2/G9_thenfinalReplay4/5whole6/T5;external009/010stillowed"
+    },
+    {
+      "kind": "ACTUAL_TEN_CODE_TWO_DOC_APPLIED_NEW_SOURCE_a1f8_MATCHING_CONFIGURED_BUILD91505_ACTIVE",
+      "atUtc": "2026-10-21T03:09:36.199042+00:00",
+      "allStoriesComplete": false,
+      "stories": {
+        "009": "InProgress",
+        "010": "InProgress",
+        "011": "InProgress"
+      },
+      "rootAdmission": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-root-admission02.json",
+        "sha256": "71b55bf4b75aa304edbfb63893f81289b3e68555022822ca81bd6d8cd16d81a0"
+      },
+      "guardQaManifest": "0c4e68f8edd09e1f99868653968a4098d706ee4f3100ea832e6a73f6832c2ef2",
+      "guardSha256": "8671e22132d92dd88617655b9f5bf254fe9fcdb43e58eb7668b334153ccd22b2",
+      "heavyOwner": "gateway_implementation",
+      "toolSession": 91505,
+      "actualApplicationResult": {
+        "guardOriginalTool": 82585,
+        "guardExit": 0,
+        "codeExit": 0,
+        "codePaths": 10,
+        "codeReceiptSha256": "176e78392a8d346fcbc914917ead5a55604e7a7fef4f0c3f48f6e1979919591f",
+        "documentationExit": 0,
+        "documentationPaths": 2,
+        "documentationReceiptSha256": "763f9df38a4fac7687f2b72a99ce190550043d752cec7c9b89793ee5045adb0e",
+        "postApplicationCaptureOriginalTool": 37549,
+        "postApplicationCaptureExit": 0,
+        "newActualSourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+        "newActualSourceFiles": 1814,
+        "buildResult": "RUNNING_NOT_YET_ACCEPTED",
+        "distBeforeBuild": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+        "expectedComplete238BuildOutput": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1"
+      },
+      "authorizedScope": {
+        "codePaths": 10,
+        "appendOnlyStoryDocs": 2,
+        "matchingActualConfiguredBuildInvocations": 1,
+        "furtherTestsNativeBackendReplayImage": false
+      },
+      "oldGuardStopAndAllHistoricalSeals": "PRESERVED",
+      "nativeProducerRule": "Exact35plusonefinalQAownedSuccessorOnly_not36currentEqual",
+      "runtimeOutput": "rt-bootstrap-actual-application02",
+      "applyReceiptRouting": "Newunusedoriginal01code/documentationpaths_originalb7scriptunchanged_02referenceshashes",
+      "readiness": {
+        "manifest": "cf13020e13f92166e05f414fc7ba117cefc316164c3d2e5c02e7c77cb286af67",
+        "P7SinglesAndReverse": "RETAINED_PASS_FOUND_NOT_NEW_RUNTIME",
+        "finalSourceApplicability": {
+          "architectManifest": "2d0f4554519f7ef1663cde3507d864fbc2eb77e5ac52edd9e97a07d5a08029d2",
+          "rootReadAndRehashed": true,
+          "disposition": "CONDITIONAL_SOURCE_APPLICABLE_TO_EXISTING_FINAL_PAIR_NO_TRACEABILITY_ONLY_RERUN",
+          "independentT5QaAndRuntimeStillRequired": true
+        },
+        "planningReservationSeconds": 41709.735,
+        "cutoffUtc": "2026-10-22T04:35:27.361777Z",
+        "upperBoundOrGuarantee": false
+      },
+      "benchmark": "PRIVATE105_ALL8_RESTORATION_QA_ACCEPTED_ACTUAL_ADOPTION_AFTER011FREEZE",
+      "nextAfterAcceptedBuild": "Finalactualrunnercoverage/static/contracts/pins_thenimage/deployment/D2/G9_thenfinalReplay4/5whole6/T5;external009/010stillowed",
+      "parallelPreparation": "DevOps final-linux-image-preparation03 sourceonly disjoint stableDockerCI+immutableevidence; no currentactualglobal/TS/doc reads",
+      "futureActualRunnerPrepManifest": "942fb712ddda3f1c7eb8cc13082a725d0f82cb8bcb04b4d04d8b6288db39eb0e"
+    },
+    {
+      "kind": "ACTUAL_APPLICATION_AND_BUILD_QA_ACCEPTED_FINAL_RUNNER_FIVE_GATES_RELEASED",
+      "atUtc": "2026-10-21T03:19:59.322553+00:00",
+      "allStoriesComplete": false,
+      "stories": {
+        "009": "InProgress",
+        "010": "InProgress",
+        "011": "InProgress"
+      },
+      "actualSourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+      "actualSourceFiles": 1814,
+      "actualDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+      "actualDistFiles": 238,
+      "acceptedApplicationProducer": "ec0cc03c9e30429bd3e87231a3730025202a1636c17082d3a7bd5581fe594bdf",
+      "acceptedApplicationQa": "7032cd338b78e9d89e95e6d09b40163fa74aabd9b2ce99e48c8d6aaef713f693",
+      "matchingActualBuild": {
+        "originalTool": 91505,
+        "collectorPid": 54966,
+        "rawChildExit": 0,
+        "rawOuterExit": 0,
+        "receipt": "aa55d986311e4c92b09d1ba87ecda5b81fd49390f65312ca45000848ad8385df",
+        "complete238ArrayExact": true,
+        "sourceInputStable": true
+      },
+      "qualifiedPrivateFixtureCarry": "Accepted_finalactual13756noncacheinputrows_exact_238product_exact_composed301plus6_307covered298P9S_across2_notnewactual307",
+      "heavyOwner": "gateway_implementation",
+      "finalRunnerRelease": "4f2e29ccd6f0cb53c1f806b7b5dbddd4df0d84ecf1488c0dccbe34cdec63d1c5",
+      "toolSession": 38694,
+      "status": "ACTUAL_FINAL_GUARDS_ACTIVE_THEN_TYPES_LINT_UNIT_WITH_COVERAGE_CONTRACTS_HOSTPINS",
+      "unitForecastOnly": {
+        "total": 2717,
+        "passed": 2692,
+        "skipped": 25,
+        "distinctIdentityKeys": 2713
+      },
+      "parallelQa": "FEcarry_all454relevantinputs23pins72webpackNode23WCAGchecksPASS_sealpending",
+      "parallelArchitect": "Existing011T5namedsource/symbol/Liveinventory_readonlyspecificpublicsource_A1",
+      "g9": {
+        "originalCopyAttempt": "STOP_BEFORE_COPY_MKDIR_NO_CUSTODY_CREDIT",
+        "failureManifest": "6ff626b91dec7da2865fa58f7aa398bc66478fce97dd5c1eb8247743193c1ac9",
+        "actualInputReadWindow": "RELEASED",
+        "sourceOnlyCorrectedGuard": "ea1ae6073a22dabb06338d2795efe26908b1973a1204800300647ee0b32e3763",
+        "rootDeltaReview": "017803c065a34fb1b4c5451026bbd47af7a120cc27caf5fb6c213b3af0682338",
+        "futureCopyAndNative": "AFTER_ACTUAL_RUNNER_GATES_SEPARATE_RELEASE_NO_RUNTIME_NOW"
+      },
+      "image": {
+        "sourceOnlyPreparation": "7133e98393c7fd5203cc6e9b6981fde388c01f3cda61be443d8a7e339c4378c2",
+        "rootReview": "e2e38e33258ddde77cacb9757bf9aa6353905e41fa2dc59d52cb9a5299aedfdf",
+        "finalBindings": "NULL_NOT_EXECUTED"
+      },
+      "remaining": [
+        "Actualrunner5gates/coverage",
+        "FEcarryseal",
+        "Freshpublicimage/inimagepins/deployment722/correctedD2",
+        "G9COPY+existingstagefileoldREDfixedGREEN",
+        "Finalinput/diagnostic/C10/sourceinventory/TEST001binding",
+        "Replay4/5consecutive+whole6mergedcoverage/T5QA",
+        "009realexternal/model/security/human+post011benchmarkadoption",
+        "010gatedfiveactualpilots/remediation"
+      ],
+      "cutoffUtc": "2026-10-22T04:35:27.361777Z",
+      "replayConsumed": 3,
+      "replayMax": 6
+    },
+    {
+      "kind": "ACTUAL_IMAGE_BUILD_AND_STRICT_PINS_PASS_G9_OLD_NATIVE86244_ACTIVE",
+      "atUtc": "2026-10-21T03:49:39.540107+00:00",
+      "allStoriesComplete": false,
+      "stories": {
+        "009": "InProgress",
+        "010": "InProgress",
+        "011": "InProgress"
+      },
+      "actualSource": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+      "actualSourceFiles": 1814,
+      "actualHostDist": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+      "actualHostDistFiles": 238,
+      "actualApplicationAndMatchingBuild": "ec0cc/QA7032_ACCEPTED",
+      "actualRunnerFiveGates": {
+        "producer": "345d1004c6ad7759a72b8b6c0afec8fb4ec5c0b1f6fc0b989db5973c27dc4020",
+        "qa": "4624779b021f678a017338c85e8b44408529d53b64ec5035f9b0de5edb89e3c7",
+        "counts": "2717_total_2692PASS25originalSKIP_118files419suites_2713distinct_keys_4duplicates",
+        "coverage": "97.75lines_statements_97.68functions_90.14branches_all28originalthresholdsPASS",
+        "allFiveOriginalOuterChildExits": 0
+      },
+      "frontendCarry": "03672093/root820101c6_PASS_454relevant23quoted7admission72outputs_Node23_scope",
+      "sourceInventory": {
+        "producer": "dfc6cbfe1d1c94a2952403c1fd774ca8c8b00d26551c3ef5062fe8020de2a3b5",
+        "qa": "c26a4230199af546d64ea8bc7b8ae1d62935721ab803f1e5a617cf5bb9c22b73",
+        "verdict": "PASS_SOURCE_TRACEABILITY_FOR_FINAL_T5",
+        "scope": "60CLN_729Live_51contracts22migrations_existingCLN10cosignbound_no_unexplained_removal",
+        "runtimeOrOverallT5Approval": false
+      },
+      "emptyDirCleanup": "8b38c159_3explicitEmptyRmdir_0files_fullA1E19arraysExact",
+      "image": {
+        "oldOffline03": "639d64d8_31799raw1_EAI_AGAIN_uncachedTypescript5.9.3_preserved",
+        "qualifiedPublicTar": "8457b7413e543ff88eea95e7fec554d380e5903e839e0f814c46739833bdb886_111members101regular",
+        "rootCauseSupported04": "Onlyfreshbuildlabel02_and_DockerBUILDnetworkDEFAULT_fororiginallockedpublicnpmci;Dockerfile/source/407integritylockedHTTPSnpm/baseunchanged",
+        "producer": "e4d7b082ea8b21ce3b2f4d7223ed6fa609e5722817455246f18ee50fe7d07183",
+        "producerArtifacts": 116,
+        "receipt": "e2ea1908c556c041be05a5e931014f1d91656f7f7ee723ebb14247e77b46555d",
+        "immutableId": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+        "platform": "Linux_arm64_pwuser_Entrypoint_null_productionCMD_exact",
+        "originalBuildTool": 77079,
+        "imageOwnPackageTool": 10246,
+        "strictPinsTool": 15596,
+        "rawExits": 0,
+        "strictPins": "oktrue_failures[]_notAsserted[]_Node24.20_PW1.63_Chromium1243_Linuxbrowser839efe",
+        "runtimeVerificationNetwork": "NONE_readonly_exactpublicsupport",
+        "hostSourceDistInputsCache191": "UNCHANGED",
+        "heavyAndInputReadLane": "RELEASED",
+        "qa": "RUNNING_CLOSED_METADATA_ONLY",
+        "deploymentAndD2": "NOT_EXECUTED_9thbindingUNBOUND"
+      },
+      "g9": {
+        "staging": "d69361dfb5326522dacf121b65660f506a29f2e587543b95454c30a47588f51c",
+        "copyOriginalTool": 30592,
+        "copyExit": 0,
+        "copies": "2_regular14213each_noactual_or_shared_hardlinks_23dep_symlinks_21directbin_exact",
+        "patchOriginalTool": 78566,
+        "patchExit": 0,
+        "oldChanges": "2_Transportd4c_helper928",
+        "fixedChanges": "1_helper928_Transport75cunchanged",
+        "heavyOwner": "final_readiness_traceability03",
+        "oldNativeOriginalTool": 86244,
+        "driverPid": 22248,
+        "outerCollectorPid": 22416,
+        "inhibitorPid": 22415,
+        "gradleJvmPids": "NOT_RETAINED_NO_NEW_OBSERVER",
+        "status": "OLD_NATIVE_LIVE_DO_NOT_ASSUME_INTENDED_RED_OR_FIXED_GREEN",
+        "source": "ActualA1E19frozen_onlyprivatebuffers",
+        "newRuntimeBeyondTwoExistingVariants": false
+      },
+      "singleHeavyLaneOwner": "final_readiness_traceability03",
+      "parallelExperts": {
+        "imageQa": "benchmark_report_candidate_qa_closed116metadataonly",
+        "deploymentD2SourcePreparation": "gateway_implementation_no_runtime"
+      },
+      "externalQuestion": "Oneconsolidatedapproved-referencepacket_recommended_asyncPENDING_no_externalfacts_inferred",
+      "remaining": [
+        "G9actualintendedoldREDthenfixedGREEN+cleanup/restoration/QA",
+        "ImageQA",
+        "Fulldeployment722onBD83",
+        "Genuine9bindings+correctedD2sameimage",
+        "Finaldiagnostic/C10/TEST001/time/sourcebindings",
+        "ReservedReplay4/5pairthenwhole6mergedJacoco+T5",
+        "009post011benchmarkactualadoption_realexternalmodelsecurityhumanproof",
+        "010gatedreal5pilots/remediation"
+      ],
+      "replayConsumed": 3,
+      "replayMax": 6,
+      "cutoffUtc": "2026-10-22T04:35:27.361777Z",
+      "verifiedNow": [
+        {
+          "manifest": "final-source-inventory03/independent-qa/manifest.json",
+          "sha256": "c26a4230199af546d64ea8bc7b8ae1d62935721ab803f1e5a617cf5bb9c22b73",
+          "verifiedArtifacts": 2
+        },
+        {
+          "manifest": "final-linux-image-execution04/manifest.json",
+          "sha256": "e4d7b082ea8b21ce3b2f4d7223ed6fa609e5722817455246f18ee50fe7d07183",
+          "verifiedArtifacts": 116
+        }
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/deployment722-pass-d2-pending-root-checkpoint.json",
+      "sha256": "ab82b6a77cdf1bc0856c800813f2c396c2a0c65af80086ad444d410f8dad30cd"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/three-story-review-current04-completion-checkpoint.json",
+      "sha256": "ea49e66bc16969ca7bff36330b4b87dd52034764a74f6340a002a5856ed66fb4",
+      "bytes": 2741
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-binding-complete-runtime-released05-root-checkpoint.json",
+      "sha256": "ea717271d698c3d9adb8c6a94d9157da8117a69191ca82ec0082bb998b2c8a76"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-failed05-confirmed-shell-source-successor-root-checkpoint.json",
+      "sha256": "be61e08c3014beb233b37d53e09b6c5df4b3f5af4f0b0a9343a6026aa77b7c13"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-failed06-active-inspection-diagnostic-preparation-root-checkpoint.json",
+      "sha256": "c6332d5d4d03444fa27b8915b180c9bbe1966d71cc21bc6e877c9fa91f47adc1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-kernel-format-parser03-source08-ready-root-checkpoint.json",
+      "sha256": "d761aa9bdd1ed942c7daf2e8788468b0634e862f225911f15cbc0f97c448b6b8"
+    }
+  ]
+}

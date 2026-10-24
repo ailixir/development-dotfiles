@@ -1,0 +1,115 @@
+{
+  "atUtc": "2026-10-20T12:00:34.453017+00:00",
+  "label": "obs011-lean-ir-before01",
+  "terminalToolSession": 9520,
+  "exit": 0,
+  "counts": {
+    "total": 2774,
+    "passed": 2765,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 9
+  },
+  "taskResults": {
+    "test": {
+      "counts": {
+        "total": 2710,
+        "passed": 2701,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 9
+      },
+      "freshXmlFiles": 331,
+      "freshHtmlIndex": true,
+      "freshExec": true,
+      "execRequired": true,
+      "joinCasesPresent": true,
+      "freshJoinCohorts": 1
+    },
+    "guidedIncrementalTest": {
+      "counts": {
+        "total": 62,
+        "passed": 62,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "freshXmlFiles": 1,
+      "freshHtmlIndex": true,
+      "freshExec": true,
+      "execRequired": true,
+      "joinCasesPresent": true,
+      "freshJoinCohorts": 1
+    },
+    "crossReplicaTest": {
+      "counts": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "freshXmlFiles": 1,
+      "freshHtmlIndex": true,
+      "freshExec": true,
+      "execRequired": true,
+      "joinCasesPresent": false,
+      "freshJoinCohorts": 0
+    }
+  },
+  "exactApprovedSkipMatch": true,
+  "exactReplayDefault46Incremental62AllPass": true,
+  "executedRequiredTasks": [
+    "requireFreshGuidedPartitions",
+    "jacocoTestReport",
+    "jacocoTestCoverageVerification",
+    "checkstyleTest",
+    "spotlessJavaCheck",
+    "spotbugsMain",
+    "check"
+  ],
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true,
+  "coverageReport": "backend/build/reports/jacoco/test/jacocoTestReport.xml",
+  "coverageReportSha256": "0a36fa4df8c54986240c2cb826eb6a8c4a2e05d1de42406b653d5abeddabe9ad",
+  "coverageRatios": {
+    "INSTRUCTION": {
+      "missed": 10367,
+      "covered": 118723,
+      "ratio": 0.9196916879696336
+    },
+    "BRANCH": {
+      "missed": 3646,
+      "covered": 9472,
+      "ratio": 0.7220612898307669
+    },
+    "LINE": {
+      "missed": 2124,
+      "covered": 23334,
+      "ratio": 0.9165684657082254
+    },
+    "COMPLEXITY": {
+      "missed": 3641,
+      "covered": 6346,
+      "ratio": 0.635426053870031
+    },
+    "METHOD": {
+      "missed": 285,
+      "covered": 3111,
+      "ratio": 0.916077738515901
+    },
+    "CLASS": {
+      "missed": 6,
+      "covered": 528,
+      "ratio": 0.9887640449438202
+    }
+  },
+  "elapsedSeconds": 6468.83,
+  "resultReceipt": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-before01-results.json",
+  "resultSha256": "24569b84cf570bd4b8156b7b9fee6237fedb1b0ae7a0cb2b9868c4613ae2db2e",
+  "fullClassBudgetSlot": 2,
+  "freshBackendCheckJacocoPrerequisite": "SATISFIED_CURRENT_PRE_WAIT_SOURCE",
+  "allStoriesComplete": false,
+  "remainingCoreAndFinalGates": "Owed; baseline does not complete009/010/011."
+}

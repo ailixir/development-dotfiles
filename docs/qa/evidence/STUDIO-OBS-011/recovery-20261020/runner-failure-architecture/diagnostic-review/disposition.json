@@ -1,0 +1,63 @@
+{
+  "kind": "SOURCE_ONLY_EXACT_DIAGNOSTIC_ARCHITECTURE_REVIEW",
+  "disposition": "CLEAN",
+  "mandatoryCorrections": [],
+  "forwardPatchSha256": "959f0ccecbe938ba74341676575dedcd0f5eefc157c1187129bff6caad0b2c58",
+  "inversePatchSha256": "cc6b5822840e4b3bb19ff67cc8be663d8317dc7cab334d9117dc36d31a6b6daa",
+  "reviewedArtifacts": {
+    "bindings.json": "d10a5abcb9557b0e80e0229f81cfded6fb219d899e3337d1b035153da84ff365",
+    "derivative-copy-plan.json": "ef897a83f35584d0be994234c439059db14d6b7ec4e0052c369e8ebffe70a91b",
+    "single-case-command.json": "2f603117dfa71f72cb9a248da31d973e6e8c42c8567b845c897bbcd8ddd3f621",
+    "trace-schema.json": "9ad9b7627189eb83b2bbdd10d248a522a061445bc885813b1084fa9035d6dad8",
+    "read-closed-trace.py": "1a3631c8a57b2f10237f926573f98757b48a02ec341dafedd149fd3d4c81fa3e"
+  },
+  "checks": {
+    "threePristineInstrumentedHashPairsMatch": true,
+    "textualDiffsMatchPatch": true,
+    "hardTeardownBodyUnchanged": true,
+    "scratchEventAfterExistingRmCompletion": true,
+    "catchOriginalWallSampleAndShortCircuitPreserved": true,
+    "timerSelectedExpressionAndExistingWallSamplePreserved": true,
+    "ordinaryErrorCancellationMaxMsSemanticsPreserved": true,
+    "allOriginalTargetAssertionsAndTimersPreserved": true,
+    "reserveAndTransportCeilingsUnchanged": true,
+    "observationOnlyNewClockReads": true,
+    "recordCap": 32,
+    "eventCodeCount": 9,
+    "numericBooleanOnly": true,
+    "timedPathAddedIoAwaitConsolePoll": false,
+    "oneFinallyFlushOriginalRethrow": true,
+    "closedReaderInspectedOnly": true,
+    "missingOverflowInstrumentationFailureIncomplete": true,
+    "exactOneCaseCommandPreparedOnly": true,
+    "separateFreshDerivativeAndRestorationBindings": true
+  },
+  "limitations": [
+    "Observation overhead can suppress or move a timing race; no timing equivalence.",
+    "Trace completeness is independent of original test success.",
+    "Aggregate493-source/238-dist inventories not independently recomputed in this source-only review.",
+    "Actual fresh copies, preconditions, source/delta/dist inventories, exact executed case and trace provenance remain root execution responsibilities.",
+    "No direct first-list/wait branch measurements because hardTeardown body remains unchanged.",
+    "No historical cause, native-control explanation, product fix, gate or lifecycle credit."
+  ],
+  "authority": {
+    "rootRunAuthorizationRequired": true,
+    "runAuthorizedByThisReview": false
+  },
+  "performed": {
+    "parser": false,
+    "compiler": false,
+    "native": false,
+    "process": false,
+    "provider": false,
+    "productEdits": false,
+    "sandboxEdits": false,
+    "authorFileEdits": false,
+    "privateCaptureOrBaselineBodyReads": false,
+    "delegation": false
+  },
+  "budget": {
+    "sharedCeilingUsd": 500,
+    "aggregateSpend": "UNKNOWN"
+  }
+}

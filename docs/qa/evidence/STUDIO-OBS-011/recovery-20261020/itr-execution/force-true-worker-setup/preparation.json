@@ -1,0 +1,82 @@
+{
+  "kind": "SOURCE_ONLY_FORCE_TRUE_SINGLETON_REAL_WORKER_SETUP",
+  "atUtc": "2026-10-20T16:37:25.306079+00:00",
+  "status": "PREPARED_UNAPPLIED_UNEXECUTED_REQUIRES_INDEPENDENT_EXACT_REVIEW",
+  "canonicalPath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "canonicalSha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+  "failedDiagnosticSourceSha256": "6a10fca7681b6d11d5cc82927fe6b632025abe85554884975ca1378b2e6b6b36",
+  "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/force-true-worker-setup/reader/mutations/M-gate-true-subset/repo/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "candidateSha256": "94b9db694ee543a9f9cd5e341021acdcdce8f936d49a68c8d63607ad7feb45cc",
+  "canonicalSourceStillExact": true,
+  "actualSourceApplied": false,
+  "delta": "Only adds throws Exception to the existing selected diagnostic method and invokes the existing startWorkers() before its original body.",
+  "inverseDeltaRecoversExactFailedDiagnostic": true,
+  "existingScannerBodyByteIdentical": true,
+  "forceGateAndBothFinalAuditControlsByteIdentical": true,
+  "noAdditionalAssertionsCatchesSkipsTimeoutOrCanaryRegistrations": true,
+  "readerAndCaseFiles": {
+    "verify_mutation_run.py": {
+      "historicalPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/verify_mutation_run.py",
+      "successorPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/force-true-worker-setup/reader/verify_mutation_run.py",
+      "sha256": "8e8c7e3e6ec91ff2638d7b4248429368b2df446ef238349d9b1b92b08b5449d1",
+      "byteIdentical": true
+    },
+    "expected-cases.json": {
+      "historicalPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/expected-cases.json",
+      "successorPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/force-true-worker-setup/reader/expected-cases.json",
+      "sha256": "fda33efa440799c23af34fd7ee34715782a1e50fec8602f2686ee4486b1e4c8d",
+      "byteIdentical": true
+    },
+    "ReplayIT.original.java": {
+      "historicalPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/ReplayIT.original.java",
+      "successorPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/force-true-worker-setup/reader/ReplayIT.original.java",
+      "sha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+      "byteIdentical": true
+    },
+    "checker-input-provenance.json": {
+      "historicalPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/checker-input-provenance.json",
+      "successorPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/force-true-worker-setup/reader/checker-input-provenance.json",
+      "sha256": "7976f78a3953d5c1eaae4c5083b96cb8d18dc17faec4419b068ced361e2d17b7",
+      "byteIdentical": true
+    },
+    "boundary-activation.schema.json": {
+      "historicalPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/boundary-activation.schema.json",
+      "successorPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/force-true-worker-setup/reader/boundary-activation.schema.json",
+      "sha256": "acfa1c3b8b9e8ed6721668383a49d541c3224ba3224f4ed3ee8f2921406081fd",
+      "byteIdentical": true
+    }
+  },
+  "mutationPlanLiteralChangesOnly": {
+    "patchSha256": {
+      "before": "afaa6dd2560b4f0032b4729f7c0bd0f2a2692b2f418a01074e24b6a9b92ad02c",
+      "after": "2700d87946f1f6798f1a982ca651f21f8f28aff626b5ea6cbbe3fa614591f511"
+    },
+    "mutantSha256": {
+      "before": "6a10fca7681b6d11d5cc82927fe6b632025abe85554884975ca1378b2e6b6b36",
+      "after": "94b9db694ee543a9f9cd5e341021acdcdce8f936d49a68c8d63607ad7feb45cc"
+    },
+    "activationSourceSha256": {
+      "before": "6a10fca7681b6d11d5cc82927fe6b632025abe85554884975ca1378b2e6b6b36",
+      "after": "94b9db694ee543a9f9cd5e341021acdcdce8f936d49a68c8d63607ad7feb45cc"
+    }
+  },
+  "patchSha256": {
+    "from-existing-force-true.patch": "d53c32abe6deaf166998fe58a48013aa41f6b4fe51960b9bf2d51f14e7d35e89",
+    "restore-existing-force-true.patch": "6b895976d25d4e88776134902c8cbb2bf5f73d141a78c6386ece4a189384ed73",
+    "from-test001.patch": "2700d87946f1f6798f1a982ca651f21f8f28aff626b5ea6cbbe3fa614591f511",
+    "restore-test001.patch": "b5070f8cfe3cad2ae6246b0bc59b22ea753bf18a426aee07ea2a0fe72d4b97aa"
+  },
+  "sourceInspection": {
+    "workerSetup": "startWorkers creates genuine guided and ordinary ProcessBuilders, redirects their actual output to the existing log paths, registers ownership, waits for exact listener readiness, and propagates setup failure with original cleanup.",
+    "noLearnedCorpusSetup": "The added call does not create/learn/finalize/execute a test and contains no AUDIT_CANARIES registration; original synthetic scanner only uses local values and C5CanaryStream objects, not C5Capture.",
+    "teardown": "Existing final stop traverses all OWNED_FIXTURE_PROCESSES, stops/verifies roots and descendants before scanFinalOwnedSinks, then closes the actual application context and performs second audit boundary. No cleanup path changed.",
+    "policyPrerequisite": "seedGovernedPolicies invokes existing policy fixture; V19 studio_guided_policies.csi_id and created_by are plain required varchar fields, with no CSI/user foreign key. No new prerequisite seeding is proposed.",
+    "limits": "Source inspection only; actual worker readiness, realCanaryCount0, ownership/drain and exact two-assertion throwable tree remain runtime obligations."
+  },
+  "rawFailedRunPreserved": "obs011-recovery-20261020-itr-test001-force-true01",
+  "rawPrivateValuesExported": false,
+  "fullClassCredit": false,
+  "budgetUsdCeiling": 500,
+  "aggregateSpendKnown": false,
+  "javaCompilationOrSourceParserOrNativeRuntimeExecuted": false
+}

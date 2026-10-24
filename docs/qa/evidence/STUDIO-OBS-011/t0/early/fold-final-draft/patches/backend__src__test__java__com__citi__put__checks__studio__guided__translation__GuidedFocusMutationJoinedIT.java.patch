@@ -1,0 +1,40 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java
+@@ -17,7 +17,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.session.GuidedContracts;
+ import com.citi.put.checks.studio.guided.session.GuidedInternalController;
+ import com.citi.put.checks.studio.guided.session.GuidedInternalSecurity;
+@@ -644,8 +644,8 @@
+     }
+ 
+     @Bean
+-    GuidedRunnerClient runner() {
+-      return new GuidedRunnerClient(
++    HttpRunnerDispatchClient runner() {
++      return new HttpRunnerDispatchClient(
+           URI.create("https://127.0.0.1:" + RUNNER_PORT),
+           TLS,
+           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -656,7 +656,7 @@
+     GuidedDispatchService dispatch(
+         GuidedSessionService sessions,
+         GuidedMaterializationService materialization,
+-        GuidedRunnerClient runner) {
++        HttpRunnerDispatchClient runner) {
+       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
+       sessions.installStopSender(dispatch::stop);
+       return dispatch;
+@@ -865,7 +865,7 @@
+   @Autowired GuidedSessionRepository repository;
+   @Autowired GuidedMaterializationService materialization;
+   @Autowired GuidedDispatchService dispatch;
+-  @Autowired GuidedRunnerClient runner;
++  @Autowired HttpRunnerDispatchClient runner;
+   @Autowired JdbcTemplate jdbc;
+   @Autowired DataSource fixtureDataSource;
+   @Autowired GuidedTranslationStore store;

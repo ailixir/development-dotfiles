@@ -1,0 +1,8 @@
+Error: execution error at (put-checks/templates/deployment.yaml:400:4): configOverrides property studio.gateway.provider is managed by the chart; use its dedicated values or Secret references
+
+Use --debug flag to render out invalid YAML
+
+Command failed: helm template release-name /var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/gateway-independent-XtQzEF/fixed --set studioRunner.enabled=true --set studioRunner.tls.controllerCertificateFingerprint256=0B:12:19:20:27:2E:35:3C:43:4A:51:58:5F:66:6D:74:7B:82:89:90:97:9E:A5:AC:B3:BA:C1:C8:CF:D6:DD:E4 --set-json worker.configOverrides={"studio":{"gateway":{"provider":"override"}}}
+Error: execution error at (put-checks/templates/deployment.yaml:400:4): configOverrides property studio.gateway.provider is managed by the chart; use its dedicated values or Secret references
+
+Use --debug flag to render out invalid YAML

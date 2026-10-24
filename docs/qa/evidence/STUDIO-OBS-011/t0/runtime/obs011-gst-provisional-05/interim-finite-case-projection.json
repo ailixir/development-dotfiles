@@ -1,0 +1,66 @@
+{
+  "atUtc": "2026-10-19T10:14:01.848491+00:00",
+  "status": "INTERIM_TOOL_LINES_NOT_XML_PROOF",
+  "perClassToolLines": {
+    "GuidedCommittedRefreshStateTest": {
+      "PASSED": 3,
+      "FAILED": 0,
+      "SKIPPED": 0
+    },
+    "GuidedEvidencePendingAppendIT": {
+      "PASSED": 8,
+      "FAILED": 0,
+      "SKIPPED": 0
+    },
+    "GuidedLifecycleReasonIT": {
+      "PASSED": 5,
+      "FAILED": 0,
+      "SKIPPED": 0
+    },
+    "GuidedServiceTransportFaultIT": {
+      "PASSED": 37,
+      "FAILED": 2,
+      "SKIPPED": 0
+    },
+    "GuidedSessionIT": {
+      "PASSED": 38,
+      "FAILED": 6,
+      "SKIPPED": 0
+    }
+  },
+  "failedToolNames": [
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost()"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost()"
+    },
+    {
+      "class": "GuidedSessionIT",
+      "displayName": "clarificationSelectionAndPauseChangeRollBackTogether()"
+    },
+    {
+      "class": "GuidedSessionIT",
+      "displayName": "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer()"
+    },
+    {
+      "class": "GuidedSessionIT",
+      "displayName": "clarificationIsBoundToGenerationChoiceAndOriginalDeadline()"
+    },
+    {
+      "class": "GuidedSessionIT",
+      "displayName": "concurrentConflictingStartsHaveOneWinner()"
+    },
+    {
+      "class": "GuidedSessionIT",
+      "displayName": "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping()"
+    },
+    {
+      "class": "GuidedSessionIT",
+      "displayName": "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState()"
+    }
+  ],
+  "completedXmlProofNotYetRead": true
+}

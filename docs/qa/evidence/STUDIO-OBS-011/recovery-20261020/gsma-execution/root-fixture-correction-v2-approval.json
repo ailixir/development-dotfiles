@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-10-20T14:29:44.541341+00:00",
+  "decision": "APPROVE_CORRECTED_FRESH_SESSION_FIXTURE",
+  "previousApprovalDefect": "Root also missed V14 terminal-state immutability;red03 setupfailures preserved,no greencredit",
+  "patchSha256": "e8802db516fea0f1948d5fe5a11b1147fd5d15b0c0c3c71d8a41245799c76cdd",
+  "candidateSha256": "255469af129ef55146c568d5a839d643c6469c54900bbd81c699b87b2f056c05",
+  "review": "Reuse same realHTTPstart setup for retainedbase halves and later PREPARING/FINALIZING segment. Capture only freshPREPARING rows thenSUCCEEDED. Original assertions/lookup-boundaries retained. All ownstartIDs canceled usingassertAll AfterEach,including receipt-test initialstart. No maincandidate/migration/policy change.",
+  "authority": "User authorized implementation;root concretefixture correction;no product waiver",
+  "freshLabel": "obs011-recovery-20261020-gsma-red04",
+  "noNativeCreditForOldSetupFailures": true
+}

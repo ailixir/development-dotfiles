@@ -1,0 +1,737 @@
+{
+  "scope": "ACTUAL_FAILED_GATEWAY_SETUP_AND_EXACT_UNEXECUTED_MASK_CORRECTION",
+  "dispatchPinsVerified": 142,
+  "oldRawSuiteExit": 1,
+  "actualFailedCases": 2,
+  "actualPassedCases": 0,
+  "actualTemplateRenders": 0,
+  "oldPerCaseErrorCounts": {
+    "M-RECURSION": 2,
+    "M-NORMALIZED-COMPARISON": 2
+  },
+  "failedChartModesHistogram": {
+    "0600": 86,
+    "0644": 2
+  },
+  "failedChartBytesAllFixedCandidateExact": true,
+  "originalRepository22ChartBindingsUnchanged": true,
+  "sealedPackageArtifactsVerified": 63,
+  "originalManifestSha256": "06107221f5863414867f79831e69758253252ff1d991663db460200882a80d54",
+  "oldFailureClassificationSha256": "1afe9e3d7a9274b839123bf62d639d7ff0aba5a9a643ec5487bed4ebe92dd98b",
+  "newAuthorizationSha256": "716079f965cea83eea5b54796aae5f834b909b273cc6bab9a4cdaa973a6cfabe",
+  "newRunPrivateSha256": "1cfcd55a293d790182bebf7ef05af9453e4d6004754c194587912692e71aa890",
+  "newExecuteOnceSha256": "20698ce517a856b3f613c3bbca8b32ca4c3848bf3188b3cde64fb3ffeac0c2c0",
+  "candidateOnlyGlobal022PlusAuthPins": true,
+  "childOnlyMaskActuallyImplemented": false,
+  "installedPythonChildUmaskKeywordSupported": true,
+  "requiredPrecisionCorrection": "Keep parent077; remove global022 and pass umask=0o022 only to Vitest subprocess.run",
+  "cleanupCandidates": [
+    {
+      "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/gateway-independent-g4OtPa",
+      "dev": 16777229,
+      "ino": 218714714,
+      "uid": 501,
+      "gid": 20,
+      "mode": "0700",
+      "kind": "EXACT_FAILED_OWNED_CHART_UNIT",
+      "unit": "M-RECURSION",
+      "archive": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway-independent-20261019-0620-once/failed-owned-chart-archives/M-RECURSION",
+      "files": {
+        "fixed/.helmignore": {
+          "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+          "mode": "0600",
+          "bytes": 86
+        },
+        "fixed/Chart.yaml": {
+          "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+          "mode": "0600",
+          "bytes": 263
+        },
+        "fixed/templates/NOTES.txt": {
+          "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+          "mode": "0600",
+          "bytes": 989
+        },
+        "fixed/templates/_helpers.tpl": {
+          "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+          "mode": "0600",
+          "bytes": 44353
+        },
+        "fixed/templates/api-guided-tls-networkpolicy.yaml": {
+          "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+          "mode": "0600",
+          "bytes": 2789
+        },
+        "fixed/templates/configmap.yaml": {
+          "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+          "mode": "0600",
+          "bytes": 6068
+        },
+        "fixed/templates/deployment.yaml": {
+          "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+          "mode": "0600",
+          "bytes": 39697
+        },
+        "fixed/templates/hpa.yaml": {
+          "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+          "mode": "0600",
+          "bytes": 778
+        },
+        "fixed/templates/ingress.yaml": {
+          "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+          "mode": "0600",
+          "bytes": 2276
+        },
+        "fixed/templates/pdb.yaml": {
+          "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+          "mode": "0600",
+          "bytes": 1566
+        },
+        "fixed/templates/service.yaml": {
+          "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+          "mode": "0600",
+          "bytes": 1544
+        },
+        "fixed/templates/serviceaccount.yaml": {
+          "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+          "mode": "0600",
+          "bytes": 1440
+        },
+        "fixed/templates/studio-object-store-pvc.yaml": {
+          "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+          "mode": "0600",
+          "bytes": 1189
+        },
+        "fixed/templates/studio-runner-deployment.yaml": {
+          "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+          "mode": "0600",
+          "bytes": 26332
+        },
+        "fixed/templates/studio-runner-networkpolicy.yaml": {
+          "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+          "mode": "0600",
+          "bytes": 4483
+        },
+        "fixed/templates/studio-runner-scaledobject.yaml": {
+          "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+          "mode": "0600",
+          "bytes": 2732
+        },
+        "fixed/templates/studio-runner-service.yaml": {
+          "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+          "mode": "0600",
+          "bytes": 2524
+        },
+        "fixed/templates/studio-sse-ingress.yaml": {
+          "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+          "mode": "0600",
+          "bytes": 5470
+        },
+        "fixed/values-dev.yaml": {
+          "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+          "mode": "0600",
+          "bytes": 5488
+        },
+        "fixed/values-prod.yaml": {
+          "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+          "mode": "0600",
+          "bytes": 9186
+        },
+        "fixed/values-uat.yaml": {
+          "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+          "mode": "0600",
+          "bytes": 9462
+        },
+        "fixed/values.yaml": {
+          "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+          "mode": "0600",
+          "bytes": 50683
+        },
+        "mutant/.helmignore": {
+          "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+          "mode": "0600",
+          "bytes": 86
+        },
+        "mutant/Chart.yaml": {
+          "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+          "mode": "0600",
+          "bytes": 263
+        },
+        "mutant/templates/NOTES.txt": {
+          "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+          "mode": "0600",
+          "bytes": 989
+        },
+        "mutant/templates/_helpers.tpl": {
+          "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+          "mode": "0644",
+          "bytes": 44353
+        },
+        "mutant/templates/api-guided-tls-networkpolicy.yaml": {
+          "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+          "mode": "0600",
+          "bytes": 2789
+        },
+        "mutant/templates/configmap.yaml": {
+          "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+          "mode": "0600",
+          "bytes": 6068
+        },
+        "mutant/templates/deployment.yaml": {
+          "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+          "mode": "0600",
+          "bytes": 39697
+        },
+        "mutant/templates/hpa.yaml": {
+          "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+          "mode": "0600",
+          "bytes": 778
+        },
+        "mutant/templates/ingress.yaml": {
+          "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+          "mode": "0600",
+          "bytes": 2276
+        },
+        "mutant/templates/pdb.yaml": {
+          "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+          "mode": "0600",
+          "bytes": 1566
+        },
+        "mutant/templates/service.yaml": {
+          "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+          "mode": "0600",
+          "bytes": 1544
+        },
+        "mutant/templates/serviceaccount.yaml": {
+          "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+          "mode": "0600",
+          "bytes": 1440
+        },
+        "mutant/templates/studio-object-store-pvc.yaml": {
+          "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+          "mode": "0600",
+          "bytes": 1189
+        },
+        "mutant/templates/studio-runner-deployment.yaml": {
+          "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+          "mode": "0600",
+          "bytes": 26332
+        },
+        "mutant/templates/studio-runner-networkpolicy.yaml": {
+          "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+          "mode": "0600",
+          "bytes": 4483
+        },
+        "mutant/templates/studio-runner-scaledobject.yaml": {
+          "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+          "mode": "0600",
+          "bytes": 2732
+        },
+        "mutant/templates/studio-runner-service.yaml": {
+          "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+          "mode": "0600",
+          "bytes": 2524
+        },
+        "mutant/templates/studio-sse-ingress.yaml": {
+          "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+          "mode": "0600",
+          "bytes": 5470
+        },
+        "mutant/values-dev.yaml": {
+          "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+          "mode": "0600",
+          "bytes": 5488
+        },
+        "mutant/values-prod.yaml": {
+          "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+          "mode": "0600",
+          "bytes": 9186
+        },
+        "mutant/values-uat.yaml": {
+          "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+          "mode": "0600",
+          "bytes": 9462
+        },
+        "mutant/values.yaml": {
+          "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+          "mode": "0600",
+          "bytes": 50683
+        }
+      },
+      "directories": {
+        "fixed": "0o700",
+        "fixed/templates": "0o700",
+        "mutant": "0o700",
+        "mutant/templates": "0o700"
+      },
+      "symlinks": {},
+      "allFixedCandidateBytesPreserved": true,
+      "exact0644RestorationGatePassed": false,
+      "cleanupProposedNotExecuted": true
+    },
+    {
+      "path": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/gateway-independent-tqMENK",
+      "dev": 16777229,
+      "ino": 218714764,
+      "uid": 501,
+      "gid": 20,
+      "mode": "0700",
+      "kind": "EXACT_FAILED_OWNED_CHART_UNIT",
+      "unit": "M-NORMALIZED-COMPARISON",
+      "archive": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway-independent-20261019-0620-once/failed-owned-chart-archives/M-NORMALIZED-COMPARISON",
+      "files": {
+        "fixed/.helmignore": {
+          "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+          "mode": "0600",
+          "bytes": 86
+        },
+        "fixed/Chart.yaml": {
+          "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+          "mode": "0600",
+          "bytes": 263
+        },
+        "fixed/templates/NOTES.txt": {
+          "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+          "mode": "0600",
+          "bytes": 989
+        },
+        "fixed/templates/_helpers.tpl": {
+          "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+          "mode": "0600",
+          "bytes": 44353
+        },
+        "fixed/templates/api-guided-tls-networkpolicy.yaml": {
+          "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+          "mode": "0600",
+          "bytes": 2789
+        },
+        "fixed/templates/configmap.yaml": {
+          "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+          "mode": "0600",
+          "bytes": 6068
+        },
+        "fixed/templates/deployment.yaml": {
+          "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+          "mode": "0600",
+          "bytes": 39697
+        },
+        "fixed/templates/hpa.yaml": {
+          "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+          "mode": "0600",
+          "bytes": 778
+        },
+        "fixed/templates/ingress.yaml": {
+          "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+          "mode": "0600",
+          "bytes": 2276
+        },
+        "fixed/templates/pdb.yaml": {
+          "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+          "mode": "0600",
+          "bytes": 1566
+        },
+        "fixed/templates/service.yaml": {
+          "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+          "mode": "0600",
+          "bytes": 1544
+        },
+        "fixed/templates/serviceaccount.yaml": {
+          "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+          "mode": "0600",
+          "bytes": 1440
+        },
+        "fixed/templates/studio-object-store-pvc.yaml": {
+          "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+          "mode": "0600",
+          "bytes": 1189
+        },
+        "fixed/templates/studio-runner-deployment.yaml": {
+          "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+          "mode": "0600",
+          "bytes": 26332
+        },
+        "fixed/templates/studio-runner-networkpolicy.yaml": {
+          "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+          "mode": "0600",
+          "bytes": 4483
+        },
+        "fixed/templates/studio-runner-scaledobject.yaml": {
+          "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+          "mode": "0600",
+          "bytes": 2732
+        },
+        "fixed/templates/studio-runner-service.yaml": {
+          "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+          "mode": "0600",
+          "bytes": 2524
+        },
+        "fixed/templates/studio-sse-ingress.yaml": {
+          "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+          "mode": "0600",
+          "bytes": 5470
+        },
+        "fixed/values-dev.yaml": {
+          "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+          "mode": "0600",
+          "bytes": 5488
+        },
+        "fixed/values-prod.yaml": {
+          "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+          "mode": "0600",
+          "bytes": 9186
+        },
+        "fixed/values-uat.yaml": {
+          "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+          "mode": "0600",
+          "bytes": 9462
+        },
+        "fixed/values.yaml": {
+          "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+          "mode": "0600",
+          "bytes": 50683
+        },
+        "mutant/.helmignore": {
+          "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+          "mode": "0600",
+          "bytes": 86
+        },
+        "mutant/Chart.yaml": {
+          "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+          "mode": "0600",
+          "bytes": 263
+        },
+        "mutant/templates/NOTES.txt": {
+          "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+          "mode": "0600",
+          "bytes": 989
+        },
+        "mutant/templates/_helpers.tpl": {
+          "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+          "mode": "0644",
+          "bytes": 44353
+        },
+        "mutant/templates/api-guided-tls-networkpolicy.yaml": {
+          "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+          "mode": "0600",
+          "bytes": 2789
+        },
+        "mutant/templates/configmap.yaml": {
+          "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+          "mode": "0600",
+          "bytes": 6068
+        },
+        "mutant/templates/deployment.yaml": {
+          "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+          "mode": "0600",
+          "bytes": 39697
+        },
+        "mutant/templates/hpa.yaml": {
+          "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+          "mode": "0600",
+          "bytes": 778
+        },
+        "mutant/templates/ingress.yaml": {
+          "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+          "mode": "0600",
+          "bytes": 2276
+        },
+        "mutant/templates/pdb.yaml": {
+          "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+          "mode": "0600",
+          "bytes": 1566
+        },
+        "mutant/templates/service.yaml": {
+          "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+          "mode": "0600",
+          "bytes": 1544
+        },
+        "mutant/templates/serviceaccount.yaml": {
+          "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+          "mode": "0600",
+          "bytes": 1440
+        },
+        "mutant/templates/studio-object-store-pvc.yaml": {
+          "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+          "mode": "0600",
+          "bytes": 1189
+        },
+        "mutant/templates/studio-runner-deployment.yaml": {
+          "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+          "mode": "0600",
+          "bytes": 26332
+        },
+        "mutant/templates/studio-runner-networkpolicy.yaml": {
+          "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+          "mode": "0600",
+          "bytes": 4483
+        },
+        "mutant/templates/studio-runner-scaledobject.yaml": {
+          "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+          "mode": "0600",
+          "bytes": 2732
+        },
+        "mutant/templates/studio-runner-service.yaml": {
+          "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+          "mode": "0600",
+          "bytes": 2524
+        },
+        "mutant/templates/studio-sse-ingress.yaml": {
+          "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+          "mode": "0600",
+          "bytes": 5470
+        },
+        "mutant/values-dev.yaml": {
+          "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+          "mode": "0600",
+          "bytes": 5488
+        },
+        "mutant/values-prod.yaml": {
+          "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+          "mode": "0600",
+          "bytes": 9186
+        },
+        "mutant/values-uat.yaml": {
+          "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+          "mode": "0600",
+          "bytes": 9462
+        },
+        "mutant/values.yaml": {
+          "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+          "mode": "0600",
+          "bytes": 50683
+        }
+      },
+      "directories": {
+        "fixed": "0o700",
+        "fixed/templates": "0o700",
+        "mutant": "0o700",
+        "mutant/templates": "0o700"
+      },
+      "symlinks": {},
+      "allFixedCandidateBytesPreserved": true,
+      "exact0644RestorationGatePassed": false,
+      "cleanupProposedNotExecuted": true
+    },
+    {
+      "path": "/private/tmp/obs009-gateway-independent-20261019-0620-once",
+      "dev": 16777229,
+      "ino": 218714657,
+      "uid": 501,
+      "gid": 0,
+      "mode": "0700",
+      "kind": "EXACT_FAILED_OWNED_WORKSPACE",
+      "archive": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway-independent-20261019-0620-once/complete-workspace-archive",
+      "files": {
+        "helm-chart/put-checks/.helmignore": {
+          "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+          "mode": "0644",
+          "bytes": 86
+        },
+        "helm-chart/put-checks/Chart.yaml": {
+          "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+          "mode": "0644",
+          "bytes": 263
+        },
+        "helm-chart/put-checks/templates/NOTES.txt": {
+          "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+          "mode": "0644",
+          "bytes": 989
+        },
+        "helm-chart/put-checks/templates/_helpers.tpl": {
+          "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+          "mode": "0644",
+          "bytes": 44353
+        },
+        "helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml": {
+          "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+          "mode": "0644",
+          "bytes": 2789
+        },
+        "helm-chart/put-checks/templates/configmap.yaml": {
+          "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+          "mode": "0644",
+          "bytes": 6068
+        },
+        "helm-chart/put-checks/templates/deployment.yaml": {
+          "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+          "mode": "0644",
+          "bytes": 39697
+        },
+        "helm-chart/put-checks/templates/hpa.yaml": {
+          "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+          "mode": "0644",
+          "bytes": 778
+        },
+        "helm-chart/put-checks/templates/ingress.yaml": {
+          "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+          "mode": "0644",
+          "bytes": 2276
+        },
+        "helm-chart/put-checks/templates/pdb.yaml": {
+          "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+          "mode": "0644",
+          "bytes": 1566
+        },
+        "helm-chart/put-checks/templates/service.yaml": {
+          "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+          "mode": "0644",
+          "bytes": 1544
+        },
+        "helm-chart/put-checks/templates/serviceaccount.yaml": {
+          "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+          "mode": "0644",
+          "bytes": 1440
+        },
+        "helm-chart/put-checks/templates/studio-object-store-pvc.yaml": {
+          "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+          "mode": "0644",
+          "bytes": 1189
+        },
+        "helm-chart/put-checks/templates/studio-runner-deployment.yaml": {
+          "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+          "mode": "0644",
+          "bytes": 26332
+        },
+        "helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml": {
+          "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+          "mode": "0644",
+          "bytes": 4483
+        },
+        "helm-chart/put-checks/templates/studio-runner-scaledobject.yaml": {
+          "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+          "mode": "0644",
+          "bytes": 2732
+        },
+        "helm-chart/put-checks/templates/studio-runner-service.yaml": {
+          "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+          "mode": "0644",
+          "bytes": 2524
+        },
+        "helm-chart/put-checks/templates/studio-sse-ingress.yaml": {
+          "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+          "mode": "0644",
+          "bytes": 5470
+        },
+        "helm-chart/put-checks/values-dev.yaml": {
+          "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+          "mode": "0644",
+          "bytes": 5488
+        },
+        "helm-chart/put-checks/values-prod.yaml": {
+          "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+          "mode": "0644",
+          "bytes": 9186
+        },
+        "helm-chart/put-checks/values-uat.yaml": {
+          "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+          "mode": "0644",
+          "bytes": 9462
+        },
+        "helm-chart/put-checks/values.yaml": {
+          "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+          "mode": "0644",
+          "bytes": 50683
+        },
+        "render-evidence-exit2/M-NORMALIZED-COMPARISON-receipt.json": {
+          "sha256": "2d8b4be052d57c5962e92b71edf4cb306e35d3c6ed7ae83376bd40edffee6a6e",
+          "mode": "0600",
+          "bytes": 4157
+        },
+        "render-evidence-exit2/M-RECURSION-receipt.json": {
+          "sha256": "4f212d25968fad8bc8ce5dd135ed9f975da7268c9527ab8fd3c17d41b59c98dd",
+          "mode": "0600",
+          "bytes": 4133
+        },
+        "render-evidence-exit2/versions.json": {
+          "sha256": "f4a951601fec4e015d638f4fc525e489e49bd4327b66b9b41330eff1fc9b4b13",
+          "mode": "0600",
+          "bytes": 3710
+        },
+        "studio-runner/.vite-gateway-independent/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json": {
+          "sha256": "ec7a126692a812f6df974928e888b8cfd81266d1c44a12c39f0dcf5b411cb5cb",
+          "mode": "0600",
+          "bytes": 133
+        },
+        "studio-runner/eslint.config.js": {
+          "sha256": "9a90981a969856f3190f82b4bcebf1a04a0fa38abe0a5fc5571f83f01d8e68eb",
+          "mode": "0644",
+          "bytes": 4410
+        },
+        "studio-runner/package-lock.json": {
+          "sha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613",
+          "mode": "0644",
+          "bytes": 213424
+        },
+        "studio-runner/package.json": {
+          "sha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e",
+          "mode": "0644",
+          "bytes": 1481
+        },
+        "studio-runner/test/deployment/gateway-independent-mutants.test.ts": {
+          "sha256": "b6dbbda99916ea1ba25b5e98357eccf3e91a6affc583eb2cc7fda628f45846d6",
+          "mode": "0644",
+          "bytes": 10629
+        },
+        "studio-runner/test/deployment/gateway-native-observer.ts": {
+          "sha256": "6b7225e4a9ac67fbfffc1a4f6383f1e0bcced79bda97ca65f718893403d0637b",
+          "mode": "0644",
+          "bytes": 10183
+        },
+        "studio-runner/test/deployment/helm.ts": {
+          "sha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0",
+          "mode": "0644",
+          "bytes": 23388
+        },
+        "studio-runner/test/helpers/corpus.ts": {
+          "sha256": "63c091d87319035db1673bfbca75d31a02206697ed454f52b3e8f21093dfab79",
+          "mode": "0644",
+          "bytes": 438
+        },
+        "studio-runner/tsconfig.json": {
+          "sha256": "723196d470e796a3638c23d794004b30053e0e334a0bb3f1fa270a0a75075046",
+          "mode": "0644",
+          "bytes": 767
+        },
+        "studio-runner/vitest.deployment.config.ts": {
+          "sha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b",
+          "mode": "0644",
+          "bytes": 3063
+        },
+        "studio-runner/vitest.gateway-independent.config.ts": {
+          "sha256": "73051c9b69ddfcfa1e5bbc2e7df5f2d974cd97edd18c5510b70910f19bede6ac",
+          "mode": "0644",
+          "bytes": 399
+        },
+        "vitest.json": {
+          "sha256": "d3b36185b0396ca49ae653c68daa44f9367b10a718c2495355e70530db010bf7",
+          "mode": "0600",
+          "bytes": 4228
+        }
+      },
+      "directories": {
+        "helm-chart": "0o755",
+        "helm-chart/put-checks": "0o755",
+        "helm-chart/put-checks/templates": "0o755",
+        "render-evidence-exit2": "0o700",
+        "studio-runner": "0o755",
+        "studio-runner/.vite-gateway-independent": "0o700",
+        "studio-runner/.vite-gateway-independent/vitest": "0o700",
+        "studio-runner/.vite-gateway-independent/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709": "0o700",
+        "studio-runner/test": "0o755",
+        "studio-runner/test/deployment": "0o755",
+        "studio-runner/test/helpers": "0o755"
+      },
+      "symlinks": {
+        "studio-runner/node_modules": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules"
+      },
+      "cleanupProposedNotExecuted": true,
+      "dependencyTargetMustRemain": true
+    }
+  ],
+  "cleanupRequiresFreshExactIdentityAndInventoryRecheck": true,
+  "cleanupExecuted": false,
+  "newNativeOrHelmRun": false,
+  "productSourceWritten": false,
+  "oldFailureOrGateFlagsRewritten": false,
+  "nativeLaneC8LifecycleCredit": false
+}

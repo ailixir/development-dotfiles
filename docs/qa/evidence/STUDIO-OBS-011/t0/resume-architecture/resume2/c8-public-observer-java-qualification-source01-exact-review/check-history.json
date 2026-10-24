@@ -1,0 +1,54 @@
+{
+  "subjectSourceNeverEdited": true,
+  "guardedAttempts": [
+    {
+      "tool": "d8cbd2",
+      "actualExit": 0,
+      "checks": 18,
+      "cases": 6,
+      "stderrEmpty": true,
+      "auditUnchanged": true,
+      "actualTargetActions": 0
+    }
+  ],
+  "finiteAttempts": [
+    {
+      "tool": "a5ab3d",
+      "actualExit": 1,
+      "source": "verify-source-attempt01.py",
+      "stdout": "source-attempt01.stdout",
+      "stderr": "source-attempt01.stderr",
+      "classification": "Reviewer expected map to include local closures; packet maps top-level/class definitions and direct methods. Corrected checker traversal only, no subject/test change."
+    },
+    {
+      "tool": "f7ab2e",
+      "actualExit": 0,
+      "source": "verify_source.py",
+      "checks": 1617,
+      "pinRecords": 348,
+      "stderrEmpty": true
+    }
+  ],
+  "bookkeepingDisplayAttempts": [
+    {
+      "tool": "139465",
+      "actualExit": 1,
+      "error": "AttributeError list has no items; verified-inputs.json is a list. Correct exact layout read8f44d0."
+    },
+    {
+      "tool": "4992e9",
+      "actualExit": 1,
+      "error": "AttributeError list has no items; implementation-map.json is a list. Correct exact layout read1ce560."
+    },
+    {
+      "tool": "72ac55",
+      "actualExit": 1,
+      "error": "JSONDecodeError Extra data; Quinn replay stdout is a JSON stream, not one document. Complete sealed raw buffers/hash and structured checks were bound without modifying/replaying them."
+    }
+  ],
+  "priorAuthorHistory": "Initial genuine strict-bool/nonempty classpath predicate failure and correction, absent guessed context filename, all successful later runs retained in immutable subject. Prior design/observer histories unchanged.",
+  "newGuessedFilenames": false,
+  "noFurtherTargetExpansionAfterBoundedBatch": true,
+  "aggregateSpend": "UNKNOWN",
+  "budgetCeilingUsd": 500
+}

@@ -1,0 +1,154 @@
+
+ RUN  v3.2.7 /private/tmp/obs009-gateway80-offtree03-20261019/repo/studio-runner
+
+ ❯ test/deployment/integrations.test.ts (95 tests | 48 failed | 47 skipped) 8280ms
+   ↓ production integration provider wiring > ships production-safe Vertex translation and an enabled UI_TEST source by default
+   ↓ production integration provider wiring > passes a test-scoped Vault path template the backend accepts, with the provider off
+   ↓ production integration provider wiring > renders one Sonic endpoint/bucket into writer and readers with file credentials
+   ↓ production integration provider wiring > fails rendering an incomplete Sonic selection instead of falling back
+   ↓ production integration provider wiring > can reuse one pre-provisioned local claim and rejects an unbound local store
+   ↓ production integration provider wiring > mounts Vault and Vertex credentials only when their real providers are selected
+   ↓ production integration provider wiring > values-uat.yaml selects Vertex Gemini Flash and environment-owned routing configuration
+   ↓ production integration provider wiring > values-prod.yaml selects Vertex Gemini Flash and environment-owned routing configuration
+   ↓ production integration provider wiring > values-uat.yaml rejects disabled translation
+   ↓ production integration provider wiring > values-prod.yaml rejects disabled translation
+   ↓ production integration provider wiring > fails a Vertex selection that provides neither direct routing values nor a ConfigMap
+   ↓ production integration provider wiring > values-uat.yaml cannot disable UI_TEST to bypass the application readiness guard
+   ↓ production integration provider wiring > values-prod.yaml cannot disable UI_TEST to bypass the application readiness guard
+   ↓ production integration provider wiring > values-uat.yaml cannot relabel a deployed Spring profile as local to weaken provider guards
+   ↓ production integration provider wiring > values-prod.yaml cannot relabel a deployed Spring profile as local to weaken provider guards
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects flat studio.gateway.provider 318ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects flat studio.gateway.endpoint 116ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects flat studio.gateway.project 116ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects flat studio.gateway.location 122ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects flat studio.gateway.model 116ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects flat studio.gateway.credentials.mode 105ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects flat studio.gateway.credentials.service-account-key-file 107ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects flat STUDIO_GATEWAY_CREDENTIALS_KEY_FILE 108ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects nested studio.gateway.provider 95ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects nested studio.gateway.endpoint 98ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects nested studio.gateway.project 129ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects nested studio.gateway.location 108ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects nested studio.gateway.model 107ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects nested studio.gateway.credentials.mode 225ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects nested studio.gateway.credentials.service-account-key-file 136ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects nested STUDIO_GATEWAY_CREDENTIALS_KEY_FILE 134ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects relaxed studio.gateway.provider 149ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects relaxed studio.gateway.endpoint 198ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects relaxed studio.gateway.project 277ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects relaxed studio.gateway.location 168ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects relaxed studio.gateway.model 140ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects relaxed studio.gateway.credentials.mode 183ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects relaxed studio.gateway.credentials.service-account-key-file 180ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > backend rejects relaxed STUDIO_GATEWAY_CREDENTIALS_KEY_FILE 173ms
+     → expected true to be false // Object.is equality
+   ↓ gateway chart-owned facts in mounted Spring configuration > backend keeps legacy compile spelling studio.gateway.provider reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > backend keeps legacy compile spelling studio.gateway.endpoint reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > backend keeps legacy compile spelling studio.gateway.project reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > backend keeps legacy compile spelling studio.gateway.location reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > backend keeps legacy compile spelling studio.gateway.model reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > backend keeps legacy compile spelling studio.gateway.credentials.mode reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > backend keeps legacy compile spelling studio.gateway.credentials.service-account-key-file reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > backend keeps gateway tuning and custom properties available
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects flat studio.gateway.provider 176ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects flat studio.gateway.endpoint 138ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects flat studio.gateway.project 125ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects flat studio.gateway.location 140ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects flat studio.gateway.model 184ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects flat studio.gateway.credentials.mode 175ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects flat studio.gateway.credentials.service-account-key-file 220ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects flat STUDIO_GATEWAY_CREDENTIALS_KEY_FILE 200ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects nested studio.gateway.provider 234ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects nested studio.gateway.endpoint 187ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects nested studio.gateway.project 190ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects nested studio.gateway.location 178ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects nested studio.gateway.model 182ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects nested studio.gateway.credentials.mode 184ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects nested studio.gateway.credentials.service-account-key-file 550ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects nested STUDIO_GATEWAY_CREDENTIALS_KEY_FILE 337ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects relaxed studio.gateway.provider 196ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects relaxed studio.gateway.endpoint 172ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects relaxed studio.gateway.project 132ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects relaxed studio.gateway.location 160ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects relaxed studio.gateway.model 151ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects relaxed studio.gateway.credentials.mode 142ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects relaxed studio.gateway.credentials.service-account-key-file 160ms
+     → expected true to be false // Object.is equality
+   × gateway chart-owned facts in mounted Spring configuration > worker rejects relaxed STUDIO_GATEWAY_CREDENTIALS_KEY_FILE 158ms
+     → expected true to be false // Object.is equality
+   ↓ gateway chart-owned facts in mounted Spring configuration > worker keeps legacy compile spelling studio.gateway.provider reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > worker keeps legacy compile spelling studio.gateway.endpoint reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > worker keeps legacy compile spelling studio.gateway.project reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > worker keeps legacy compile spelling studio.gateway.location reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > worker keeps legacy compile spelling studio.gateway.model reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > worker keeps legacy compile spelling studio.gateway.credentials.mode reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > worker keeps legacy compile spelling studio.gateway.credentials.service-account-key-file reserved
+   ↓ gateway chart-owned facts in mounted Spring configuration > worker keeps gateway tuning and custom properties available
+   ↓ gateway chart-owned facts in mounted Spring configuration > mutation: removing only studio.gateway.provider defeats its refusal
+   ↓ gateway chart-owned facts in mounted Spring configuration > mutation: removing only studio.gateway.endpoint defeats its refusal
+   ↓ gateway chart-owned facts in mounted Spring configuration > mutation: removing only studio.gateway.project defeats its refusal
+   ↓ gateway chart-owned facts in mounted Spring configuration > mutation: removing only studio.gateway.location defeats its refusal
+   ↓ gateway chart-owned facts in mounted Spring configuration > mutation: removing only studio.gateway.model defeats its refusal
+   ↓ gateway chart-owned facts in mounted Spring configuration > mutation: removing only studio.gateway.credentials.mode defeats its refusal
+   ↓ gateway chart-owned facts in mounted Spring configuration > mutation: removing only studio.gateway.credentials.service-account-key-file defeats its refusal
+   ↓ gateway chart-owned facts in mounted Spring configuration > mutation: removing only STUDIO_GATEWAY_CREDENTIALS_KEY_FILE defeats its refusal
+   ↓ gateway chart-owned facts in mounted Spring configuration > values.yaml: valid application-default manifests stay byte-identical after adding the guards
+   ↓ gateway chart-owned facts in mounted Spring configuration > values-dev.yaml: valid application-default manifests stay byte-identical after adding the guards
+   ↓ gateway chart-owned facts in mounted Spring configuration > values-uat.yaml: valid application-default manifests stay byte-identical after adding the guards
+   ↓ gateway chart-owned facts in mounted Spring configuration > values-prod.yaml: valid application-default manifests stay byte-identical after adding the guards
+   ↓ gateway chart-owned facts in mounted Spring configuration > values.yaml: valid service-account-file manifests stay byte-identical after adding the guards
+   ↓ gateway chart-owned facts in mounted Spring configuration > values-dev.yaml: valid service-account-file manifests stay byte-identical after adding the guards
+   ↓ gateway chart-owned facts in mounted Spring configuration > values-uat.yaml: valid service-account-file manifests stay byte-identical after adding the guards
+   ↓ gateway chart-owned facts in mounted Spring configuration > values-prod.yaml: valid service-account-file manifests stay byte-identical after adding the guards
+
+ Test Files  1 failed (1)
+      Tests  48 failed | 47 skipped (95)
+   Start at  14:17:33
+   Duration  8.80s (transform 194ms, setup 0ms, collect 264ms, tests 8.28s, environment 0ms, prepare 66ms)
+
+JSON report written to /private/tmp/obs009-gateway80-offtree03-20261019/repo/red-vitest.json

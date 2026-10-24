@@ -1,0 +1,377 @@
+--- a/studio-runner/README.md
++++ b/studio-runner/README.md
+@@ -4,27 +4,28 @@
+ 
+ Validation and execution component of the Checks UI Studio (architecture
+ [§3](../docs/architecture/studio-execution.md#3-system-architecture), §4.5, §5.2). It is the only
+-component that ever launches Chromium, and the only one that reads an LLM-proposed artifact.
++component that launches Chromium and validates data-only observed artifacts against their retained evidence.
+ 
+ Layout, toolchain, pinning, CI stages and deployment placement are fixed by
+ [ADR-001](../docs/architecture/ADR-001-studio-runner-scaffolding.md). This README documents what the
+ package does today and the defaults callers can override.
+ 
+-## What ships today (stories 10.2, 10.3, 10.6)
++## What ships today
+ 
+ | Module | Responsibility |
+ |---|---|
+-| `src/validator/` | Artifact envelope checks, default-deny AST validation, argument/reference schemas, bounds. Pure and browser-free. |
+-| `src/executor/` | Trusted executor over a `BrowserAdapter`, `StepReporter` and `ValueResolver`, with outbound redaction. |
++| `src/validator/` | Closed observed schemas, immutable evidence/history checks, policy and replay validation; pure and browser-free. |
++| `src/executor/` | Trusted data-only observed replay operations, step reporting and outbound redaction. |
+ | `src/compat/` | Reads `dist/runtime-versions.json` (`loadRuntimeVersions`) and refuses a record that lacks a required identity field. The artifact-1 compatibility check was deleted with its engine (STUDIO-OBS-012A); the observed path proves its runtime through the build identity (`assertBuild`). |
+-| `src/server/` | The four internal HTTP routes, the capacity pool, the service-identity check, bounded bodies and structured redacted logging. |
++| `src/server/` | Internal observed validation/run/cancel and health routes, the optional guided bridge, capacity, peer/service identity, bounded bodies and redacted logging. |
+ | `src/reporting/` | The admission CAS **client**, the progress/terminal report client, and the `StepReporter` implementation 10.2 left as a seam. |
+ | `src/run/` | The real browser: the `BrowserLauncher` that forks a killable child, the data-only parent↔child protocol, the Playwright adapter, the recording lifecycle and evidence vocabulary, the run-scoped clock and the runner error-code set — plus story 10.13's **runtime deadline** (`deadline.ts`), **process-tree kill and observation** (`tree.ts`) and **captured, redacted child output relay** (`outputRelay.ts`). |
+ | `src/main.ts` | Process entry: configuration, server start, `SIGTERM` drain, scratch clearing at startup and on exit. |
+ | `src/versions.ts` | `OBSERVED_CONTRACT_VERSION` only. The artifact-1 stamps were retired by STUDIO-OBS-009 AC-1 P2; the executable pins are the `const`s of the generated v3 schemas. |
+ 
+-Not yet present: `src/evidence/` (10.14). Uploading a recording, the durable result manifest and
+-the `STORED` evidence state are 10.14's; a recording still lives and dies in scratch.
++Evidence upload and durable result manifests are implemented under `src/run/`
++(`evidenceUpload.ts`, `manifest.ts` and the object-store adapters). `STORED` follows an
++acknowledged write; scratch is cleared after the bounded evidence window.
+ 
+ ## The two budgets (story 10.13)
+ 
+@@ -96,37 +97,16 @@
+ One case remains and is stated rather than implied: **a child that writes a value with a newline
+ through the middle of it** produces two lines by its own choice, and neither half matches anything.
+ 
+-## What a resolved value may touch (story 10.17)
+-
+-A run receives `resolvedVars` and `resolvedSecrets` on its job envelope and holds them in memory for
+-the length of the run. §9.2: *"Never persist them in jobs, retry queues, manifests or diagnostics."*
+-
+-**Correspondence is checked before capacity.** `validateEnvelope` is step 1 of `submit` — before
+-`pool.tryAcquire()`, before admission and before any process — and since story 10.17 it compares the
+-resolved maps' keys against `references`: every declared name has a value, no resolved key is
+-undeclared in either map, and a name crossed between the two kinds is a refusal. Before that, a job
+-declaring a secret and supplying no value was admitted, took a capacity slot, launched Chromium and
+-died mid-step in front of a real application. Every refusal carries the reference **name** and never
+-a value, which is what makes the whole `detail` array safe to log.
+-
+-**Both maps are scrubbed, not only the secrets.** The contract describes only `resolvedSecrets` as
+-*"additionally scrubbed"*; `knownValuesOf` feeds the redactor both. @po ruled on 2026-09-11 that the
+-code's stronger behaviour is correct and intended and that the *document* is what is narrower — a
+-variable value is author-supplied free text the system knows nothing about, and a `REGION` today is
+-a URL carrying a token tomorrow. Amending the document is Class B and an architect's; story 10.17
+-records the divergence and changes nothing.
+-
+-**The redactor scrubs eight variants**, not seven: plain, `encodeURIComponent`, `encodeURI`,
+-double-encoded, four base64 forms, and — since story 10.17 — the **JSON-escaped** form. `logging.ts`
+-is serialize-then-redact by design, so the bytes on a log line are escaped and a value containing
+-`"`, `\` or a newline was not the value the redactor was looking for. `redact` stays `split`/`join`:
+-no `RegExp` is built over attacker-influenced text.
+-
+-**The retained log buffer truncates before the report client redacts**, and that order is not
+-reversed — bounding is `bounds.ts`'s job and scrubbing is not. The requirement that follows is made
+-a property of the code rather than of today's callers: `RunSnapshot.appendLog` is the only caller
+-reachable from a run and it applies the run's redactor before delegating, so a producer added later
+-cannot skip it.
++## What a resolved value may touch
++
++An observed replay job carries authored `inputs`, resolved `secrets` and `secretOrigins` for
++run-scoped use. Never persist resolved values in jobs, retry queues, manifests or diagnostics.
++
++**Observed job validation comes before capacity and admission.** `runCoordinator` validates
++the closed observed job against its build identity and policy before reserving a slot.
++The child-output relay and report paths use the run's redactor. After the bounded evidence
++phase, the coordinator clears scratch and wipes input and secret values before terminal
++delivery. The former artifact-1 `resolvedVars` correspondence validator is retired.
+ 
+ ## The real browser (story 10.12)
+ 
+@@ -136,8 +116,8 @@
+ ### Where the browser runs, and what it may touch
+ 
+ One browser, one context, one page, per run, **in a child process** that exits on every path —
+-success, step failure, launch failure, error. The parent's `/v1/validate`, `/health`, `/ready` and
+-`/v1/runs` stay responsive throughout, on separate bounded resources.
++success, step failure, launch failure, error. The parent's `/v2/validate-observed`, `/health`, `/ready` and
++`/v2/runs` stay responsive throughout, on separate bounded resources.
+ 
+ The child is forked with **no arguments** and an enumerated environment (`PATH`, `HOME`, `LANG`,
+ `LC_ALL`, `NODE_OPTIONS`, `PLAYWRIGHT_BROWSERS_PATH`, `DISPLAY`, `XDG_RUNTIME_DIR`, plus `TMPDIR`
+@@ -148,9 +128,9 @@
+ 
+ Everything Chromium writes goes under the per-run scratch directory — `browser-profile/`, `video/`,
+ `downloads/`, `traces/`, `tmp/` — which is cleared on success, step failure, launch failure, error
+-and drain. **The recording is deleted with it.** Until story 10.14 uploads it, no file survives the
+-run; the runner reports `PENDING` because the evidence is real and unstored, not because something
+-is being kept.
++and drain. The bounded evidence window uploads the recording and durable result manifest
++before scratch is cleared; an acknowledged object write earns `STORED`. Upload failure is
++reported without replacing a known assertion outcome.
+ 
+ ### The sandbox
+ 
+@@ -241,20 +221,22 @@
+ 
+ | Route | Behaviour |
+ |---|---|
+-| `POST /v1/validate` | Browser-free wrapper over `validateArtifact` with bounded work. Takes **no capacity slot**, so it answers while the pool is saturated. |
+-| `POST /v1/runs` | Envelope → artifact → capacity slot → admission CAS → `202`. Nothing starts before the CAS succeeds. |
++| `POST /v2/validate-observed` | Browser-free observed validation against immutable evidence and policy; takes no capacity slot. |
++| `POST /v2/runs` | Closed observed job → capacity slot → observed admission → `202`; no browser starts before admission. |
++| `DELETE /v2/runs/{id}` | Cancels an admitted run through ordered stop, bounded grace and process-tree observation. |
+ | `GET /health` | Liveness only. Stays `200` while saturated **and** while draining. |
+ | `GET /ready` | Ability to admit safely. Saturation alone keeps it **true**; only draining makes it false. |
+ 
+-All four require a restricted service identity in an `Authorization: Bearer` header, checked on the
+-request head before the body is read, compared in constant time over SHA-256 digests. There is no
+-credential in any URL or query string, inbound or outbound.
++The TLS listener requires a CA-verified client certificate. Replay routes pin the backend peer
++before checking the service bearer on the request head; exec health probes accept the
++controller or self peer. The optional guided bridge has its own peer pin and JWT. There is
++no credential in a URL or query string.
+ 
+ ### Saturated is not draining
+ 
+ These are different conditions with different answers, and conflating them is a real defect:
+ 
+-| Condition | `/v1/runs` | `/ready` | Why |
++| Condition | `/v2/runs` | `/ready` | Why |
+ |---|---|---|---|
+ | Pool saturated | `429` + `Retry-After` | **`200`, ready** | The pod is healthy and about to be free. Removing it from its Service for being busy is the opposite of backpressure. |
+ | Draining | `503` | `503`, not ready | The pod is leaving. |
+@@ -298,7 +280,7 @@
+ 
+ ### Drain
+ 
+-`SIGTERM` runs, in this order: readiness goes false → new `/v1/runs` is refused `503` → the
++`SIGTERM` runs, in this order: readiness goes false → new `/v2/runs` is refused `503` → the
+ in-flight run finishes and delivers its terminal report (bounded by `DRAIN_TIMEOUT_MS`) → the
+ listener closes → scratch is cleared. Scratch is also cleared at startup, so a pod killed mid-run
+ leaves nothing for the next one to inherit.
+@@ -327,7 +309,7 @@
+ npm test               # Vitest unit tier, with coverage gate
+ npm run build          # tsc -> dist/ + dist/runtime-versions.json
+ npm run check:pins     # asserts the four copies of the Playwright pin agree
+-npm run test:fixtures  # fixture tier; the reference corpus against fixtures/pages/
++npm run test:fixtures  # real-browser observed replay and controlled-page fixtures
+ npm start              # node dist/main.js — the image entry point (requires npm run build)
+ ```
+ 
+@@ -342,32 +324,22 @@
+ 
+ ## Security model
+ 
+-Generated source is **never evaluated**. `validateArtifact` parses each step with the TypeScript
+-compiler API and accepts only a bounded sequence of `await <permitted call>;` statements drawn from
+-the table in architecture §4.5. Accepted steps are converted to a typed, serializable operation
+-list; the executor then calls its own Playwright methods from that data. There is no `eval`, no
+-`Function`, no `vm`, no async IIFE and no dynamic `import()` of artifact content anywhere in the
+-package, and `eslint.boundary-rules.js` makes each of those a lint error (verified by
+-`test/lint-boundary.test.ts`, and re-checked against the emitted `dist/` by
+-`test/no-dynamic-evaluation.test.ts`).
+-
+-This restricts *capabilities*, not intent. A valid artifact can still perform a harmful but
+-permitted browser action, and the validator cannot prove a locator matches the application or that
+-an assertion captures the author's intent. Destination and secret-use policy (architecture §9)
+-remain mandatory and live outside this package.
++Observed artifacts are data. Closed schemas and independent evidence/policy checks derive
++the permitted replay plan; the trusted executor performs its typed operations. The retired
++artifact-1 TypeScript AST language is no longer an execution path. Dynamic evaluation of
++artifact content remains forbidden by the boundary lint and emitted-output checks.
++
++Validation cannot establish an author's intent or replace destination and secret-use policy.
++Those controls remain mandatory at their existing boundaries.
+ 
+ ### Secrets
+ 
+-A secret appears in an artifact only as `vars.secret('ID')` and only as the value argument of
+-`fill()` — the single approved position in V1. It is rejected in URLs, selectors, key arguments,
+-assertion arguments and option values. Resolved values are produced by `ValueResolver.secret` at the
+-moment of the action call, are never placed in operation objects, and every outbound failure message
+-passes through a redactor that scrubs known values in plain, URL-encoded, double-URL-encoded and
+-base64 (standard and URL-safe, padded and unpadded) forms.
+-
+-The redactor scrubs *known* values. It cannot prove an arbitrary string is free of secrets, and
+-inline credentials that never go through `vars.secret` are invisible here — the backend rejects
+-known credential patterns before gateway submission (story 10.8).
++Observed login uses a `secretRef` in a `fill.value` operation and the trusted
++password-control path. The adapter checks the origin and permitted operation before the
++fill. Secret values are run-scoped, and outbound diagnostics pass through the redactor.
++See [secret-login-design.md](../docs/specs/studio-observed-authoring/secret-login-design.md)
++for the login boundary and residuals. Redaction covers known values; it is not proof that
++arbitrary authored text contains no credential.
+ 
+ On the outbound path the redactor runs over the **serialized** payload — the request body string
+ handed to the HTTP client and the line handed to the log sink — never over the objects behind them.
+@@ -381,8 +353,8 @@
+ Three build-gated parts enforce it:
+ 
+ 1. **Allowlist over the resolved production dependency closure** (`test/isolation.test.ts`). The
+-   lockfile's transitive non-dev closure must equal an enumerated list — today `playwright`,
+-   `playwright-core` and `typescript`. **Any** package not on the list fails, whatever it is. This
++   lockfile's transitive non-dev closure must equal the explicit list in `test/isolation.test.ts`, including Playwright, TypeScript and
++   the S3 SDK's allowed runtime dependencies. **Any** package not on the list fails, whatever it is. This
+    is the part that catches the client nobody predicted; a denylist only fails for one somebody did.
+ 2. **Named-module lint rules** (`eslint.boundary-rules.js` `MODULE_GROUPS`), with one proving
+    fixture per entry under `fixtures/lint/`. A fast, readable second line of defence.
+@@ -395,116 +367,17 @@
+ ADR-001 §5 allowed this story one HTTP server library. It took none: `node:https` (the one TLS listener,
+ client certificate required) covers the small route surface with no middleware, so the closure did not grow.
+ 
+-## Bounds (AC-10 defaults)
+-
+-Every bound is configuration. Pass overrides as `validateArtifact(artifact, source, refs, { bounds: { … } })`.
+-
+-| Bound | Default | Meaning |
+-|---|---:|---|
+-| `maxArtifactBytes` | 65536 | UTF-8 size of the serialized artifact, checked before anything is parsed |
+-| `maxSteps` | 100 | Entries in one artifact |
+-| `maxCodeLength` | 2048 | Characters in one step's `code` |
+-| `maxStatementsPerStep` | 8 | Statements in one step |
+-| `maxAstDepth` | 24 | AST nesting depth within one statement |
+-| `maxStringLength` | 1024 | Any accepted string literal argument |
+-| `maxSelectorLength` | 512 | CSS selector passed to `locator()` |
+-| `maxUrlLength` | 2048 | URL literal |
+-| `maxRegexLength` | 256 | Regular expression literal including delimiters and flags |
+-| `maxRegexQuantifierNesting` | 1 | Depth of quantified groups tolerated in a regular expression |
+-| `maxOptionKeys` | 8 | Keys in one options object |
+-| `maxDiagnosticsPerStep` | 10 | Diagnostics kept per step before truncation |
+-| `maxDiagnosticMessageLength` | 400 | Characters in a diagnostic message |
+-| `maxExcerptLength` | 120 | Characters of the failing node echoed back |
+-| `maxReferenceNameLength` | 64 | Length of a `vars.get`/`vars.secret` name |
+-
+-## Accepted language
+-
+-`src/validator/language.ts` is the single machine-readable description of the accepted surface:
+-receivers, methods, positional argument kinds and option-key schemas. The reference corpus is keyed
+-on it — `test/reference-manifest.test.ts` fails when a permitted method or option key has no
+-example, and when an example claims a method the surface does not contain — and the backend
+-prompt's syntax reference is meant to be generated from it rather than restated.
+-
+-| Surface | Permitted |
+-|---|---|
+-| Statements | `await <permitted call>;`, up to `maxStatementsPerStep` |
+-| Navigation | `page.goto(url, opts?)`, `page.waitForURL(urlOrRegex, opts?)` |
+-| Locators | chains rooted at `page`: `getByRole`, `getByText`, `getByLabel`, `getByPlaceholder`, `getByTestId`, `locator` (CSS only) |
+-| Actions | `click`, `fill`, `press`, `check`, `uncheck`, `selectOption`, `hover` |
+-| Assertions | `expect(locator).toBeVisible / toContainText / toHaveValue`, `expect(page).toHaveURL / toHaveTitle` |
+-| Arguments | bounded literals, safe regular expressions, enumerated option keys, `vars.get` / `vars.secret` |
+-
+-URLs must be absolute `http`/`https`; `locator()` rejects Playwright selector-engine syntax
+-(`text=`, `xpath=`, `>>`, `:has-text(...)`, …); regular expressions reject backreferences,
+-lookbehind, unpermitted flags and quantifier nesting beyond the configured depth.
+-
+-### Text-entry role equivalence (VAL-031)
+-
+-The compiler cannot see the page, so the role of a text field is a guess: `searchbox`, `textbox`
+-and `combobox` are all things "the search field" can be. For `fill` and `press` only, when the
+-chain's **terminal** segment is `getByRole` with one of those three roles and options limited to
+-`name`/`exact`/`disabled`, `src/run/playwrightAdapter.ts` resolves the target like this:
+-
+-1. The authored role is tried first on every poll. If it matches any visible element (see
+-   visible-only resolution below), it is used, strict mode included.
+-2. Only after it has matched nothing for `min(2 s, timeout/4)` are the other two roles counted,
+-   with the same options, as one `.or()` union. Exactly one match is acted on with the remaining
+-   timeout. Several are refused with a fixed message (`no <role> matched; N other text-entry
+-   controls did — refusing to choose`). `.first()` is never used. If nothing matches by the
+-   deadline, the usual "no element matched" failure is reported.
+-3. `guard()` and the secret-origin check run before any of this.
+-4. Each use writes one line to the child's stderr, which the output relay redacts and bounds:
+-   `text-entry-equivalence: authored=<role> resolved=<role> step=<i>`.
+-
+-`click`, `hover`, `check`, the assertions, other roles, non-terminal segments and any role with
+-`checked`/`expanded`/`selected`/`pressed`/`level` are unchanged. The step report does not yet name
+-the resolved role; adding it is an ADR-002 Class B change.
+-
+-### Visible-only resolution of actions (VAL-040)
+-
+-Real pages carry hidden twins of their controls. Wikipedia's search input has hidden copies with
+-the same placeholder, so `getByPlaceholder('Search Wikipedia')` matched 2 elements. Google's
+-`getByLabel('Search')` matched 6, most of them hidden. Strict mode refused both, even though a
+-hidden element can't be acted on anyway. For the action operations (`click`, `fill`, `press`,
+-`check`, `uncheck`, `hover`, `selectOption`), the adapter narrows the authored locator with
+-`locator.filter({ visible: true })` and polls its count until the step timeout:
+-
+-| Visible matches | Outcome |
+-|---|---|
+-| ≥ 2 | The VAL-028 strict-mode failure, with N the **visible** count: `<action> failed: the locator matched N elements; make the step more specific.` `.first()` is never used. |
+-| exactly 1 | The action runs on it with the remaining timeout. |
+-| 0 until the deadline | `<action> failed: the element was not visible within <t>ms.` if the authored locator matched hidden elements, otherwise `… no element matched the locator within <t>ms.` |
+-
+-- **Assertions are unchanged.** `toBeVisible`, `toContainText` and `toHaveValue` resolve the
+-  unfiltered locator, so their strict-mode and visibility semantics are the same as before.
+-- **With text-entry equivalence**, the authored role and the alternatives' `.or()` union are both
+-  narrowed the same way. A hidden-only authored match therefore counts as no match, and the
+-  settle-window fallback above applies.
+-- **`force: true` opts out.** The author asked to skip actionability, so the authored locator is
+-  used unfiltered, exactly as before.
+-- `guard()` and the secret-origin check still run first.
+-- When the filter changed the outcome (the one visible element had hidden twins, so total > 1),
+-  the child writes one stderr line through the output relay: `visible-only-resolution: step=<i>
+-  total=<n>`. It carries counts only, never the locator text.
+-
+-
+-## Fixture corpora
+-
+-| Directory | Purpose |
+-|---|---|
+-| `fixtures/reference/` | The pinned syntax reference: one valid artifact per permitted method and option key, each asserting the exact `BrowserAdapter` call sequence. `manifest.json` binds every example to the methods and option keys it demonstrates and to the fixture page it targets. |
+-| `fixtures/adversarial/` | One rejected artifact per denial class. Every code in `DIAGNOSTIC_CODES` must have a fixture; a test fails when one does not. |
+-| `fixtures/lint/` | Files containing each construct the execution-boundary lint rules forbid. Excluded from `tsconfig.json` and from `npm run lint` on purpose, and linted programmatically by a test. |
+-| `fixtures/pages/` | Controlled local HTML the reference corpus targets. Every element carries an explicit `role` attribute so the fixture tier can check a locator against the page exactly. Served on loopback by `test/helpers/pageServer.ts` at the paths `manifest.json` binds them to, so a real Chromium reaches them without reaching `example.com` and without a DNS lookup. `popup.html` and `timeline.html` belong to story 10.12 (unsupported multi-page workflow; seek measurement) and are deliberately **not** in `manifest.json` — that file is the pinned syntax reference. |
+-
+-### Adding a reference example
+-
+-1. Add the fixture JSON to `fixtures/reference/` in the shape the existing examples use
+-   (`source`, `references`, `values`, `artifact`, `expectedCalls`).
+-2. Add its entry to `fixtures/reference/manifest.json` with the fixture page it targets. The
+-   `methods`, `optionKeys` and `referenceKinds` fields are re-derived from the validator by
+-   `test/reference-manifest.test.ts`, which prints the exact expected arrays when they disagree —
+-   a declaration cannot claim coverage the example does not have.
++## Current validation bounds and fixtures
++
++Observed byte limits are defined by `OBSERVED_LIMITS` in
++`src/validator/observedReferencePolicy.ts`; the packaged closed schemas and trusted replay
++policy provide the remaining validation bounds. The retired artifact-1 AST bounds,
++accepted-language table and `fixtures/reference` / `fixtures/adversarial` corpora do not
++apply to this path.
++
++`fixtures/lint/` retains the boundary-rule proving inputs. `fixtures/pages/` supplies
++controlled local pages for the real-browser tier. The observed schema/reference bundles
++and replay fixtures are described under [Observed replay](#observed-replay-artifact-2).
+ 
+ ## Versions
+ 
+@@ -575,19 +448,18 @@
+ 2. **Regenerate the record** — `npm run build`, which rewrites `dist/runtime-versions.json`.
+ 3. **Assert the copies** — `npm run check:pins`, and `npm run check:pins -- --require-image` against
+    the rebuilt image so the new `chromiumBuild` and `image` are asserted rather than skipped.
+-4. **Run both corpora** — `npm test` (unit tier: the adversarial corpus and every reference example
+-   against the current validator) and `npm run test:fixtures` inside the pinned image. A reference
+-   example that no longer validates, or an adversarial fixture that is no longer rejected, blocks
+-   the upgrade. This is the fixture-corpus run §4.6 requires before release.
++4. **Run the current unit and real-browser tiers** — `npm test` and `npm run test:fixtures`
++   inside the pinned image. Use the observed validation/replay and controlled-page fixtures;
++   the deleted artifact-1 corpora cannot establish current compatibility.
+ 5. **Compatibility is the build identity, not a rule table.** The artifact-1 per-field rule table
+    was deleted with its engine (STUDIO-OBS-012A). The observed path compares the bundle hashes,
+    the Chromium build and the launcher hash it reports (`assertBuild`), so a bump that changes any of
+    them is visible in the next run's identity. Do not reintroduce a range rule speculatively.
+ 6. **Existing recorded runs.** A run records the identity it ran under. After the bump new runs
+    report the new identity; preserve the old runs and do not reinterpret them.
+-7. **Never rewrite approved source.** A revision is recompiled only by an explicit, reconfirmed
+-   authoring action. An upgrade does not silently reinterpret an artifact under the new runtime,
+-   and a vulnerable runtime is not kept alive to preserve replay.
++7. **Never rewrite approved source.** A new observed revision requires explicit learning and
++   publication. An upgrade does not silently reinterpret an artifact under the new runtime;
++   the exact supported build tuple governs replay compatibility.
+ 
+ ### Runtime compatibility
+ 
+@@ -789,7 +661,7 @@
+ 
+ ### Observed replay (artifact 2)
+ 
+-Observed artifacts use the one collapsed replay profile `{contract: 3}`, compared together with the exact build identity (STUDIO-OBS-012A). The authenticated `POST /v2/validate-observed` endpoint independently derives the plan, operation guards, input recipes and binding graph from original immutable evidence. `POST /v2/runs` uses ordinary admission, capacity, the confined recorded child, cancellation, reporting and evidence upload. Legacy artifact 1 validation, AST semantics and protocol 1 remain separate.
++Observed artifacts use the one collapsed replay profile `{contract: 3}`, compared together with the exact build identity (STUDIO-OBS-012A). The authenticated `POST /v2/validate-observed` endpoint independently derives the plan, operation guards, input recipes and binding graph from original immutable evidence. `POST /v2/runs` uses ordinary admission, capacity, the confined recorded child, cancellation, reporting and evidence upload. Artifact-1 validation, AST execution and protocol-1 routes were removed by STUDIO-OBS-012A.
+ 
+ Enable validation and replay independently with `STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED` and `STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED` (both default false). Trusted startup supplies `STUDIO_RUNNER_OBSERVED_CATALOG_FILE` containing exactly `{profile,build}`, `STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST`, and `STUDIO_RUNNER_OBSERVED_POLICY_FILE` containing the mounted policy projections. The catalog must match packaged schema/reference hashes, the installed Chromium revision and the independently supplied immutable release image digest. A local build records `observedChromiumBuild` separately; it does not assert container provenance or satisfy `check:pins --require-image`.
+ 

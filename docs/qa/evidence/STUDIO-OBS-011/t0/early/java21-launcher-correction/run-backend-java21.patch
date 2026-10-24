@@ -1,0 +1,11 @@
+--- a/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py
++++ b/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py
+@@ -5,7 +5,7 @@
+ excluded=set(exclusion['paths']) if exclusion else set()
+ out=root/'docs/qa/evidence/STUDIO-OBS-011/execution';manifest=root/'.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py'
+ subprocess.run([sys.executable,str(manifest),str(out/f'{label}-before.json')],check=True)
+-started=time.time();env=dict(os.environ,JAVA_HOME='/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home');command=['caffeinate','-i','./gradlew',*args]
++started=time.time();env=dict(os.environ,JAVA_HOME='/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home');command=['caffeinate','-i','./gradlew',*args]
+ with (out/f'{label}.log').open('w') as log: run=subprocess.run(command,cwd=root/'backend',env=env,stdout=log,stderr=subprocess.STDOUT)
+ xmlout=out/f'{label}-xml';xmlout.mkdir(exist_ok=True);counts={'total':0,'passed':0,'failed':0,'errors':0,'skipped':0};tests=[];xml=[]
+ for p in sorted((root/'backend/build/test-results/test').glob('TEST-*.xml')):

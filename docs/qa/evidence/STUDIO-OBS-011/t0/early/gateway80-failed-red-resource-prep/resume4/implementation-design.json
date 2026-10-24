@@ -1,0 +1,23 @@
+{
+  "kind": "SOURCE04_COMPLETE_THREE_FINDING_DESIGN_BEFORE_CODE",
+  "source03ManifestSha256": "2e4f6203a252cae88239d37513e7f956f9dc1dd1d8345d1c79086023a1a8a198",
+  "rootAdoptionSha256": "a4b1642e42cb49049ff23b0e398ada2463acc4582007d77926a322c0d8f1419e",
+  "changes": [
+    {
+      "id": "FR03-PRIMARY-PUBLISH",
+      "plan": "Record original capture failure before finally publication; publication error accumulates separately and never replaces original"
+    },
+    {
+      "id": "FR03-OUTER-CLEANUP",
+      "plan": "Explicit single finalization owner token; inner calls accumulate only; guard/install-loader finalize once after all selected cleanup, direct APIs own equivalent boundary or require an explicit owner"
+    },
+    {
+      "id": "FR03-PARTIAL-NAMESPACE",
+      "plan": "Track successful exclusive mkdir immediately before subsequent acquisition; preserve created/partial true and null unknown opened identity independently of custody return"
+    }
+  ],
+  "operationalNamespace": "failed-red-resource-disposition02",
+  "operationalNamesUnchanged": "gateway80_failed_red03_*/GATEWAY_FR03_*",
+  "actualAuthority": false,
+  "runtimeFrozenOrPrivateReads": false
+}

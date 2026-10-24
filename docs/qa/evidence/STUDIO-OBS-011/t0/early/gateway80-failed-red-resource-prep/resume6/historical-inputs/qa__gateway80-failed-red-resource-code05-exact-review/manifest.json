@@ -1,0 +1,170 @@
+{
+  "kind": "QUINN_COMPLETE_GATEWAY_FAILED_RESOURCE_CODE05_SOURCE_REVIEW",
+  "reviewer": "Quinn",
+  "subjectManifestSha256": "bd9da067c9d56545171050373a1926f9cd9d061966847ad35db680841cc8e9aa",
+  "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+  "mandatoryFindingCount": 4,
+  "mandatoryFindings": [
+    "FR05-OWNER-SCALAR-TYPES",
+    "FR05-PENDING-CONTROL-AUTHOR",
+    "FR05-CONCRETE-CONTROL-CALLER",
+    "FR05-AFTERALLOW-FRESHNESS"
+  ],
+  "payloadCount": 22,
+  "files": [
+    {
+      "path": "SHA256SUMS",
+      "sha256": "8d5b76d919445726c9859a5f22438754f058e037b02aa28e61cc74decc8e5614",
+      "bytes": 1745,
+      "mode": 420
+    },
+    {
+      "path": "afterallow.py",
+      "sha256": "07abb3cb57ad44fb92e7ee753b9374fc22757a94824fdb8aa833a4a1ccf78725",
+      "bytes": 5621,
+      "mode": 420
+    },
+    {
+      "path": "afterallow.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "afterallow.stdout",
+      "sha256": "6f607bf9a42a540b6aa606c90ddaca917c5b02d22b5bbbc97863f11a5cd5ae5f",
+      "bytes": 1280,
+      "mode": 420
+    },
+    {
+      "path": "checks.json",
+      "sha256": "8d22440d5fd3893b6e0ffdbd89186c7cd83c7932a876373dda4926bfa3c0a86f",
+      "bytes": 44343,
+      "mode": 420
+    },
+    {
+      "path": "condition-bindings.json",
+      "sha256": "4489bb6908bb9cdf25fc2ca1af844baffae5ef717f131fbfe003b1e2337698f8",
+      "bytes": 86964,
+      "mode": 420
+    },
+    {
+      "path": "critical-attempt01.py.txt",
+      "sha256": "ff37d361744bcbb2f6a33dcc2d9504971eac564030c1596e6c2bb2be8cef3f72",
+      "bytes": 7151,
+      "mode": 420
+    },
+    {
+      "path": "critical-attempt01.stderr",
+      "sha256": "d75d4c142b1c7d2feebb71102aa1c7b412fd0baf163e24da545c501fdf74d61d",
+      "bytes": 426,
+      "mode": 420
+    },
+    {
+      "path": "critical-attempt01.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "critical.py",
+      "sha256": "b95bdbfeee4fa55e4410fecf06ebe4e2a8dfae233ab6e274e9e397e78f6946f4",
+      "bytes": 6836,
+      "mode": 420
+    },
+    {
+      "path": "critical.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "critical.stdout",
+      "sha256": "b32fece63aa518bed89b0c1aab7942d7fba36a8b92cbe174899d63f9e4a30e50",
+      "bytes": 2075,
+      "mode": 420
+    },
+    {
+      "path": "findings.json",
+      "sha256": "2fd5bd9692fed016b240de0a959749a86a4d04cbe0b1021692af84ae18c773f4",
+      "bytes": 13248,
+      "mode": 420
+    },
+    {
+      "path": "history.json",
+      "sha256": "366ec300d83b5bd098f29cd150c315d5af564db19bcd94c42b789926e8af127b",
+      "bytes": 1614,
+      "mode": 420
+    },
+    {
+      "path": "peer-evidence-binding.json",
+      "sha256": "d7a13a3cf892a2e42f99a12513bdb860b05382d3ad61995b23a2ddfc64b9faa1",
+      "bytes": 1627,
+      "mode": 420
+    },
+    {
+      "path": "pins.json",
+      "sha256": "5698aa1e892a7449e12ae7e5c90a3fe0446b0fa82198159dc082fba2f77b5342",
+      "bytes": 87524,
+      "mode": 420
+    },
+    {
+      "path": "review-record.json",
+      "sha256": "797be0b74a45bb84f848a4a38cb62ece562b9489d15cff4c770a7ade47c73d8f",
+      "bytes": 8896,
+      "mode": 420
+    },
+    {
+      "path": "review.md",
+      "sha256": "df105e3a2f70c6fcf03cc75ad06ffab9a43b9530dfbc72ea94afccbb46ad3200",
+      "bytes": 9762,
+      "mode": 420
+    },
+    {
+      "path": "source-binding.json",
+      "sha256": "f2c484d2db2ed7fb45266d421dd5105e3531f75e4be7da48e5d916161cbfe21b",
+      "bytes": 1030,
+      "mode": 420
+    },
+    {
+      "path": "verify.py",
+      "sha256": "b29b0ec8816b40a96ccebe9e07971aae8c192f28e3765ba2c40b51b7abb4ce11",
+      "bytes": 10075,
+      "mode": 420
+    },
+    {
+      "path": "verify.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "verify.stdout",
+      "sha256": "7e7b5cede1ecb89a9b738176279ff728c87908ba80ecaa5638ac9aa3f94d322f",
+      "bytes": 230,
+      "mode": 420
+    }
+  ],
+  "independentFiniteChecks": 578,
+  "pinRecords": 327,
+  "uniquePublicPaths": 325,
+  "apiFunctions": 132,
+  "interpretationSites": 140,
+  "inputClasses": 14,
+  "unchangedFunctionAsts": 88,
+  "independentQuinnAssertions": 17,
+  "attributedAriaIndependentAssertions": 34,
+  "attributedAriaFiniteChecks": 813,
+  "attributedAuthorCurrentChecks": 78,
+  "authorHistoricalAcrossCandidateAssertions": 147,
+  "old313And332Replayed": false,
+  "reviewerAttempt01FailurePreserved": true,
+  "technicalOwnerDecisionIssued": false,
+  "sourceOnly": true,
+  "actualTargetOperations": 0,
+  "actualRuntimeAuthority": false,
+  "actualInstallationAuthority": false,
+  "credit": false,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

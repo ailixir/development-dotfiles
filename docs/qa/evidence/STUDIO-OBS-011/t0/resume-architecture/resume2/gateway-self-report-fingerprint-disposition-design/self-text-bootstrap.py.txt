@@ -1,0 +1,41 @@
+# INACTIVE reviewed literal. One child verifies and consumes the same body argument.
+try:
+    import hashlib, os, sys
+    if (len(sys.argv) != 2 or type(sys.argv[1]) is not str
+            or not (0 < len(sys.argv[1]) <= 4096) or not sys.argv[1].isascii() or '\x00' in sys.argv[1]):
+        raise ValueError
+    raw = sys.argv[1].encode('ascii', 'strict')
+    if not (0 < len(raw) <= 4096) or hashlib.sha256(raw).hexdigest() != '65022489e374d4096adbc2b73b29c8347318ed6bd8be9d3a6b22bfaba7ec5108':
+        raise ValueError
+    exec(compile(raw, '<reviewed-python-self-role-metadata>', 'exec'), {'__name__': '__main__'})
+except SystemExit:
+    raise
+except BaseException:
+    pid = ppid = None
+    # Independently retain each ID even when its partner read/value fails.
+    try:
+        value = os.getpid()
+        if type(value) is int and 0 < value < 2147483648:
+            pid = value
+    except BaseException:
+        pass
+    try:
+        value = os.getppid()
+        if type(value) is int and 0 < value < 2147483648:
+            ppid = value
+    except BaseException:
+        pass
+    record = ('{"kind":"PYTHON_SELF_REPORTED_TEXT_FINGERPRINT_V1","status":"HOLD",'
+              '"reason":"LITERAL_INTEGRITY_OR_EXECUTION_FAILURE","pid":%s,"ppid":%s,'
+              '"reportedRole":"UNAVAILABLE","reportedTextStatus":"UNAVAILABLE",'
+              '"reportedTextUtf8Bytes":null,"reportedTextSha256":null,"origArgv0Role":"UNAVAILABLE",'
+              '"origArgv0TextStatus":"UNAVAILABLE","origArgv0TextUtf8Bytes":null,"origArgv0TextSha256":null,'
+              '"digestKind":"SELF_REPORTED_TEXT_DIGEST","start":null,"argvHash":null,"fullFingerprint":null,'
+              '"observedProcessImage":null,"timestamp":null,"qualified":false,"NFact":false,'
+              '"descriptorCompletion":"NOT_OBSERVED","postExitLeakProof":false,"outerObserverCompletionOwed":true}\n') % (
+                  'null' if pid is None else str(pid), 'null' if ppid is None else str(ppid))
+    try:
+        sys.stdout.write(record)
+    except BaseException:
+        pass
+    raise SystemExit(1)

@@ -1,0 +1,11 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java
+@@ -572,7 +572,7 @@
+         ignored -> {
+           var runner =
+               org.mockito.Mockito.mock(
+-                  com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.class);
++                  com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.class);
+           org.mockito.stubbing.Answer<JsonNode> contextReply =
+               call -> {
+                 JsonNode context = call.getArgument(1);

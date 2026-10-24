@@ -1,0 +1,123 @@
+{
+  "kind": "SEALED_ARIA_FAILED_RESOURCE_CODE06_REVIEW",
+  "reviewer": "Aria",
+  "subjectManifestSha256": "b751602e38355042033e1a1b86ad0996c30a0377e56fae064f1eb383866e7976",
+  "protocol": "FAILED_RESOURCE_TYPED_SELF_TEXT_AND_PHYSICAL_ROLES_V1",
+  "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+  "mandatoryFindingCount": 1,
+  "mandatoryFindings": [
+    {
+      "id": "FR06-INITIAL-AUTHORIZATION-ACTOR-COMPLETENESS",
+      "severity": "HIGH",
+      "category": "Initial authorization provenance/complete actual actor roster",
+      "locations": [
+        "install-cli.py:execute allowed scope and forbidden derived candidate fields",
+        "install-cli.py:194 known11+installer typedPriorActors construction",
+        "protocol.py:authority_shape / contract.authorityAllowedFields",
+        "operator-completion.js:actualActor / control-author.py:assemble later setup path"
+      ],
+      "problem": "Initial installation authorization sets typedActorRosterComplete:true but derives only contract known11 plus the actual installer designation. The installer rejects caller typedPriorActors/evidence maps and has no narrow separately completed outside/install-scope/owner/source-reader fact input. Therefore already-known actual outside actors cannot enter this first immutable control through any reviewed producer path.",
+      "impact": "The first authorization is labelled complete while those actual writers/helpers are omitted. Adding them to a later setup control before the negative observation does not retroactively complete or truthfully scope the immutable initial authorization. The inherited requirement covers all actual known outside/install-scope actors, not merely known11+installer or first qualifying observation.",
+      "counterexampleAndSourceEvidence": "Exact installer code produces known11+installer; allowed scope/candidate graph contains no actualPriorActors fact channel. Independent current composition retained synthetic outside900090 and verifier900101 only when added through later JSrequest/setup author; the same first source-produced INSTALL state preceded those additions. This supports the later carrier mechanism while exposing the missing initial channel. No additional target case or real actors were invented.",
+      "minimumCorrection": "Add one bounded narrow actual outside/helper fact input to the concrete installation scope/CLI, with exact separately captured status/tool provenance, strict fields and approved evidence-carrier binding; derive/validate and incrementally union those facts with known11 and the actual pending installer before pure preflight and before declaring initial roster complete/writing. Continue forbidding root-built code/binary/input/member/derived actor maps. Preserve initial installer pendingNull and no self/future completion. Correct in an immutable successor, then new exact independent reviews/root adoption; do not silently reinterpret Complete as a subset.",
+      "allActualAuthority": "HOLD",
+      "technicalOwnerDecisionIssued": false
+    }
+  ],
+  "files": [
+    {
+      "path": "checks.json",
+      "sha256": "8a8a112f7a3da02e508f86281ceebd8288e6903cb521a37ada83b7a2962b2eea",
+      "bytes": 9403,
+      "mode": 420
+    },
+    {
+      "path": "conditions.json",
+      "sha256": "ccc6e32574d81a6956ec6dbd993471857ea70c68f50ca58e050b493e7767410c",
+      "bytes": 5625,
+      "mode": 420
+    },
+    {
+      "path": "critical-results.json",
+      "sha256": "735eae387c557f8dbab2b22f6a143af7be36a579ad2cef5ef3d980a1f7b492c8",
+      "bytes": 3076,
+      "mode": 420
+    },
+    {
+      "path": "critical-transcript.txt",
+      "sha256": "f39274ee658d9e7bb6c8eb7100b891ad133478fc5563d002cc121e8f4cdd5b11",
+      "bytes": 36150,
+      "mode": 420
+    },
+    {
+      "path": "critical_checks.py",
+      "sha256": "db7596314743563404272ae8e6f47bcfc231520c91e5d7bcc224f2484f16f135",
+      "bytes": 9726,
+      "mode": 420
+    },
+    {
+      "path": "findings.json",
+      "sha256": "c26391e9e6fb71881e107980b3682f95ab0783ca3f918b82b637ccfdf24e316a",
+      "bytes": 3117,
+      "mode": 420
+    },
+    {
+      "path": "history.json",
+      "sha256": "3befbcc69c0ae743e36564bca1cfeed2f26e718ccba9a8c962152365dcceccee",
+      "bytes": 2436,
+      "mode": 420
+    },
+    {
+      "path": "operator-results.json",
+      "sha256": "4a2a41f39eee008b899894c7f0e61bc2b09ba257504d8d3d0f7d984d1ba6ac3b",
+      "bytes": 3704,
+      "mode": 420
+    },
+    {
+      "path": "pins.json",
+      "sha256": "4b4a63607d444e7f255bb787e976e4208d645ad4899f48b414ae57a3f32dd212",
+      "bytes": 123847,
+      "mode": 420
+    },
+    {
+      "path": "review-record.json",
+      "sha256": "e444ca0d60c2a5da04c1b248e680591180aae473bee48099258709dd94af0a62",
+      "bytes": 3379,
+      "mode": 420
+    },
+    {
+      "path": "review.md",
+      "sha256": "766dacc1fdac071e0338d5239083a86f0ad89fe3c35b73bb3faa32502abbf192",
+      "bytes": 7592,
+      "mode": 420
+    },
+    {
+      "path": "static-attempt01.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "static-attempt01.stdout",
+      "sha256": "b5814b5624eb830907c3ea6447fa42384048f5a8c7772ec692970ec5529f1107",
+      "bytes": 275111,
+      "mode": 420
+    },
+    {
+      "path": "verify_source.py",
+      "sha256": "f885c16e54145ae886bc1813cd5eb3d2d7c7874bc10f8c2a73c3aa44193ac086",
+      "bytes": 6778,
+      "mode": 420
+    }
+  ],
+  "payloadCount": 14,
+  "manifestSelfExcluded": true,
+  "ownerDecisionExcludedAndNotIssued": true,
+  "sourceOnly": true,
+  "actualAuthority": false,
+  "criticalPythonChecks": 19,
+  "pureMemoryJSChecks": 7,
+  "finiteChecks": 855,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

@@ -1,0 +1,1172 @@
+{
+  "functions": {
+    "entry.py:root_read": {
+      "file": "entry.py",
+      "line": 12,
+      "endLine": 44,
+      "signature": "path, cap=16777216, failure_sink=None"
+    },
+    "entry.py:pairs": {
+      "file": "entry.py",
+      "line": 46,
+      "endLine": 51,
+      "signature": "values"
+    },
+    "entry.py:execute": {
+      "file": "entry.py",
+      "line": 53,
+      "endLine": 73,
+      "signature": "mode, auth_sha, control_sha=None, failure_sink=None"
+    },
+    "failed_gateway.py:System.__init__": {
+      "file": "failed_gateway.py",
+      "line": 40,
+      "endLine": 40,
+      "signature": "self"
+    },
+    "failed_gateway.py:System.operator_emit": {
+      "file": "failed_gateway.py",
+      "line": 41,
+      "endLine": 41,
+      "signature": "self, value"
+    },
+    "failed_gateway.py:System.custody": {
+      "file": "failed_gateway.py",
+      "line": 42,
+      "endLine": 43,
+      "signature": "self, path, mode=None"
+    },
+    "failed_gateway.py:System.read": {
+      "file": "failed_gateway.py",
+      "line": 44,
+      "endLine": 47,
+      "signature": "self, path, mode=None, cap=16777216"
+    },
+    "failed_gateway.py:System.umask": {
+      "file": "failed_gateway.py",
+      "line": 48,
+      "endLine": 51,
+      "signature": "self"
+    },
+    "failed_gateway.py:System.now": {
+      "file": "failed_gateway.py",
+      "line": 52,
+      "endLine": 52,
+      "signature": "self"
+    },
+    "failed_gateway.py:System.monotonic": {
+      "file": "failed_gateway.py",
+      "line": 53,
+      "endLine": 53,
+      "signature": "self"
+    },
+    "failed_gateway.py:System.pid": {
+      "file": "failed_gateway.py",
+      "line": 54,
+      "endLine": 54,
+      "signature": "self"
+    },
+    "failed_gateway.py:System.ppid": {
+      "file": "failed_gateway.py",
+      "line": 55,
+      "endLine": 55,
+      "signature": "self"
+    },
+    "failed_gateway.py:System.uid": {
+      "file": "failed_gateway.py",
+      "line": 56,
+      "endLine": 56,
+      "signature": "self"
+    },
+    "failed_gateway.py:System.python": {
+      "file": "failed_gateway.py",
+      "line": 57,
+      "endLine": 57,
+      "signature": "self"
+    },
+    "failed_gateway.py:System.popen": {
+      "file": "failed_gateway.py",
+      "line": 58,
+      "endLine": 58,
+      "signature": "self, argv"
+    },
+    "failed_gateway.py:System.lock_free": {
+      "file": "failed_gateway.py",
+      "line": 59,
+      "endLine": 71,
+      "signature": "self, path, expected"
+    },
+    "failed_gateway.py:Unit.__init__": {
+      "file": "failed_gateway.py",
+      "line": 74,
+      "endLine": 108,
+      "signature": "self, system, authority, authority_sha, contract, control, control_sha, code_buffers, failure_sink=None"
+    },
+    "failed_gateway.py:Unit.merge_pins": {
+      "file": "failed_gateway.py",
+      "line": 110,
+      "endLine": 114,
+      "signature": "self, pins"
+    },
+    "failed_gateway.py:Unit.bound": {
+      "file": "failed_gateway.py",
+      "line": 116,
+      "endLine": 131,
+      "signature": "self, path, expected=None, mode=None, cap=16777216"
+    },
+    "failed_gateway.py:Unit.document": {
+      "file": "failed_gateway.py",
+      "line": 132,
+      "endLine": 132,
+      "signature": "self, path, expected=None"
+    },
+    "failed_gateway.py:Unit.local": {
+      "file": "failed_gateway.py",
+      "line": 133,
+      "endLine": 135,
+      "signature": "self, name"
+    },
+    "failed_gateway.py:Unit.write": {
+      "file": "failed_gateway.py",
+      "line": 136,
+      "endLine": 140,
+      "signature": "self, name, value"
+    },
+    "failed_gateway.py:Unit.validate_root": {
+      "file": "failed_gateway.py",
+      "line": 141,
+      "endLine": 144,
+      "signature": "self, value, role"
+    },
+    "failed_gateway.py:Unit.check_members": {
+      "file": "failed_gateway.py",
+      "line": 145,
+      "endLine": 162,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.check_prior": {
+      "file": "failed_gateway.py",
+      "line": 164,
+      "endLine": 175,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.source_call": {
+      "file": "failed_gateway.py",
+      "line": 176,
+      "endLine": 183,
+      "signature": "self, stage, function, *args, **kwargs"
+    },
+    "failed_gateway.py:Unit.load_libraries": {
+      "file": "failed_gateway.py",
+      "line": 184,
+      "endLine": 237,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.capture": {
+      "file": "failed_gateway.py",
+      "line": 239,
+      "endLine": 268,
+      "signature": "self, command, allowed=(0,)"
+    },
+    "failed_gateway.py:Unit.table": {
+      "file": "failed_gateway.py",
+      "line": 270,
+      "endLine": 287,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.client_identity": {
+      "file": "failed_gateway.py",
+      "line": 289,
+      "endLine": 302,
+      "signature": "self, row"
+    },
+    "failed_gateway.py:Unit.require_setup": {
+      "file": "failed_gateway.py",
+      "line": 304,
+      "endLine": 317,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.register": {
+      "file": "failed_gateway.py",
+      "line": 318,
+      "endLine": 329,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.publish": {
+      "file": "failed_gateway.py",
+      "line": 330,
+      "endLine": 338,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.clients": {
+      "file": "failed_gateway.py",
+      "line": 339,
+      "endLine": 359,
+      "signature": "self, rows"
+    },
+    "failed_gateway.py:Unit.postclose_lock": {
+      "file": "failed_gateway.py",
+      "line": 360,
+      "endLine": 363,
+      "signature": "self, rows"
+    },
+    "failed_gateway.py:Unit.observe": {
+      "file": "failed_gateway.py",
+      "line": 364,
+      "endLine": 389,
+      "signature": "self, archive=False"
+    },
+    "failed_gateway.py:Unit.bounded_inventory": {
+      "file": "failed_gateway.py",
+      "line": 391,
+      "endLine": 416,
+      "signature": "self, path"
+    },
+    "failed_gateway.py:Unit.copy_budget": {
+      "file": "failed_gateway.py",
+      "line": 417,
+      "endLine": 417,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.copy_entry": {
+      "file": "failed_gateway.py",
+      "line": 418,
+      "endLine": 419,
+      "signature": "self, budget"
+    },
+    "failed_gateway.py:Unit.copy_tree": {
+      "file": "failed_gateway.py",
+      "line": 420,
+      "endLine": 443,
+      "signature": "self, source, destination, rows, budget=None"
+    },
+    "failed_gateway.py:Unit.require_admission": {
+      "file": "failed_gateway.py",
+      "line": 444,
+      "endLine": 451,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.make_archive": {
+      "file": "failed_gateway.py",
+      "line": 452,
+      "endLine": 469,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.check_archives": {
+      "file": "failed_gateway.py",
+      "line": 470,
+      "endLine": 481,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.require_actual_archive_review": {
+      "file": "failed_gateway.py",
+      "line": 483,
+      "endLine": 490,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.operate": {
+      "file": "failed_gateway.py",
+      "line": 492,
+      "endLine": 529,
+      "signature": "self"
+    },
+    "failed_gateway.py:Unit.close": {
+      "file": "failed_gateway.py",
+      "line": 531,
+      "endLine": 539,
+      "signature": "self"
+    },
+    "failed_gateway.py:run": {
+      "file": "failed_gateway.py",
+      "line": 541,
+      "endLine": 563,
+      "signature": "mode, auth_sha, control_sha=None, system=None, root_raw=None, code_buffers=None, failure_sink=None"
+    },
+    "custody.py:need": {
+      "file": "custody.py",
+      "line": 8,
+      "endLine": 9,
+      "signature": "value, reason"
+    },
+    "custody.py:member": {
+      "file": "custody.py",
+      "line": 10,
+      "endLine": 10,
+      "signature": "name"
+    },
+    "custody.py:key": {
+      "file": "custody.py",
+      "line": 11,
+      "endLine": 11,
+      "signature": "st"
+    },
+    "custody.py:filekey": {
+      "file": "custody.py",
+      "line": 12,
+      "endLine": 12,
+      "signature": "st"
+    },
+    "custody.py:rowkey": {
+      "file": "custody.py",
+      "line": 13,
+      "endLine": 13,
+      "signature": "row"
+    },
+    "custody.py:Custody.__init__": {
+      "file": "custody.py",
+      "line": 18,
+      "endLine": 33,
+      "signature": "self, path, mode=None, api=os"
+    },
+    "custody.py:Custody.check": {
+      "file": "custody.py",
+      "line": 34,
+      "endLine": 38,
+      "signature": "self"
+    },
+    "custody.py:Custody.acquire": {
+      "file": "custody.py",
+      "line": 39,
+      "endLine": 43,
+      "signature": "self, name, flags, mode=384"
+    },
+    "custody.py:Custody.release": {
+      "file": "custody.py",
+      "line": 44,
+      "endLine": 47,
+      "signature": "self, fd"
+    },
+    "custody.py:Custody.release_preserving": {
+      "file": "custody.py",
+      "line": 48,
+      "endLine": 53,
+      "signature": "self, fd"
+    },
+    "custody.py:Custody.close_preserving": {
+      "file": "custody.py",
+      "line": 54,
+      "endLine": 59,
+      "signature": "self"
+    },
+    "custody.py:Custody.info": {
+      "file": "custody.py",
+      "line": 60,
+      "endLine": 61,
+      "signature": "self, name"
+    },
+    "custody.py:Custody.absent": {
+      "file": "custody.py",
+      "line": 62,
+      "endLine": 65,
+      "signature": "self, name"
+    },
+    "custody.py:Custody.members": {
+      "file": "custody.py",
+      "line": 66,
+      "endLine": 68,
+      "signature": "self"
+    },
+    "custody.py:Custody.read": {
+      "file": "custody.py",
+      "line": 69,
+      "endLine": 85,
+      "signature": "self, name, mode=None, cap=16777216, expected=None"
+    },
+    "custody.py:Custody.output": {
+      "file": "custody.py",
+      "line": 86,
+      "endLine": 92,
+      "signature": "self, name, mode"
+    },
+    "custody.py:Custody.write": {
+      "file": "custody.py",
+      "line": 93,
+      "endLine": 101,
+      "signature": "self, name, raw, mode=384"
+    },
+    "custody.py:Custody.copy_from": {
+      "file": "custody.py",
+      "line": 102,
+      "endLine": 142,
+      "signature": "self, source, name, row, budget"
+    },
+    "custody.py:Custody.mkdir": {
+      "file": "custody.py",
+      "line": 143,
+      "endLine": 148,
+      "signature": "self, name, mode"
+    },
+    "custody.py:Custody.symlink": {
+      "file": "custody.py",
+      "line": 149,
+      "endLine": 150,
+      "signature": "self, name, target"
+    },
+    "custody.py:Custody.readlink": {
+      "file": "custody.py",
+      "line": 151,
+      "endLine": 152,
+      "signature": "self, name"
+    },
+    "custody.py:Custody.close": {
+      "file": "custody.py",
+      "line": 153,
+      "endLine": 168,
+      "signature": "self"
+    },
+    "protocol.py:need": {
+      "file": "protocol.py",
+      "line": 8,
+      "endLine": 9,
+      "signature": "value, reason"
+    },
+    "protocol.py:sha": {
+      "file": "protocol.py",
+      "line": 10,
+      "endLine": 10,
+      "signature": "raw"
+    },
+    "protocol.py:packed": {
+      "file": "protocol.py",
+      "line": 11,
+      "endLine": 11,
+      "signature": "value"
+    },
+    "protocol.py:pin": {
+      "file": "protocol.py",
+      "line": 12,
+      "endLine": 12,
+      "signature": "value"
+    },
+    "protocol.py:pairs": {
+      "file": "protocol.py",
+      "line": 13,
+      "endLine": 16,
+      "signature": "items"
+    },
+    "protocol.py:decode": {
+      "file": "protocol.py",
+      "line": 17,
+      "endLine": 19,
+      "signature": "raw"
+    },
+    "protocol.py:canonical": {
+      "file": "protocol.py",
+      "line": 20,
+      "endLine": 21,
+      "signature": "path"
+    },
+    "protocol.py:binary_requirements": {
+      "file": "protocol.py",
+      "line": 22,
+      "endLine": 33,
+      "signature": "a, k"
+    },
+    "protocol.py:authority_shape": {
+      "file": "protocol.py",
+      "line": 34,
+      "endLine": 43,
+      "signature": "a, contract"
+    },
+    "protocol.py:authority": {
+      "file": "protocol.py",
+      "line": 45,
+      "endLine": 49,
+      "signature": "a, contract"
+    },
+    "protocol.py:finite_join": {
+      "file": "protocol.py",
+      "line": 51,
+      "endLine": 71,
+      "signature": "rows, contract, clients, current, controllers, probe, helpers=()"
+    },
+    "protocol.py:equivalent": {
+      "file": "protocol.py",
+      "line": 73,
+      "endLine": 74,
+      "signature": "rows"
+    },
+    "protocol.py:freshness": {
+      "file": "protocol.py",
+      "line": 75,
+      "endLine": 77,
+      "signature": "now, readiness, permit"
+    },
+    "protocol.py:FailureSink.__init__": {
+      "file": "protocol.py",
+      "line": 85,
+      "endLine": 86,
+      "signature": "self, emit, pid=None, ppid=None"
+    },
+    "protocol.py:FailureSink.text": {
+      "file": "protocol.py",
+      "line": 87,
+      "endLine": 90,
+      "signature": "self, value, maximum"
+    },
+    "protocol.py:FailureSink.number": {
+      "file": "protocol.py",
+      "line": 91,
+      "endLine": 94,
+      "signature": "self, value, minimum, maximum"
+    },
+    "protocol.py:FailureSink.classify": {
+      "file": "protocol.py",
+      "line": 95,
+      "endLine": 102,
+      "signature": "self, error, stage=None"
+    },
+    "protocol.py:FailureSink.primary": {
+      "file": "protocol.py",
+      "line": 103,
+      "endLine": 105,
+      "signature": "self, error, stage=None"
+    },
+    "protocol.py:FailureSink.cleanup": {
+      "file": "protocol.py",
+      "line": 106,
+      "endLine": 108,
+      "signature": "self, error"
+    },
+    "protocol.py:FailureSink.forward": {
+      "file": "protocol.py",
+      "line": 109,
+      "endLine": 144,
+      "signature": "self, error"
+    },
+    "factory.py:canonical": {
+      "file": "factory.py",
+      "line": 5,
+      "endLine": 6,
+      "signature": "path"
+    },
+    "factory.py:graph": {
+      "file": "factory.py",
+      "line": 8,
+      "endLine": 15,
+      "signature": "base, k"
+    },
+    "factory.py:validate": {
+      "file": "factory.py",
+      "line": 17,
+      "endLine": 46,
+      "signature": "candidate, k, code_buffers, witnesses, records, physical=None"
+    },
+    "factory.py:preflight": {
+      "file": "factory.py",
+      "line": 48,
+      "endLine": 59,
+      "signature": "base, k, code_buffers, witnesses, records"
+    },
+    "factory.py:finalize": {
+      "file": "factory.py",
+      "line": 61,
+      "endLine": 65,
+      "signature": "draft, k, code_buffers, witnesses, records, physical"
+    },
+    "installer.py:fact": {
+      "file": "installer.py",
+      "line": 9,
+      "endLine": 11,
+      "signature": "c, path"
+    },
+    "installer.py:input_specs": {
+      "file": "installer.py",
+      "line": 12,
+      "endLine": 25,
+      "signature": "base, k, source"
+    },
+    "installer.py:acquire": {
+      "file": "installer.py",
+      "line": 27,
+      "endLine": 36,
+      "signature": "system, base, k, scope, source"
+    },
+    "installer.py:audit_ancestry": {
+      "file": "installer.py",
+      "line": 38,
+      "endLine": 54,
+      "signature": "system, k, old, active"
+    },
+    "installer.py:install": {
+      "file": "installer.py",
+      "line": 56,
+      "endLine": 116,
+      "signature": "scope, contract, source, system, sink"
+    },
+    "install-cli.py:FailureSink.__init__": {
+      "file": "install-cli.py",
+      "line": 22,
+      "endLine": 23,
+      "signature": "self, emit, pid=None, ppid=None"
+    },
+    "install-cli.py:FailureSink.text": {
+      "file": "install-cli.py",
+      "line": 24,
+      "endLine": 27,
+      "signature": "self, value, maximum"
+    },
+    "install-cli.py:FailureSink.number": {
+      "file": "install-cli.py",
+      "line": 28,
+      "endLine": 31,
+      "signature": "self, value, minimum, maximum"
+    },
+    "install-cli.py:FailureSink.classify": {
+      "file": "install-cli.py",
+      "line": 32,
+      "endLine": 39,
+      "signature": "self, error, stage=None"
+    },
+    "install-cli.py:FailureSink.primary": {
+      "file": "install-cli.py",
+      "line": 40,
+      "endLine": 42,
+      "signature": "self, error, stage=None"
+    },
+    "install-cli.py:FailureSink.cleanup": {
+      "file": "install-cli.py",
+      "line": 43,
+      "endLine": 45,
+      "signature": "self, error"
+    },
+    "install-cli.py:FailureSink.forward": {
+      "file": "install-cli.py",
+      "line": 46,
+      "endLine": 81,
+      "signature": "self, error"
+    },
+    "install-cli.py:bootstrap_read": {
+      "file": "install-cli.py",
+      "line": 84,
+      "endLine": 112,
+      "signature": "path, mode, sink, api=os, cap=16777216"
+    },
+    "install-cli.py:execute": {
+      "file": "install-cli.py",
+      "line": 114,
+      "endLine": 166,
+      "signature": "scope_path, scope_sha, system=None, failure_sink=None, verified_self_sha=None"
+    },
+    "shell-buffer-verify.py:verify": {
+      "file": "shell-buffer-verify.py",
+      "line": 6,
+      "endLine": 10,
+      "signature": "buffer, expected_sha, expected_bytes, readonly, read_status"
+    },
+    "shell-buffer-verify.py:execute": {
+      "file": "shell-buffer-verify.py",
+      "line": 11,
+      "endLine": 15,
+      "signature": "argv"
+    },
+    "buffer-verifier-inline.py:verify": {
+      "file": "buffer-verifier-inline.py",
+      "line": 6,
+      "endLine": 10,
+      "signature": "buffer, expected_sha, expected_bytes, readonly, read_status"
+    },
+    "buffer-verifier-inline.py:execute": {
+      "file": "buffer-verifier-inline.py",
+      "line": 11,
+      "endLine": 15,
+      "signature": "argv"
+    }
+  },
+  "reachedInterpretationSites": [
+    {
+      "file": "entry.py",
+      "line": 59,
+      "callee": "json.loads"
+    },
+    {
+      "file": "entry.py",
+      "line": 72,
+      "callee": "exec"
+    },
+    {
+      "file": "entry.py",
+      "line": 70,
+      "callee": "exec"
+    },
+    {
+      "file": "entry.py",
+      "line": 72,
+      "callee": "compile"
+    },
+    {
+      "file": "entry.py",
+      "line": 26,
+      "callee": "os.read"
+    },
+    {
+      "file": "entry.py",
+      "line": 70,
+      "callee": "compile"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 132,
+      "callee": "P.decode"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 135,
+      "callee": "self.document"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 194,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 195,
+      "callee": "exec"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 199,
+      "callee": "self.source_call"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 203,
+      "callee": "self.source_call"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 218,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 225,
+      "callee": "self.source_call"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 227,
+      "callee": "self.source_call"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 230,
+      "callee": "self.document"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 235,
+      "callee": "self.document"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 247,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 306,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 321,
+      "callee": "self.require_setup"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 445,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 450,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 471,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 484,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 488,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 527,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 549,
+      "callee": "P.decode"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 549,
+      "callee": "P.decode"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 46,
+      "callee": "c.read"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 62,
+      "callee": "c.acquire"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 122,
+      "callee": "self.c.read"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 132,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 151,
+      "callee": "self.old.read"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 161,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 191,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 195,
+      "callee": "compile"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 201,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 225,
+      "callee": "self.document"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 261,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 294,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 300,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 322,
+      "callee": "self.source_call"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 366,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 368,
+      "callee": "self.source_call"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 385,
+      "callee": "self.bound"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 498,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 499,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 513,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 513,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 517,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 551,
+      "callee": "concrete.read"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 552,
+      "callee": "P.decode"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 123,
+      "callee": "self.old.read"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 124,
+      "callee": "self.s.read"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 172,
+      "callee": "c.read"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 197,
+      "callee": "self.s.read"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 213,
+      "callee": "self.s.read"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 343,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 352,
+      "callee": "self.local"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 465,
+      "callee": "rawdir.copy_from"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 480,
+      "callee": "rawdir.read"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 207,
+      "callee": "self.source_call"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 437,
+      "callee": "dst.copy_from"
+    },
+    {
+      "file": "failed_gateway.py",
+      "line": 409,
+      "callee": "c.read"
+    },
+    {
+      "file": "custody.py",
+      "line": 70,
+      "callee": "self.acquire"
+    },
+    {
+      "file": "custody.py",
+      "line": 87,
+      "callee": "self.acquire"
+    },
+    {
+      "file": "custody.py",
+      "line": 107,
+      "callee": "source.acquire"
+    },
+    {
+      "file": "custody.py",
+      "line": 145,
+      "callee": "self.acquire"
+    },
+    {
+      "file": "custody.py",
+      "line": 79,
+      "callee": "self.api.read"
+    },
+    {
+      "file": "custody.py",
+      "line": 116,
+      "callee": "source.api.read"
+    },
+    {
+      "file": "protocol.py",
+      "line": 19,
+      "callee": "json.loads"
+    },
+    {
+      "file": "factory.py",
+      "line": 27,
+      "callee": "P.decode"
+    },
+    {
+      "file": "factory.py",
+      "line": 33,
+      "callee": "P.decode"
+    },
+    {
+      "file": "installer.py",
+      "line": 74,
+      "callee": "F.preflight"
+    },
+    {
+      "file": "installer.py",
+      "line": 33,
+      "callee": "system.read"
+    },
+    {
+      "file": "installer.py",
+      "line": 44,
+      "callee": "old.read"
+    },
+    {
+      "file": "installer.py",
+      "line": 87,
+      "callee": "F.finalize"
+    },
+    {
+      "file": "installer.py",
+      "line": 50,
+      "callee": "c.read"
+    },
+    {
+      "file": "installer.py",
+      "line": 68,
+      "callee": "P.decode"
+    },
+    {
+      "file": "installer.py",
+      "line": 94,
+      "callee": "created.read"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 130,
+      "callee": "json.loads"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 134,
+      "callee": "json.loads"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 152,
+      "callee": "exec"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 155,
+      "callee": "exec"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 157,
+      "callee": "exec"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 161,
+      "callee": "P.decode"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 165,
+      "callee": "I.install"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 96,
+      "callee": "api.read"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 150,
+      "callee": "exec"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 152,
+      "callee": "compile"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 155,
+      "callee": "compile"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 157,
+      "callee": "compile"
+    },
+    {
+      "file": "install-cli.py",
+      "line": 150,
+      "callee": "compile"
+    }
+  ],
+  "reachedInterpretationSiteCount": 93,
+  "inputClasses": [
+    "externally pinned actual buffer/bootstrap",
+    "root scope/source manifest/review raw buffers",
+    "exact same-buffer installed6/code/control records",
+    "complete seven-role physical witnesses",
+    "pure pending draft and actual-FD-only finalize",
+    "old2263 regulars plus typed priorN01 seven/activeN02",
+    "source06 leaf/package/contracts and CORE definitions",
+    "historical2255 and dynamic setup helper set union",
+    "current client/utility/census/source/resource/archive facts",
+    "root parent readonly/setup/launcher attestations",
+    "full W/original22/helper/raw4 bounded archive",
+    "closed future namespace/stage/literal primary-cleanup ownership",
+    "actual archive QA/final/permit/wrapper/postclose graph"
+  ],
+  "inputClassCount": 13,
+  "source06ForbiddenEntries": [
+    "main",
+    "run_native",
+    "make_copy",
+    "install_fixed",
+    "safe_new_copy",
+    "safe_archive_tree",
+    "normal final/archive/close"
+  ],
+  "reasonRegistry": "source-reason-registry.json",
+  "firstReadIntegrity": "root raw SHA and descriptor metadata checked before JSON/compile, exact consumed buffers; own exclusive outputs are separate trust",
+  "actualCurrentFactsObserved": false
+}

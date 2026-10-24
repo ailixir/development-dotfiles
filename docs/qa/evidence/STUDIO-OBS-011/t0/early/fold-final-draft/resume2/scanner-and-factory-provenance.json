@@ -1,0 +1,189 @@
+{
+  "pureScannerSha256": "9d1b248be160d0b5ece727d2d10c452efae6498ca140b356dc724c9ef2be424a",
+  "acceptedQAPureHelperFile": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/fullcheck03-source-catalog/derive_catalog.py",
+    "sha256": "bb12bc3366d001a54fe7bffc92a97dcf9c0dd4d631ed93105a9e71685c5eaa27"
+  },
+  "extractedPureFunctionHashes": {
+    "tokens": "b1e39f82fe4b4c3d54fb59a47bcfa91cadced85e77d33ec13674d43c2153eaab",
+    "inside": "8e6953c2d0bba85ec10b52830db161f491ee19f6403308a15c49efb5c8e1de52",
+    "split": "8070cecd2d94207a8732ed2ef8e890d7efd833acc69493184c5ad6e1d32b0a53",
+    "jstr": "fccf592e1d34d189e72759d1fae64e98f4601e3cade86c4e0818d947b1bdd830",
+    "strings": "81d224c163b49e1e5bf4f31d26e549a0a346b4d5bc940be4463fe15d262baa00",
+    "constants": "e5f831bc73555350c174f00a65cbb48b4888a172beab58e58ec066fa2a4bfcee",
+    "scalar": "100cfa72a06a9ddf69657ff864e8c222fe26c912ad79c81f550b2d488c3bf880",
+    "split_plus": "7e595debeea7ecac5e1b77688a8cd644a5f4403ad6f2386e35c25c9e2b1deb51",
+    "stream_rows": "d70bdf521f055a3024e1ae33299181d71391f4d610784a9daf4bfd8e7931900e",
+    "literal_set": "602c150c350a136bbfbbff4b99dbfa9e635a4db63b16a81a8b4e91055b525264"
+  },
+  "QAEntryPointImportedOrExecuted": false,
+  "QAOutputWrites": false,
+  "actualSourceFactoryBodies": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/config/logging/SecretMaskerEquivalenceTest.java",
+      "provider": "longRuns",
+      "actualSourceBodySha256": "f0771ac9765dc5a91b2d7d73ecd70a01df3bd786ed10b99f1e7e376c371d2818",
+      "acceptedProviderRecordSha256": "6ce6872f5bb92d849096f92e9660f086c59e28af796575cb9155198061c13c65"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/InternalBodyContractConformanceTest.java",
+      "provider": "internalBodies",
+      "actualSourceBodySha256": "f20482cdc1ec8ef5825dddc71c7af883df81d11f51e4e49567d873db0f930731",
+      "acceptedProviderRecordSha256": "74bb1504310433e72892dd49fec704a0dfe354094ff131f46a185b574ab01c44"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+      "provider": "deployedProfiles",
+      "actualSourceBodySha256": "4b8a33cffe889876c64f0d4ba8d30658dcb44c2a92725e7225af375e3b52872c",
+      "acceptedProviderRecordSha256": "99dcd7d9c98c995d5eb29ba641dc449f1d0f297ee60256b69ff60d7c4784dc4b"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+      "provider": "plaintextProfiles",
+      "actualSourceBodySha256": "17766cbd4e1b3c2fb390c1b07a371935772464e3d6cb1b1fb962574805c467a1",
+      "acceptedProviderRecordSha256": "a14edd00413e849bcc89093f0a234dd788044493eeb0abb5e1b6ee31b45b1f21"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+      "provider": "apiChainParts",
+      "actualSourceBodySha256": "54b1b3c5c30cc15ad3d96e0d42135a39c2a70ef5f06458ec533cd08d1b7d7ce2",
+      "acceptedProviderRecordSha256": "6e93983a49486baaaf776289d295cbf4f93ddcb3147c0b6b68abc4f30708ca8f"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/evidence/ExecutionVideoAuthorizationIT.java",
+      "provider": "identities",
+      "actualSourceBodySha256": "d2f357bcdef442d3b595339548176b976cc2a58acdc13b58b8272ceffba54af4",
+      "acceptedProviderRecordSha256": "9b186f5a58e1c270e33b84d0fcc0c1486a91184ad5c0497ee50104a1c0df7592"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/evidence/ExecutionVideoEvidenceIT.java",
+      "provider": "evidenceStates",
+      "actualSourceBodySha256": "070f25d9d70f699ab30a8c17b34c8879b98aabf71db7b96241095d3a2755f64b",
+      "acceptedProviderRecordSha256": "229b252d6df8d8dd20df5f1ffd87b9c3836fbfcfb4d4ad950ac254eb0a6de229"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedScheduledBeansProfileTest.java",
+      "provider": "roles",
+      "actualSourceBodySha256": "0909e1ac8bda2f3bf31cc22d7fb97f103ed74ddc3e4d5ed2ed891f1a18044d22",
+      "acceptedProviderRecordSha256": "73e753cd30b8aa7806e8d1b1113c9d7ed4b9765dd8afcc56869d28f8d6bd340b"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+      "provider": "brokenJoins",
+      "actualSourceBodySha256": "49519f9598881f4aab94c14bffe33faf2753ee3fad336b94bf5555cce0e57f31",
+      "acceptedProviderRecordSha256": "7a3ae5120e0002e035d5515db4eef4915214c4860d009e43d67259d0b6be4080"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+      "provider": "brokenChoiceJoins",
+      "actualSourceBodySha256": "c5654b7ab7451e7fe4483ad74f050cbb410accec125577d7da2df50f0f985e2a",
+      "acceptedProviderRecordSha256": "e900ace959164f6072537615650195d786d5117e26c20c1496c4c4bee7690ecc"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+      "provider": "positives",
+      "actualSourceBodySha256": "c9e46c232e0587ff8b03034070a0df766121e7b33bd65f7a90fcdaa77315fff4",
+      "acceptedProviderRecordSha256": "19b1b1b70eec1cca893a4f20167ec134dba2c51a81cf2c564d77627c3e7bcc61"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+      "provider": "snapshotNegatives",
+      "actualSourceBodySha256": "b46ea344ea514e0bb3831493281ac045e03c923f462c35f2ad66742a16299ceb",
+      "acceptedProviderRecordSha256": "0aff1aee3a40d47c6a85434504ea7454378813b01612382a438c5d788b6921dc"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+      "provider": "candidateSnapshotNegatives",
+      "actualSourceBodySha256": "5bb457dd82754b38fc9c2d6a13fe09680b3748409830a7c3847607383108e885",
+      "acceptedProviderRecordSha256": "d6c63511e144fdc065d43207a8dbdda8d6b0516c7577798eb62028c883cd6b95"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+      "provider": "admittedHistoryNegatives",
+      "actualSourceBodySha256": "a619d37431c0c619ca3b40a321f5cecfb97e5918b5e1ed74fe15b46cdd4c1904",
+      "acceptedProviderRecordSha256": "f0353128e365a778a41a87587f0a865f44eea3dd45f4031d2f470f4e9d6beb31"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+      "provider": "graphNegatives",
+      "actualSourceBodySha256": "3d2b2d51a0e18abe38b6702b312d2ce4eb84919bdd797d7beb5adaf2c5c89a66",
+      "acceptedProviderRecordSha256": "03ea40ea3344dd2ce1e944b0d839133772b8495ba36e07fb3adce7785721cff5"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/IncrementalPublicationConformanceTest.java",
+      "provider": "fullyResealedCandidateAttacks",
+      "actualSourceBodySha256": "e6820c3fe7b88dc4d382d81ea1b8ddee20ae79175331a391858f54f18241e7e5",
+      "acceptedProviderRecordSha256": "1b4f8d59a122a708f39cea946183a1a2dce6afdf2b8bdc94efb689af0aae6662"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "provider": "credentials",
+      "actualSourceBodySha256": "d85100c9e95cf4989a92277fd55dbf5b8f867a82cde9bd3251c24d410f6e7e31",
+      "acceptedProviderRecordSha256": "6abdff8701785a9418f39db835cff69a5d620cd8ef1fd05052b39846ba5a9456"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "provider": "malformedIdentity",
+      "actualSourceBodySha256": "54e471229e3213973c2f296530c3a16ece89e70e33119ad0011515af1b8b2496",
+      "acceptedProviderRecordSha256": "f93024021d0b1d057bdfa580cf5811ea4178c46f641b6f62b48d09b279ddd5d9"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "provider": "pairedChoiceMutations",
+      "actualSourceBodySha256": "d6fa0ea89680494e9c700a78cf6d647c1baea4435c6657e8607bc092660493b4",
+      "acceptedProviderRecordSha256": "e5acce59af93fe221503c8aa6a3acf062768e57dc7613b25fa62952c73557c9a"
+    }
+  ],
+  "publicationFixtureSha256": "c573e50bb3fb6cbf2ea39e269888dbb07f8da2b193de769da167cc7998d072b6",
+  "rootAndProspectiveMethodSources": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+      "provider": "deployedProfiles",
+      "beforeBodySha256": "4b8a33cffe889876c64f0d4ba8d30658dcb44c2a92725e7225af375e3b52872c",
+      "afterBodySha256": "4b8a33cffe889876c64f0d4ba8d30658dcb44c2a92725e7225af375e3b52872c",
+      "normalizedBodyEqual": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+      "provider": "plaintextProfiles",
+      "beforeBodySha256": "17766cbd4e1b3c2fb390c1b07a371935772464e3d6cb1b1fb962574805c467a1",
+      "afterBodySha256": "17766cbd4e1b3c2fb390c1b07a371935772464e3d6cb1b1fb962574805c467a1",
+      "normalizedBodyEqual": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+      "provider": "apiChainParts",
+      "beforeBodySha256": "54b1b3c5c30cc15ad3d96e0d42135a39c2a70ef5f06458ec533cd08d1b7d7ce2",
+      "afterBodySha256": "54b1b3c5c30cc15ad3d96e0d42135a39c2a70ef5f06458ec533cd08d1b7d7ce2",
+      "normalizedBodyEqual": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedScheduledBeansProfileTest.java",
+      "provider": "roles",
+      "beforeBodySha256": "0909e1ac8bda2f3bf31cc22d7fb97f103ed74ddc3e4d5ed2ed891f1a18044d22",
+      "afterBodySha256": "0909e1ac8bda2f3bf31cc22d7fb97f103ed74ddc3e4d5ed2ed891f1a18044d22",
+      "normalizedBodyEqual": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "provider": "credentials",
+      "beforeBodySha256": "d85100c9e95cf4989a92277fd55dbf5b8f867a82cde9bd3251c24d410f6e7e31",
+      "afterBodySha256": "d85100c9e95cf4989a92277fd55dbf5b8f867a82cde9bd3251c24d410f6e7e31",
+      "normalizedBodyEqual": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "provider": "malformedIdentity",
+      "beforeBodySha256": "54e471229e3213973c2f296530c3a16ece89e70e33119ad0011515af1b8b2496",
+      "afterBodySha256": "54e471229e3213973c2f296530c3a16ece89e70e33119ad0011515af1b8b2496",
+      "normalizedBodyEqual": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "provider": "pairedChoiceMutations",
+      "beforeBodySha256": "d6fa0ea89680494e9c700a78cf6d647c1baea4435c6657e8607bc092660493b4",
+      "afterBodySha256": "d6fa0ea89680494e9c700a78cf6d647c1baea4435c6657e8607bc092660493b4",
+      "normalizedBodyEqual": true
+    }
+  ]
+}

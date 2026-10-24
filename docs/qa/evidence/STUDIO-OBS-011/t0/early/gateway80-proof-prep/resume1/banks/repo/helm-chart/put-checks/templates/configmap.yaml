@@ -1,0 +1,142 @@
+{{- if .Values.backend.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.api.fullname" . }}-config
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.api.selectorLabels" . | nindent 4 }}
+data:
+  SERVER_PORT: {{ .Values.backend.service.port | quote }}
+---
+# Spring property names belong in configuration data, not environment-variable names.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.api.fullname" . }}-properties
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+data:
+  application.yaml: |
+    {{- include "put-checks.backend.springProperties" (dict "root" . "role" "api") | nindent 4 }}
+{{- end }}
+{{- if .Values.worker.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.worker.fullname" . }}-config
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.worker.selectorLabels" . | nindent 4 }}
+data:
+  SERVER_PORT: {{ .Values.worker.service.port | quote }}
+---
+# Spring property names belong in configuration data, not environment-variable names.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.worker.fullname" . }}-properties
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+data:
+  application.yaml: |
+    {{- include "put-checks.backend.springProperties" (dict "root" . "role" "worker") | nindent 4 }}
+{{- end }}
+{{- if .Values.frontend.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.frontend.fullname" . }}-config
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.frontend.selectorLabels" . | nindent 4 }}
+data:
+  {{- range $key, $val := .Values.frontend.env }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}
+{{- end }}
+{{- if .Values.studioRunner.enabled }}
+---
+# The object-store lifecycle declaration (§6.2, ED-03 / SPK-03).
+#
+# **Logical expiry is what the API enforces**, at `videoExpiresAt`, and it renders from the same
+# `objectStore.retention` key as the API's and worker's `STUDIO_EVIDENCE_RETENTION` — one key, two
+# rendered values, compared to each other rather than each to a literal (AC-12).
+#
+# This ConfigMap declares the window the bucket's lifecycle rule must be set to; it does not apply
+# it, and applying it is Platform/SRE's under ED-03. **No claim of exact-time physical deletion is
+# made here or anywhere else in this chart**: whether lifecycle expiry is prompt, whether
+# noncurrent versions and delete markers are collected, and whether a GET on an expired object
+# still serves are all SPK-03's to measure (AC-11, blocked).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.fullname" . }}-studio-object-store
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+data:
+  STUDIO_OBJECT_STORE_LIFECYCLE: {{ .Values.objectStore.retention | quote }}
+  STUDIO_OBJECT_STORE_KEY_PREFIX: {{ .Values.studioRunner.objectStore.keyPrefix | quote }}
+{{- end }}
+{{- if include "put-checks.studioRunner.guidedEnabled" . }}
+---
+# The guided controller's PUBLIC key, mounted on the runner as a file (read once at start-up).
+# Public material in a ConfigMap, rendered from the one `guided.token.publicKey` value that also
+# becomes the backend's `studio.guided-authoring.service-public-key`, so the two sides of the
+# guided-token chain cannot be configured apart. Rotation: change that value, the issuer and the
+# external issuer's signing key together, and let the checksum annotation roll the pod
+# ("rotate by draining sessions, updating the configured key/issuer together and restarting").
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.fullname" . }}-studio-guided-controller-key
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.studioRunner.selectorLabels" . | nindent 4 }}
+data:
+  {{ .Values.studioRunner.guided.controllerPublicKey.file }}: |
+    {{- .Values.studioRunner.guided.token.publicKey | trim | nindent 4 }}
+{{- end }}
+{{- if include "put-checks.studioObserved.enabled" . }}
+---
+# The runner's observed-replay trust inputs: its own {profile, build} catalog entry and the trusted
+# policies, mounted as files (STUDIO_RUNNER_OBSERVED_CATALOG_FILE / _POLICY_FILE). Rendered from the
+# SAME `studioObserved` values that become the backend's `studio.observed-replay.*-json`, so the two
+# images cannot be configured apart. Public hashes and trust policy, not secrets. `|-` keeps the JSON
+# byte-exact with no trailing newline. (toJson escapes &, < and > as \u0026, \u003c, \u003e: the same
+# JSON value, which both consumers parse.)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.studioObserved.configMapName" . }}
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.studioRunner.selectorLabels" . | nindent 4 }}
+data:
+  catalog.json: |-
+    {{- toJson .Values.studioObserved.catalog | nindent 4 }}
+  policies.json: |-
+    {{- toJson .Values.studioObserved.policies | nindent 4 }}
+{{- end }}
+{{- $_ := include "put-checks.studioAuditSiem.guard" . }}
+{{- if .Values.studioAuditSiem.enabled }}
+---
+# The studio audit stream's routing contract (STUDIO-OBS-009 AC-5; STUDIO-OBS-014 AC-10). The
+# stream name and the logger are CONSTANTS of the application (logback-spring.xml AUDIT_JSON), so
+# they are written here as constants and compared against that file by the chart test. What is
+# configurable is only the sink NAME, which is Platform/SRE's. This ConfigMap is documentation the
+# platform forwarder (and a reviewer) can read; it provisions nothing, and the sink is "unrun,
+# owner Platform/SRE" until it exists.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.fullname" . }}-studio-audit-siem
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+data:
+  STUDIO_AUDIT_STREAM: "studio-audit"
+  STUDIO_AUDIT_LOGGER: "com.citi.put.checks.audit.studio"
+  STUDIO_AUDIT_SINK: {{ .Values.studioAuditSiem.sink.name | quote }}
+{{- end }}

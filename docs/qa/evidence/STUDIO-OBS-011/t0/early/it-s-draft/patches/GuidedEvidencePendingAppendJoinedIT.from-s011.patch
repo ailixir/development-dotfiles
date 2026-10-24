@@ -1,0 +1,134 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
+@@ -1030,8 +1030,63 @@
+   /** Waits for the V20 fact; the failure names what the runner did (its log is value-free). */
+   void awaitRecording(String id) throws Exception {
+     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(90_000);
+-    while (recordingRows(id) != 1 && System.nanoTime() < end) {
+-      Thread.sleep(50);
++    {
++      class ItsPollEvidencerecording {
++        Throwable failure;
++        boolean slept;
++        boolean initialAwaitTick = true;
++
++
++        boolean step() {
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++
++            if (!(recordingRows(id) != 1 && System.nanoTime() < end)) {
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++
++          } catch (Throwable caught) {
++            failure = caught;
++            return true;
++          }
++        }
++      }
++      var itsPoll = new ItsPollEvidencerecording();
++      if (!itsPoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("IT-S Evidence-recording")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(java.time.Duration.ZERO)
++              .pollInterval(java.time.Duration.ofMillis(50))
++              .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (itsPoll.initialAwaitTick) {
++                      itsPoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return itsPoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++          // Preserve the original last guard/observation and its assertion/error mapping.
++          itsPoll.step();
++        }
++      }
++      if (itsPoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (itsPoll.failure instanceof Error error) {
++        throw error;
++      }
+     }
+     assertThat(recordingRows(id))
+         .as(
+@@ -1436,8 +1491,63 @@
+ 
+   static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-    while (!condition.getAsBoolean() && System.nanoTime() < end) {
+-      Thread.sleep(25);
++    {
++      class ItsPollGuidedEvidencePendingAppendJoinedITcondition {
++        Throwable failure;
++        boolean slept;
++        boolean initialAwaitTick = true;
++
++
++        boolean step() {
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++
++            if (!(!condition.getAsBoolean() && System.nanoTime() < end)) {
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++
++          } catch (Throwable caught) {
++            failure = caught;
++            return true;
++          }
++        }
++      }
++      var itsPoll = new ItsPollGuidedEvidencePendingAppendJoinedITcondition();
++      if (!itsPoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("IT-S GuidedEvidencePendingAppendJoinedIT-condition")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(java.time.Duration.ZERO)
++              .pollInterval(java.time.Duration.ofMillis(25))
++              .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (itsPoll.initialAwaitTick) {
++                      itsPoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return itsPoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++          // Preserve the original last guard/observation and its assertion/error mapping.
++          itsPoll.step();
++        }
++      }
++      if (itsPoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (itsPoll.failure instanceof Error error) {
++        throw error;
++      }
+     }
+     assertThat(condition.getAsBoolean()).isTrue();
+   }

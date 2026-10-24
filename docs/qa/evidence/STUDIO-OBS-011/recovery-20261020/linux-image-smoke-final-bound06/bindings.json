@@ -1,0 +1,101 @@
+{
+  "kind": "SOURCE_ONLY_D2_TWO_FINDING_CORRECTION_BINDINGS",
+  "executed": false,
+  "actualSourceChanged": false,
+  "actualDistChanged": false,
+  "finalBindings": {
+    "acceptedSourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "acceptedTestInputDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "acceptedDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "buildContextSha256": "8457b7413e543ff88eea95e7fec554d380e5903e839e0f814c46739833bdb886",
+    "finalBuildReceiptSha256": "2d46c813bc32bcd8f56eecc48e65c30ba0871328ecac54a26bc554fe66a3ce3d",
+    "configuredImageReference": "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "measuredImmutableImageId": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "finalImagePinsReceiptSha256": "effa2ebb317234691de3de9c09e5a5b7cd194b59e0ed23df0f00ae1fe0ac3ab1",
+    "finalDeployment722ReceiptSha256": "3ba83d0f0af820cbe836714a2142fba380cd6d8b3c3f71bb32a4aa181e9c9329"
+  },
+  "bindingDisposition": "New08 exact public-kernel-format parser successor; original05/06/07 failures preserved; runtime separately released.",
+  "historicalDeploymentBaseline": {
+    "sourceDigest": "507228c984235dee043ec3310d84a04710517c9efe143a4ac70ed2c27d3cef1d",
+    "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+    "imageId": "sha256:f8bcb56378b9277f5947a915b25bfdd483e3898ea6dd31681c3ad39d3b616cdf",
+    "passed": 722,
+    "failed": 0,
+    "skipped": 0,
+    "files": 10,
+    "credit": "executed local baseline only; no final-image/D2-step6/cluster/provider credit"
+  },
+  "sourceDependenciesAtPreparation": "Inherited unchanged from ../linux-image-smoke-preparation/bindings.json; no fresh actual-source digest assumed. Final accepted dependency review/binding remains required.",
+  "scope": {
+    "sourceReadOnly": true,
+    "noDockerOrNativeExecution": true,
+    "newTests": 0,
+    "businessAssertionsChanged": 0,
+    "authenticationWeakened": false,
+    "externalCredentialNeeded": false,
+    "privateBodiesReadOrExported": false,
+    "fullReplaySlotCost": 0,
+    "maximumFullReplayAttempts": 6,
+    "chargedAttemptsRemain": [
+      1,
+      2,
+      3
+    ],
+    "reservedAttemptsRemain": [
+      4,
+      5,
+      6
+    ],
+    "originalClockReset": false,
+    "fixtureAdapter": "one-shot off-tree smoke adapter; only bash/Node syntax checks executed; no application imported"
+  },
+  "originalManifestSha256": "605d9b20b3fc96d645a7f2f076a22ab9df8beda80139c301677d451180aca146",
+  "independentNotReadyReviewSha256": "31f7046578138ebfdf98ce5560c983d1b53bc89dbaa01a41e084ca04c255693b",
+  "candidateChanges": [
+    {
+      "original": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-preparation/fixture.mjs",
+      "beforeSha256": "2079981be2e517deca9acff148aa28d12b9dc72a59a2d4b9ea19c306ea5224bd",
+      "candidate": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/fixture.mjs",
+      "afterSha256": "4a6c8474c7c609c25b3c40ea3116094eb9e504d5b3da35f66fe730fdf9f89f91"
+    },
+    {
+      "original": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-preparation/future-smoke.sh",
+      "beforeSha256": "8ba2b767edd9745ac21869b45204efb61a0d4a2f34a8f0f1d8b3c7582dd8c6b1",
+      "candidate": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/future-smoke.sh",
+      "afterSha256": "2b46b5e901df833ce11f570284516515dac8ca48df0119f6a3c97723fbdbc0ad"
+    }
+  ],
+  "finalDependencySuccessor": {
+    "acceptedReviewReference": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-dependency-root-acceptance08.json@sha256:0628109205f87560ce37d35f21f1243126699bc707fa9c3c073a1fa9f96f7292",
+    "measuredFactsSha256": "63b68eec7766bb2b43042f411bce69f81ac97c6425752979a4d300e8630fbc77",
+    "originalBindingsSha256": "4087035f5f77c76c53780a44c183f041b55b13ff7a513cc8dee2ddcf6d47736a"
+  },
+  "sourceCorrectionSuccessor": {
+    "ownerManifestSha256": "1b6ac6c046dd173aede93a492491533b4d9156996083698f832ff54ee9a5c315",
+    "sourceQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-correction01/independent-qa/manifest.json",
+      "sha256": "d5c33394a4c5a61d5fe2ab17d541f2473f89d7e43615305e1542e90c13f08cdd",
+      "bytes": 1179
+    },
+    "canonicalShell": {
+      "path": "/bin/bash",
+      "sha256": "41e7f937a0d2e7e0bc03884595f54f7a892e468087519de1fc53e177b2503308",
+      "mode": "0o555",
+      "versionFirstLine": "GNU bash, version 3.2.57(1)-release (arm64-apple-darwin23)"
+    },
+    "historicalScriptSha256": "2b46b5e901df833ce11f570284516515dac8ca48df0119f6a3c97723fbdbc0ad",
+    "candidateScriptSha256": "ea56c0ef2c45b4107a726b3c26cfd5cb35a96e51d18820da5d28463f6a414455"
+  },
+  "inspectionDiagnosticSuccessor": {
+    "ownerManifestSha256": "f0d41c372cb5558037153267f53e8940b4d5778110a651c9711e9a5a396df973",
+    "fixtureSha256": "b73395f135d5db15fca3a575c43b9c58e6c4a03e6ca8e2f06e3ef3931ce9a95d",
+    "schemaSha256": "9015f9683d7765e4dd207d07a9eaa6f32426de698491256024d2a395d49688bb",
+    "sourceQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-linux-limits-parser-correction03/independent-qa/manifest.json",
+      "sha256": "2a040cc3245ff1c90887c0e129363d395b3a15d58c3008890760ab4170bcb673",
+      "bytes": 1187
+    },
+    "historicalFixtureSha256": "4a6c8474c7c609c25b3c40ea3116094eb9e504d5b3da35f66fe730fdf9f89f91",
+    "failureOnly": true
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "kind": "QUINN_FAILED_RESOURCE_TYPED_PYTHON_ROLE_DESIGN_REVIEW",
+  "reviewer": "Quinn",
+  "subjectManifestSha256": "057a1eec581db2f2ace5185d7478815128be9fe94d3fc0d53bec6a7c34465cd9",
+  "verdict": "CONDITIONAL_EXACT_DESIGN_ONLY_SUPPORT",
+  "mandatoryFindings": [],
+  "mandatoryFindingCount": 0,
+  "payloadCount": 11,
+  "files": [
+    {
+      "path": "SHA256SUMS",
+      "sha256": "1f3dc592b74db713ca2a1fd2a590f00569b813cb45eaec0c4ab4cab8389637a6",
+      "bytes": 800,
+      "mode": 420
+    },
+    {
+      "path": "checks.json",
+      "sha256": "d8ac5374800d3d74100d4c5a655e9248d2b8ff494bbeed2ce19217003ba6775f",
+      "bytes": 23118,
+      "mode": 420
+    },
+    {
+      "path": "condition-bindings.json",
+      "sha256": "845017cfdb1b9ddb6c2807cb3c3bfdb6cc36319ee9d172c5f4193a9326cd71ce",
+      "bytes": 39055,
+      "mode": 420
+    },
+    {
+      "path": "findings.json",
+      "sha256": "0d589ff04d3ca3bfde08e35e8ee444aaaedf30df6bee6681b8f172bf89933892",
+      "bytes": 6347,
+      "mode": 420
+    },
+    {
+      "path": "history.json",
+      "sha256": "08e464c5989427bab998c9fc6d78448b0845a8e60a1ab0e8fd33b0974a879ecb",
+      "bytes": 938,
+      "mode": 420
+    },
+    {
+      "path": "pins.json",
+      "sha256": "d65405a4ce98410ac9c38f8e84f78653df5decf09497bd5ac4b39ddde8a111ab",
+      "bytes": 67879,
+      "mode": 420
+    },
+    {
+      "path": "review-record.json",
+      "sha256": "d723f3d7a279150c3d4076a78de70739ff603db76ecfac48f37da0f704cea914",
+      "bytes": 398,
+      "mode": 420
+    },
+    {
+      "path": "review.md",
+      "sha256": "71a8b7317e2301b6095337e0a46252f5c188276d69433e728bca4ab3e20dc86e",
+      "bytes": 7837,
+      "mode": 420
+    },
+    {
+      "path": "verify.py",
+      "sha256": "169f8dff0f24e4cdff44b9ac27f8d1234e512117f5acd5c472a2cc443db5971b",
+      "bytes": 12805,
+      "mode": 420
+    },
+    {
+      "path": "verify.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "verify.stdout",
+      "sha256": "40be161d1fe5269debd3649ef6f9a724c9b00104fb90bbbdf1163ece160870a2",
+      "bytes": 129,
+      "mode": 420
+    }
+  ],
+  "independentFiniteDocumentChecks": 332,
+  "pinRecords": 251,
+  "completePublicPacketPayloads": 216,
+  "actualRootMetadataRecords": 9,
+  "roleUseSites": 41,
+  "interpretationSites": 118,
+  "inputClasses": 13,
+  "attributedAuthorFiniteChecks": 383,
+  "attributedDeclarativeCases": 12,
+  "targetExecutions": 0,
+  "old332Or313RuntimeSuitesReplayed": false,
+  "actualRuntimeActions": 0,
+  "fullInheritedConditionBinding": true,
+  "legacyReportedCanonicalPredicateSatisfied": false,
+  "oldAndNewPredicatesEquivalent": false,
+  "technicalOwnerDecisionIssued": false,
+  "implementationSelected": false,
+  "actualAuthority": false,
+  "credit": false,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

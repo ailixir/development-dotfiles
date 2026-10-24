@@ -1,0 +1,2674 @@
+{
+  "actual": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.fixtures.config.ts",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-current-fixtures01-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-20T22:16:12.640345+00:00",
+    "elapsedSeconds": 304.31,
+    "exit": 1,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "17be0a2544f758822c4a2364e71992b744910e8574a8f1d680d627c44e3151cd",
+    "testInputStable": true,
+    "testInputDigestBefore": "c3c3c9aa6d79a993438d0500c598a5372b34f5134de8a554d991e117f2d6805c",
+    "testInputDigestAfter": "c3c3c9aa6d79a993438d0500c598a5372b34f5134de8a554d991e117f2d6805c",
+    "vitest": {
+      "success": false,
+      "numPassedTests": 297,
+      "numFailedTests": 1,
+      "numPendingTests": 9,
+      "numTotalTests": 307,
+      "numPassedTestSuites": 50,
+      "numFailedTestSuites": 1
+    },
+    "vitestReportSha256": "4b4e9a50bd8125620411b9b581f2269cf1f703cdfabf045dbccad492aa2e3e6b"
+  },
+  "exactFullIdentityMultiset": true,
+  "perFileGroupCaseOrderExact": true,
+  "expected307Actual307": true,
+  "statusCounts": {
+    "passed": 297,
+    "skipped": 9,
+    "failed": 1
+  },
+  "allCases": [
+    {
+      "file": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses unsafe preferences-symlink before invoking any browser launch",
+      "fullName": "refuses unsafe preferences-symlink before invoking any browser launch",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses unsafe default-symlink before invoking any browser launch",
+      "fullName": "refuses unsafe default-symlink before invoking any browser launch",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses unsafe preferences-replacement before invoking any browser launch",
+      "fullName": "refuses unsafe preferences-replacement before invoking any browser launch",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses unsafe preferences-hardlink before invoking any browser launch",
+      "fullName": "refuses unsafe preferences-hardlink before invoking any browser launch",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses unsafe default-replacement before invoking any browser launch",
+      "fullName": "refuses unsafe default-replacement before invoking any browser launch",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "ancestorTitles": [],
+      "title": "awaits actual scratch removal after guided preparation rejection without an acquired context",
+      "fullName": "awaits actual scratch removal after guided preparation rejection without an acquired context",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "ancestorTitles": [],
+      "title": "awaits actual scratch removal after guided initial-launch rejection without an acquired context",
+      "fullName": "awaits actual scratch removal after guided initial-launch rejection without an acquired context",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "ancestorTitles": [],
+      "title": "a failed launch after context acquisition takes the hard teardown: no context.close(), processes and scratch gone when it rejects",
+      "fullName": "a failed launch after context acquisition takes the hard teardown: no context.close(), processes and scratch gone when it rejects",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses a Default directory redirected after actual launch rather than accepting its newly canonical outside path",
+      "fullName": "refuses a Default directory redirected after actual launch rather than accepting its newly canonical outside path",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "ancestorTitles": [],
+      "title": "launches the actual owned confined guided profile and removes it only after successful close",
+      "fullName": "launches the actual owned confined guided profile and removes it only after successful close",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/deadline-cleanup.test.ts",
+      "ancestorTitles": [
+        "deferred criteria \u2014 skipped, not passed"
+      ],
+      "title": "AC-5b \u2014 the runner total sits inside the API recovery deadline (story 10.19, gated with 10.18)",
+      "fullName": "deferred criteria \u2014 skipped, not passed AC-5b \u2014 the runner total sits inside the API recovery deadline (story 10.19, gated with 10.18)",
+      "status": "skipped"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/deadline-cleanup.test.ts",
+      "ancestorTitles": [
+        "deferred criteria \u2014 skipped, not passed"
+      ],
+      "title": "AC-7b \u2014 nothing the API persists carries the canary (story 10.19, with 10.17)",
+      "fullName": "deferred criteria \u2014 skipped, not passed AC-7b \u2014 nothing the API persists carries the canary (story 10.19, with 10.17)",
+      "status": "skipped"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/deadline-cleanup.test.ts",
+      "ancestorTitles": [
+        "deferred criteria \u2014 skipped, not passed"
+      ],
+      "title": "AC-11b \u2014 the six paths inside the pinned image under PID-1 reaping (ED-05 / story 10.18)",
+      "fullName": "deferred criteria \u2014 skipped, not passed AC-11b \u2014 the six paths inside the pinned image under PID-1 reaping (ED-05 / story 10.18)",
+      "status": "skipped"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "D5 probe trigger no trigger: an unrelated <output> rewritten",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes D5 probe trigger no trigger: an unrelated <output> rewritten",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "D5 probe trigger focus: an unrelated <output> rewritten",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes D5 probe trigger focus: an unrelated <output> rewritten",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "D5 probe trigger input: the mutation comes after the write and never refused it",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes D5 probe trigger input: the mutation comes after the write and never refused it",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "D5 probe trigger change: the mutation comes after the write and never refused it",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes D5 probe trigger change: the mutation comes after the write and never refused it",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(1) helper text inserted elsewhere on focus",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (1) helper text inserted elsewhere on focus",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(1) helper text inserted next to the field, inside its own section",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (1) helper text inserted next to the field, inside its own section",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(2) an autocomplete listbox rendered in a portal outside the form",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (2) an autocomplete listbox rendered in a portal outside the form",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(3) the allowlisted attribute class set on the target",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (3) the allowlisted attribute class set on the target",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(3) the allowlisted attribute style set on the target",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (3) the allowlisted attribute style set on the target",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(3) the allowlisted attribute aria-expanded set on the target",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (3) the allowlisted attribute aria-expanded set on the target",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(3) the allowlisted attribute aria-activedescendant set on the target",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (3) the allowlisted attribute aria-activedescendant set on the target",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(3) the allowlisted attribute aria-describedby set on the target",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (3) the allowlisted attribute aria-describedby set on the target",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(3) the allowlisted attribute aria-controls set on the target",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (3) the allowlisted attribute aria-controls set on the target",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(3) the allowlisted attribute data-focus set on the target",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (3) the allowlisted attribute data-focus set on the target",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "(3) the allowlisted attribute data-focus-visible set on the target",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes (3) the allowlisted attribute data-focus-visible set on the target",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes"
+      ],
+      "title": "inert attributes and a class on an ancestor are ignored",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change elsewhere during the fill's focus writes inert attributes and a class on an ancestor are ignored",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "a non-allowlisted attribute set on the target: readonly",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing a non-allowlisted attribute set on the target: readonly",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "a non-allowlisted attribute set on the target: name",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing a non-allowlisted attribute set on the target: name",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "a non-allowlisted attribute set on the target: autocomplete",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing a non-allowlisted attribute set on the target: autocomplete",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "a non-allowlisted attribute set on the target: aria-hidden",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing a non-allowlisted attribute set on the target: aria-hidden",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "a non-allowlisted attribute set on the target: contenteditable",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing a non-allowlisted attribute set on the target: contenteditable",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "a non-allowlisted attribute set on the target: aria-disabled",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing a non-allowlisted attribute set on the target: aria-disabled",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "a non-allowlisted attribute set on the target: disabled",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing a non-allowlisted attribute set on the target: disabled",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "the target replaced by a copy",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing the target replaced by a copy",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "the target detached",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing the target detached",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "an ancestor removed",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing an ancestor removed",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "an ancestor replaced by a copy",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing an ancestor replaced by a copy",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "an ancestor moved",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing an ancestor moved",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "hidden set on an ancestor",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing hidden set on an ancestor",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "inert set on an ancestor",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing inert set on an ancestor",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "ancestorTitles": [
+        "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing"
+      ],
+      "title": "a tolerated change plus a real one in the same focus handler is refused",
+      "fullName": "FOCUS-MUTATION-01 on real Chromium: a change to the target or its ancestors still refuses POST_FOCUS_CHANGED and writes nothing a tolerated change plus a real one in the same focus handler is refused",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "ancestorTitles": [
+        "real guided Chromium dataflow"
+      ],
+      "title": "proves regionVisible policy source\u2192consumer without value disclosure or duplicate invocation",
+      "fullName": "real guided Chromium dataflow proves regionVisible policy source\u2192consumer without value disclosure or duplicate invocation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "ancestorTitles": [
+        "real guided Chromium dataflow"
+      ],
+      "title": "proves regionControl policy source\u2192consumer without value disclosure or duplicate invocation",
+      "fullName": "real guided Chromium dataflow proves regionControl policy source\u2192consumer without value disclosure or duplicate invocation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "ancestorTitles": [
+        "real guided Chromium dataflow"
+      ],
+      "title": "STUDIO-OBS-014 ar-mounted-rules oracle 2: the former exact-rule page exports only structural nodes under the governed policy and never the former rule target",
+      "fullName": "real guided Chromium dataflow STUDIO-OBS-014 ar-mounted-rules oracle 2: the former exact-rule page exports only structural nodes under the governed policy and never the former rule target",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-observation-boundary.test.ts",
+      "ancestorTitles": [],
+      "title": "drops a completed private CDP collection when disposal won the race",
+      "fullName": "drops a completed private CDP collection when disposal won the race",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-observation-boundary.test.ts",
+      "ancestorTitles": [],
+      "title": "normalizes unexpected CDP exceptions and permanently refuses later collection",
+      "fullName": "normalizes unexpected CDP exceptions and permanently refuses later collection",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-recording-kill.test.ts",
+      "ancestorTitles": [],
+      "title": "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=false)",
+      "fullName": "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=false)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-recording-kill.test.ts",
+      "ancestorTitles": [],
+      "title": "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=true)",
+      "fullName": "parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=true)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-recording-kill.test.ts",
+      "ancestorTitles": [],
+      "title": "actual SIGINT gracefully settles real guided recorder and removes its owned recording bytes",
+      "fullName": "actual SIGINT gracefully settles real guided recorder and removes its owned recording bytes",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-recording.test.ts",
+      "ancestorTitles": [
+        "guided learn run recording on real Chromium (STUDIO-OBS-013)"
+      ],
+      "title": "records the persistent context, uploads after browser scratch disposal, and reports one timing per dispatched action",
+      "fullName": "guided learn run recording on real Chromium (STUDIO-OBS-013) records the persistent context, uploads after browser scratch disposal, and reports one timing per dispatched action",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-recording.test.ts",
+      "ancestorTitles": [
+        "guided learn run recording on real Chromium (STUDIO-OBS-013)"
+      ],
+      "title": "settles a recorder-side fault as UNAVAILABLE without a fake video, and the session still terminates",
+      "fullName": "guided learn run recording on real Chromium (STUDIO-OBS-013) settles a recorder-side fault as UNAVAILABLE without a fake video, and the session still terminates",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-recording.test.ts",
+      "ancestorTitles": [
+        "guided learn run recording on real Chromium (STUDIO-OBS-013)"
+      ],
+      "title": "REL-001: a launch that fails mid-startup keeps the original error and names the step it failed in",
+      "fullName": "guided learn run recording on real Chromium (STUDIO-OBS-013) REL-001: a launch that fails mid-startup keeps the original error and names the step it failed in",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-recording.test.ts",
+      "ancestorTitles": [
+        "guided learn run recording on real Chromium (STUDIO-OBS-013)"
+      ],
+      "title": "produces no video for an unrecorded guided launch (the webm comes from recordVideo, not from a directory pick)",
+      "fullName": "guided learn run recording on real Chromium (STUDIO-OBS-013) produces no video for an unrecorded guided launch (the webm comes from recordVideo, not from a directory pick)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-recording.test.ts",
+      "ancestorTitles": [
+        "guided learn run recording on real Chromium (STUDIO-OBS-013)"
+      ],
+      "title": "runs the observed replay adapter on the guided-mode recorded handle (AC-1 parity)",
+      "fullName": "guided learn run recording on real Chromium (STUDIO-OBS-013) runs the observed replay adapter on the guided-mode recorded handle (AC-1 parity)",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+      "ancestorTitles": [],
+      "title": "ISO1 rejects mounted capacity2 before worker TLS, claim, browser or secret effects",
+      "fullName": "ISO1 rejects mounted capacity2 before worker TLS, claim, browser or secret effects",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+      "ancestorTitles": [],
+      "title": "ISO2 retains capacity1 through actual A close and writer quiescence before B",
+      "fullName": "ISO2 retains capacity1 through actual A close and writer quiescence before B",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+      "ancestorTitles": [],
+      "title": "ISO3 isolates fresh CSI-B PASS from genuine A producer, cookie, masking and profile state",
+      "fullName": "ISO3 isolates fresh CSI-B PASS from genuine A producer, cookie, masking and profile state",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts",
+      "ancestorTitles": [],
+      "title": "uses actual mTLS and native focus for guided secret ownership: revoked",
+      "fullName": "uses actual mTLS and native focus for guided secret ownership: revoked",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts",
+      "ancestorTitles": [],
+      "title": "uses actual mTLS and native focus for guided secret ownership: slow-grant",
+      "fullName": "uses actual mTLS and native focus for guided secret ownership: slow-grant",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts",
+      "ancestorTitles": [],
+      "title": "uses actual mTLS and native focus for guided secret ownership: lost-body-late-grant",
+      "fullName": "uses actual mTLS and native focus for guided secret ownership: lost-body-late-grant",
+      "status": "failed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts",
+      "ancestorTitles": [],
+      "title": "uses actual mTLS and native focus for guided secret ownership: hard-expiry",
+      "fullName": "uses actual mTLS and native focus for guided secret ownership: hard-expiry",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts",
+      "ancestorTitles": [],
+      "title": "rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before context or secret effects",
+      "fullName": "rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before context or secret effects",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "ancestorTitles": [
+        "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down"
+      ],
+      "title": "rejects at the deadline with TIMEOUT, and after close() no process, scratch or recording file remains",
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at the deadline with TIMEOUT, and after close() no process, scratch or recording file remains",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "ancestorTitles": [
+        "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down"
+      ],
+      "title": "rejects at once when the signal aborts during the launch ('a bare abort'), naming 'CANCELLED', with the same teardown",
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a bare abort'), naming 'CANCELLED', with the same teardown",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "ancestorTitles": [
+        "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down"
+      ],
+      "title": "rejects at once when the signal aborts during the launch ('a CANCELLED reason (a stop)'), naming 'CANCELLED', with the same teardown",
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a CANCELLED reason (a stop)'), naming 'CANCELLED', with the same teardown",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "ancestorTitles": [
+        "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down"
+      ],
+      "title": "rejects at once when the signal aborts during the launch ('a TIMEOUT reason (the runtime\\'s budg\u2026'), naming 'TIMEOUT', with the same teardown",
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a TIMEOUT reason (the runtime\\'s budg\u2026'), naming 'TIMEOUT', with the same teardown",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "ancestorTitles": [
+        "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down"
+      ],
+      "title": "with a recording on disk: kills the encoder as well, and leaves the recorder's files exactly as they were",
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down with a recording on disk: kills the encoder as well, and leaves the recorder's files exactly as they were",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "ancestorTitles": [
+        "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down"
+      ],
+      "title": "kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled",
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "ancestorTitles": [
+        "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down"
+      ],
+      "title": "Quinn F5: refuses to confirm the teardown while a process it enumerated is still alive, and leaves the scratch directory in place",
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down Quinn F5: refuses to confirm the teardown while a process it enumerated is still alive, and leaves the scratch directory in place",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "ancestorTitles": [
+        "controlled startup timeout-origin handoff for 009"
+      ],
+      "title": "hands an absolute startup timeout to the caller before pending teardown when the wall sample is still before its deadline",
+      "fullName": "controlled startup timeout-origin handoff for 009 hands an absolute startup timeout to the caller before pending teardown when the wall sample is still before its deadline",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "ancestorTitles": [
+        "controlled startup timeout-origin handoff for 009"
+      ],
+      "title": "keeps an earlier operation-cap TIMEOUT on the ordinary cleanup-before-response path",
+      "fullName": "controlled startup timeout-origin handoff for 009 keeps an earlier operation-cap TIMEOUT on the ordinary cleanup-before-response path",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "reads a positively classified field exactly without accepting runtime policy substitutions",
+      "fullName": "retained isolated target at invocation reads a positively classified field exactly without accepting runtime policy substitutions",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "refuses a post-prepare type change to password",
+      "fullName": "retained isolated target at invocation refuses a post-prepare type change to password",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "refuses a post-prepare type change to hidden",
+      "fullName": "retained isolated target at invocation refuses a post-prepare type change to hidden",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "refuses a post-prepare type change to email",
+      "fullName": "retained isolated target at invocation refuses a post-prepare type change to email",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "refuses replacement by an indistinguishable node and never fills the replacement",
+      "fullName": "retained isolated target at invocation refuses replacement by an indistinguishable node and never fills the replacement",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "rejects a hidden locator twin inserted after preparation",
+      "fullName": "retained isolated target at invocation rejects a hidden locator twin inserted after preparation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "refuses a cross-origin/document race and disposed capture context",
+      "fullName": "retained isolated target at invocation refuses a cross-origin/document race and disposed capture context",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "refuses empty reads",
+      "fullName": "retained isolated target at invocation refuses empty reads",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "refuses whitespace reads",
+      "fullName": "retained isolated target at invocation refuses whitespace reads",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "refuses oversize reads",
+      "fullName": "retained isolated target at invocation refuses oversize reads",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "refuses invalid Unicode reads",
+      "fullName": "retained isolated target at invocation refuses invalid Unicode reads",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "checks lowered UTF-8 byte limit on the exact read",
+      "fullName": "retained isolated target at invocation checks lowered UTF-8 byte limit on the exact read",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "produces native CSS hover and trusted mouse click sequencing",
+      "fullName": "retained isolated target at invocation produces native CSS hover and trusted mouse click sequencing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "implements native Tab and prevented Enter default behavior",
+      "fullName": "retained isolated target at invocation implements native Tab and prevented Enter default behavior",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "implements native Arrow selection and trusted check/uncheck without duplicate no-op effects",
+      "fullName": "retained isolated target at invocation implements native Arrow selection and trusted check/uncheck without duplicate no-op effects",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "allows native Escape to dismiss a modal dialog and respects prevented keyboard defaults",
+      "fullName": "retained isolated target at invocation allows native Escape to dismiss a modal dialog and respects prevented keyboard defaults",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "stops uncertain after focus theft or a mouseover overlay and does not click a replacement",
+      "fullName": "retained isolated target at invocation stops uncertain after focus theft or a mouseover overlay and does not click a replacement",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "requires a positive region grant without treating generic discovery or application consent as a field override",
+      "fullName": "retained isolated target at invocation requires a positive region grant without treating generic discovery or application consent as a field override",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "rejects the entire region text source with hidden/sensitive/field descendants and private text echoes",
+      "fullName": "retained isolated target at invocation rejects the entire region text source with hidden/sensitive/field descendants and private text echoes",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "prefers a unique region over application grants and denies equal-priority overlaps",
+      "fullName": "retained isolated target at invocation prefers a unique region over application grants and denies equal-priority overlaps",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "erases the private masking inventory and refuses late repopulation after disposal",
+      "fullName": "retained isolated target at invocation erases the private masking inventory and refuses late repopulation after disposal",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "permits benign focus styling but never writes after focus retypes, detaches or steals the pinned field",
+      "fullName": "retained isolated target at invocation permits benign focus styling but never writes after focus retypes, detaches or steals the pinned field",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "asserts readonly/disabled nonsecret values without granting password/hidden access",
+      "fullName": "retained isolated target at invocation asserts readonly/disabled nonsecret values without granting password/hidden access",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "reveals the retained below-fold target before native click",
+      "fullName": "retained isolated target at invocation reveals the retained below-fold target before native click",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "reveals the retained below-fold target before native hover",
+      "fullName": "retained isolated target at invocation reveals the retained below-fold target before native hover",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "reveals the retained below-fold target before native check",
+      "fullName": "retained isolated target at invocation reveals the retained below-fold target before native check",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "reveals the retained below-fold target before native press",
+      "fullName": "retained isolated target at invocation reveals the retained below-fold target before native press",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "reveals an unchanged target inside nested scrolling containers without reacquiring it",
+      "fullName": "retained isolated target at invocation reveals an unchanged target inside nested scrolling containers without reacquiring it",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "does not scroll an already satisfied offscreen check",
+      "fullName": "retained isolated target at invocation does not scroll an already satisfied offscreen check",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "does not scroll an already satisfied offscreen uncheck",
+      "fullName": "retained isolated target at invocation does not scroll an already satisfied offscreen uncheck",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "retained isolated target at invocation"
+      ],
+      "title": "stops uncertain after a scroll handler replaces the retained target, without clicking the replacement",
+      "fullName": "retained isolated target at invocation stops uncertain after a scroll handler replaces the retained target, without clicking the replacement",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "QA session privacy and native toggle postconditions"
+      ],
+      "title": "withholds uncaptured password bytes and aliases after removal and navigation",
+      "fullName": "QA session privacy and native toggle postconditions withholds uncaptured password bytes and aliases after removal and navigation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "QA session privacy and native toggle postconditions"
+      ],
+      "title": "withholds uncaptured text bytes and aliases after removal and navigation",
+      "fullName": "QA session privacy and native toggle postconditions withholds uncaptured text bytes and aliases after removal and navigation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "QA session privacy and native toggle postconditions"
+      ],
+      "title": "retains authorized business source text after removal without requiring a capture",
+      "fullName": "QA session privacy and native toggle postconditions retains authorized business source text after removal without requiring a capture",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "QA session privacy and native toggle postconditions"
+      ],
+      "title": "fails closed persistently on private inventory count/byte overflow instead of evicting earlier bytes",
+      "fullName": "QA session privacy and native toggle postconditions fails closed persistently on private inventory count/byte overflow instead of evicting earlier bytes",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "QA session privacy and native toggle postconditions"
+      ],
+      "title": "does not report a prevented/reverted/replaced checkbox as success: event.preventDefault()",
+      "fullName": "QA session privacy and native toggle postconditions does not report a prevented/reverted/replaced checkbox as success: event.preventDefault()",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "QA session privacy and native toggle postconditions"
+      ],
+      "title": "does not report a prevented/reverted/replaced checkbox as success: this.checked=false",
+      "fullName": "QA session privacy and native toggle postconditions does not report a prevented/reverted/replaced checkbox as success: this.checked=false",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "QA session privacy and native toggle postconditions"
+      ],
+      "title": "does not report a prevented/reverted/replaced checkbox as success: this.replaceWith(this.cloneNode())",
+      "fullName": "QA session privacy and native toggle postconditions does not report a prevented/reverted/replaced checkbox as success: this.replaceWith(this.cloneNode())",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "QA session privacy and native toggle postconditions"
+      ],
+      "title": "does not report a prevented/reverted/replaced checkbox as success: this.type='radio'",
+      "fullName": "QA session privacy and native toggle postconditions does not report a prevented/reverted/replaced checkbox as success: this.type='radio'",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [
+        "QA session privacy and native toggle postconditions"
+      ],
+      "title": "refuses radio uncheck during preparation and before any native input while allowing radio check",
+      "fullName": "QA session privacy and native toggle postconditions refuses radio uncheck during preparation and before any native input while allowing radio check",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [],
+      "title": "poisons later observation after an unexpected collector error instead of forgetting prior inventory",
+      "fullName": "poisons later observation after an unexpected collector error instead of forgetting prior inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "ancestorTitles": [],
+      "title": "keeps explicit sensitive-region text private after the region is gone",
+      "fullName": "keeps explicit sensitive-region text private after the region is gone",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guided-wire.test.ts",
+      "ancestorTitles": [],
+      "title": "uses real mTLS + service JWT for blank-to-Chromium control and data-free callbacks",
+      "fullName": "uses real mTLS + service JWT for blank-to-Chromium control and data-free callbacks",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+      "ancestorTitles": [
+        "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner)"
+      ],
+      "title": "F1 (i) frozen after a completed start: the stop replies 200 once the close settled, within the grace plus the teardown",
+      "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F1 (i) frozen after a completed start: the stop replies 200 once the close settled, within the grace plus the teardown",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+      "ancestorTitles": [
+        "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner)"
+      ],
+      "title": "F2 (ii) frozen entering WITHHOLD: the start is refused CONTEXT_LOST inside the backend window, after the hard teardown alone",
+      "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F2 (ii) frozen entering WITHHOLD: the start is refused CONTEXT_LOST inside the backend window, after the hard teardown alone",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+      "ancestorTitles": [
+        "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner)"
+      ],
+      "title": "F3 (iii) a non-deadline error inside the launch with Chrome frozen: the failed launch takes the hard teardown at once",
+      "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F3 (iii) a non-deadline error inside the launch with Chrome frozen: the failed launch takes the hard teardown at once",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+      "ancestorTitles": [
+        "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner)"
+      ],
+      "title": "F4 (iv-a) stop before spawn: unchanged, the reply is pinned to the D4 backstop (start + 15 s) and the slot is free after it",
+      "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F4 (iv-a) stop before spawn: unchanged, the reply is pinned to the D4 backstop (start + 15 s) and the slot is free after it",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+      "ancestorTitles": [
+        "KL-015-D5 H: a healthy recorded close finishes far inside the grace"
+      ],
+      "title": "H five recorded closes, unfrozen, one navigation each: orderly, a webm header, scratch gone, and the slowest is recorded",
+      "fullName": "KL-015-D5 H: a healthy recorded close finishes far inside the grace H five recorded closes, unfrozen, one navigation each: orderly, a webm header, scratch gone, and the slowest is recorded",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+      "ancestorTitles": [
+        "mixed prefix and suffix on one actual recorded guided session"
+      ],
+      "title": "recaptures a stable binding, preserves exact prepared lineage, crosses at4 and records both modes",
+      "fullName": "mixed prefix and suffix on one actual recorded guided session recaptures a stable binding, preserves exact prepared lineage, crosses at4 and records both modes",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+      "ancestorTitles": [],
+      "title": "retains actual read ordinal0 inside drift step2, spends only failed ordinal1, then natively recaptures twice under identical fixture artifact bytes",
+      "fullName": "retains actual read ordinal0 inside drift step2, spends only failed ordinal1, then natively recaptures twice under identical fixture artifact bytes",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+      "ancestorTitles": [],
+      "title": "exact native blank classifier rejects actual 'chrome://version/' at 640 x 360 separately",
+      "fullName": "exact native blank classifier rejects actual 'chrome://version/' at 640 x 360 separately",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+      "ancestorTitles": [],
+      "title": "exact native blank classifier rejects actual 'chrome://prefs-internals/' at 640 x 360 separately",
+      "fullName": "exact native blank classifier rejects actual 'chrome://prefs-internals/' at 640 x 360 separately",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+      "ancestorTitles": [],
+      "title": "exact native blank classifier rejects actual 'chrome://version/' at 800 x 600 separately",
+      "fullName": "exact native blank classifier rejects actual 'chrome://version/' at 800 x 600 separately",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+      "ancestorTitles": [],
+      "title": "exact native blank classifier rejects actual 'chrome://prefs-internals/' at 800 x 600 separately",
+      "fullName": "exact native blank classifier rejects actual 'chrome://prefs-internals/' at 800 x 600 separately",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps generic semantic discovery usable for ordinary-checkbox",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps generic semantic discovery usable for ordinary-checkbox",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps generic semantic discovery usable for short-input",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps generic semantic discovery usable for short-input",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps generic semantic discovery usable for nested-form",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps generic semantic discovery usable for nested-form",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps generic semantic discovery usable for long-content-before",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps generic semantic discovery usable for long-content-before",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps generic semantic discovery usable for long-content-after",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps generic semantic discovery usable for long-content-after",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "scrubs real short-value echoes without classifying structural fields or IDs as data",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary scrubs real short-value echoes without classifying structural fields or IDs as data",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps substring masking strict for explicit-toggle-value, regardless of value length",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps substring masking strict for explicit-toggle-value, regardless of value length",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps substring masking strict for text-value, regardless of value length",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps substring masking strict for text-value, regardless of value length",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps substring masking strict for password-value, regardless of value length",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps substring masking strict for password-value, regardless of value length",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps substring masking strict for hidden-value, regardless of value length",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps substring masking strict for hidden-value, regardless of value length",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps substring masking strict for sensitive-default, regardless of value length",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps substring masking strict for sensitive-default, regardless of value length",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps substring masking strict for configured-secret, regardless of value length",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps substring masking strict for configured-secret, regardless of value length",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps substring masking strict for strict-normalized-alias, regardless of value length",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps substring masking strict for strict-normalized-alias, regardless of value length",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps ordinary short data strict and only exempts safe implicit toggle defaults",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps ordinary short data strict and only exempts safe implicit toggle defaults",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "supports real native action captions, keeps freshness, and never grants the exemption from ARIA alone",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary supports real native action captions, keeps freshness, and never grants the exemption from ARIA alone",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "lets independent late and shadow private sources override action-caption and toggle-default provenance",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary lets independent late and shadow private sources override action-caption and toggle-default provenance",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "recomputes semantic depth and nearest retained parents after redaction",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary recomputes semantic depth and nearest retained parents after redaction",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "inventories every selected value and detects selection changes without a DOM mutation",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary inventories every selected value and detects selection changes without a DOM mutation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "retains native label competitors in the relevant inventory",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary retains native label competitors in the relevant inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps a unique action provable beside unrelated role semantics: <div role=\"alert\">Notice</div>",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps a unique action provable beside unrelated role semantics: <div role=\"alert\">Notice</div>",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps a unique action provable beside unrelated role semantics: <div role=\"progressbar\" aria-label=\"Loading\"></div>",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps a unique action provable beside unrelated role semantics: <div role=\"progressbar\" aria-label=\"Loading\"></div>",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps a unique action provable beside unrelated role semantics: <button role=\"alert button\">Notice</button>",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps a unique action provable beside unrelated role semantics: <button role=\"alert button\">Notice</button>",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps a unique action provable beside unrelated role semantics: <span role=\"presentation\">Decorative text</span>",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps a unique action provable beside unrelated role semantics: <span role=\"presentation\">Decorative text</span>",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "retains possible duplicates when role/name semantics can match the target: <div role=\"button\"><span aria-label=\"Search\">Different</span></div>",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary retains possible duplicates when role/name semantics can match the target: <div role=\"button\"><span aria-label=\"Search\">Different</span></div>",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "retains possible duplicates when role/name semantics can match the target: <button role=\"not-a-valid-role\">Search</button>",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary retains possible duplicates when role/name semantics can match the target: <button role=\"not-a-valid-role\">Search</button>",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "retains possible duplicates when role/name semantics can match the target: <button role=\"presentation\">Search</button>",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary retains possible duplicates when role/name semantics can match the target: <button role=\"presentation\">Search</button>",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "retains possible duplicates when role/name semantics can match the target: <button role=\"not-a-valid-role button\">Search</button>",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary retains possible duplicates when role/name semantics can match the target: <button role=\"not-a-valid-role button\">Search</button>",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "counts protected password competitors without exporting their metadata",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary counts protected password competitors without exporting their metadata",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "retains a complete private-value inventory past irrelevant page content",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary retains a complete private-value inventory past irrelevant page content",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "enforces distinct semantic-output and internal-work limits without raising frozen ceilings",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary enforces distinct semantic-output and internal-work limits without raising frozen ceilings",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-001 removes unsafe source text for sensitive-ancestor-aria-label while retaining ordinary automatic discovery",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-001 removes unsafe source text for sensitive-ancestor-aria-label while retaining ordinary automatic discovery",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-001 removes unsafe source text for sensitive-ancestor-native-label while retaining ordinary automatic discovery",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-001 removes unsafe source text for sensitive-ancestor-native-label while retaining ordinary automatic discovery",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-001 removes unsafe source text for password-label-aliased while retaining ordinary automatic discovery",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-001 removes unsafe source text for password-label-aliased while retaining ordinary automatic discovery",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-001 removes unsafe source text for aria-hidden-ancestor-label while retaining ordinary automatic discovery",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-001 removes unsafe source text for aria-hidden-ancestor-label while retaining ordinary automatic discovery",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-001 removes unsafe source text for sensitive-inline-source while retaining ordinary automatic discovery",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-001 removes unsafe source text for sensitive-inline-source while retaining ordinary automatic discovery",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-001 removes unsafe source text for sensitive-fallback-source while retaining ordinary automatic discovery",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-001 removes unsafe source text for sensitive-fallback-source while retaining ordinary automatic discovery",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER  CANARY\"",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER  CANARY\"",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\\nCANARY\"",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\\nCANARY\"",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\\tCANARY\"",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\\tCANARY\"",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\u00a0CANARY\"",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\u00a0CANARY\"",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\u2003CANARY\"",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\u2003CANARY\"",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\u200b CANARY\"",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\u200b CANARY\"",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\u00ad CANARY\"",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-002 scrubs normalized current values from final bytes: \"CUSTOMER\u00ad CANARY\"",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "SEC-002 scrubs normalized configured secrets independently of input controls",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary SEC-002 scrubs normalized configured secrets independently of input controls",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 refuses ambiguous native-name competitors: default-submit-duplicate",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 refuses ambiguous native-name competitors: default-submit-duplicate",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 refuses ambiguous native-name competitors: title-button-duplicate",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 refuses ambiguous native-name competitors: title-button-duplicate",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 refuses ambiguous native-name competitors: svg-title-duplicate",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 refuses ambiguous native-name competitors: svg-title-duplicate",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 preserves truthful automatic names and actual positive identity for default-submit",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 preserves truthful automatic names and actual positive identity for default-submit",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 preserves truthful automatic names and actual positive identity for default-reset",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 preserves truthful automatic names and actual positive identity for default-reset",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 preserves truthful automatic names and actual positive identity for title-only-button",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 preserves truthful automatic names and actual positive identity for title-only-button",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 preserves truthful automatic names and actual positive identity for content-precedes-title",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 preserves truthful automatic names and actual positive identity for content-precedes-title",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 preserves truthful automatic names and actual positive identity for repeated-aria-reference",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 preserves truthful automatic names and actual positive identity for repeated-aria-reference",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 includes non-input ARIA labels and each individual ARIA reference in label matching",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 includes non-input ARIA labels and each individual ARIA reference in label matching",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 counts open-shadow competitors and invalidates late attachment",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 counts open-shadow competitors and invalidates late attachment",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "supports unique light and open-shadow controls with root-scoped labels and observed mutations",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary supports unique light and open-shadow controls with root-scoped labels and observed mutations",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "applies sensitivity across shadow hosts and slots, scopes references and bounds shadow traversal",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary applies sensitivity across shadow hosts and slots, scopes references and bounds shadow traversal",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "counts zero-area and unmodeled native competitors without inventing uniqueness",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary counts zero-area and unmodeled native competitors without inventing uniqueness",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "uses block-separated accessible button text and detects native search combobox competitors",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary uses block-separated accessible button text and detects native search combobox competitors",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "REL-001 preserves exact placeholder whitespace and explicit disposed-session refusal",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary REL-001 preserves exact placeholder whitespace and explicit disposed-session refusal",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "discovers ordinary semantic controls and narrow data neighborhoods with one application policy and no control setup",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary discovers ordinary semantic controls and narrow data neighborhoods with one application policy and no control setup",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "keeps policy, secrets, DOM reads and mutation observation isolated from hostile main-world prototypes",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary keeps policy, secrets, DOM reads and mutation observation isolated from hostile main-world prototypes",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "differentially matches Playwright exact hints, including hidden duplicates and nested labels",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary differentially matches Playwright exact hints, including hidden duplicates and nested labels",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "refuses unresolved name semantics instead of falsely proving a unique role locator",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary refuses unresolved name semantics instead of falsely proving a unique role locator",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "invalidates locator proof after CSSOM changes even without a DOM mutation record",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary invalidates locator proof after CSSOM changes even without a DOM mutation record",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "retains the raw ARIA leak baseline and excludes every planted data channel from export",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary retains the raw ARIA leak baseline and excludes every planted data channel from export",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "scrubs known secrets and late field values from approved names/hints and relationships",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary scrubs known secrets and late field values from approved names/hints and relationships",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "preserves trusted DOM identity, rejects duplicate locators, and invalidates identical replacements and mutation",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary preserves trusted DOM identity, rejects duplicate locators, and invalidates identical replacements and mutation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "preserves the document identity across same-document URL navigation while advancing generation",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary preserves the document identity across same-document URL navigation while advancing generation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "detects property-only field mutation and document.open replacement without URL changes",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary detects property-only field mutation and document.open replacement without URL changes",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "applies count/depth/byte budgets before reading unbounded subtrees and counts UTF-8",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary applies count/depth/byte budgets before reading unbounded subtrees and counts UTF-8",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "ancestorTitles": [
+        "OBS-002 actual Chromium exported-byte boundary"
+      ],
+      "title": "marks unsupported surfaces and ambiguous labels explicitly, observes only the current page",
+      "fullName": "OBS-002 actual Chromium exported-byte boundary marks unsupported surfaces and ambiguous labels explicitly, observes only the current page",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled no-app Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled no-app Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled captured-unpublished Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled captured-unpublished Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled committed-before-ready Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled committed-before-ready Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled committed-before-ready-orderly Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled committed-before-ready-orderly Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled ready-sent-dropped Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled ready-sent-dropped Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "ancestorTitles": [],
+      "title": "settles actual compiled ready-received-stop Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "fullName": "settles actual compiled ready-received-stop Chromium/encoder tree and exact native ownership while releasing scratch/capacity",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "ancestorTitles": [],
+      "title": "deletes only the captured startup-native capability before creating the distinct sole app page in the same recorded context",
+      "fullName": "deletes only the captured startup-native capability before creating the distinct sole app page in the same recorded context",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses probe-popup in the actual recorded bootstrap and closes the same context before returning",
+      "fullName": "refuses probe-popup in the actual recorded bootstrap and closes the same context before returning",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses delete-popup in the actual recorded bootstrap and closes the same context before returning",
+      "fullName": "refuses delete-popup in the actual recorded bootstrap and closes the same context before returning",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses competing-new-page in the actual recorded bootstrap and closes the same context before returning",
+      "fullName": "refuses competing-new-page in the actual recorded bootstrap and closes the same context before returning",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses delete-failure in the actual recorded bootstrap and closes the same context before returning",
+      "fullName": "refuses delete-failure in the actual recorded bootstrap and closes the same context before returning",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses symlink-video in the actual recorded bootstrap and closes the same context before returning",
+      "fullName": "refuses symlink-video in the actual recorded bootstrap and closes the same context before returning",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses cancel-delete in the actual recorded bootstrap and closes the same context before returning",
+      "fullName": "refuses cancel-delete in the actual recorded bootstrap and closes the same context before returning",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses expired-delete in the actual recorded bootstrap and closes the same context before returning",
+      "fullName": "refuses expired-delete in the actual recorded bootstrap and closes the same context before returning",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses close-failure in the actual recorded bootstrap and closes the same context before returning",
+      "fullName": "refuses close-failure in the actual recorded bootstrap and closes the same context before returning",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "ancestorTitles": [],
+      "title": "retains an unexpected app-page latch until a subscriber is attached and never deletes the app video as bootstrap",
+      "fullName": "retains an unexpected app-page latch until a subscriber is attached and never deletes the app video as bootstrap",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+      "ancestorTitles": [],
+      "title": "decodes actual compiled normal-failure full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+      "fullName": "decodes actual compiled normal-failure full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+      "ancestorTitles": [],
+      "title": "decodes actual compiled forced-step-loss full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+      "fullName": "decodes actual compiled forced-step-loss full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+      "ancestorTitles": [],
+      "title": "decodes actual compiled completed-pass-lost-final full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+      "fullName": "decodes actual compiled completed-pass-lost-final full-Chromium app video after bootstrap deletion and retains native timing/partial facts",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "containsText matches pinned Playwright toContainText in real Chromium (H6, F4)"
+      ],
+      "title": "the H6 regression: padded read value against its padded dd",
+      "fullName": "containsText matches pinned Playwright toContainText in real Chromium (H6, F4) the H6 regression: padded read value against its padded dd",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "containsText matches pinned Playwright toContainText in real Chromium (H6, F4)"
+      ],
+      "title": "preserved tabs and newlines against collapsed spacing",
+      "fullName": "containsText matches pinned Playwright toContainText in real Chromium (H6, F4) preserved tabs and newlines against collapsed spacing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "containsText matches pinned Playwright toContainText in real Chromium (H6, F4)"
+      ],
+      "title": "inline children separated by source whitespace",
+      "fullName": "containsText matches pinned Playwright toContainText in real Chromium (H6, F4) inline children separated by source whitespace",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "containsText matches pinned Playwright toContainText in real Chromium (H6, F4)"
+      ],
+      "title": "an exact match",
+      "fullName": "containsText matches pinned Playwright toContainText in real Chromium (H6, F4) an exact match",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "containsText matches pinned Playwright toContainText in real Chromium (H6, F4)"
+      ],
+      "title": "a soft hyphen in the rendered text",
+      "fullName": "containsText matches pinned Playwright toContainText in real Chromium (H6, F4) a soft hyphen in the rendered text",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "containsText matches pinned Playwright toContainText in real Chromium (H6, F4)"
+      ],
+      "title": "a zero-width space in the rendered text",
+      "fullName": "containsText matches pinned Playwright toContainText in real Chromium (H6, F4) a zero-width space in the rendered text",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "containsText matches pinned Playwright toContainText in real Chromium (H6, F4)"
+      ],
+      "title": "a no-break space in the rendered text",
+      "fullName": "containsText matches pinned Playwright toContainText in real Chromium (H6, F4) a no-break space in the rendered text",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "containsText matches pinned Playwright toContainText in real Chromium (H6, F4)"
+      ],
+      "title": "a different word",
+      "fullName": "containsText matches pinned Playwright toContainText in real Chromium (H6, F4) a different word",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "containsText matches pinned Playwright toContainText in real Chromium (H6, F4)"
+      ],
+      "title": "a case difference",
+      "fullName": "containsText matches pinned Playwright toContainText in real Chromium (H6, F4) a case difference",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "containsText matches pinned Playwright toContainText in real Chromium (H6, F4)"
+      ],
+      "title": "normalizing never joins words",
+      "fullName": "containsText matches pinned Playwright toContainText in real Chromium (H6, F4) normalizing never joins words",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "ancestorTitles": [
+        "PO R4 divergence: a whitespace-only expected value (intentional, not parity)"
+      ],
+      "title": "PO R4 divergence: the pinned toContainText passes it, the runner never does",
+      "fullName": "PO R4 divergence: a whitespace-only expected value (intentional, not parity) PO R4 divergence: the pinned toContainText passes it, the runner never does",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "observed retained native/fixed primitive behavior"
+      ],
+      "title": "preserves role-div click, CSS hover, native Tab/Arrow and fixed fill/select without legacy fallback",
+      "fullName": "observed retained native/fixed primitive behavior preserves role-div click, CSS hover, native Tab/Arrow and fixed fill/select without legacy fallback",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "real private acquisition without public observation widening"
+      ],
+      "title": "classifies visibility from the retained bounded inventory",
+      "fullName": "real private acquisition without public observation widening classifies visibility from the retained bounded inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "real private acquisition without public observation widening"
+      ],
+      "title": "classifies duplicate from the retained bounded inventory",
+      "fullName": "real private acquisition without public observation widening classifies duplicate from the retained bounded inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "real private acquisition without public observation widening"
+      ],
+      "title": "classifies sensitive-descendant from the retained bounded inventory",
+      "fullName": "real private acquisition without public observation widening classifies sensitive-descendant from the retained bounded inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "real private acquisition without public observation widening"
+      ],
+      "title": "classifies hidden-sensitive from the retained bounded inventory",
+      "fullName": "real private acquisition without public observation widening classifies hidden-sensitive from the retained bounded inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "real private acquisition without public observation widening"
+      ],
+      "title": "classifies unresolved-name from the retained bounded inventory",
+      "fullName": "real private acquisition without public observation widening classifies unresolved-name from the retained bounded inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "real private acquisition without public observation widening"
+      ],
+      "title": "classifies wrong-type from the retained bounded inventory",
+      "fullName": "real private acquisition without public observation widening classifies wrong-type from the retained bounded inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "real private acquisition without public observation widening"
+      ],
+      "title": "classifies private-property from the retained bounded inventory",
+      "fullName": "real private acquisition without public observation widening classifies private-property from the retained bounded inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "real private acquisition without public observation widening"
+      ],
+      "title": "classifies replacement from the retained bounded inventory",
+      "fullName": "real private acquisition without public observation widening classifies replacement from the retained bounded inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "real private acquisition without public observation widening"
+      ],
+      "title": "classifies absent from the retained bounded inventory",
+      "fullName": "real private acquisition without public observation widening classifies absent from the retained bounded inventory",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "actual retained native preparation and input fences"
+      ],
+      "title": "stops before-timeout without a later native input",
+      "fullName": "actual retained native preparation and input fences stops before-timeout without a later native input",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "actual retained native preparation and input fences"
+      ],
+      "title": "stops before-cancel without a later native input",
+      "fullName": "actual retained native preparation and input fences stops before-cancel without a later native input",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "actual retained native preparation and input fences"
+      ],
+      "title": "stops after-timeout without a later native input",
+      "fullName": "actual retained native preparation and input fences stops after-timeout without a later native input",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "actual retained native preparation and input fences"
+      ],
+      "title": "stops after-cancel without a later native input",
+      "fullName": "actual retained native preparation and input fences stops after-cancel without a later native input",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "actual initial-blank CDP acknowledgement fence"
+      ],
+      "title": "keeps held inner blank check PREPARING on timeout and never navigates later",
+      "fullName": "actual initial-blank CDP acknowledgement fence keeps held inner blank check PREPARING on timeout and never navigates later",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [
+        "actual initial-blank CDP acknowledgement fence"
+      ],
+      "title": "keeps held inner blank check PREPARING on cancel and never navigates later",
+      "fullName": "actual initial-blank CDP acknowledgement fence keeps held inner blank check PREPARING on cancel and never navigates later",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "ancestorTitles": [],
+      "title": "poisons an expired real retained scroll before held cleanup can permit validation or input",
+      "fullName": "poisons an expired real retained scroll before held cleanup can permit validation or input",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: fresh",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: fresh",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: async-confirmation",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: async-confirmation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: never-confirmation",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: never-confirmation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: application",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: application",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: control",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: control",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: no-grant",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: no-grant",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: hidden",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: hidden",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: password",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: password",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: sensitive-descendant",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: sensitive-descendant",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: duplicate",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: duplicate",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "ancestorTitles": [
+        "observed ordinary recorded child"
+      ],
+      "title": "uses actual recorded normal pipeline: readonly",
+      "fullName": "observed ordinary recorded child uses actual recorded normal pipeline: readonly",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-secret-control.test.ts",
+      "ancestorTitles": [],
+      "title": "proves actual secret-bearing observed control cutoff: worst-phase",
+      "fullName": "proves actual secret-bearing observed control cutoff: worst-phase",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-secret-control.test.ts",
+      "ancestorTitles": [],
+      "title": "proves actual secret-bearing observed control cutoff: slow-revoked",
+      "fullName": "proves actual secret-bearing observed control cutoff: slow-revoked",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-secret-control.test.ts",
+      "ancestorTitles": [],
+      "title": "proves actual secret-bearing observed control cutoff: lost-control-body",
+      "fullName": "proves actual secret-bearing observed control cutoff: lost-control-body",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/observed-secret-control.test.ts",
+      "ancestorTitles": [],
+      "title": "proves actual secret-bearing observed control cutoff: progress-revoked",
+      "fullName": "proves actual secret-bearing observed control cutoff: progress-revoked",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "counts /login without exporting any password node",
+      "fullName": "isolated-world password control production boundary counts /login without exporting any password node",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "counts /two-passwords without exporting any password node",
+      "fullName": "isolated-world password control production boundary counts /two-passwords without exporting any password node",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "counts /no-password without exporting any password node",
+      "fullName": "isolated-world password control production boundary counts /no-password without exporting any password node",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "counts /shadow-login without exporting any password node",
+      "fullName": "isolated-world password control production boundary counts /shadow-login without exporting any password node",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "refuses a pinned swap mutation without typing",
+      "fullName": "isolated-world password control production boundary refuses a pinned swap mutation without typing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "refuses a pinned reattach mutation without typing",
+      "fullName": "isolated-world password control production boundary refuses a pinned reattach mutation without typing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "refuses a pinned type mutation without typing",
+      "fullName": "isolated-world password control production boundary refuses a pinned type mutation without typing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "refuses /trap before a value is typed",
+      "fullName": "isolated-world password control production boundary refuses /trap before a value is typed",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "refuses /cross-origin-form before a value is typed",
+      "fullName": "isolated-world password control production boundary refuses /cross-origin-form before a value is typed",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "permits inert focus styling while retaining the same unique password input",
+      "fullName": "isolated-world password control production boundary permits inert focus styling while retaining the same unique password input",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "requires both allowed and approved origin and scrubs later echoes",
+      "fullName": "isolated-world password control production boundary requires both allowed and approved origin and scrubs later echoes",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "refuses the native origin boundary at its first guard: nonempty-allowed-exclusion",
+      "fullName": "isolated-world password control production boundary refuses the native origin boundary at its first guard: nonempty-allowed-exclusion",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "refuses the native origin boundary at its first guard: approved-exclusion",
+      "fullName": "isolated-world password control production boundary refuses the native origin boundary at its first guard: approved-exclusion",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "refuses the native origin boundary at its first guard: formless-declared-navigation",
+      "fullName": "isolated-world password control production boundary refuses the native origin boundary at its first guard: formless-declared-navigation",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "counts adversarial shadow-plus-light candidates identically at prepare",
+      "fullName": "isolated-world password control production boundary counts adversarial shadow-plus-light candidates identically at prepare",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "counts adversarial offscreen candidates identically at prepare",
+      "fullName": "isolated-world password control production boundary counts adversarial offscreen candidates identically at prepare",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "counts adversarial iframe candidates identically at prepare",
+      "fullName": "isolated-world password control production boundary counts adversarial iframe candidates identically at prepare",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [
+        "isolated-world password control production boundary"
+      ],
+      "title": "counts adversarial closed-shadow candidates identically at prepare",
+      "fullName": "isolated-world password control production boundary counts adversarial closed-shadow candidates identically at prepare",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "scans recorded and guided persistent profiles before close and cleanup",
+      "fullName": "scans recorded and guided persistent profiles before close and cleanup",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "refuses an actual browser launch without the prewritten Preferences file",
+      "fullName": "refuses an actual browser launch without the prewritten Preferences file",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "measures raw Playwright fill error text before the production redactor",
+      "fullName": "measures raw Playwright fill error text before the production redactor",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "measures actual GuidedRuntime native-guard failure and its diagnostic sinks in Chromium",
+      "fullName": "measures actual GuidedRuntime native-guard failure and its diagnostic sinks in Chromium",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "measures actual GuidedRuntime injected-released-value failure and its diagnostic sinks in Chromium",
+      "fullName": "measures actual GuidedRuntime injected-released-value failure and its diagnostic sinks in Chromium",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "uses structural login signature only; a passing registration assertion remains passing",
+      "fullName": "uses structural login signature only; a passing registration assertion remains passing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "settles a protected redirect on the reached login document instead of timing out",
+      "fullName": "settles a protected redirect on the reached login document instead of timing out",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "executes the actual replay LOGIN_REQUIRED oracle: no-login",
+      "fullName": "executes the actual replay LOGIN_REQUIRED oracle: no-login",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "executes the actual replay LOGIN_REQUIRED oracle: wrong-password",
+      "fullName": "executes the actual replay LOGIN_REQUIRED oracle: wrong-password",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "executes the actual replay LOGIN_REQUIRED oracle: registration",
+      "fullName": "executes the actual replay LOGIN_REQUIRED oracle: registration",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: no-login",
+      "fullName": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: no-login",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: wrong-password",
+      "fullName": "retains actual missing-target TIMEOUT without LOGIN_REQUIRED: wrong-password",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "replays the published password-only guard against /two-passwords and refuses before typing",
+      "fullName": "replays the published password-only guard against /two-passwords and refuses before typing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "replays the published password-only guard against /no-password and refuses before typing",
+      "fullName": "replays the published password-only guard against /no-password and refuses before typing",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "replays login twice without a model, records distinct receipts/video and uses rotated values",
+      "fullName": "replays login twice without a model, records distinct receipts/video and uses rotated values",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "executes actual recorded password-only prefix guard: valid",
+      "fullName": "executes actual recorded password-only prefix guard: valid",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "executes actual recorded password-only prefix guard: bad-origin",
+      "fullName": "executes actual recorded password-only prefix guard: bad-origin",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "executes actual recorded password-only prefix guard: zero-password",
+      "fullName": "executes actual recorded password-only prefix guard: zero-password",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "executes actual recorded password-only prefix guard: two-passwords",
+      "fullName": "executes actual recorded password-only prefix guard: two-passwords",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "executes actual recorded password-only prefix guard: focus-typeflip",
+      "fullName": "executes actual recorded password-only prefix guard: focus-typeflip",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "executes actual recorded password-only prefix guard: oversize-frame",
+      "fullName": "executes actual recorded password-only prefix guard: oversize-frame",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "ancestorTitles": [],
+      "title": "executes actual recorded password-only prefix guard: stopped-lease",
+      "fullName": "executes actual recorded password-only prefix guard: stopped-lease",
+      "status": "passed"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/seek-measurement.test.ts",
+      "ancestorTitles": [
+        "AC-12b \u2014 seek accuracy through the pipeline, against the 500 ms target"
+      ],
+      "title": "measures dispatch \u2192 runner \u2192 Sonic \u2192 API \u2192 MFE seek in staging \u2014 SPK-06 phase B",
+      "fullName": "AC-12b \u2014 seek accuracy through the pipeline, against the 500 ms target measures dispatch \u2192 runner \u2192 Sonic \u2192 API \u2192 MFE seek in staging \u2014 SPK-06 phase B",
+      "status": "skipped"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/seek-measurement.test.ts",
+      "ancestorTitles": [
+        "AC-12c \u2014 the readiness-to-first-frame gap"
+      ],
+      "title": "measures the gap on the controlled fixture in staging \u2014 evidenced by SPK-06 phase B",
+      "fullName": "AC-12c \u2014 the readiness-to-first-frame gap measures the gap on the controlled fixture in staging \u2014 evidenced by SPK-06 phase B",
+      "status": "skipped"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/upload-evidence.test.ts",
+      "ancestorTitles": [
+        "deferred criteria \u2014 skipped, not passed"
+      ],
+      "title": "AC-7b \u2014 the terminal manifest is declared as a closed schema in the frozen contract (@architect, ADR-002 \u00a712 Class B)",
+      "fullName": "deferred criteria \u2014 skipped, not passed AC-7b \u2014 the terminal manifest is declared as a closed schema in the frozen contract (@architect, ADR-002 \u00a712 Class B)",
+      "status": "skipped"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/upload-evidence.test.ts",
+      "ancestorTitles": [
+        "deferred criteria \u2014 skipped, not passed"
+      ],
+      "title": "AC-18b \u2014 real Sonic endpoint, write-only runner credentials scoped to studio/, read-only API credentials (ED-03, story 10.18; integrated 10.19)",
+      "fullName": "deferred criteria \u2014 skipped, not passed AC-18b \u2014 real Sonic endpoint, write-only runner credentials scoped to studio/, read-only API credentials (ED-03, story 10.18; integrated 10.19)",
+      "status": "skipped"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/upload-evidence.test.ts",
+      "ancestorTitles": [
+        "deferred criteria \u2014 skipped, not passed"
+      ],
+      "title": "AC-19b \u2014 verified lifecycle configuration on real Sonic: physical deletion, versioning/noncurrent objects, incomplete-upload cleanup (ED-03, story 10.18)",
+      "fullName": "deferred criteria \u2014 skipped, not passed AC-19b \u2014 verified lifecycle configuration on real Sonic: physical deletion, versioning/noncurrent objects, incomplete-upload cleanup (ED-03, story 10.18)",
+      "status": "skipped"
+    },
+    {
+      "file": "studio-runner/test/fixtures-tier/upload-evidence.test.ts",
+      "ancestorTitles": [
+        "deferred criteria \u2014 skipped, not passed"
+      ],
+      "title": "AC-26 (O-14) \u2014 promote RunnerEvidence.partial from optional to required in the frozen contract",
+      "fullName": "deferred criteria \u2014 skipped, not passed AC-26 (O-14) \u2014 promote RunnerEvidence.partial from optional to required in the frozen contract",
+      "status": "skipped"
+    }
+  ],
+  "allNineHistoricalSkipsExact": true,
+  "twoNew009ControlsBothPass": true,
+  "fullDeadlineFile9Pass": true,
+  "reportFreshness": {
+    "reportStartMs": 1792534572996,
+    "collectorStartedMs": 1792534572640.3452,
+    "reportMtimeMs": 1792534875651.994
+  },
+  "suiteMessageCount": 0,
+  "failureCount": 1,
+  "closedFailureMetadata": "fixture-closed-failure-metadata.json",
+  "actualProductTestInputsAndDistStable": true,
+  "privateSourceDependenciesStableExceptExplicitGeneratedCacheDelta": true,
+  "private238DistExactlyAccepted": true,
+  "gatePass": false,
+  "retry": false
+}

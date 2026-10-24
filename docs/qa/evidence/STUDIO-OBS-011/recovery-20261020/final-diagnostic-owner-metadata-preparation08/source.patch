@@ -1,0 +1,20 @@
+--- preparation07/extraction-draft.json:argv[2]
++++ preparation08/extraction-draft.json:argv[2]
+@@ -109,7 +109,16 @@
+     try:
+      candidate=os.open(entry.name,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=parent);initial=os.fstat(candidate)
+      if initial.st_uid!=os.getuid():continue
+-     sizes={name:os.stat(name,dir_fd=candidate,follow_symlinks=False).st_size for name in ['guided.log','ordinary.log']}
++     sizes={};missingMandatory=False
++     for name in ['guided.log','ordinary.log']:
++      try:leaf=os.stat(name,dir_fd=candidate,follow_symlinks=False)
++      except FileNotFoundError:
++       missingMandatory=True;continue
++      if not stat.S_ISREG(leaf.st_mode) or leaf.st_uid!=os.getuid():refuse('UNSAFE_MANDATORY_LEAF')
++      sizes[name]=leaf.st_size
++     if missingMandatory:
++      if signature(initial)!=signature(os.fstat(candidate)) or signature(initial)!=signature(os.stat(entry.name,dir_fd=parent,follow_symlinks=False)):refuse('DIRECTORY_CHANGED')
++      continue
+      possible=[i for i,t in enumerate(targets) if all(sizes[n]==t[n]['bytes'] for n in sizes)]
+      if not possible:continue
+      opaque={name:read_file(candidate,name,limits['terminalLogBytes'],sizes[name],True)[0] for name in sizes}

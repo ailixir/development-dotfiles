@@ -1,0 +1,36 @@
+{
+  "state": "UNAPPLIED_NO_GO",
+  "paths": [
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "requiredActualBeforeExists": true,
+      "requiredActualBeforeSha256": "7b928dc51eef99343cdeefdb1cbf8055c70b7d46c2ed086073ec380f92c17fb1",
+      "validatedCandidate": "SOURCE_QA_PENDING_NOT_RUNTIME_VALIDATED",
+      "v2CandidateSha256": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-lint-correction01/after/studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts"
+    },
+    {
+      "path": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "requiredActualBeforeExists": false,
+      "requiredActualBeforeSha256": null,
+      "validatedCandidate": "SOURCE_QA_PENDING_NOT_RUNTIME_VALIDATED",
+      "v2CandidateSha256": "b15b569f43c40f2461d8f5c1604a3243f4ea837a40e04fc0e2e576abecc8a5a1",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-lint-correction01/after/studio-runner/test/helpers/bootstrapProcessTreeObservation.ts"
+    },
+    {
+      "path": "studio-runner/test/run/bootstrapProcessTreeObservation.test.ts",
+      "requiredActualBeforeExists": false,
+      "requiredActualBeforeSha256": null,
+      "validatedCandidate": "SOURCE_QA_PENDING_NOT_RUNTIME_VALIDATED",
+      "v2CandidateSha256": "775ee841b73fa4a3a78fc0bd27a419d1ec97b7cec6b8e7bf38863c4eb24fc181",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-lint-correction01/after/studio-runner/test/run/bootstrapProcessTreeObservation.test.ts"
+    }
+  ],
+  "actualOriginalFixtureBuffer": "actual-before/studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+  "oldV1ProofUnchanged": true,
+  "oldActualRedFrame52NotV2Frame": true,
+  "futureV2RedFrame54Unexecuted": true,
+  "actualApplicationPerformed": false,
+  "independentSourceQaRequired": true,
+  "nativeGo": false
+}

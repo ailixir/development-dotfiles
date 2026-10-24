@@ -1,0 +1,167 @@
+{
+  "checks": [
+    {
+      "id": "COMMON_FACTORY_EXACT_OWNER_POSITIVE",
+      "passed": true
+    },
+    {
+      "id": "OWNER_bool_as_int",
+      "passed": true
+    },
+    {
+      "id": "OWNER_false_as_int",
+      "passed": true
+    },
+    {
+      "id": "OWNER_float_bool",
+      "passed": true
+    },
+    {
+      "id": "OWNER_float_pid",
+      "passed": true
+    },
+    {
+      "id": "OWNER_bool_pid",
+      "passed": true
+    },
+    {
+      "id": "OUTSIDE_WRITER_CARRIED_IN_ACTUAL_SOURCE_AUTHORED_CONTROL",
+      "passed": true
+    },
+    {
+      "id": "DESIGNATION_omitted",
+      "passed": true
+    },
+    {
+      "id": "DESIGNATION_precompleted",
+      "passed": true
+    },
+    {
+      "id": "DESIGNATION_wrong_producer",
+      "passed": true
+    },
+    {
+      "id": "DUPLICATE_CONTROL_INPUT_BELOW8192",
+      "passed": true
+    },
+    {
+      "id": "REAL_FINAL_GUARD_ENTRY_NEGATIVE_WITH_DUPLICATE_PRIOR_CONTROLS",
+      "passed": true
+    },
+    {
+      "id": "ALL_UNIQUE_OUTSIDE_AND_PENDING_ACTORS_SURVIVE",
+      "passed": true
+    },
+    {
+      "id": "EXACT_DUPLICATES_RECONCILE",
+      "passed": true
+    },
+    {
+      "id": "DUPLICATE_CONFLICT_HOLD",
+      "passed": true
+    },
+    {
+      "id": "DECLARED8192_BOUND_ACCEPTS_EXACT_DUPLICATES",
+      "passed": true
+    },
+    {
+      "id": "ABOVE8192_HOLD",
+      "passed": true
+    },
+    {
+      "id": "FINAL_ACCEPT_False",
+      "passed": true
+    },
+    {
+      "id": "FINAL_ACCEPT_True",
+      "passed": true
+    },
+    {
+      "id": "NO_REAL_TARGET_BOUNDARY",
+      "passed": true
+    }
+  ],
+  "passed": 20,
+  "failure": null,
+  "compositionChecks": [
+    {
+      "id": "REAL_INSTALLER_DERIVES_SEVEN_AND_PENDING_AUTHOR",
+      "passed": true
+    },
+    {
+      "id": "INSTALL_AUTH_AUTHOR_PENDING_LITERAL_NULL",
+      "passed": true
+    },
+    {
+      "id": "DERIVED_STATE_RAW_MISMATCH_PREWRITE_DENIES",
+      "passed": true
+    },
+    {
+      "id": "DERIVED_STATE_DENIAL_NO_MUTATION",
+      "passed": true
+    },
+    {
+      "id": "AUTHOR_SETUP_OWNERSHIP_ADMISSION_ACTUAL_CORRECTED_CALLER_ZERO",
+      "passed": true
+    },
+    {
+      "id": "AUTHOR_SETUP_OWNERSHIP_ADMISSION_PENDING_SELF_AND_DERIVED_MAP",
+      "passed": true
+    },
+    {
+      "id": "REAL_GUARD_negative_EXPECTED_STATUS",
+      "passed": true
+    },
+    {
+      "id": "OUTER_FINAL_TRACE_AFTER_CLEANUP_negative",
+      "passed": true
+    }
+  ],
+  "operatorSteps": [
+    {
+      "step": 1,
+      "kind": "author_request",
+      "sourceHelperSha256": "ac43df7caec7ddb1341f92b197cb3861af7b3292133bb3f5bc29d530e628a506"
+    },
+    {
+      "step": 2,
+      "kind": "completion",
+      "sourceHelperSha256": "ac43df7caec7ddb1341f92b197cb3861af7b3292133bb3f5bc29d530e628a506"
+    }
+  ],
+  "diagnostics": [
+    {
+      "authorRole": "SETUP_OWNERSHIP_ADMISSION",
+      "status": 0,
+      "primary": null,
+      "cleanup": [],
+      "utilityJournals": 0
+    },
+    {
+      "mode": "negative",
+      "status": 1,
+      "fault": null,
+      "primary": null,
+      "cleanup": []
+    }
+  ],
+  "realBoundaryCalls": [],
+  "sourcePins": {
+    "failed_gateway.py": "f3468b14ac8a22c8fb6228b8be3ddd85ba43ad82c293b93647ee4c901f99a03d",
+    "custody.py": "e81ae1a019c78161863700bfe34f9abb71d9fb9040e464a7b3eaa5c73c8bddda",
+    "protocol.py": "8c3e6ed8771e220ae23ad7eb405b11668529fca68aea1e198ca9ceba32ac95ac",
+    "entry.py": "3d110c53d0cf376ae3dfb81077b2dd4a7f936cd3ead9153b78126fff8f7f267d",
+    "contract.json": "b414708277087c728914332573543da7c888d41992591d0c71473986916f7974",
+    "guard-failed-red.bash": "b44d934dfe9f2e84c895d513981aa6e38ab9cd79a7eac53a9458c0b38622a804",
+    "factory.py": "b2b5531818dd20f06efff41b254acb93435be4bc0d8de779535d51fb3b7bfa8d",
+    "installer.py": "014c9693a8e4524f6007e07df53ff3cc1cc7cab68433d4e144bf757fdb0ba28c",
+    "install-cli.py": "d7d0207c3372195988ae8b3db8c0c87078a0c3701bac6550c427154889fe3cd6",
+    "control-author.py": "a42995d1519e7c12eb6916b1a0d56481b667a78640e0dd5a5bf694229c2d9228",
+    "control-author-cli.py": "2bb7c62043bad2273b6a57c01a6e8d858df21fd678f2a669e90ce75621995127",
+    "control-author-loader.bash": "9bc7ff73b9a75812985530c91059de980c2a7432cadf963ae58d30766181050e",
+    "operator-completion.js": "ac43df7caec7ddb1341f92b197cb3861af7b3292133bb3f5bc29d530e628a506"
+  },
+  "whole13OrOldSuitesReplayed": false,
+  "sourceUnchanged": true,
+  "actualTargetEffects": 0
+}

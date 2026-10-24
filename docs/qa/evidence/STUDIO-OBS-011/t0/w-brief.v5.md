@@ -1,0 +1,3 @@
+# v5 narrow frontend ownership amendment
+
+v4 brief remains adopted in full. v5 changes only 11-FE write permission: guided/index.ts may remove the exact four stale metadata reexports COPY_SOURCE_FILES, CopyBasis, CopySource, CopySourceFile as required by R08-3 relocation. Every other export and all key/templates remain byte-identical. Root verified no other frontend consumers and no matching protected Live entry. Bind source SHA in lanes.v5.json. Off-tree/sandbox preparation only; actual frontend copyback stays11MERGE. All B1/B7/sourcefreeze, formalreview-stage, unchanged-mainGS-T, worker capacity and finalgate rules remain unchanged. Preserve v4 and earlier artifacts. No architectural wiring or historical-grep exception is decided here.

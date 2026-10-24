@@ -1,0 +1,41 @@
+{
+  "driverPid": 22248,
+  "phase": "old",
+  "actual": {
+    "sourceMembers": 1814,
+    "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "selectedMembers": 14213,
+    "fullSelectedRowsHashesModesEqualCopy": true,
+    "all23DependencySymlinkTuplesExact": true,
+    "directSdkBin21Exact": true,
+    "distMembers": 238,
+    "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "browserSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+    "environmentExact": true,
+    "protectedAndCanonicalInputsExact": true
+  },
+  "host": {
+    "atUtc": "2026-10-21T03:47:54.428173+00:00",
+    "acPower": true,
+    "lidObserved": true,
+    "lidOpen": true,
+    "powerOutputSha256": "ee51943d5ec7ade401917d38b054831a052c44d668f62164377da0e23914286e",
+    "lidOutputSha256": "bfdc91e48740311c6dd8da0dbbc9465237c3dd35b070e8dc25a51a99ac9d81ff"
+  },
+  "node": "v24.20.0",
+  "javaHome": "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+    "python3",
+    "-c",
+    "import os,sys,json,hashlib,datetime\nfrom pathlib import Path\nlive=Path(sys.argv[1]); scratch=Path(sys.argv[2]); output=Path(sys.argv[3]); label=sys.argv[4]; selector=sys.argv[5]\nsource=live/'docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/pre-g9-review/c10.sh'\nassert hashlib.sha256(source.read_bytes()).hexdigest()=='0f8212cf58cc085190c0efd7b96886584330b6f8164eed62dcdf19c7a5d09d7b'\ntext=source.read_text(); marker=\"cat > \\\"$PYF\\\" <<'PY'\\n\"; start=text.index(marker)+len(marker); code=text[start:text.index('\\nPY\\n}',start)]+'\\n'\nassert hashlib.sha256(code.encode()).hexdigest()=='f95aee6a3a656796daf4b72cce8d4fc6e16efea4f72eb5c895d0f53d82cddf35'\nassert not output.exists(); output.mkdir(parents=True)\nos.environ.update(C10_LIVE=str(live),C10_SCR=str(scratch),C10_OUT=str(output),C10_GATE=str(output),C10_TIER='core')\nns={'__name__':'existing_c10_definitions_only'}; exec(compile(code,str(source)+'::heredoc','exec'),ns)\nstarted=datetime.datetime.now(datetime.timezone.utc).isoformat()\nresult=ns['gradle'](label,[selector],{})\n(output/'result.json').write_text(json.dumps(dict(kind='EXISTING_C10_SINGLE_CASE_COLLECTION',startedAt=started,**result),indent=2)+'\\n')\nprint(json.dumps({k:result[k] for k in ('label','exit','elapsedS','counts')}))\nraise SystemExit(result['exit'])\n",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "/private/tmp/obs009-g9-f2-current-20261020-root01/old-existence-consumer",
+    "/private/tmp/obs009-g9-f2-current-20261020-root01/old-existence-consumer/g9-f2-output",
+    "obs009-g9-f2-old-red01",
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "nativeInvocationsAuthorized": 1
+}

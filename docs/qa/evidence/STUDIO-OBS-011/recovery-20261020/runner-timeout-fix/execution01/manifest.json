@@ -1,0 +1,85 @@
+{
+  "kind": "009_TIMEOUT_ORIGIN_CONTROLLED_SANDBOX_VALIDATION_SEAL",
+  "files": [
+    {
+      "path": "after-inputs.json",
+      "sha256": "8cf4a9f5a9eeabca0c0de7b540b7e94478bc6047e2a6be1a8530122db6046057",
+      "bytes": 190650
+    },
+    {
+      "path": "before-inputs.json",
+      "sha256": "7644658b6934e7d6cd3b971defead26589d61dfa90ef27c2ba8205dba1ac365e",
+      "bytes": 198126
+    },
+    {
+      "path": "before-native.json",
+      "sha256": "298b46211d525f2d241b559e1dc7eccae8bc4fc85dd3e1db45da26103d842288",
+      "bytes": 36232
+    },
+    {
+      "path": "deadline-native-green.json",
+      "sha256": "8174f6d9e548721dcd0f6b33be456a1d9f0a1267e755f79074a20bc1cb34f31e",
+      "bytes": 3948
+    },
+    {
+      "path": "execution-argv.json",
+      "sha256": "ca1915b5fd42159c6cb425369fb64b505564469d30a337ce73b8c05c700c8842",
+      "bytes": 5911
+    },
+    {
+      "path": "genuine-red.json",
+      "sha256": "f9b303c2da1ac2cbcdb5b152c4ac51fecd83c69b90bd84341982dc94138c6c14",
+      "bytes": 1239
+    },
+    {
+      "path": "green-controlled.json",
+      "sha256": "88006295c43dbb0cf6cae0e3b7535158290ca1068e6ac55d937ed3472510faa5",
+      "bytes": 36511
+    },
+    {
+      "path": "green-inputs.json",
+      "sha256": "15bc0b046bc5c587f08364813da6289a794938a558aa9b15230f15a992650f77",
+      "bytes": 81945
+    },
+    {
+      "path": "native-f3-green.json",
+      "sha256": "2e75260cb1219d3fcb18162a1582c0244f7d2f1e95dd88d36f3fe686d018c9be",
+      "bytes": 3205
+    },
+    {
+      "path": "receipt.md",
+      "sha256": "b983c3fa241619be3848b3c8d82ac91513ec33f455bce25c670e7693a931e5cd",
+      "bytes": 5140
+    },
+    {
+      "path": "red-inputs.json",
+      "sha256": "a9b68974ea1e782590b63844e13238eb332b95fe3f37f875f8d122914456d389",
+      "bytes": 81949
+    },
+    {
+      "path": "results.json",
+      "sha256": "c676185859b5a5a471025861cc7a04f4b9456bac7d9606391775d4d33ab0f6a3",
+      "bytes": 34534
+    },
+    {
+      "path": "sandbox-dist-delta.json",
+      "sha256": "93e3a24ee1f5cb4645a42962d5c0cc08dea8adbb25e0ba2921d90278b26059f1",
+      "bytes": 68959
+    },
+    {
+      "path": "unit-green.json",
+      "sha256": "495853bbeea5aa46e1aead117fa8175c07649d1481102158422c15784e833891",
+      "bytes": 3561
+    },
+    {
+      "path": "validated-four-file-application-binding.json",
+      "sha256": "a8ece9d9f506d574ddd9ad1b629bb6541ee7b2d8911b4feb68dc916ec4fd852f",
+      "bytes": 3094
+    }
+  ],
+  "controlledRedGreenComplete": true,
+  "targetedNativeGuardsPassed": true,
+  "actualApplicationReleased": false,
+  "fullTierOrHistoricalCauseCredit": false,
+  "runningJobs": false
+}

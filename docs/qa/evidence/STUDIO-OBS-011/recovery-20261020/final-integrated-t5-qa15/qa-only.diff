@@ -1,0 +1,51 @@
+--- STUDIO-OBS-011.InReview.0.2.18.md
++++ STUDIO-OBS-011.Done.0.2.19.md
+@@ -3,7 +3,7 @@
+ | Field | Value |
+ |---|---|
+ | Story ID | STUDIO-OBS-011 |
+-| Status | **InReview** |
++| Status | **Done** |
+ | Epic | Studio observed authoring |
+ | Depends on | STUDIO-OBS-010 |
+ | Dependency notes | User decision: "at the end of the wave". ADR-SC-005 allows a start once OBS-009 is Done, in parallel with OBS-010, provided nothing on OBS-010's dated "Live surface" list is removed — so T0 waits for that list. Thin by design: compile-path removal, v1/v2 retirement, migration re-baseline and the frontend compile UI moved to OBS-012A/012B. **Amended 2026-10-15 (user decision):** this story no longer waits for OBS-009 Done. It may start once two things hold: OBS-009's locally achievable ACs are implemented and validated, and OBS-010's dated "Live surface" list exists. See "Start-condition amendment" under PO Validation. |
+@@ -631,6 +631,34 @@
+ ## QA Results
+ 
+ Not reviewed. No quality verdict assigned.
++
++### Formal integrated review — 2026-10-21 UTC
++
++### Reviewed By: Quinn (@qa; independent SDC reviewer)
++
++### Reviewed Revision: story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee
++
++**Verdict: PASS.** The earlier “Not reviewed” template is historical; this dated gate is authoritative. All original AC1–7/T5 criteria are met within the declared local scope; no new waiver or mandatory finding. Independent architect13 (`97cabe7a…`, root `995d4e73…`) and actual diagnostic/candidate QA13 (`9bfa99f7…`) are formally adopted with their recorded qualifications.
++
++**Requirement and test trace.** [AC1–7 evidence](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/ac-traceability.json) records each original criterion, given/when/then proof, exact accepted component references and all carried limits. Independent c26 per-item inventory/query evidence and unchanged A1 bindings fulfill the symbol/inventory method; no broad grep or completed proof was repeated. [Formal review](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/review.md) adopts source/Live/contracts, code health, TEST001, count reconciliation, exact timing and the current103-entry File List.
++
++**Quality assessment.** Coding standards/project structure/testing strategy and original ACs: PASS. Architecture/security/maintainability use accepted independent components; no refactoring was performed here. Backend whole2792=2783PASS+9 exact SKIP with2768distinct keys/multiplicities and all task/cohort/coverage controls is accepted. Runner2717, FE1388 Node23 carry, qualified private301+6 across two invocations, image/deployment722/G9/localD2 retain their original scope. Three actual Replay diagnostic exposures preserve324cases/222parents/219child lines, three exact named R10 baseline records, three observed start-failed lines/plain refusals and0new scoped trigger candidates. Unknown bootstrap/chronology/startup and reverse-reuse/Replay-only limitations are preserved; no all-guided or external zero is inferred.
++
++**Performance and documentation.** Matched9class/10row/283case time3865.201→3911.173s (+45.972, increase), with whole elapsed6468.83→6407.02s separately, meets the exact comparison/no-weaker-assertion requirement without claiming speedup. The103-entry shared File List and dated developer/carried record are accepted, with18historical attribution unknowns and document-profile qualifications retained. Existing permitted F1/F2/optional/evaluation/CLN10/.ai/Live/C10/FOLD/P7/external carries are not marked implemented or stronger than proved.
++
++**CodeRabbit fallback.** Actual nonloginPATH lookup resolved none of coderabbit/cr/wsl (raw1/output0, metadata `112885d5…`); the configured independent architect+QA fallback applies. No global installation claim or extra tool/native/network call is made.
++
++**Revision provenance.** Recipe [story-content-revision-v1.py](../../qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/story-content-revision-v1.py), SHA256 `1fc0b7b7a8dbac78223afa0bbcbf527d0c84b38f4e4f1b83554556eb5ec7c8ed`, defines the gate revision. It retains all reviewed AC/developer/File List/carry text after LF normalization and normalizes only lifecycle Status/task checkbox markers while excluding QA Results/admin Change Log bodies. Both headings remain. Raw developer input is `0e4ad7f2220c9cecd0d24adad1515c61085e30dda4fad5015bd154e6989c41ff`; actual QA output/raw hash and before/after equality proof are stored separately in QA15 provenance. Future retained-body changes require new review; task completeness is checked separately by PO.
++
++**Files changed and next owner.** QA changes only this story's QA Results/Status/append-only QA Change Log, the actual gate and fresh QA15 evidence. Existing File List already names the story; QA-owned artifacts are bound by this gate/evidence. @dev must record factual post-gate completion/NArouting for the three unchanged Quality Gates checkbox markers before PO close; their reviewable text/body must stay unchanged for current provenance. No commit, PR, push, administrative close or other story transition is performed here.
++
++### Gate Status
++
++Gate: PASS → docs/qa/gates/STUDIO-OBS-011-final-sweep-inventory-re-run-leftover-removal-and-code-health-refactors.yml
++
++### Lifecycle Transition
++
++QA applied **InReview → Done**, patch **0.2.19**, on 2026-10-21; waiver inactive. This is the original scoped011 gate, not deployment/provider/human approval for009/010.
+ 
+ ## Change Log
+ 
+@@ -657,3 +685,4 @@
+ | 2026-10-18 | 0.2.16 | Start conditions recorded, append-only, in a new section, "PO note — start conditions satisfied (2026-10-18)", on the lead's instruction. **(a) Satisfied:** the 009 @qa local-validation record (`bca21f53…`) reads `trigger: MET` under the user's C8 waiver. It is bound to source `061fc41f…`, dist `698a9365…` and helm `46070907…`. **(b) Satisfied:** the dated 010 Live surface list `live-surface-20261018/live-surface-list.json` (`e5c58fa5…`) has @architect CROSS-CHECKED-WITH-NOTES, **@pm ACCEPTED-WITH-NOTES** and the @po removal confirmation (`finalize-record.md` `c4e635a8…`). Noted: the owed full `check` plus JaCoCo at the T0 fresh baseline (B1) before any lane claims credit; @pm's notes; D5 for root to confirm. Also noted: plan v2 (`lanes.v2.json` `5d00751f…`, `w-brief.v2.md` `946d6189…`, `t0-record-draft.md` `56162d71…`, a draft that root signs), which @po has not ratified. Root confirms the condition and signs T0 (S-2); no lane started. AC text and meaning and Status (**Ready**) are unchanged. Receipt `docs/qa/evidence/STUDIO-OBS-009/execution-20261018/po-carry/receipt-6.md`. Story sha256 before this pass: `413fcaa4d825f51906965baa841966c0fa0c79dbac55778eef5b1a5c47753931` (0.2.15) | @po (Pax) |
+ | 2026-10-18 | 0.2.17 | Developer lifecycle bookkeeping: **Ready → InProgress** for actual T0 execution after terminal B1/B7 receipts and stable end/input captures. Added dated Dev Agent Record provenance; existing first line, ACs, tasks and QA Results preserved. B1 failures/coverage debt, B7 unused-code failure and all implementation/final gates remain open. Root authorized only this status unit; no W1/source application, diagnostic run, completion or QA verdict. Receipt `docs/qa/evidence/STUDIO-OBS-011/t0/status-progress/receipt.json`. | @dev (Dex) |
+ | 2026-10-21 | 0.2.18 | Development complete — Status: InProgress → InReview. Added dated final Dev Agent Record, actual shared103-entry File List/story-after-hash supplement, carried dispositions and developer task submission; preserved AC/PO/QA Results and failed history. Formal independent QA remains pending; no Done, runtime or external acceptance. | @dev (Dex) |
++| 2026-10-21 | 0.2.19 | QA Gate PASS — Status: InReview → Done | @qa (Quinn) |

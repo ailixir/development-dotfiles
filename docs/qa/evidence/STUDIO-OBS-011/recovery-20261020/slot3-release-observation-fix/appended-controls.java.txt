@@ -1,0 +1,141 @@
+
+    // Controlled C6 classification only: no real handle, process query, signal or wait.
+    List<String> terminationReads = new ArrayList<>();
+    boolean[] terminationAlive = {true};
+    assertThat(
+            p8TerminatedUnsignalled(
+                () -> {
+                  terminationReads.add("alive");
+                  return terminationAlive[0];
+                },
+                () -> {
+                  terminationReads.add("status");
+                  terminationAlive[0] = false;
+                  return "S";
+                }))
+        .as("C6 successful nonterminal snapshot followed by death needs no signal")
+        .isTrue();
+    assertThat(terminationReads).containsExactly("alive", "status", "alive");
+
+    terminationReads.clear();
+    assertThat(
+            p8TerminatedUnsignalled(
+                () -> {
+                  terminationReads.add("alive");
+                  return true;
+                },
+                () -> {
+                  terminationReads.add("status");
+                  return "S";
+                }))
+        .as("C6 continuously live nonterminal state stays refused")
+        .isFalse();
+    assertThat(terminationReads).containsExactly("alive", "status", "alive");
+
+    terminationReads.clear();
+    assertThat(
+            p8TerminatedUnsignalled(
+                () -> {
+                  terminationReads.add("alive");
+                  return terminationReads.size() == 1;
+                },
+                () -> {
+                  terminationReads.add("status");
+                  throw new IllegalStateException("controlled status unavailable");
+                }))
+        .as("C6 unavailable status cannot fall back to accepting fresh death")
+        .isFalse();
+    assertThat(terminationReads).containsExactly("alive", "status");
+
+    terminationReads.clear();
+    assertThat(
+            p8TerminatedUnsignalled(
+                () -> {
+                  terminationReads.add("alive");
+                  return terminationReads.size() == 1;
+                },
+                () -> {
+                  terminationReads.add("status");
+                  return null;
+                }))
+        .as("C6 missing status stays unknown without another liveness read")
+        .isFalse();
+    assertThat(terminationReads).containsExactly("alive", "status");
+
+    terminationReads.clear();
+    assertThat(
+            p8TerminatedUnsignalled(
+                () -> {
+                  terminationReads.add("alive");
+                  throw new AssertionError("controlled liveness unavailable");
+                },
+                () -> {
+                  terminationReads.add("status");
+                  return "X";
+                }))
+        .as("C6 unknown initial liveness cannot be accepted or query status")
+        .isFalse();
+    assertThat(terminationReads).containsExactly("alive");
+
+    terminationReads.clear();
+    assertThat(
+            p8TerminatedUnsignalled(
+                () -> {
+                  terminationReads.add("alive");
+                  return false;
+                },
+                () -> {
+                  terminationReads.add("status");
+                  throw new AssertionError("dead entry must not query status");
+                }))
+        .as("C6 explicit dead entry needs no status or signal")
+        .isTrue();
+    assertThat(terminationReads).containsExactly("alive");
+
+    terminationReads.clear();
+    assertThat(
+            p8TerminatedUnsignalled(
+                () -> {
+                  terminationReads.add("alive");
+                  return true;
+                },
+                () -> {
+                  terminationReads.add("status");
+                  return "X";
+                }))
+        .as("C6 terminal X retains its original short circuit")
+        .isTrue();
+    assertThat(terminationReads).containsExactly("alive", "status");
+
+    terminationReads.clear();
+    assertThat(
+            p8TerminatedUnsignalled(
+                () -> {
+                  terminationReads.add("alive");
+                  return true;
+                },
+                () -> {
+                  terminationReads.add("status");
+                  return "Z+";
+                }))
+        .as("C6 terminal Z prefix retains its original short circuit")
+        .isTrue();
+    assertThat(terminationReads).containsExactly("alive", "status");
+
+    terminationReads.clear();
+    assertThat(
+            p8TerminatedUnsignalled(
+                () -> {
+                  terminationReads.add("alive");
+                  if (terminationReads.size() == 1) {
+                    return true;
+                  }
+                  throw new AssertionError("controlled fresh liveness unavailable");
+                },
+                () -> {
+                  terminationReads.add("status");
+                  return "S";
+                }))
+        .as("C6 unavailable fresh liveness stays refused")
+        .isFalse();
+    assertThat(terminationReads).containsExactly("alive", "status", "alive");

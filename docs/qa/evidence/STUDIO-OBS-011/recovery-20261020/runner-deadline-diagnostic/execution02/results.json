@@ -1,0 +1,291 @@
+{
+  "kind": "ONE_ARCHITECTURE_REVIEWED_EXISTING_CASE_DIAGNOSTIC_COMPLETE_NONREPRODUCTION",
+  "recordedAt": "2026-10-20T16:03:57.580447+00:00",
+  "structuredArgvExecuted": [
+    "python3",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-runner-deadline-diag02",
+    "pnpm",
+    "--dir=/private/tmp/obs011-runner-deadline-20261020-diag02/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs011-runner-deadline-20261020-diag02/repo/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.fixtures.config.ts",
+    "test/fixtures-tier/guided-start-deadline.test.ts",
+    "--testNamePattern=^REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled$",
+    "--minWorkers=1",
+    "--maxWorkers=1"
+  ],
+  "inheritedShellRenderingUsed": false,
+  "rootArgvSha256": "788ceedd533e2e14c7abe8523b3e95303f79095192c231231c2585e699cc074f",
+  "rootSeedExecutionSha256": "9936dbfee29ebcbfb07af8536a4da026571a9a88a3ddabd413e7145940728e0f",
+  "seedReceiptSha256": "2c11f0ef37e0f5cef22396dc409f25a8c6a506938e6cd4e085c5af1e726d1c70",
+  "rootProfileSha256": "d1b740d41579c442c6b22c1612b3ec1c9c01a4fca56f1b6092280abfe09db7c0",
+  "patchSha256": "959f0ccecbe938ba74341676575dedcd0f5eefc157c1187129bff6caad0b2c58",
+  "instrumentedTargetChecks": [
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "pristineSha256": "0a1b85fcb121d21f2d4c4c0b262cce3216d4a86097c459a6d82ffa8755f2e1c0",
+      "instrumentedSha256": "50c699e554c10adb0e5d6ca4ea0a33dab1be2b0d7fc30ef59ce183bfc17863d8",
+      "restoredSha256": "0a1b85fcb121d21f2d4c4c0b262cce3216d4a86097c459a6d82ffa8755f2e1c0",
+      "actualDerivativeSha256": "50c699e554c10adb0e5d6ca4ea0a33dab1be2b0d7fc30ef59ce183bfc17863d8"
+    },
+    {
+      "path": "studio-runner/src/run/observedBootstrap.ts",
+      "pristineSha256": "bbb3436035c9fcbe2fd787412ccb2a039dae3152a902dd4d1f3bbeeb533728d5",
+      "instrumentedSha256": "98274beed1f72615bd811fd506606855dde850c27e56e6ed8bca8b378487d54e",
+      "restoredSha256": "bbb3436035c9fcbe2fd787412ccb2a039dae3152a902dd4d1f3bbeeb533728d5",
+      "actualDerivativeSha256": "98274beed1f72615bd811fd506606855dde850c27e56e6ed8bca8b378487d54e"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "pristineSha256": "17b59ff7ad67f2249697c059c266453300f658dc0b9e1846438a34da01fcaef5",
+      "instrumentedSha256": "37bb2b8e3721831dc3c2454426e0cd2d46ac489597b3d075e25824d18242cb59",
+      "restoredSha256": "17b59ff7ad67f2249697c059c266453300f658dc0b9e1846438a34da01fcaef5",
+      "actualDerivativeSha256": "37bb2b8e3721831dc3c2454426e0cd2d46ac489597b3d075e25824d18242cb59"
+    }
+  ],
+  "actualCollectorResultsPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-runner-deadline-diag02-results.json",
+  "actualCollectorResultsSha256": "70996beb98578287cd73cb4a74499453815cad31aeab27d48228f60e1f4439a0",
+  "actual": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs011-runner-deadline-20261020-diag02/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs011-runner-deadline-20261020-diag02/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.fixtures.config.ts",
+      "test/fixtures-tier/guided-start-deadline.test.ts",
+      "--testNamePattern=^REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled$",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-runner-deadline-diag02-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-20T16:00:48.628683+00:00",
+    "elapsedSeconds": 8.01,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "ae38a2582153d982923df4cd90609aa0f1663add044eaca6daa756ff99ffa9f6",
+    "testInputStable": true,
+    "testInputDigestBefore": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+    "testInputDigestAfter": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+    "vitest": {
+      "success": true,
+      "numPassedTests": 1,
+      "numFailedTests": 0,
+      "numPendingTests": 6,
+      "numTotalTests": 7,
+      "numPassedTestSuites": 2,
+      "numFailedTestSuites": 0
+    },
+    "vitestReportSha256": "bc818c1e9fa7f9d0abc0589a7b9ce2f71f935619f55f6d26a8123adc3fefa1b0"
+  },
+  "actualReportSha256": "bc818c1e9fa7f9d0abc0589a7b9ce2f71f935619f55f6d26a8123adc3fefa1b0",
+  "allSelectedFileCases": [
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at the deadline with TIMEOUT, and after close() no process, scratch or recording file remains",
+      "status": "skipped",
+      "durationMs": null
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a bare abort'), naming 'CANCELLED', with the same teardown",
+      "status": "skipped",
+      "durationMs": null
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a CANCELLED reason (a stop)'), naming 'CANCELLED', with the same teardown",
+      "status": "skipped",
+      "durationMs": null
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a TIMEOUT reason (the runtime\\'s budg\u2026'), naming 'TIMEOUT', with the same teardown",
+      "status": "skipped",
+      "durationMs": null
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down with a recording on disk: kills the encoder as well, and leaves the recorder's files exactly as they were",
+      "status": "skipped",
+      "durationMs": null
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled",
+      "status": "passed",
+      "durationMs": 2907.881334
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down Quinn F5: refuses to confirm the teardown while a process it enumerated is still alive, and leaves the scratch directory in place",
+      "status": "skipped",
+      "durationMs": null
+    }
+  ],
+  "exactlyOneExecutedCase": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled",
+  "diagnosticCompanionFilterOmissions": 6,
+  "reader": {
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-deadline-diagnostic/read-closed-trace.py",
+      "/private/tmp/obs011-runner-deadline-20261020-diag02/repo/late-spawn-diagnostic.json"
+    ],
+    "exit": 0,
+    "stdoutSha256": "03f0db84ad2ca2b3ab9743bbdcb9f9965f1a2def9489250a0397743814cb9e95",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "preparedReaderSha256": "1a3631c8a57b2f10237f926573f98757b48a02ec341dafedd149fd3d4c81fa3e"
+  },
+  "closedTraceSha256": "98aeb2242a270594ccbbd753d4ee77c4ad1ef0c090bb8c9830b514f1858539b3",
+  "trace": {
+    "readerValid": true,
+    "complete": true,
+    "overflow": false,
+    "instrumentationFailed": false,
+    "minimumEventsSeen": true,
+    "originalTestFailed": false,
+    "records": [
+      {
+        "event": 1,
+        "order": 1,
+        "monoMs": 7.0383750000000305,
+        "a": 30000,
+        "b": 994,
+        "c": 994,
+        "flagA": false,
+        "flagB": false
+      },
+      {
+        "event": 2,
+        "order": 2,
+        "monoMs": 1001.9091249999999,
+        "a": 1,
+        "b": 30000,
+        "c": 994,
+        "flagA": false,
+        "flagB": false
+      },
+      {
+        "event": 3,
+        "order": 3,
+        "monoMs": 1002.40375,
+        "a": 1,
+        "b": 1,
+        "c": 0,
+        "flagA": false,
+        "flagB": false
+      },
+      {
+        "event": 5,
+        "order": 4,
+        "monoMs": 1002.5630409999999,
+        "a": 1,
+        "b": 0,
+        "c": 0,
+        "flagA": true,
+        "flagB": false
+      },
+      {
+        "event": 6,
+        "order": 5,
+        "monoMs": 1003.9780000000001,
+        "a": 0,
+        "b": 0,
+        "c": 0,
+        "flagA": false,
+        "flagB": false
+      },
+      {
+        "event": 7,
+        "order": 6,
+        "monoMs": 1045.223875,
+        "a": 1,
+        "b": 0,
+        "c": 0,
+        "flagA": false,
+        "flagB": false
+      },
+      {
+        "event": 8,
+        "order": 7,
+        "monoMs": 2547.233,
+        "a": 1546,
+        "b": 0,
+        "c": 0,
+        "flagA": false,
+        "flagB": false
+      },
+      {
+        "event": 4,
+        "order": 8,
+        "monoMs": 2906.134458,
+        "a": 0,
+        "b": 0,
+        "c": 0,
+        "flagA": false,
+        "flagB": false
+      },
+      {
+        "event": 9,
+        "order": 9,
+        "monoMs": 2906.147333,
+        "a": 1905,
+        "b": 0,
+        "c": 0,
+        "flagA": false,
+        "flagB": false
+      }
+    ]
+  },
+  "observedThisExecution": {
+    "timerDelayMs": 994,
+    "maxMs": 30000,
+    "selectionDeadlineDeltaMs": 994,
+    "timerWallDeltaMs": 1,
+    "catchExactWallDeltaMs": 1,
+    "catchPhaseProcess": true,
+    "catchAborted": false,
+    "catchAwaitSelected": false,
+    "callerFailureBeforeDisposal": true,
+    "originalDirectoryCount": 1,
+    "originalDirectoryCompletionBeforeDisposal": true,
+    "standInAndCloseReached": true
+  },
+  "interpretation": "Original late-spawn case passed. Timer and catch were both1msafterdeadline; catchdidnotawaitteardown, scratchcount1wasobservedbeforedisposal. Proposedprematuretimer/catchawaitpathnotobserved inthisexecution. Historicalfailurecause remainsunproved; synchronousobservationcanperturb asubmillisecondrace.",
+  "noHistoricalCauseOrProductFixCredit": true,
+  "derivativeSourceCount": 492,
+  "ancestorRtSourceCount": 493,
+  "omittedRuntimeOutput": {
+    "path": "studio-runner/short.webm",
+    "sha256": "5fd872525fa77d054b86ca7b50927b4d1f860b21ab2b166fdf6c3ed3c4b5d0bc",
+    "bytes": 4,
+    "publicProducer": "studio-runner/test/guided/evidence.test.ts:111 writes WEBM_MAGIC-only truncated output; no input reference found",
+    "copyPlanAlreadyExcludedIt": true
+  },
+  "all492DerivativeAnd493AncestorSourceStable": true,
+  "actualSevenAndProtected18Stable": true,
+  "actualSourceDigestDuringRun": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+  "actualDistDigestDuringRun": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "acceptedAncestorAndPristineDist": "f726d3f41a06809fc88a41415809ed8e415ef565ef42b323cd282135060375ac",
+  "derivativeOnlyDist": "971623b9a7eb1a39f573f6b5b4b2426ba6b1811af76aa278f4aa93bca0140211",
+  "derivativeChangedDistPaths": [
+    "run/browser.js",
+    "run/browser.js.map",
+    "run/observedBootstrap.js",
+    "run/observedBootstrap.js.map"
+  ],
+  "completeDistManifestPath": "after-inputs.json",
+  "privateCapturesRead": false,
+  "furtherRuntimeOrRetries": false,
+  "derivativeRestoredOrDeleted": false,
+  "rtCopyBackReleased": false,
+  "fullFixtureGatePassed": false,
+  "priorFullFixtureAndSetupFailuresPreserved": true,
+  "runningJobs": false,
+  "sharedBudgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN",
+  "lifecycleOrProductionCredit": false
+}

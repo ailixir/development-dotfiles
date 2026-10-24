@@ -1,0 +1,51 @@
+{
+  "kind": "STATIC_RECONSTRUCTION_NOT_RUNTIME",
+  "isQaVerdict": false,
+  "runtimeVerified": false,
+  "checks": {
+    "originalArtifactsByteUnchanged": true,
+    "threeStagePatchReplayEqualsAll20PrepFiles": true,
+    "wiringPatchReplayEqualsAll20AlternateFiles": true,
+    "mutantReconstructions": [
+      {
+        "id": "m1-mint",
+        "declaredEqualsReconstruction": true,
+        "sha256": "ced7fae0cf5203780aa9fea8184abb4d0e1413121cd47064dd01037fdcf0e4fd"
+      },
+      {
+        "id": "m2-judge",
+        "declaredEqualsReconstruction": true,
+        "sha256": "7c6ff1a0bb97a2496d47d0abad3c2855c786bd6b1a7921d126e0e816cf47b34b"
+      },
+      {
+        "id": "m3-claim",
+        "declaredEqualsReconstruction": true,
+        "sha256": "423df1f61d05ed8d3ce9b8baab764450ccc09f2c366d6f708a35ed2a159b7884"
+      },
+      {
+        "id": "m4-budget",
+        "declaredEqualsReconstruction": true,
+        "sha256": "57457251f354a361f1d1136db6076684bb807978c8e95f0d1122b25cd352ea02"
+      },
+      {
+        "id": "m5-worker",
+        "declaredEqualsReconstruction": true,
+        "sha256": "6bd8e01e65cc3485d2d792bf95c38aa6d03b24deaf9d1d6434f5b141678fcf0a"
+      }
+    ],
+    "distinctOverloadSlots": {
+      "sender2": true,
+      "sender3": true,
+      "sender4": true
+    },
+    "exactHelperForwarding": true,
+    "secretOverloadForwarding": true,
+    "noNullOrGeneratedKeyCollapsedAdapter": true,
+    "dispatchDownstreamAlgorithmByteIdenticalAfterTypeOnlyNormalization": true,
+    "actualFixtureTranslationScopeInBothSets": true,
+    "threeClockTestNamesPreserved": true,
+    "clockOnlyScopeSetupChanged": true,
+    "finalClockCleanupExact": true,
+    "lexicalJavaDelimitersBalancedAllSets": true
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-test001-reverse01-results.json",
+  "resultSha256": "2c79b30df638ac91e0531bfe387274bb5f31a78ae58c0b264ff75c3f7c065861",
+  "cohortSha256": "99d8e6db860ed41c6b9251b5d0149080d8a1f5ab36510b418d6a0aba660d965d",
+  "actualInvocations": [
+    {
+      "method": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+      "invocationOrdinal": 1,
+      "variant": "singleton",
+      "variantOrdinal": 0,
+      "passed": true,
+      "afterEachComplete": true
+    },
+    {
+      "method": "queuedAndPreReadyRefusals",
+      "invocationOrdinal": 2,
+      "variant": "singleton",
+      "variantOrdinal": 0,
+      "passed": true,
+      "afterEachComplete": true
+    },
+    {
+      "method": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+      "invocationOrdinal": 3,
+      "variant": "singleton",
+      "variantOrdinal": 0,
+      "passed": true,
+      "afterEachComplete": true
+    },
+    {
+      "method": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+      "invocationOrdinal": 4,
+      "variant": "singleton",
+      "variantOrdinal": 0,
+      "passed": true,
+      "afterEachComplete": true
+    }
+  ],
+  "expectedReverseOrderObserved": true,
+  "fullClassGateCredit": false
+}

@@ -1,0 +1,1330 @@
+{
+  "scope": "Exact diagnostic AST edits; existing textual carry proof plus JDK candidate branch/scope parse proof; no new runtime oracle",
+  "files": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "beforeSha256": "693e95f0f9ace90451b2e83e63fa45716f8a0eabe45c2b3f6508a5a9d6f9d49a",
+      "candidateSha256": "91fed1c9240d506f402447f534adb1f86686dc8e797176cddafd32285988f35e",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 61,
+      "assertionChainsAfter": 61,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 10,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 0,
+      "wrapperScopesPreservedByUnreferencedLabels": 7,
+      "labels": [
+        "styleWaitScope001",
+        "styleWaitScope002",
+        "styleWaitScope003",
+        "styleWaitScope004",
+        "styleWaitScope005",
+        "styleWaitScope006",
+        "styleWaitScope007"
+      ],
+      "aliases": {},
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "Test",
+          "method": "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple"
+        },
+        {
+          "annotation": "Test",
+          "method": "callbackAcceptsValidUnicodeSessionLargerThan64KiB"
+        },
+        {
+          "annotation": "Test",
+          "method": "stopRetryAfterCloseCompletesConfirmsWithSameKey"
+        },
+        {
+          "annotation": "Test",
+          "method": "aWedgedGuidedBrowserIsTerminatedInsideTheBackendDeadlineAndTheSlotIsReleased"
+        },
+        {
+          "annotation": "Test",
+          "method": "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot"
+        },
+        {
+          "annotation": "Test",
+          "method": "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim"
+        },
+        {
+          "annotation": "Test",
+          "method": "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition"
+        },
+        {
+          "annotation": "Test",
+          "method": "legacyClarificationAnswerCannotResumeObservedV2Session"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualRunnerResponseBoundaryRejectsMalformedUtf8DuplicatesTrailingAndTimestampProfiles"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 10
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "beforeSha256": "eb596dbcfae26a1ac3aff3f3d0bdba36660c8f3b7fe8b4c4a1f1936a8dcbf37a",
+      "candidateSha256": "93f2afe66a2cd2c80092cbfbba283f74c819ba40eb3066677b60d62312d316cc",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 136,
+      "assertionChainsAfter": 136,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 16,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 2,
+      "wrapperScopesPreservedByUnreferencedLabels": 8,
+      "labels": [
+        "styleWaitScope008",
+        "styleWaitScope009",
+        "styleWaitScope010",
+        "styleWaitScope011",
+        "styleWaitScope012",
+        "styleWaitScope013",
+        "styleWaitScope014",
+        "styleWaitScope015"
+      ],
+      "aliases": {},
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "Test",
+          "method": "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch"
+        },
+        {
+          "annotation": "Test",
+          "method": "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission"
+        },
+        {
+          "annotation": "Test",
+          "method": "concurrentSameAndNewKeysHaveOneRealDispatch"
+        },
+        {
+          "annotation": "Test",
+          "method": "nestedRollbackAndLostWinnerNeverManufactureSendAuthority"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption"
+        },
+        {
+          "annotation": "Test",
+          "method": "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualApplicationReplacementAfterPrepareNeverActsOnReplacement"
+        },
+        {
+          "annotation": "Test",
+          "method": "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay"
+        },
+        {
+          "annotation": "Test",
+          "method": "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly"
+        },
+        {
+          "annotation": "Test",
+          "method": "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction"
+        },
+        {
+          "annotation": "Test",
+          "method": "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue"
+        },
+        {
+          "annotation": "Test",
+          "method": "lateRenewalResponseAfterStopCannotReviveContextOrOwnership"
+        },
+        {
+          "annotation": "Test",
+          "method": "committedObservationRecoversLostHttpResponseWithoutAnotherCollection"
+        },
+        {
+          "annotation": "Test",
+          "method": "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation"
+        },
+        {
+          "annotation": "Test",
+          "method": "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration"
+        },
+        {
+          "annotation": "Test",
+          "method": "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 16
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "beforeSha256": "453fbd004f9a2c3aaa2d24e196be717e7e8cff8d9f870d36cd726b7a806448fe",
+      "candidateSha256": "44e6b58c69fefaa02422535529b7a0c5158e25779923d13c5c309280a291eeda",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 30,
+      "assertionChainsAfter": 30,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 6,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 1,
+      "wrapperScopesPreservedByUnreferencedLabels": 1,
+      "labels": [
+        "styleWaitScope016"
+      ],
+      "aliases": {},
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "Test",
+          "method": "twoSessionsContendOnActualTestLockOnlyOnePublishes"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "independentSourceWriterFencesAnAlreadyValidatedCandidate"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "terminalOrChangedAuthorityCannotAdoptOrBeOverwrittenByLateConflict"
+        },
+        {
+          "annotation": "Test",
+          "method": "grantExpiringWhileWaitingForTheRealSourceLockRollsBackAllWrites"
+        },
+        {
+          "annotation": "Test",
+          "method": "sameOwnerRenewalKeepsOriginalClaimAndStillPublishesOnce"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "realWriterRollsBackEveryBoundaryAndCanRetryTheSameClaim"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 6
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "5a39eb2689b66dead773ea31c44f4ab6e62b9f17d65389158271908c0e1f522e",
+      "candidateSha256": "16985a03b5677d5410fc30d51b39f352fb64e1a096279834bd7818ccb6ccc5b0",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 2712,
+      "assertionChainsAfter": 2712,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 73,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 21,
+      "wrapperScopesPreservedByUnreferencedLabels": 70,
+      "labels": [
+        "styleWaitScope017",
+        "styleWaitScope018",
+        "styleWaitScope019",
+        "styleWaitScope020",
+        "styleWaitScope021",
+        "styleWaitScope022",
+        "styleWaitScope023",
+        "styleWaitScope024",
+        "styleWaitScope025",
+        "styleWaitScope026",
+        "styleWaitScope027",
+        "styleWaitScope028",
+        "styleWaitScope029",
+        "styleWaitScope030",
+        "styleWaitScope031",
+        "styleWaitScope032",
+        "styleWaitScope033",
+        "styleWaitScope034",
+        "styleWaitScope035",
+        "styleWaitScope036",
+        "styleWaitScope037",
+        "styleWaitScope038",
+        "styleWaitScope039",
+        "styleWaitScope040",
+        "styleWaitScope041",
+        "styleWaitScope042",
+        "styleWaitScope043",
+        "styleWaitScope044",
+        "styleWaitScope045",
+        "styleWaitScope046",
+        "styleWaitScope047",
+        "styleWaitScope048",
+        "styleWaitScope049",
+        "styleWaitScope050",
+        "styleWaitScope051",
+        "styleWaitScope052",
+        "styleWaitScope053",
+        "styleWaitScope054",
+        "styleWaitScope055",
+        "styleWaitScope056",
+        "styleWaitScope057",
+        "styleWaitScope058",
+        "styleWaitScope059",
+        "styleWaitScope060",
+        "styleWaitScope061",
+        "styleWaitScope062",
+        "styleWaitScope063",
+        "styleWaitScope064",
+        "styleWaitScope065",
+        "styleWaitScope066",
+        "styleWaitScope067",
+        "styleWaitScope068",
+        "styleWaitScope069",
+        "styleWaitScope070",
+        "styleWaitScope071",
+        "styleWaitScope072",
+        "styleWaitScope073",
+        "styleWaitScope074",
+        "styleWaitScope075",
+        "styleWaitScope076",
+        "styleWaitScope077",
+        "styleWaitScope078",
+        "styleWaitScope079",
+        "styleWaitScope080",
+        "styleWaitScope081",
+        "styleWaitScope082",
+        "styleWaitScope083",
+        "styleWaitScope084",
+        "styleWaitScope085",
+        "styleWaitScope086"
+      ],
+      "aliases": {
+        "itrRead001Root": "itrRead001_root",
+        "itrRead001Until": "itrRead001_until",
+        "itrRead003Ready": "itrRead003_ready",
+        "itrRead003Until": "itrRead003_until",
+        "itrRead003Root": "itrRead003_root",
+        "itrRead004Until": "itrRead004_until",
+        "itrRead005FixtureDeadline": "itrRead005_fixtureDeadline",
+        "itrRead006Deadline": "itrRead006_deadline",
+        "itrRead007Second": "itrRead007_second",
+        "itrRead007Deadline": "itrRead007_deadline",
+        "itrRead008Before": "itrRead008_before",
+        "itrRead008Lease": "itrRead008_lease",
+        "itrRead008End": "itrRead008_end",
+        "itrRead009Id": "itrRead009_id",
+        "itrRead009Deadline": "itrRead009_deadline",
+        "itrRead010Id": "itrRead010_id",
+        "itrRead010Acked": "itrRead010_acked",
+        "itrRead011Accepted": "itrRead011_accepted",
+        "itrRead014Held": "itrRead014_held",
+        "itrRead015Acked": "itrRead015_acked",
+        "itrRead016Execution": "itrRead016_execution",
+        "itrRead016End": "itrRead016_end",
+        "itrRead017Held": "itrRead017_held",
+        "itrRead018End": "itrRead018_end",
+        "itrRead019End": "itrRead019_end",
+        "itrRead020End": "itrRead020_end",
+        "itrRead021End": "itrRead021_end",
+        "itrRead022Execution": "itrRead022_execution",
+        "itrRead022End": "itrRead022_end",
+        "itrRead023End": "itrRead023_end",
+        "itrRead029Until": "itrRead029_until",
+        "itrRead030End": "itrRead030_end",
+        "itrRead031End": "itrRead031_end",
+        "itrRead032End": "itrRead032_end",
+        "itrRead033End": "itrRead033_end",
+        "itrRead034Execution": "itrRead034_execution",
+        "itrRead034End": "itrRead034_end",
+        "itrRead035Execution": "itrRead035_execution",
+        "itrRead035Deadline": "itrRead035_deadline",
+        "itrRead036Second": "itrRead036_second",
+        "itrRead036SecondDeadline": "itrRead036_secondDeadline",
+        "itrRead037Deadline": "itrRead037_deadline",
+        "itrRead038Deadline": "itrRead038_deadline",
+        "itrRead041Until": "itrRead041_until",
+        "itrRead042Until": "itrRead042_until",
+        "itrRead043Deadline": "itrRead043_deadline",
+        "itrRead044Id": "itrRead044_id",
+        "itrRead044LearningEnd": "itrRead044_learningEnd",
+        "itrRead045ExecutionId": "itrRead045_executionId",
+        "itrRead045End": "itrRead045_end",
+        "itrRead047EnteredDeadline": "itrRead047_enteredDeadline",
+        "itrRead048Id": "itrRead048_id",
+        "itrRead048Until": "itrRead048_until",
+        "itrRead049CaptureDeadline": "itrRead049_captureDeadline",
+        "itrRead050Id": "itrRead050_id",
+        "itrRead050Deadline": "itrRead050_deadline",
+        "itrRead051Execution": "itrRead051_execution",
+        "itrRead051End": "itrRead051_end",
+        "itrRead052Id": "itrRead052_id",
+        "itrRead052Deadline": "itrRead052_deadline",
+        "itrRead054Navigations": "itrRead054_navigations",
+        "itrRead054Id": "itrRead054_id",
+        "itrRead054Until": "itrRead054_until",
+        "itrRead055Id": "itrRead055_id",
+        "itrRead055Until": "itrRead055_until",
+        "itrRead055Expected": "itrRead055_expected",
+        "itrRead058Execution": "itrRead058_execution",
+        "itrRead058End": "itrRead058_end",
+        "itrRead060End": "itrRead060_end",
+        "itrRead061Execution": "itrRead061_execution",
+        "itrRead061Deadline": "itrRead061_deadline",
+        "itrRead062Deadline": "itrRead062_deadline",
+        "itrRead063LaunchesBefore": "itrRead063_launchesBefore",
+        "itrRead063SessionId": "itrRead063_sessionId",
+        "itrRead063Deadline": "itrRead063_deadline",
+        "itrRead064Cut": "itrRead064_cut",
+        "itrRead064StoppedBy": "itrRead064_stoppedBy",
+        "itrRead066Deadline": "itrRead066_deadline",
+        "itrRead067Until": "itrRead067_until",
+        "itrRead069Entered": "itrRead069_entered",
+        "itrRead070Parent": "itrRead070_parent",
+        "itrRead070StoppedBy": "itrRead070_stoppedBy",
+        "itrRead072LogStart": "itrRead072_logStart",
+        "itrRead072Execution": "itrRead072_execution",
+        "itrRead072SelfStopBy": "itrRead072_selfStopBy",
+        "itrRead073Deadline": "itrRead073_deadline",
+        "itrRead074LogStart": "itrRead074_logStart",
+        "itrRead074Receipts": "itrRead074_receipts",
+        "itrRead074DrainingDeadline": "itrRead074_drainingDeadline",
+        "itrRead077Deadline": "itrRead077_deadline",
+        "itrRead078Root": "itrRead078_root",
+        "itrRead078Deadline": "itrRead078_deadline",
+        "itrRead078File": "itrRead078_file",
+        "itrRead079Deadline": "itrRead079_deadline",
+        "itrRead080Deadline": "itrRead080_deadline",
+        "itrRead081SamplePath": "itrRead081_samplePath",
+        "itrRead081Deadline": "itrRead081_deadline",
+        "itrRead083Deadline": "itrRead083_deadline",
+        "itrRead084Started": "itrRead084_started",
+        "itrRead084Deadline": "itrRead084_deadline",
+        "itrRead085Deadline": "itrRead085_deadline",
+        "itrRead086Deadline": "itrRead086_deadline",
+        "itrRead087Deadline": "itrRead087_deadline",
+        "itrRead089Directory": "itrRead089_directory",
+        "itrRead089Receipt": "itrRead089_receipt",
+        "itrRead089Deadline": "itrRead089_deadline",
+        "itrRead090End": "itrRead090_end",
+        "itrRead093Deadline": "itrRead093_deadline",
+        "itrRead093Tracked": "itrRead093_tracked",
+        "itrRead094Root": "itrRead094_root",
+        "itrRead094Deadline": "itrRead094_deadline",
+        "itrRead095Root": "itrRead095_root",
+        "itrRead095Deadline": "itrRead095_deadline"
+      },
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "Test",
+          "method": "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache"
+        },
+        {
+          "annotation": "Test",
+          "method": "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalPartialDriftStepReadPublishesAndReplaysTwice"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalStartCannotWidenTrustedOriginCeiling"
+        },
+        {
+          "annotation": "Test",
+          "method": "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest"
+        },
+        {
+          "annotation": "Test",
+          "method": "prefixProducerContextDefiniteRefusalsStopBeforePreparation"
+        },
+        {
+          "annotation": "Test",
+          "method": "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch"
+        },
+        {
+          "annotation": "Test",
+          "method": "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalSecretPrefixPreservesEveryVaultFaultOracle"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication"
+        },
+        {
+          "annotation": "Test",
+          "method": "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalPrefixCallbacksKeepStateAndFenceBothReservations"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalDriftAuthorityRejectsEveryExactJoin"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalExcludedAttemptCannotHideOtherUnsettledActions"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalPrefixContinuationMatrixDoneAndRefreshRows"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalPrefixPolicyRefusalsNeverBecomeDrift"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalFreshPostConsentGuardsDenyDangerousProposals"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery"
+        },
+        {
+          "annotation": "Test",
+          "method": "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+        },
+        {
+          "annotation": "Test",
+          "method": "queuedAndPreReadyRefusals"
+        },
+        {
+          "annotation": "Test",
+          "method": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness"
+        },
+        {
+          "annotation": "Test",
+          "method": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays"
+        },
+        {
+          "annotation": "Test",
+          "method": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance"
+        },
+        {
+          "annotation": "Test",
+          "method": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork"
+        },
+        {
+          "annotation": "Test",
+          "method": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays"
+        },
+        {
+          "annotation": "Test",
+          "method": "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel"
+        },
+        {
+          "annotation": "Test",
+          "method": "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualCoreMayUseDenialStartsNoSessionAndNoBrowser"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualGuidedRegistrationPassingAssertRemainsPassed"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualPublishedRegistrationPassingAssertRemainsPassed"
+        },
+        {
+          "annotation": "Test",
+          "method": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualPublishedPublicCancelWhileNativePasswordWorldPending"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualSecretControlWindowLossBeforeReadyReachesTerminalError"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion"
+        },
+        {
+          "annotation": "Test",
+          "method": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 74,
+      "original35VariantSourceDefinitionsRetainedByExactTokenAndLiteralProof": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "beforeSha256": "e354342aea22e68860085c714c5b9f780480f8922db168b83e9ee7c6d89ab74d",
+      "candidateSha256": "63c41d4fdc7c1bf5cc270bd5e055cd89aa9388a9fba0993c2965aabf1b737a6a",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 14,
+      "assertionChainsAfter": 14,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 3,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 0,
+      "wrapperScopesPreservedByUnreferencedLabels": 0,
+      "labels": [],
+      "aliases": {},
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "Test",
+          "method": "publicationMintAndJudgeReadDatabaseClockWithJvmAheadAndBehind"
+        },
+        {
+          "annotation": "Test",
+          "method": "databaseExpiredPublicationGrantRefusesDespiteJvmBehind"
+        },
+        {
+          "annotation": "Test",
+          "method": "publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 3
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "beforeSha256": "74ed1658684b7ce272eb256600c13cda367afd20e186c4617eb68177d32f9f91",
+      "candidateSha256": "f53d7536c746d40a2b2f49dcb9c8849dd0f60da0343471b831df1df15fba0ffa",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 225,
+      "assertionChainsAfter": 225,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 36,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 0,
+      "wrapperScopesPreservedByUnreferencedLabels": 1,
+      "labels": [
+        "styleWaitScope087"
+      ],
+      "aliases": {},
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "Test",
+          "method": "auditAndDispatchStateCommitOrRollbackTogetherAndRequireTransaction"
+        },
+        {
+          "annotation": "Test",
+          "method": "releaseUsageAndRevocationAreIdempotentImmutableScopedMetadata"
+        },
+        {
+          "annotation": "Test",
+          "method": "unreachedDeclarationHasOnlyOneTerminalNotUsedWithoutRelease"
+        },
+        {
+          "annotation": "Test",
+          "method": "concurrentDuplicateWritersProduceOneRelease"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualJavaBootstrapHealthSchedulerAndPrunerManageAuditLifecycle"
+        },
+        {
+          "annotation": "Test",
+          "method": "leastWriterCanRecordUsageButCannotRewriteOrPrunePartitions"
+        },
+        {
+          "annotation": "Test",
+          "method": "consumedWithoutDecisionIsHonestUnlinkedUncertaintyNeverUnreached"
+        },
+        {
+          "annotation": "Test",
+          "method": "consumedScopeRequiresActualAdmissionDeclarationFenceAndAckLossEvidence"
+        },
+        {
+          "annotation": "Test",
+          "method": "committedResolutionCannotBeRelabelledNoDecisionAndLateUnknownPreservesPositive"
+        },
+        {
+          "annotation": "Test",
+          "method": "mixedKnownAndUnknownReplayUsageKeepsSparseWireSeparateAndRejectsAckWithoutEvidence"
+        },
+        {
+          "annotation": "Test",
+          "method": "concurrentConsumedUnknownWritersAreIdempotentAndCannotInventTwoSummaries"
+        },
+        {
+          "annotation": "Test",
+          "method": "ordinaryGuidedReleaseRequiresConsumedDeclarationMaterializationAndFence"
+        },
+        {
+          "annotation": "Test",
+          "method": "terminalNoDecisionCannotAcquireContradictoryLateRelease"
+        },
+        {
+          "annotation": "Test",
+          "method": "rawAndRecorderWritersShareOwnerThenEventOrderWithoutDeadlock"
+        },
+        {
+          "annotation": "Test",
+          "method": "authenticUnreachedReferenceHasNoInventedOrdinalSequenceOrPlan"
+        },
+        {
+          "annotation": "Test",
+          "method": "positiveReplayAbsenceCommitsOnlyWithWinningNoSendTransition"
+        },
+        {
+          "annotation": "Test",
+          "method": "readEntryAndScopeAreDurableIdempotentAndCannotCertifyMissingDecisionAsUnused"
+        },
+        {
+          "annotation": "Test",
+          "method": "noSendReceiptAuditAndClosureRollbackTogetherWithoutGrantingRetry"
+        },
+        {
+          "annotation": "Test",
+          "method": "emptyCompletedNoSendReceiptStillRequiresActualOwnedClosure"
+        },
+        {
+          "annotation": "Test",
+          "method": "futureEvidencePartitionsKeepDeferredAndDirectTruncateGuards"
+        },
+        {
+          "annotation": "Test",
+          "method": "sameDeclarationCanHaveSeparateRealConsumedCoordinatesWithoutFalseUnused"
+        },
+        {
+          "annotation": "Test",
+          "method": "terminalWinnerClassifiesExactUnsettledNoReadAndPossibleReadDeclarations"
+        },
+        {
+          "annotation": "Test",
+          "method": "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction"
+        },
+        {
+          "annotation": "Test",
+          "method": "terminalSettlementPreservesActualLinkedPositiveAndHasNoRetryAuthority"
+        },
+        {
+          "annotation": "Test",
+          "method": "terminalCutRejectsLaterReadReleaseDispatchAndReceiptOnlyRequest"
+        },
+        {
+          "annotation": "Test",
+          "method": "terminalReceiptOwnerHistoryAndSummariesRollbackTogether"
+        },
+        {
+          "annotation": "Test",
+          "method": "terminalSavepointReceiptOrWinnerWritesAreExplicitlyProhibited"
+        },
+        {
+          "annotation": "Test",
+          "method": "waitedTerminalCutUsesFreshCommittedReadEntryInsteadOfStaleNoReadView"
+        },
+        {
+          "annotation": "Test",
+          "method": "ordinaryRuntimeWriterCanSettleButCannotAlterOrTruncateTerminalEvidence"
+        },
+        {
+          "annotation": "Test",
+          "method": "terminalReceiptAndUnlinkedSummaryExpireInTheSameRetentionMonth"
+        },
+        {
+          "annotation": "Test",
+          "method": "earlyConstraintFlushCannotPermitLaterTerminalCauseTimeOrSnapshotMismatch"
+        },
+        {
+          "annotation": "Test",
+          "method": "committedTerminalCutAllowsLaterGenuineEvidenceMetadataWithoutChangingItsWinner"
+        },
+        {
+          "annotation": "Test",
+          "method": "earlyFlushCannotHideLaterSubtransactionWinnerVersion"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualProductionPartitionPublishesAllGuardsAtomicallyWithOrWithoutOuterTransaction"
+        },
+        {
+          "annotation": "Test",
+          "method": "productionPartitionFailureRollsBackNewAttachmentAndAllApplicableGuards"
+        },
+        {
+          "annotation": "Test",
+          "method": "productionExistingLeafRepairIsAtomicIdempotentAndDoesNotNeedDefaultOrMutation"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 36
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "beforeSha256": "7711053da6b4ae02945595d805fc617f20f5ed3d9e5a42bdcb9ee114d4c813da",
+      "candidateSha256": "a8cc959b9e3b909b5124d810523ffd76f34b47227806fafed658f14777adc479",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 58,
+      "assertionChainsAfter": 58,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 2,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 0,
+      "wrapperScopesPreservedByUnreferencedLabels": 2,
+      "labels": [
+        "styleWaitScope088",
+        "styleWaitScope089"
+      ],
+      "aliases": {},
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "Test",
+          "method": "aSessionEndedWhileAnAppendIsPendingKeepsARecordingThatSettlesPlaysAndSeeks"
+        },
+        {
+          "annotation": "Test",
+          "method": "aSessionLosingItsBrowserWhileAnAppendIsPendingStillRecordsTheRunnersOwnFact"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 2
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "beforeSha256": "c3e92a3923d5d01f576dedac390d6abc2163eec48c116430e3481a4a9ce29733",
+      "candidateSha256": "db9b0a9d8548e510b4534a9ff094c372e875157026b683a952794f31290c6e50",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 541,
+      "assertionChainsAfter": 541,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 31,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 8,
+      "wrapperScopesPreservedByUnreferencedLabels": 6,
+      "labels": [
+        "styleWaitScope090",
+        "styleWaitScope091",
+        "styleWaitScope092",
+        "styleWaitScope093",
+        "styleWaitScope094",
+        "styleWaitScope095"
+      ],
+      "aliases": {},
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "ParameterizedTest",
+          "method": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery"
+        },
+        {
+          "annotation": "Test",
+          "method": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent"
+        },
+        {
+          "annotation": "Test",
+          "method": "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop"
+        },
+        {
+          "annotation": "Test",
+          "method": "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation"
+        },
+        {
+          "annotation": "Test",
+          "method": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose"
+        },
+        {
+          "annotation": "Test",
+          "method": "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout"
+        },
+        {
+          "annotation": "Test",
+          "method": "expiredTeardownConfirmsOnSweepAfterResendsExhausted"
+        },
+        {
+          "annotation": "Test",
+          "method": "teardownWithoutAckNeverConfirmsAndStopsAfterWindow"
+        },
+        {
+          "annotation": "Test",
+          "method": "abandonedTeardownReportQueriesOncePerIntervalAndIsSilentWhenNone"
+        },
+        {
+          "annotation": "Test",
+          "method": "concurrentAfterCompletionAndSweepSendOneStopAtATime"
+        },
+        {
+          "annotation": "Test",
+          "method": "legacyPendingWithoutRequestIsNotRedriven"
+        },
+        {
+          "annotation": "Test",
+          "method": "publicationConflictTeardownTargetsTheAssignmentAndConfirms"
+        },
+        {
+          "annotation": "Test",
+          "method": "publicationConflictedIsIdempotentAndFailsClosed"
+        },
+        {
+          "annotation": "Test",
+          "method": "publicationConflictTeardownIsRedrivenAfterResendsExhausted"
+        },
+        {
+          "annotation": "Test",
+          "method": "pendingAppendPublicationConflictTargetsTheAssignment"
+        },
+        {
+          "annotation": "Test",
+          "method": "stopWithoutAStopTargetRecordsNoPendingTeardown"
+        },
+        {
+          "annotation": "Test",
+          "method": "pendingAppendDeliveryTeardownTargetsTheAssignment"
+        },
+        {
+          "annotation": "Test",
+          "method": "noPendingDeliveryKeepsIdentityTarget"
+        },
+        {
+          "annotation": "Test",
+          "method": "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing"
+        },
+        {
+          "annotation": "Test",
+          "method": "lifecycleAtLastAcknowledgedIdentityEndsSession"
+        },
+        {
+          "annotation": "Test",
+          "method": "lifecycleAtAnyOtherIdentityIsRefusedWhilePending"
+        },
+        {
+          "annotation": "Test",
+          "method": "consumingVerificationStaysRefusedWhilePending"
+        },
+        {
+          "annotation": "Test",
+          "method": "lifecycleWithoutPendingDeliveryIsExactlyVerify"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 31
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "beforeSha256": "4d2329027617624f10b7376ec6f523c5d36aba2ac6808066a18f1a454daa5e4a",
+      "candidateSha256": "91ad59ecf6e2f3a1daf820bd5057351dfc5f29b8490ed2962fb340ce230f4e19",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 30,
+      "assertionChainsAfter": 30,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 2,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 0,
+      "wrapperScopesPreservedByUnreferencedLabels": 0,
+      "labels": [],
+      "aliases": {},
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "Test",
+          "method": "shedWarnsOncePerIntervalAndTheNextTickKeepsOneDurableAttempt"
+        },
+        {
+          "annotation": "Test",
+          "method": "anIdAlreadyQueuedOrInFlightIsNeverSubmittedTwice"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 2
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "beforeSha256": "fa09a47fdaa7073d64aeeadacf609c8738fdc4a4b01ba8102f462805cf892add",
+      "candidateSha256": "14e8ae52c523c5e52411503de8eefa31fedaa7261444513a0ecdaeda30f0b1e6",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 22,
+      "assertionChainsAfter": 22,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 2,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 1,
+      "wrapperScopesPreservedByUnreferencedLabels": 1,
+      "labels": [
+        "styleWaitScope096"
+      ],
+      "aliases": {},
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "Test",
+          "method": "aFillWhoseFocusHandlerInsertsHelperTextElsewhereWritesAndTheSessionContinues"
+        },
+        {
+          "annotation": "Test",
+          "method": "aFocusHandlerThatChangesTheTargetItselfStillStopsTheSessionAndWritesNothing"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 2
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "beforeSha256": "cd32ec4e510b51344e5f3ec3e49227f34fb57d297418eca5e781607377950f4e",
+      "candidateSha256": "9f38719a92d30bde4a9a44b28b16d57248a561280b4ece75ed4574bc118f5ac0",
+      "normalizedOriginalTokensEqual": true,
+      "allOriginalLiteralTokensExact": true,
+      "allOriginalCommentsExactExcept2PermittedNoopComments": true,
+      "assertionChainsBefore": 295,
+      "assertionChainsAfter": 295,
+      "allAssertionValuesOrderAndChainsRetained": true,
+      "orderedAnnotatedMethodsRetained": 24,
+      "testMethodIdentitiesAnnotationsRetained": true,
+      "originalSleepCallsRetained": 0,
+      "wrapperScopesPreservedByUnreferencedLabels": 1,
+      "labels": [
+        "styleWaitScope097"
+      ],
+      "aliases": {},
+      "allJUnitPlainAndQualifiedMethodIdentities": [
+        {
+          "annotation": "ParameterizedTest",
+          "method": "configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules"
+        },
+        {
+          "annotation": "Test",
+          "method": "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "sourceQuestionIsDurableBeforeMaterializationAndPublicAnswerResumesBootstrap"
+        },
+        {
+          "annotation": "Test",
+          "method": "optionalChargedVerificationCannotOverrideMissingExecution"
+        },
+        {
+          "annotation": "Test",
+          "method": "sourceChangeDuringProviderCallCannotRestampAndLateUsageRetainsReservation"
+        },
+        {
+          "annotation": "Test",
+          "method": "malformedProviderReplyRepairsThroughDurableChargedAttemptsWithoutEcho"
+        },
+        {
+          "annotation": "Test",
+          "method": "typedUnsupportedOutcomeStopsWithoutInventingAnAction"
+        },
+        {
+          "annotation": "Test",
+          "method": "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch"
+        },
+        {
+          "annotation": "Test",
+          "method": "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "anAuthoredSaveOrDestructiveClickUnderAllowRunsExactlyOnce"
+        },
+        {
+          "annotation": "Test",
+          "method": "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence"
+        },
+        {
+          "annotation": "Test",
+          "method": "anAuthoredDeleteStillFailsTheGovernedDenyStance"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "governedDenyRefusesTheFormSubmitBeforeAnyDispatchAndFailsPolicyDenied"
+        },
+        {
+          "annotation": "Test",
+          "method": "governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "governedDenyRefusesAnUnlabelledOrFormAttributeSubmit"
+        },
+        {
+          "annotation": "Test",
+          "method": "governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit"
+        },
+        {
+          "annotation": "Test",
+          "method": "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend"
+        },
+        {
+          "annotation": "Test",
+          "method": "chosenSourceCannotBeAppendedUnusedWhileTheRejectedDestinationIsUsed"
+        },
+        {
+          "annotation": "Test",
+          "method": "futureNonzeroSourceQuestionCannotBeRedefinedByChangingItsOperation"
+        },
+        {
+          "annotation": "Test",
+          "method": "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "actualScannerRecoversEveryCommittedBootstrapWindow"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "genuineDelayedOldCallbackRequiresAcknowledgedFinalMetadata"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "oldUnprovedReadyCannotRebuildOrReplayBeforeOrAfterEffects"
+        },
+        {
+          "annotation": "Test",
+          "method": "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall"
+        },
+        {
+          "annotation": "Test",
+          "method": "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch"
+        },
+        {
+          "annotation": "Test",
+          "method": "aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried"
+        },
+        {
+          "annotation": "Test",
+          "method": "aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries"
+        },
+        {
+          "annotation": "Test",
+          "method": "acknowledgedOlderSnapshotCannotMarkChangedAllocationsReady"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "hostileCurrentPageCannotSubstituteAnotherPermittedEffect"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "lateUsageCommitsBeforeEveryReservationAndSendClaim"
+        },
+        {
+          "annotation": "ParameterizedTest",
+          "method": "underCeilingLateDeltaSurvivesRefusedNextReservation"
+        },
+        {
+          "annotation": "Test",
+          "method": "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority"
+        },
+        {
+          "annotation": "Test",
+          "method": "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop"
+        },
+        {
+          "annotation": "Test",
+          "method": "reportedThoughtOutputOverageStopsBeforeMaterializationDespiteSmallVisibleOutput"
+        },
+        {
+          "annotation": "Test",
+          "method": "thoughtAndToolUsageOnStaleReplyRemainInImmutableLateAudit"
+        }
+      ],
+      "allJUnitMethodCountIncludingQualifiedParameterized": 35
+    }
+  ],
+  "editKindCounts": {
+    "ADD_UNREFERENCED_WAIT_SCOPE_LABEL": 97,
+    "IF_THEN_CLOSE": 1325,
+    "IF_THEN_OPEN": 1325,
+    "ALIAS_REFERENCE": 210,
+    "ALIAS_DECLARATION": 113,
+    "EMPTY_FIXTURE_HOOK_COMMENT": 2
+  },
+  "globallyNewUnreferencedLabels": 97,
+  "wrapperScopesRemoved": 0,
+  "allOldIfElseAssociationsAndJumpInventoryRetained": true,
+  "JdkParseProofPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/style-correction01/parse-proof.tsv",
+  "noConfigRuleSuppressionAssertionsPredicatesIntervalsDeadlinesChanged": true,
+  "literalTokenValuesAndTextBlocksPreservedExactly": true,
+  "newTestsMethodsProfilesOrDependencies": 0,
+  "originalRootSourceStillBefore": true
+}

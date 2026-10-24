@@ -1,0 +1,59 @@
+{
+  "kind": "DOCUMENTATION_SUMMARY_OF_EXISTING_COMPLETED_RESULTS",
+  "subjectManifestSha256": "e9515051d3ce31bf075296b94dafcea5db7c3ac59c44850ba5a9c05d7323162b",
+  "requiredControlsPassed": 114,
+  "requiredControlsFailed": 0,
+  "requiredSuites": [
+    {
+      "artifact": "checks.py.result.json",
+      "passed": 89,
+      "failed": 0,
+      "evidence": {
+        "path": "checks.py.result.json",
+        "sha256": "ce6bdfa60b8ea337e45c3076c6dcfa8444702f947707ec7e25b206ff45234b76",
+        "bytes": 8193,
+        "mode": 420
+      },
+      "realBoundaryCalls": []
+    },
+    {
+      "artifact": "extra_checks.py.result.json",
+      "passed": 19,
+      "failed": 0,
+      "evidence": {
+        "path": "extra_checks.py.result.json",
+        "sha256": "4f9ea86442f9c183170bc3621eb196a3c9a489c7cdef9a62a2266ed75da1d0ca",
+        "bytes": 2405,
+        "mode": 420
+      },
+      "realBoundaryCalls": []
+    },
+    {
+      "artifact": "optimized_bootstrap_checks.py.result.json",
+      "passed": 6,
+      "failed": 0,
+      "evidence": {
+        "path": "optimized_bootstrap_checks.py.result.json",
+        "sha256": "b7ea1cb331bfc33fc539bd6f3a30e7879045327bc8cb5dc0c391678e551a1002",
+        "bytes": 1134,
+        "mode": 420
+      },
+      "realBoundaryCalls": []
+    }
+  ],
+  "targetedAriaCases": 2,
+  "targetedExpectedOutcomesConfirmed": true,
+  "targetedEvidence": {
+    "path": "targeted-results.json",
+    "sha256": "5fcbaa6b727f01c29c3a949e1e82c998ca9cccd21f279194d924429bfddfab00",
+    "bytes": 857,
+    "mode": 420
+  },
+  "qaTimeoutEvidence": "Communicated by /root/gateway06_qa: actual run negative fake timeout path; exact outer guard failure sink independently inspected statically. No Aria rerun or actual process-exit probe.",
+  "mandatoryFindingCount": 2,
+  "priorFinalHandoffInterrupted": true,
+  "sealOnlyAdditionalTests": 0,
+  "sealOnlyAdditionalInvestigation": false,
+  "actualOperationalActions": 0,
+  "verdict": "HOLD_NEW_EXACT_SOURCE_SUCCESSOR_REQUIRED"
+}

@@ -1,0 +1,12 @@
+{
+  "sameCompleteApi": true,
+  "onlyCaptureFunctionDiffers": true,
+  "candidateCapture": "export function captureBootstrapTree(childPid: number): BootstrapProcessTree {\n  const table = readSnapshot(childPid), byPid = new Map(table.map(row => [row.pid, row]));\n  const pids = descendantsOf(childPid, table);\n  const labels = pids.map(pid => {\n    const row = byPid.get(pid);\n    if (!row) throw new Error('BOOTSTRAP_PROCESS_TABLE_INVALID');\n    return { pid, command: row.command };\n  });\n  return freezeObservation(childPid, pids, labels);\n}\n",
+  "oldCapture": "export function captureBootstrapTree(childPid: number): BootstrapProcessTree {\n  // Same strict preflight/API as candidate; the following acquisition remains the original fixture algorithm.\n  readSnapshot(childPid);\n  const pids = descendantsOf(childPid), labels = pids.map(pid => ({\n    pid, command: execFileSync('ps', ['-p', String(pid), '-o', 'comm='], { encoding: 'utf8', timeout: 1000 }).trim(),\n  }));\n  return freezeObservation(childPid, pids, labels);\n}\n",
+  "oldOriginalReadySpan": "const pids=handle?.pid?descendantsOf(handle.pid):[],labels=pids.map(pid=>({pid,command:execFileSync('ps',['-p',String(pid),'-o','comm='],{encoding:'utf8',timeout:1000}).trim()}));writeFileSync(marker,JSON.stringify({phase,actualReadyAccepted:true,pids,labels}));app.coordinator.cancel(job.binding.executionId);",
+  "oldOriginalOrdinarySpan": "const pid=handle?.pid;if(!pid)throw Error('CHILD_PID');const pids=phase==='ready-received-stop'?captureFacts.pids as number[]:descendantsOf(pid),labels=phase==='ready-received-stop'?captureFacts.labels as {pid:number;command:string}[]:pids.map(p=>({pid:p,command:execFileSync('ps',['-p',String(p),'-o','comm='],{encoding:'utf8',timeout:1000}).trim()}));",
+  "sharedStrictPreflightAddition": "Both buffers validate the same strict observer/expected child table and root liveness before their scoped algorithm. This is not asserted neutral for a whole old native run.",
+  "legacyAcquisition": "Unchanged production descendantsOf(childPid) default table then original per-PID ps comm/trim, no swallowed legacy query error",
+  "primaryRedOnly": "Old lookup for transient throws mocked ESRCH; same explicit complete-inventory assertion fails, not missing export/setup.",
+  "allOtherHelperBytesIdentical": true
+}

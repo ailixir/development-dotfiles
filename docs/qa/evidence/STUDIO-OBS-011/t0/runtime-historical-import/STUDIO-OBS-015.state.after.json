@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "kind": "full-sdc",
+  "storyId": "STUDIO-OBS-015",
+  "storyPath": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md",
+  "mode": "interactive",
+  "status": "completed",
+  "currentPhase": null,
+  "phases": {
+    "validate": {
+      "status": "passed",
+      "at": "2026-10-10T04:23:31.927Z",
+      "notes": null
+    },
+    "develop": {
+      "status": "skipped",
+      "at": "2026-10-19T02:49:42.971Z",
+      "notes": "Historical import at current timestamp. Story already QA Done. Develop verifier currently fails Done-before-close integrity; it is not marked passed. Existing development was completed before runtime reconciliation. Evidence: docs/qa/evidence/STUDIO-OBS-011/t0/po-historical-prep/audit.json. No prior verification invented."
+    },
+    "review": {
+      "status": "skipped",
+      "at": "2026-10-19T02:49:43.019Z",
+      "notes": "Historical independent Quinn CONCERNS and QA InReview-to-Done at story 0.1.21 imported. No new review or QA verdict. Reviewed source 9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884 differs from current later-story source. Existing QA provenance and historical limits retained. Evidence: po-historical-prep/audit.json."
+    },
+    "apply_qa_fixes": {
+      "status": "pending",
+      "at": null,
+      "notes": null
+    },
+    "close": {
+      "status": "skipped",
+      "at": "2026-10-19T02:49:43.061Z",
+      "notes": "Historical administrative transaction imported, not rerun. Existing .ai/STUDIO-OBS-015-close.json and exactly one story/index closure key verified; current story and all eight protected sections equal recorded post-close hashes. No new closure, source verification or lifecycle transition claimed. Evidence: docs/qa/evidence/STUDIO-OBS-011/t0/po-historical-prep/audit.json."
+    }
+  },
+  "qgIterations": 0,
+  "maxQgIterations": 3,
+  "createdAt": "2026-10-10T04:23:31.927Z",
+  "updatedAt": "2026-10-19T02:49:43.061Z"
+}

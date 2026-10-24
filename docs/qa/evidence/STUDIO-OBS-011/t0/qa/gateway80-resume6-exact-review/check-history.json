@@ -1,0 +1,35 @@
+{
+  "attempt01": {
+    "runner": "check_review.py",
+    "sha256": "d544736fc1e4768f1d8c2719288863a1ec61fdcc782c5dfdfdaa31b939c213d7",
+    "actualExit": 1,
+    "toolChunk": "57cb24",
+    "boundary121Passed": true,
+    "failure": "Reviewer omitted resource/shlex/signal/xml.etree.ElementTree standard-library preload before strict audit; denied import read, no target operation.",
+    "protectedRuntimeBaselineOrNativeActions": 0
+  },
+  "correction": "Preload only required standard library imports before UNCHANGED deny audit; remaining70+24+33+85 replay, boundary121 carried from actual preceding completion. No original source mutation.",
+  "attempt02": {
+    "runner": "check_review_retry.py",
+    "sha256": "d77b229556094a2e61d2fd9250eeb69d521dc201e873091067875516ed412e40",
+    "launchTool": "cd71f1",
+    "completionTool": "a2572a",
+    "actualExit": 0,
+    "remainingSuites": {
+      "revision": 70,
+      "report": 24,
+      "admission": 33,
+      "revision06": 85
+    },
+    "boundary121": "Prior actual0 completion within attempt01, carried without repeating its full suite",
+    "sourceChecks": 356,
+    "independentAdverseCases": 12,
+    "denyAuditUnchanged": true,
+    "deniedAuditCalls": []
+  },
+  "additional": {
+    "tool": "51b1ea",
+    "actualExit": 0,
+    "count": 109
+  }
+}

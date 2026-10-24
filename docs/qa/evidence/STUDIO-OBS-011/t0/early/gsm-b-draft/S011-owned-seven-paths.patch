@@ -1,0 +1,2063 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java
+@@ -128,63 +128,12 @@
+   private ObjectNode result(
+       GuidedSessionRepository.Session current, PublicationContracts.Receipt receipt) {
+     JsonNode session = current.document();
+-    String id = text(session, "sessionId"), state = text(session, "state");
+-    ObjectNode result =
+-        contracts
+-            .object()
+-            .put("schemaVersion", 3)
+-            .put("sessionId", id)
+-            .put("executionId", id)
+-            .put("scopeHash", text(session, "scopeHash"))
+-            .put("mode", "guided")
+-            .put("outcome", state)
+-            .put("learnedFromThisRun", receipt != null)
+-            .put("replayVerified", false)
+-            .put("scheduleActivated", false);
+-    boolean completed =
+-        current.progress().path("stepIndex").asInt(-1) == session.path("sourceSteps").size()
+-            && sessions.effectiveActions(id).stream()
+-                .allMatch(a -> a.path("state").asText().equals("SUCCEEDED"));
+-    result.put("assertionsPassed", completed);
+-    // Learned-from-execution evidence: the guided run's own recording. It never sets
+-    // replayVerified and is never conflated with replay evidence.
+-    ObjectNode boundary = sessions.incremental().relearnedFrom(id);
+-    if (boundary == null) {
+-      result.putNull("relearnedFrom");
+-    } else {
+-      result.set("relearnedFrom", boundary);
+-    }
+-    evidence.project(id, state).writeTo(result, id);
+-    // P2/P3: one shared projection of this session's own facts; it never reads the current head.
+-    result.set("progress", presentation.progress(current));
+-    result.set("explanation", presentation.explanation(current));
+-    if (current.progress().path("errorCode").isTextual()) {
+-      result.set("errorCode", current.progress().path("errorCode"));
+-    } else {
+-      result.putNull("errorCode");
+-    }
+-    if (current.progress().path("errorCode").asText().equals("LOGIN_REQUIRED")) {
+-      result.set("detail", current.progress().path("detail"));
+-      result
+-          .putObject("failure")
+-          .put("code", "LOGIN_REQUIRED")
+-          .set("detail", current.progress().path("detail"));
+-    }
+-    ObjectNode publication = result.putObject("publication"),
+-        ready = result.putObject("currentReadiness");
+-    if (receipt == null) {
+-      publication
+-          .put(
+-              "status",
+-              state.equals("PUBLICATION_CONFLICT")
+-                  ? "CONFLICT"
+-                  : java.util.Set.of("FAILED", "CANCELLED", "EXPIRED", "UNKNOWN_OUTCOME")
+-                          .contains(state)
+-                      ? "REFUSED"
+-                      : "PENDING")
+-          .putNull("receipt");
+-      ready.putNull("revisionId").put("ready", false).put("code", "NOT_PUBLISHED");
+-    } else {
++    String id = text(session, "sessionId");
++    ObjectNode result = guided.projectResult(current, true, evidence, presentation);
++    result.put("learnedFromThisRun", receipt != null);
++    ObjectNode publication = (ObjectNode) result.path("publication"),
++        ready = (ObjectNode) result.path("currentReadiness");
++    if (receipt != null) {
+       JsonNode proof = receipt.document();
+       publication.put("status", "PUBLISHED").set("receipt", proof.path("publicReceipt"));
+       UUID revisionId = UUID.fromString(text(proof, "revisionId")),
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java
+@@ -71,7 +71,9 @@
+       }
+     }
+     JsonNode result = service.read(user, id, "result");
+-    return ResponseEntity.status(result.has("outcome") ? 200 : 202).body(result);
++    return ResponseEntity.status(
++            GuidedSessionService.terminalOutcome(result.path("outcome").asText()) ? 200 : 202)
++        .body(result);
+   }
+ 
+   @GetMapping("/{id}/clarification")
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -32,11 +32,22 @@
+   private static final Set<String> TEARDOWNS_IN_FLIGHT =
+       java.util.concurrent.ConcurrentHashMap.newKeySet();
+ 
++  /** Reservations cover queued and running attempts, so a redrive cannot queue an id twice. */
++  private static final Set<String> TEARDOWNS_QUEUED =
++      java.util.concurrent.ConcurrentHashMap.newKeySet();
++
++  private static final java.time.Duration TEARDOWN_SHED_WARN_INTERVAL =
++      java.time.Duration.ofMinutes(15);
++  private final java.util.concurrent.atomic.AtomicLong shedTeardowns =
++      new java.util.concurrent.atomic.AtomicLong();
++  private final java.util.concurrent.atomic.AtomicReference<Instant> nextShedReport =
++      new java.util.concurrent.atomic.AtomicReference<>(Instant.MIN);
++
+   /**
+    * STUDIO-OBS-015 H8: blocking stop sends (up to 15 s each) never run on the common pool. A full
+    * queue discards the attempt; the durable request stays for the reaper's re-drive.
+    */
+-  private final java.util.concurrent.ThreadPoolExecutor teardowns = teardownExecutor();
++  private java.util.concurrent.ThreadPoolExecutor teardowns = teardownExecutor();
+ 
+   /** STUDIO-OBS-015 aria-warn-ruling01: earliest instant of the next past-window count. */
+   private final java.util.concurrent.atomic.AtomicReference<Instant> nextAbandonedReport =
+@@ -63,6 +74,23 @@
+   private java.util.function.BiConsumer<ObjectNode, String> stopSender;
+   private PublicationLifecycle publication;
+   private java.util.function.BooleanSupplier executionEnabled = () -> true;
++  private record PublicationProjectionPolicy(
++      java.util.function.BooleanSupplier enabled,
++      java.util.function.Predicate<String> baseExists) {}
++
++  private volatile PublicationProjectionPolicy publicationProjectionPolicy =
++      new PublicationProjectionPolicy(() -> true, id -> false);
++
++  /** Installs both existing publication facts together; manual compositions keep enabled=true. */
++  @org.springframework.beans.factory.annotation.Autowired(required = false)
++  void installPublicationProperties(
++      com.citi.put.checks.studio.guided.publication.GuidedPublicationProperties configured,
++      com.citi.put.checks.studio.guided.publication.GuidedPublicationBaseRepository bases) {
++    var properties = java.util.Objects.requireNonNull(configured);
++    var repository = java.util.Objects.requireNonNull(bases);
++    publicationProjectionPolicy =
++        new PublicationProjectionPolicy(properties::enabled, id -> repository.find(id).isPresent());
++  }
+ 
+   public void installExecutionEnabled(java.util.function.BooleanSupplier enabled) {
+     this.executionEnabled = enabled;
+@@ -158,6 +186,10 @@
+     require(translation == null, "RUNTIME_INCOMPATIBLE", 409);
+     translation = store;
+     questions = contexts;
++  }
++
++  private void requireTranslation(String id) {
++    require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
+   }
+ 
+   /** Fresh authorization/identity checks even when another command has a cached response. */
+@@ -174,7 +206,7 @@
+           owner(controller, "backend-controller", session, fence);
+           active(session);
+           access.checkSourceCurrent(session.document());
+-          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
++          requireTranslation(id);
+           return operation.apply(session);
+         });
+   }
+@@ -188,7 +220,7 @@
+           access.checkCurrent(session.document());
+           require(
+               session.document().path("owner").path("fence").asLong() == fence, "STALE_FENCE", 409);
+-          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
++          requireTranslation(id);
+           return reconcileLateModelUsageLocked(session);
+         });
+   }
+@@ -333,6 +365,7 @@
+         id,
+         fence,
+         session -> {
++          requireTranslation(id);
+           require(
+               (state(session).equals("PROPOSING") || state(session).equals("REPLAYING_PREFIX"))
+                   && !session.progress().has("sideEffectConfirmation")
+@@ -367,9 +400,7 @@
+             require(prefixRequestDigest == null, "INVALID_CONTRACT", 422);
+           }
+           session.document().put("state", "AWAITING_CLARIFICATION");
+-          if (translation != null && translation.exists(id)) {
+-            translation.continuation(id, prefix ? "REPLAYING_PREFIX" : "AWAITING_CLARIFICATION");
+-          }
++          translation.continuation(id, prefix ? "REPLAYING_PREFIX" : "AWAITING_CLARIFICATION");
+           repository.save(session);
+           return question.deepCopy();
+         });
+@@ -402,7 +433,7 @@
+           access.checkCurrent(session.document());
+           owner(controller, "backend-controller", session, fence);
+           active(session);
+-          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
++          requireTranslation(id);
+           session.progress().put("errorCode", code);
+           stop(session, "FAILED");
+           return null;
+@@ -757,9 +788,6 @@
+           access.checkUser(user, session.document());
+           access.checkCurrent(session.document());
+           if (projection.equals("result")) {
+-            if (!terminal(session)) {
+-              return view(session);
+-            }
+             return result(session);
+           }
+           if (projection.equals("clarification")) {
+@@ -797,6 +825,7 @@
+         key,
+         request,
+         session -> {
++          requireTranslation(id);
+           active(session);
+           JsonNode question = session.progress().path("clarification");
+           boolean sourceQuestion = question.path("phase").asText().equals("source");
+@@ -843,10 +872,8 @@
+             session
+                 .document()
+                 .put("state", incremental.pending(id) ? "REPLAYING_PREFIX" : "OBSERVING");
+-            if (translation != null && translation.exists(id)) {
+-              translation.continuation(
+-                  id, incremental.pending(id) ? "REPLAYING_PREFIX" : "REFRESH");
+-            }
++            translation.continuation(
++                id, incremental.pending(id) ? "REPLAYING_PREFIX" : "REFRESH");
+             repository.save(session);
+             return view(session);
+           }
+@@ -877,10 +904,8 @@
+               "configurationRevision",
+               session.document().path("scope").path("configurationRevision"));
+           answer.put("resolvedAt", clock.instant().toString());
+-          if (translation != null && translation.exists(id)) {
+-            questions.accept(session.document(), questionId, request.path("choiceId").asText());
+-            translation.continuation(id, sourceQuestion ? "SOURCE_PLAN" : "REFRESH");
+-          }
++          questions.accept(session.document(), questionId, request.path("choiceId").asText());
++          translation.continuation(id, sourceQuestion ? "SOURCE_PLAN" : "REFRESH");
+           answers.set(questionId, answer);
+           session.progress().remove("clarification");
+           session.document().put("state", sourceQuestion ? "PREPARING" : "OBSERVING");
+@@ -1286,6 +1311,7 @@
+         key,
+         proposal,
+         session -> {
++          requireTranslation(id);
+           require(
+               Set.of("PROPOSING", "REPLAYING_PREFIX").contains(state(session)),
+               "STALE_GENERATION",
+@@ -1439,9 +1465,7 @@
+           operation.set("operation", proposal.path("operation"));
+           action.put("operationHash", GuidedContracts.hash(operation));
+           repository.insertAction(action, proposal);
+-          if (translation != null && translation.exists(id)) {
+-            translation.attachAdmission(id, key, action);
+-          }
++          translation.attachAdmission(id, key, action);
+           preparations.attach(action);
+           bindings.attachConsumer(session.document(), proposal, action);
+           if (publication != null) {
+@@ -1636,7 +1660,7 @@
+     }
+     Instant now = clock.instant();
+     for (String id : repository.pendingTeardowns(now, window, batch)) {
+-      if (TEARDOWNS_IN_FLIGHT.contains(id)) {
++      if (TEARDOWNS_IN_FLIGHT.contains(id) || TEARDOWNS_QUEUED.contains(id)) {
+         continue;
+       }
+       JsonNode request = repository.transaction(() -> repository.teardownRequest(id));
+@@ -1647,7 +1671,7 @@
+       }
+       ObjectNode target = (ObjectNode) request.path("target");
+       String reason = request.path("reason").asText();
+-      teardowns.execute(() -> teardownAttempt(id, target, reason));
++      queueTeardown(id, target, reason);
+     }
+   }
+ 
+@@ -1694,40 +1718,6 @@
+             stop(session, "UNKNOWN_OUTCOME");
+           }
+           return null;
+-        });
+-  }
+-
+-  /** Opaque evidence-store identifiers only; the authorized evidence service resolves them. */
+-  public JsonNode recordEvidence(
+-      Authentication worker,
+-      String id,
+-      long fence,
+-      String key,
+-      String evidenceId,
+-      String reference) {
+-    require(
+-        evidenceId != null
+-            && evidenceId.matches("[A-Za-z0-9_-]{1,256}")
+-            && reference != null
+-            && reference.matches("[A-Za-z0-9_-]{1,256}"),
+-        "INVALID_CONTRACT",
+-        422);
+-    ObjectNode request =
+-        contracts.object().put("evidenceId", evidenceId).put("reference", reference);
+-    return internal(
+-        worker,
+-        "owning-worker",
+-        id,
+-        fence,
+-        "evidence",
+-        key,
+-        request,
+-        session -> {
+-          repository.evidence(
+-              id, session.document().path("scopeHash").asText(), evidenceId, reference);
+-          session.progress().put("evidenceRef", reference);
+-          repository.save(session);
+-          return request;
+         });
+   }
+ 
+@@ -1995,6 +1985,7 @@
+         key,
+         request,
+         session -> {
++          requireTranslation(id);
+           materialization.verify(session.document(), request);
+           access.checkSourceCurrent(session.document());
+           require(
+@@ -2010,21 +2001,19 @@
+                   && GuidedContracts.hash(evidence).equals(request.path("evidenceHash").asText()),
+               "INVALID_CONTRACT",
+               422);
+-          if (translation != null && translation.exists(id)) {
+-            ObjectNode receipt = contracts.object();
+-            for (String field :
+-                List.of(
+-                    "contextId",
+-                    "contextRevision",
+-                    "sourceRevision",
+-                    "configurationRevision",
+-                    "scopeHash",
+-                    "workerId",
+-                    "ownerFence")) {
+-              receipt.set(field, request.path(field));
+-            }
+-            session.progress().set("translationBootstrapEvidence", receipt);
+-          }
++          ObjectNode receipt = contracts.object();
++          for (String field :
++              List.of(
++                  "contextId",
++                  "contextRevision",
++                  "sourceRevision",
++                  "configurationRevision",
++                  "scopeHash",
++                  "workerId",
++                  "ownerFence")) {
++            receipt.set(field, request.path(field));
++          }
++          session.progress().set("translationBootstrapEvidence", receipt);
+           session.progress().set("executionEvidence", evidence);
+           session.progress().set("evidenceHash", request.path("evidenceHash"));
+           session.progress().set("documentId", evidence.path("documentId"));
+@@ -2703,7 +2692,7 @@
+                   @Override
+                   public void afterCompletion(int status) {
+                     if (status == STATUS_COMMITTED) {
+-                      teardowns.execute(() -> teardownAttempt(sessionId, sent, reason));
++                      queueTeardown(sessionId, sent, reason);
+                     }
+                   }
+                 });
+@@ -2791,7 +2780,54 @@
+     return TEARDOWNS_IN_FLIGHT.contains(id);
+   }
+ 
+-  private static java.util.concurrent.ThreadPoolExecutor teardownExecutor() {
++  /** Test seam: replace an unused executor without changing production pool or queue sizes. */
++  void installTeardownExecutor(java.util.concurrent.ThreadPoolExecutor executor) {
++    require(
++        executor != null && !executor.isShutdown() && teardowns.getTaskCount() == 0,
++        "RUNTIME_INCOMPATIBLE",
++        409);
++    executor.setRejectedExecutionHandler(this::teardownRejected);
++    var previous = teardowns;
++    teardowns = executor;
++    previous.shutdown();
++  }
++
++  /** A reservation stays held through the attempt; rejected attempts release it for the next tick. */
++  private void queueTeardown(String id, ObjectNode target, String reason) {
++    if (!TEARDOWNS_QUEUED.add(id)) {
++      return;
++    }
++    if (TEARDOWNS_IN_FLIGHT.contains(id)) {
++      TEARDOWNS_QUEUED.remove(id);
++      return;
++    }
++    try {
++      teardowns.execute(
++          () -> {
++            try {
++              teardownAttempt(id, target, reason);
++            } finally {
++              TEARDOWNS_QUEUED.remove(id);
++            }
++          });
++    } catch (java.util.concurrent.RejectedExecutionException rejected) {
++      // The rejection handler recorded the shed. Only the volatile reservation is removed.
++      TEARDOWNS_QUEUED.remove(id);
++    }
++  }
++
++  private void teardownRejected(
++      Runnable attempt, java.util.concurrent.ThreadPoolExecutor executor) {
++    shedTeardowns.incrementAndGet();
++    Instant now = clock.instant();
++    Instant due = nextShedReport.get();
++    if (!now.isBefore(due) && nextShedReport.compareAndSet(due, now.plus(TEARDOWN_SHED_WARN_INTERVAL))) {
++      LOG.warn("Guided teardown executor shed: {} attempt(s)", shedTeardowns.getAndSet(0));
++    }
++    throw new java.util.concurrent.RejectedExecutionException("Guided teardown executor saturated");
++  }
++
++  private java.util.concurrent.ThreadPoolExecutor teardownExecutor() {
+     var executor =
+         new java.util.concurrent.ThreadPoolExecutor(
+             2,
+@@ -2804,7 +2840,7 @@
+               thread.setDaemon(true);
+               return thread;
+             },
+-            new java.util.concurrent.ThreadPoolExecutor.DiscardPolicy());
++            this::teardownRejected);
+     executor.allowCoreThreadTimeOut(true);
+     return executor;
+   }
+@@ -2857,8 +2893,12 @@
+     return s.document().path("state").asText();
+   }
+ 
++  static boolean terminalOutcome(String outcome) {
++    return TERMINAL.contains(outcome);
++  }
++
+   private static boolean terminal(GuidedSessionRepository.Session s) {
+-    return TERMINAL.contains(state(s));
++    return terminalOutcome(state(s));
+   }
+ 
+   private ObjectNode view(GuidedSessionRepository.Session current) {
+@@ -2879,6 +2919,19 @@
+   }
+ 
+   private ObjectNode result(GuidedSessionRepository.Session session) {
++    return projectResult(session, false, evidence, presentation());
++  }
++
++  /**
++   * One result projection under the caller's session lock, after its authority check. The base flag
++   * preserves the existing receipt-path defaults; it never grants read or publication authority.
++   * Evidence and presentation are the caller's installed projections, not reconstructed literals.
++   */
++  public ObjectNode projectResult(
++      GuidedSessionRepository.Session session,
++      boolean publicationBase,
++      com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection installedEvidence,
++      GuidedPublicPresentationProjector installedPresentation) {
+     String id = session.document().path("sessionId").asText(), state = state(session);
+     ObjectNode out =
+         contracts
+@@ -2888,41 +2941,58 @@
+             .put("executionId", id)
+             .put("scopeHash", session.document().path("scopeHash").asText())
+             .put("mode", "guided")
+-            .put("outcome", state)
+-            .put(
+-                "assertionsPassed",
+-                session.progress().path("stepIndex").asInt()
+-                        == session.document().path("sourceSteps").size()
+-                    && repository.effectiveActions(id).stream()
+-                        .allMatch(a -> a.path("state").asText().equals("SUCCEEDED")))
+-            .put("learnedFromThisRun", false)
+-            .put("replayVerified", false)
+-            .put("scheduleActivated", false);
++            .put("outcome", state);
++    boolean completed =
++        session.progress().path("stepIndex").asInt(publicationBase ? -1 : 0)
++                == session.document().path("sourceSteps").size()
++            && repository.effectiveActions(id).stream()
++                .allMatch(a -> a.path("state").asText().equals("SUCCEEDED"));
++    // Preserve each existing path's JSON member order as well as its values.
++    if (!publicationBase) {
++      out.put("assertionsPassed", completed);
++    }
++    out.put("learnedFromThisRun", false)
++        .put("replayVerified", false)
++        .put("scheduleActivated", false);
++    if (publicationBase) {
++      out.put("assertionsPassed", completed);
++    }
+     ObjectNode boundary = incremental.relearnedFrom(id);
+     if (boundary == null) {
+       out.putNull("relearnedFrom");
+     } else {
+       out.set("relearnedFrom", boundary);
+     }
+-    out.putObject("publication")
+-        .put(
++    var publicationPolicy = publicationProjectionPolicy;
++    ObjectNode publicationProjection = contracts.object();
++    publicationProjection.put(
+             "status",
+             state.equals("PUBLICATION_CONFLICT")
+                 ? "CONFLICT"
+                 : Set.of("FAILED", "CANCELLED", "EXPIRED", "UNKNOWN_OUTCOME").contains(state)
++                        || (!publicationBase
++                            && !publicationPolicy.enabled().getAsBoolean()
++                            && state.equals("SUCCEEDED")
++                            && !publicationPolicy.baseExists().test(id))
+                     ? "REFUSED"
+                     : "PENDING")
+         .putNull("receipt");
+-    out.putObject("currentReadiness")
+-        .putNull("revisionId")
++    ObjectNode readinessProjection = contracts.object();
++    readinessProjection.putNull("revisionId")
+         .put("ready", false)
+         .put("code", "NOT_PUBLISHED");
++    if (!publicationBase) {
++      out.set("publication", publicationProjection);
++      out.set("currentReadiness", readinessProjection);
++    }
+     // Learned-from-execution evidence (STUDIO-OBS-013): actionTimings + evidence.video.
+-    evidence.project(id, state).writeTo(out, id);
++    installedEvidence.project(id, state).writeTo(out, id);
+     // STUDIO-OBS-008 P2/P3: the same projection the receipt-backed result publishes.
+-    out.set("progress", presentation().progress(session));
+-    out.set("explanation", presentation().explanation(session));
+-    if (session.progress().has("errorCode")) {
++    out.set("progress", installedPresentation.progress(session));
++    out.set("explanation", installedPresentation.explanation(session));
++    if (publicationBase
++        ? session.progress().path("errorCode").isTextual()
++        : session.progress().has("errorCode")) {
+       out.set("errorCode", session.progress().path("errorCode"));
+     } else {
+       out.putNull("errorCode");
+@@ -2933,6 +3003,10 @@
+           .put("code", "LOGIN_REQUIRED")
+           .set("detail", session.progress().path("detail"));
+     }
++    if (publicationBase) {
++      out.set("publication", publicationProjection);
++      out.set("currentReadiness", readinessProjection);
++    }
+     contracts.validate("v3/result", out);
+     return out;
+   }
+--- /dev/null
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedAdmissionWithoutTranslationIT.java
+@@ -0,0 +1,390 @@
++package com.citi.put.checks.studio.guided.session;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.assertj.core.api.Assertions.catchThrowable;
++import static org.mockito.ArgumentMatchers.any;
++import static org.mockito.Mockito.never;
++import static org.mockito.Mockito.spy;
++import static org.mockito.Mockito.verify;
++
++import com.citi.put.checks.security.BffAuthenticationToken;
++import com.citi.put.checks.security.CsiOwnershipEntry;
++import com.citi.put.checks.security.CsiOwnershipEvaluator;
++import com.citi.put.checks.security.UserIdentity;
++import com.citi.put.checks.studio.guided.bridge.GuidedAssignmentStore;
++import com.citi.put.checks.studio.guided.bridge.GuidedBindingStore;
++import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
++import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
++import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
++import com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore;
++import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
++import com.fasterxml.jackson.databind.JsonNode;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.fasterxml.jackson.databind.node.ObjectNode;
++import java.time.Clock;
++import java.time.Instant;
++import java.time.ZoneOffset;
++import java.util.LinkedHashMap;
++import java.util.List;
++import java.util.Map;
++import java.util.UUID;
++import java.util.function.Consumer;
++import org.flywaydb.core.Flyway;
++import org.junit.jupiter.api.AfterAll;
++import org.junit.jupiter.api.BeforeAll;
++import org.junit.jupiter.api.Test;
++import org.springframework.jdbc.core.JdbcTemplate;
++import org.springframework.jdbc.datasource.DataSourceTransactionManager;
++import org.springframework.jdbc.datasource.DriverManagerDataSource;
++import org.springframework.security.core.Authentication;
++import org.springframework.transaction.support.TransactionSynchronizationManager;
++import org.springframework.transaction.support.TransactionTemplate;
++import org.testcontainers.containers.PostgreSQLContainer;
++
++/**
++ * Real PostgreSQL negative-only compositions. No plan, obligation, manifest, admission or
++ * translation-state fixture is inserted. Both a missing installed store and an installed store
++ * with no state are tested. These probes never become positive planner or browser evidence.
++ */
++class GuidedAdmissionWithoutTranslationIT {
++  private static final PostgreSQLContainer<?> POSTGRES =
++      new PostgreSQLContainer<>("postgres:15-alpine");
++  private static final Instant NOW = Instant.parse("2026-10-08T03:00:00Z");
++  private static JsonNode documents;
++  private static final String[] TABLES = {
++    "studio_guided_actions", "studio_guided_obligation_admissions",
++    "studio_guided_preparations", "studio_guided_translation_plans",
++    "studio_guided_translation_state", "studio_guided_source_manifests",
++    "studio_guided_model_attempts", "studio_guided_clarification_contexts",
++    "studio_guided_materializations", "studio_guided_materialization_deliveries",
++    "studio_guided_sessions"
++  };
++
++  @BeforeAll
++  static void database() throws Exception {
++    POSTGRES.start();
++    try (var input = GuidedAdmissionWithoutTranslationIT.class.getResourceAsStream(
++        "/studio/guided/session-it-documents.json")) {
++      documents = new ObjectMapper().readTree(input).path("documents");
++    }
++  }
++
++  @AfterAll
++  static void close() {
++    POSTGRES.stop();
++  }
++
++  @Test
++  void sideEffectConfirmationWithoutTranslationIsAlreadyRefusedByWrapper() {
++    eachComposition(f -> {
++      f.observe();
++      ObjectNode question = f.question(true);
++      f.refuses("side-effect-wrapper-control", () ->
++          f.service.sideEffectConfirmation(f.controller, f.id, 1, question));
++    });
++  }
++
++  @Test
++  void clarifyConfirmationWithoutTranslationRefusesBeforeRefreshContinuation() {
++    eachComposition(f -> {
++      f.observe();
++      ObjectNode question = f.question(true);
++      f.service.clarification(f.controller, f.id, 1, "ask-confirmation", question);
++      // The legacy non-production SPI cannot create this confirmation through the guarded
++      // translation wrapper. This negative-only progress fixture supplies no executable authority:
++      // the actual session, question, owner, materialization and command gates remain real.
++      f.repository.transaction(() -> {
++        var current = f.repository.lock(f.id);
++        assertThat(current.progress().path("clarification")).isEqualTo(question);
++        current.progress().putObject("sideEffectConfirmation")
++            .put("clarificationId", question.path("clarificationId").asText())
++            .put("status", "PENDING");
++        f.repository.save(current);
++        return null;
++      });
++      f.refuses("clarify-confirmation", () ->
++          f.service.clarify(f.user, f.id, "answer-confirmation", f.answer()));
++    });
++  }
++
++  @Test
++  void clarifyChoiceWithoutTranslationRefusesBeforeAnswerContinuation() {
++    eachComposition(f -> {
++      f.observe();
++      f.service.clarification(f.controller, f.id, 1, "ask-choice", f.question(false));
++      f.refuses("clarify-choice", () ->
++          f.service.clarify(f.user, f.id, "answer-choice", f.answer()));
++    });
++  }
++
++  @Test
++  void admissionWithoutTranslationRefusesBeforeAnyActionAuthorizationOrWrite() {
++    eachComposition(f -> {
++      f.observe();
++      ObjectNode proposal = f.proposal();
++      ObjectNode proof = f.materialization.identity(f.context());
++      proof.put("preparationId", UUID.randomUUID().toString())
++          .put("requestDigest", GuidedContracts.hash(proposal))
++          .put("evidenceHash", proposal.path("evidenceHash").asText())
++          .put("authoredInputsHash", proposal.path("authoredInputsHash").asText())
++          .put("expiresAt", NOW.plusSeconds(20).toString());
++      // Existing authenticated preparation seam; never store-level planner/obligation seeding.
++      f.service.storePreparation(f.controller, f.id, 1, proposal, proof);
++      assertThat(f.count("studio_guided_preparations")).isEqualTo(1);
++      f.refuses("admission", () ->
++          f.service.admit(f.controller, f.id, 1, "admit-negative-probe", proposal));
++    });
++  }
++
++  @Test
++  void bootstrapWithoutTranslationRefusesBeforeEvidenceReceiptOrStateWrite() {
++    eachComposition(f -> {
++      ObjectNode context = f.context();
++      ObjectNode request = f.materialization.identity(context);
++      ObjectNode evidence = f.contracts.object().put("kind", "initialBlank")
++          .put("sessionId", f.id).put("contextId", context.path("contextId").asText())
++          .put("creationId", UUID.randomUUID().toString()).put("documentId", "blank-document")
++          .put("bootstrapId", UUID.randomUUID().toString()).put("url", "about:blank")
++          .putNull("origin").put("generation", 0);
++      request.set("executionEvidence", evidence);
++      request.put("evidenceHash", GuidedContracts.hash(evidence));
++      f.contracts.validate("v3/bridge#/definitions/bootstrap", request);
++      f.refuses("bootstrap", () -> f.service.bootstrap(f.worker, f.id, 1, "bootstrap", request));
++    });
++  }
++
++  private static void eachComposition(Consumer<Fixture> assertion) {
++    for (boolean installEmptyStore : List.of(false, true)) {
++      assertion.accept(new Fixture(installEmptyStore));
++    }
++  }
++
++  private static final class Fixture {
++    private final GuidedContracts contracts = new GuidedContracts();
++    private final Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
++    private final Authentication user = new BffAuthenticationToken(new UserIdentity(
++        "user-1", "fixture@example.test", "Fixture", "Test", List.of(),
++        List.of(new CsiOwnershipEntry("CSI-123", "owner"))));
++    private final Authentication worker =
++        new GuidedInternalSecurity.Identity("worker-1", "owning-worker");
++    private final Authentication controller =
++        new GuidedInternalSecurity.Identity("controller-1", "backend-controller");
++    private final JdbcTemplate jdbc;
++    private final GuidedSessionRepository repository;
++    private final NegativeAccess access;
++    private final GuidedSessionService service;
++    private final GuidedMaterializationService materialization;
++    private final GuidedPreparationStore preparations;
++    private final GuidedBindingStore bindings;
++    private final String id;
++    private final boolean installEmptyStore;
++
++    Fixture(boolean installEmptyStore) {
++      this.installEmptyStore = installEmptyStore;
++      String database = "no_translation_" + UUID.randomUUID().toString().replace("-", "");
++      var admin = new DriverManagerDataSource(
++          POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
++      new JdbcTemplate(admin).execute("CREATE DATABASE " + database);
++      var source = new DriverManagerDataSource(
++          POSTGRES.getJdbcUrl().replace(POSTGRES.getDatabaseName(), database),
++          POSTGRES.getUsername(), POSTGRES.getPassword());
++      Flyway.configure().dataSource(source).target("22").load().migrate();
++      jdbc = new JdbcTemplate(source);
++      repository = new GuidedSessionRepository(jdbc,
++          new TransactionTemplate(new DataSourceTransactionManager(source)), contracts);
++      access = spy(new NegativeAccess());
++      service = new GuidedSessionService(repository, contracts, access,
++          new GuidedSessionProperties(true, Map.of()), clock);
++      service.installPresentation(new GuidedPublicPresentationProjector(jdbc, contracts));
++      materialization = new GuidedMaterializationService(jdbc, contracts);
++      preparations = spy(new GuidedPreparationStore(jdbc, contracts));
++      bindings = spy(new GuidedBindingStore(jdbc, contracts, materialization));
++      service.installBridge(materialization, preparations, bindings,
++          new GuidedAssignmentStore(jdbc, contracts));
++      if (installEmptyStore) {
++        service.installTranslation(new GuidedTranslationStore(jdbc, contracts),
++            new GuidedClarificationContextStore(jdbc, contracts));
++      }
++      com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
++          service, jdbc, "CSI-123", "orders", List.of("fixture"),
++          List.of("https://orders.example.test"), null);
++      ObjectNode start = contracts.object().put("schemaVersion", 3).put("testId", "test-1")
++          .put("sourceRevision", "1").put("configurationRevision", "1")
++          .put("environmentId", "fixture").put("applicationId", "orders");
++      start.set("versions", versions());
++      id = service.start(user, "start", start).path("sessionId").asText();
++      ObjectNode intent = service.prepareAssignment(controller, id, "assign", "worker-1");
++      ObjectNode claim = contracts.object().put("schemaVersion", 3).put("sessionId", id)
++          .put("workerId", "worker-1").put("expectedFence", 0);
++      claim.set("versions", versions());
++      JsonNode owned = service.claim(worker, id, "claim", claim);
++      ObjectNode receipt = contracts.object().put("schemaVersion", 3).put("status", "OWNED")
++          .put("ownerFence", 1)
++          .put("leaseExpiresAt", owned.path("owner").path("leaseExpiresAt").asText());
++      receipt.set("assignment", intent);
++      service.acknowledgeAssignment(controller, id, receipt);
++      service.materialize(controller, id, 1, "materialize", new ObjectMapper().createArrayNode());
++      // First materialization is revision1: V21 creates pending delivery only for revision>1.
++      assertThat(context().path("contextRevision").asInt()).isEqualTo(1);
++      assertThat(materialization.pendingDeliveryId(id)).isNull();
++      for (String table : List.of("studio_guided_translation_state", "studio_guided_source_manifests",
++          "studio_guided_translation_plans", "studio_guided_obligation_admissions",
++          "studio_guided_actions", "studio_guided_preparations")) {
++        assertThat(count(table)).as("negative fixture has no planner authority: %s", table).isZero();
++      }
++      repository.transaction(() -> {
++        var current = repository.lock(id);
++        assertThat(current.document().path("owner").path("workerId").asText()).isEqualTo("worker-1");
++        assertThat(current.document().path("owner").path("fence").asInt()).isEqualTo(1);
++        assertThat(Instant.parse(current.document().path("owner").path("leaseExpiresAt").asText()))
++            .isAfter(NOW);
++        assertThat(current.document().path("state").asText()).isEqualTo("PREPARING");
++        return null;
++      });
++    }
++
++    private ObjectNode versions() {
++      return contracts.object().put("contract", 3);
++    }
++
++    private ObjectNode context() {
++      return repository.transaction(() -> materialization.context(repository.lock(id).document()));
++    }
++
++    private String scope() {
++      return repository.transaction(() -> repository.lock(id).document().path("scopeHash").asText());
++    }
++
++    private int count(String table) {
++      return jdbc.queryForObject("SELECT count(*) FROM " + table + " WHERE session_id=?", Integer.class, id);
++    }
++
++    private void observe() {
++      ObjectNode observation = documents.path("observation").deepCopy();
++      observation.put("sessionId", id).put("scopeHash", scope()).put("generation", 1);
++      service.observe(worker, id, 1, "observe", observation);
++      assertThat(repository.transaction(() -> repository.lock(id).document().path("state").asText()))
++          .isEqualTo("PROPOSING");
++    }
++
++    private ObjectNode question(boolean confirmation) {
++      ObjectNode question = documents.path("clarification").deepCopy();
++      question.put("sessionId", id).put("scopeHash", scope())
++          .put("expiresAt", NOW.plusSeconds(20).toString());
++      if (confirmation) {
++        question.put("reason", "SIDE_EFFECT_CONFIRMATION").put("promptCode", "CONFIRM_ACTION");
++      }
++      contracts.validate("v3/clarification", question);
++      return question;
++    }
++
++    private ObjectNode answer() {
++      return contracts.object().put("schemaVersion", 3).put("clarificationId", "question-1")
++          .put("choiceId", "choice-1").put("generation", 1);
++    }
++
++    private ObjectNode proposal() {
++      ObjectNode proposal = documents.path("action").deepCopy();
++      JsonNode progress = repository.transaction(() -> repository.lock(id).progress().deepCopy());
++      proposal.put("sessionId", id).put("scopeHash", scope()).put("generation", 1)
++          .put("evidenceHash", progress.path("evidenceHash").asText())
++          .put("authoredInputsHash", context().path("authoredInputsHash").asText())
++          .put("contextRevision", 1);
++      proposal.set("executionEvidence", progress.path("executionEvidence"));
++      proposal.remove("observationHash");
++      proposal.putObject("operation").put("kind", "click");
++      contracts.validate("action", proposal);
++      return proposal;
++    }
++
++    private Map<String, List<String>> rows() {
++      Map<String, List<String>> out = new LinkedHashMap<>();
++      var tables = new java.util.TreeSet<String>(List.of(TABLES));
++      tables.addAll(jdbc.queryForList(
++          "SELECT table_name FROM information_schema.columns WHERE table_schema='public'"
++              + " AND column_name='session_id' AND table_name LIKE 'studio_guided_%'", String.class));
++      for (String table : tables) {
++        assertThat(table).matches("studio_guided_[a-z_]+");
++        out.put(table, jdbc.queryForList(
++            "SELECT to_jsonb(t)::text FROM " + table + " t WHERE session_id=? ORDER BY 1", String.class, id));
++      }
++      out.put("studio_guided_commands", jdbc.queryForList(
++          "SELECT to_jsonb(t)::text FROM studio_guided_commands t WHERE namespace=? ORDER BY 1", String.class, id));
++      return out;
++    }
++
++    private void refuses(String site, java.util.function.Supplier<JsonNode> operation) {
++      assertThat(count("studio_guided_translation_state")).isZero();
++      Map<String, List<String>> before = rows();
++      JsonNode[] accepted = new JsonNode[1];
++      Throwable failure = catchThrowable(() -> accepted[0] = operation.get());
++      // A returned operation must fail the explicit 409 assertion. Once a correct refusal is
++      // observed, the SPI check separately catches admission guarding after authorization.
++      assertThat(failure).as("F1_EXPECT_409 %s emptyStore=%s accepted=%s returnedState=%s",
++              site, installEmptyStore, failure == null,
++              accepted[0] == null ? "NONE" : accepted[0].path("state").asText("ACCEPTED"))
++          .isInstanceOfSatisfying(GuidedSessionException.class, refusal -> {
++            assertThat(refusal.status()).isEqualTo(409);
++            assertThat(refusal.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
++            assertThat(refusal.messageCode()).isEqualTo("RUNTIME_INCOMPATIBLE");
++          });
++      verify(access, never()).authorizeAction(any(), any(), any());
++      verify(bindings, never()).validateAction(any(), any(), any());
++      verify(preparations, never()).authorize(any(), any(), any(), any());
++      assertThat(rows()).as("F1_ZERO_NEW_OR_CHANGED_ROWS %s", site).isEqualTo(before);
++      assertThat(count("studio_guided_actions")).isZero();
++      assertThat(count("studio_guided_obligation_admissions")).isZero();
++    }
++  }
++
++  /** Test-only existing SPI. It grants no planner, step-complete or translation authority. */
++  private static class NegativeAccess implements GuidedSessionAccess {
++    NegativeAccess() {}
++
++    @Override
++    public Snapshot resolve(Authentication principal, JsonNode start) {
++      assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
++      ObjectNode session = documents.path("session").deepCopy();
++      return new Snapshot((ObjectNode) session.path("scope"), session.path("sourceSteps"));
++    }
++
++    @Override
++    public GuidedSourceReferenceValidator.Sources sources(JsonNode session) {
++      checkSourceCurrent(session);
++      return new GuidedSourceReferenceValidator.Sources("1", "1", Map.of(), Map.of());
++    }
++
++    @Override
++    public void checkCurrent(JsonNode session) {
++      assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
++      GuidedSessionException.require(session.path("scope").path("csiId").asText().equals("CSI-123"),
++          "FORBIDDEN_SCOPE", 403);
++    }
++
++    @Override
++    public void checkSourceCurrent(JsonNode session) {
++      checkCurrent(session);
++      GuidedSessionException.require(
++          session.path("scope").path("sourceRevision").asText().equals("1")
++              && session.path("scope").path("configurationRevision").asText().equals("1"),
++          "REVISION_CONFLICT", 409);
++    }
++
++    @Override
++    public void checkUser(Authentication principal, JsonNode session) {
++      checkCurrent(session);
++      GuidedSessionException.require(
++          principal instanceof BffAuthenticationToken && principal.isAuthenticated()
++              && ((BffAuthenticationToken) principal).getPrincipal().userId()
++                  .equals(session.path("scope").path("principalId").asText())
++              && new CsiOwnershipEvaluator().canExecute(principal, "CSI-123"),
++          "FORBIDDEN_SCOPE", 403);
++    }
++
++    @Override
++    public String authorizeAction(JsonNode session, JsonNode proposal, JsonNode preparation) {
++      // Default production SPI calculation; no positive executable planner permit is fabricated.
++      return GuidedSessionAccess.super.authorizeAction(session, proposal, preparation);
++    }
++  }
++}
+--- /dev/null
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java
+@@ -0,0 +1,367 @@
++package com.citi.put.checks.studio.guided.session;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.assertj.core.api.Assertions.assertThatThrownBy;
++import static org.mockito.Mockito.clearInvocations;
++import static org.mockito.Mockito.doThrow;
++import static org.mockito.Mockito.never;
++import static org.mockito.Mockito.reset;
++import static org.mockito.Mockito.times;
++import static org.mockito.Mockito.verify;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
++
++import com.citi.put.checks.studio.StudioExecutionFixtures;
++import com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection;
++import com.citi.put.checks.studio.guided.publication.GuidedPublicationBaseRepository;
++import com.citi.put.checks.studio.guided.publication.GuidedPublicationProperties;
++import com.citi.put.checks.studio.guided.publication.GuidedPublicationRepository;
++import com.citi.put.checks.studio.guided.publication.ObservedReplayPins;
++import com.citi.put.checks.studio.support.ObservedPublicationFixture;
++import com.fasterxml.jackson.databind.JsonNode;
++import com.fasterxml.jackson.databind.node.ObjectNode;
++import java.time.Clock;
++import java.time.Instant;
++import jakarta.servlet.http.Cookie;
++import java.util.List;
++import java.util.UUID;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
++import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.boot.test.mock.mockito.SpyBean;
++import org.springframework.context.annotation.Import;
++import org.springframework.jdbc.core.JdbcTemplate;
++import org.springframework.security.core.Authentication;
++import org.springframework.test.context.ActiveProfiles;
++import org.springframework.test.context.DynamicPropertyRegistry;
++import org.springframework.test.context.DynamicPropertySource;
++import org.springframework.test.web.servlet.MockMvc;
++import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
++import org.springframework.test.web.servlet.setup.MockMvcBuilders;
++
++/**
++ * C-OBS008-1 / R-08-1e: the real disabled-publication start and HTTP result use one v3 shape.
++ * The SUCCEEDED fixture changes only durable state/progress to probe result projection; it does
++ * not claim a successful model or browser execution. No provider or runner is contacted.
++ */
++@SpringBootTest(properties = {
++    "studio.guided.publication.enabled=false",
++    "studio.guided-authoring.reaper-delay-ms=3600000"
++})
++@AutoConfigureMockMvc
++@ActiveProfiles("test")
++@Import(ObservedPublicationFixture.FreshAuthority.class)
++class GuidedResultPublicationDisabledIT {
++  private static final String CSI = "60496";
++  private static final String OWNER = "publication-disabled-owner@citi.com";
++  private static final String ROOT = "/api/v1/studio/guided-sessions";
++
++  @DynamicPropertySource
++  static void configuration(DynamicPropertyRegistry registry) {
++    ObservedPublicationFixture.register(registry);
++    registry.add("studio.guided-authoring.translation.applications",
++        () -> ObservedPublicationFixture.APPLICATION);
++    registry.add("studio.guided-authoring.translation.environments", () -> "Production");
++  }
++
++  @Autowired private MockMvc mvc;
++  @Autowired private GuidedContracts contracts;
++  @Autowired private JdbcTemplate jdbc;
++  @Autowired private GuidedSessionRepository repository;
++  @Autowired private GuidedSessionService sessions;
++  @Autowired private GuidedSessionAccess access;
++  @Autowired private GuidedSessionProperties sessionProperties;
++  @Autowired private GuidedPublicationProperties publicationProperties;
++  @SpyBean private GuidedPublicationBaseRepository bases;
++  @Autowired private GuidedPublicationRepository publications;
++  @Autowired private ObservedReplayPins pins;
++  @Autowired private GuidedPublicPresentationProjector presentation;
++  @Autowired private GuidedEvidenceProjection evidence;
++  private String id;
++  private Authentication owner;
++
++  @BeforeEach
++  void startWithPublicationDisabled() throws Exception {
++    assertThat(publicationProperties.enabled()).isFalse();
++    var fixtures = new StudioExecutionFixtures(jdbc);
++    fixtures.seedUser(OWNER);
++    fixtures.seedCsi(CSI, OWNER);
++    ObservedPublicationFixture.seedApprovedPolicies(jdbc, CSI);
++    owner = StudioExecutionFixtures.identity(OWNER, CSI, "owner");
++    UUID testId = fixtures.seedTest("Disabled publication " + UUID.randomUUID(), CSI, OWNER,
++        List.of("Open the home page"));
++    ObjectNode start = contracts.object().put("schemaVersion", 3).put("testId", testId.toString())
++        .put("sourceRevision", "1").put("configurationRevision", "1")
++        .put("applicationId", ObservedPublicationFixture.APPLICATION)
++        .put("environmentId", "Production");
++    start.putObject("versions").put("contract", 3);
++    JsonNode started = contracts.parse(mvc.perform(asOwner(post(ROOT))
++        .header("Idempotency-Key", UUID.randomUUID().toString())
++        .contentType("application/json").content(start.toString()))
++        .andExpect(status().isAccepted()).andReturn().getResponse().getContentAsString());
++    id = started.path("sessionId").asText();
++    assertThat(id).isNotBlank();
++    assertThat(bases.find(id)).as("the disabled start captured no publication base").isEmpty();
++  }
++
++  @Test
++  void nonTerminalHttpResultIsAcceptedAndConformsToV3Result() throws Exception {
++    for (String state : List.of("PREPARING", "FINALIZING")) {
++      state(state);
++      assertThat(bases.find(id)).as("nonterminal fallback has no actual base").isEmpty();
++      JsonNode result = result(202);
++      // The old PublicSession shortcut must fail this assertion before schema validation.
++      assertThat(result.path("outcome").asText()).isEqualTo(state);
++      contracts.validate("v3/result", result);
++      assertThat(result.has("state")).as("no bare PublicSession result body").isFalse();
++      assertThat(result.path("publication").path("status").asText()).isEqualTo("PENDING");
++      assertThat(result.path("publication").path("receipt").isNull()).isTrue();
++      assertNotPublished(result);
++      assertOwnProjections(result);
++      assertThat(sessions.read(owner, id, "result")).isEqualTo(result);
++    }
++  }
++
++  @Test
++  void terminalSucceededHttpResultRefusesPublicationInsteadOfSavingForever() throws Exception {
++    state("SUCCEEDED");
++    JsonNode result = result(200);
++    contracts.validate("v3/result", result);
++    assertThat(result.path("outcome").asText()).isEqualTo("SUCCEEDED");
++    assertThat(result.path("publication").path("status").asText()).isEqualTo("REFUSED");
++    assertThat(result.path("publication").path("receipt").isNull()).isTrue();
++    assertThat(result.path("learnedFromThisRun").asBoolean()).isFalse();
++    assertThat(result.path("replayVerified").asBoolean()).isFalse();
++    assertThat(result.path("scheduleActivated").asBoolean()).isFalse();
++    assertNotPublished(result);
++    assertOwnProjections(result);
++    assertThat(bases.find(id)).isEmpty();
++    assertThat(sessions.read(owner, id, "result")).isEqualTo(result);
++  }
++
++  @Test
++  void manualEnabledFallbackRetainsTerminalSucceededPendingAndHttp200() throws Exception {
++    state("SUCCEEDED");
++    // No Spring properties installer is called: this composition keeps the existing enabled
++    // default. It uses the real installed presentation and evidence, with the real repository.
++    var manual = new GuidedSessionService(repository, contracts, access, sessionProperties,
++        Clock.systemUTC());
++    manual.installPresentation(presentation);
++    manual.installEvidence(evidence);
++    MockMvc fallback = MockMvcBuilders.standaloneSetup(new GuidedSessionController(manual)).build();
++    JsonNode result = contracts.parse(fallback.perform(get(ROOT + "/" + id + "/result")
++        .principal(owner)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
++    contracts.validate("v3/result", result);
++    assertThat(result.path("outcome").asText()).isEqualTo("SUCCEEDED");
++    assertThat(result.path("publication").path("status").asText()).isEqualTo("PENDING");
++    assertNotPublished(result);
++    assertOwnProjections(result);
++  }
++
++  @Test
++  void disabledPublicationKeepsResultReadAuthorityChecks() throws Exception {
++    mvc.perform(get(ROOT + "/" + id + "/result")).andExpect(status().isUnauthorized());
++    mvc.perform(get(ROOT + "/" + id + "/result")
++        .header("X-User-Id", "another-owner@citi.com")
++        .header("X-User-Csi-Ownership", CSI + ":owner")).andExpect(status().isForbidden());
++    assertThat(bases.find(id)).isEmpty();
++  }
++
++  /** GSM-P5: receipt-path selection alone cannot establish actual publication-base absence. */
++  @Test
++  void disabledRetainedSucceededBaseKeepsDirectFallbackPendingAndHttp202() throws Exception {
++    captureBase();
++    state("SUCCEEDED");
++    assertThat(bases.find(id)).as("real retained publication base").isPresent();
++    assertThat(publications.receipt(id)).isEmpty();
++    JsonNode legacy = manualFallback().read(owner, id, "result");
++    assertThat(legacy.path("publication").path("status").asText()).isEqualTo("PENDING");
++    assertThat(legacy.path("publication").path("receipt").isNull()).isTrue();
++    assertNotPublished(legacy);
++    JsonNode direct = sessions.read(owner, id, "result");
++    assertThat(direct.toString()).as("original enabled-default fallback bytes over the same row")
++        .isEqualTo(legacy.toString());
++    JsonNode http = result(202);
++    contracts.validate("v3/result", http);
++    assertThat(http.path("outcome").asText()).isEqualTo("SUCCEEDED");
++    assertThat(http.path("publication").path("status").asText()).isEqualTo("PENDING");
++    assertThat(http.path("publication").path("receipt").isNull()).isTrue();
++    assertNotPublished(http);
++    assertOwnProjections(http);
++  }
++
++  /** Real fixture publication writers supply a valid receipt; no receipt or success is fabricated. */
++  @Test
++  void disabledRetainedReceiptKeepsHttpReceiptAuthorityAndCurrentHeadReadiness() throws Exception {
++    var fixtures = new StudioExecutionFixtures(jdbc);
++    UUID testId = fixtures.seedRunnableTest("Retained receipt " + UUID.randomUUID(), CSI, OWNER,
++        List.of("Go home")).testId();
++    UUID revision = new ObservedPublicationFixture(jdbc).publish(testId, List.of(), List.of());
++    id = jdbc.queryForObject("SELECT session_id FROM studio_guided_publications WHERE revision_id=?",
++        String.class, revision);
++    assertThat(bases.find(id)).isPresent();
++    var receipt = publications.receipt(id).orElseThrow().document().path("publicReceipt");
++    JsonNode legacy = manualFallback().read(owner, id, "result");
++    assertThat(sessions.read(owner, id, "result").toString()).isEqualTo(legacy.toString());
++    assertThat(legacy.path("publication").path("status").asText()).isEqualTo("PENDING");
++    assertThat(legacy.path("publication").path("receipt").isNull()).isTrue();
++    assertNotPublished(legacy);
++
++    // A cookie refresh is mandatory on the retained receipt path, even for the same header owner.
++    mvc.perform(asOwner(get(ROOT + "/" + id + "/result")))
++        .andExpect(status().isUnauthorized());
++    clearInvocations(bases);
++    JsonNode http = receiptResult();
++    // Preserve the original initial-base and readiness-base reads; no fallback exception lookup.
++    verify(bases, times(2)).find(id);
++    assertThat(http.path("publication").path("status").asText()).isEqualTo("PUBLISHED");
++    assertThat(http.path("publication").path("receipt")).isEqualTo(receipt);
++    assertThat(http.path("learnedFromThisRun").asBoolean()).isTrue();
++    assertThat(http.path("currentReadiness").path("revisionId").asText())
++        .isEqualTo(revision.toString());
++    assertThat(http.path("currentReadiness").path("code").asText()).isEqualTo("READY");
++    assertThat(http.path("currentReadiness").path("ready").asBoolean()).isTrue();
++    assertOwnProjections(http);
++    assertDeniedDirectBeforeBaseLookup();
++    mvc.perform(get(ROOT + "/" + id + "/result")).andExpect(status().isUnauthorized());
++    mvc.perform(get(ROOT + "/" + id + "/result")
++        .header("X-User-Id", "another-owner@citi.com")
++        .header("X-User-Csi-Ownership", CSI + ":owner")
++        .cookie(new Cookie("put_session", ObservedPublicationFixture.sessionCookie(owner))))
++        .andExpect(status().isForbidden());
++
++    // Historic receipt stays public truth when the current head changes; readiness alone changes.
++    assertThat(jdbc.update("UPDATE ui_tests SET confirmed_revision_id=NULL WHERE id=?", testId))
++        .isEqualTo(1);
++    JsonNode historical = receiptResult();
++    assertThat(historical.path("publication")).isEqualTo(http.path("publication"));
++    assertThat(historical.path("currentReadiness").path("revisionId").asText())
++        .isEqualTo(revision.toString());
++    assertThat(historical.path("currentReadiness").path("code").asText())
++        .isEqualTo("HEAD_CHANGED");
++    assertThat(historical.path("currentReadiness").path("ready").asBoolean()).isFalse();
++  }
++
++  @Test
++  void deniedDirectResultsCheckAuthorityBeforeBaseLookupWithAndWithoutBase() throws Exception {
++    state("SUCCEEDED");
++    assertThat(bases.find(id)).isEmpty();
++    assertDeniedDirectBeforeBaseLookup();
++    captureBase();
++    assertThat(bases.find(id)).isPresent();
++    assertDeniedDirectBeforeBaseLookup();
++    mvc.perform(get(ROOT + "/" + id + "/result")).andExpect(status().isUnauthorized());
++    mvc.perform(get(ROOT + "/" + id + "/result")
++        .header("X-User-Id", "another-owner@citi.com")
++        .header("X-User-Csi-Ownership", CSI + ":owner")).andExpect(status().isForbidden());
++  }
++
++  @Test
++  void enabledAndReceiptDefaultPathsDoNotAddBasePresenceLookup() throws Exception {
++    state("SUCCEEDED");
++    clearInvocations(bases);
++    assertThat(manualFallback().read(owner, id, "result")
++        .path("publication").path("status").asText()).isEqualTo("PENDING");
++    verify(bases, never()).find(id);
++    captureBase();
++    assertThat(bases.find(id)).isPresent();
++    clearInvocations(bases);
++    assertThat(sessions.read(owner, id, "result")
++        .path("publication").path("status").asText()).isEqualTo("PENDING");
++    verify(bases, times(1)).find(id);
++    clearInvocations(bases);
++    assertThat(result(202).path("publication").path("status").asText()).isEqualTo("PENDING");
++    // The original base projector's initial lookup remains; its receipt-default builder adds none.
++    verify(bases, times(1)).find(id);
++    state("PREPARING");
++    clearInvocations(bases);
++    sessions.read(owner, id, "result");
++    verify(bases, never()).find(id);
++    state("FINALIZING");
++    clearInvocations(bases);
++    sessions.read(owner, id, "result");
++    verify(bases, never()).find(id);
++  }
++
++  @Test
++  void disabledSucceededBaseQueryFailurePropagatesInsteadOfClaimingAbsentBase() {
++    state("SUCCEEDED");
++    var failure = new org.springframework.dao.DataAccessResourceFailureException("fixture outage");
++    doThrow(failure).when(bases).find(id);
++    try {
++      assertThatThrownBy(() -> sessions.read(owner, id, "result")).isSameAs(failure);
++    } finally {
++      reset(bases);
++    }
++  }
++
++  private void captureBase() {
++    repository.transaction(() -> {
++      var current = repository.lock(id);
++      bases.capture(current.document(), pins.requirements(current.document()), Instant.now());
++      return null;
++    });
++  }
++
++  private GuidedSessionService manualFallback() {
++    var manual = new GuidedSessionService(repository, contracts, access, sessionProperties,
++        Clock.systemUTC());
++    manual.installPresentation(presentation);
++    manual.installEvidence(evidence);
++    return manual;
++  }
++
++  private JsonNode receiptResult() throws Exception {
++    JsonNode value = contracts.parse(mvc.perform(asOwner(get(ROOT + "/" + id + "/result"))
++        .cookie(new Cookie("put_session", ObservedPublicationFixture.sessionCookie(owner))))
++        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
++    contracts.validate("v3/result", value);
++    return value;
++  }
++
++  private void assertDeniedDirectBeforeBaseLookup() {
++    var denied = StudioExecutionFixtures.identity("another-owner@citi.com", CSI, "owner");
++    clearInvocations(bases);
++    for (Authentication caller : java.util.Arrays.asList(denied, null)) {
++      assertThatThrownBy(() -> sessions.read(caller, id, "result"))
++          .isInstanceOf(GuidedSessionException.class).hasMessage("FORBIDDEN_SCOPE");
++    }
++    verify(bases, never()).find(id);
++  }
++
++  private void state(String state) {
++    repository.transaction(() -> {
++      var current = repository.lock(id);
++      current.document().put("state", state);
++      current.progress().put("stepIndex", state.equals("PREPARING") ? 0
++          : current.document().path("sourceSteps").size());
++      repository.save(current);
++      return null;
++    });
++  }
++
++  private JsonNode result(int expectedStatus) throws Exception {
++    return contracts.parse(mvc.perform(asOwner(get(ROOT + "/" + id + "/result")))
++        .andExpect(status().is(expectedStatus)).andReturn().getResponse().getContentAsString());
++  }
++
++  private static MockHttpServletRequestBuilder asOwner(MockHttpServletRequestBuilder request) {
++    return request.header("X-User-Id", OWNER).header("X-User-Csi-Ownership", CSI + ":owner");
++  }
++
++  private static void assertNotPublished(JsonNode result) {
++    assertThat(result.path("currentReadiness").path("revisionId").isNull()).isTrue();
++    assertThat(result.path("currentReadiness").path("ready").asBoolean()).isFalse();
++    assertThat(result.path("currentReadiness").path("code").asText()).isEqualTo("NOT_PUBLISHED");
++  }
++
++  private static void assertOwnProjections(JsonNode result) {
++    assertThat(result.path("progress").path("stepCount").asInt()).isEqualTo(1);
++    assertThat(result.path("explanation").isObject()).isTrue();
++    assertThat(result.path("actionTimings").isArray()).isTrue();
++    assertThat(result.path("evidence").isObject()).isTrue();
++  }
++}
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -107,7 +107,8 @@
+   }
+ 
+   @BeforeEach
+-  void setup() {
++  void setup(org.junit.jupiter.api.TestInfo testInfo) {
++    admissionSubject = ADMISSION_SUBJECTS.contains(testInfo.getTestMethod().orElseThrow().getName());
+     // Isolated real databases preserve the append-only audit trigger. No privileged trigger
+     // bypass or TRUNCATE CASCADE is used to reset protected production tables.
+     String database = "session_" + UUID.randomUUID().toString().replace("-", "");
+@@ -133,6 +134,7 @@
+             jdbc,
+             new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource())),
+             contracts);
++    sourceFixture();
+     service = newService(new GuidedSessionProperties(true, Map.of()));
+   }
+ 
+@@ -190,7 +192,10 @@
+   @Test
+   void concurrentConflictingStartsHaveOneWinner() throws Exception {
+     ObjectNode changed = start();
+-    changed.put("environmentId", "other");
++    changed.put("applicationId", "other");
++    // GS-T-S2: both requests are valid starts before they compete for one idempotency key.
++    assertThat(service.start(user, "control-orders", start()).path("state").asText()).isEqualTo("PREPARING");
++    assertThat(service.start(user, "control-other", changed).path("state").asText()).isEqualTo("PREPARING");
+     var results =
+         race(
+             () -> attempt(() -> service.start(user, "same", start())),
+@@ -249,6 +254,7 @@
+   void rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge() {
+     String id = observing();
+     service.observe(worker, id, 1, "observe", observation(id, 1));
++    planner(id).reserve(id, "admit", proposal(id));
+     assertThatThrownBy(
+             () ->
+                 repository.transaction(
+@@ -590,12 +596,9 @@
+   @Test
+   void evidenceReferencesAreScopedAndDoNotClaimReplay() {
+     String id = observing();
+-    service.recordEvidence(worker, id, 1, "evidence", "video-1", "evidence-store-1");
+-    assertThatThrownBy(
+-            () ->
+-                service.recordEvidence(
+-                    worker, id, 1, "raw", "video-2", "https://secret@example.test"))
+-        .hasMessage("INVALID_CONTRACT");
++    // R-21: the unused command is retired. Preserve this case's independent relational
++    // scope, opaque reference and public no-replay oracles at their surviving repository seam.
++    repository.evidence(id, scope(id), "video-1", "evidence-store-1");
+     assertThatThrownBy(() -> repository.evidence(id, "0".repeat(64), "foreign", "ref"))
+         .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+     service.cancel(user, id, "cancel", cancel());
+@@ -1123,7 +1126,8 @@
+     var selected = new GuidedMaterializationService(jdbc, checked);
+     var localService =
+         new GuidedSessionService(
+-            repository, contracts, access, new GuidedSessionProperties(true, Map.of()), clock);
++            repository, contracts, sourceAccess(), new GuidedSessionProperties(true, Map.of()), clock);
++    installTranslation(localService, jdbc, contracts);
+     localService.installBridge(
+         selected,
+         new GuidedPreparationStore(jdbc, contracts),
+@@ -1169,9 +1173,10 @@
+         new GuidedSessionService(
+             repository,
+             validationContracts,
+-            access,
++            sourceAccess(),
+             new GuidedSessionProperties(true, Map.of()),
+             clock);
++    installTranslation(selected, jdbc, contracts);
+     selected.installBridge(
+         materialization,
+         new GuidedPreparationStore(jdbc, contracts),
+@@ -1358,9 +1363,10 @@
+         new GuidedSessionService(
+             selectedRepository,
+             checked,
+-            access,
++            sourceAccess(),
+             new GuidedSessionProperties(true, Map.of()),
+             clock);
++    installTranslation(selectedService, jdbc, contracts);
+     selectedService.installBridge(
+         materialization,
+         new GuidedPreparationStore(jdbc, contracts),
+@@ -1397,7 +1403,8 @@
+   }
+ 
+   private GuidedSessionService newService(GuidedSessionProperties properties) {
+-    var result = new GuidedSessionService(repository, contracts, access, properties, clock);
++    var result = new GuidedSessionService(repository, contracts, sourceAccess(), properties, clock);
++    installTranslation(result, jdbc, contracts);
+     // STUDIO-OBS-008 P2/P3: the real presentation projector, as the production composition wires.
+     result.installPresentation(new GuidedPublicPresentationProjector(jdbc, contracts));
+     materialization = new GuidedMaterializationService(jdbc, contracts);
+@@ -1417,6 +1424,8 @@
+         List.of("fixture", "other"),
+         List.of("https://orders.example.test"),
+         null);
++    com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
++        jdbc, "CSI-123", "other", "fixture", List.of("https://orders.example.test"), null, "ALLOW");
+     // STUDIO-OBS-013/014 S3b: the production recording projection, as GuidedEvidenceConfiguration
+     // installs it; the NONE default's null video is invalid v3/result after C2b by design.
+     result.installEvidence(
+@@ -1462,7 +1471,26 @@
+   // This PostgreSQL service test supplies a trusted runner preparation at the existing
+   // authenticated
+   // transport seam; it does not claim browser/DOM or HTTP transport proof (covered by joined ITs).
+-  private JsonNode admit(
++  private JsonNode admit(Authentication actor, String id, long fence, String key, JsonNode probe) {
++    JsonNode session = repository.transaction(() -> repository.lock(id).document().deepCopy());
++    if (session.path("counters").path("actions").asInt() >= session.path("limits").path("maxActions").asInt()) {
++      return refusedAdmission(actor, id, fence, key, probe);
++    }
++    JsonNode association = planner(id).reserve(id, key, probe);
++    JsonNode proposal = association.path("proposal");
++    String issuedKey = association.path("admissionKey").asText();
++    JsonNode existing = service.existingAdmission(actor, id, fence, issuedKey, proposal);
++    if (existing != null) return existing;
++    ObjectNode proof = materialization.identity(context(id));
++    proof.put("preparationId", UUID.randomUUID().toString()).put("requestDigest", GuidedContracts.hash(proposal))
++        .put("evidenceHash", proposal.path("evidenceHash").asText())
++        .put("authoredInputsHash", proposal.path("authoredInputsHash").asText())
++        .put("expiresAt", clock.now.plusSeconds(20).toString());
++    service.storePreparation(actor, id, fence, proposal, proof);
++    return service.admit(actor, id, fence, issuedKey, proposal);
++  }
++
++  private JsonNode refusedAdmission(
+       Authentication actor, String id, long fence, String key, JsonNode proposal) {
+     JsonNode existing = service.existingAdmission(actor, id, fence, key, proposal);
+     if (existing != null) {
+@@ -1546,7 +1574,7 @@
+     return contracts
+         .object()
+         .put("schemaVersion", 3)
+-        .put("testId", "test-1")
++        .put("testId", SOURCE_TEST.toString())
+         .put("sourceRevision", "1")
+         .put("configurationRevision", "1")
+         .put("environmentId", "fixture")
+@@ -1578,7 +1606,8 @@
+             .put("leaseExpiresAt", claimed.path("owner").path("leaseExpiresAt").asText());
+     receipt.set("assignment", intent);
+     service.acknowledgeAssignment(controller, id, receipt);
+-    service.materialize(controller, id, 1, "materialize", new ObjectMapper().createArrayNode());
++    if (admissionSubject) planner(id).bootstrap(id);
++    else service.materialize(controller, id, 1, "materialize", new ObjectMapper().createArrayNode());
+     frozenCallbackIdentities.put(id, materialization.identity(context(id)));
+     return id;
+   }
+@@ -1823,4 +1852,350 @@
+       return "a".repeat(64);
+     }
+   }
++
++  private static final java.util.Set<String> ADMISSION_SUBJECTS = java.util.Set.of(
++      "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch",
++      "conflictingAdmissionAndUniqueCoordinatesFail",
++      "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge",
++      "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown",
++      "lostAckNeverRetriesAndDelayedCallbackCannotRevive",
++      "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence",
++      "observationBudgetAndGenerationAreSharedAcrossActions",
++      "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent",
++      "successfulLedgerStillCannotPublishWithoutExactPlanVerifier",
++      "actionBudgetAndFalseAssertionReportsFailClosed",
++      "liveOwnerRenewalPreservesAdmittedAndDispatchedActions",
++      "takeoverCannotReopenFinalizingAfterExecutedEffects",
++      "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite");
++
++  private static final UUID SOURCE_TEST = UUID.fromString("00000000-0000-4000-8000-0000000000b1");
++  private final Map<String, PlanningPath> planningPaths = new java.util.concurrent.ConcurrentHashMap<>();
++  private boolean admissionSubject;
++
++  private void sourceFixture() {
++    try {
++      var mapper = new ObjectMapper().findAndRegisterModules();
++      var authoring = new com.citi.put.checks.studio.dto.AuthoringV2Request(2, null, List.of(
++          new com.citi.put.checks.studio.dto.AuthoringStep(
++              UUID.fromString("00000000-0000-4000-8000-0000000000a1"), "Click Order reference.", null),
++          new com.citi.put.checks.studio.dto.AuthoringStep(
++              UUID.fromString("00000000-0000-4000-8000-0000000000a2"), "Assert Order reference is visible.", null)));
++      jdbc.update("INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
++              + "authoring_revision_inputs,created_by) VALUES (?,'GS-T source','CSI-123','fixture',"
++              + "'chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,'user-1')",
++          SOURCE_TEST, mapper.writeValueAsString(List.of("Click Order reference.", "Assert Order reference is visible.")),
++          mapper.writeValueAsString(authoring), mapper.writeValueAsString(
++              com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity.create(authoring, Map.of())));
++    } catch (com.fasterxml.jackson.core.JsonProcessingException failure) {
++      throw new IllegalStateException("GS-T source fixture serialization", failure);
++    }
++  }
++
++  private com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess sourceAccess() {
++    return productionAccess(jdbc, contracts, access, "https://orders.example.test");
++  }
++
++  private PlanningPath planner(String id) {
++    return planningPaths.computeIfAbsent(id, ignored -> {
++      var runner = org.mockito.Mockito.mock(com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.class);
++      org.mockito.stubbing.Answer<JsonNode> contextReply = call -> {
++        JsonNode context = call.getArgument(1);
++        if (repository.transaction(() -> !repository.lock(id).progress().has("executionEvidence"))) {
++          service.bootstrap(worker, id, 1, "gs-t-bootstrap-" + id, blankBootstrap(contracts, context));
++        }
++        return materialization.identity(context);
++      };
++      org.mockito.Mockito.doAnswer(contextReply).when(runner).send(
++          org.mockito.ArgumentMatchers.eq("context"), org.mockito.ArgumentMatchers.any());
++      org.mockito.Mockito.doAnswer(contextReply).when(runner).send(
++          org.mockito.ArgumentMatchers.eq("context"), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any(Instant.class));
++      return new PlanningPath(jdbc, contracts, repository, service,
++          new com.citi.put.checks.studio.guided.bridge.GuidedDispatchService(service, materialization, runner), clock, controller);
++    });
++  }
++
++  /** A JDBC-backed adapter for the existing JPA source seam, with the real source row locked. */
++  private static com.citi.put.checks.studio.StudioRepository sourceRepository(
++      JdbcTemplate jdbc, GuidedContracts contracts) {
++    var sources = org.mockito.Mockito.mock(com.citi.put.checks.studio.StudioRepository.class);
++    org.mockito.Mockito.when(sources.findByIdForUpdate(org.mockito.ArgumentMatchers.any(UUID.class)))
++        .thenAnswer(call -> {
++          UUID id = call.getArgument(0);
++          var rows = jdbc.queryForList(
++              "SELECT csi_id,environment,steps::text,variables::text,authoring::text,"
++                  + "authoring_revision_inputs::text,source_revision,configuration_revision"
++                  + " FROM ui_tests WHERE id=? AND deleted_at IS NULL AND quarantined_at IS NULL FOR UPDATE",
++              id);
++          if (rows.isEmpty()) return java.util.Optional.empty();
++          var row = rows.getFirst();
++          var test = new com.citi.put.checks.studio.entity.UITest(
++              "GS-T source", null, (String) row.get("csi_id"), (String) row.get("steps"),
++              (String) row.get("variables"), "chromium", 1280, 720,
++              (String) row.get("environment"), "user-1");
++          test.setCsiId((String) row.get("csi_id"));
++          test.setEnvironment((String) row.get("environment"));
++          test.setSteps((String) row.get("steps"));
++          test.setVariables((String) row.get("variables"));
++          test.setAuthoring((String) row.get("authoring"));
++          test.setAuthoringRevisionInputs((String) row.get("authoring_revision_inputs"));
++          test.setSourceRevision(((Number) row.get("source_revision")).longValue());
++          test.setConfigurationRevision(((Number) row.get("configuration_revision")).longValue());
++          return java.util.Optional.of(test);
++        });
++    return sources;
++  }
++
++  private static com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties planningProperties() {
++    return new com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties(
++        true, true, List.of("orders", "other"), List.of("fixture", "other"), 131072, 2048, 60, "worker-1");
++  }
++
++  /** The controls can only narrow real current/source/user checks; initialize is never stubbed. */
++  private static com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess productionAccess(
++      JdbcTemplate jdbc, GuidedContracts contracts, GuidedSessionAccess controls, String origin) {
++    var store = new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, contracts);
++    var policy = contracts.object().put("version", 1).put("policyId", "gs-t-source-policy")
++        .put("policyVersion", "1").put("applicationId", "orders").put("environment", "fixture")
++        .put("entryPolicyId", "blank");
++    policy.putArray("allowedOrigins").add(origin);
++    policy.putArray("rules");
++    policy.putNull("applicationPolicy");
++    var policies = contracts.object().putArray("policies");
++    for (String application : List.of("orders", "other")) {
++      for (String environment : List.of("fixture", "other")) {
++        var configured = policy.deepCopy();
++        configured.put("policyId", "gs-t-" + application + "-" + environment)
++            .put("applicationId", application).put("environment", environment);
++        policies.add(configured);
++      }
++    }
++    var pins = new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
++        contracts, new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
++            true, 30000, 1048576, 4194304, 2097152, "[]", policies.toString(), 1280, 720));
++    var access = org.mockito.Mockito.spy(
++        new com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess(
++            new com.citi.put.checks.studio.guided.translation.GuidedSourceSnapshotRepository(
++                sourceRepository(jdbc, contracts), contracts),
++            new com.citi.put.checks.studio.guided.translation.GuidedSourceClassifier(
++                contracts, planningProperties(),
++                new com.citi.put.checks.studio.guided.translation.CredentialPatternScreen()),
++            new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(contracts),
++            store, new com.citi.put.checks.studio.guided.translation.GuidedStepVerifier(store),
++            new CsiOwnershipEvaluator(), pins,
++            org.mockito.Mockito.mock(com.citi.put.checks.studio.dispatch.StudioReferenceResolver.class),
++            (principal, csi, environment, secret) -> true));
++    org.mockito.Mockito.doAnswer(call -> {
++      controls.checkCurrent(call.getArgument(0));
++      return call.callRealMethod();
++    }).when(access).checkCurrent(org.mockito.ArgumentMatchers.any());
++    org.mockito.Mockito.doAnswer(call -> {
++      controls.checkSourceCurrent(call.getArgument(0));
++      return call.callRealMethod();
++    }).when(access).checkSourceCurrent(org.mockito.ArgumentMatchers.any());
++    org.mockito.Mockito.doAnswer(call -> {
++      controls.checkUser(call.getArgument(0), call.getArgument(1));
++      return call.callRealMethod();
++    }).when(access).checkUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
++    org.mockito.Mockito.doAnswer(call -> controls.recoverableContext(call.getArgument(0), call.getArgument(1)))
++        .when(access).recoverableContext(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
++    return access;
++  }
++
++  /** Mirrors production installation; initialization remains inside real production access.start. */
++  private static void installTranslation(
++      GuidedSessionService sessions, JdbcTemplate jdbc, GuidedContracts contracts) {
++    sessions.installTranslation(
++        new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, contracts),
++        new com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore(jdbc, contracts));
++  }
++
++  /** The exact bounded document-state-only R-5 seam, architect GS-T-S1. */
++  private static void firstObservationWindow(
++      GuidedSessionRepository repository, String id) {
++    repository.transaction(() -> {
++      var current = repository.lock(id);
++      assertThat(current.document().path("state").asText()).isEqualTo("PROPOSING");
++      assertThat(current.progress().path("translationBootstrap").path("phase").asText()).isEqualTo("READY");
++      assertThat(current.progress().path("translationBootstrap").path("metadataAcknowledgement").path("version").asInt()).isEqualTo(2);
++      assertThat(current.progress().path("executionEvidence").path("kind").asText()).isEqualTo("initialBlank");
++      assertThat(current.progress().path("executionEvidence").path("generation").asInt()).isZero();
++      assertThat(repository.actions(id)).isEmpty();
++      assertThat(current.document().path("counters").path("actions").asInt()).isZero();
++      JsonNode beforeProgress = current.progress().deepCopy();
++      current.document().put("state", "OBSERVING");
++      repository.save(current);
++      assertThat(repository.lock(id).progress()).isEqualTo(beforeProgress);
++      return null;
++    });
++  }
++
++  private static void firstObservationCommitted(GuidedSessionRepository repository, String id) {
++    repository.transaction(() -> {
++      var current = repository.lock(id);
++      assertThat(current.document().path("state").asText()).isEqualTo("PROPOSING");
++      assertThat(current.progress().path("executionEvidence").path("kind").asText()).isEqualTo("observedDocument");
++      assertThat(repository.actions(id)).isEmpty();
++      assertThat(current.document().path("counters").path("actions").asInt()).isZero();
++      return null;
++    });
++  }
++
++  /** Authenticated worker protocol at the existing trusted transport seam, not browser proof. */
++  private static ObjectNode blankBootstrap(GuidedContracts contracts, JsonNode context) {
++    var request = new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(null, contracts).identity(context);
++    var evidence = contracts.object().put("kind", "initialBlank")
++        .put("sessionId", context.path("sessionId").asText()).put("contextId", context.path("contextId").asText())
++        .put("creationId", UUID.randomUUID().toString()).put("documentId", "gs-t-blank-" + UUID.randomUUID())
++        .put("bootstrapId", UUID.randomUUID().toString()).put("url", "about:blank").putNull("origin")
++        .put("generation", 0);
++    request.set("executionEvidence", evidence);
++    request.put("evidenceHash", GuidedContracts.hash(evidence));
++    return request;
++  }
++
++  /** Per-composition planner; controlled model replies never construct bridge authority. */
++  private static final class PlanningPath {
++    private final JdbcTemplate jdbc;
++    private final GuidedContracts contracts;
++    private final GuidedSessionRepository repository;
++    private final GuidedSessionService sessions;
++    private final com.citi.put.checks.studio.guided.translation.GuidedTranslationStore store;
++    private final com.citi.put.checks.studio.guided.translation.GuidedTranslationService translation;
++    private final Authentication controller;
++    private final Map<String, JsonNode> selected = new java.util.HashMap<>();
++    private final Map<String, JsonNode> associations = new java.util.HashMap<>();
++    private final Map<String, JsonNode> probes = new java.util.HashMap<>();
++
++    PlanningPath(JdbcTemplate jdbc, GuidedContracts contracts, GuidedSessionRepository repository,
++        GuidedSessionService sessions, com.citi.put.checks.studio.guided.bridge.GuidedDispatchService dispatch,
++        Clock clock, Authentication controller) {
++      this.jdbc = jdbc;
++      this.contracts = contracts;
++      this.repository = repository;
++      this.sessions = sessions;
++      this.controller = controller;
++      store = new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, contracts);
++      var stopped = org.mockito.Mockito.spy(dispatch);
++      org.mockito.Mockito.doThrow(new AssertionError("gs-t-planner-reservation-stop"))
++          .when(stopped).prepareAndAdmit(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString(),
++              org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any());
++      com.citi.put.checks.studio.guided.translation.GuidedLlmGatewayClient gateway = (request, budget) -> {
++        var context = request.projection().document();
++        var response = contracts.object().put("schemaVersion", 3).put("requestId", request.requestId())
++            .put("kind", request.kind().name());
++        if (request.kind() == com.citi.put.checks.studio.guided.translation.GuidedModelRequest.Kind.SOURCE_PLAN) {
++          var references = response.putArray("sourceReferences");
++          var obligations = response.putArray("obligations");
++          response.putArray("needs");
++          for (JsonNode step : context.path("sourceSteps")) {
++            String stepId = step.path("stepId").asText();
++            JsonNode secret = null;
++            for (JsonNode reference : context.path("configurationReferences")) {
++              if (reference.path("stepId").asText().equals(stepId)
++                  && reference.path("kind").asText().equals("secretRef")) secret = reference;
++            }
++            String kind = secret != null ? "fill" : stepId.endsWith("a2") ? "assert" : "click";
++            var obligation = obligations.addObject().put("stepId", stepId).put("occurrence", 0)
++                .put("operationKind", kind).put("targetIntent", secret == null ? "order-reference" : "Password")
++                .putNull("needId");
++            if (secret == null) obligation.putNull("referenceIndex");
++            else {
++              obligation.put("referenceIndex", references.size());
++              var reference = (ObjectNode) secret.deepCopy();
++              reference.put("referenceKind", "configuration")
++                  .put("configurationRevision", context.path("configurationRevision").asText());
++              references.add(reference);
++            }
++            if (kind.equals("assert")) obligation.put("predicate", "visible");
++            else obligation.putNull("predicate");
++          }
++        } else if (request.kind() == com.citi.put.checks.studio.guided.translation.GuidedModelRequest.Kind.NEXT_ACTION) {
++          JsonNode probe = selected.get(context.path("sessionId").asText());
++          assertThat(probe).as("selected controlled-provider action").isNotNull();
++          JsonNode chosen = null;
++          for (JsonNode obligation : context.path("obligations")) {
++            if (obligation.path("stepId").equals(probe.path("coordinate").path("stepId"))
++                && obligation.path("occurrence").equals(probe.path("coordinate").path("ordinal"))) chosen = obligation;
++          }
++          assertThat(chosen).as("remaining planner obligation").isNotNull();
++          var action = contracts.object();
++          ObjectNode target = probe.path("target").deepCopy();
++          target.remove(List.of("documentId", "generation"));
++          action.set("target", target);
++          action.set("operation", probe.path("operation").deepCopy());
++          response.put("status", "ACTION").put("obligationId", chosen.path("obligationId").asText()).putNull("question");
++          response.set("action", action);
++        } else throw new AssertionError("Unexpected GS-T model request: " + request.kind());
++        contracts.validate("v3/guided-model-response", response);
++        return new com.citi.put.checks.studio.guided.translation.GuidedModelResponse(
++            com.citi.put.checks.studio.guided.translation.GuidedModelResponse.Code.OK, response, 1, 1, "gs-t-controlled");
++      };
++      translation = new com.citi.put.checks.studio.guided.translation.GuidedTranslationService(
++          sessions, repository, store,
++          new com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore(jdbc, contracts),
++          stopped, gateway, contracts, new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(contracts),
++          new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(contracts),
++          new com.citi.put.checks.studio.guided.translation.GuidedProposalValidator(contracts),
++          new com.citi.put.checks.studio.guided.translation.GuidedDependencyPlanner(sessions),
++          planningProperties(), clock);
++      translation.installDatabase(jdbc);
++    }
++
++    private ObjectNode command(String id) {
++      return repository.transaction(() -> {
++        var current = repository.lock(id).document();
++        return contracts.object().put("schemaVersion", 3).put("sessionId", id)
++            .put("expectedSourceRevision", current.path("scope").path("sourceRevision").asText())
++            .put("expectedConfigurationRevision", current.path("scope").path("configurationRevision").asText())
++            .put("expectedPlanRevision", store.state(id).path("planRevision").asInt());
++      });
++    }
++
++    synchronized void bootstrap(String id) {
++      translation.plan(controller, id, 1, "gs-t-plan-" + id, command(id));
++      firstObservationWindow(repository, id);
++    }
++
++    /** Call before opening a rollback transaction; only read the committed association afterward. */
++    synchronized JsonNode reserve(String id, String key, JsonNode probe) {
++      String cache = id + ":" + key;
++      if (!associations.containsKey(cache)) {
++        assertThat(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive())
++            .as("planner reservation precedes the test's admission rollback transaction").isFalse();
++        if (associations.keySet().stream().noneMatch(saved -> saved.startsWith(id + ":"))) {
++          firstObservationCommitted(repository, id);
++        }
++        selected.put(id, probe.deepCopy());
++        boolean stopped = false;
++        for (int attempt = 0; attempt < 3 && !stopped; attempt++) {
++          try { translation.advance(controller, id, 1, "gs-t-reserve-" + UUID.randomUUID(), command(id)); }
++          catch (AssertionError expected) {
++            assertThat(expected).hasMessage("gs-t-planner-reservation-stop");
++            stopped = true;
++          }
++        }
++        assertThat(stopped).as("real planner reached committed prepareAndAdmit crash window").isTrue();
++        JsonNode association = sessions.translationTransaction(controller, id, 1, current -> {
++          for (JsonNode obligation : store.state(id).path("plan").path("obligations")) {
++            if (obligation.path("stepId").equals(probe.path("coordinate").path("stepId"))
++                && obligation.path("occurrence").equals(probe.path("coordinate").path("ordinal")))
++              return store.obligation(id, obligation.path("obligationId").asText());
++          }
++          return null;
++        });
++        assertThat(association).as("committed planner-issued authority").isNotNull();
++        assertThat(association.path("admissionId").isNull()).isTrue();
++        assertThat(association.path("admissionKey").asText()).startsWith("obligation-");
++        associations.put(cache, association.deepCopy());
++        probes.put(cache, probe.deepCopy());
++      }
++      JsonNode association = associations.get(cache).deepCopy();
++      if (!probes.get(cache).equals(probe)) {
++        // Preserve the hostile changed-payload idempotency probe under its original issued key.
++        ((ObjectNode) association.path("proposal")).set("operation", probe.path("operation").deepCopy());
++      }
++      return association;
++    }
++  }
++
+ }
+--- /dev/null
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java
+@@ -0,0 +1,237 @@
++package com.citi.put.checks.studio.guided.session;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.awaitility.Awaitility.await;
++import static org.mockito.ArgumentMatchers.any;
++import static org.mockito.ArgumentMatchers.eq;
++import static org.mockito.Mockito.doAnswer;
++import static org.mockito.Mockito.mock;
++import static org.mockito.Mockito.never;
++import static org.mockito.Mockito.verify;
++import static org.mockito.Mockito.when;
++
++import ch.qos.logback.classic.Level;
++import ch.qos.logback.classic.Logger;
++import ch.qos.logback.classic.spi.ILoggingEvent;
++import ch.qos.logback.core.read.ListAppender;
++import com.fasterxml.jackson.databind.node.ObjectNode;
++import java.time.Clock;
++import java.time.Duration;
++import java.time.Instant;
++import java.time.ZoneId;
++import java.time.ZoneOffset;
++import java.util.List;
++import java.util.Map;
++import java.util.UUID;
++import java.util.concurrent.ArrayBlockingQueue;
++import java.util.concurrent.CountDownLatch;
++import java.util.concurrent.ThreadPoolExecutor;
++import java.util.concurrent.TimeUnit;
++import java.util.concurrent.atomic.AtomicInteger;
++import java.util.concurrent.atomic.AtomicReference;
++import java.util.function.Supplier;
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++import org.slf4j.LoggerFactory;
++
++/** C-OBS009-1: bounded shed visibility and one queued or running attempt for each durable request. */
++class GuidedTeardownShedTest {
++  private static final Duration WINDOW = Duration.ofMinutes(15);
++  private static final int BATCH = 32;
++  private final GuidedContracts contracts = new GuidedContracts();
++  private final MutableClock clock = new MutableClock();
++  private final String id = UUID.randomUUID().toString();
++  private final GuidedSessionRepository repository = mock(GuidedSessionRepository.class);
++  private final AtomicReference<GuidedSessionRepository.Session> durable = new AtomicReference<>();
++  private final AtomicInteger sends = new AtomicInteger();
++  private final CountDownLatch workerBlocked = new CountDownLatch(1);
++  private final CountDownLatch releaseWorker = new CountDownLatch(1);
++  private final CountDownLatch releaseSender = new CountDownLatch(1);
++  private final Logger logger = (Logger) LoggerFactory.getLogger(GuidedSessionService.class);
++  private final ListAppender<ILoggingEvent> log = new ListAppender<>();
++  private ThreadPoolExecutor executor;
++  private GuidedSessionService service;
++
++  @BeforeEach
++  void setUp() {
++    ObjectNode document = contracts.object().put("sessionId", id).put("state", "CANCELLED");
++    ObjectNode progress = contracts.object().put("teardownStatus", "PENDING");
++    progress.putObject("teardownRequest").put("reason", "CANCELLED")
++        .putObject("target").put("assignmentId", "private-target-" + id);
++    durable.set(new GuidedSessionRepository.Session(document, progress));
++    when(repository.transaction(any())).thenAnswer(
++        invocation -> {
++          synchronized (durable) {
++            return ((Supplier<?>) invocation.getArgument(0)).get();
++          }
++        });
++    when(repository.pendingTeardowns(any(), eq(WINDOW), eq(BATCH))).thenAnswer(
++        invocation -> "PENDING".equals(durable.get().progress().path("teardownStatus").asText())
++            ? List.of(id) : List.of());
++    when(repository.teardownRequest(id)).thenAnswer(
++        invocation -> durable.get().progress().path("teardownRequest").deepCopy());
++    when(repository.lock(id)).thenAnswer(
++        invocation -> new GuidedSessionRepository.Session(
++            durable.get().document().deepCopy(), durable.get().progress().deepCopy()));
++    doAnswer(invocation -> {
++      durable.set(invocation.getArgument(0));
++      return null;
++    }).when(repository).save(any());
++    service = new GuidedSessionService(repository, contracts, mock(GuidedSessionAccess.class),
++        new GuidedSessionProperties(true, Map.of()), clock);
++    service.installStopSender((target, reason) -> sends.incrementAndGet());
++    // A small injected executor makes saturation deterministic; production remains 2 / 64.
++    // DiscardPolicy is intentional: the final installer must install the production handler.
++    executor = new ThreadPoolExecutor(1, 1, 30, TimeUnit.SECONDS,
++        new ArrayBlockingQueue<>(2), runnable -> new Thread(runnable, "shed-test-" + id),
++        new ThreadPoolExecutor.DiscardPolicy());
++    service.installTeardownExecutor(executor);
++    log.start();
++    logger.addAppender(log);
++  }
++
++  @AfterEach
++  void close() throws InterruptedException {
++    releaseWorker.countDown();
++    releaseSender.countDown();
++    try {
++      if (executor != null) {
++        executor.shutdown();
++        if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
++          executor.shutdownNow();
++          assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
++        }
++      }
++    } finally {
++      logger.detachAppender(log);
++      log.stop();
++    }
++  }
++
++  @Test
++  void shedWarnsOncePerIntervalAndTheNextTickKeepsOneDurableAttempt() throws Exception {
++    blockWorker();
++    executor.execute(() -> {});
++    executor.execute(() -> {}); // Occupy both queue slots as well as the one worker.
++    ObjectNode request = durable.get().progress().path("teardownRequest").deepCopy();
++    ObjectNode document = durable.get().document().deepCopy();
++
++    service.redriveTeardowns(WINDOW, BATCH);
++    service.redriveTeardowns(WINDOW, BATCH);
++    assertThat(warnings()).containsExactly("Guided teardown executor shed: 1 attempt(s)");
++    clock.advance(WINDOW.minusNanos(1));
++    service.redriveTeardowns(WINDOW, BATCH);
++    assertThat(warnings()).hasSize(1);
++    clock.advance(Duration.ofNanos(1));
++    service.redriveTeardowns(WINDOW, BATCH);
++    assertThat(warnings()).containsExactly(
++        "Guided teardown executor shed: 1 attempt(s)",
++        "Guided teardown executor shed: 3 attempt(s)");
++    assertThat(log.list).allSatisfy(event -> {
++      assertThat(event.getLevel()).isEqualTo(Level.WARN);
++      assertThat(event.getThrowableProxy()).isNull();
++      assertThat(event.getFormattedMessage()).doesNotContain(id, "private-target", "CANCELLED");
++    });
++    assertThat(durable.get().progress().path("teardownRequest")).isEqualTo(request);
++    assertThat(durable.get().progress().path("teardownStatus").asText()).isEqualTo("PENDING");
++    assertThat(durable.get().document()).isEqualTo(document);
++    assertThat(sends).hasValue(0);
++    verify(repository, never()).save(any());
++
++    releaseWorker.countDown();
++    await().alias("saturated executor drains").atMost(Duration.ofSeconds(5))
++        .pollInterval(Duration.ofMillis(20)).until(
++            () -> executor.getActiveCount() == 0 && executor.getQueue().isEmpty());
++    service.redriveTeardowns(WINDOW, BATCH);
++    service.redriveTeardowns(WINDOW, BATCH);
++    await().alias("next tick acknowledges the original durable request").atMost(Duration.ofSeconds(5))
++        .pollInterval(Duration.ofMillis(20)).untilAsserted(() -> {
++          assertThat(sends).hasValue(1);
++          assertThat(durable.get().progress().path("teardownStatus").asText()).isEqualTo("CONFIRMED");
++          assertThat(durable.get().progress().has("teardownRequest")).isFalse();
++          assertThat(service.teardownInFlight(id)).isFalse();
++        });
++    assertThat(warnings()).hasSize(2);
++    assertThat(durable.get().document()).isEqualTo(document);
++  }
++
++  @Test
++  void anIdAlreadyQueuedOrInFlightIsNeverSubmittedTwice() throws Exception {
++    blockWorker();
++    service.installStopSender((target, reason) -> {
++      sends.incrementAndGet();
++      blockUntil(releaseSender);
++    });
++    service.redriveTeardowns(WINDOW, BATCH);
++    assertThat(executor.getQueue()).hasSize(1);
++    service.redriveTeardowns(WINDOW, BATCH);
++    assertThat(executor.getQueue()).hasSize(1);
++    assertThat(warnings()).isEmpty();
++    assertThat(durable.get().progress().path("teardownStatus").asText()).isEqualTo("PENDING");
++
++    releaseWorker.countDown();
++    await().alias("one queued teardown starts").atMost(Duration.ofSeconds(5))
++        .pollInterval(Duration.ofMillis(20)).until(() -> service.teardownInFlight(id) && sends.get() == 1);
++    service.redriveTeardowns(WINDOW, BATCH);
++    assertThat(executor.getQueue()).isEmpty();
++    assertThat(sends).hasValue(1);
++    assertThat(durable.get().progress().path("teardownStatus").asText()).isEqualTo("PENDING");
++    releaseSender.countDown();
++    await().alias("one acknowledged attempt completes").atMost(Duration.ofSeconds(5))
++        .pollInterval(Duration.ofMillis(20)).untilAsserted(() -> {
++          assertThat(durable.get().progress().path("teardownStatus").asText()).isEqualTo("CONFIRMED");
++          assertThat(service.teardownInFlight(id)).isFalse();
++        });
++    service.redriveTeardowns(WINDOW, BATCH);
++    assertThat(sends).hasValue(1);
++    assertThat(warnings()).isEmpty();
++  }
++
++  private void blockWorker() throws InterruptedException {
++    executor.execute(() -> {
++      workerBlocked.countDown();
++      blockUntil(releaseWorker);
++    });
++    assertThat(workerBlocked.await(5, TimeUnit.SECONDS)).isTrue();
++  }
++
++  private static void blockUntil(CountDownLatch latch) {
++    try {
++      if (!latch.await(10, TimeUnit.SECONDS)) {
++        throw new IllegalStateException("Test did not release its owned executor");
++      }
++    } catch (InterruptedException interrupted) {
++      Thread.currentThread().interrupt();
++      throw new IllegalStateException(interrupted);
++    }
++  }
++
++  private List<String> warnings() {
++    return log.list.stream().filter(event -> event.getLevel().equals(Level.WARN))
++        .map(ILoggingEvent::getFormattedMessage).toList();
++  }
++
++  private static final class MutableClock extends Clock {
++    private Instant now = Instant.parse("2026-10-18T00:00:00Z");
++
++    void advance(Duration duration) {
++      now = now.plus(duration);
++    }
++
++    @Override
++    public ZoneId getZone() {
++      return ZoneOffset.UTC;
++    }
++
++    @Override
++    public Clock withZone(ZoneId zone) {
++      return this;
++    }
++
++    @Override
++    public Instant instant() {
++      return now;
++    }
++  }
++}

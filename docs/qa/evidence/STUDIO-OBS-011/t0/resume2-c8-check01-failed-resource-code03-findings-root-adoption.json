@@ -1,0 +1,63 @@
+{
+  "atUtc": "2026-10-19T16:15:56.449996+00:00",
+  "authorizedBy": "root",
+  "kind": "REJECT_CODE03_ADOPT_COMPLETE_EXACT_FINDINGS_FOR_OFFTREE_CODE04",
+  "rejectedManifestSha256": "fd4195e7ec23851b6bd6b50529a8656cb17b29cd83f85ddcc4f270b85e06236f",
+  "architectureReviewManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume3-code-review/manifest.json",
+    "sha256": "c1d5b363d7794b0be13dc628335fc36eba4b7565c8215bab1c88fc4596a846f5"
+  },
+  "qaReviewManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-failed-resource-resume3-code-review/manifest.json",
+    "sha256": "b14a9ce568d8508b6b5f70976f1238ba4dfad60a6e5e28880289752e28676565"
+  },
+  "rootVerifiedReviewMembers": {
+    "architecture": 11,
+    "qa": 5
+  },
+  "adoptAllMandatoryFindings": true,
+  "fixCategories": [
+    "EXACT_CONSUMED_INHERITED_BASELINE_BUFFER_BEFORE_CORE_JSON_INTERPRETATION",
+    "PID_START_SCOPED_CONTROLLER_EXEMPTIONS_NOT_RECYCLED_NUMBERS",
+    "REQUESTED_LAUNCH_VERSUS_OBSERVED_REEXEC_ARGUMENT_ROLE"
+  ],
+  "baselineBinding": {
+    "sourcePlanSha256": "9391e76dd403d45a1c8ab09c428ed6884a762c326959cefa63c781633c687313",
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/diag-start1-harness/resume2/preexisting-baseline.json",
+    "sha256": "fd39b45fd27689034742d5a3205461e9aa4a316baa810f8488216f8f49b7101a",
+    "bodyReadByRootNow": false,
+    "authority": "verified successor-plan immutableHelpers entry; rootreadplanmetadataonly"
+  },
+  "externalExactInvocationFacts": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/root-external-prospective-tool-bindings-05.json",
+    "sha256": "af267068488221426368742557d1955b5817abc8ac081ad9d04661fc306ce67e"
+  },
+  "actualProspectiveLauncherFacts": {
+    "pid": 40004,
+    "parentPid": 40003,
+    "start": "Mon Oct 19 12:11:27 2026",
+    "originalArgv0Role": "PROCESS_APP",
+    "reportedRole": "REPORTED_BIN",
+    "rawCommRole": "PROCESS_APP",
+    "resolvedCommRole": "PROCESS_APP",
+    "launchMatchesBin": false,
+    "reportedMatchesBin": true,
+    "rawCommEqualsExactApp": true,
+    "rawMapContainsExactApp": true,
+    "resolvedMapContainsApp": true,
+    "statusesAllZero": true,
+    "stderrAllEmpty": true,
+    "rawDataExported": false
+  },
+  "launcherCorrection": "Canonical BIN is the root-requested launch role; runtime sys.executable reportsBIN while actual sys.orig_argv0/comm/map are APP due reexec. Bind observed argv0 to exact known process/observed-argument role. Root-inspected readonly guard/exact operator trace establishes requestedlaunch. Do not mislabel configured launch as in-process observed proof or allow wildcard aliases.",
+  "preparationToolInventoryFailureHistory": "External04 source had minified multiassertfailure tool3441bd before anyrecordwrite; failed subpredicate unpersisted.05retainsallclosedcomparisons and explicitstrict0/emptystderr observations. No unit/source/controller/lock/private/action occurred.",
+  "preserveOldFingerprintUnknown": true,
+  "readSiteCompletenessRequirement": "Audit/list every reachable JSON interpretation or executable-source buffer and exact pre-use pin/reader, including reused CORE regular baseline and old source observer plan. Compile/parser must consume verified buffer, no second unverified reads. No new framework/phase.",
+  "allowedOutput": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume4",
+  "selectedCompileState": "NOT_STARTED",
+  "selectedOutcome": "QUALIFIED_FAILED_RESOURCE_ONLY_EXPECTED_WRAPPER1_FULLBUILDFAILED_NO_STANDALONE_COMPILE0_CERTIFICATE",
+  "preserveAllOldPacketsReviewsActualFailuresAndQualifications": true,
+  "operationalDualExceptionIssued": false,
+  "runtimeInstallGuardReadinessPermitExitOrSourceChangeAuthorized": false,
+  "C8MainLaneIrLifecycleCredit": false
+}

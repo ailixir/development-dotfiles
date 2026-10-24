@@ -1,0 +1,112 @@
+{
+  "createdAt": "2026-10-19T01:33:27.595033+00:00",
+  "kind": "Static documentation-package checks only; no QA/product/story/release verdict",
+  "checks": {
+    "everyPatchReconstructsExactPreview": true,
+    "allTargetBasesPreviewsAndPatchHashesMatch": true,
+    "combinedLiteralConcatenationOfFiveDiffs": true,
+    "combinedShaMatches": true,
+    "exactlyFiveAuthorizedDocumentationTargets": true,
+    "readOnlyGitApplyCheck": true,
+    "all123InputHashesUnchanged": true,
+    "resume2PreservedByteForByte": true,
+    "resume2ArtifactSetPreserved": true,
+    "architecture01021RowsVerbatim": true,
+    "globalExternal21RowsVerbatim": true,
+    "RBR19InOrderAnd21Mappings": true,
+    "groupsAtoNand33OriginalIDs": true,
+    "noOldACPassed": true,
+    "AC24Named008WithPOApplicationPending": true,
+    "1034OriginalBytesRemainPrefix": true,
+    "bothReviewFindingsAcceptedAndMapped": true,
+    "RBR12RequiredCorrectedConceptsPresent": true,
+    "VIDEOLoggingCurrentDisclosureAndProofLinksPresent": true,
+    "VIDEOLoggingStrictDispositionVerbatim": true,
+    "fiveSeparateStoryCarriesMapped": true,
+    "exactSamePendingT4Disclosure": true,
+    "pilot-attempts.csvHeaderOnly": true,
+    "pilot-focus-targets.csvHeaderOnly": true,
+    "fiveUnassignedZeroRealUsers": true,
+    "twelveBlankNotRunDenominators": true,
+    "allSheetsPreservedExactFromReviewedPackage": true,
+    "tenPilotCopyTemplatesRemainSourceExact": true,
+    "all70ReleaseRowsFixedShapeAndMapped": true,
+    "releaseEvidenceSourcesExist": true,
+    "relativeLinksResolveFromEventualTargets": true,
+    "runnerSection14BytePreserved": true,
+    "rootProvenanceRefreshPreservesOriginalContent": true
+  },
+  "allPassed": true,
+  "details": {
+    "patchReconstruction": [
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "byteExact": true,
+        "baseHashMatches": true,
+        "previewHashMatches": true,
+        "patchHashMatches": true
+      },
+      {
+        "target": "docs/qa/evidence/studio-observed-authoring/usability-pilot.md",
+        "byteExact": true,
+        "baseHashMatches": true,
+        "previewHashMatches": true,
+        "patchHashMatches": true
+      },
+      {
+        "target": "docs/qa/evidence/studio-observed-authoring/release-readiness.md",
+        "byteExact": true,
+        "baseHashMatches": true,
+        "previewHashMatches": true,
+        "patchHashMatches": true
+      },
+      {
+        "target": "docs/qa/evidence/studio-observed-authoring/devops-handoff.md",
+        "byteExact": true,
+        "baseHashMatches": true,
+        "previewHashMatches": true,
+        "patchHashMatches": true
+      },
+      {
+        "target": "docs/stories/10.34.story.md",
+        "byteExact": true,
+        "baseHashMatches": true,
+        "previewHashMatches": true,
+        "patchHashMatches": true
+      }
+    ],
+    "gitApplyCheck": {
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "inputDrift": [],
+    "rootProvenanceRefresh": {
+      "createdAt": "2026-10-19T01:35:03.267238+00:00",
+      "mutator": "root coordinator, not this worker",
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/RESUME-HANDOFF-20261018-CODEX.md",
+      "beforeSha256": "604260c53e752257f3ea53d61b2a15d5b536ff61924be53c340cd595e39729a7",
+      "afterSha256": "7965d55220905ada4ca1670c941f65360c596697f6970f39b096fcaa94c17212",
+      "prependedBytes": 525,
+      "prependedSha256": "93b449b910cc1cdd99920b33f4c2c0265b5ebd80b0073322f65e19854801c78b",
+      "originalContentSha256": "604260c53e752257f3ea53d61b2a15d5b536ff61924be53c340cd595e39729a7",
+      "originalPausedContentBytePreserved": true,
+      "reason": "Root explicitly notified this worker that a current-resume pointer banner was prepended; root checked outside B1 source capture and 20 quoted inputs. Current resume3 binding is refreshed for this root-owned provenance change only.",
+      "resume2HistoricalManifestAndArtifacts": "Preserved byte-for-byte; historical handoff input hash intentionally remains the old captured hash.",
+      "patchAndPreviewChanges": false,
+      "affectedChecksRerun": [
+        "Current manifest input hashes",
+        "Pure prepend / original content hash",
+        "Reviewed resume2 artifact preservation"
+      ],
+      "unaffectedStaticChecks": "Prior exact patch reconstruction/applicability, previews, links/anchors, section14 and content/package checks remain bound to unchanged artifacts; no runtime test/build rerun."
+    }
+  },
+  "runtimeTestsRun": false,
+  "buildsRun": false,
+  "patchesApplied": false,
+  "sourceOrQuotedTargetsEdited": false,
+  "gitWrites": false,
+  "externalContacts": false,
+  "affectedChecksRerunAt": "2026-10-19T01:35:03.305061+00:00"
+}

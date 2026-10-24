@@ -1,0 +1,54 @@
+{{- /*
+Studio v1 WP7, decision D3: the runner's only autoscaler, and it is OFF by default.
+
+Scales runner PODS (one browser each) on the dispatch backlog the worker exports as
+`studio_dispatch_backlog{state}`: ledger rows accepted and not yet handed to a runner. Never on CPU:
+a saturated runner refuses with 429 and stays ready, so CPU is not the constraint.
+
+KEDA creates and owns the HPA for this object from the external metric; the chart renders no
+HorizontalPodAutoscaler for the runner, CPU-based or otherwise.
+*/ -}}
+{{- if and .Values.studioRunner.enabled .Values.studioRunner.autoscaling.enabled }}
+{{- $as := .Values.studioRunner.autoscaling }}
+{{- $runDeadline := div (int (default 120000 (get .Values.studioRunner.runnerEnv "STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS"))) 1000 }}
+{{- $cooldown := int $as.cooldownPeriodSeconds }}
+{{- if lt $cooldown $runDeadline }}
+{{- fail (printf "studioRunner.autoscaling.cooldownPeriodSeconds (%d) must be >= the runner's run deadline, STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS (%d s), so a scale-in never lands inside a run's lifetime" $cooldown $runDeadline) }}
+{{- end }}
+{{- if lt (int $as.minReplicaCount) 1 }}
+{{- fail "studioRunner.autoscaling.minReplicaCount must be >= 1: with no runner pod a dispatch is a connection failure, which the dispatcher treats as ambiguous" }}
+{{- end }}
+{{- if lt (int $as.maxReplicaCount) (int $as.minReplicaCount) }}
+{{- fail "studioRunner.autoscaling.maxReplicaCount must be >= minReplicaCount" }}
+{{- end }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "put-checks.studioRunner.fullname" . }}
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.studioRunner.selectorLabels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "put-checks.studioRunner.fullname" . }}
+  minReplicaCount: {{ $as.minReplicaCount }}
+  maxReplicaCount: {{ $as.maxReplicaCount }}
+  pollingInterval: {{ $as.pollingIntervalSeconds }}
+  # KEDA applies cooldownPeriod only to scale-to-zero; with minReplicaCount >= 1 the scale-down
+  # stabilization window below is what delays a scale-in. Both come from the same key.
+  cooldownPeriod: {{ $cooldown }}
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: {{ $cooldown }}
+  triggers:
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: {{ required "studioRunner.autoscaling.prometheus.serverAddress is required when autoscaling is enabled" $as.prometheus.serverAddress | quote }}
+        query: {{ $as.prometheus.query | quote }}
+        threshold: {{ $as.targetBacklogPerPod | quote }}
+{{- end }}

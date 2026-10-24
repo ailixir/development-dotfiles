@@ -1,0 +1,20 @@
+{
+  "statuses": [
+    {
+      "exit_code": null,
+      "session_id": 34034,
+      "outputBytes": 0,
+      "done": []
+    },
+    {
+      "exit_code": 1,
+      "session_id": null,
+      "outputBytes": 6825,
+      "done": [
+        "FR06_DONE:{\"passed\": 4, \"failure\": {\"type\": \"AssertionError\", \"args\": [\"OPERATOR_REJECTED:STATIC_ORIGINAL_CLOCK_LAST_SAMPLE_CORRECTION_BEFORE_FINAL_RUN\"]}, \"operatorSteps\": 0}"
+      ]
+    }
+  ],
+  "reason": "bounded run stopped before operator response to carry the already checked after-observation sample into final token chronology",
+  "actualTargetEffects": 0
+}

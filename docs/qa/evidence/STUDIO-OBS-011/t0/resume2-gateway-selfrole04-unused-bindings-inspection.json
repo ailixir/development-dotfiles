@@ -1,0 +1,30 @@
+{
+  "kind": "ROOT_UNUSED_SELFROLE04_BINDING_INSPECTION",
+  "scope": "Original held Bash builtins only; parent control trace, no helper execution or resource qualification.",
+  "variables": {
+    "chunk_id": "140816",
+    "wall_time_seconds": 1.00293775,
+    "session_id": 29815,
+    "original_token_count": 95,
+    "output": "declare -p GATEWAY_SELFROLE04_SOURCE_BUFFER GATEWAY_SELFROLE04_READ_ST \rATUS GATEWAY_SELFROLE04_STARTED GATEWAY_SELFROLE04_ACTUAL_STATUS\r\nbash: declare: GATEWAY_SELFROLE04_SOURCE_BUFFER: not found\r\nbash: declare: GATEWAY_SELFROLE04_READ_STATUS: not found\r\nbash: declare: GATEWAY_SELFROLE04_STARTED: not found\r\nbash: declare: GATEWAY_SELFROLE04_ACTUAL_STATUS: not found\r\nbash-3.2$ "
+  },
+  "variableSeparateStatus": {
+    "chunk_id": "e8bf8f",
+    "wall_time_seconds": 1.001858417,
+    "session_id": 29815,
+    "original_token_count": 24,
+    "output": "printf 'SELFROLE04_PRIOR_NAMES_STATUS=%s\\n' \"$?\"\r\nSELFROLE04_PRIOR_NAMES_STATUS=1\r\nbash-3.2$ "
+  },
+  "function": {
+    "chunk_id": "764a25",
+    "wall_time_seconds": 1.001542666,
+    "session_id": 29815,
+    "original_token_count": 51,
+    "output": "if declare -F gateway_python_self_roles04_once; then printf 'SELFROLE0 \r4_PRIOR_FUNCTION=PRESENT\\n'; else printf 'SELFROLE04_PRIOR_FUNCTION=ABSENT\\n'; f \ri\r\nSELFROLE04_PRIOR_FUNCTION=ABSENT\r\nbash-3.2$ "
+  },
+  "allFourVariablesAbsent": true,
+  "functionAbsent": true,
+  "diagnosticInvocations": 0,
+  "freezeInvocations": 0,
+  "credit": false
+}

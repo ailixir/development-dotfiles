@@ -1,0 +1,34 @@
+{
+  "status": "PREPARED_RESUME5_PENDING_EXACT_REVIEWS_AFTER_ACTUAL_ADMISSION_FAILURE",
+  "story": "STUDIO-OBS-009",
+  "rootAdoptionSha256": "a4d1437fbd8f868b276f01ea1d85f4767022fcdf3323b002cd656a8c4c072097",
+  "architectureReviewSha256": "1805b363dfbc37e3df13d2ea71fb706a2527feb6f11227478cb0d1ced944bea5",
+  "qaReviewSha256": "f3571ed98e5c5423cfcd83181d849c9847b5bbd750ec0475680f27010a548976",
+  "qaFindingsSha256": "f063a1acf9df32dfdb5ec127ed6285ddd62bb236bea5164b4f42ff7d47188a51",
+  "subjectPreserved": "6b308963dc623749151daad14d363f2a58899d6687bb3da6a8986e439a6375d9",
+  "adoptedFindings": {
+    "G80-LINK-06 native-report custody": "IMPLEMENTED_PENDING_EXACT_REVIEW",
+    "G80-DIFF-08 generated-proof metadata": "EXPLICIT_GENERATED_ROLES_FINAL_MANIFEST_AUTHORITY_PENDING_EXACT_REVIEW"
+  },
+  "priorAllSafeguardsPreserved": true,
+  "functionalControls": 248,
+  "sourceBindings": "Prior accepted f9c1808/main506/dist238/Helm22 metadata, no new census",
+  "prospectiveLabel": "obs009-gateway80-offtree03-20261019",
+  "prospectiveWorkspaceRuntimeNeverCreatedOrConsumed": false,
+  "parallelC8ActionOrInspection": false,
+  "remaining": [
+    "exact05 architecture/QA reviews",
+    "separate root SAME-H continuation decision",
+    "actual fresh continuation capture and separate rootrelease",
+    "guardnegative/status/SAMEheld then separately authorized native phases/archive/review/final0/permit/exit/postclose"
+  ],
+  "readiness": false,
+  "released": false,
+  "credit": false,
+  "sourceGeneration": "resume5",
+  "actualAdmissionFailureSha256": "78435452fb79a10ba5bbc580f65e405a01a0bd71271854d70039d951f44179cf",
+  "runtimeAlreadyExistsHoldOnly": true,
+  "workspaceAbsent": true,
+  "actualNativePhases": 0,
+  "currentState": "RESERVED_READ_ONLY_ADMISSION_FAILED_NO_NATIVE"
+}

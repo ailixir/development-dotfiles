@@ -1,0 +1,55 @@
+"""Bound corrected literals and unchanged seals. No prior756/1020 replay or186 reads."""
+import ast,hashlib,json,shlex,stat
+from pathlib import Path
+B=Path('docs/qa/evidence/STUDIO-OBS-011/t0');S=B/'resume-architecture/resume2/gateway-source04-bin-app-failure-disposition-design02';P=B/'resume-architecture/resume2/gateway-source04-bin-app-failure-disposition-design';Q=B/'qa/gateway-source04-bin-app-failure-disposition-design-review';O=B/'qa/gateway-source04-bin-app-failure-disposition-design02-review'
+checks=[];pins=[]
+def sha(b):return hashlib.sha256(b).hexdigest()
+def check(n,v):
+ if v is not True:raise AssertionError(n)
+ checks.append({'id':n,'passed':True})
+def bound(p,digest,size=None,mode=None):
+ b=p.read_bytes();s=p.lstat();check('HASH_'+str(p),sha(b)==digest);check('REGULAR_'+str(p),stat.S_ISREG(s.st_mode))
+ if size is not None:check('BYTES_'+str(p),len(b)==size)
+ if mode is not None:check('MODE_'+str(p),stat.S_IMODE(s.st_mode)==mode)
+ pins.append(dict(path=str(p),sha256=sha(b),bytes=len(b),mode=stat.S_IMODE(s.st_mode)));return b
+raw=bound(S/'manifest.json','b170a86598e96a4e50cd398fbc4da6e39b03f3e8693db9b0b53f4c4bb9e94fa8');m=json.loads(raw)
+for r in m['files']:bound(S/r['path'],r['sha256'],r['bytes'],r['mode'])
+pp=json.loads((S/'pins.json').read_bytes())
+for r in pp['pins']:bound(Path(r['path']),r['sha256'],r['bytes'],r['mode'])
+check('CURRENT20_PRIOR25',len(m['files'])==20 and len(pp['pins'])==25)
+check('OLD12_IMMUTABLE',len(json.loads((P/'manifest.json').read_bytes())['files'])==12)
+check('OLD_QA10_IMMUTABLE',len(json.loads((Q/'manifest.json').read_bytes())['files'])==10)
+body=(S/'python-self-roles.py.txt').read_bytes();boot=(S/'self-role-bootstrap.py.txt').read_text();direct=(S/'direct-function-literal.bash.txt').read_text();inv=(S/'proposed-invocation.bash.txt').read_text();d=json.loads((S/'design.json').read_bytes());old=json.loads((P/'design.json').read_bytes())
+check('BODY2221',len(body)==2221 and sha(body)==d['proposedHelper']['payloadSha256'])
+check('BOOTSTRAP1696',len(boot.encode())==1696 and sha(boot.encode())==d['proposedHelper']['bootstrapSha256'])
+check('DIRECT2447_51_195',len(direct.encode())==2447 and len(direct.splitlines())==51 and max(len(x.encode()) for x in direct.splitlines())==195 and sha(direct.encode())==d['proposedHelper']['directFunctionSha256'])
+check('EXACT_EMBEDDED_BOOTSTRAP',shlex.quote(boot) in direct and direct in inv)
+check('SAME_BODY_BEFORE_COMPILE',sha(body) in boot and boot.index('hashlib.sha256(raw).hexdigest()')<boot.index('exec(compile(raw,'))
+check('CAP_BEFORE_PYTHON',direct.index('readonly GATEWAY_SELFROLE04_STARTED=1')<direct.index(' -B -c '))
+check('SINGLE_CHILD',direct.count(' -B -c ')==1 and '"$GATEWAY_SELFROLE04_SOURCE_BUFFER" < /dev/null' in direct)
+check('CLOSED_SHELL_GUARDS','$$ == 3749 && $PPID == 3720' in direct and '${GATEWAY_SELFROLE04_READ_STATUS-} == 1' in direct and 'readonly -f gateway_python_self_roles04_once' in direct)
+check('READONLY_BUFFER_BOUNDED',"read -r -d '' -n 4097" in inv and 'readonly GATEWAY_SELFROLE04_SOURCE_BUFFER' in inv)
+check('PROMPT_SEPARATE_CALL_INACTIVE','Stop for genuine prompt' in inv and '# if gateway_python_self_roles04_once; then' in inv and 'Segmented exact directfunction literal only' in d['proposedHelper']['delivery'])
+for name,text in [('body',body.decode()),('bootstrap',boot)]:
+ t=ast.parse(text)
+ check('NO_JOINT_PID_TUPLE_'+name,not any(isinstance(n,ast.Assign) and any(isinstance(a,ast.Tuple) and any(isinstance(v,ast.Name) and v.id in ('pid','ppid') for v in a.elts) for a in n.targets) for n in ast.walk(t)))
+ check('STRICT_ID_READS_'+name,'value = os.getpid()' in text and 'value = os.getppid()' in text and text.count('type(value) is int and 0 < value < 2147483648')==2)
+oldrole=next(n for n in ast.parse((P/'python-self-roles.py.txt').read_bytes()).body if isinstance(n,ast.FunctionDef) and n.name=='role');newrole=next(n for n in ast.parse(body).body if isinstance(n,ast.FunctionDef) and n.name=='role')
+check('UNCHANGED_CLOSED_ROLE_AST',ast.dump(oldrole)==ast.dump(newrole))
+check('FREEZE_BYTE_IDENTICAL',(S/'freeze-scope-proposal.json').read_bytes()==(P/'freeze-scope-proposal.json').read_bytes())
+changed={'kind','proposedHelper','limits','originalDesignManifestSha256','originalQaManifestSha256','correctedCategory','correctionDesignSha256','rootCompleteFindingAdoptionSha256','prospectiveNamesUnusedRootAttestation'}
+check('REST_OF_DESIGN_UNCHANGED',all(d[k]==v for k,v in old.items() if k not in changed))
+check('NO_NEW_RUNTIME',not d['newRuntimeNamesSelected'] and not d['runtimeInstallerImplemented'] and not d['roleEquivalenceSelected'] and not d['source09ProfileBorrowed'] and not d['actualRuntimeAuthorized'])
+c=json.loads((S/'checks.json').read_bytes());f=json.loads((S/'fake-attempt01.stdout').read_bytes());own=json.loads((O/'critical.stdout').read_bytes())
+check('ATTRIBUTED126_STATIC',c['checks']==126 and all(r['passed'] for r in c['results']))
+check('ATTRIBUTED85_12',f['checks']==85 and len(f['cases'])==12 and all(r['passed'] for r in f['results']) and f['literalFakeExecutions']=={'body':8,'bootstrap':5})
+check('AUTHOR_NO_REAL_BOUNDARIES',f['boundaryAttempts']==[] and f['actualDiagnosticOrProcessActions']==0 and f['nestedExecUsesSameFakeImports'] and f['subjectSafetyEdits'] is False)
+check('INDEPENDENT41_5',own['checks']==41 and own['cases']==5 and all(r['passed'] for r in own['results']) and own['boundaryAttempts']==[])
+check('EMPTY_STDERR',(S/'fake-attempt01.stderr').read_bytes()==b'' and (O/'critical.stderr').read_bytes()==b'')
+check('NO_OLD_SUITE_REPLAY',pp['original186SourcePinsReacquired']==0 and pp['original756AndQa1020Replayed'] is False)
+check('PRIOR1020_ATTRIBUTED',json.loads((Q/'checks.json').read_bytes())['checks']==1020)
+check('PRIOR756_ATTRIBUTED',json.loads((P/'checks.json').read_bytes())['checks']==756)
+check('AUTHOR_FALSEPOSITIVE_RETAINED',b'status/reason/code' in (S/'static-attempt01-error.txt').read_bytes())
+(O/'pins.json').write_text(json.dumps({'subjectManifestSha256':sha(raw),'pins':pins,'pinCount':len(pins),'original186Reacquired':0,'old756Qa1020Replayed':False,'runtimeResourceReads':0},indent=2)+'\n')
+(O/'checks.json').write_text(json.dumps({'kind':'QUINN_DESIGN02_BOUNDED_COHERENCE_VERIFICATION','checks':len(checks),'results':checks,'pins':len(pins),'currentPayloads':20,'priorPinnedMembers':25,'attributedAuthorChecks':{'fake':85,'cases':12,'changedStatic':126},'independentFakeChecks':41,'independentFakeCases':5,'prior756Qa1020Replayed':False,'original186Reacquired':0,'mandatoryFindings':0,'actualDiagnosticOrResourceActions':0},indent=2)+'\n')
+print(json.dumps({'checks':len(checks),'pins':len(pins),'independentFakeChecks':41,'independentFakeCases':5,'mandatoryFindings':0,'actualDiagnosticOrResourceActions':0}))

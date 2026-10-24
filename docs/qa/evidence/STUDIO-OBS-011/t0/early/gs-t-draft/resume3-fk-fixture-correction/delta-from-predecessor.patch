@@ -1,0 +1,64 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -1904,17 +1904,27 @@
+                       UUID.fromString("00000000-0000-4000-8000-0000000000a2"),
+                       "Assert Order reference is visible.",
+                       null)));
++      var principal = ((BffAuthenticationToken) user).getPrincipal();
++      jdbc.update(
++          "INSERT INTO users(sso_id,name,email) VALUES (?,'GS-T fixture',?)",
++          principal.userId(),
++          principal.email());
++      jdbc.update(
++          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) "
++              + "VALUES ('CSI-123','GS-T fixture','Test','LOW',?,'Development')",
++          principal.email());
+       jdbc.update(
+           "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
+               + "authoring_revision_inputs,created_by) VALUES (?,'GS-T source','CSI-123','fixture',"
+-              + "'chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,'user-1')",
++              + "'chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,?)",
+           SOURCE_TEST,
+           mapper.writeValueAsString(
+               List.of("Click Order reference.", "Assert Order reference is visible.")),
+           mapper.writeValueAsString(authoring),
+           mapper.writeValueAsString(
+               com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity.create(
+-                  authoring, Map.of())));
++                  authoring, Map.of())),
++          principal.email());
+     } catch (com.fasterxml.jackson.core.JsonProcessingException failure) {
+       throw new IllegalStateException("GS-T source fixture serialization", failure);
+     }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java
+@@ -535,17 +535,27 @@
+                       UUID.fromString("00000000-0000-4000-8000-0000000000a2"),
+                       "Assert Order reference is visible.",
+                       null)));
++      var principal = ((BffAuthenticationToken) user).getPrincipal();
++      jdbc.update(
++          "INSERT INTO users(sso_id,name,email) VALUES (?,'GS-T fixture',?)",
++          principal.userId(),
++          principal.email());
++      jdbc.update(
++          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) "
++              + "VALUES ('CSI-123','GS-T fixture','Test','LOW',?,'Development')",
++          principal.email());
+       jdbc.update(
+           "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
+               + "authoring_revision_inputs,created_by) VALUES (?,'GS-T source','CSI-123','fixture',"
+-              + "'chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,'user-1')",
++              + "'chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,?)",
+           SOURCE_TEST,
+           mapper.writeValueAsString(
+               List.of("Click Order reference.", "Assert Order reference is visible.")),
+           mapper.writeValueAsString(authoring),
+           mapper.writeValueAsString(
+               com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity.create(
+-                  authoring, Map.of())));
++                  authoring, Map.of())),
++          principal.email());
+     } catch (com.fasterxml.jackson.core.JsonProcessingException failure) {
+       throw new IllegalStateException("GS-T source fixture serialization", failure);
+     }

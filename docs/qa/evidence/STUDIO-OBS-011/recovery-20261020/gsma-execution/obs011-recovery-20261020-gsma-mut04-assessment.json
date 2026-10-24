@@ -1,0 +1,58 @@
+{
+  "label": "obs011-recovery-20261020-gsma-mut04",
+  "mutant": "actual-base-removed",
+  "verdict": "INTENDED_ASSERTION_KILL_GSM_P5",
+  "counts": {
+    "total": 9,
+    "passed": 5,
+    "failed": 4,
+    "errors": 0,
+    "skipped": 0
+  },
+  "collectorExit": 1,
+  "failures": [
+    {
+      "name": "enabledAndReceiptDefaultPathsDoNotAddBasePresenceLookup()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "sites": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT.enabledAndReceiptDefaultPathsDoNotAddBasePresenceLookup(GuidedResultPublicationDisabledIT.java:294)"
+      ],
+      "messageSha256": "a68adedeeacd08d1d556d1abb9725fa7e0a2ae96de96d1d9c3da2f484bce447f",
+      "summary": "original direct fallback PENDING was changed to REFUSED"
+    },
+    {
+      "name": "disabledRetainedSucceededBaseKeepsDirectFallbackPendingAndHttp202()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "sites": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT.disabledRetainedSucceededBaseKeepsDirectFallbackPendingAndHttp202(GuidedResultPublicationDisabledIT.java:203)"
+      ],
+      "messageSha256": "932d38913763638cee4f1848bcd714428e17e457fdfbc6002009e8991c28bb34",
+      "summary": "original direct fallback PENDING was changed to REFUSED"
+    },
+    {
+      "name": "disabledRetainedReceiptKeepsHttpReceiptAuthorityAndCurrentHeadReadiness()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "sites": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT.disabledRetainedReceiptKeepsHttpReceiptAuthorityAndCurrentHeadReadiness(GuidedResultPublicationDisabledIT.java:225)"
+      ],
+      "messageSha256": "a189fcc38c3f17ecc69c50785b88421e20a339fe887be5d3c9b7a84c74ee2f35",
+      "summary": "original direct fallback PENDING was changed to REFUSED"
+    },
+    {
+      "name": "disabledSucceededBaseQueryFailurePropagatesInsteadOfClaimingAbsentBase()",
+      "type": "java.lang.AssertionError",
+      "sites": [
+        "at com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT.disabledSucceededBaseQueryFailurePropagatesInsteadOfClaimingAbsentBase(GuidedResultPublicationDisabledIT.java:317)"
+      ],
+      "messageSha256": "59dd1c9af90f9b8601909fdc8f3e8bef13418278248b6cd348466baf10a01ef0",
+      "summary": "required repository exception not propagated"
+    }
+  ],
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true,
+  "restoreMatches": true,
+  "restoredServiceSha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e",
+  "resultSha256": "edfb96ee7f1ea50841d9136f00cfb46d5d996de3df120fc1e1be0874e436f911",
+  "lifecycleCredit": false
+}

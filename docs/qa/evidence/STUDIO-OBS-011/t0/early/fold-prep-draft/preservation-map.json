@@ -1,0 +1,85 @@
+{
+  "status": "DRAFT_NO_RUNTIME_PROOF",
+  "readOnlySourceBindings": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/DatabaseClock.java": "7cffcd144671e2c82cb9645818905fb17688997b8893687b1afa6ad7ec4d505c",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretValue.java": "d1663040d620f4998ae205e7a61c3c22756b66a9367946cbff486453978ec601",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretWireWriter.java": "14dfb2bee9f4c1fcff936a5e89a392b0c33c0f48dab3eb51fca4c71baed1c954",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/live-surface-judgments.json": "c4b1f0bb7ae5dc41f3f45a609fe5d92fa067f2121e8a248f586061f68ed70adf",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/check.json": "c5f237937f4f8e523a4c79e3db8e87654084ab7f6a6c41d52ecdb4cf108234a1"
+  },
+  "transportBeforeEqualsDraft": [
+    {
+      "operation": "dispatch,cancel",
+      "endpoint": "base-url /v2/runs[/id]",
+      "credential": "runner.serviceIdentityToken",
+      "connectTimeout": "execution.admissionTimeoutOrDefault",
+      "httpVersion": "JDK default HTTP_2 preference",
+      "tls": "StudioRunnerTls.configure",
+      "requestTimeout": "execution.admissionTimeoutOrDefault",
+      "redirects": "NEVER"
+    },
+    {
+      "operation": "validation",
+      "endpoint": "base-url /v2/validate-observed",
+      "credential": "runner.serviceIdentityToken",
+      "connectTimeout": "runner.connectTimeout or 2s",
+      "httpVersion": "HTTP_1_1",
+      "tls": "StudioRunnerTls.configure",
+      "requestTimeout": "min(PublicationBudget.remaining, per-call validationTimeoutMs)",
+      "redirects": "NEVER"
+    },
+    {
+      "operation": "guided assign,context,prepare,dispatch,stop,observe",
+      "endpoint": "runner-origin /internal/v2/studio/guided-sessions/{id}/{operation}",
+      "credential": "fresh controller-token-file supplier",
+      "connectTimeout": "5s",
+      "httpVersion": "HTTP_1_1",
+      "tls": "StudioRunnerTls.sslContext, exact old guided constructor behavior",
+      "requestTimeout": "monotonic 15s narrowed by caller deadline",
+      "redirects": "NEVER"
+    }
+  ],
+  "constructorsPreserved": [
+    "public3arg ObjectMapper/StudioExecutionProperties/StudioRunnerProperties",
+    "public4arg plus StudioRunnerTls"
+  ],
+  "visibilityPreserved": [
+    "observeRequestBytes package-private",
+    "CONTEXT_REFUSED public",
+    "CONTEXT_CLOSED_REFUSAL public",
+    "definiteContextRefusal public static",
+    "closedContextRefusal public static"
+  ],
+  "serializer": {
+    "implementation": "SecretValue.Writer",
+    "registration": "SecretWireWriter.bytes",
+    "count": 1,
+    "modified": false
+  },
+  "profiles": {
+    "publicationGrantAuthority": "!worker",
+    "provisionalDispatchAuthorization": "unconditional",
+    "absentCollaborator": "409 RUNTIME_INCOMPATIBLE at all3 operations",
+    "workerPublicationPropertiesInjectedByFoldedClient": false,
+    "newConfigKeys": []
+  },
+  "clockSites": [
+    "PublicationGrantAuthority mint",
+    "PublicationGrantAuthority judge",
+    "GuidedPlanPublisher claim argument",
+    "GuidedPlanPublisher PublicationBudget clock"
+  ],
+  "protectedLive": [
+    "CFK18 TLS inputs",
+    "CFC01 worker/main bean/profile semantics",
+    "RTP16..21 routes/results",
+    "runner-origin independent of base-url",
+    "all existing configuration keys"
+  ],
+  "alternateSet": {
+    "path": "proposed-final-wiring",
+    "mainFiles": 17,
+    "testFiles": 3,
+    "difference": "three active consumer configuration type swaps; remains proposed pending architecture ruling; no old classes or FOLD_TESTS deletions"
+  }
+}

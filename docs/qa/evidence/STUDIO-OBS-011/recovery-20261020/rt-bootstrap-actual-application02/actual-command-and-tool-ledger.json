@@ -1,0 +1,65 @@
+{
+  "rootAdmissionSha256": "71b55bf4b75aa304edbfb63893f81289b3e68555022822ca81bd6d8cd16d81a0",
+  "guard": {
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application-successor-preparation02/preflight-successor.py",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-root-admission02.json",
+      "71b55bf4b75aa304edbfb63893f81289b3e68555022822ca81bd6d8cd16d81a0"
+    ],
+    "originalToolSession": 82585,
+    "rawExit": 0,
+    "honestNativeProducerRule": "35 exact + exact QA singleton; old36 equality remains false"
+  },
+  "codeApplication": {
+    "originalFastToolSession": null,
+    "rawExit": 0,
+    "receipt": {
+      "scope": "code",
+      "originalPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/code-application.json",
+      "sha256": "176e78392a8d346fcbc914917ead5a55604e7a7fef4f0c3f48f6e1979919591f",
+      "status": "APPLIED_ALL_EXACT_AFTER_HASHES_VERIFIED",
+      "pathCount": 10
+    }
+  },
+  "documentationApplication": {
+    "originalFastToolSession": null,
+    "rawExit": 0,
+    "receipt": {
+      "scope": "documentation",
+      "originalPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/documentation-application.json",
+      "sha256": "763f9df38a4fac7687f2b72a99ce190550043d752cec7c9b89793ee5045adb0e",
+      "status": "APPLIED_ALL_EXACT_AFTER_HASHES_VERIFIED",
+      "pathCount": 2
+    }
+  },
+  "postapplicationCapture": {
+    "originalToolSession": 37549,
+    "rawExit": 0,
+    "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "sourceFiles": 1814
+  },
+  "configuredBuild": {
+    "originalToolSession": 91505,
+    "collectorPid": 54966,
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner-build.py",
+      "obs011-recovery-20261020-rt-bootstrap-actual-build01"
+    ],
+    "rawOuterExit": 0,
+    "rawChildExit": 0,
+    "startedAtUtc": "2026-10-21T03:09:15.110495+00:00",
+    "endedAtUtc": "2026-10-21T03:09:17.552387+00:00",
+    "elapsedSeconds": 2.13,
+    "sourceStable": true,
+    "buildInputStable": true,
+    "logSha256": "074ddb29026707f65de6f943bf533eb35900f2470e8a62d8fe62e52e3ec949f1",
+    "resultSha256": "aa55d986311e4c92b09d1ba87ecda5b81fd49390f65312ca45000848ad8385df"
+  },
+  "allOriginalHandlesTerminal": true,
+  "configuredBuildInvocationCount": 1,
+  "testNativeBackendReplayImageInvocations": 0,
+  "heavyAndCurrentInputReadRelease": "EXPLICITLY_SENT_AFTER_91505_POSTCAPTURES_TERMINAL; sealing from captured metadata only",
+  "privateProofReadsAfterRelease": false
+}

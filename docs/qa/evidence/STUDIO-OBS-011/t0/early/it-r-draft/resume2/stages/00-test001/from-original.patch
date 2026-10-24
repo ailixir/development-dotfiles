@@ -1,0 +1,317 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -3577,7 +3577,13 @@
+             .put("auditCanaryCount", AUDIT_CANARIES.size())
+             .put("producersDrained", finalProducersDrained)
+             .put("contextClosed", ownedApplicationQuiescent)
+-            .put("auditComplete", true);
++            .put("auditComplete", true)
++            .put("exactLaneObserved", itrExactWholeLaneObserved())
++            .put("expectedInvocations", itrExpectedInvocationMultiset().size())
++            .put("observedInvocations", FIXTURE_INVOCATIONS.size())
++            .put("corpusControlChecks", ITR_AUDIT_CORPUS_CHECKS.get())
++            .put("finalCorpusControlChecks", ITR_FINAL_CORPUS_CHECKS.get())
++            .put("contentScans", ITR_AUDIT_CONTENT_SCANS.get());
+     privateImmutableJson(COHORT_DIRECTORY.resolve("audit-final.json"), audit);
+     finalAuditComplete = true;
+   }
+@@ -4775,9 +4781,88 @@
+     return snapshot.toString();
+   }
+ 
+-  private UUID publishedTestId;
+-  private String currentPublishedSession;
+-  private JsonNode currentPublishedReceipt;
++  private record ItrPublishedFixture(UUID testId, String sessionId, JsonNode receipt) {}
++
++  private void itrEnsureClassFixtures() throws Exception {
++    assertThat(cleanupUnconfirmed).as("prior actual owner cleanup remains unconfirmed").isFalse();
++    coreRole = "owner";
++    forgetCachedCoreIdentity(); // This invocation reads its actual current fixture Core identity.
++    jdbc.update(
++        "INSERT INTO users(id,sso_id,name,email,created_at) VALUES"
++            + " (?,'user-1','Fixture','fixture@example.invalid',now()) ON CONFLICT DO NOTHING",
++        UUID.randomUUID());
++    jdbc.update(
++        "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) VALUES"
++            + " ('CSI-123','Orders','Ops','HIGH','fixture@example.invalid','Production') ON"
++            + " CONFLICT DO NOTHING");
++    if (guidedWorker == null && ordinaryWorker == null) {
++      startWorkers(); // First construction only; no retry of an existing or unknown owner.
++    } else {
++      assertThat(guidedWorker).as("existing guided owner is retained").isNotNull();
++      assertThat(ordinaryWorker).as("existing ordinary owner is retained").isNotNull();
++      assertThat(guidedWorker.isAlive()).as("no implicit guided restart").isTrue();
++      assertThat(ordinaryWorker.isAlive()).as("no implicit ordinary restart").isTrue();
++    }
++    seedGovernedPolicies("CSI-123");
++  }
++
++  private ItrPublishedFixture itrFreshPublishedFixture() throws Exception {
++    itrEnsureClassFixtures();
++    coreRole = "owner";
++    UUID test = createSource(TEXT);
++    String session = startLearning(test);
++    awaitFinalizing(session);
++    JsonNode command = C.object().put("schemaVersion", 3)
++        .put("expectedSourceRevision", "1").put("expectedConfigurationRevision", "1");
++    JsonNode receipt = publicCall("/api/v1/studio/guided-sessions/" + session + "/finalize",
++        command, 200, UUID.randomUUID().toString());
++    assertThat(receipt.path("revisionId").asText()).isNotBlank();
++    p3AwaitTeardown(session); // Original confirmed native-owner acknowledgement, never early cleanup.
++    return new ItrPublishedFixture(test, session, receipt.deepCopy());
++  }
++
++  private void itrEstablishOwnAuditCorpus() throws Exception {
++    // Actual authored source canaries precede this invocation's genuine producers.
++    AUDIT_CANARIES.addAll(TEXT);
++    ItrPublishedFixture fixture = itrFreshPublishedFixture();
++    UUID execution = UUID.fromString(publicCall(
++        "/api/v1/studio/tests/" + fixture.testId() + "/execute", C.object(), 202,
++        UUID.randomUUID().toString()).path("executionId").asText());
++    assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
++    JsonNode result = awaitJoinedVideo(execution);
++    assertThat(result.path("status").asText()).isEqualTo("PASSED");
++  }
++
++  private static final java.util.concurrent.atomic.AtomicInteger ITR_AUDIT_CONTENT_SCANS =
++      new java.util.concurrent.atomic.AtomicInteger();
++  private static final java.util.concurrent.atomic.AtomicInteger ITR_AUDIT_CORPUS_CHECKS =
++      new java.util.concurrent.atomic.AtomicInteger();
++  private static final java.util.concurrent.atomic.AtomicInteger ITR_FINAL_CORPUS_CHECKS =
++      new java.util.concurrent.atomic.AtomicInteger();
++
++  private static java.util.Map<String, Long> itrExpectedInvocationMultiset() {
++    var expected = new java.util.TreeMap<String, Long>();
++    for (String method : SINGLETON_METHODS) {
++      if (INCREMENTAL_METHODS.contains(method)
++          == (FIXTURE_PROFILE == FixtureProfile.INCREMENTAL_2048)) {
++        expected.put(method + "/singleton/0", 1L);
++      }
++    }
++    if (FIXTURE_PROFILE == FixtureProfile.INCREMENTAL_2048) {
++      for (int ordinal = 0; ordinal < INCREMENTAL_VARIANTS.size(); ordinal++) {
++        expected.put("incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser/"
++            + INCREMENTAL_VARIANTS.get(ordinal) + "/" + (ordinal + 1), 1L);
++      }
++    }
++    return expected;
++  }
++
++  private static boolean itrExactWholeLaneObserved() {
++    var actual = FIXTURE_INVOCATIONS.stream().collect(java.util.stream.Collectors.groupingBy(
++        invocation -> invocation.method + "/" + invocation.variant + "/" + invocation.variantOrdinal,
++        java.util.TreeMap::new, java.util.stream.Collectors.counting()));
++    return actual.equals(itrExpectedInvocationMultiset());
++  }
+ 
+   @Test
+   void actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache() throws Exception {
+@@ -17620,6 +17705,7 @@
+   @org.junit.jupiter.api.Order(1)
+   void actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()
+       throws Exception {
++    final int itrNav0 = NAVIGATIONS.get(), itrRec0 = RECEIPTS.size(), itrVal0 = VALUES.size();
+     startWorkers();
+     // The real service-token filter precedes Spring path/body binding. These refusals have no
+     // execution row and cannot reach the admission CAS or either model gateway.
+@@ -17754,8 +17840,8 @@
+     assertThat(learningState.document().path("state").asText())
+         .as("%s logs=%s", diagnostic, TEMP)
+         .isEqualTo("FINALIZING");
+-    assertThat(RECEIPTS).containsExactly(VALUES.get(0));
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(RECEIPTS.subList(itrRec0, RECEIPTS.size())).containsExactly(VALUES.get(itrVal0));
++    assertThat(NAVIGATIONS.get()).isEqualTo(itrNav0 + 1);
+     int learningCalls = MODEL_WIRE.size();
+     assertThat(learningCalls).isPositive();
+     String key = UUID.randomUUID().toString();
+@@ -17769,8 +17855,8 @@
+     assertThat(publicCall("/api/v1/studio/guided-sessions/" + id + "/finalize", finalize, 200, key))
+         .isEqualTo(receipt);
+     assertThat(MODEL_WIRE).hasSize(learningCalls);
+-    assertThat(RECEIPTS).hasSize(1);
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(RECEIPTS).hasSize(itrRec0 + 1);
++    assertThat(NAVIGATIONS.get()).isEqualTo(itrNav0 + 1);
+     String artifact =
+         jdbc.queryForObject(
+             "SELECT artifact::text FROM ui_test_revisions WHERE id=?",
+@@ -17925,8 +18011,9 @@
+         assertThat(closedWorkerExecutors.get()).isEqualTo(3);
+       }
+     }
+-    assertThat(NAVIGATIONS.get()).isEqualTo(3);
+-    assertThat(RECEIPTS).containsExactlyElementsOf(VALUES);
++    assertThat(NAVIGATIONS.get()).isEqualTo(itrNav0 + 3);
++    assertThat(RECEIPTS.subList(itrRec0, RECEIPTS.size()))
++        .containsExactlyElementsOf(VALUES.subList(itrVal0, VALUES.size()));
+     assertThat(VALUES).doesNotHaveDuplicates();
+     assertThat(MODEL_WIRE).hasSize(learningCalls);
+     assertThat(LEGACY_MODEL_CALLS.get()).isZero();
+@@ -17954,8 +18041,8 @@
+     historicalReplica(id, receipt, true, false, "RUNTIME_INCOMPATIBLE");
+     assertThat(MODEL_WIRE).hasSize(learningCalls);
+     assertThat(LEGACY_MODEL_CALLS.get()).isZero();
+-    assertThat(RECEIPTS).hasSize(3);
+-    assertThat(NAVIGATIONS.get()).isEqualTo(3);
++    assertThat(RECEIPTS).hasSize(itrRec0 + 3);
++    assertThat(NAVIGATIONS.get()).isEqualTo(itrNav0 + 3);
+     ObjectNode evidence =
+         C.object()
+             .put("controlledProviderCalls", learningCalls)
+@@ -17971,13 +18058,13 @@
+         sessions.transaction(() -> sessions.lock(id).document().path("counters").deepCopy()));
+     Files.writeString(TEMP.resolve("joined-evidence.json"), evidence.toPrettyString());
+     schedulerAndNewHead(testId, id, start, finalize, receipt);
+-    publishedTestId = testId;
+   }
+ 
+   @Test
+   @org.junit.jupiter.api.Order(2)
+   void queuedAndPreReadyRefusals() throws Exception {
+-    UUID testId = publishedTestId;
++    ItrPublishedFixture own = itrFreshPublishedFixture();
++    UUID testId = own.testId();
+     assertThat(testId)
+         .as("Requires the genuinely published revision from the preceding integration flow")
+         .isNotNull();
+@@ -18389,6 +18476,10 @@
+   @Test
+   @org.junit.jupiter.api.Order(3)
+   void editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness() throws Exception {
++    ItrPublishedFixture own = itrFreshPublishedFixture();
++    UUID publishedTestId = own.testId();
++    String currentPublishedSession = own.sessionId();
++    JsonNode currentPublishedReceipt = own.receipt();
+     assertThat(publishedTestId).isNotNull();
+     assertThat(currentPublishedReceipt).isNotNull();
+     coreRole = "owner";
+@@ -18512,8 +18603,6 @@
+             200,
+             UUID.randomUUID().toString());
+     assertThat(nextReceipt.path("revisionId")).isNotEqualTo(originalReceipt.path("revisionId"));
+-    currentPublishedSession = secondSession;
+-    currentPublishedReceipt = nextReceipt.deepCopy();
+     assertThat(activationIdentity(schedule)).isEqualTo(before);
+     assertThat(RECEIPTS).hasSize(priorSubmits + 1);
+     assertThat(MODEL_WIRE).hasSize(afterLearningCalls);
+@@ -18584,6 +18673,7 @@
+   @Test
+   @org.junit.jupiter.api.Order(4)
+   void asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays() throws Exception {
++    itrEnsureClassFixtures();
+     int beforeModels = MODEL_WIRE.size(),
+         beforeNavigations = NAVIGATIONS.get(),
+         beforeReceipts = RECEIPTS.size(),
+@@ -18744,6 +18834,7 @@
+   @Test
+   @org.junit.jupiter.api.Order(5)
+   void modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance() throws Exception {
++    itrEnsureClassFixtures();
+     int models = MODEL_WIRE.size(), navigations = NAVIGATIONS.get(), receipts = RECEIPTS.size();
+     timingSourceText =
+         "Open " + URL + " or " + URL + "?alternative=two and read the Order reference.";
+@@ -18845,6 +18936,7 @@
+   @Test
+   @org.junit.jupiter.api.Order(6)
+   void absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork() throws Exception {
++    itrEnsureClassFixtures();
+     for (boolean cancel : List.of(false, true)) {
+       int navigations = NAVIGATIONS.get(), receipts = RECEIPTS.size(), calls = MODEL_WIRE.size();
+       UUID test = createSource(TEXT, cancel ? 30 : 1);
+@@ -18929,6 +19021,7 @@
+   @org.junit.jupiter.api.Order(7)
+   void observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays()
+       throws Exception {
++    itrEnsureClassFixtures();
+     int models = MODEL_WIRE.size(), navigations = NAVIGATIONS.get(), receipts = RECEIPTS.size();
+     int choiceReceipts = CHOICE_RECEIPTS.size(), invocations = REPLAY_INVOCATIONS.size();
+     int providerFailures = PROVIDER_FAILURES.get();
+@@ -19123,6 +19216,7 @@
+   @org.junit.jupiter.api.Order(8)
+   void originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall()
+       throws Exception {
++    itrEnsureClassFixtures();
+     observedChoicePage = true;
+     try {
+       for (String mode : List.of("observation-body-drift", "sql-capture")) {
+@@ -19407,6 +19501,7 @@
+   @org.junit.jupiter.api.Order(9)
+   void actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()
+       throws Exception {
++    itrEnsureClassFixtures();
+     coreRole = "owner";
+     String canary = "JOINED-LOGIN-" + UUID.randomUUID();
+     var fixtureHttp = HttpClient.newHttpClient();
+@@ -20141,6 +20236,7 @@
+   @Test
+   @org.junit.jupiter.api.Order(9)
+   void guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes() throws Exception {
++    itrEnsureClassFixtures();
+     UUID testId = createSource(TEXT);
+     long launchesBefore = p3LaunchCounter().path("count").asLong();
+     String sessionId = startLearning(testId);
+@@ -30825,6 +30921,7 @@
+ 
+     C5Capture(List<String> values, boolean traceFromStart) {
+       this.values = values;
++      AUDIT_CANARIES.addAll(values);
+       encoded = new C5CanaryStream(values);
+       this.traceFromStart = traceFromStart;
+       var context =
+@@ -31800,8 +31897,8 @@
+             }
+           }
+           if (producersDrained && targetClosed && appender.getOutputStream() == originalStream) {
+-            // Same complete audit assertions before this earlier private-capture deletion boundary.
+-            p3AttemptTeardown(failures, GuidedPublicationReplayIT::scanCompleteAuditStream);
++            // Same audit-content assertions before private capture deletion; whole-corpus controls run at exact final lane boundaries.
++            p3AttemptTeardown(failures, GuidedPublicationReplayIT::scanAuditContent);
+             p3AttemptTeardown(
+                 failures, () -> Files.deleteIfExists(TEMP.resolve("c5-private-values.json")));
+             synchronized (encodedMonitor) {
+@@ -34422,17 +34519,33 @@
+    */
+   @Test
+   @org.junit.jupiter.api.Order(39)
+-  void auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass() {
+-    scanCompleteAuditStream();
++  void auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass() throws Exception {
++    itrEstablishOwnAuditCorpus();
++    scanAuditContent();
++    itrAssertAuditCorpus();
+   }
+ 
+   private static void scanCompleteAuditStream() {
++    scanAuditContent();
++    if (itrExactWholeLaneObserved()) {
++      itrAssertAuditCorpus();
++      ITR_FINAL_CORPUS_CHECKS.incrementAndGet();
++    }
++  }
++
++  private static void itrAssertAuditCorpus() {
+     var events = new java.util.ArrayList<>(AUDIT_EVENTS.list);
+     assertThat(AUDIT_CANARIES).as("the OBS-007 case registered its canaries").isNotEmpty();
+     assertThat(events)
+         .as("the joined runs emitted admitted-action and replay-dispatch events")
+         .anyMatch(e -> e.getFormattedMessage().equals("GUIDED_ACTION_ADMITTED"))
+         .anyMatch(e -> e.getFormattedMessage().equals("REPLAY_DISPATCHED"));
++
++    ITR_AUDIT_CORPUS_CHECKS.incrementAndGet();
++  }
++
++  private static void scanAuditContent() {
++    var events = new java.util.ArrayList<>(AUDIT_EVENTS.list);
+     for (var event : events) {
+       var keys = new java.util.ArrayList<String>();
+       var rendered = new StringBuilder(event.getFormattedMessage());
+@@ -34450,5 +34563,7 @@
+         assertThat(rendered.toString()).doesNotContain(canary);
+       }
+     }
++  
++    ITR_AUDIT_CONTENT_SCANS.incrementAndGet();
+   }
+ }

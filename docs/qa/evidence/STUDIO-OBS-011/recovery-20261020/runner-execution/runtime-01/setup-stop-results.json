@@ -1,0 +1,122 @@
+{
+  "kind": "11_RT_EXECUTION_SETUP_STOP",
+  "capturedAt": "2026-10-20T14:51:38.548061+00:00",
+  "status": "STOPPED_AFTER_EXPECTED_PROOFS_UNEXPECTED_SANDBOX_LAUNCHER_SETUP_FAILURE",
+  "runs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-selftest01-results.json",
+      "sha256": "2ad6d6bd562546e0e06088684fba1b393b18bf0da2839613fa9912527b93562f",
+      "actual": {
+        "command": [
+          "node",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/ast-equal.self-test.mjs",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T14:50:01.922691+00:00",
+        "elapsedSeconds": 0.41,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "0cfba547d86bbc96a3acdddace743e65cd7e1f81d1d6b9433a0293543f51c768",
+        "testInputStable": true,
+        "testInputDigestBefore": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+        "testInputDigestAfter": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116"
+      }
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-ast01-results.json",
+      "sha256": "22bf81b28027c810390bfb29774cc6b6617173a2ca7bf27b9bc1e54d4c6ced36",
+      "actual": {
+        "command": [
+          "node",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/ast-equal.mjs",
+          "/private/tmp/obs011-rt-recovery-20261020-root01/before-repo",
+          "/private/tmp/obs011-rt-recovery-20261020-root01/repo",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/exact-comment-allowance.json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T14:50:11.230651+00:00",
+        "elapsedSeconds": 0.32,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "d4eff480ca3a742f2fa247a7a518b180913fbaaa72a157fb05dd954420129ce9",
+        "testInputStable": true,
+        "testInputDigestBefore": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+        "testInputDigestAfter": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116"
+      }
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-names01-results.json",
+      "sha256": "d21bbfb93d9bb6aff90a0a72711e0d6c26ae95871721d4070c42eb3bb37ef559",
+      "actual": {
+        "command": [
+          "node",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/test-name-map.mjs",
+          "/private/tmp/obs011-rt-recovery-20261020-root01/before-repo",
+          "/private/tmp/obs011-rt-recovery-20261020-root01/repo",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-execution/runtime-deferred-name-map.json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T14:50:19.838615+00:00",
+        "elapsedSeconds": 0.25,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "testInputStable": true,
+        "testInputDigestBefore": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+        "testInputDigestAfter": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116"
+      }
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-types01-results.json",
+      "sha256": "71c9154a78e8fd71dd9b8de76121ab3f188ddc6f93e16b671a4b74b8feec90ef",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--config.package-manager-strict=false",
+          "--dir=/private/tmp/obs011-rt-recovery-20261020-root01/repo/studio-runner",
+          "run",
+          "type-check"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T14:50:26.717345+00:00",
+        "elapsedSeconds": 0.82,
+        "exit": 1,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "c92c55ba8f6b95d3891fd2193164452a2908a9eb547905e902865fb7b09834cf",
+        "testInputStable": true,
+        "testInputDigestBefore": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+        "testInputDigestAfter": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116"
+      }
+    }
+  ],
+  "seedReceiptSha256": "ddf4a0373ccb69a82c6029b94b4a03571d85f0fbf7e33fc8c7e77e6c371a14e7",
+  "nameMapPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-execution/runtime-deferred-name-map.json",
+  "nameMapSha256": "b229bd1bb999055c8316beb6fa1a355d7c36e428b65b46213da3c34050184b30",
+  "setupFindingPath": "setup-finding.json",
+  "actualSourceDigest": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+  "actualDistDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "sandboxInputAndDistStable": true,
+  "historicalPacketUnchanged": true,
+  "unrun": [
+    "lint",
+    "fullunit",
+    "beforecompileremit",
+    "aftercompileremit",
+    "emitcomparison",
+    "fixtures",
+    "copyback"
+  ],
+  "implementationTestFailureClaimed": false,
+  "unitNamedSkipReconciliation": "UNRUN",
+  "rootDisposition": "REQUESTED_MINIMAL_SETUP_REMEDY_BEFORE_ANY_RETRY",
+  "runningJobs": false,
+  "sourceOrDependencyRepairApplied": false,
+  "productionCredit": false
+}

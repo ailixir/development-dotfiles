@@ -1,0 +1,92 @@
+{
+  "recordedAt": "2026-10-19T02:25:07.576802+00:00",
+  "reviewer": "Aria / aiox-architect",
+  "isQaVerdict": false,
+  "compileVerified": false,
+  "runtimeVerified": false,
+  "sourceApplied": false,
+  "authorCorrectionsPerformed": false,
+  "decisions": {
+    "FOLD-prep": "TWO_MANDATORY_CORRECTIONS_THEN_REVIEW_BEFORE_APPLICATION",
+    "FOLD-ORDER-1": "SUPPORT_PRESERVATION_COMPATIBLE_PREP_AND_ATOMIC_FINAL_SWITCH_WITH_PORTS_NO_END_STATE_DEFERRAL",
+    "final-clock-test-baton": "SUPPORT_EXACT_FINAL_TEST_ONLY_SCOPE_ADDITION_FOR_OLD_AUTHORITY_FALLBACK_REMOVAL",
+    "LEFT-V20-1": "SUPPORT_EXACT_FOUR_MATCH_ALLOWLIST_WITH_HASH_BINDING_AND_GLOBAL_V18_ZERO_NO_SIXTH_PATH_RENAME"
+  },
+  "mandatoryCorrections": [
+    "FOLD-PREP-1 preserve exact runner send overload arity",
+    "FOLD-PREP-2 register actual clock fixture translation application/environment scope"
+  ],
+  "foldPaths": {
+    "prepMain": 17,
+    "prepTest": 3,
+    "alternateSamePaths": true,
+    "alternateDifferences": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java"
+    ]
+  },
+  "leftPaths": {
+    "nonDataPaths": 11,
+    "dataPaths": 5,
+    "totalPaths": 16,
+    "overlap": [],
+    "foldPrepOverlap": []
+  },
+  "retainedV20": {
+    "broadPattern": "HistoricalV18|requireV18|historicalV18|HistoricalFault|probeHistoricalAdapter|changedHistoricalCommand|historicalRows|verifyHistorical|readHistoricalV18|historical-v18",
+    "beforeCount": 78,
+    "virtualAfterCount": 4,
+    "virtualAfterHits": [
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+        "line": 1296,
+        "text": "    verifyHistoricalVerdict(a, a.verdict());"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+        "line": 1309,
+        "text": "    verifyHistoricalCandidate(commit.snapshot(), candidate, a.verdict());"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+        "line": 1489,
+        "text": "  private static void verifyHistoricalCandidate("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+        "line": 1561,
+        "text": "  private static void verifyHistoricalVerdict(PublicationContracts.Attempt a, JsonNode v) {"
+      }
+    ],
+    "v18SpecificPattern": "HistoricalV18|requireV18|historicalV18|HistoricalFault|probeHistoricalAdapter|changedHistoricalCommand|historicalRows|readHistoricalV18|historical-v18",
+    "v18SpecificBeforeCount": 70,
+    "v18SpecificVirtualAfterCount": 0,
+    "v18SpecificVirtualAfterHits": [],
+    "exactRetainedFile": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+    "retainedFileSha256": "0f60fabce9dab238203682de49a031a8ec103e4ac18b1694375059f20ab312df",
+    "retainedSymbols": [
+      "verifyHistoricalCandidate",
+      "verifyHistoricalVerdict"
+    ],
+    "allowlistDecision": "SUPPORTED_EXACT_FOUR_MATCH_MULTISET_ONLY_NO_V18_EXCEPTION"
+  },
+  "review": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/fold-left/review.md",
+    "sha256": "ba397c979e396bfa3e70fc81a0aa799a9b213a4f8e11fc5387cc58587e8d33b8"
+  },
+  "independentStatic": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/fold-left/independent-static.json",
+    "sha256": "4123dffd821ecfb5c295f2a68dfdfa2bc7142895e0f87fa024e2bb2be0d12a24"
+  },
+  "boundInputCount": 154,
+  "noPermissionsGranted": [
+    "W1/tree opening",
+    "lane exit",
+    "actual compile/run",
+    "migration changes",
+    "V20 fixture source mutation",
+    "early FOLD_TESTS ports",
+    "weakening native oracles"
+  ]
+}

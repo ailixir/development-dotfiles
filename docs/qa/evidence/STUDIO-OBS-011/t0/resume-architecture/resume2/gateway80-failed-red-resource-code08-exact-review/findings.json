@@ -1,0 +1,32 @@
+{
+  "kind": "INDEPENDENT_ARIA_CODE08_COMPLETE_FINDINGS",
+  "reviewer": "Aria",
+  "subjectManifestSha256": "3fe65bc487f8badf8329ff44040b11d1634e93145142eb3b5bd72d782a82190b",
+  "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+  "mandatoryFindingCount": 1,
+  "mandatoryFindings": [
+    {
+      "id": "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS",
+      "mandatory": true,
+      "severity": "HIGH",
+      "category": "All-consumer registered external mode/hash dispatch before body",
+      "locations": [
+        "failed_gateway.py:180 Unit.retained_source_read",
+        "failed_gateway.py:263/279-280 leaf.anchored_raw and d.SAFE_READER/TOOL_READER/d.sha",
+        "failed_gateway.py:72 System.read",
+        "failed_gateway.py:155 Unit.bound"
+      ],
+      "problem": "retained_source_read tests str(path) membership before applying the System path representation. An accepted raw string /./ alias misses the canonical registry key, then generic System.read normalizes Path(path) and reads the same registered file with mode=None, without registered SHA validation or retained-buffer continuity.",
+      "supportedInputAssessment": "No type/canonical-Path-only requirement is enforced on this callback. Historical anchored_raw coerces Path(path), System.read accepts and normalizes str, and the d.sha wrapper forwards its argument directly to SAFE_READER. Usual internal Path callers do not establish a restriction excluding supported raw-string input.",
+      "evidence": "Independent Aria source/control trace bound to Quinn's single real-System/real-Custody fake alias pair a2c9db/exit0: direct bound(alias) normalizes and rejects fixed actual644 versus declared600 before body; retained_source_read(alias) returns changed synthetic bytes with wrong mode and hash, one fake body read, no registered buffer entry, closed selected descriptors and zero real boundaries. Exact alias-results SHA6abc8efaeddb52859dbdb7d74e550627bec5d864a70e01499c89a7525729338d/567B; no duplicate target case was run by Aria.",
+      "impact": "The all-consumer exact mode/hash-before-body invariant fails for an accepted spelling of a registered resource. This is a source-level reader-boundary defect; it establishes no actual private-file access/current exploit or precise immediate member of historical Source07 failure.",
+      "minimumCorrection": "Normalize to the approved System path representation BEFORE membership and use that same canonical identity in both routes, or reject noncanonical/unsupported input before access. Every accepted registered spelling must use bound with declared600/644 and SHA or HOLD before body. Keep unregistered package/binary/prior/control/qualified-baseline policies and all caps unchanged. Seal an immutable exact correction with independent affected reviews/root adoption/new source-specific owners and fresh actual scopes; do not weaken mode/hash or change original private mode.",
+      "ownerDecisionIssued": false,
+      "actualRuntimeAuthority": false
+    }
+  ],
+  "advisories": [],
+  "allMandatoryFindingsTogether": true,
+  "allChangedAndInheritedCategoriesAssessed": true,
+  "ownerDecisionIssued": false
+}

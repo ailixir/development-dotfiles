@@ -1,0 +1,54 @@
+{
+  "subjectManifestSha256": "53d3d2fddc2022a4e58de136adf75b5bfe4e971b919b604ea38476848508fcad",
+  "exactPayloadsVerified": 96,
+  "checksumsVerified": {
+    "SHA256SUMS": 94,
+    "RUNTIME-SHA256SUMS": 95
+  },
+  "authorSuitesReplayed": [
+    {
+      "suite": "pure_checks.py",
+      "passed": 311,
+      "failed": 0,
+      "realBoundaryCalls": [],
+      "actualExit": 0,
+      "stdout": "pure_checks.py.stdout",
+      "stderr": "pure_checks.py.stderr"
+    },
+    {
+      "suite": "runtime_adapter_checks.py",
+      "passed": 121,
+      "failed": 0,
+      "realBoundaryCalls": [],
+      "actualExit": 0,
+      "stdout": "runtime_adapter_checks.py.stdout",
+      "stderr": "runtime_adapter_checks.py.stderr"
+    },
+    {
+      "suite": "boundary03_checks.py",
+      "passed": 104,
+      "failed": 0,
+      "realBoundaryCalls": [],
+      "actualExit": 0,
+      "stdout": "boundary03_checks.py.stdout",
+      "stderr": "boundary03_checks.py.stderr"
+    }
+  ],
+  "authorTotal": 536,
+  "independentIntegrationChecks": {
+    "suite": "independent",
+    "passed": 3,
+    "failed": 0,
+    "realBoundaryCalls": [],
+    "actualExit": 0,
+    "stdout": "independent.stdout",
+    "stderr": "independent.stderr"
+  },
+  "declaredInterpretationSitesMatchedToExactAst": 93,
+  "callbackDefinitionsMatchedToExactAst": 18,
+  "cliModesReviewed": 9,
+  "inputClassesReviewed": 14,
+  "actualJavaOrNativeRuntimePlatformProbes": 0,
+  "sourceScopeOnly": true,
+  "reviewerExecutionNotes": "Source test-output write removed by AST, source reads supplied from verified preloaded cache, reviewed test boundaries retained, persistent deny audit added before exercising tests; exact source code/implementation unchanged."
+}

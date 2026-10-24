@@ -1,0 +1,130 @@
+{
+  "kind": "PROPOSED_FAILED_RESOURCE_TYPED_SELF_TEXT_AND_PHYSICAL_ROLES_V1",
+  "sourceOnly": true,
+  "designRouteSelected": true,
+  "policySelected": false,
+  "actualAuthority": false,
+  "unit": {
+    "label": "obs009-gateway80-offtree03-20261019",
+    "pty": 29815,
+    "wrapper": {
+      "pid": 3720,
+      "start": "Mon Oct 19 12:48:37 2026",
+      "argvHash": "1d1638cae329a35e35525dbea90f90afea0724722d4b3ae17d673fa8a10670f6"
+    },
+    "shell": {
+      "pid": 3749,
+      "start": "Mon Oct 19 12:48:37 2026",
+      "argvHash": "e693ea77d4dc14554715c43d1be0d346a18945c4ef836b403ed7c46fe14271a8"
+    },
+    "lock": {
+      "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/gradle.lock",
+      "dev": 16777229,
+      "ino": 215213569
+    },
+    "holdSha256": "fd58e6a6d34cb9f3c9c0a100a7bb38109a6913322232691d2528701d5825a073",
+    "releaseSha256": "43ff6885ad33d1084a6a60ccb94390a099e097fd31b35496442b46ebce24ce71",
+    "code06ManifestSha256": "e2e3340b48628c76884d6b243dd69134052e8e2ff3d25f5ab09d94f4e9150585",
+    "sourceReviews": {
+      "architecture": "dd6456fc01575c1eb0afe82cf2793903eccac27a388c5dec4da10d55d7248f92",
+      "qa": "ec64b9b5fb243c9c6bf2a29828e03784cbba720b0b77a4ed3d03c3896db3658a"
+    },
+    "currentHeldOrResourceFactsObservedByDesigner": false
+  },
+  "legacyReportedCanonicalPredicateSatisfied": false,
+  "legacyPredicateEquivalent": false,
+  "narrowReplacement": "Only the current reported-memory-string==canonicalBIN operand and its misleading physical-role representation; not requested launch, origArgv0 literal APP, mapped process image, seven files or any physical/source/resource/ownership predicate.",
+  "physicalPythonRoles": {
+    "requestedLaunchBIN": {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+      "sha256": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095"
+    },
+    "sampledProcessAPP": {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+      "sha256": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7"
+    },
+    "origArgv0CanonicalAPP": {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+      "sha256": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7"
+    }
+  },
+  "selfTextConstraints": {
+    "reported": {
+      "kind": "SELF_REPORTED_TEXT_DIGEST",
+      "encoding": "STRICT_UTF8",
+      "normalization": "NONE",
+      "status": "COMPLETE",
+      "expectedUtf8Bytes": 44,
+      "expectedTextSha256": "6ca8f35c51bc4625b88aba368e0e3e6b52bd4f043902a68ceae684135a43d0f2",
+      "physicalPath": null,
+      "provenanceRoleOnly": "OTHER"
+    },
+    "origArgv0": {
+      "kind": "SELF_REPORTED_TEXT_DIGEST",
+      "encoding": "STRICT_UTF8",
+      "normalization": "NONE",
+      "status": "COMPLETE",
+      "expectedUtf8Bytes": 124,
+      "expectedTextSha256": "246e02e7d1db128f0eb0625c3692aad64a4bc811387aa4a58d4914b479242165",
+      "independentLiteralEqualityRequired": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+      "provenanceRoleOnly": "APP"
+    }
+  },
+  "sevenPhysicalExpectedHashesAncestryOnly": {
+    "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095",
+    "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7",
+    "/bin/ps": "f2211a1d7ff5e5c2e034df4acf450e30ffeec4e5ed632f21948d7181a1c493b6",
+    "/usr/sbin/lsof": "8a76f446149b77c31d9b769ef7b0b2d4fa3550805303103b081886c5d8d68de4",
+    "/opt/homebrew/Cellar/git/2.43.2/bin/git": "5c9b91ebbfb0e2b6d759a082d3b9d18886d52e2fee333cd245b00561db632d8c",
+    "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node": "9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a",
+    "/opt/homebrew/Cellar/helm/4.2.0/bin/helm": "87c4f99aa4edc63a5536838123680bece0e63c51019e515b122ba27f6276a3c9"
+  },
+  "actualPhysicalModes": null,
+  "actualWitnesses": null,
+  "rawSelfTextUsesAllowed": [
+    "exact-str bounded in-memory validation",
+    "same strictUTF8 bytes count and SHA",
+    "origArgv0 literal APP equality in memory"
+  ],
+  "rawSelfTextUsesForbidden": [
+    "executable",
+    "path",
+    "Path",
+    "resolve",
+    "open",
+    "stat",
+    "read",
+    "cwd",
+    "environment",
+    "authorization-map-key",
+    "alias",
+    "raw-output",
+    "exception-output"
+  ],
+  "runtimeRequirements": {
+    "sameClientFreshSample": true,
+    "metadataHelperQualifiesClient": false,
+    "strictExactString": true,
+    "maximumCharactersBeforeEncoding": 4096,
+    "maximumUtf8BytesBeforeEncodingOrHash": 4096,
+    "rejectEmptyNulSurrogate": true,
+    "noNormalization": true,
+    "digestAndCountBothRequired": true,
+    "reportedDigestIsPhysicalIdentity": false,
+    "origArgv0LiteralAppEqualityRequired": true,
+    "physicalSevenFactoryBeforeAnyMutation": true,
+    "noCallerBinaryMaps": true,
+    "psStartCommArgvBeforeAfter": true,
+    "twoLsofTxtAppAndFileChecks": true,
+    "allSevenFileModeHashBeforeAfter": true,
+    "parentLaunchIsActorAttestation": true,
+    "parentFingerprintClaimed": false
+  },
+  "ownerRulingsRequired": [
+    "Aria",
+    "Quinn",
+    "root"
+  ],
+  "ifAnyActualSecurityPropertyCannotBePreserved": "HOLD_NO_USE_NO_SILENT_DELETION",
+  "currentSource04": "UNCHANGED_HOLD"
+}

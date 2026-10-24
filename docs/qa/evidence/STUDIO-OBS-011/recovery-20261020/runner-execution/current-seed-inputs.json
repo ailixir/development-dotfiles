@@ -1,0 +1,27 @@
+{
+  "kind": "EXACT_TWO_APPROVED_CURRENT_SEED_INPUT_BINDING",
+  "status": "PREPARED_FOR_ROOT_REVIEW_NOT_EXECUTED",
+  "historicalStartCapturePath": "docs/qa/evidence/STUDIO-OBS-011/t0/start-capture.json",
+  "historicalStartCaptureSha256": "e73152e4294a28da6dd435fb4b0b31fb9d35e0b47f04c91816e34642930bb1b6",
+  "historicalS011": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+  "historicalSeedHelperPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/prepare-sandbox.py",
+  "historicalSeedHelperSha256": "783ab3ac548d59f57cea3ed405c24c8d83dd51d3a97f19c3484a3ea4ba656286",
+  "historicalActiveDraftManifestSha256": "04a00ad58a0e8b06fb18b1a41397313f56bbc0f7980b43131f0f46944ec19500",
+  "historicalCopyListSha256": "ab9105a7e6b0cf27a9d512b0a6fb84efd65f3f28425a56ee5208d0806b97d9b1",
+  "selectedHistoricalFileCount": 493,
+  "unchangedHistoricalFileCount": 491,
+  "paths": [
+    {
+      "path": "studio-runner/README.md",
+      "historicalSha256": "1b8891f988234b4f8e875df644332e69ac2f57efe720a86af63878ef5ada92d2",
+      "currentSha256": "4184d77764d72842d9bc4f5de5f39bafb491ea5f0987bead437b59e51f0bc9cd"
+    },
+    {
+      "path": "studio-runner/test/deployment/integrations.test.ts",
+      "historicalSha256": "6358d5d008ea3545df78719d5c2e66bc16f5cdf564e17af8056bd9d3e57d302b",
+      "currentSha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907"
+    }
+  ],
+  "authority": "Root explicitly authorized these two current source identities: integrated runner README and gateway test accepted with fresh722-test deployment gate. No other source identity change is admitted.",
+  "acceptanceMode": "Each named path requires only its currentSha256; historicalSha256 is provenance and is not an alternative accepted current hash. All491 other selected hashes still require S011 exactly."
+}

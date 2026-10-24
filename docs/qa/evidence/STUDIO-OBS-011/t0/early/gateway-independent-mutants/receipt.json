@@ -1,0 +1,38 @@
+{
+  "status": "PREPARED_NATIVE_UNEXECUTED_INDEPENDENT_REVIEW_OWED",
+  "storyId": "STUDIO-OBS-009",
+  "author": "Quinn (@qa), independent mutation-oracle preparation",
+  "manifestSha256": "b91e0e70e995a76435ed9cfd7e24f8398b3e2ddebb7b605526b75d98da121665",
+  "receiptMdSha256": "860b967aaff1d56fbcaf987a473f09edee45425f0280279883bf01a15cf32199",
+  "nativeExecutionCount": 0,
+  "helmExecutionCount": 0,
+  "sourceApplied": false,
+  "qaSelfApproval": false,
+  "sourceOrRuntimeRelease": false,
+  "originalPublishedInventoryChange": 0,
+  "original80CasesSourceExpanded": 80,
+  "scratchCasesPrepared": 2,
+  "expectedFutureHelmTemplateOutcomes": 40,
+  "mutants": [
+    {
+      "id": "M-RECURSION",
+      "preimageSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "candidateSha256": "aaf4c73fb38eb2d391ab38b79e2f17df0c8a389f681d990e605d221c7f174d74",
+      "forwardPatchSha256": "6fbdecd1608f66899d7036e99da98612aaa69ed4d24e7d2d8a71d743e79871f9",
+      "restorePatchSha256": "3bc2bf3ffc539f8d0e3a03a2b30f8b9dbd011fc8a4d1ee30e225c0587e50d76b"
+    },
+    {
+      "id": "M-NORMALIZED-COMPARISON",
+      "preimageSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "candidateSha256": "2aefb17257b11a1e1ce0a29c355e0cced5c8a69ef33099d5fbb567bc20c62115",
+      "forwardPatchSha256": "fc2aa4328e6b815c1e19a3dd1c730a995d3857ab15525e35e6aef33c622f26ba",
+      "restorePatchSha256": "940290ece699c9d29cccbdbe2e95eab2060a6e448bc232ca4726cfb0ec3a876a"
+    }
+  ],
+  "staticChecksSha256": "5fb95cc51098eb7b1eb9a2d7a8db17035ee0b3b74e1653e9ba990359ab5a4983",
+  "futureCommandsSha256": "122931dd44996167bf9aea06e44aba584c50816ed273f47e00a110cad86dfa29",
+  "scratchSourceSha256": "d09fa30c03791ac59450b64cba55137ea05485fd861415d2d2fb6c863a74506f",
+  "budgetCeilingUsd": 500,
+  "actualSpend": "UNAVAILABLE",
+  "remainingGateChecklist": "FUTURE-EXECUTION.md#remaining-gates"
+}

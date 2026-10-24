@@ -1,0 +1,67 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
+@@ -10,7 +10,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
+ import com.citi.put.checks.studio.support.RunnerProcessHarness;
+ import com.citi.put.checks.studio.support.RunnerTestTls.Identity;
+@@ -170,8 +170,8 @@
+     }
+ 
+     @Bean
+-    GuidedRunnerClient runner() {
+-      return new GuidedRunnerClient(
++    HttpRunnerDispatchClient runner() {
++      return new HttpRunnerDispatchClient(
+           URI.create("https://127.0.0.1:" + ENV.runnerPort),
+           ENV.tls,
+           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -182,7 +182,7 @@
+     GuidedDispatchService dispatch(
+         GuidedSessionService sessions,
+         GuidedMaterializationService materialization,
+-        GuidedRunnerClient runner) {
++        HttpRunnerDispatchClient runner) {
+       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
+       sessions.installStopSender(dispatch::stop);
+       return dispatch;
+@@ -342,7 +342,7 @@
+   @Autowired GuidedSessionRepository repository;
+   @Autowired GuidedMaterializationService materialization;
+   @Autowired GuidedDispatchService dispatch;
+-  @Autowired GuidedRunnerClient runner;
++  @Autowired HttpRunnerDispatchClient runner;
+   @Autowired JdbcTemplate jdbc;
+   @Autowired DataSource fixtureDataSource;
+   final Authentication controller =
+@@ -442,7 +442,7 @@
+             com.citi.put.checks.studio.guided.session.GuidedSessionException.class,
+             refused -> {
+               assertThat(refused).hasMessage("RUNTIME_INCOMPATIBLE");
+-              assertThat(refused.messageCode()).isEqualTo(GuidedRunnerClient.CONTEXT_REFUSED);
++              assertThat(refused.messageCode()).isEqualTo(HttpRunnerDispatchClient.CONTEXT_REFUSED);
+               assertThat(refused.retryable()).isFalse();
+             });
+     ObjectNode wrong = context.deepCopy();
+@@ -494,7 +494,7 @@
+     dispatch.pushContext(controller, id, 1);
+     var digests = new java.util.concurrent.CopyOnWriteArrayList<String>();
+     var observer =
+-        GuidedRunnerClient.class.getDeclaredMethod(
++        HttpRunnerDispatchClient.class.getDeclaredMethod(
+             "observeRequestBytes", java.util.function.Consumer.class);
+     observer.setAccessible(true);
+     observer.invoke(
+@@ -1341,7 +1341,7 @@
+     proxy.start();
+     try {
+       var client =
+-          new GuidedRunnerClient(
++          new HttpRunnerDispatchClient(
+               URI.create("https://localhost:" + proxy.getAddress().getPort()),
+               ENV.tls,
+               () -> token("backend-controller", "controller-1", "studio-guided-runner"),

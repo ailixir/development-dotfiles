@@ -1,0 +1,40 @@
+{
+  "kind": "ACTUAL_BOOTSTRAP_OPTIMIZE0_OPTIMIZE1_PAIRED_INTEGRITY_CASES",
+  "passed": 6,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "OPT0_PINNED_BUFFER_COMPILED",
+      "pass": true
+    },
+    {
+      "name": "OPT0_WRONG_SHA_REFUSED_BEFORE_COMPILE",
+      "pass": true
+    },
+    {
+      "name": "OPT1_PINNED_BUFFER_COMPILED",
+      "pass": true
+    },
+    {
+      "name": "OPT1_WRONG_SHA_REFUSED_BEFORE_COMPILE",
+      "pass": true
+    },
+    {
+      "name": "NO_RUNTIME_ASSERT_DEPENDENCY",
+      "pass": true
+    },
+    {
+      "name": "ZERO_REAL_BOUNDARY_CALLS",
+      "pass": true
+    }
+  ],
+  "realBoundaryCalls": [],
+  "guardSha256": "24dbc6c27564afc6c8194db70140e3a8100f22b712f56d34beeadfa11ccd29ad",
+  "sourcePins": {
+    "entry.py": "202279536f18b61ae8a3b32471e90d15c371872234498ce47dbec181b4e1cc19",
+    "failed_gateway.py": "acf923c8d401c377540e1de190bfc5b5dd5c1e96e9e40033ce0ae8c2889e6e25",
+    "custody.py": "e81ae1a019c78161863700bfe34f9abb71d9fb9040e464a7b3eaa5c73c8bddda",
+    "protocol.py": "faa72ca1b55fccca78394a796cdf468af06b3393bb4d94d2510865983a8d055e"
+  },
+  "actualRuntimeOrNativeOrPrivateActions": 0
+}

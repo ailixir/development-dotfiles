@@ -1,0 +1,37 @@
+--- gst-three-only.init.gradle
++++ style-format-reports.init.gradle
+@@ -3,7 +3,7 @@
+ 
+ gradle.projectsEvaluated {
+     def p = gradle.rootProject
+-    def expectedProject = new File('/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend').canonicalFile
++    def expectedProject = new File('/private/tmp/obs011-gst-style-isolated01-20261019/repo/backend').canonicalFile
+     // Only the observed exact buildSrc child may bypass this main-build formatter hook.
+     def expectedAuxiliary = new File(expectedProject, 'buildSrc')
+     if (p.projectDir.canonicalFile == expectedAuxiliary && gradle.parent != null) return
+@@ -37,9 +37,13 @@
+                 throw new GradleException('GST_HOLD_STAGED_OUTPUT')
+         }
+     }
++    // Reporting metadata only: keep full source sets and all Checkstyle rules unchanged.
++    p.tasks.withType(org.gradle.api.plugins.quality.Checkstyle).configureEach { task ->
++        task.reports.xml.required.set(true)
++    }
+     gradle.taskGraph.whenReady { graph ->
+         checkTarget()
+-        def allowed = ['spotlessJava', 'spotlessJavaApply', 'spotlessInternalRegisterDependencies'] as Set
++        def allowed = ['spotlessJava', 'spotlessJavaApply', 'spotlessJavaCheck', 'spotlessInternalRegisterDependencies'] as Set
+         if (graph.allTasks.any { it.name.startsWith('spotless') && (it.project != p || !allowed.contains(it.name)) })
+             throw new GradleException('GST_HOLD_GRAPH')
+     }
+--- filtered-output.init.gradle
++++ peer-filter.init.gradle
+@@ -2,7 +2,7 @@
+ import org.gradle.api.tasks.testing.Test
+ 
+ gradle.projectsEvaluated {
+-  def expected = new File('/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend').canonicalFile
++  def expected = new File('/private/tmp/obs011-gst-style-isolated01-20261019/repo/backend').canonicalFile
+   def p = gradle.rootProject
+   if (p.projectDir.canonicalFile == new File(expected, 'buildSrc').canonicalFile && gradle.parent != null) return
+   if (p.projectDir.canonicalFile != expected) throw new GradleException('GST_DIAG_PROJECT_HOLD')

@@ -1,0 +1,24 @@
+{
+  "roots": [
+    "frontend/src",
+    "backend/src/main",
+    "studio-runner/src",
+    "helm-chart",
+    "tools"
+  ],
+  "tokens": {
+    "studioAuthoringV2": [],
+    "STUDIO_AUTHORING_V2_ENABLED": [],
+    "STUDIO_INCREMENTAL_ENABLED": []
+  },
+  "positiveControl": {
+    "token": "STUDIO_GATEWAY_PROVIDER",
+    "matchingFiles": [
+      "backend/src/main/resources/application-staging.yml",
+      "backend/src/main/resources/application.yml",
+      "backend/src/main/resources/application-local.yml",
+      "helm-chart/put-checks/templates/deployment.yaml"
+    ]
+  },
+  "limits": "Text scan only; any hit must be classified before claiming absence of readers."
+}

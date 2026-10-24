@@ -1,0 +1,32 @@
+{
+  "status": "SOURCE_ONLY_PRESERVATION_VERIFIED",
+  "priorPackets": [
+    {
+      "generation": "resume4",
+      "manifestSha256": "43220c811bc60d2f7dbf8397d2f5c57ceca4e1f8c6b0454e60fb69a545dae5ce",
+      "memberCount": 93,
+      "bytesAndModesVerified": true
+    },
+    {
+      "generation": "resume5",
+      "manifestSha256": "607859e3f5e43ab4dad52afdcf1f1842801f2abacc197527b819e11668ccf1ab",
+      "memberCount": 109,
+      "bytesAndModesVerified": true,
+      "operationRejected": true
+    }
+  ],
+  "oldRootHelper01Sha256": "49294775837827d66614b1253214db16f8206770a6affbda63929f3d97095d3c",
+  "banksFixtureHarnessConfigPatches95_48CaseSetsNativeArgvTimeoutsUmasksExact": true,
+  "runtimeSnapshot": "Existing H-only E from root7843; W absent; native/phase0; no author runtime read/action",
+  "sourceGeneration": "resume6",
+  "historicalRepairClaimed": false,
+  "currentPriorManifestSha256": "607859e3f5e43ab4dad52afdcf1f1842801f2abacc197527b819e11668ccf1ab",
+  "currentRootFindingsAdoptionSha256": "448b1896730f77740e52561c12065ec315e85d336089be1097be72fe1e89fd4d",
+  "historical05FunctionalDiff": "Only held lsof flags moved before -- exactlock",
+  "currentFunctionalDiff": "All five root448b categories; see interpretation-sites.json/IMPLEMENTATION-DESIGN.md, exact source diffs and faithful actual-function tests.",
+  "historical05GenerationBindingsOnly": [
+    "guard-exit.bash",
+    "exit-gate.py",
+    "verify-final.py"
+  ]
+}

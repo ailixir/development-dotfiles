@@ -1,0 +1,551 @@
+{
+  "kind": "JAVA_QUALIFICATION_SOURCE01_FAKE_BOUNDARY_CONTROLS",
+  "passed": 135,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "VALID_COMPLETE_RELEASE",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_EXTRA",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_OWNER_BOOL",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_MISSING_INPUT",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_WRONG_PURPOSE",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_NO_GATEWAY_CLOSURE",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_LIMIT_BOOL",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_ARG_EXTRA",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_MISSING_CODE",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_ALIAS_ROLE_CONFLICT",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_CONTROL_SECRET_ARG",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_MISSING_ENV",
+      "passed": true
+    },
+    {
+      "name": "RELEASE_DENIES_NO_SOURCE_BINDING",
+      "passed": true
+    },
+    {
+      "name": "STRICT_CLOSED_JSON_13",
+      "passed": true
+    },
+    {
+      "name": "STRICT_CLOSED_JSON_14",
+      "passed": true
+    },
+    {
+      "name": "STRICT_CLOSED_JSON_15",
+      "passed": true
+    },
+    {
+      "name": "STRICT_CLOSED_JSON_16",
+      "passed": true
+    },
+    {
+      "name": "VALID_DECISION",
+      "passed": true
+    },
+    {
+      "name": "DECISION_cap",
+      "passed": true
+    },
+    {
+      "name": "DECISION_attempt",
+      "passed": true
+    },
+    {
+      "name": "DECISION_mode",
+      "passed": true
+    },
+    {
+      "name": "DECISION_authorizedBy",
+      "passed": true
+    },
+    {
+      "name": "EARLY_ENROLLMENT_HOLD",
+      "passed": true
+    },
+    {
+      "name": "EARLY_CONSUMED",
+      "passed": true
+    },
+    {
+      "name": "EARLY_NO_REBIND",
+      "passed": true
+    },
+    {
+      "name": "MATCHING_PEER_BOUND",
+      "passed": true
+    },
+    {
+      "name": "TWO_BEFORE_TWO_ENROLLMENT_OBSERVATIONS",
+      "passed": true
+    },
+    {
+      "name": "ONE_ENROLLMENT",
+      "passed": true
+    },
+    {
+      "name": "FOREIGN_PID",
+      "passed": true
+    },
+    {
+      "name": "FRESH_START_CHANGED",
+      "passed": true
+    },
+    {
+      "name": "WRONG_PARENT",
+      "passed": true
+    },
+    {
+      "name": "IMMEDIATE_ACTUAL_REFERENCE_False",
+      "passed": true
+    },
+    {
+      "name": "CONFIRMED_CLOSE_IDEMPOTENT",
+      "passed": true
+    },
+    {
+      "name": "IMMEDIATE_ACTUAL_REFERENCE_True",
+      "passed": true
+    },
+    {
+      "name": "CLOSE_FAIL_UNKNOWN",
+      "passed": true
+    },
+    {
+      "name": "ACTUAL_RETAINED_UNKNOWN",
+      "passed": true
+    },
+    {
+      "name": "NO_UNKNOWN_RECLOSE",
+      "passed": true
+    },
+    {
+      "name": "CLOSE_ONCE",
+      "passed": true
+    },
+    {
+      "name": "ACCEPT_REGISTERED_BEFORE_RETURN",
+      "passed": true
+    },
+    {
+      "name": "ALL_ASSIGNED_CLOSED",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_GOOD_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_ALL_CLOSED_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_NO_FD_RETRY_good_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_DENY_wrong_sha_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_NO_FD_RETRY_wrong_sha_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_DENY_wrong_mode_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_NO_FD_RETRY_wrong_mode_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_UNKNOWN_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_NO_FD_RETRY_close_unknown_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_NO_INTERPRETATION_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_COMPILE_NOT_REACHED_OPT0",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_GOOD_OPT2",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_ALL_CLOSED_OPT2",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_NO_FD_RETRY_good_OPT2",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_DENY_wrong_sha_OPT2",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_NO_FD_RETRY_wrong_sha_OPT2",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_DENY_wrong_mode_OPT2",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_NO_FD_RETRY_wrong_mode_OPT2",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_UNKNOWN_OPT2",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_NO_FD_RETRY_close_unknown_OPT2",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_NO_INTERPRETATION_OPT2",
+      "passed": true
+    },
+    {
+      "name": "BOOTSTRAP_COMPILE_NOT_REACHED_OPT2",
+      "passed": true
+    },
+    {
+      "name": "RELAY_EXACT_ZERO_HTTP_DATA",
+      "passed": true
+    },
+    {
+      "name": "RELAY_DATA_DENY_extra",
+      "passed": true
+    },
+    {
+      "name": "RELAY_DATA_DENY_nonce",
+      "passed": true
+    },
+    {
+      "name": "RELAY_DATA_DENY_control",
+      "passed": true
+    },
+    {
+      "name": "RELAY_DATA_DENY_captured",
+      "passed": true
+    },
+    {
+      "name": "RELAY_DATA_DENY_network",
+      "passed": true
+    },
+    {
+      "name": "RELAY_CONSERVATIVE_FULL_INTERVAL",
+      "passed": true
+    },
+    {
+      "name": "RELAY_COMMIT_DENY_callerElapsedNsTrue",
+      "passed": true
+    },
+    {
+      "name": "RELAY_COMMIT_DENY_callerElapsedNs14999999999",
+      "passed": true
+    },
+    {
+      "name": "RELAY_COMMIT_DENY_statusACK",
+      "passed": true
+    },
+    {
+      "name": "RELAY_COMMIT_DENY_projectionSha2565555555555555555555555555555555555555555555555555555555555555555",
+      "passed": true
+    },
+    {
+      "name": "PARSER_DECLARED24_RESULT_SCHEMA",
+      "passed": true
+    },
+    {
+      "name": "PARSER_COUNT_NOT_CONFLATED",
+      "passed": true
+    },
+    {
+      "name": "RELAY_PRODUCER_HALF_ONLY",
+      "passed": true
+    },
+    {
+      "name": "TLS_FINITE_MODE_tls-good",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-good_connects",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-good_stage",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-good_serverPeerClose",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-good_networkTerminated",
+      "passed": true
+    },
+    {
+      "name": "TLS_FINITE_MODE_tls-oversize",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-oversize_connects",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-oversize_stage",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-oversize_serverPeerClose",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-oversize_networkTerminated",
+      "passed": true
+    },
+    {
+      "name": "TLS_FINITE_MODE_tls-stall-handshake",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-handshake_connects",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-handshake_stage",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-handshake_serverPeerClose",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-handshake_networkTerminated",
+      "passed": true
+    },
+    {
+      "name": "TLS_FINITE_MODE_tls-stall-write",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-write_connects",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-write_stage",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-write_serverPeerClose",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-write_networkTerminated",
+      "passed": true
+    },
+    {
+      "name": "BUFFERED_WRITE_NEVER_WRITE_STALL",
+      "passed": true
+    },
+    {
+      "name": "TLS_FINITE_MODE_tls-stall-body",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-body_connects",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-body_stage",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-body_serverPeerClose",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-body_networkTerminated",
+      "passed": true
+    },
+    {
+      "name": "TLS_FINITE_MODE_tls-stall-trailers",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-trailers_connects",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-trailers_stage",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-trailers_serverPeerClose",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-stall-trailers_networkTerminated",
+      "passed": true
+    },
+    {
+      "name": "TLS_FINITE_MODE_tls-dribble",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-dribble_connects",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-dribble_stage",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-dribble_serverPeerClose",
+      "passed": true
+    },
+    {
+      "name": "TLS_DENY_tls-dribble_networkTerminated",
+      "passed": true
+    },
+    {
+      "name": "PRODUCTION_FRAGMENT_EXACT",
+      "passed": true
+    },
+    {
+      "name": "FRAGMENT_EXACT_ONCE",
+      "passed": true
+    },
+    {
+      "name": "ORIGINAL15_ENTITY_IDENTITIES_RETAINED",
+      "passed": true
+    },
+    {
+      "name": "SIX_ADDED_IDENTITIES",
+      "passed": true
+    },
+    {
+      "name": "ORIGINAL_THREE_JSON_REJECTS_LITERAL",
+      "passed": true
+    },
+    {
+      "name": "HEADER_EXACT_BYTES",
+      "passed": true
+    },
+    {
+      "name": "TRAILER_EXACT_BYTES",
+      "passed": true
+    },
+    {
+      "name": "TIMESTAMP_BEFORE_SERVER_JOIN",
+      "passed": true
+    },
+    {
+      "name": "NO_WRITE_STALL_OVERRIDE",
+      "passed": true
+    },
+    {
+      "name": "SERVER_CLOSE_CONFIRMATION",
+      "passed": true
+    },
+    {
+      "name": "EXACT_CUSTODY_EXTRACTION_Ownership",
+      "passed": true
+    },
+    {
+      "name": "EXACT_CUSTODY_EXTRACTION_Custody",
+      "passed": true
+    },
+    {
+      "name": "UNCHANGED_RELAY_METHOD_check_custody",
+      "passed": true
+    },
+    {
+      "name": "UNCHANGED_RELAY_METHOD_start",
+      "passed": true
+    },
+    {
+      "name": "UNCHANGED_RELAY_METHOD_wait_io",
+      "passed": true
+    },
+    {
+      "name": "UNCHANGED_RELAY_METHOD_exact_read",
+      "passed": true
+    },
+    {
+      "name": "UNCHANGED_RELAY_METHOD_read_frame",
+      "passed": true
+    },
+    {
+      "name": "UNCHANGED_RELAY_METHOD_write_frame",
+      "passed": true
+    },
+    {
+      "name": "UNCHANGED_RELAY_METHOD_validate_data",
+      "passed": true
+    },
+    {
+      "name": "UNCHANGED_RELAY_METHOD_validate_commit",
+      "passed": true
+    },
+    {
+      "name": "UNCHANGED_RELAY_METHOD_refresh_closure",
+      "passed": true
+    },
+    {
+      "name": "UNCHANGED_RELAY_METHOD_stop",
+      "passed": true
+    },
+    {
+      "name": "ZERO_FORBIDDEN_REAL_CALLS",
+      "passed": true
+    }
+  ],
+  "forbiddenRealBoundaryCalls": [],
+  "actualJavaCompilerFixtureTlsUnixPeerPlatformActions": 0,
+  "actualNineModeQualificationResults": "UNEXECUTED_OWED",
+  "java24DeclaredNotExecuted": true
+}

@@ -1,0 +1,139 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java
++++ /dev/null
+@@ -1,136 +0,0 @@
+-package com.citi.put.checks.studio.guided.publication;
+-
+-import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
+-
+-import com.citi.put.checks.studio.guided.session.GuidedContracts;
+-import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+-import com.fasterxml.jackson.databind.JsonNode;
+-import java.net.URI;
+-import java.net.http.HttpClient;
+-import java.net.http.HttpRequest;
+-import java.net.http.HttpResponse;
+-import java.nio.charset.StandardCharsets;
+-import java.time.Duration;
+-import java.util.function.Supplier;
+-import org.springframework.transaction.support.TransactionSynchronizationManager;
+-
+-/** One charged HTTP validator send. No browser, model, SDK retry or transaction is involved. */
+-public final class ObservedValidationClient {
+-  private final URI endpoint;
+-  private final HttpClient client;
+-  private final Supplier<String> token;
+-  private final GuidedContracts contracts;
+-  private final GuidedPublicationProperties properties;
+-
+-  public ObservedValidationClient(
+-      URI origin,
+-      HttpClient client,
+-      Supplier<String> token,
+-      GuidedContracts contracts,
+-      GuidedPublicationProperties properties) {
+-    require(
+-        origin == null
+-            || origin.getHost() != null
+-                && origin.getUserInfo() == null
+-                && origin.getQuery() == null
+-                && origin.getFragment() == null
+-                && (origin.getPath().isEmpty() || origin.getPath().equals("/"))
+-                && (origin.getScheme().equals("https") || origin.getScheme().equals("http")),
+-        "RUNTIME_INCOMPATIBLE",
+-        409);
+-    require(
+-        client.followRedirects() == HttpClient.Redirect.NEVER
+-            && !Boolean.getBoolean("jdk.httpclient.enableAllMethodRetry"),
+-        "RUNTIME_INCOMPATIBLE",
+-        409);
+-    this.endpoint = origin == null ? null : origin.resolve("/v2/validate-observed");
+-    this.client = client;
+-    this.token = token;
+-    this.contracts = contracts;
+-    this.properties = properties;
+-  }
+-
+-  public JsonNode validate(JsonNode request, PublicationBudget budget) {
+-    require(
+-        !TransactionSynchronizationManager.isActualTransactionActive(),
+-        "RUNTIME_INCOMPATIBLE",
+-        409);
+-    require(endpoint != null, "RUNTIME_INCOMPATIBLE", 409);
+-    String representation = contracts.validateAndCanonical("v3/replay-validation", request);
+-    if (representation == null) {
+-      // Unsupported dependency stubs retain the original strict validation/encoding path.
+-      contracts.validate("v3/replay-validation", request);
+-      representation = GuidedContracts.canonical(request);
+-    }
+-    byte[] payload = representation.getBytes(StandardCharsets.UTF_8);
+-    require(payload.length <= properties.maxValidationBytes(), "BUDGET_EXCEEDED", 413);
+-    String credential = token.get();
+-    require(credential != null && !credential.isBlank(), "UNAUTHENTICATED", 401);
+-    Duration remaining = budget.remaining();
+-    if (remaining.compareTo(Duration.ofMillis(properties.validationTimeoutMs())) > 0) {
+-      remaining = Duration.ofMillis(properties.validationTimeoutMs());
+-    }
+-    HttpRequest outbound =
+-        HttpRequest.newBuilder(endpoint)
+-            .timeout(remaining)
+-            .header("Content-Type", "application/json")
+-            .header("Authorization", "Bearer " + credential)
+-            .POST(HttpRequest.BodyPublishers.ofByteArray(payload))
+-            .build();
+-    try {
+-      HttpResponse<java.io.InputStream> response =
+-          client.send(outbound, HttpResponse.BodyHandlers.ofInputStream());
+-      try (var body = response.body()) {
+-        byte[] bytes;
+-        java.util.concurrent.FutureTask<byte[]> read =
+-            new java.util.concurrent.FutureTask<>(() -> body.readNBytes(65537));
+-        Thread reader = Thread.ofVirtual().name("observed-validator-response").start(read);
+-        try {
+-          bytes =
+-              read.get(
+-                  Math.max(1L, budget.remaining().toMillis()),
+-                  java.util.concurrent.TimeUnit.MILLISECONDS);
+-        } catch (java.util.concurrent.TimeoutException
+-            | java.util.concurrent.ExecutionException failure) {
+-          read.cancel(true);
+-          body.close();
+-          throw new GuidedSessionException("UNKNOWN_OUTCOME", 409);
+-        } finally {
+-          if (!read.isDone()) {
+-            read.cancel(true);
+-            reader.interrupt();
+-          }
+-        }
+-        require(bytes.length <= 65536, "UNKNOWN_OUTCOME", 409);
+-        if (response.statusCode() == 400 || response.statusCode() == 422) {
+-          throw new GuidedSessionException("INVALID_CONTRACT", 422);
+-        }
+-        if (response.statusCode() == 401 || response.statusCode() == 403) {
+-          throw new GuidedSessionException("FORBIDDEN_SCOPE", 403);
+-        }
+-        if (response.statusCode() == 409) {
+-          throw new GuidedSessionException("RUNTIME_INCOMPATIBLE", 409);
+-        }
+-        require(response.statusCode() == 200, "UNKNOWN_OUTCOME", 409);
+-        JsonNode verdict = contracts.parseWire(bytes);
+-        contracts.validate("v3/replay-validation#/definitions/ValidationVerdict", verdict);
+-        for (String field :
+-            java.util.List.of("attemptId", "claimId", "snapshotHash", "basisHash")) {
+-          require(verdict.path(field).equals(request.path(field)), "EVIDENCE_MISMATCH", 422);
+-        }
+-        require(
+-            verdict.path("profile").equals(request.path("requiredProfile"))
+-                && verdict.path("build").equals(request.path("requiredBuild")),
+-            "RUNTIME_INCOMPATIBLE",
+-            409);
+-        budget.remaining();
+-        return verdict;
+-      }
+-    } catch (InterruptedException failure) {
+-      Thread.currentThread().interrupt();
+-      throw new GuidedSessionException("UNKNOWN_OUTCOME", 409);
+-    } catch (java.io.IOException failure) {
+-      throw new GuidedSessionException("UNKNOWN_OUTCOME", 409);
+-    }
+-  }
+-}

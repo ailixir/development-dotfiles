@@ -1,0 +1,27 @@
+{
+  "method": "Text/hash/JSON operations only, no program parse/compiler/test",
+  "v2FixtureWithFailureStateRepresentationRevertedEqualsV1Exactly": true,
+  "v2HelperWithOnlyAsciiPredicateRevertedEqualsV1Exactly": true,
+  "v2OldHelperWithOnlyAsciiPredicateRevertedEqualsV1OldExactly": true,
+  "v2UnitWithOnlyTypeSpyAndStringRepresentationsRevertedEqualsV1Exactly": true,
+  "same37LiteralNamesAndOrder": true,
+  "all15OriginalNativeExpectSpansExact": true,
+  "originalSixCaseDeclarationAndTimersAndBothFinallySpansPreservedViaExactNormalization": true,
+  "actualFakeProcessKillInvocationsUnchanged": true,
+  "originalSigstopRecordingLoopsUnchanged": true,
+  "spyBeforeEachAndAfterEachRestorationPreserved": true,
+  "noNewLintSuppressions": true,
+  "existingImportJustificationExact": true,
+  "noOriginalAssertionsRemovedOrExpectedValuesChanged": true,
+  "v1ValidRuntimeProofAndFailedLintUnchanged": true,
+  "v2PrimaryLine": 54,
+  "oldLine52NotRelabeled": true,
+  "asciiEquivalence": {
+    "oldRejectedSet": "U+0000 through U+001F inclusive, and U+007F",
+    "newPredicate": "For each StringIterator character, first UTF16 code unit <=0x1f or ===0x7f",
+    "proof": "Each ASCII code point is one identical UTF16 unit; every nonASCII scalar begins with a code unit >=128 and isolated surrogates are >=0xD800, so neither predicate rejects it. Empty strings yield false in both. Both are existential over the same ASCII-member set; command trim and all other row predicates remain exact.",
+    "nonAsciiAndSurrogatesUnchanged": true,
+    "executionOrNewTestMatrix": false
+  },
+  "callbackEquivalence": "Only failure boolean storage becomes a typed mutable object property. Initfalse/catchtrue/afterawaitread/closedthrow and synchronous listener-capture-marker-cancel sequence remain exact after representation normalization. No callback await, timer or new promise."
+}

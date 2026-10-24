@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "status": "SEALED_PROPOSAL_ONLY_NO_LIVE_ACTION_OR_CLOSING_AUTHORITY",
+  "subject": "ONE_UNIT_C8_CHECK01_QUALIFIED_FAILED_RESOURCE",
+  "files": [
+    {
+      "path": "RECIPE.md",
+      "sha256": "0e4fb3e4f0fc1f52ccdfb612e563242e8920172a3bbeff9f9294c5e1ffa929a8",
+      "bytes": 8582,
+      "mode": 420
+    },
+    {
+      "path": "failed_resource.py",
+      "sha256": "6a54a404f98e69c3d5e8d3c3116c71144fe73bcea1fbd6ca537ccdcc26f3a96f",
+      "bytes": 18261,
+      "mode": 420
+    },
+    {
+      "path": "guard-failed-resource.bash",
+      "sha256": "bb62fc5d5f7b594e7d43081072b0519d6dcaaa91d2072771796dcd59d7e93c2c",
+      "bytes": 975,
+      "mode": 420
+    },
+    {
+      "path": "implementation-contract.json",
+      "sha256": "c5a9e77cbdc6697f706c829488880af741e3d4b9ed6be80867fbb95d918d1b54",
+      "bytes": 1942,
+      "mode": 420
+    },
+    {
+      "path": "input-pins.json",
+      "sha256": "7731671ed537bd9979a9bace686a36b90a6cb1e0559e0686c22138682da06c6c",
+      "bytes": 25950,
+      "mode": 420
+    },
+    {
+      "path": "permit.template.json",
+      "sha256": "d142462cfc136d2ef8b7298bc4b7cf39a15c001b77cfbe327567f7c790d2ba4a",
+      "bytes": 307,
+      "mode": 420
+    },
+    {
+      "path": "predicates.py",
+      "sha256": "f4fabc6f7d91231ce528fe13157a48ed34fa00a62bab1e1756cdcd4d23d5214b",
+      "bytes": 6228,
+      "mode": 420
+    },
+    {
+      "path": "pure-check-results-expanded.json",
+      "sha256": "0a7eea0f785787264cc1575764fa0acb4ab5915db3a86d8fe2f810f807905e44",
+      "bytes": 7644,
+      "mode": 420
+    },
+    {
+      "path": "pure-check-results-final-source-before-dirfd.json",
+      "sha256": "0a7eea0f785787264cc1575764fa0acb4ab5915db3a86d8fe2f810f807905e44",
+      "bytes": 7644,
+      "mode": 420
+    },
+    {
+      "path": "pure-check-results-initial.json",
+      "sha256": "860f4442b2a75e7dd30c1fc7f161edd58977ac6b0a22f4e7080dd51423ad9355",
+      "bytes": 6663,
+      "mode": 420
+    },
+    {
+      "path": "pure-check-results.json",
+      "sha256": "0a7eea0f785787264cc1575764fa0acb4ab5915db3a86d8fe2f810f807905e44",
+      "bytes": 7644,
+      "mode": 420
+    },
+    {
+      "path": "pure_checks.py",
+      "sha256": "404c8cc3b920fcdbfbb6e5080f8b92068071a22beae1765fdbeb6ed21f4efe7d",
+      "bytes": 9841,
+      "mode": 420
+    },
+    {
+      "path": "retained-contract.json",
+      "sha256": "1ded4101bbfa934049e41c12c2139c3d43bf5b0a9d6925a064807ec170c46b09",
+      "bytes": 21101,
+      "mode": 420
+    },
+    {
+      "path": "root-admission.template.json",
+      "sha256": "56ec6f6b92fa103b032995d42b8a746d245dbb1e1edf26481c93669973aa2e52",
+      "bytes": 544,
+      "mode": 420
+    },
+    {
+      "path": "root-disposition-authorization.template.json",
+      "sha256": "04b49a9dceed1d11d1bb3cf1b7c5db5bbff67a3348efff48f6970d678d5468dc",
+      "bytes": 2810,
+      "mode": 420
+    },
+    {
+      "path": "root-wrapper-result.template.json",
+      "sha256": "b54c55482e104265fbdfcd8dd8f63eac61e400d1bfed097902461e9d2dca6335",
+      "bytes": 166,
+      "mode": 420
+    },
+    {
+      "path": "SHA256SUMS",
+      "sha256": "2740176669ae4017dc56018e1f54e1a204d7f921f7f49c0a39a603e98daf7a18",
+      "bytes": 1477,
+      "mode": 420
+    }
+  ],
+  "pureChecks": 97,
+  "purePassed": 97,
+  "mandatoryKnownDesignDefects": [],
+  "runtimeInstalled": false,
+  "actualGuardSetup": false,
+  "actualAdmission": false,
+  "actualReadiness": false,
+  "actualPermit": false,
+  "actualExit": false,
+  "actualPostclose": false,
+  "newNativeOrCompilePhases": 0,
+  "productSourceWrites": 0,
+  "originalNamespacesChanged": false,
+  "C8Credit": false,
+  "mainLaneIrLifecycleRelease": false,
+  "sealRule": "Listed exact files/hashes/modes; manifest intentionally does not self-hash."
+}

@@ -1,0 +1,721 @@
+--- resume1/CHECKPOINT.json
++++ resume2/CHECKPOINT.json
+@@ -1,47 +1,39 @@
+ {
+-  "status": "PREPARED_SEALED_PENDING_EXACT_INDEPENDENT_REVIEW",
++  "status": "PREPARED_SUCCESSOR_PENDING_EXACT_INDEPENDENT_REVIEW",
+   "story": "STUDIO-OBS-009",
+-  "directory": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume1",
+-  "currentProductSourceBinding": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+-  "actualWorkPerformed": [
+-    "finite approved source-copy banks and exact helper/test patches",
+-    "closed source/mode baseline metadata1808 and dist238",
+-    "case/token/check maps",
+-    "copy-aware separate per-phase collector source and success guard",
+-    "archive/closure/cleanup policies, root release/hold/decision/permit false templates",
+-    "50 pure injected/static controls, source hash/AST/JSON checks"
++  "directory": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume2",
++  "supersedesWithoutMutating": "d8021489e0938166fc4779105964a971e7c015ffaaaf7bab7c149541b4432c0e",
++  "normativeReviewSha256": "7e36deee1c104a28d7efbeaf9eb9ca856c75115d0f41cb60c310f887b57209de",
++  "rootFindingsAdoptionSha256": "6ce05298446bbcf33e2bde42815cfa4e5e943964b937ea0a5b749b330a6c2075",
++  "findings": {
++    "G80-CONTROL-01": "IMPLEMENTED_PENDING_INDEPENDENT_REVIEW",
++    "G80-RESOURCE-02": "IMPLEMENTED_PENDING_INDEPENDENT_REVIEW",
++    "G80-FREEZE-03": "IMPLEMENTED_PENDING_INDEPENDENT_REVIEW",
++    "G80-EVIDENCE-04": "IMPLEMENTED_PENDING_INDEPENDENT_REVIEW",
++    "G80-TEST-05": "IMPLEMENTED_PENDING_INDEPENDENT_REVIEW"
++  },
++  "pureControls": 121,
++  "actualNativeExecutions": 0,
++  "old56Preserved": true,
++  "acceptedNativeScopeUnchanged": true,
++  "pending": [
++    "exact architecture and QA successor review",
++    "root fresh actual release and source/tool/deps/modes/candidate baseline/hold/boundary binding",
++    "actual same-holder denied-exit admission",
++    "actual separateprepare/red/inspection/install/green/inspection/archive",
++    "independent actual review/root adoption",
++    "standalone final0/result/readiness inspection",
++    "separate hash-bound permit",
++    "separate guarded exit and fresh postclose proof"
+   ],
+-  "notPerformed": [
+-    "Node",
+-    "Helm",
+-    "Vitest",
+-    "compiler",
+-    "Gradle",
+-    "CLI native probe",
+-    "process/resource census",
+-    "lock acquisition",
+-    "runtime scratch creation or read",
+-    "source application",
+-    "cleanup",
+-    "private body reads",
+-    "delegation"
++  "limits": [
++    "resident roles bounded16384 process/64Node rows and10s observations; no completeintervalcapture",
++    "UNKNOWN/observation/identity gaps sticky; later absence no repair",
++    "timeout retains work/evidence and blocks success close; no signal",
++    "exclusive finalv1 failure or stale proof requires separate reviewed disposition, no refresh",
++    "ordinary unrelated Node without concrete role/workspace association not globally waited",
++    "no nativeframes/rendercount/source/C8/lane/Done/external/IR credit"
+   ],
+-  "pending": [
+-    "independent Aria exact code/commands/control review",
+-    "independent Quinn exact code/commands/counts/control review",
+-    "root acceptance and fresh exact one-shot actual release",
+-    "fresh current tool/dependency/source modes/resources/held-lock identities",
+-    "actual48expected-red and95green evidence",
+-    "independent actual review and ordered guarded closure"
+-  ],
+-  "observationalLimits": [
+-    "Static predicted48 and112 render calls only; no actual frames/counts",
+-    "Sampled native ownership is not complete interval capture; gaps are sticky HOLD",
+-    "Timeout retains active work and blocks success close; exact reviewed failure disposition required",
+-    "No automatic cleanup, retry, signal, product/C8/011/lifecycle/external credit"
+-  ],
+-  "nativeExecuted": false,
+-  "sourceApplied": false,
+   "readiness": false,
+   "released": false,
+   "credit": false
+--- resume1/RECIPE.md
++++ resume2/RECIPE.md
+@@ -1,6 +1,6 @@
+ Prepared source only. Actual execution, readiness, source application and credit are false. Root must first obtain independent architecture and QA review of this exact packet and commands. The prior40 release is consumed. No command below was executed during preparation.
+ 
+-The fresh label is `obs009-gateway80-offtree01-20261019`; workspace `/private/tmp/obs009-gateway80-offtree01-20261019`; runtime evidence is `docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree01-20261019`. Future root must prove both paths unused before creating the private0700 runtime root. Preparation did not read or create that workspace. The repository-shaped copy contains precisely29 approved originals, the exact accepted fixture and native config. `repo/studio-runner` is beside `repo/helm-chart/put-checks`.
++The fresh label is `obs009-gateway80-offtree02-20261019`; workspace `/private/tmp/obs009-gateway80-offtree02-20261019`; runtime evidence is `docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree02-20261019`. Future root must prove both paths unused before creating the private0700 runtime root. Preparation did not read or create that workspace. The repository-shaped copy contains precisely29 approved originals, the exact accepted fixture and native config. `repo/studio-runner` is beside `repo/helm-chart/put-checks`.
+ 
+ The accepted helper/test patches are banked unchanged. No product apply or rollback is involved. Only `install-fixed` replaces the owned helper's exact original preimage with the exact fixed bank. The fixture and `helm.ts` stay byte-exact. Embedded8 token mutants are run once as part of the95, without extra selected reruns. The independently accepted40 and its failed predecessor remain separate historical evidence.
+ 
+@@ -16,16 +16,16 @@
+ 
+ Freshly bind the wrapper/shell PID, start, argv hash and parent relation, wrapper's actual open lock inode/dev and kernel-held proof into runtime `hold.json`; bind its SHA in the reviewed actual release. This root action is a separate prerequisite, not a prepared fake identity. Keep one heavy unit only. Root checks that no C8 or other native unit is running before release. This packet does not invoke the old fixed-cwd execute011 collector, GST phase writers, GST readiness or C8 guard.
+ 
+-In the held shell, set umask077 and source this packet's `guard-exit.bash` with the exact root release SHA. Capture setup status separately and inspect `declare -f exit`. Request `exit 1` in its own tool call before preparation: it must HOLD because the final root permit is absent. Capture `$?` separately and require1. Independently establish the SAME holder/start/FD/inode/kernel and source boundary before proceeding. A new wrapper after accidental exit is not admission proof. The guard is a local backstop; no builtin/exec/EOF bypass is authorized.
++In the held shell, set umask077 and source this packet's `guard-exit.bash` with the exact root release SHA. Capture setup status separately and inspect `declare -f exit`. Request `exit 0` in its own tool call before preparation: it must HOLD because the final readiness/permit are absent. Capture `$?` separately and require1. Independently establish the SAME holder/start/FD/inode/kernel and source boundary before proceeding. A new wrapper after accidental exit is not admission proof. The guard is a local backstop; no builtin/exec/EOF bypass is authorized.
+ 
+ Each following line is a separate future command from that held shell. Root supplies a distinct phase decision SHA; the actual release SHA stays the same. Always wait for the actual prompt, capture `$?` in a separate call, inspect the immutable receipt, every sticky flag, native result and resources before issuing the next command. Do not paste these lines as a chained pipeline.
+ 
+ ```text
+-python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume1/run-private.py prepare RUNTIME/root-authorization.json RELEASE_SHA PREPARE_DECISION_SHA < /dev/null
+-python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume1/run-private.py red RUNTIME/root-authorization.json RELEASE_SHA RED_DECISION_SHA < /dev/null
+-python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume1/run-private.py install-fixed RUNTIME/root-authorization.json RELEASE_SHA INSTALL_DECISION_SHA < /dev/null
+-python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume1/run-private.py green RUNTIME/root-authorization.json RELEASE_SHA GREEN_DECISION_SHA < /dev/null
+-python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume1/run-private.py archive RUNTIME/root-authorization.json RELEASE_SHA ARCHIVE_DECISION_SHA < /dev/null
++python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume2/run-private.py prepare RUNTIME/root-authorization.json RELEASE_SHA PREPARE_DECISION_SHA < /dev/null
++python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume2/run-private.py red RUNTIME/root-authorization.json RELEASE_SHA RED_DECISION_SHA < /dev/null
++python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume2/run-private.py install-fixed RUNTIME/root-authorization.json RELEASE_SHA INSTALL_DECISION_SHA < /dev/null
++python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume2/run-private.py green RUNTIME/root-authorization.json RELEASE_SHA GREEN_DECISION_SHA < /dev/null
++python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume2/run-private.py archive RUNTIME/root-authorization.json RELEASE_SHA ARCHIVE_DECISION_SHA < /dev/null
+ ```
+ 
+ Here `RUNTIME` is the **absolute exact runtime directory** named above; placeholders are instructions for a later root decision, not executable shell variables or authorization. Each `<phase>.root-decision.json` must bind the actual release SHA, authorize only that phase and pin the exact required predecessor receipt. A `.consumed.json` file prevents retry even after a collector failure. There is no implicit next phase.
+@@ -38,8 +38,27 @@
+ 
+ On successful terminal phases, archive preserves the whole owned tree, including both complete Vitest reports, its dependency symlink itself and the final22-file fixed chart. It compares source/archived bytes, modes and link text without traversing dependencies and records the full finite owned inventory and root uid/dev/ino/path. Fixture scratch cleanup is checked by empty owned TMPDIR after each native phase. The evidence root separately retains exact commands/cwd/safe env/times/status/stdout/stderr/phase inventories, source guards and ownership observations.
+ 
+-Keep the hold while obtaining independent actual evidence review. Root then creates the separately inspected `close.root-permit.json` with exact five receipt hashes, actual review, release SHA, expected wrapper0 and a fresh timestamp. Its maximum age is60s before and after guard checks. Issue `exit 0` as a separate tool call; require `ALLOW_VERIFIED_GATEWAY80`, actual wrapper0 and a separate postclose proof of controller absence, kernelFree, recorded descendants absent/reused, inherited resources unchanged/absent, source/modes/dependencies and archive equality. No successful pre-close check is inferred from a prior command's exit or from historical unit06.
++Keep the hold while obtaining independent actual evidence review. Before any final attempt, root writes `actual-review.root-adoption.json`, binding the actual review path/hash, release and all5 phase receipt hashes. This adoption is a local evidence decision and grants no credit.
++
++Run the standalone gateway final producer in its own tool call:
++
++```text
++python3 -B docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume2/verify-final.py RELEASE_SHA < /dev/null
++```
++
++Wait for its actual prompt; separately capture the actual status and require0. Inspect `final-result-v1.json` and `final-readiness-v1.json` and their exact hashes, code/release/hold, reports/assessments, both archives and resources. The producer creates an exclusive `final-attempt-v1.json` before checking and never overwrites/retries/refreshes. It creates readiness ONLY after every check succeeds and emits a separate result. A failed verification leaves a failure result and no readiness; it cannot be reused to justify a permit. The producer writes no permit, phase, exit or cleanup. The earlier result is mandatory; checking at exit is additional protection.
++
++Only AFTER actual final0/result inspection may root separately create `close.root-permit.json`, binding readiness and final-result SHA, actual final status0/inspection, actual review, release and expected wrapper0. Readiness and permit must both remain within60s before AND after the gate's fresh checks; permit timestamp must follow readiness. Stale/missing/wrong proof is HOLD, never an automatic refresh. Issue `exit 0` as a separate tool call; require `ALLOW_VERIFIED_GATEWAY80` and actual wrapper0.
++
++Then root separately proves postclose: original wrapper/shell PID/start absent/reused, exact lock inode retained and kernelFree; all recorded native and candidate-history identities absent/reused; fresh bounded `worker_candidates` against the same pre-unit baseline has no new/UNKNOWN resident Vitest/Tinypool candidates; inherited baseline facts unchanged/absent; current source/bytes/modes/main/Replay/dist/actualHelm22/copyHelm22/tools/dependencies and both archives remain exact. Record this postclose proof, release/final/readiness/permit/ALLOW hashes and raw wrapper exit in a new root closed receipt. Do not reuse a held-only proof or borrow an old unit's PIDs. The candidate baseline and full history stay retained for postclose and later cleanup decisions. No successful pre-close check is inferred from a prior command's exit or historical unit06.
+ 
+ Cleanup remains a later root-only separate decision, after successful closure and fresh exact workspace identity/inventory/archive equality. No cleanup code is in this packet. Remove only the finite owned workspace and its symlink entry; retain the dependency target and all evidence. Do not enumerate unrelated TEMP, read old scratch/private bodies, or signal inherited processes.
+ 
+ Remaining even after a successful copy unit: product source-open/apply, full runner typecheck and fixture lint, applicable full deployment tier with existing verified image/prerequisites, current runbook disclosure, full fresh C8 check/JaCoCo before011 credit, review-digest/lifecycle gates, all21 external inputs and real pilot. No IR clock, provider, deployment, lane or Done credit is granted.
++
++
++Resume2 corrections are limited to G80-CONTROL-01/RESOURCE-02/FREEZE-03/EVIDENCE-04/TEST-05. The fresh unused future label is off-tree02; all previous off-tree01 records/seals remain historical and untouched. Accepted fixture, Helm harness,95/48 case identities and original/fixed helper banks remain byte-exact. Native phase selection and argv arrays change no test or oracle.
++
++Before preparation, root freshly creates and binds `candidate-baseline.json`; the template is not evidence. Observe concrete Node/Vitest/Tinypool roles and inherited identities with the verified Node binary, PID/start/argv/comm/executable facts. New resident Tinypool/Vitest roles with no recorded native lineage are UNKNOWN even when their parent is1 and argv has no workspace marker. Current/recorded parent lineage or verified cwd under the exact workspace supplies association where available. Ordinary unrelated Node without a concrete role/workspace association is not globally waited on. Candidate checks are bounded to16384 process rows/64 Node rows, with10s command bounds. Unknown/identity/observation gaps stay sticky in native receipts; later absence cannot repair them. Complete interval capture and hostile same-UID protection remain unclaimed. No signal authority is added.
++
++Real Helm and copied charts are enumerated for exact22-file path membership, expected bytes/modes and no links before/after phases and at final/gate. New/deleted templates and unexpected empty directories reject rather than rebasing. Final independently rebinds current evidence-root red/green reports to their native report hashes and exact re-assessments, raw outputs/launches, both current copied reports, complete workspace archive and separate final-fixed-chart archive. The gate repeats those checks against immutable readiness and rejects later drift.
+--- resume1/archive-and-close.json
++++ resume2/archive-and-close.json
+@@ -10,8 +10,8 @@
+       "archive"
+     ],
+     "separateRootDecisionEachPhase": true,
+-    "successBackstop": "exit-gate.py + readonly Bash exit function, fresh max60s root permit, exact5 receipt pins, source/dependency guard and recorded-owned terminality",
+-    "guardNegativeAdmission": "Before prepare: request explicit exit0 or1 in separate tool call; observe HOLD_FINAL_ROOT_PERMIT_REQUIRED, separately record status1 and same holder/FD/inode/kernel before stage",
++    "successBackstop": "Standalone gateway final0/readiness/result inspection THEN separate hash-bound permit THEN additional gate fresh checks/exit THEN explicit postclose. Exclusive v1 no refresh.",
++    "guardNegativeAdmission": "Separate exit0 -> HOLD/status1, SAME wrapper/shell/FD/inode/kernel proof before prepare",
+     "noSecurityBoundaryClaim": true,
+     "heldScope": "One shared immutable wrapper hold across both native phases, root inspections and archive/actual review; no heavy concurrency"
+   },
+@@ -63,5 +63,7 @@
+       "automatic cleanup on failure",
+       "cleanup before archive/review/postclose"
+     ]
+-  }
++  },
++  "finalReadiness": "final-readiness.schema.json",
++  "residentCandidatePolicy": "candidate-baseline.template.json plus bounded worker_candidates, sticky UNKNOWN/history retained through final/gate/postclose"
+ }
+--- resume1/check-map.json
++++ resume2/check-map.json
+@@ -21,7 +21,7 @@
+   "unchangedNativeHarnessSha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0",
+   "configCache": "native mjs loader, explicitownedcache; no .vite-temp bundles in shareddependencies",
+   "ownershipReuse": "Pinned a1e7 read-only census/identity/boundary functions + prior40 child-only022; new monitor/guard require exact review",
+-  "pureControls": "50 injected/static checks; no native or actual collector invocation",
++  "pureControls": "121 total:50 prior and71 actual-boundary fake IO/OS/process/time controls; no real main/native/census",
+   "uncredited": [
+     "product application",
+     "runner typecheck/lint",
+@@ -35,5 +35,38 @@
+     "external21",
+     "pilot",
+     "IR clock"
+-  ]
++  ],
++  "findingMap": {
++    "G80-CONTROL-01": [
++      "verify-final.py",
++      "final-controls.py:produce_final/close_check",
++      "final-readiness.schema.json",
++      "RECIPE.md"
++    ],
++    "G80-RESOURCE-02": [
++      "run-private.py:worker_candidates/run_native/boundary",
++      "candidate-baseline.template.json",
++      "native candidateObservations retained",
++      "RECIPE.md postclose"
++    ],
++    "G80-FREEZE-03": [
++      "run-private.py:chart_guard/guards/workspace_guard",
++      "final-controls.py:final_facts"
++    ],
++    "G80-EVIDENCE-04": [
++      "run-private.py:archive/native hashes",
++      "final-controls.py:final_facts/close_check"
++    ],
++    "G80-TEST-05": [
++      "boundary-controls.py",
++      "boundary-control-results.json"
++    ]
++  },
++  "necessaryApiChanges": {
++    "namespace": "resume1/offtree01 -> resume2/offtree02; old seal and inputs immutable",
++    "resource": "boundary(H,C) -> boundary(H,C,A), bounded worker_candidates with root candidateBaseline SHA; native stdout/stderr/launch hashes and candidateObservations",
++    "final": "new standalone verify-final.py and shared final-controls.py actual functions; exclusive final-attempt/readiness/result-v1",
++    "permit": "readinessSha256/finalResultSha256 + actualFinalResultInspected/finalVerificationExit; five receipt hashes bound inside readiness facts instead of a duplicate permit receiptPins field",
++    "archive": "add finalChartInventory and finalChartArchiveInventory; both are revalidated at final/gate"
++  }
+ }
+--- resume1/close-permit.template.json
++++ resume2/close-permit.template.json
+@@ -4,13 +4,11 @@
+   "expectedWrapperExit": 0,
+   "verifiedAtEpoch": null,
+   "independentActualReviewSha256": null,
+-  "receiptPins": {
+-    "prepare": null,
+-    "red": null,
+-    "install-fixed": null,
+-    "green": null,
+-    "archive": null
+-  },
+   "credit": false,
+-  "cleanupAuthorized": false
++  "cleanupAuthorized": false,
++  "readinessSha256": null,
++  "finalResultSha256": null,
++  "actualFinalResultInspected": false,
++  "finalVerificationExit": null,
++  "phasePinsBoundThroughReadiness": true
+ }
+--- resume1/exit-gate.py
++++ resume2/exit-gate.py
+@@ -1,81 +1,33 @@
+-"""Prepared success-close backstop specific to gateway80; not a GST/C8 guard.
+-
+-An unexpected outcome remains HOLD for exact root/QA disposition. This does not
+-authorize recovery signals, a retry, or an unreviewed failure-release shortcut.
+-"""
++"""Success gate: recheck after separately inspected final0 and root permit."""
+ from pathlib import Path
+ import importlib.util
+-import json
+ import sys
+ import time
+-
+ sys.dont_write_bytecode = True
+ D = Path(__file__).resolve().parent
+-spec = importlib.util.spec_from_file_location('gateway80_driver', D / 'run-private.py')
+-driver = importlib.util.module_from_spec(spec)
+-spec.loader.exec_module(driver)
+-
++def load(name, filename):
++    spec = importlib.util.spec_from_file_location(name, D / filename)
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    return module
++driver = load('gateway80_driver', 'run-private.py')
++final = load('gateway80_final', 'final-controls.py')
+ 
+ def main():
+-    require = driver.require
+-    require(__debug__ and len(sys.argv) == 3, 'UNBOUND_GATE_CALL')
++    driver.require(__debug__ and len(sys.argv) == 3, 'UNBOUND_GATE_CALL')
+     release_sha, requested = sys.argv[1:]
+-    E, W = driver.E, driver.W
+-    A = driver.read(E / 'root-authorization.json')
+-    require(driver.file_hash(E / 'root-authorization.json') == release_sha
+-            and A['authorized'] is True, 'ROOT_RELEASE_REQUIRED')
+-    require(driver.file_hash(D / 'manifest.json') == A['packetManifestSha256'], 'PACKET_SEAL')
+-    for row in driver.read(D / 'manifest.json')['files']:
+-        require(driver.file_hash(D / row['path']) == row['sha256'], 'PACKET_MEMBER_CHANGED')
+-    permit_path = E / 'close.root-permit.json'
+-    require(permit_path.is_file(), 'FINAL_ROOT_PERMIT_REQUIRED')
+-    permit = driver.read(permit_path)
+-    require(permit['releaseSha256'] == release_sha and permit['authorized'] is True
+-            and permit['expectedWrapperExit'] == int(requested) == 0, 'CLOSE_PERMIT_SCOPE')
+-    require(permit['independentActualReviewSha256'] and permit['credit'] is False,
+-            'ACTUAL_REVIEW_REQUIRED')
+-    require(0 <= time.time() - permit['verifiedAtEpoch'] <= 60, 'STALE_ROOT_PERMIT')
+-    C = driver.core()
+-    H = driver.held(A, C)
+-    driver.guards(A, C)
+-    driver.boundary(H, C)
+-    require(set(permit['receiptPins']) == set(driver.SCOPE['phaseIds']), 'ALL_PHASE_PINS_REQUIRED')
+-    known = {}
+-    for phase, h in permit['receiptPins'].items():
+-        p = E / (phase + '.receipt.json')
+-        require(driver.file_hash(p) == h, 'PHASE_RECEIPT_CHANGED')
+-        receipt = driver.read(p)
+-        require(receipt['accepted'] is True and not receipt['stickyFlags']
+-                and receipt['releaseSha256'] == release_sha, 'PHASE_NOT_ACCEPTED')
+-        if phase in ('red', 'green'):
+-            native = receipt['native']
+-            require(native['status'] == 'TERMINAL' and not native['stickyFlags']
+-                    and native['timedOut'] is False, 'NATIVE_NOT_TERMINAL')
+-            for f in native['ownedIdentities']:
+-                known[(f['pid'], f['start'])] = f
+-    rows = C['table']()
+-    require(all((rows.get(pid) or {}).get('start') != start for pid, start in known),
+-            'OWNED_DESCENDANT_SURVIVES')
+-    driver.workspace_guard('fixed')
+-    archive = driver.read(E / 'archive.receipt.json')
+-    require(driver.owned_root_identity() == archive['workspace'], 'OWNED_ROOT_CHANGED')
+-    require(driver.inventory(W) == archive['workspaceInventory'], 'WORKSPACE_CHANGED_AFTER_ARCHIVE')
+-    require(driver.inventory(E / 'complete-workspace-archive') == archive['archiveInventory'],
+-            'ARCHIVE_CHANGED')
+-    driver.held(A, C)
+-    require(0 <= time.time() - permit['verifiedAtEpoch'] <= 60, 'PERMIT_EXPIRED_DURING_CHECK')
+-    driver.write_new(E / ('allow-close-' + str(time.time_ns()) + '.json'),
+-                     {'status': 'ALLOW_VERIFIED_GATEWAY80', 'requestedExit': int(requested),
+-                      'rootPermitSha256': driver.file_hash(permit_path), 'releaseSha256': release_sha,
+-                      'actualRenderCountClaimed': False, 'credit': False})
++    driver.require(requested == '0', 'SUCCESS_ONLY_CLOSE_EXPECTED_ZERO')
++    A = driver.read(driver.E / 'root-authorization.json')
++    permit = driver.read(driver.E / 'close.root-permit.json')
++    result = final.close_check(driver, A, release_sha, permit, driver.core(), time.time)
++    result['rootPermitSha256'] = driver.file_hash(driver.E / 'close.root-permit.json')
++    driver.write_new(driver.E / ('allow-close-' + str(time.time_ns()) + '.json'), result)
+     return 0
+-
+ 
+ if __name__ == '__main__':
+     try:
+         sys.exit(main())
+     except BaseException as exc:
+-        # SystemExit(0) is a success, not a HOLD.
+         if isinstance(exc, SystemExit) and exc.code == 0:
+             raise
+         print('HOLD_GATEWAY80:' + (str(exc) if isinstance(exc, ValueError) else type(exc).__name__))
+--- resume1/guard-exit.bash
++++ resume2/guard-exit.bash
+@@ -4,7 +4,7 @@
+   return 1
+ fi
+ readonly GATEWAY80_ROOT_RELEASE_SHA="$1"
+-readonly GATEWAY80_PACKET_DIR="/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume1"
++readonly GATEWAY80_PACKET_DIR="/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume2"
+ set +e
+ function exit() {
+   if [[ $# != 1 || ! $1 =~ ^[0-9]+$ ]]; then
+--- resume1/hold.template.json
++++ resume2/hold.template.json
+@@ -1,5 +1,5 @@
+ {
+-  "label": "obs009-gateway80-offtree01-20261019",
++  "label": "obs009-gateway80-offtree02-20261019",
+   "wrapper": null,
+   "shell": null,
+   "lock": {
+--- resume1/provenance.json
++++ resume2/provenance.json
+@@ -49,8 +49,42 @@
+       "path": "studio-runner/node_modules/@vitest/runner/dist/chunk-hooks.js",
+       "sha256": "5e0b0ece2242e3475a0312a375fac6e47287602792d7f4999d2d733ecda2d69a",
+       "purpose": "Installed reporter/runner source only; filtered assertion status skipped, pending summary count, error.stack provenance, describe ancestors"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-exact-packet-review/review.md",
++      "sha256": "7e36deee1c104a28d7efbeaf9eb9ca856c75115d0f41cb60c310f887b57209de"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-exact-packet-review/findings.json",
++      "sha256": "7626813c3fbc07daf41338e81fcfec297e9380bbc6e8da48e153f754d27222e0"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-exact-packet-review/seal.json",
++      "sha256": "c305546120af2ac22cc2ae9096b419bb3c84ba50c892d03f0d2c44c3ea1d93d7"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-exact-packet-review/independent-pure-controls.py",
++      "sha256": "da6816742991bd47e357e175e54e51dec00580bc18257a1ced64dedd5531a5b2"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-exact-packet-review/independent-pure-results.json",
++      "sha256": "094a1a1cb94e4e76ffd3958cc8f8ac14bf8d801fa263be78435df696c251b3dd"
++    },
++    {
++      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/gateway80-resume2-fix-task.txt",
++      "sha256": "9e447ac46c49ed1997d9b2cb6e3443a289fd9bd7836cc5243673db320b46dc71"
++    },
++    {
++      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/gateway80-resume2-fix-context.json",
++      "sha256": "70e73395485d9da111b2ad8a8b16e1beb5562c28aa230fec76ca046847a9bac1"
++    },
++    {
++      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-009/gateway80-resume2-fix-preflight.json",
++      "sha256": "873fbb02feae33f3a5ed4e4c71f8ad86a378e09b2a788e3a138a9890e28ec5b2"
+     }
+   ],
+   "frameworkLoadAlwaysFiles": "Configured docs/framework and available fallbacks absent; no native activation run under explicit source-only instruction",
+-  "actualExecution": false
++  "actualExecution": false,
++  "supersedesWithoutMutating": "d8021489e0938166fc4779105964a971e7c015ffaaaf7bab7c149541b4432c0e",
++  "rootFindingAdoptionSha256": "6ce05298446bbcf33e2bde42815cfa4e5e943964b937ea0a5b749b330a6c2075"
+ }
+--- resume1/receipt-schema.json
++++ resume2/receipt-schema.json
+@@ -30,11 +30,17 @@
+         "cwd",
+         "safeEnvironment",
+         "startedAtUtc",
+-        "endedAtUtc"
++        "endedAtUtc",
++        "candidateObservations",
++        "stdoutSha256",
++        "stderrSha256",
++        "launchSha256",
++        "reportSha256"
+       ],
+       "nativeExit": "integer actual status or null if still alive/unknown; never synthesized124 for timeout",
+       "timeout": "HOLD/not terminality",
+-      "ownedIdentities": "observed identity rows only, not complete interval capture claim"
++      "ownedIdentities": "observed identity rows only, not complete interval capture claim",
++      "candidateObservations": "Every sampled state retained; UNKNOWN or observation failure is sticky HOLD, later absence does not repair"
+     },
+     "assessment": {
+       "red": "exact95 identities;48failed intendedtrue/false assertion;47filtered; native1 retained",
+@@ -54,7 +60,13 @@
+       "archiveEqual",
+       "independentActualReview",
+       "cleanupAuthorizedFalse",
+-      "creditFalse"
++      "creditFalse",
++      "residentRoleCandidateBaselineAndHistoryRetained",
++      "freshNoUnknownResidentRoleProof",
++      "bothArchivesAndEvidenceReportsFresh",
++      "finalReadinessAndResultHashes"
+     ]
+-  }
++  },
++  "finalProtocol": "final-readiness.schema.json",
++  "finalProducer": "Exclusive attempt first, readiness only after checks, actual0 result before separate permit; failure result leaves no readiness and no refresh"
+ }
+--- resume1/root-authorization.template.json
++++ resume2/root-authorization.template.json
+@@ -1,6 +1,6 @@
+ {
+   "authorized": false,
+-  "label": "obs009-gateway80-offtree01-20261019",
++  "label": "obs009-gateway80-offtree02-20261019",
+   "packetManifestSha256": null,
+   "independentArchitectureReviewSha256": null,
+   "independentQaReviewSha256": null,
+@@ -23,5 +23,7 @@
+   "automaticRetry": false,
+   "actualFreshToolVersions": null,
+   "readiness": false,
+-  "auxModes": null
++  "auxModes": null,
++  "candidateBaselineSha256": null,
++  "finalProtocol": "gateway80-exclusive-final-v1-inspect0-separate-permit-guard-postclose"
+ }
+--- resume1/run-private.py
++++ resume2/run-private.py
+@@ -88,6 +88,11 @@
+     ns = {}
+     exec(compile(ast.Module(body=nodes, type_ignores=[]), '<pinned-readonly-ownership>', 'exec'), ns)
+     ns['ROOT'] = R
++    def bounded_capture(argv):
++        p = subprocess.run(argv, capture_output=True, text=True, timeout=10, check=False)
++        require(p.returncode in (0, 1), 'BOUNDED_OBSERVATION_FAILED')
++        return p.stdout
++    ns['bounded_capture'] = bounded_capture
+     return ns
+ 
+ 
+@@ -121,6 +126,25 @@
+     return H
+ 
+ 
++def chart_guard(root, fixed=False):
++    I = read(D / 'input-manifest.json')
++    expected = {r['destination'].removeprefix('repo/helm-chart/put-checks/'): r
++                for r in I['finiteCopies'] if r['destination'].startswith('repo/helm-chart/put-checks/')}
++    actual = inventory(root)
++    require(not any(r['kind'] == 'symlink' for r in actual), 'CHART_SYMLINK_FORBIDDEN')
++    files = {r['path']: r for r in actual if r['kind'] != 'directory'}
++    require(set(files) == set(expected) and len(files) == 22, 'CHART_EXACT_22_PATH_SET')
++    # Only directories that contain one of those22 files are legitimate.
++    directories = {str(Path(n).parent) for n in expected if str(Path(n).parent) != '.'}
++    require({r['path'] for r in actual if r['kind'] == 'directory'} == directories,
++            'CHART_DIRECTORY_PATH_SET')
++    for n, row in files.items():
++        h = I['helperBanks']['fixed']['sha256'] if fixed and n == 'templates/_helpers.tpl' else expected[n]['sha256']
++        require(row['kind'] == 'file' and row['sha256'] == h
++                and row['mode'] == expected[n]['mode'], 'CHART_BYTES_OR_MODE')
++    return True
++
++
+ def guards(A, C):
+     G = read(D / 'source-guards.json')
+     require(A['sourceDigest'] == G['sourceDigest'], 'SOURCE_RELEASE_DIGEST')
+@@ -147,6 +171,7 @@
+         for n, h in group.items():
+             require(file_hash(R / n) == h
+                     and stat.S_IMODE((R / n).stat().st_mode) == A['auxModes'][n], 'AUXILIARY_CHANGED')
++    chart_guard(R / 'helm-chart/put-checks')
+     require(file_hash(Path(SCOPE['node'])) == A['nodeSha256'], 'NODE_CHANGED')
+     require(file_hash(Path(SCOPE['helm']).resolve()) == A['helmSha256'], 'HELM_CHANGED')
+     dep = Path(SCOPE['dependencies']).resolve()
+@@ -158,7 +183,70 @@
+             'dependenciesExact': True, 'atUtc': utc()}
+ 
+ 
+-def boundary(H, C):
++def worker_candidates(A, C, rows=None, native_ids=()):
++    """Bounded resident-role observation, not global Node ownership or interval capture.
++
++    A new verified Node Tinypool/Vitest role is UNKNOWN until current/recorded
++    native lineage proves ownership. Disappearance cannot erase its sticky gap.
++    Other ordinary Node processes are not waited on merely for being Node.
++    """
++    baseline_path = E / 'candidate-baseline.json'
++    require(file_hash(baseline_path) == A['candidateBaselineSha256'], 'CANDIDATE_BASELINE_CHANGED')
++    baseline = read(baseline_path)
++    require(baseline['capturedBeforeUnit'] is True and baseline['label'] == SCOPE['label'],
++            'PREUNIT_CANDIDATE_BASELINE_REQUIRED')
++    rows = C['table']() if rows is None else rows
++    require(len(rows) <= 16384, 'CANDIDATE_TABLE_BOUND')
++    node_rows = C['bounded_capture'](['/bin/ps', '-ww', '-axo', 'pid=,comm='])
++    nodes = []
++    for line in node_rows.splitlines():
++        words = line.strip().split(None, 1)
++        require(len(words) == 2 and words[0].isdigit(), 'CANDIDATE_COMM_PARSE')
++        if Path(words[1]).name.lower() == 'node':
++            nodes.append(int(words[0]))
++    require(len(nodes) <= 64, 'NODE_CANDIDATE_BOUND')
++    old = {(r['pid'], r['start']): r for r in baseline['identities']}
++    current, unknown, inherited = [], [], []
++    fields = ('pid', 'start', 'argvHash', 'commHash', 'executableHash', 'executableFileHash')
++    native_ids = set(native_ids)
++    for pid in nodes:
++        row = rows.get(pid)
++        if row is None:
++            continue
++        key = (pid, row['start'])
++        argv = C['pid_text'](pid, 'command')
++        if not argv:
++            unknown.append({'pid': pid, 'start': row['start'], 'classification': 'UNKNOWN_ARGV'})
++            continue
++        role = ('tinypool/dist/entry/process.js' in argv or 'vitest.mjs' in argv
++                or '/vitest/' in argv or '/@vitest/' in argv)
++        # Cwd and open files provide concrete workspace association when argv is neutral.
++        if not role and key not in old and key not in native_ids:
++            locations = C['bounded_capture'](['/usr/sbin/lsof', '-nP', '-a', '-p', str(pid),
++                                               '-d', 'cwd', '-F', 'n'])
++            role = any(line.startswith('n' + str(W) + '/') or line == 'n' + str(W)
++                       for line in locations.splitlines())
++        if not role and key not in old and key not in native_ids:
++            continue  # No concrete unit/role association; do not globally wait on Node.
++        identity = C['identity'](row)
++        if identity is None or not identity.get('identityComplete'):
++            unknown.append({'pid': pid, 'start': row['start'], 'classification': 'UNKNOWN_IDENTITY'})
++            continue
++        if key in old:
++            require(all(identity.get(k) == old[key].get(k) for k in fields), 'INHERITED_NODE_CHANGED')
++            inherited.append(identity)
++        elif identity['executableFileHash'] != A['nodeSha256']:
++            unknown.append({**identity, 'classification': 'UNKNOWN_NODE_EXECUTABLE'})
++        elif key in native_ids:
++            current.append({**identity, 'classification': 'RECORDED_NATIVE'})
++        else:
++            unknown.append({**identity, 'classification': 'UNKNOWN_NEW_RESIDENT_ROLE'})
++    return {'currentNative': current, 'unknownCandidates': unknown,
++            'inheritedMatched': inherited, 'baselineSha256': A['candidateBaselineSha256'],
++            'sampledObservationOnly': True}
++
++
++def boundary(H, C, A):
+     require(file_hash(R / H['baselinePath']) == H['baselineSha256'], 'BASELINE_CHANGED')
+     facts = C['boundary_inventory']({'baselinePath': H['baselinePath']})
+     require(not facts['inheritedIdentityChanged'] and not facts['incompleteStableIdentities']
+@@ -176,6 +264,10 @@
+                                'argvHash': hashlib.sha256(words[7].encode()).hexdigest()})
+     facts['gatewayMarkerCandidates'] = candidates
+     require(not candidates, 'GATEWAY_MARKER_SURVIVOR_OR_UNOWNED_CANDIDATE')
++    worker_state = worker_candidates(A, C)
++    require(not worker_state['currentNative'] and not worker_state['unknownCandidates'],
++            'RESIDENT_WORKER_OR_UNKNOWN_CANDIDATE')
++    facts['workerCandidates'] = worker_state
+     return facts
+ 
+ 
+@@ -188,6 +280,7 @@
+         require(file_hash(p) == h and stat.S_IMODE(p.stat().st_mode) == row['mode'], 'COPIED_INPUT_CHANGED')
+     entry = W / 'repo/studio-runner/node_modules'
+     require(entry.is_symlink() and os.readlink(entry) == SCOPE['dependencies'], 'DEPENDENCY_SYMLINK_CHANGED')
++    chart_guard(W / 'repo/helm-chart/put-checks', fixed=helper == 'fixed')
+ 
+ 
+ def make_copy():
+@@ -220,7 +313,7 @@
+                VITE_CACHE_DIR=str(W / 'repo/studio-runner/.vite-gateway80'))
+     argv = spec['argv']
+     require(not (W / ('repo/' + phase + '-vitest.json')).exists(), 'REPORT_ALREADY_EXISTS')
+-    known, gaps = {}, set()
++    known, gaps, candidate_history = {}, set(), []
+     started = utc()
+     # Raw native output is archived unchanged in the new evidence directory.
+     with (E / (phase + '.stdout')).open('xb') as out, (E / (phase + '.stderr')).open('xb') as err:
+@@ -255,8 +348,16 @@
+                             known[key] = identity
+                         else:
+                             gaps.add('OWNED_IDENTITY_INCOMPLETE')
++                state = worker_candidates(A, C, rows, ((f['pid'], f['start']) for f in known.values()))
++                candidate_history.append(state)
++                if state['unknownCandidates']:
++                    gaps.add('RESIDENT_REPARENTED_OR_UNKNOWN_CANDIDATE')
+                 code = child.poll()
+                 live = [f for f in known.values() if (rows.get(f['pid']) or {}).get('start') == f['start']]
++                if time.monotonic() - begin >= spec['maximumSeconds']:
++                    timed_out = True
++                    gaps.add('PHASE_TIMEOUT_NOT_TERMINALITY')
++                    break
+                 if code is not None and not live:
+                     break
+             except BaseException:
+@@ -271,7 +372,11 @@
+     result = {'startedAtUtc': started, 'endedAtUtc': utc(), 'argv': argv, 'cwd': str(cwd),
+               'safeEnvironment': env, 'nativeExit': code, 'timedOut': timed_out,
+               'ownedIdentities': list(known.values()), 'stickyFlags': sorted(gaps),
++              'candidateObservations': candidate_history,
+               'status': 'HOLD' if gaps or code is None else 'TERMINAL', 'automaticRetry': False}
++    result['stdoutSha256'] = file_hash(E / (phase + '.stdout'))
++    result['stderrSha256'] = file_hash(E / (phase + '.stderr'))
++    result['launchSha256'] = file_hash(E / (phase + '.launched.json'))
+     report = W / ('repo/' + phase + '-vitest.json')
+     if report.is_file() and not report.is_symlink():
+         shutil.copyfile(report, E / (phase + '-vitest.json'))
+@@ -295,6 +400,8 @@
+             'FINAL_CHART_ARCHIVE_MISMATCH')
+     return {'workspace': owned_root_identity(), 'workspaceInventory': after,
+             'archiveInventory': archive_rows, 'archiveEqual': True,
++            'finalChartInventory': inventory(chart),
++            'finalChartArchiveInventory': inventory(E / 'final-fixed-chart-archive'),
+             'finalChart22': True, 'cleanupAuthorized': False, 'credit': False}
+ 
+ 
+@@ -320,7 +427,7 @@
+     C = core()
+     H = held(A, C)
+     pre_source = guards(A, C)
+-    pre_resources = boundary(H, C)
++    pre_resources = boundary(H, C, A)
+     decision_path = E / (phase + '.root-decision.json')
+     require(file_hash(decision_path) == decision_sha, 'DECISION_SHA')
+     decision = read(decision_path)
+@@ -371,7 +478,7 @@
+                 result.update(archive())
+             result['afterInventory'] = inventory(W)
+         result['postSource'] = guards(A, C)
+-        result['postResources'] = boundary(H, C)
++        result['postResources'] = boundary(H, C, A)
+         held(A, C)
+         result.update(status='TERMINAL_ACCEPTED_LOCAL_ONLY', accepted=True)
+     except BaseException as exc:
+--- resume1/scope.json
++++ resume2/scope.json
+@@ -1,10 +1,10 @@
+ {
+   "status": "PREPARED_UNRELEASED",
+   "story": "STUDIO-OBS-009",
+-  "label": "obs009-gateway80-offtree01-20261019",
++  "label": "obs009-gateway80-offtree02-20261019",
+   "repository": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+-  "workspace": "/private/tmp/obs009-gateway80-offtree01-20261019",
+-  "runtime": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree01-20261019",
++  "workspace": "/private/tmp/obs009-gateway80-offtree02-20261019",
++  "runtime": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree02-20261019",
+   "authorization": {
+     "actualExecution": false,
+     "sourceApplication": false,
+@@ -90,5 +90,8 @@
+   "noRetry": true,
+   "noSignals": true,
+   "noCleanupByDriver": true,
+-  "expectedRootPreparationAdoptionSha256": "6949cefecb7b998f40431f74af389336694a9005d063d9efbfa8a98977726b47"
++  "expectedRootPreparationAdoptionSha256": "6949cefecb7b998f40431f74af389336694a9005d063d9efbfa8a98977726b47",
++  "successorOfManifestSha256": "d8021489e0938166fc4779105964a971e7c015ffaaaf7bab7c149541b4432c0e",
++  "rootFindingsAdoptionSha256": "6ce05298446bbcf33e2bde42815cfa4e5e943964b937ea0a5b749b330a6c2075",
++  "finalProducer": "verify-final.py (standalone, not a native phase)"
+ }
+--- resume1/static-checks.json
++++ resume2/static-checks.json
+@@ -1,14 +1,16 @@
+ {
+-  "status": "SOURCE_ONLY_ALL_CHECKED",
+-  "finiteBanks29Exact": true,
+-  "acceptedFixtureExact": true,
+-  "helmHarnessExact": true,
+-  "original15DescribeAndBodiesExact": true,
+-  "eightTokensUnique": true,
+-  "sourceMetadata1808": true,
+-  "distMetadata238": true,
+-  "fullFreshSourceOrResourceCensusPerformed": false,
+-  "nativeExecuted": false,
++  "status": "SOURCE_ONLY_SUCCESSOR_CHECKS_PASSED_PENDING_EXACT_REVIEW",
++  "old56MembersAndSealUnchanged": true,
++  "finite29BanksExact": true,
++  "acceptedFixture38c101beExact": true,
++  "helmHarnessAndConfigExact": true,
++  "nativePhasesArgvAndCountsUnchanged": true,
++  "caseMap95AndSelected48Exact": true,
++  "redAssertionLine310Exact": true,
++  "pureActualFunctionAndPriorControls": 121,
++  "priorControlsRetained": 50,
++  "actualNodeHelmOrNative": false,
++  "freshSourceOrResourceCensus": false,
+   "readiness": false,
+-  "release": false
++  "released": false
+ }

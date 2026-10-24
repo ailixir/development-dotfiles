@@ -1,0 +1,81 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java
+@@ -24,6 +24,7 @@
+ import java.time.Clock;
+ import java.time.Instant;
+ import jakarta.servlet.http.Cookie;
++import java.util.ArrayList;
+ import java.util.List;
+ import java.util.UUID;
+ import org.junit.jupiter.api.AfterEach;
+@@ -82,7 +83,7 @@
+   @Autowired private GuidedPublicPresentationProjector presentation;
+   @Autowired private GuidedEvidenceProjection evidence;
+   private String id;
+-  private String startedSessionId;
++  private final List<String> startedSessionIds = new ArrayList<>();
+   private Authentication owner;
+ 
+   @BeforeEach
+@@ -93,6 +94,11 @@
+     fixtures.seedCsi(CSI, OWNER);
+     ObservedPublicationFixture.seedApprovedPolicies(jdbc, CSI);
+     owner = StudioExecutionFixtures.identity(OWNER, CSI, "owner");
++    startSession();
++  }
++
++  private void startSession() throws Exception {
++    var fixtures = new StudioExecutionFixtures(jdbc);
+     UUID testId = fixtures.seedTest("Disabled publication " + UUID.randomUUID(), CSI, OWNER,
+         List.of("Open the home page"));
+     ObjectNode start = contracts.object().put("schemaVersion", 3).put("testId", testId.toString())
+@@ -105,17 +111,17 @@
+         .contentType("application/json").content(start.toString()))
+         .andExpect(status().isAccepted()).andReturn().getResponse().getContentAsString());
+     id = started.path("sessionId").asText();
+-    startedSessionId = id;
++    startedSessionIds.add(id);
+     assertThat(id).isNotBlank();
+     assertThat(bases.find(id)).as("the disabled start captured no publication base").isEmpty();
+   }
+ 
+   @AfterEach
+-  void cancelOnlyTheSessionStartedByThisTest() {
+-    if (startedSessionId != null && !startedSessionId.isBlank()) {
+-      sessions.cancel(owner, startedSessionId, UUID.randomUUID().toString(),
+-          contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-    }
++  void cancelOnlyTheSessionsStartedByThisTest() {
++    org.junit.jupiter.api.Assertions.assertAll(
++        startedSessionIds.stream().<org.junit.jupiter.api.function.Executable>map(ownedId -> () ->
++            sessions.cancel(owner, ownedId, UUID.randomUUID().toString(),
++                contracts.object().put("schemaVersion", 3).put("reason", "userRequested"))));
+   }
+ 
+   @Test
+@@ -261,7 +267,7 @@
+     state("SUCCEEDED");
+     assertThat(bases.find(id)).isEmpty();
+     assertDeniedDirectBeforeBaseLookup();
+-    state("PREPARING");
++    startSession();
+     captureBase();
+     state("SUCCEEDED");
+     assertThat(bases.find(id)).isPresent();
+@@ -279,7 +285,7 @@
+     assertThat(manualFallback().read(owner, id, "result")
+         .path("publication").path("status").asText()).isEqualTo("PENDING");
+     verify(bases, never()).find(id);
+-    state("PREPARING");
++    startSession();
+     captureBase();
+     state("SUCCEEDED");
+     assertThat(bases.find(id)).isPresent();
+@@ -291,6 +297,7 @@
+     assertThat(result(202).path("publication").path("status").asText()).isEqualTo("PENDING");
+     // The original base projector's initial lookup remains; its receipt-default builder adds none.
+     verify(bases, times(1)).find(id);
++    startSession();
+     state("PREPARING");
+     clearInvocations(bases);
+     sessions.read(owner, id, "result");

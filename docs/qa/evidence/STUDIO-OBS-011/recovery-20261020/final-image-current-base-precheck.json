@@ -1,0 +1,21 @@
+{
+  "atUtc": "2026-10-21T01:00:37.259343+00:00",
+  "command": [
+    "docker",
+    "image",
+    "inspect",
+    "mcr.microsoft.com/playwright:v1.63.0-noble",
+    "--format",
+    "{{.Id}} {{.Os}} {{.Architecture}}"
+  ],
+  "originalToolSession": 40068,
+  "rawExit": 0,
+  "imageId": "sha256:5536bbbd0ffc106a9fdab13fbff6b3abab01418cceff67ff246552b64cf5623d",
+  "os": "linux",
+  "architecture": "arm64",
+  "matchesAcceptedCachedDefaultBase": true,
+  "scope": "READ_ONLY_CURRENT_CACHED_BASE_PREFLIGHT_ONLY",
+  "noBuildRunPullOrRetag": true,
+  "finalImageAndFinalSourceContext": "UNBOUND",
+  "reverifyBeforeActualBuild": true
+}

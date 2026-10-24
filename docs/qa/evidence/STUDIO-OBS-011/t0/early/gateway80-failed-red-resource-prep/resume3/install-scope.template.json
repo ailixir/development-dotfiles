@@ -1,0 +1,247 @@
+{
+  "role": "SOURCE03_INSTALL_ONLY",
+  "authorizedBy": null,
+  "authorized": false,
+  "cleanup": false,
+  "nativeInvocations": 0,
+  "sourceDirectory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume3",
+  "destination": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree03-20261019/failed-red-resource-disposition02",
+  "outsideDirectory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr03-root-install01",
+  "outsideDirectoryFact": null,
+  "oldEDirectory": null,
+  "sourceManifestSha256": null,
+  "reviewPins": {
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume3/manifest.json": null,
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code03-exact-review/manifest.json": null,
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code03-exact-review/manifest.json": null
+  },
+  "readsetPolicy": "EXACT_SOURCE03_CONTRACT_REVIEWS_AND_SEVEN_CANONICAL_BINARIES",
+  "candidate": {
+    "kind": "INERT_FAILED_RED_RESOURCE_ONLY_ROOT_AUTHORIZATION_TEMPLATE",
+    "authorizedBy": null,
+    "authorized": false,
+    "expectedWrapperExit": 1,
+    "newNativeInvocations": 0,
+    "sourceWrites": [],
+    "cleanup": false,
+    "normalRoute": "HARD_HOLD",
+    "credit": false,
+    "subject": {
+      "label": "obs009-gateway80-offtree03-20261019",
+      "pty": 29815,
+      "wrapper": {
+        "pid": 3720,
+        "start": "Mon Oct 19 12:48:37 2026",
+        "argvHash": "1d1638cae329a35e35525dbea90f90afea0724722d4b3ae17d673fa8a10670f6"
+      },
+      "shell": {
+        "pid": 3749,
+        "start": "Mon Oct 19 12:48:37 2026",
+        "argvHash": "e693ea77d4dc14554715c43d1be0d346a18945c4ef836b403ed7c46fe14271a8"
+      },
+      "lock": {
+        "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/gradle.lock",
+        "dev": 16777229,
+        "ino": 215213569
+      },
+      "holdSha256": "fd58e6a6d34cb9f3c9c0a100a7bb38109a6913322232691d2528701d5825a073",
+      "releaseSha256": "43ff6885ad33d1084a6a60ccb94390a099e097fd31b35496442b46ebce24ce71",
+      "code06ManifestSha256": "e2e3340b48628c76884d6b243dd69134052e8e2ff3d25f5ab09d94f4e9150585",
+      "sourceReviews": {
+        "architecture": "dd6456fc01575c1eb0afe82cf2793903eccac27a388c5dec4da10d55d7248f92",
+        "qa": "ec64b9b5fb243c9c6bf2a29828e03784cbba720b0b77a4ed3d03c3896db3658a"
+      },
+      "currentHeldOrResourceFactsObservedByDesigner": false
+    },
+    "retainedFailure": {
+      "actualNativeExit": 1,
+      "actualCollectorStatus": 1,
+      "phaseAccepted": false,
+      "phaseStatus": "HOLD",
+      "failureCode": "NATIVE_OWNERSHIP_HOLD",
+      "nativeTimedOut": false,
+      "stickyFlags": [
+        "OWNED_IDENTITY_RACE_OR_INCOMPLETE",
+        "RESIDENT_REPARENTED_OR_UNKNOWN_CANDIDATE"
+      ],
+      "phaseStickyFlags": [
+        "PHASE_FAILED_ValueError"
+      ],
+      "candidateObservationCount": 3,
+      "pureClosedReportAssessment": {
+        "qualification": "EXPECTED_RED_48_INTENDED_ASSERTIONS",
+        "nativeExit": 1,
+        "nativeSuccess": false,
+        "counts": {
+          "skipped": 47,
+          "failed": 48
+        },
+        "all95IdentitiesReconciled": true,
+        "actualRenderFrameCount": null,
+        "actualRenderFrameCountClaimed": false,
+        "credit": false
+      },
+      "assessmentDoesNotQualifyPhase": true,
+      "cause": "UNKNOWN",
+      "postSourceAndPostResourcesProduced": false,
+      "fixedGreenNormalArchiveFinalPermit": "NOT_STARTED_NOT_AUTHORIZED",
+      "historicalGapCodes": [
+        "RED01_OWNED_IDENTITY_RACE_OR_INCOMPLETE",
+        "RED01_RESIDENT_REPARENTED_OR_UNKNOWN_CANDIDATE",
+        "RED01_ONE_CANDIDATE_WITHOUT_START",
+        "RED01_OLD_OBSERVER_BINARY_FINGERPRINT_INCOMPLETE",
+        "RED01_UNRECORDED_FORK_OR_INTERVAL_ABSENCE_NOT_PROVEN",
+        "HISTORICAL_C8_GST_GAPS_UNCHANGED"
+      ],
+      "oldFlagsRepairableByNewPointObservation": false
+    },
+    "compileObligation": "NONE_NODE_ONLY_UNCHANGED_SOURCE",
+    "distinctFailedEntrypointAuthorized": false,
+    "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+    "limits": {
+      "maximumArchiveEntries": 8192,
+      "maximumArchiveBytes": 536870912,
+      "maximumFileBytes": 134217728,
+      "maximumJsonBytes": 16777216,
+      "maximumCensusRows": 16384,
+      "utilityDeadlineSeconds": 15,
+      "freshnessSeconds": 60
+    },
+    "rootInputPins": {},
+    "externalPins": {
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-resume6-red01-terminal-index.json": "67994db98e1cf81d6aabd60899333f3979fd9993eae8b756211c434095288228",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-resume6-red01-failed-terminal-assessment.json": "1a4678333a0a968dfe1c5936ce74b55638b9e3a2a9bffe8c375b724ea8398b7d",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-root-after-negative-held-06.py": "b89e94e647d7702f845a004d98043fffa5c992cc31771417b5f95e5b025a0237",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/fullcheck-harness/resume3/harness.py": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-resume6-exact-review/manifest.json": "dd6456fc01575c1eb0afe82cf2793903eccac27a388c5dec4da10d55d7248f92",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-resume6-exact-review/manifest.json": "ec64b9b5fb243c9c6bf2a29828e03784cbba720b0b77a4ed3d03c3896db3658a",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-red01-failed-resource-design/manifest.json": "6678da2aee002f8fc4e9d923a3166a2e72e8ba9c4715bc27c6ea3137e0ac52cb",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-red01-actual-failed-review/manifest.json": "a2c7f8b85c25d7b9ef1244e7942c99139bdfc9f204fa555a1e830d6a41f6cdba",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-failed-resource-code02-negative-failed-index.json": "8b1f8f9be540788d05b66923fd7fc60c7d9df19f254868dacde87d0819db8761",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-failed-resource-code02-failure-interpretation-correction.json": "541f914cd77cd9a5c0571bc42d7d65dd5e4042883a61dbd4805c10c54aaa9079",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume2/manifest.json": "aaeb967ecc7eb279c70fb50e69218898295094b96fea23f7fdf82c99ce224558",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code02-exact-review/manifest.json": "19948c278df2fdb3fe334ebe328c3b0fe2a1eef0c8d1e51c6c2c4227a5e0a1ed",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code02-exact-review/manifest.json": "894be13e034fcfb1cc137a5b1b76b28a2eaac650a2c6145713251108a2252610",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway-failed-prequalification-disposition-design/manifest.json": "eaddcae2d795989a6585d636718d8c5f67340d79bde824803d16f8a28704f06c",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway-failed-prequalification-disposition-design-review/manifest.json": "6a5fc57b2f89b879f5f12d3760a01d1b5bf9f54d62a297268644427e2536fa25",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-failed-resource-code03-preparation-root-scope.json": "95ad5dd326b114c6aac04e62202292a7ab2980e267388d7f5a9bf4d66673d554",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-failed-prequalification-design-qa-root-adoption.json": "e26a774ea5d70a3bb5f03a21b60ce739832e47a08a5ec606147863fd779caac7"
+    },
+    "newDirectoryPins": {},
+    "pythonRoles": {
+      "launch": {
+        "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+        "sha256": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095"
+      },
+      "reported": {
+        "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+        "sha256": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095"
+      },
+      "process": {
+        "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+        "sha256": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7"
+      },
+      "observedArgument": {
+        "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+        "sha256": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7"
+      }
+    },
+    "observationExecutables": {
+      "/bin/ps": {
+        "path": "/bin/ps",
+        "sha256": "f2211a1d7ff5e5c2e034df4acf450e30ffeec4e5ed632f21948d7181a1c493b6"
+      },
+      "/usr/sbin/lsof": {
+        "path": "/usr/sbin/lsof",
+        "sha256": "8a76f446149b77c31d9b769ef7b0b2d4fa3550805303103b081886c5d8d68de4"
+      },
+      "git": {
+        "path": "/opt/homebrew/Cellar/git/2.43.2/bin/git",
+        "sha256": "5c9b91ebbfb0e2b6d759a082d3b9d18886d52e2fee333cd245b00561db632d8c"
+      }
+    },
+    "exactIndependentCodeReviewsQualified": false,
+    "priorNamespaces": [
+      {
+        "type": "IMMUTABLE_PRIOR_FAILED_PREQUALIFICATION_NAMESPACE",
+        "directory": {
+          "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree03-20261019/failed-red-resource-disposition01",
+          "uid": 501,
+          "dev": 16777229,
+          "ino": 219188670,
+          "mode": 448
+        },
+        "members": [
+          {
+            "path": "contract.json",
+            "sha256": "f45d5b644d4863158cc6f8d560fd5b4ef55592e6b07baa9d526799dce5abfcee",
+            "bytes": 520773,
+            "mode": 384,
+            "uid": 501,
+            "dev": 16777229,
+            "ino": 219188675
+          },
+          {
+            "path": "custody.py",
+            "sha256": "28734fb5f9c8a53736027b1887fdf5585b3a31cae64d1cae9ac9930bbcb10000",
+            "bytes": 9731,
+            "mode": 384,
+            "uid": 501,
+            "dev": 16777229,
+            "ino": 219188672
+          },
+          {
+            "path": "entry.py",
+            "sha256": "da015600c5b620e145f71af45ab4a915260c62369c10f62b1cb4ab16bd757a1e",
+            "bytes": 4274,
+            "mode": 384,
+            "uid": 501,
+            "dev": 16777229,
+            "ino": 219188676
+          },
+          {
+            "path": "failed_gateway.py",
+            "sha256": "cbc8a9e34b70697227afbde28312ef9e6233f5d147b700e73a2af834fc9311a9",
+            "bytes": 45231,
+            "mode": 384,
+            "uid": 501,
+            "dev": 16777229,
+            "ino": 219188671
+          },
+          {
+            "path": "guard-failed-red.bash",
+            "sha256": "87cad704023ec86ce1bccfaa8680fbf255f04ec06c93e38d2d155de8dc101c84",
+            "bytes": 8428,
+            "mode": 384,
+            "uid": 501,
+            "dev": 16777229,
+            "ino": 219188674
+          },
+          {
+            "path": "protocol.py",
+            "sha256": "7420eefc62e4a5a652a4b35a09b783fd7c7ea378af16a211686ebd6fd78e36b2",
+            "bytes": 8344,
+            "mode": 384,
+            "uid": 501,
+            "dev": 16777229,
+            "ino": 219188673
+          },
+          {
+            "path": "root-authorization.json",
+            "sha256": "083846fd7ea205cee4bb487a46e23e9cf3b253993cf8d8858a49f3e37267ec44",
+            "bytes": 8779,
+            "mode": 384,
+            "uid": 501,
+            "dev": 16777229,
+            "ino": 219188677
+          }
+        ]
+      }
+    ],
+    "oldIndexSha256": "67994db98e1cf81d6aabd60899333f3979fd9993eae8b756211c434095288228",
+    "physicalNFactFinalizeOnly": true,
+    "currentFactsObserved": false,
+    "actualInstallationAuthorized": false,
+    "actualGuardClosingAuthority": false
+  }
+}

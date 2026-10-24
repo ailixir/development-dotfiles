@@ -1,0 +1,9 @@
+# SNAP-MANIFEST-IO-01 corrected; preparation only
+
+Dex changed one finite16-label constant and one optional catch-membership expression. Retained descriptor/path/read/identity/owner/mode/size/close refusals now become OPTIONAL_INSTRUMENTATION_FAILED with incomplete exit2 while preserving the validated snapshot enums/errorCode when unchanged enclosing ownership/output checks permit safe writing. Missing/deleted/ambiguous semantic witnesses remain qualified UNPROVEN. Non-FileNotFound OSError remains incomplete2. No retry, alternate file, relaxed check, raw exception text or public schema field was added.
+
+All original40 semantic/8 FD controls pass. New pure controls:32 source-label×role negatives (including all ten reproduced pairs),6 non-FileNotFound/unexpected errors,8 ordinary missing/semantic controls and2 complete/false-NONE positives. IO negatives return2, preserve snapshot state/error/bootstrap and write only snapshot-facts.json. Source maps bind all16 labels to the active reviewed read call path.
+
+All24 original sealed SOURCE artifacts and36 bindings remain unchanged. Core f015/dc9, schema/enums/caps/paths/guards/conditional provenance and snapshot-only no-warning/no-preknown-ID behavior are preserved. Original release and consumed output were never enumerated/statted/opened/read/copied/modified. Root's supplied first result FAILED/OTHER/CONTEXT_PENDING was not independently read here; OTHER identifies neither a writer nor no-error.
+
+Actual private IO, helper main/CLI/real descriptor IO, native/build/compiler/process/source/Git operations and delegation: **0**. Only new resume2 artifacts were written. False future optional packet templates/command and PACKET-CONSTRUCTION.md require separate exact independent code/actual-scope review. No new release or automatic retry of the consumed first capture. No QA/W1/native/lane/lifecycle/cause credit. USD500 declared; actual aggregate unavailable.

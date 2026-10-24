@@ -1,0 +1,80 @@
+{
+  "kind": "SOURCE_ONLY_D2_TWO_FINDING_CORRECTION_CANDIDATE",
+  "disposition": "READY_FOR_INDEPENDENT_REVIEW_NOT_RUNTIME_PROOF",
+  "originalManifestSha256": "605d9b20b3fc96d645a7f2f076a22ab9df8beda80139c301677d451180aca146",
+  "originalNotReadyReviewSha256": "31f7046578138ebfdf98ce5560c983d1b53bc89dbaa01a41e084ca04c255693b",
+  "findingsAddressed": [
+    "D2-QA-01",
+    "D2-QA-02"
+  ],
+  "preservedOriginalSealMembers": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-preparation/assessment.md",
+      "sha256": "bb9affd627222d699a9329e935ac6ad86efabc0840f405f150cf1ad6be02e23f",
+      "unchanged": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-preparation/bindings.json",
+      "sha256": "0facec4397830fb73cefddcef312cce76730ad3a95e555f169141b3969d69a83",
+      "unchanged": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-preparation/fixture.mjs",
+      "sha256": "2079981be2e517deca9acff148aa28d12b9dc72a59a2d4b9ea19c306ea5224bd",
+      "unchanged": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-preparation/future-command-and-bindings.json",
+      "sha256": "73953905c0e7b807b68b3011aacb4bd14e976ff2779f6dc298feefcd1ecee20b",
+      "unchanged": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-preparation/future-smoke.sh",
+      "sha256": "8ba2b767edd9745ac21869b45204efb61a0d4a2f34a8f0f1d8b3c7582dd8c6b1",
+      "unchanged": true
+    }
+  ],
+  "files": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/bindings.json",
+      "sha256": "4087035f5f77c76c53780a44c183f041b55b13ff7a513cc8dee2ddcf6d47736a",
+      "bytes": 3106
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/correction.md",
+      "sha256": "40f58abf2ce713743a3197089680a86eb2e4477c6c5fd37e958dc4a17dc2e594",
+      "bytes": 2544
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/correction.patch",
+      "sha256": "4dfe7ac8216114a1fc215ae40d350f64be0a9842dae94282bf7e8dd9044a76ea",
+      "bytes": 12819
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/fixture.mjs",
+      "sha256": "4a6c8474c7c609c25b3c40ea3116094eb9e504d5b3da35f66fe730fdf9f89f91",
+      "bytes": 13444
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/future-command-and-bindings.json",
+      "sha256": "11d52b49ba3d1f95fbe907f5f6ca4344f6588d471236d7a11b777d76432cbf1e",
+      "bytes": 5074
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/future-smoke.sh",
+      "sha256": "2b46b5e901df833ce11f570284516515dac8ca48df0119f6a3c97723fbdbc0ad",
+      "bytes": 9717
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/syntax-only-checks.json",
+      "sha256": "76ee2e0a8788a4bd765981feac7b386d8a0a0188df25f617d93fc4a25ada151e",
+      "bytes": 966
+    }
+  ],
+  "finalBindingsRemainUnbound": true,
+  "sourceOrDistWrites": false,
+  "dockerOrApplicationRuntime": false,
+  "newTestsOrScenarios": 0,
+  "fullReplaySlotCost": 0,
+  "originalClockReset": false
+}

@@ -1,0 +1,37 @@
+{
+  "kind": "HONEST_BOUNDARY_AVAILABILITY_FIXTURE_ONLY",
+  "witnesses": [
+    {
+      "boundary": "nextRenewal scheduling",
+      "available": "Exact numeric nextRenewal before/after original schedule; paired entry/return samples",
+      "unknown": "Exact original Date.now samples, chosen timer delay and timer-registration instant"
+    },
+    {
+      "boundary": "cap and arming",
+      "available": "Actual timeoutMs handed to existing ClaimPort; requestClaim entry and sync-return, ClaimPort entry bracket its original synchronous arming",
+      "unknown": "Internal cap/budget operands, selected internal wall sample, exact timer registration/fire instant"
+    },
+    {
+      "boundary": "abort",
+      "available": "Actual incoming signal abort event callback, after original ownership abort listener and before transport listener; signal.aborted boolean",
+      "unknown": "Exact abort dispatch start/causing timer callback instant or cancellation source"
+    },
+    {
+      "boundary": "ownership invalidation",
+      "available": "Original invalidate entry/return and stopped boolean, original called once",
+      "unknown": "Exact stopped=true/epoch++ write instant inside bracket"
+    },
+    {
+      "boundary": "runtime stopped/onStopping",
+      "available": "Existing real runtime.stop entry, readonly stopped flag before and existing post-return observer after; nested invalidate entry/return",
+      "unknown": "Exact runtime stopped=true instruction/onStopping callback-return instant; only source-bound bracketing, no synthesized timestamp"
+    },
+    {
+      "boundary": "last complete ack/grant validation",
+      "available": "Existing t0 sample retained unchanged; response record after that sample, checkGrant successful return observed after all original checks and clone",
+      "unknown": "Network body arrival earlier than actual adapter return; no payload data is recorded"
+    }
+  ],
+  "interpretation": "All results belong only to this instrumented execution. A within-bound invalidation return gives an upper bound for local invalidation in this run; a bracket crossing2000 remains inconclusive. Neither outcome rewrites historical failure or authorizes epsilon/cap/timer changes.",
+  "observerPerturbation": "Read-only getter/mock bookkeeping, extra clock reads, allocations and synchronous abort listener consume time and can shift submillisecond ordering. No claim of uninstrumented exact causality."
+}

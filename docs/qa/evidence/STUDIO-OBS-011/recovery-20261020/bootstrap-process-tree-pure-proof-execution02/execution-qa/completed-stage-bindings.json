@@ -1,0 +1,68 @@
+{
+  "status": "ACCEPTED_SEALED_V2_ALL_SIX_ORIGINAL_PURE_STATIC_STAGE_BINDINGS",
+  "exactV1GreenToV2OldThreeSourceOverlay": true,
+  "privateBeforeCopyStableFromPriorReviewedTerminal": true,
+  "sameV2FixtureAndUnitBothProofSides": true,
+  "only7058ToB15HelperGreenDelta": true,
+  "terminals": [
+    {
+      "id": "lint-old01",
+      "rawOuterExit": 0,
+      "rawChildExit": 0,
+      "terminalSha256": "e7e111fbd49650776b4b35dc8eaf0a45daef44537f89bb3da37f300c0855821b",
+      "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+      "actualAndPrivateInputsProductStable": true
+    },
+    {
+      "id": "types-old01",
+      "rawOuterExit": 0,
+      "rawChildExit": 0,
+      "terminalSha256": "d855d842ca02cdbd89ad669179bf8186e336db0e40eb390b8aa638b462adebe8",
+      "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+      "actualAndPrivateInputsProductStable": true
+    },
+    {
+      "id": "red01",
+      "rawOuterExit": 1,
+      "rawChildExit": 1,
+      "terminalSha256": "67c7e5b5c52c0aad5a088039e99cc022dd2848244767c3967dd85cc499362d48",
+      "logSha256": "cabc27968f300479381b6ece106f88a056b9d18719033f9987f45088037275ad",
+      "actualAndPrivateInputsProductStable": true
+    },
+    {
+      "id": "green01",
+      "rawOuterExit": 0,
+      "rawChildExit": 0,
+      "terminalSha256": "8a18a164a938c01794ed9d822682c4e90ade64a9dabdd3acd49f85ba5752460e",
+      "logSha256": "f597c688220afbf22ddf487ec623160b15777900e4aa3e1fcae38c3e4bd72a0f",
+      "actualAndPrivateInputsProductStable": true
+    },
+    {
+      "id": "types-green01",
+      "rawOuterExit": 0,
+      "rawChildExit": 0,
+      "terminalSha256": "c29dc452102bd84b9f554610bc5f9e2b09979d703d5b83aad34e138607caf71f",
+      "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+      "actualAndPrivateInputsProductStable": true
+    },
+    {
+      "id": "lint-green01",
+      "rawOuterExit": 0,
+      "rawChildExit": 0,
+      "terminalSha256": "7a5c32b137ea1626c6502fd1b3009ce622789a6f1ae6ee87578b7273312328d9",
+      "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+      "actualAndPrivateInputsProductStable": true
+    }
+  ],
+  "bothCorrectedLintRawExits": 0,
+  "all23PriorLintSitesClearedWithUnchangedConfigAndSourceQaNoSuppression": true,
+  "bothV2TypesRawExits": 0,
+  "complete238E19StableEveryStage": true,
+  "onlyMeasuredExactCacheDeltaInUnitRuns": true,
+  "newGlobalCatalogHashAdmissionOrReseedOrBuildClaim": false,
+  "finalProducerSealAndLiveCriticalPinsStillPending": false,
+  "lintTargetPathNormalization": "Existing CLI targets are package-cwd-relative; source bindings are repo-relative. Same exact three files after removing studio-runner/ prefix.",
+  "nativeGo": false,
+  "newRuntimeInReview": false,
+  "producerManifestSha256": "4680636b4e1fc17209f7a30af2c63f4070c625dff359159d5fd82f57c1b03966"
+}

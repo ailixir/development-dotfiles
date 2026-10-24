@@ -1,0 +1,60 @@
+{
+  "isRuntimeEvidence": false,
+  "mutants": [
+    {
+      "id": "P1-metadata-guard-noop",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "base": "candidate",
+      "baseSha256": "1de5011128d75353d7e9e32a890412202a7a1be87f22f3834b8a59c194deb884",
+      "mutantSha256": "e0eee9631184a49d141629d378d0198ee13bddaa9eb0739cfa681e465be14624",
+      "patchSha256": "2cb694999b8a66388cd57abe633e0f033e8b571264943f91f71830215022a85a",
+      "testFilter": "com.citi.put.checks.studio.InferenceMigrationLatestIT.reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot",
+      "description": "Wrong snapshot must become accepted, producing an assertion failure; installed V21 guard remains deferred and transaction rolls back.",
+      "executed": false
+    },
+    {
+      "id": "P2-drop-full-baseline-index",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "base": "candidate",
+      "baseSha256": "1de5011128d75353d7e9e32a890412202a7a1be87f22f3834b8a59c194deb884",
+      "mutantSha256": "5561cd3f8686746f37e89b039b7812ecad71e859d4b2accd5443224d49c9b39b",
+      "patchSha256": "75e9478e3c4566b54dc75414ad205dcd07fbb9722a470adf9d8bcc06981d8eaf",
+      "testFilter": "com.citi.put.checks.studio.InferenceMigrationLatestIT.historicalExecutionCannotBeRelabelledAsFullEvidence",
+      "description": "Catalog assertion must read zero instead of one; transaction rollback restores the index.",
+      "executed": false
+    },
+    {
+      "id": "P3-receipt-hash-conjunct",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+      "base": "candidate",
+      "baseSha256": "7dfc7a53f038ca9fd93fe08122390a7a09be82b5e7611cec371f7f53fb3bc8d6",
+      "mutantSha256": "f87f8578d067cf106006fc2a46e63d04be55b163f93c52cbca964a4f6c611865",
+      "patchSha256": "e9a066b8c3084a6ecc32333e93ce7fdf0e24fa02e063dfb4e0d10e7e3089b315",
+      "testFilter": "com.citi.put.checks.studio.guided.GuidedReplayingPrefixMigrationIT.publicationReceiptRejectsWrongRelearnedBoundaryOrExtraKeys",
+      "description": "Wrong hash must cease failing the shape guard. An independent relational guard may still reject it with a different message; that also makes the shape-specific new assertion red. Inspect actual failure, never count infrastructure errors.",
+      "executed": false
+    },
+    {
+      "id": "J1-omit-verdict-basis-check",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "base": "frozen-production",
+      "baseSha256": "a7f3114799e6dfb7238f4393af2b84929926316ab761a43d8db55bcfddef74ac",
+      "mutantSha256": "cef2d29541c1ae828d98bada7ac23e656fc3bbff581a61ed131e425714c3489a",
+      "patchSha256": "cd95ccb3e776f345977464e732b05a23d51585752e905af7ad80c5eae4577e41",
+      "testFilter": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry",
+      "description": "Production Java-held verdict basis check omitted. The new bad-verdict assertion must fail or observe a different SQL-layer refusal; exact failure must be audited.",
+      "executed": false
+    },
+    {
+      "id": "J2-omit-deleted-draft-cas",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "base": "frozen-production",
+      "baseSha256": "a7f3114799e6dfb7238f4393af2b84929926316ab761a43d8db55bcfddef74ac",
+      "mutantSha256": "f923db4aac3d341ade89fb62b8fc2c7f9d1274b5f19820da9d9439ab3024dc9f",
+      "patchSha256": "c4cf1008fb8564a8c4075c7e390d416cb630bfea8914920a9f427bb209bd481c",
+      "testFilter": "com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.headCommitRejectsPolicyBasisAuthorityAndDeletedDraftWithoutAnyWrite",
+      "description": "Receipt-insert trigger changes deleted_at after early checks; removing final CAS predicate should allow commit and fail the PUBLICATION_CONFLICT assertion. Rollback-only helper transaction prevents persistent fault DDL.",
+      "executed": false
+    }
+  ]
+}

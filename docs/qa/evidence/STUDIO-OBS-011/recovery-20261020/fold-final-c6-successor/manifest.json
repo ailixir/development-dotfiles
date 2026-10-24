@@ -1,0 +1,117 @@
+{
+  "kind": "SOURCE_ONLY_FINAL_FOLD_C6_REPAIRED_B4_SUCCESSOR",
+  "status": "PREPARED_FOR_INDEPENDENT_SOURCE_REVIEW_ACTUAL_REPAIRED_B4_HANDOFF_REQUIRED",
+  "priorManifestSha256": "b25715ad81a400a76a4cb25693808a6fcf69486aba7493e0d3ed0117657ad1f5",
+  "acceptedC6GreenSha256": "ab429398f750bb493982be321bea550f16823d5b5a58111a1a3d180bff2ece1c",
+  "repairedProspectiveB4Sha256": "abb4773016aa3499b76cf1aae3ac0da0f0b820ac4df19fb66887188c7dfe53f4",
+  "typedFinalReplaySha256": "cf38d0c1314db3f4ae81c827846a97d144fdca5e9adb78de86e0723e8663a297",
+  "operationCount": 38,
+  "hunkCount": 142,
+  "same37OperationsAndOutputs": true,
+  "original142HunkBodiesByteIdentical": true,
+  "changedReplayHunkHeaders": 2,
+  "leftPathCount": 10,
+  "leftFoldOverlapPaths": [],
+  "combinedOperationCount": 48,
+  "combinedHunkCount": 162,
+  "currentLeftManifestSha256": "974048f2a76ef4714a0c3efc5e61b7cfea1827b2054609892486729728982b85",
+  "files": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/application-bindings.json",
+      "sha256": "2ea5b735f2726a86f7867f9d243b96a60a4e3f695e959e5e3580088fd1a97647",
+      "bytes": 38038
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/c6-final-review-delta.patch",
+      "sha256": "e423696f008037eaaa67833949e66c6af58b71e837d584ef234ae8e92dde4533",
+      "bytes": 6750
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/c6-incoming-review-delta.patch",
+      "sha256": "f9815b46eee27d3a8d8e4b127fa38db91fdeadf885286ded602b084bf0cd65d5",
+      "bytes": 6750
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "cf38d0c1314db3f4ae81c827846a97d144fdca5e9adb78de86e0723e8663a297",
+      "bytes": 1965615
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/combined-left10-fold38.patch",
+      "sha256": "934fa5c6b6b32d6dce37d6bba0baa357f3779aec494dd2f2edf55fca7c2c4c46",
+      "bytes": 131211
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/commands.json",
+      "sha256": "5c7412e13ec5f2c9462cd4cf2c639c209690b460cc3d05124b8a0c472bdf52bc",
+      "bytes": 32653
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/exact-hunks.json",
+      "sha256": "f42324516f447eefff6f6c603687852e9c392f97a8c8c5139d0be30969517439",
+      "bytes": 71946
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/final-from-repaired-b4.patch",
+      "sha256": "8dfa0ec0494c85415053fcf73fc710243e0a8ae5f9e75e3dfcd7b7599bfa148f",
+      "bytes": 121087
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/historical-preservation.json",
+      "sha256": "09a06abec55878d8dedc8a57c2ee67119c797748cc00897a0f4863bac7ecaf23",
+      "bytes": 22618
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/incoming/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "abb4773016aa3499b76cf1aae3ac0da0f0b820ac4df19fb66887188c7dfe53f4",
+      "bytes": 1965338
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/left-fold-composition.json",
+      "sha256": "40f4632ecc7562a233f6fb86eb173509f2a68c481ade0347a02f56809d3a912d",
+      "bytes": 8063
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/receipt.md",
+      "sha256": "695d22577b6712ec0ba5f3ca02653bccb6974e802eb637b0d58fa703c3798fb8",
+      "bytes": 8939
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/rollback-combined-to-repaired-b4.patch",
+      "sha256": "f3d38cf9cd8a7260661c83a2b9d17183b3115d37082c2d45fada98f0419e150f",
+      "bytes": 131211
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/rollback-final-to-repaired-b4.patch",
+      "sha256": "d17cbda9ff291f5c4b176c8ad9ce84e5f4edbf5f5584e601bccc41909152136a",
+      "bytes": 121087
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/rollback-left10.patch",
+      "sha256": "1cafeddb96068da1a8958a640c0d16654378f702e9418b65b792da5d909fcf5e",
+      "bytes": 10124
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/source-text-checks.json",
+      "sha256": "25d5bfd09cae605b50d5fb6f86fde06e683c3b9c66d38d8fb96db169a60fc7bb",
+      "bytes": 15366
+    }
+  ],
+  "sourceBlockers": [],
+  "pendingPrerequisites": [
+    "itr_execution actual repairedB4 terminal handback; no current stage overwritten",
+    "independent successor source review and root quiet source window",
+    "fresh exact48/55nonReplay/protected source pins and modes before application",
+    "formatter actual diff/current reader binding, integrated compile/static/focused gates",
+    "all remaining actual source/runner/FE/build/image before identical pair4/5 and wholecheck6"
+  ],
+  "oldPacketUnchanged": true,
+  "compilerParserRuntimeActualSourceDistWrites": false,
+  "fullClassAttemptGranted": false,
+  "extraFoldf04": false,
+  "historicalSlot3FailureUnchanged": true,
+  "historicalC6Cause": "UNPROVED",
+  "productReleaseLifecycleCredit": false,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

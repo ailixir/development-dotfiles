@@ -1,0 +1,75 @@
+{
+  "decision": "CHANGES_REQUIRED_BEFORE_EXACT_PACKET_SUPPORT",
+  "findings": [
+    {
+      "id": "G80-CONTROL-01",
+      "severity": "HIGH",
+      "mandatory": true,
+      "title": "Independent final readiness is missing before the permit",
+      "locations": [
+        "run-private.py:301-305",
+        "scope.json:phaseIds",
+        "exit-gate.py:30-37",
+        "exit-gate.py:67-70",
+        "RECIPE.md:final close sequence"
+      ],
+      "evidence": "Only prepare/red/install-fixed/green/archive phases exist. Gate requires the final permit before executing its verification and emits ALLOW only afterward. No separate final producer/result exists for root to inspect before issuing that permit. Root confirmed this exact requested order is mandatory.",
+      "requiredCorrection": "Fresh successor must add a gateway-specific independent read-only final readiness producer/result, inspected after actual archive/review and before a separately issued fresh permit; gate must revalidate that exact readiness/code/release/hold/artifact binding before allowing separate exit; retain separate postclose proof. No GST/C8 producer reuse."
+    },
+    {
+      "id": "G80-RESOURCE-02",
+      "severity": "HIGH",
+      "mandatory": true,
+      "title": "A resident reparented Vitest worker can escape both terminal and boundary checks",
+      "locations": [
+        "run-private.py:236-261",
+        "run-private.py:161-178",
+        "exit-gate.py:50-58",
+        "fullcheck-harness/resume3/harness.py:project_role",
+        "studio-runner/node_modules/tinypool/dist/index.js:101"
+      ],
+      "evidence": "Actual extracted run_native with fake tables: sample1 sees root10; fork20 starts and reparents before sample2, which contains resident20/ppid1 while root poll returns0. Function returns TERMINAL/no sticky with only10 known. Actual extracted boundary accepts ordinary Tinypool entry/process.js argv without workspace/config marker; existing core project vocabulary also excludes it. No actual process was created.",
+      "requiredCorrection": "Add a bounded stable candidate/UNKNOWN boundary for this unit using concrete Node/Vitest worker roles plus ownership facts such as verified cwd/FD under the exact owned workspace and parent/native history. Do not equate lack of the two argv markers with absence. Include candidates in final/gate proof; unresolved scope/identity remains HOLD. Preserve sampled-observation limits, no new signals, no complete short-lived-capture or same-UID security claim."
+    },
+    {
+      "id": "G80-FREEZE-03",
+      "severity": "MEDIUM",
+      "mandatory": true,
+      "title": "Real Helm freeze checks known bytes but omit the actual path set",
+      "locations": [
+        "run-private.py:124-149",
+        "source-guards.json:captureScope",
+        "source-guards.json:auxiliaryGroups.helm"
+      ],
+      "evidence": "captureScope excludes helm-chart. Auxiliary loop reads only sealed filenames. Actual extracted guards accepts a virtual extra helm-chart/put-checks/templates/EXTRA-SYNTHETIC.yaml and returns auxiliariesExact=true while every listed original remains exact.",
+      "requiredCorrection": "Compare the actual finite real Helm path set to the sealed expected set before/after phases and at final/gate; reject additions/removals/nonregular or unexpected links with existing scope/mode policy. Preserve expected22, rather than rebasing it. Also ensure the copied chart has the exact22 path set before native use, not merely a final file count."
+    },
+    {
+      "id": "G80-EVIDENCE-04",
+      "severity": "MEDIUM",
+      "mandatory": true,
+      "title": "Final close does not rebind the separate runtime reports and dedicated chart archive",
+      "locations": [
+        "run-private.py:275-278",
+        "run-private.py:282-298",
+        "exit-gate.py:44-64"
+      ],
+      "evidence": "The gate pins phase receipt JSON and compares workspace/complete-workspace archive inventories. It never reads native.reportSha256 against runtime red/green Vitest JSON, never reassesses those current reports, and never checks final-fixed-chart-archive. These separate evidence-root artifacts are outside the two inventories being checked; their change leaves these gate conditions unaffected. This is a protected-evidence binding issue, not a hostile same-UID boundary claim.",
+      "requiredCorrection": "New final readiness must bind and validate both current report copies/hash/phase assessments and both complete/dedicated chart archives; bind exact code/release/hold/receipts. Fresh gate validation must reject any later change to those proof inputs. Keep native exit1 separate from intended-red qualification and do not manufacture per-render observations."
+    },
+    {
+      "id": "G80-TEST-05",
+      "severity": "MEDIUM",
+      "mandatory": true,
+      "title": "The 50 pure controls do not exercise the new boundary and exit code",
+      "locations": [
+        "pure-controls.py:1-119",
+        "pure-control-results.json",
+        "check-map.json:pureControls"
+      ],
+      "evidence": "All50 replay as authored, but calls test assess/transition plus four AST parses. No actual held/guards/boundary/inventory/archive/monitor/final/gate conditions are exercised. The source-parsing controls cannot establish rejection of wrong/no readiness, stale release/hold, resource unknown/sticky/live, source additions or archive drift. Independent injected actual-function controls found the gaps above.",
+      "requiredCorrection": "Add inspected pure injection tests of actual new boundary/final/gate functions for valid path and exact negative cases: missing/wrong/stale readiness, code/release/hold mismatch, source byte/mode/path drift, receipt/native status or sticky flags, resident/reparented/unknown owned candidates, inherited boundaries and report/archive changes. Exercise the implementation, not a duplicate predicate; no native/helper-main execution. Keep success-only closure limitation explicit."
+    }
+  ],
+  "nativeOrCreditReleased": false
+}

@@ -1,0 +1,12 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -20707,7 +20707,8 @@
+ 
+   @Test
+   @org.junit.jupiter.api.Order(19)
+-  void syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls() {
++  void syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls() throws Exception {
++    itrEnsureClassFixtures();
+     String value = "é😀\"\\A z+";
+     // Independent literal vectors: C3 A9 / F0 9F 98 80 / 22 / 5C / 41 / 20 / 7A / 2B.
+     // Expectations never call the scanner's encoders.

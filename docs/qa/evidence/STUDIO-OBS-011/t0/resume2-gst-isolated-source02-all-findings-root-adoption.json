@@ -1,0 +1,100 @@
+{
+  "kind": "ROOT_COMPLETE_GST_SOURCE02_REMAINING_PERMIT_CATEGORY_ADOPTION",
+  "atUtc": "2026-10-19T22:34:48.705561+00:00",
+  "sourceOnly": true,
+  "subjectManifestSha256": "0bac75fdd932a1858aef8dfb9e67d1769025966c707bfe9dd28122545b2534b2",
+  "architectureManifestSha256": "3a46ad305b98b86308ebb3f7384fc6fb6d6ad1c5dfb596fd9af8ca27f0fa2ae1",
+  "qaManifestSha256": "ba6d60fcbaf84bc441cfb95508ec09a8fbd11c843fb92efd3a07ebebb88665ec",
+  "rootAll26AndCompleteReviewFindingsTools": {
+    "architecture": "3159bb",
+    "qa": "0cbd7f"
+  },
+  "canonicalMandatoryCategoryCount": 1,
+  "canonicalCategory": "GSTISO02-ARCH-01 / GSTISO02-QA-PERMIT-01: retain initial active-gate clocks before permit binding",
+  "adoptedAllArchitectureFindings": [
+    {
+      "id": "GSTISO02-ARCH-01",
+      "severity": "HIGH",
+      "mandatory": true,
+      "priorCategory": "GSTISO01-ARCH-01 / QA-01 same-permit complete nondecreasing gate clock",
+      "location": "pure_controller.py Controller._gates / Controller._gate_inner / Controller._permit_time",
+      "establishedBehavior": "guarded_gate sets gate_in_progress before _gate_inner. Its initial _gates consumes an admitted clock while gate_permit is stillNone, so _gates does not retain/check it with _permit_time. Independent actual-controller input clocks150 then120, followed by120, all inside the original signed interval[100,160), produce acceptedtrue/phaseStatus0/GATE_OK. The original permit raw pin and once gate cap remain unchanged.",
+      "impact": "A contradictory earlier clock fact consumed during this active gate can be discarded when binding initializes the permit clock. The source protocol therefore does not enforce its stated nondecreasing history across every active-gate admission fact. No real clock, installed Port/guard, actual permit use or close was observed.",
+      "requiredCorrection": "Retain and validate every admitted clock observation from the beginning of the active gate, including its initial pre-binding admission, against the same original permit once bound. Binding must not reset or erase that earlier history. Reversed/unknown/out-of-window evidence must latch HOLD with consumed cap and no qualifying publication, without rereading a new permit, refresh, extension or retry.",
+      "requiredPairs": [
+        "Timely nondecreasing complete gate remains positive.",
+        "Initial active admission150 followed by PRE120 inside[100,160) rejects and preserves the original permit/cap/known failed history."
+      ],
+      "evidence": [
+        "critical_checks.py",
+        "critical.stdout: initial_active_gate_clock_reversal"
+      ]
+    }
+  ],
+  "adoptedAllQaFindings": [
+    {
+      "id": "GSTISO02-QA-PERMIT-01",
+      "severity": "HIGH",
+      "mandatory": true,
+      "priorCategory": "GSTISO01-ARCH-01 / GSTISO01-QA-01",
+      "title": "Initial active gate admission clock is excluded from the original permit history",
+      "location": "pure_controller.py:122 and Controller._gate_inner:348-358",
+      "establishedBehavior": "guarded_gate sets gate_in_progress=True, but _gate_inner calls _gates before binding gate_permit. _gates calls _permit_time only if that permit is already present. Independent exact-controller fake pair returns161 at this initial admission, then100 for every later read against the unchanged permit issued100/expires160. The controller accepts phaseStatus0/GATE_OK/holdfalse, with original permit SHA and consumed gate cap1. The observed active clock sequence is[161,100,100,100,100,100,100].",
+      "requirement": "Every admitted clock fact consumed during an active gate must remain inside the same frozen original permit interval and nondecreasing; a transient expired/reversed value cannot be hidden by later recovery. Current Port contract explicitly claims this for _gates.",
+      "impact": "The prebinding admission can consume an expired clock and discard that history, allowing later recovered readings to qualify a successful gate. This is source/fake evidence only, not an actual permit or runtime bypass.",
+      "requiredCorrection": "Cover the initial active admission clock as well as all later ticks. Bind the original verified scalar permit before those facts are accepted, or retain and strictly validate all prebinding clock facts against that unchanged binding in order before success. Any expired/reversed/unknown active fact must latch HOLD with consumed cap and retained evidence. Do not refresh/reread a replacement permit, retry probes or extend expiry.",
+      "requiredPairs": [
+        "Timely initial admission and full completed gate remain accepted in the model.",
+        "Expired first active admission followed by a recovered clock must HOLD; later clean reads must not erase the initial fact."
+      ],
+      "evidence": [
+        "critical.py",
+        "critical.stdout: initial_gate_clock_expired_then_recovered",
+        "port-contract.json methods.monotonic_lease_time"
+      ]
+    }
+  ],
+  "adoptedArchitectureConditions": [
+    "Support remains limited to the honestly inactive Controller/selected-buffer/hooks/protocol scope. Real ordinary custody/ownership/native/wait/report/archive/main-object/shell guard/root caller and publication atomicity are explicitly OWED and need separate complete implementation/review/actual qualification; DefaultOwedPort/noCLI stays fail-closed. This is not a hidden additional completeness finding.",
+    "The future publication completion contract must actually run the frozen-permit callback at the qualified boundary after all fallible preparation/cleanup. False, missing, thrown or uncertain publication cannot yield gate authority; partial artifacts remain failed/unknown. A callback interface, fake hash or typed Boolean is not actual filesystem/kernel/ownership evidence.",
+    "Owned final_source_observation must retain the same phase context, account and close all own observer/FD/helper resources before return, no second collector or infinite finalizer loop. Unknown final source or observer completion remains sticky HOLD with separate primary/cleanup.",
+    "All original design1080e081/QA9c79d0a5/root9b45d5d8 and full source01 all-three conditions02177a09 remain. Same verified buffers, selected named pure/XML definitions only, exact hooks/buildSrc exception/output regex and all immutable history remain.",
+    "Current Gateway proper failed archiveQA/final/separate60s permit/wrapper1/postclose0/actualQAroot precedes heavy work. Narrow NONCREDIT step6/withheld-signature/root731 Aria/Quinn/root/preF1/NONIR/exclusive max12h3destination lease precedes actual copy/overlay and format; no shared R writer or reused holder/cap/exception.",
+    "Readonly R/f9/source/main506/Replay/dist/non-target facts need actual fresh proof.2092 literal rows and284NULL modes are ancestry only; all284 actual modes before copy/no0644 default. Offline Gradle8.10.2 seed/closure/JDK/caffeinate/property/PGarm64/Java fixture remain UNKNOWN; no cache/home/vendor scan/download/pull/retag/symlink/skip/Ryuk fallback.",
+    "Format900/verify3600/regression7200 each cap1 including setup/launch/parse failure; no signals/synthetic timeout/unresolved-native promotion. Changed hashes require exact new source equivalence/AriaQAroot/same-expiry lease adoption before unused separately decided verify. Full Spotless check/checkstyleMainTest/compileTestJava/fresh bothXML/non-skipped tasks and exact5classes99PASS0skip/fresh test.exec remain actual obligations.",
+    "Actual finite private archive contract/QAroot/standalone final0/separate actual status/inspection/exact60sPREPOST permit/guarded wrapper0/outerpostclose0/actualQAroot remain owed. No Source09 profile borrowing, old C8 compile exception, naked exit, retry/refresh, source apply or cleanup.",
+    "Author74 final unique controls are43 retained+31new/24cases; prior73 candidate is historical, total147 actual assertions not147 currentunique. Author20 static includes15 retained; old4552/624/reviewer43 are bound reuse, not rerun. Original failed attempt2 inner cause remains UNKNOWN.",
+    "C8-before-credit/mainW1/Replay/default4000/IRclocks/order/skips/cohorts/T0/root731/source-window/21 external human/lifecycle/private-baseline/cleanup holds remain unchanged. USD500 shared ceiling, aggregate usage UNKNOWN. No actual source-window/lease/copy/overlay/formatter/compiler/native/installation/permit/cleanup/credit authority."
+  ],
+  "adoptedQaConditions": [
+    "This is review of an honestly inactive pure protocol, selected-buffer adapter and hooks. Concrete ordinary custody/ownership/native/wait/tool/report/archive/shell-guard/main-object/outer-finalization Port implementation and exact caller/installation are explicitly OWED, must be independently reviewed and qualified before actual use, and are mandatory actual gates rather than implemented by booleans or this source review. DefaultOwedPort remains fail-closed.",
+    "Preserve source09-unintegrated ordinary predicate and all exact external first-read/SAME-buffer bindings, selected named definitions/globals only, no historical main/ROOT/Git invocation, no actual provider/API mechanism or unreviewed root helper.",
+    "Current Gateway proper failed archiveQA/final/separate60s permit/wrapper1/postclose0/actualQAroot must precede any heavy job. No old holder, release, consumed cap or closing/compile exception can be borrowed.",
+    "Narrow NONCREDIT step6/withheld-signature/root731 Aria/Quinn/root qualification, NONIR/preF1 and an exclusive maximum12h three-offtree-destination/source-hash lease precede actual copy/overlay as well as native formatting; no shared R writer, renewal, retry, cleanup or source apply.",
+    "R stays readonly and literal f9 through every phase.2092 finite rows are source metadata, not current facts. All284 null modes need separately admitted fresh observations before copy; no0644 default. Only exact3 preimage/inverse/mode-bound overlays and distinct virtual composition are allowed; non-target/source/main506/Replay/dist remain exact.",
+    "Exact offline Gradle8.10.2 seed/closure, current JDK21/caffeinate/utilities/property compatibility, cached PG arm64/name-resolution and Java fixture capability remain UNKNOWN/OWED. No cache/home/vendor/dependency scan, download/pull/retag, credentials/init/daemon/JDK registry copy, symlink or skip/Ryuk fallback.",
+    "Each format900s/verify3600s/regression7200s phase cap is1 including setup/launch/parse/native failure. Preserve independent native/collector/phase statuses, exact-owned identity/utility/wait/output/UNKNOWN/sticky drain, no signals/synthetic timeout/terminality. Changed target hashes require exact fresh equivalence/AriaQAroot and same-expiry lease amendment before unused later phases; no formatter retry.",
+    "Verify requires scoped SpotlessJavaCheck, full checkstyleMain/Test, compileTestJava explicit fresh non-skipped tasks and both XML; regression exact5 whole classes99PASS0failure/error/skip/fresh test.exec/task-qualified XML. Source fake99, historical99 and assertion counts supply no native/C8/fullcheck/coverage credit. Preserve exact hook root deltas/buildSrc exception/output regex and original Java behavior.",
+    "Actual finite private archive contract/membership/caps, archiveQA/root, standalone final0/separate actual status/inspection, exact60sPREPOST permit, actual guarded wrapper0/outer postclose0/actualQAroot remain owed. Failed or unknown evidence requires exact new disposition; no naked exit/cleanup shortcut.",
+    "Default4000/skips/cohorts/IRclocks/order/caps/C8-before-credit/mainW1/Replay/source-window/T0/root731/21 external human inputs/lifecycle remain unchanged. Prior failed-attempt2 inner cause remains UNKNOWN; old private C5/C212/protected-baseline scopes stay closed. No operational/source-window/lease/copy/overlay/formatter/compiler/native/permit/cleanup/credit authority is issued.",
+    "The complete three-category source correction must remain coherent in an exact successor. Category2 final-source and Category3 adoption corrections are supported here under fakes; the remaining Category1 initial-clock gap must be corrected and the whole packet independently reviewed/adopted before protocol support. No actual integration authority follows.",
+    "Actual final_source_observation must own and fully close its own references before returning its exact finite snapshot, after body drain and without a finalizer loop. The pure contract/Boolean attestations are not an implemented observer.",
+    "Actual publish_receipt must complete every fallible resource/output preparation before the supplied same-permit guard, invoke it at the qualified accepted commit boundary, and perform no later fallible cleanup/clock-advancing protocol work. Omitted/failed/unknown guard or partial publication is HOLD and supplies no gate authority. This actual commit mechanism and exact caller remain OWED."
+  ],
+  "adoptedDocAdvisory": [
+    {
+      "id": "GSTISO02-QA-DOC-01",
+      "severity": "LOW",
+      "mandatory": false,
+      "title": "Recipe retains an absent current design filename",
+      "location": "RECIPE.md opening required-read list",
+      "establishedBehavior": "The current recipe directs readers to IMPLEMENTATION-DESIGN.json, but that filename is absent from the exact65-member manifest. The packet instead contains SOURCE02-DESIGN.json and historical source01-IMPLEMENTATION-DESIGN.json.",
+      "recommendedCorrection": "Name the current SOURCE02-DESIGN.json and explicitly label any required source01 design as historical, using its retained exact filename.",
+      "impact": "Documentation navigation ambiguity only; no runtime action or extra source authority follows."
+    }
+  ],
+  "alreadyCorrectedPriorCategories": "Final owned-source proof and staged formatted adoption supported at source level; preserve them in coherent successor.",
+  "scope": "One inactive SOURCE03 clock-history correction and low recipe reference fix under separate SAFE task. No actual Port or resource authority.",
+  "ordinaryRuntimePort": "OWED_DEFAULT_FAIL_CLOSED",
+  "actualIntegrationNativeSourceWindowLeaseCopyOverlayCleanupCreditAuthority": false
+}

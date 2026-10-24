@@ -1,0 +1,76 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java
+@@ -1605,8 +1605,71 @@
+ 
+   static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-    while (!condition.getAsBoolean() && System.nanoTime() < end) {
+-      Thread.sleep(25);
++    {
++      class ItsPollGuidedFocusMutationJoinedITcondition {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++
++
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++
++            if (!(!condition.getAsBoolean() && System.nanoTime() < end)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var itsPoll = new ItsPollGuidedFocusMutationJoinedITcondition();
++      if (!itsPoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("IT-S GuidedFocusMutationJoinedIT-condition")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(java.time.Duration.ZERO)
++              .pollInterval(java.time.Duration.ofMillis(25))
++              .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (itsPoll.initialAwaitTick) {
++                      itsPoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return itsPoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++          // Preserve the original last guard/observation and its assertion/error mapping.
++          if (!itsPoll.terminal) {
++            itsPoll.step();
++          }
++        }
++      }
++      if (itsPoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (itsPoll.failure instanceof Error error) {
++        throw error;
++      }
+     }
+     assertThat(condition.getAsBoolean()).isTrue();
+   }

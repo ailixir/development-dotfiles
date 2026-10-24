@@ -1,0 +1,98 @@
+{
+  "status": "PREPARED_UNRELEASED",
+  "story": "STUDIO-OBS-009",
+  "label": "obs009-gateway80-offtree03-20261019",
+  "repository": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "workspace": "/private/tmp/obs009-gateway80-offtree03-20261019",
+  "runtime": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree03-20261019",
+  "authorization": {
+    "actualExecution": false,
+    "sourceApplication": false,
+    "readiness": false,
+    "C8": false,
+    "laneCredit": false,
+    "Done": false
+  },
+  "maximumSeconds": 300,
+  "parentUmask": "077",
+  "childUmask": "022",
+  "phaseIds": [
+    "prepare",
+    "red",
+    "install-fixed",
+    "green",
+    "archive"
+  ],
+  "phases": [
+    {
+      "id": "red",
+      "helper": "original",
+      "argv": [
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+        "./node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.gateway80.config.mjs",
+        "--configLoader",
+        "native",
+        "test/deployment/integrations.test.ts",
+        "--testNamePattern=(backend|worker) rejects (flat|nested|relaxed)",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=../red-vitest.json"
+      ],
+      "maximumSeconds": 300,
+      "expectedProcessExit": 1,
+      "expectedSelectedTests": 48,
+      "expectedSelectedFailures": 48,
+      "expectedExplicitlyFilteredTests": 47,
+      "expectedPassingSelectedTests": 0,
+      "expectedSourcePredictedTemplateCalls": 48,
+      "admissionToNext": "Root inspects terminal red receipt before next phase: all 48 identities fail at expected ok=false assertion with actual ok=true; no missing prerequisite, collection/parse, signal, spawn or timeout failure. Filtering 47 tests is intentional selection and never pass credit. Unexpected result stops this unit; no retry."
+    },
+    {
+      "id": "green",
+      "helper": "fixed",
+      "argv": [
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+        "./node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.gateway80.config.mjs",
+        "--configLoader",
+        "native",
+        "test/deployment/integrations.test.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=../green-vitest.json"
+      ],
+      "maximumSeconds": 300,
+      "expectedProcessExit": 0,
+      "expectedTests": 95,
+      "expectedPass": 95,
+      "expectedFailErrorSkipTodo": 0,
+      "existingTests": 15,
+      "newTests": 80,
+      "expectedSourcePredictedTemplateCalls": 112,
+      "newCaseGroups": {
+        "currentRefusals": 48,
+        "legacyRefusals": 14,
+        "allowedTuning": 2,
+        "tokenDeletionCounterfactuals": 8,
+        "wholeManifestEquality": 8
+      },
+      "admissionToClose": "Root independently reconciles exact testcase identities, both phases, all original/new assertions and final source/owned-resource state. A green summary alone cannot discharge missing/partial collection."
+    }
+  ],
+  "node": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+  "helm": "/opt/homebrew/bin/helm",
+  "dependencies": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules",
+  "noRetry": true,
+  "noSignals": true,
+  "noCleanupByDriver": true,
+  "expectedRootPreparationAdoptionSha256": "6949cefecb7b998f40431f74af389336694a9005d063d9efbfa8a98977726b47",
+  "successorOfManifestSha256": "ed5057fa38bbeeda3982503382f65fe8fbb2b637167094846fdf8e6969f3f4e3",
+  "rootFindingsAdoptionSha256": "6702a0dc430009d3a99ce6f18a77dcc12e39c2896826748607cb725c35cc18a4",
+  "finalProducer": "verify-final.py (standalone, not a native phase)",
+  "prospectiveOnly": "offtree03 label/W/E never created or executed. Exact root binding after both independent reviews; any later path/code change needs exact review."
+}

@@ -1,0 +1,65 @@
+{
+  "actual": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.fixtures.config.ts",
+      "test/fixtures-tier/guidedCloseBound.test.ts",
+      "--testNamePattern=^KL\\-015\\-D5\\ the\\ close\\ of\\ a\\ guided\\ browser\\ is\\ bounded\\ \\(frozen\\ Chromium,\\ real\\ runner\\)\\ F3\\ \\(iii\\)\\ a\\ non\\-deadline\\ error\\ inside\\ the\\ launch\\ with\\ Chrome\\ frozen:\\ the\\ failed\\ launch\\ takes\\ the\\ hard\\ teardown\\ at\\ once$",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-f3-native01-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-20T16:41:35.476317+00:00",
+    "elapsedSeconds": 4.68,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "6c81487ca0ad6b734ddc884faced1d12978b8c1b57a910682f38952bf545710a",
+    "testInputStable": true,
+    "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+    "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+    "vitest": {
+      "success": true,
+      "numPassedTests": 1,
+      "numFailedTests": 0,
+      "numPendingTests": 4,
+      "numTotalTests": 5,
+      "numPassedTestSuites": 3,
+      "numFailedTestSuites": 0
+    },
+    "vitestReportSha256": "687497df75035e3744e44784b72962f3a6271a031dda719fb7da096e2c21f029"
+  },
+  "allCases": [
+    {
+      "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F1 (i) frozen after a completed start: the stop replies 200 once the close settled, within the grace plus the teardown",
+      "status": "skipped"
+    },
+    {
+      "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F2 (ii) frozen entering WITHHOLD: the start is refused CONTEXT_LOST inside the backend window, after the hard teardown alone",
+      "status": "skipped"
+    },
+    {
+      "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F3 (iii) a non-deadline error inside the launch with Chrome frozen: the failed launch takes the hard teardown at once",
+      "status": "passed"
+    },
+    {
+      "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F4 (iv-a) stop before spawn: unchanged, the reply is pinned to the D4 backstop (start + 15 s) and the slot is free after it",
+      "status": "skipped"
+    },
+    {
+      "fullName": "KL-015-D5 H: a healthy recorded close finishes far inside the grace H five recorded closes, unfrozen, one navigation each: orderly, a webm header, scratch gone, and the slowest is recorded",
+      "status": "skipped"
+    }
+  ],
+  "exactF3Pass": true,
+  "fourOtherCasesFilteredNotGateCredit": true
+}

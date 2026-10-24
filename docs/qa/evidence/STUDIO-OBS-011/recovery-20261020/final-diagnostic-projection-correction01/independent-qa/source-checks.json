@@ -1,0 +1,81 @@
+{
+  "kind": "INDEPENDENT_CORRECTION01_SOURCE_CHECKS",
+  "verdict": "SOURCE_CLEAN",
+  "reviewerAuthoredCorrection": false,
+  "candidateManifestSha256": "d9fc8804b1d395e6006710b2793d93f614891abcecbeb7376d39cee92b59ce24",
+  "candidateArtifacts": {
+    "README.md": "ec0ae202fab58dcf502adae1d50f9e4069e9ac2efd3ee57786f4773661975abe",
+    "author-checks.json": "2e4b938322f035dd38a62543d3d2e380711c2c1ff8ab9c48b46f3a2e012da7a6",
+    "candidate.patch": "5fee9615c6d374a2ded3937d95959eabf8144915393fd6db544c00a69fe16ead",
+    "decoded-ipc.inverse.patch": "c6b9091d4032e1da482b74fca0d85eefc4be271bc6636e9c43fb5ddf440de28c",
+    "decoded-ipc.patch": "4e43d7f6ba5717e816ee0360f2b5a930ee1f3153563526303d8318b9855446de",
+    "future-readonly-commands.json": "a89dec88e49ff361a338d9ad50e5600a6055a738fd656cc1d1826f5c400d9bc7",
+    "inputs-template.json": "0c9d308bd9daf8098a7430d8c6663029c7c81ea72b00b944d36678ba7f2d6da7",
+    "inverse.patch": "6fe641966b4724b8a7083bdc4b6fc9e86e0dfb6aac9fc5d23dd1a814d43e115e",
+    "source-pins.json": "f63a2a9f1746bedbfed6cdc9eb209eff4f92839413aa6ada15345ff981284d63"
+  },
+  "predecessorTreeVerifiedFiles": 8,
+  "readTimeSourceAndRulingPinsVerified": 14,
+  "wrapperBlocksVerified": 3,
+  "actualChangedCommandPaths": [
+    "/ipcProjectionArgv/2",
+    "/inlineSha256/ipc"
+  ],
+  "syntaxChecks": [
+    {
+      "argv": "ipcProjectionArgv",
+      "astParsed": true,
+      "executed": false,
+      "inlineSha256": "6dd83d18a659190bdfbe5c3f51f9d37a08083e03209c14c2daa9d9f9d982e357"
+    },
+    {
+      "argv": "startFailureProjectionArgv",
+      "astParsed": true,
+      "executed": false,
+      "inlineSha256": "776fd232946cfeaf5c1f4a35006e441d08b320bf00bc9bf164027ff5e88a8094"
+    }
+  ],
+  "patchChecks": [
+    {
+      "patch": "candidate.patch",
+      "exactInMemoryReconstruction": true,
+      "appliedToFilesystem": false
+    },
+    {
+      "patch": "inverse.patch",
+      "exactInMemoryReconstruction": true,
+      "appliedToFilesystem": false
+    },
+    {
+      "patch": "decoded-ipc.patch",
+      "exactInMemoryReconstruction": true,
+      "appliedToFilesystem": false
+    },
+    {
+      "patch": "decoded-ipc.inverse.patch",
+      "exactInMemoryReconstruction": true,
+      "appliedToFilesystem": false
+    }
+  ],
+  "inputTemplateByteIdentical": true,
+  "startFailurePayloadByteIdentical": true,
+  "finalBindings": "UNBOUND",
+  "runtimePayloadsRead": false,
+  "protectedBodiesRead": false,
+  "payloadsExecuted": false,
+  "runtimeOrNativeInvocationsAdded": 0,
+  "candidateEdited": false,
+  "productWrapperReaderStoryEdited": false,
+  "findingsResolved": [
+    "F1_CONTROL_READ_NUMBERS_OMITTED",
+    "F2_MISSING_REQUIRED_NULLABLE_KEYS"
+  ],
+  "remainingBlockingFindings": [],
+  "retainedLimitations": [
+    "Terminal owned writers required: precheck16MiB plus unbounded f.read and postread size/mtime equality, no max+1 read",
+    "Reverse child-to-parent uniqueness not independently established",
+    "At 512 retained controlReads rows, possible producer truncation; maxima and overlaps apply only to retained rows",
+    "Empty controlReads means no timing sample; maxima unavailable",
+    "Source-only approval cannot classify runtime events or admit unbound ownership/source inputs"
+  ]
+}

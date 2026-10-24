@@ -1,0 +1,44 @@
+{
+  "draftOnly": true,
+  "testsOrBuildsRun": false,
+  "patchChecks": [
+    {
+      "name": "non-data",
+      "argv": [
+        "git",
+        "apply",
+        "--check",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/early/left-main-draft/left-main-draft.patch"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "readOnly": true
+    },
+    {
+      "name": "atomic-with-data",
+      "argv": [
+        "git",
+        "apply",
+        "--check",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/early/left-main-draft/left-main-draft.patch",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/early/left-data-draft/left-data-draft.patch"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "readOnly": true
+    }
+  ],
+  "javaFileCount": 9,
+  "fileCount": 11,
+  "constructorCount": 27,
+  "constructorChanges": 4,
+  "unownedDependencyPaths": [],
+  "residuals": [
+    "Static lexical checks are not a compiler or binding proof.",
+    "All runtime tests/compile/formatter/full JaCoCo task execution remain pending after root gates.",
+    "CLN-F2 broad grep has four unowned V20 generic verifyHistorical residual lines, retained by root instruction in Dara draft; needs root ruling.",
+    "Empty account directory can only be removed from filesystem at application time; no Git file deletion exists."
+  ]
+}

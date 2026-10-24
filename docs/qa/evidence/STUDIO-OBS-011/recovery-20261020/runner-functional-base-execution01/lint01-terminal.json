@@ -1,0 +1,43 @@
+{
+  "id": "lint01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-rt-functional-base-lint01",
+    "pnpm",
+    "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+    "."
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-20T23:46:33.836992+00:00",
+  "collectorPid": 53144,
+  "outerExit": 0,
+  "endedAtUtc": "2026-10-20T23:46:59.485609+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+      "."
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-20T23:46:34.326009+00:00",
+    "elapsedSeconds": 25.15,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+    "testInputStable": true,
+    "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f"
+  },
+  "collectorResultSha256": "c254d617828c912163a339de22d869316aeea68fa097f3dc07beb4ace003bb9b",
+  "collectorLogSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+  "privateSourceAndDependencyInputsStable": true,
+  "expectedRawComparisonDifferenceAllowedOnlyForRootDisposition": false
+}

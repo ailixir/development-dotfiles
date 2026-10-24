@@ -1,0 +1,91 @@
+{
+  "status": "PLANNED_NOT_EXECUTED",
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "childCwd": "frontend (set by existing collector)",
+  "hostNodePathPrepend": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+  "expectedNode": "v24.20.0; confirm via collector output; do not use host Node23",
+  "pnpmOnly": true,
+  "collector": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-frontend.py",
+  "collectorSha256": "5fee48be32c351faaee5e58ab62e392c64573f03f01ff019a792ac97abd378fa",
+  "sourceExclusions": null,
+  "preconditions": [
+    "Root assigns exclusive frontend execution and confirms backend/native heavy work is not concurrent.",
+    "Reconfirm current HEAD and target source SHA256 against manifest immediately before application.",
+    "Check all planned execution label artifacts remain absent; choose fresh labels if any exist, never overwrite.",
+    "Apply01 tests-only patch to actual currentfrontend; leave handler and Reports unchanged for the red run.",
+    "Inspect real red JSON/log by exact name and assertion; only then apply02 implementation patch.",
+    "Run green and strict unused sequentially; record exact source/dist bindings and raw exit/counts.",
+    "All source mutations and runtime commands remain unexecuted by this packet."
+  ],
+  "labelArtifactsAtPreparation": {
+    "obs011-recovery-20261020-mirror-red01": [],
+    "obs011-recovery-20261020-mirror-green01": [],
+    "obs011-recovery-20261020-unused01": []
+  },
+  "commands": [
+    {
+      "phase": "tests-only red",
+      "label": "obs011-recovery-20261020-mirror-red01",
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-frontend.py",
+        "obs011-recovery-20261020-mirror-red01",
+        "--",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "src/services/mocks/studio/studioHandlers.test.ts",
+        "--minWorkers=1",
+        "--maxWorkers=2"
+      ],
+      "expected": "Discover all20 cases; exactly the added name-only-secretRef assertion fails with the old handler, positive declared-secretId control and all18 existing cases pass. A setup/compile/no-tests failure is not a valid red."
+    },
+    {
+      "phase": "implementation green",
+      "label": "obs011-recovery-20261020-mirror-green01",
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-frontend.py",
+        "obs011-recovery-20261020-mirror-green01",
+        "--",
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "src/services/mocks/studio/studioHandlers.test.ts",
+        "--minWorkers=1",
+        "--maxWorkers=2"
+      ],
+      "expected": "All20 cases pass with no skips, including both added controls; verify unchanged pre-existing names and bodies."
+    },
+    {
+      "phase": "strict unused after Reports rename",
+      "label": "obs011-recovery-20261020-unused01",
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-frontend.py",
+        "obs011-recovery-20261020-unused01",
+        "--",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit",
+        "--noUnusedLocals",
+        "--noUnusedParameters"
+      ],
+      "expected": "Exit0 with both original unused flags unchanged; retain any actual failure without scope expansion."
+    }
+  ],
+  "collectorBehavior": [
+    "Adds default+JSON Vitest reporters and absolute report output automatically.",
+    "Captures before/after source and studio-runner/dist digests; requires unchanged inputs within each run.",
+    "Records actual Node/pnpm versions, raw child exit, elapsed time, log/report hashes and axe output hash.",
+    "No source-exclusion flag; no collector/config/skip/timeout changes."
+  ],
+  "notSubstitutes": [
+    "Focused20-case red/green does not replace required final frontend/full-suite gates.",
+    "Historical1386 or1387 counts are not asserted as current full-suite counts.",
+    "No fresh baseline/fullcheck/final/release/21 external-input gate is waived."
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "reviewer": "Quinn",
+  "verdict": "HOLD",
+  "subjectManifestSha256": "8949bd8b929db701e4da798db04ddc1d025c8cb7d3e831eb155a307d10ddebe7",
+  "mandatoryFindings": [
+    {"id": "OBS01-BODY-01", "severity": "HIGH", "status": "OPEN", "source": "observer-fragment.java.txt:48-56", "title": "Response body collection is unbounded before length rejection", "evidence": "ofByteArray collects the full body;262144-byte check runs only after synchronous send returns.", "requiredCorrection": "Enforce the262144-byte limit while consuming the observer response, fail closed/cancel on oversize, retain no raw body and preserve original oracle/hooks. Test actual Java boundary in later authorized validation; Python reference cannot prove it."},
+    {"id": "OBS01-DEADLINE-02", "severity": "HIGH", "status": "OPEN", "source": "observer-fragment.java.txt:39-54,104-120", "title": "Request timeout does not bound full observation and owned client lifetime", "evidence": "Pinned OpenJDK21 response timer is cancelled before readBodyAsync. Candidate has no body deadline and discards its client without finally cancellation/termination accounting; a stalled body can block original assertion.", "requiredCorrection": "Use an observer-local total15s deadline covering request/body and finite failure/cleanup handling, retain/cancel/account observer-owned operations in all exits, preserve actual unresolved status as HOLD and execute unchanged business oracle/hooks. Do not assume cancel is instant or add unbounded close, global fixture change, retry or process signal."},
+    {"id": "OBS01-RETRY-03", "severity": "HIGH", "status": "OPEN", "source": "observer-fragment.java.txt:47-54; OpenJDK21 MultiExchange retry paths", "title": "One send/CAS does not establish one transport attempt", "evidence": "GET and unprocessed/connection failures can enter cited implementation retries within one application send. Synthetic send can hide two transport events and still pass projection.", "requiredCorrection": "Provide exact observer-local enforcement/evidence of adopted one-read/no-retry contract, or obtain explicit owning design qualification before changing that meaning. No implicit waiver or global ordinary-fixture retry property change; preserve cap1 and unknown/failure semantics."},
+    {"id": "OBS01-CUSTODY-04", "severity": "HIGH", "status": "OPEN", "source": "observer-fragment.java.txt:149-180", "title": "Secure traversal is not bound to root-approved output directory identity", "evidence": "Writer retains no-follow directory handles and exclusively creates0600 file, but never checks opened directory expected identity, owner,0700 mode or named continuity. A substituted ordinary directory passes all explicit writer checks.", "requiredCorrection": "Bind the approved runtime output directory/necessary ancestors to actual root-owned identity metadata, verify opened identity/owner/mode and relevant named continuity through write using retained handles; preserve nofollow/CREATE_NEW/0600 and closed-only export. Reject mismatch with honest unavailable/HOLD evidence. No generic same-UID security expansion."}
+  ],
+  "guardedAuthorChecksPassed": 311,
+  "independentSourceChecksPassed": 72,
+  "independentCases": 12,
+  "javaApiInferredSchedules": 4,
+  "actualJavaHttpNativeRuntimeOsPrivateActions": 0,
+  "realAdapterMissingIsNewFinding": false,
+  "sourceScopeApproved": false,
+  "executionReleased": false,
+  "rootSourceGateOrLeaseIssued": false,
+  "C8MainSourceIRLaneLifecycleCredit": false,
+  "historicalEvidenceAndCandidatePreserved": true
+}

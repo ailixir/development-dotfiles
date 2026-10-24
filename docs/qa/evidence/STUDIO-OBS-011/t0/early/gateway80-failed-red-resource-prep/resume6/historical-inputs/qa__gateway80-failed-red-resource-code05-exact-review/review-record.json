@@ -1,0 +1,89 @@
+{
+  "reviewer": "Quinn",
+  "subjectManifestSha256": "bd9da067c9d56545171050373a1926f9cd9d061966847ad35db680841cc8e9aa",
+  "protocol": "FAILED_RESOURCE_TYPED_SELF_TEXT_AND_PHYSICAL_ROLES_V1_SOURCE_REVIEW_NOT_OWNER_RULING",
+  "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+  "mandatoryFindingCount": 4,
+  "mandatoryFindings": [
+    {
+      "id": "FR05-OWNER-SCALAR-TYPES",
+      "severity": "HIGH",
+      "mandatory": true,
+      "title": "Owner decisions accept numeric values in Boolean fields",
+      "location": "protocol.py:82 owner_records; factory.validate/preflight",
+      "establishedBehavior": "owner_records validates decode(raw)==owner_expected(...). Python dict equality treats1==True and0==False. The independently raw-pinned fake owner record changes authorized to1, legacyReportedCanonicalPredicateSatisfied to0 and physical-preservation acceptance to1; actual F.preflight still accepts before mutation. A wrong-code-subject owner record is correctly rejected.",
+      "impact": "An owner input that violates the required exact scalar schema is accepted as the exact technical decision. This proves a source validation gap, not an actual owner decision or installed unauthorized action.",
+      "requiredCorrection": "Validate exact closed owner schema and exact built-in scalar types before expected-value comparison, across every consumed owner record and decision flag. Numeric1/0 must not satisfy Boolean constants. Keep raw SHA before parsing, exact original unit/code/review/contract binding and all three independently issued decisions; reject invalid input before mutation.",
+      "requiredPairs": [
+        "Valid exact Boolean owner decision remains accepted by pure preflight.",
+        "Same independently pinned owner values encoded as numeric1/0 reject before any pending/attempt/mkdir/write."
+      ],
+      "evidence": [
+        "critical.py",
+        "critical.stdout: owner_numeric_boolean_coercion",
+        "critical.stdout: owner_wrong_subject_control"
+      ]
+    },
+    {
+      "id": "FR05-PENDING-CONTROL-AUTHOR",
+      "severity": "HIGH",
+      "mandatory": true,
+      "title": "Current control can self-complete or omit its writer",
+      "location": "protocol.py:90 actor_union /116 resolve_actor_completions; failed_gateway.py:346 Unit.require_setup",
+      "establishedBehavior": "The current setup-control fixture originally includes writer900102 with self-evidence and actualStatus:null. Keeping that row but setting actualStatus0, or omitting it entirely, both permit actual A.run negative to write the client journal and MISSING_READINESS/status1 denial with an empty completion-attestation actor list. Keeping the pending row and omitting its attestation correctly rejects.",
+      "impact": "Exact pending-set matching covers only rows supplied by the control. It does not establish a designated current writer or enforce that the immutable control cannot claim its own future completion. A falsely complete/omitted writer can evade required external completion and future numeric accounting. No real writer or completion was observed.",
+      "requiredCorrection": "Require an exact source-bound designated author for every setup/prior/current control, with actual known PID/parent/evidence binding and pending completion in its own immutable record. Reject omitted, wrong-source or precompleted current-author rows; resolve only from the independently supplied post-completion attestation. Preserve every old control and accumulated pending author, historical failure/tool-status distinctions and actual dynamic union; do not coerce old failed actors into success.",
+      "requiredPairs": [
+        "A correct designated pending author plus matching post-completion ROOT_OPERATOR_ATTESTATION qualifies without mutating the control.",
+        "Omitted current author or self-declared actualStatus0 rejects even when the empty observed set matches the supplied rows."
+      ],
+      "evidence": [
+        "critical.stdout: current_author_self_completed",
+        "critical.stdout: current_author_omitted",
+        "critical.stdout: pending_author_empty_attestation_control",
+        "peer Aria accumulated-prior/current binding pairs"
+      ]
+    },
+    {
+      "id": "FR05-CONCRETE-CONTROL-CALLER",
+      "severity": "HIGH",
+      "mandatory": true,
+      "title": "Reviewed setup/current-control and finite completion constructor is missing",
+      "location": "RECIPE05.md:11-19; install-cli.py:183; api-map.json / control templates",
+      "establishedBehavior": "The reviewed installer derives installation input/code/binary maps, but the complete132-function production inventory has no setup/current phase-control author. RECIPE05 delegates complete current inputPins/typed roster and known pending author data to root templates. It also promises parent/operator builtins plus externally computed completion SHA without a selected reviewed finite helper-free constructor/hash/binder path. Fixture root_control/build/completion functions supply these facts in tests only.",
+      "impact": "Actual setup/later controls cannot be concretely generated through the reviewed production path while respecting no root-built maps and no unaccounted completion-writer/helper recursion. This is a missing packet/caller implementation, not a claim that such a pure operator mechanism is impossible.",
+      "requiredCorrection": "Include a complete reviewed finite setup/current-control author/caller that derives the required current maps and typed author/history rows from exact approved same buffers/state; define the concrete helper-free bounded SAMEargv completion serialization/SHA/binding path or a separately accounted alternative under exact new scope. Preserve caps/old controls/actual PID-parent-null provenance, actual separate outer0 before attestation and no further writer recursion. Templates, test fixtures or unspecified root helper code are insufficient.",
+      "requiredPairs": [
+        "A complete actual-function fake composition constructs the exact control/map and pending current author under the reviewed caller before the mode.",
+        "Missing/extra/unknown map or author, incomplete/nonzero completion, forged source and mismatched SAMEargv/SHA reject with retained partials/cap."
+      ],
+      "evidence": [
+        "peer-evidence-binding.json / Aria static callerGap",
+        "source-binding.json",
+        "RECIPE05.md",
+        "whole-invariant-trace.json controlGeneration"
+      ]
+    },
+    {
+      "id": "FR05-AFTERALLOW-FRESHNESS",
+      "severity": "HIGH",
+      "mandatory": true,
+      "title": "No original-permit check covers the complete allow/cleanup/caller suffix",
+      "location": "failed_gateway.py:581-584 Unit.operate then593/603 close/run; entry.py:75; guard-failed-red.bash:136-160",
+      "establishedBehavior": "The last freshness check precedes gate-allow serialization/write/fsync/close. Unit.close/run finally, entry return, guard bootstrap FD close/finalization and shell builtin exit branch follow without another original-permit/readiness check. In the actual composed fake guard case, gate starts1002 with original issued1001; the successful final selected outer entry-FD close advances time to1062. The guard still exits Python0, gate-allow remains0, finalizer is clean GUARD and no failure record is emitted. Static Bash tail then chooses builtin exit1 on that success. No actual Bash builtin or wrapper was executed.",
+      "impact": "A clean but late selected operation can authorize the closing branch after the original60-second window, despite valid earlier PRE/POST samples. Cleanup-error rejection does not cover successful late cleanup or delivery. This is modeled source evidence only, not an actual late close.",
+      "requiredCorrection": "Account the whole selected suffix and exact caller after-allow boundary under the unchanged original permit/readiness and admitted clock domain, with no refresh/retry/unaccounted observer or invented completion. Late/unknown/reversed facts must HOLD and preserve provisional allow/partials rather than authorize the exit branch. If the actual required physical scheduling/timing invariant cannot be implemented with approved mechanisms, state that precise boundary and keep HOLD; do not claim a final sample proves an unobserved interval.",
+      "requiredPairs": [
+        "Timely complete actual guard/caller composition retains intended conditional gate behavior.",
+        "Successful late allow IO, Unit cleanup or final outer cleanup/delivery cannot return a qualifying close permission under the expired original permit. One late outer-close case plus the full suffix trace establishes this gap."
+      ],
+      "evidence": [
+        "afterallow.py",
+        "afterallow.stdout",
+        "peer whole-invariant-trace.json"
+      ]
+    }
+  ],
+  "technicalOwnerDecisionIssued": false,
+  "actualAuthority": false
+}

@@ -1,0 +1,144 @@
+{
+  "kind": "COMPLETE_INDEPENDENT_SOURCE03_ARCHITECTURE_REVIEW",
+  "reviewer": "Aria",
+  "subjectManifestSha256": "2e4f6203a252cae88239d37513e7f956f9dc1dd1d8345d1c79086023a1a8a198",
+  "verdict": "HOLD_NO_OPERATIONAL_AUTHORITY",
+  "mandatoryFindingCount": 3,
+  "mandatoryFindings": [
+    "FR03-PRIMARY-PUBLISH",
+    "FR03-OUTER-CLEANUP",
+    "FR03-PARTIAL-NAMESPACE"
+  ],
+  "files": [
+    {
+      "path": "check-history.json",
+      "sha256": "7c80b26f71b6419af0d8dd32c24e4453c715d45b635541cb5fe62bb6a2006757",
+      "bytes": 1333,
+      "mode": 420
+    },
+    {
+      "path": "findings.json",
+      "sha256": "0c8365c67469f22677bf31d5ace9cece75d10d498e7c43c3452a74801fee5c63",
+      "bytes": 2391,
+      "mode": 420
+    },
+    {
+      "path": "pins.json",
+      "sha256": "4770c6b48bef2bebcc0e4ef7305577b05817eb4016f3f9b7f78d9465545cf35a",
+      "bytes": 111678,
+      "mode": 420
+    },
+    {
+      "path": "review.md",
+      "sha256": "8a549a04c7972401d1ff08ae7fe2ce7971604ef64e582de010c41332724c20e3",
+      "bytes": 11418,
+      "mode": 420
+    },
+    {
+      "path": "source-check-attempt01.stderr",
+      "sha256": "413b79d3e1b0289d76b3eb6391a1c90074acbfc8e0b7b77e6f98e9378c257d3e",
+      "bytes": 844,
+      "mode": 420
+    },
+    {
+      "path": "source-check-attempt01.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "source-check-attempt02.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "source-check-attempt02.stdout",
+      "sha256": "a2f80c4d9fbdb38a99ad5c473a9925147faece3b1194bc89d97f8f252ab24208",
+      "bytes": 79,
+      "mode": 420
+    },
+    {
+      "path": "source-checks.json",
+      "sha256": "813a7df2f92095cf60a2be96d5d84260af42f2ee6539e1d893d8078e1d8e5fc8",
+      "bytes": 457903,
+      "mode": 420
+    },
+    {
+      "path": "targeted-attempt01.stderr",
+      "sha256": "305daefeb86000eaaebd1ec2ac15271fb5575c0bf1bf28d124a89fed552fca40",
+      "bytes": 1288,
+      "mode": 420
+    },
+    {
+      "path": "targeted-attempt01.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "targeted-attempt02.stderr",
+      "sha256": "b8a6be4e489a5973b01a50b8bed1a34ed87acc344e19746108150fddcc98fa14",
+      "bytes": 1423,
+      "mode": 420
+    },
+    {
+      "path": "targeted-attempt02.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "targeted-attempt03.stderr",
+      "sha256": "5ec98288cb17e17358f6a9e3d3329cb69ac602d7f8a5904d1c06a803438538d7",
+      "bytes": 758,
+      "mode": 420
+    },
+    {
+      "path": "targeted-attempt03.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "targeted-attempt04.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "targeted-attempt04.stdout",
+      "sha256": "c570ad7a2555c4f35df706d34ee111366fd024f9dc1627bf30d0a0b0c0a8f584",
+      "bytes": 61,
+      "mode": 420
+    },
+    {
+      "path": "targeted-results.json",
+      "sha256": "01965a9dbf6028e8118830c1febc41d536100d8477f9cbbaa398154a8f2d81bf",
+      "bytes": 2859,
+      "mode": 420
+    },
+    {
+      "path": "targeted_checks.py",
+      "sha256": "2779352cb79b188cee6b06af54cba6dd9e5cf2260ad6aa6a20a0038312612416",
+      "bytes": 8618,
+      "mode": 420
+    },
+    {
+      "path": "verify_source.py",
+      "sha256": "5d58a0b9dbf9cc5bffd75358864ac6fe123154ed67cd6d667ca7d76eb389a982",
+      "bytes": 6890,
+      "mode": 420
+    }
+  ],
+  "memberCount": 20,
+  "independentSourceChecks": 2298,
+  "uniquePublicPins": 425,
+  "independentActualFunctionChecks": 18,
+  "qaCurrent269ExactlyBound": true,
+  "qaIndependent12Attributed": true,
+  "qaFinalSealPendingAtAriaSeal": true,
+  "actualSubjectOperations": 0,
+  "operationalAuthority": false,
+  "manifestSelfExcluded": true
+}

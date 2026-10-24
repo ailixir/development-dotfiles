@@ -1,0 +1,1347 @@
+{
+  "status": "STATIC_MAPPING_NOT_RUNTIME_EQUIVALENCE",
+  "libraryEvidence": "awaitility-source-bytecode.json",
+  "policy": "No shared helper. Each direct Awaitility chain has same-thread/dontCatchUncaughtExceptions/ignoreNoExceptions and explicit old sleep-boundary interrupt checks. CheckedExceptionRethrower.safeRethrow0 preserves the original callback throwable type.",
+  "remainingLimits": [
+    "Exact instruction-level arrival timing is not claimed; scheduler/condition overhead up to one old polling turn still requires review/runtime disposition.",
+    "A VM-specific raw Thread.sleep interruption message/stack cannot be recreated; the preserved contract is checked InterruptedException with cleared status and original caller catch/flag behavior.",
+    "Do not keep any batch whose interruption/timeout paths are unproved within the source-order/timebox gate."
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "siteIds": [
+        1,
+        2
+      ],
+      "oldLine": 749,
+      "enclosingMethod": "registerOwnedProcess",
+      "oldIntervalMs": 5,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "FALL_THROUGH",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 2,
+      "siteIds": [
+        1,
+        2
+      ],
+      "oldLine": 758,
+      "enclosingMethod": "registerOwnedProcess",
+      "oldIntervalMs": 5,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "FALL_THROUGH",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 3,
+      "siteIds": [
+        3
+      ],
+      "oldLine": 959,
+      "enclosingMethod": "startOwnedWorker",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "FAIL_AT_WAIT",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 4,
+      "siteIds": [
+        4
+      ],
+      "oldLine": 1085,
+      "enclosingMethod": "verifyPreviousWorkerGenerationClosed",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "MAP_EXCEPTION",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 5,
+      "siteIds": [
+        5
+      ],
+      "oldLine": 2313,
+      "enclosingMethod": "<static initializer> (secret fixture bootstrap)",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "fixtureDeadline",
+      "oldOnTimeout": "MAP_EXCEPTION",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 6,
+      "siteIds": [
+        6
+      ],
+      "oldLine": 3942,
+      "enclosingMethod": "cancelFailedTestOwnedSessions (@AfterEach, failed-test path)",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 7,
+      "siteIds": [
+        7
+      ],
+      "oldLine": 7294,
+      "enclosingMethod": "b3PublishedPartialDriftStepAndSecondReplay",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 8,
+      "siteIds": [
+        8
+      ],
+      "oldLine": 7606,
+      "enclosingMethod": "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 9,
+      "siteIds": [
+        9
+      ],
+      "oldLine": 8328,
+      "enclosingMethod": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 10,
+      "siteIds": [
+        10
+      ],
+      "oldLine": 8401,
+      "enclosingMethod": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "acked",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 11,
+      "siteIds": [
+        11
+      ],
+      "oldLine": 9285,
+      "enclosingMethod": "b2bAppendAuthority",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "accepted",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 14,
+      "siteIds": [
+        14
+      ],
+      "oldLine": 9316,
+      "enclosingMethod": "b2bAppendAuthority",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "held",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 15,
+      "siteIds": [
+        15
+      ],
+      "oldLine": 9401,
+      "enclosingMethod": "b2bAppendAuthority",
+      "oldIntervalMs": 25,
+      "oldAbsoluteDeadline": "acked",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 16,
+      "siteIds": [
+        16
+      ],
+      "oldLine": 9529,
+      "enclosingMethod": "b2bAppendAuthority",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 17,
+      "siteIds": [
+        17
+      ],
+      "oldLine": 9544,
+      "enclosingMethod": "b2bOwnerLoss",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "held",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 18,
+      "siteIds": [
+        18
+      ],
+      "oldLine": 10071,
+      "enclosingMethod": "b2AwaitSettled",
+      "oldIntervalMs": 25,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 19,
+      "siteIds": [
+        19
+      ],
+      "oldLine": 10084,
+      "enclosingMethod": "b2AwaitLeft",
+      "oldIntervalMs": 25,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 20,
+      "siteIds": [
+        20
+      ],
+      "oldLine": 10137,
+      "enclosingMethod": "b2AwaitCheckCurrentGate",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "MAP_EXCEPTION",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 21,
+      "siteIds": [
+        21
+      ],
+      "oldLine": 11322,
+      "enclosingMethod": "prefixSyncAwaitDiagnostic",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "MAP_EXCEPTION",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 22,
+      "siteIds": [
+        22
+      ],
+      "oldLine": 11486,
+      "enclosingMethod": "prefixSyncFinishAndReplay",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 23,
+      "siteIds": [
+        23
+      ],
+      "oldLine": 11850,
+      "enclosingMethod": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "FALL_THROUGH",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 29,
+      "siteIds": [
+        29
+      ],
+      "oldLine": 14283,
+      "enclosingMethod": "b1AwaitDriftCapture",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "FAIL_AT_WAIT",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 30,
+      "siteIds": [
+        30
+      ],
+      "oldLine": 14508,
+      "enclosingMethod": "b1AwaitTerminal",
+      "oldIntervalMs": 25,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 31,
+      "siteIds": [
+        31
+      ],
+      "oldLine": 14543,
+      "enclosingMethod": "b1AwaitRow",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "FAIL_AT_WAIT",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 32,
+      "siteIds": [
+        32
+      ],
+      "oldLine": 14557,
+      "enclosingMethod": "b1AwaitSucceeded",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "FAIL_AT_WAIT",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 33,
+      "siteIds": [
+        33
+      ],
+      "oldLine": 14567,
+      "enclosingMethod": "b1AwaitQuestion",
+      "oldIntervalMs": 25,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "FAIL_AT_WAIT",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 34,
+      "siteIds": [
+        34
+      ],
+      "oldLine": 15590,
+      "enclosingMethod": "incrementalJoinedCase",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 35,
+      "siteIds": [
+        35
+      ],
+      "oldLine": 16027,
+      "enclosingMethod": "incrementalJoinedCase",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 36,
+      "siteIds": [
+        36
+      ],
+      "oldLine": 16066,
+      "enclosingMethod": "incrementalJoinedCase",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "secondDeadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 37,
+      "siteIds": [
+        37
+      ],
+      "oldLine": 16139,
+      "enclosingMethod": "assertIncrementalTerminalRefusal",
+      "oldIntervalMs": 25,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 38,
+      "siteIds": [
+        38
+      ],
+      "oldLine": 16430,
+      "enclosingMethod": "confirmIncrementalPrefix",
+      "oldIntervalMs": 25,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 41,
+      "siteIds": [
+        41
+      ],
+      "oldLine": 16775,
+      "enclosingMethod": "confirmIncrementalPrefix",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 42,
+      "siteIds": [
+        42
+      ],
+      "oldLine": 16825,
+      "enclosingMethod": "assertActualDriftCallbackAuthorityThenRelease",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 43,
+      "siteIds": [
+        43
+      ],
+      "oldLine": 16948,
+      "enclosingMethod": "assertPendingContextGuardsThenRelease",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 44,
+      "siteIds": [
+        44
+      ],
+      "oldLine": 17716,
+      "enclosingMethod": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues (Order 1)",
+      "oldIntervalMs": 50,
+      "oldAbsoluteDeadline": "learningEnd",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 45,
+      "siteIds": [
+        45
+      ],
+      "oldLine": 17896,
+      "enclosingMethod": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues (Order 1)",
+      "oldIntervalMs": 50,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 47,
+      "siteIds": [
+        47
+      ],
+      "oldLine": 18056,
+      "enclosingMethod": "queuedAndPreReadyRefusals (Order 2)",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "enteredDeadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 48,
+      "siteIds": [
+        48
+      ],
+      "oldLine": 18079,
+      "enclosingMethod": "queuedAndPreReadyRefusals (Order 2)",
+      "oldIntervalMs": 50,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 49,
+      "siteIds": [
+        49
+      ],
+      "oldLine": 18126,
+      "enclosingMethod": "queuedAndPreReadyRefusals (Order 2)",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "captureDeadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 50,
+      "siteIds": [
+        50
+      ],
+      "oldLine": 18636,
+      "enclosingMethod": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays (Order 4)",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 51,
+      "siteIds": [
+        51
+      ],
+      "oldLine": 18693,
+      "enclosingMethod": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays (Order 4)",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 52,
+      "siteIds": [
+        52
+      ],
+      "oldLine": 18762,
+      "enclosingMethod": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance (Order 5)",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 54,
+      "siteIds": [
+        54
+      ],
+      "oldLine": 18864,
+      "enclosingMethod": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork (Order 6)",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 55,
+      "siteIds": [
+        55
+      ],
+      "oldLine": 18882,
+      "enclosingMethod": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork (Order 6)",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 58,
+      "siteIds": [
+        58
+      ],
+      "oldLine": 19062,
+      "enclosingMethod": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays (Order 7)",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 60,
+      "siteIds": [
+        60
+      ],
+      "oldLine": 19251,
+      "enclosingMethod": "awaitState",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "MAP_EXCEPTION",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 61,
+      "siteIds": [
+        61
+      ],
+      "oldLine": 19589,
+      "enclosingMethod": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel (Order 9)",
+      "oldIntervalMs": 50,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 62,
+      "siteIds": [
+        62
+      ],
+      "oldLine": 19835,
+      "enclosingMethod": "awaitGuidedVideoSettled",
+      "oldIntervalMs": 100,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 63,
+      "siteIds": [
+        63
+      ],
+      "oldLine": 20207,
+      "enclosingMethod": "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes (Order 9)",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 64,
+      "siteIds": [
+        64
+      ],
+      "oldLine": 21459,
+      "enclosingMethod": "p6CommittedChildCut (Order 26, through p3Case)",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "stoppedBy",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 66,
+      "siteIds": [
+        66
+      ],
+      "oldLine": 21899,
+      "enclosingMethod": "p6AwaitProcesses",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "MAP_EXCEPTION",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 67,
+      "siteIds": [
+        67
+      ],
+      "oldLine": 22043,
+      "enclosingMethod": "p7FaultAndRetry (Order 27)",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "until",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 69,
+      "siteIds": [
+        69
+      ],
+      "oldLine": 22322,
+      "enclosingMethod": "p8PreReadySelfStop (Order 38)",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "entered",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 70,
+      "siteIds": [
+        70
+      ],
+      "oldLine": 22342,
+      "enclosingMethod": "p8PreReadySelfStop (Order 38)",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "stoppedBy",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 72,
+      "siteIds": [
+        72
+      ],
+      "oldLine": 22360,
+      "enclosingMethod": "p8PreReadySelfStop (Order 38)",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "selfStopBy",
+      "oldOnTimeout": "FALL_THROUGH",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 73,
+      "siteIds": [
+        73
+      ],
+      "oldLine": 23338,
+      "enclosingMethod": "p14AwaitAcquisitionWindow (Orders 33-36 through p14Captured)",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "MAP_EXCEPTION",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 74,
+      "siteIds": [
+        74
+      ],
+      "oldLine": 23723,
+      "enclosingMethod": "p3ConcurrentScopeReplays (Order 12)",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "drainingDeadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 75,
+      "siteIds": [
+        75
+      ],
+      "oldLine": 23891,
+      "enclosingMethod": "p3AwaitParentStarted",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 77,
+      "siteIds": [
+        77
+      ],
+      "oldLine": 24957,
+      "enclosingMethod": "p4AwaitRevocationObserverCompletion",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 78,
+      "siteIds": [
+        78
+      ],
+      "oldLine": 25056,
+      "enclosingMethod": "p4SealPrivateProducersAfterOwnerCleanup",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 79,
+      "siteIds": [
+        79
+      ],
+      "oldLine": 25309,
+      "enclosingMethod": "p4AssertRegisteredAndNoPasswordEffects",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "FALL_THROUGH",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 80,
+      "siteIds": [
+        80
+      ],
+      "oldLine": 26237,
+      "enclosingMethod": "p8AwaitC6Closed",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "FALL_THROUGH",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 81,
+      "siteIds": [
+        81
+      ],
+      "oldLine": 26313,
+      "enclosingMethod": "p8OwnedPrimaryBrowser",
+      "oldIntervalMs": 10,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 82,
+      "siteIds": [
+        82
+      ],
+      "oldLine": 27169,
+      "enclosingMethod": "p3AwaitExecution",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 83,
+      "siteIds": [
+        83
+      ],
+      "oldLine": 27179,
+      "enclosingMethod": "p3RunnerReport",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original caller snapshot first, then old leading interval before fresh report read; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 84,
+      "siteIds": [
+        84
+      ],
+      "oldLine": 27312,
+      "enclosingMethod": "incrementalAwaitExpiredTeardownConfirmed",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "MAP_EXCEPTION",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion or original mapped error tail; H8 re-evaluates the original deadline-evidence branch on Awaitility timeout",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "H8 original final read/evidence only if no terminal step occurred; never repeat after success/failure, never replace first failure."
+    },
+    {
+      "id": 85,
+      "siteIds": [
+        85
+      ],
+      "oldLine": 27376,
+      "enclosingMethod": "p3AwaitTeardown",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "MAP_EXCEPTION",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 86,
+      "siteIds": [
+        86
+      ],
+      "oldLine": 27385,
+      "enclosingMethod": "p3DecodeVideo",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original caller snapshot first, then old leading interval before fresh report read; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 87,
+      "siteIds": [
+        87
+      ],
+      "oldLine": 29545,
+      "enclosingMethod": "awaitJoinedVideo",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 89,
+      "siteIds": [
+        89
+      ],
+      "oldLine": 31110,
+      "enclosingMethod": "C5Capture.awaitS2Completion",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original do-body once before any await timeout gate; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 90,
+      "siteIds": [
+        90
+      ],
+      "oldLine": 32325,
+      "enclosingMethod": "awaitFinalizing",
+      "oldIntervalMs": 50,
+      "oldAbsoluteDeadline": "end",
+      "oldOnTimeout": "MAP_EXCEPTION",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 93,
+      "siteIds": [
+        93
+      ],
+      "oldLine": 34143,
+      "enclosingMethod": "stopOwnedApplicationJobs",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 94,
+      "siteIds": [
+        94
+      ],
+      "oldLine": 34308,
+      "enclosingMethod": "stopOwnedProcessTree",
+      "oldIntervalMs": 30,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "FALL_THROUGH",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    },
+    {
+      "id": 95,
+      "siteIds": [
+        95
+      ],
+      "oldLine": 34329,
+      "enclosingMethod": "stopOwnedProcessTree",
+      "oldIntervalMs": 20,
+      "oldAbsoluteDeadline": "deadline",
+      "oldOnTimeout": "RETURN_LAST",
+      "firstAndEvaluationOrder": "original while precondition/body once; first Awaitility callback is a deliberate no-op, not a second predicate effect",
+      "interruptMapping": "Thread.interrupted clears+throws checked InterruptedException only on old unsuccessful sleep path; check before/after each false poll and on timeout; successful original condition/body keeps its flag",
+      "timeoutMapping": "original last state/caller assertion/mapped error tail retained, interrupted timeout is not swallowed",
+      "finalFreshReads": "original post-loop fresh reads unchanged, no added RPC on successful completion",
+      "runtimeProof": "NOT_RUN",
+      "terminalLatch": "Every original success/termination and first unhandled Exception/Error is latched; exact first failure object is rethrown before timeout mapping. A late true is not converted into a new failure or rerun.",
+      "timeoutFinalStep": "No timeout-triggered predicate rerun; original separate post-loop final read/assertion stays unchanged."
+    }
+  ],
+  "firstFailurePolicy": "Store first exact Exception/Error reference per site, throw it immediately and before any elapsed-time fallback; never capture failure as success or replace it with a later timeout."
+}

@@ -1,0 +1,190 @@
+{
+  "type": "object",
+  "required": [
+    "protocol",
+    "claimSet",
+    "guarantees",
+    "historicalIdentityUncertainty",
+    "unsupportedEvidence",
+    "credit",
+    "C8",
+    "cleanupAuthorized",
+    "sourceWrites"
+  ],
+  "properties": {
+    "protocol": {
+      "const": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1"
+    },
+    "claimSet": {
+      "const": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS"
+    },
+    "guarantees": {
+      "type": "object",
+      "required": [
+        "strongExecutableObjectIdentityProved",
+        "kernelMainMappedVnodeEqualityProved",
+        "highResolutionProcessIdentityProved",
+        "launchTimeExecutableObjectBound",
+        "completeIntervalHistoryProved",
+        "exhaustiveDescendantDiscoveryProved",
+        "adversarialReplacementRaceExcluded",
+        "globalQuietProved",
+        "legacyOrdinaryGateSatisfied",
+        "intervalCaptureClaimed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "strongExecutableObjectIdentityProved": {
+          "const": false
+        },
+        "kernelMainMappedVnodeEqualityProved": {
+          "const": false
+        },
+        "highResolutionProcessIdentityProved": {
+          "const": false
+        },
+        "launchTimeExecutableObjectBound": {
+          "const": false
+        },
+        "completeIntervalHistoryProved": {
+          "const": false
+        },
+        "exhaustiveDescendantDiscoveryProved": {
+          "const": false
+        },
+        "adversarialReplacementRaceExcluded": {
+          "const": false
+        },
+        "globalQuietProved": {
+          "const": false
+        },
+        "legacyOrdinaryGateSatisfied": {
+          "const": false
+        },
+        "intervalCaptureClaimed": {
+          "const": false
+        }
+      }
+    },
+    "historicalIdentityUncertainty": {
+      "const": true
+    },
+    "unsupportedEvidence": {
+      "type": "object",
+      "required": [
+        "kernelStartSeconds",
+        "kernelStartMicroseconds",
+        "kernelMainExecutableObject",
+        "mainMappedObjectEquality",
+        "launchTimeObjectBinding",
+        "strongPlatformCertificateSha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kernelStartSeconds": {
+          "type": "object",
+          "required": [
+            "value",
+            "reason"
+          ],
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "reason": {
+              "const": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+            }
+          }
+        },
+        "kernelStartMicroseconds": {
+          "type": "object",
+          "required": [
+            "value",
+            "reason"
+          ],
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "reason": {
+              "const": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+            }
+          }
+        },
+        "kernelMainExecutableObject": {
+          "type": "object",
+          "required": [
+            "value",
+            "reason"
+          ],
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "reason": {
+              "const": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+            }
+          }
+        },
+        "mainMappedObjectEquality": {
+          "type": "object",
+          "required": [
+            "value",
+            "reason"
+          ],
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "reason": {
+              "const": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+            }
+          }
+        },
+        "launchTimeObjectBinding": {
+          "type": "object",
+          "required": [
+            "value",
+            "reason"
+          ],
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "reason": {
+              "const": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+            }
+          }
+        },
+        "strongPlatformCertificateSha256": {
+          "type": "object",
+          "required": [
+            "value",
+            "reason"
+          ],
+          "properties": {
+            "value": {
+              "type": "null"
+            },
+            "reason": {
+              "const": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+            }
+          }
+        }
+      }
+    },
+    "credit": {
+      "const": false
+    },
+    "C8": {
+      "const": false
+    },
+    "cleanupAuthorized": {
+      "const": false
+    },
+    "sourceWrites": {
+      "const": []
+    }
+  },
+  "description": "Executable enforcement is validate_claim; this static schema grants no authority."
+}

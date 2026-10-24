@@ -1,0 +1,1236 @@
+{
+  "artifact": "STUDIO-OBSERVED resume architecture review",
+  "author": "Aria (@architect)",
+  "createdAt": "2026-10-19T00:49:06.689289+00:00",
+  "isQaVerdict": false,
+  "sourceMutated": false,
+  "planMutated": false,
+  "storiesMutated": false,
+  "scopePreserved": true,
+  "sourceFreeze": "B1 live; root alone declares treeopen afterB7",
+  "processObservation": {
+    "wrapper": 88167,
+    "daemon": 88182,
+    "relationship": "daemonPPID=wrapper",
+    "command": "check --rerun-tasks --no-daemon",
+    "observedLive": true,
+    "signalsSent": false
+  },
+  "method": [
+    "read-onlycat/sed/rg/python",
+    "psidentity",
+    "smallJSON/hashes",
+    "skillgreetingnodecommandranbeforestrictbriefwasread;no furthernodecommands,no sourceedit/test/build/providercall"
+  ],
+  "inputShas": {
+    "docs/qa/evidence/STUDIO-OBS-011/t0/lanes.v3.json": "07dd42fbdf17db5fd6a137a219283fffe139471126a5f04fd01e1ff17e0cfce3",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md": "0766e7d21023198cef275f05f5696c599d4b421a4ed1f4408439133d7d4b89d8",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/w-brief.v3.md": "0b18b3961ed37d860b89613f0f69323d34df9a8e787fc3435b543e01b634d2c4",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md": "395ed4f676fc3a97e1e4c17d085dcc45394365a20dc57fc0d595c5b98a3b4edf",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md": "5847ece282808c5f84e974ffbd92d82e0893c68e0aadac9f02707542350438fd",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md": "500b671cda05654b86031b46d5b76d94a2fb7b29bc511dd33bbe138d0a0f0538",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/R-F2/cosign.md": "3a1d3016db73f8686f91eacb12d0550fded11e2d6793f82fee399cdd773c3ba4",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/R-CO/cosign.md": "48fe6e6fd409c4b0cd10a31b2f29d512353f863d6b0ae02cc9df7d7cc0f1d101",
+    "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md": "bca21f5393d4c80df49842f805ddd3b3928fff559b09919720b349962f65633a"
+  },
+  "findings": [
+    {
+      "id": "A1",
+      "severity": "BLOCK_W1",
+      "finding": "B1 live; baseline/start record unsigned and unresolved",
+      "resolution": "Wait live handle, fill all B1 fields, inspect coverage and RC10, root confirms B2-B6 carry optionB and runs freshB7, independent folds/intersection, then sign and announce treeopen.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md:55",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md:380"
+      ]
+    },
+    {
+      "id": "A2",
+      "severity": "BEFORE_LEFT",
+      "finding": "GuidedReplayingPrefixMigrationIT missing from lanesv3 despite handoff claiming addition",
+      "resolution": "Root adds one P3 case path to LEFT writes+verify; remove retired InferenceMigrationIT from verify after deletion; apply broad Dara historical grep and portJ1/J2 plus cite-or-portJ4/J8.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-011/t0/lanes.v3.json",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/early/R-F2/cosign.md"
+      ]
+    },
+    {
+      "id": "A3",
+      "severity": "BEFORE_FE_RCO",
+      "finding": "scheduleProvenance.test.tsx missing from lanesv3 writes/targeted verify",
+      "resolution": "Root adds assertion-only write and scheduling test verify; then accept Uma co-sign for label change.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-011/t0/lanes.v3.json",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/early/R-CO/cosign.md"
+      ]
+    },
+    {
+      "id": "A4",
+      "severity": "BEFORE_FE",
+      "finding": "R08-3 root half remains blank",
+      "resolution": "Co-ratify PO P11 now for metadata move only; require key/template equality, test-only registry/bundle no evidence paths, and one-owner removal of key from both tables whenAE01f lands.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md:242",
+        "docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/t0-proposal.md:249",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:175"
+      ]
+    },
+    {
+      "id": "A5",
+      "severity": "BEFORE_DISPATCH",
+      "finding": "Schedule remains five-worker v2 order inconsistent with K17 and current three slots",
+      "resolution": "Use schedule3 below, exclude IT-Rprep from worker occupancy after completedprep; runtime heavy work remains serialized and quiet.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-011/t0/lanes.v3.json",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/item1-result.json"
+      ]
+    },
+    {
+      "id": "A6",
+      "severity": "BEFORE_GATES",
+      "finding": "D5 ambiguous identifier and no009 a-f map in local QA record",
+      "resolution": "Use separate teardownD5 and replayAuditD5 records below; root may sign start mapping but independentQA retains credit and notweaker verdict.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md:34",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/early/11-IT-R/it-r-prep.json"
+      ]
+    },
+    {
+      "id": "A7",
+      "severity": "BEFORE_RT_DELETE",
+      "finding": "No written T0EP harness-owner confirmation",
+      "resolution": "Do not delete browser-oracle.test.mjs or example-manifest.json until named009T4 harness owner confirms neither is consumed. Other RT scope proceeds; carry blocked deletions by name without closing them.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md:132"
+      ]
+    },
+    {
+      "id": "A8",
+      "severity": "BEFORE_FOLD",
+      "finding": "Protected-surface path intersections are nonzero; broad zero placeholder is misleading",
+      "resolution": "Preserve CFK18 TLS inputs, CFC01 worker/main bean/profile semantics, RTP16..21 routes/results, all protected config keys and transport semantics. F1 intended result projection change uses approved exception; port and prove CFC01C1..6. No protected deletion.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/item4-file-hits.json",
+        "docs/qa/evidence/STUDIO-OBS-010/live-surface-20261018/live-surface-list.json"
+      ]
+    },
+    {
+      "id": "A9",
+      "severity": "DOC_DRIFT",
+      "finding": "009 and010 shorthand completion statements overstate authoritative artifacts",
+      "resolution": "Reconcile FM01/C9/TF3/R9 alreadylanded, distinguish T2 list acceptance from OI25 runbook stillowed, update stale U22 and plan/archive status by dated records after freeze.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/o-fm/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/c9/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/b/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-010/live-surface-20261018/finalize-record.md:49"
+      ]
+    }
+  ],
+  "teardownD5": [
+    {
+      "id": "a",
+      "state": "LOCAL_EVIDENCE_PRESENT",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w1.5/ruling-part1.md:89"
+      ],
+      "meaning": "Ruled 3s grace then hard teardown; failedstarts hard-only; iv backstop unchanged, reply-after-settle and slot-confirmed-dead rules."
+    },
+    {
+      "id": "b",
+      "state": "CURRENT_SOURCE_READ",
+      "evidence": [
+        "studio-runner/src/run/browser.ts:620",
+        "studio-runner/src/run/browser.ts:684",
+        "studio-runner/src/guided/runtime.ts:589"
+      ],
+      "meaning": "Source retains kill selection, hard-only failedstart, bounded startedclose, browserClosed only after confirmed teardown; budget/wire unchanged."
+    },
+    {
+      "id": "c",
+      "state": "HISTORICAL_PROBE_PRESENT",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/pr-rt/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/r2/receipt.md"
+      ],
+      "meaning": "Prechange probe recorded long Playwrightclose; nonreproduction alone was not closure. See pathmatrix."
+    },
+    {
+      "id": "d",
+      "state": "G9B_CARRY_EVIDENCE_PRESENT",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/r2/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/r2/bound-results.json",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-g9b-runner-fixtures01-vitest.json"
+      ],
+      "meaning": "G9b has all five guidedCloseBound F1/F2/F3/F4/H passed; runtime unit matrix coversWITHHOLD/BLANK_MATCH/BOOTSTRAP_CALLBACK; mutationsM1..M5 historical; liveSIGKILLproof survivor impossible, doubles/sourcepin limit disclosed."
+    },
+    {
+      "id": "e",
+      "state": "BACKEND_FAIL_CLOSED_RECORD_PRESENT",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/bl/d5-e-backend-stop-record.md"
+      ],
+      "meaning": "15s unknown stop keepsPENDING, max3 immediate sends/samekey, durable10s redrive15m; only validated200confirms. No new backend timing change; shedvisibility goes011GS-M, GAalert remainsGA."
+    },
+    {
+      "id": "f",
+      "state": "DIST_REBUILD_PRESENT_ROW_RECONCILIATION_OWED",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018b/status.txt",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018b/capture-before.summary",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/start-capture.summary"
+      ],
+      "meaning": "R0 clean/build/verifyRunnerDist all0; D009r698a9365 is frozenT0dist. No need to pretend originalR2 receipt was edited; root links later rebuild and QA credits current binding."
+    }
+  ],
+  "replayAuditD5": {
+    "status": "ARCHITECT_SUPPORTS_CONDITIONALLY;ROOT_ALREADY_PROVISIONAL;QA_EXIT_COSIGN_REQUIRED",
+    "scope": "TEST001 D5 split content scan from full-lanepositivecontrols; distinct from009KL015D5",
+    "conditions": [
+      "scanAuditContent still scans every event/shape/size/canary boundary each existing call",
+      "D1registerallC5canaries; no suppressed content leak assertion",
+      "wholeLaneRan compares complete declared methodsets in both lanes; negativecontrol cannot manufacture fullcoverage",
+      "full-class still requires nonemptycanaries andGUIDED_ACTION_ADMITTED+REPLAY_DISPATCHED; failuremustfail suite",
+      "subset runs prove independence only, neverregressioncredit",
+      "Mgate proves controlsbite; independently inspect full-classcontrol execution and unchanged assertioncontent",
+      "two consecutive full-classruns sameReplayITsha beforebaton; sixrun/timebox cap; nameallcarries"
+    ]
+  },
+  "R083": {
+    "architectRecommendation": "CO_RATIFY_NOW",
+    "rootSignatureRequired": true,
+    "poAlreadyRatified": true,
+    "conditions": [
+      "metadataonly move; samekeyset andbyteidenticaltemplates",
+      "registrytestonly; productionbundlecontains0 docs/qa/evidence paths",
+      "AE01f later removesauthoredLiteralTargetNotFound fromruntimeANDregistry withMSWcase/tests; rootrecordsoneownerbaton",
+      "no U13ack fabricated; no AE01runtime semantics changed"
+    ]
+  },
+  "schedule3": {
+    "unit": "inherited estimated workingdays aftertreeopen;relativecapacity model,notcalendarpromise",
+    "maxConcurrentWorkers": 3,
+    "t0TimeSeparate": true,
+    "rows": [
+      {
+        "worker": 1,
+        "lane": "11-GS-T",
+        "start": 0,
+        "end": 3,
+        "requires": [
+          "treeopen"
+        ]
+      },
+      {
+        "worker": 2,
+        "lane": "11-GS-M(a)",
+        "start": 0,
+        "end": 2,
+        "requires": [
+          "treeopen"
+        ]
+      },
+      {
+        "worker": 3,
+        "lane": "11-FOLD-prep",
+        "start": 0,
+        "end": 4.5,
+        "requires": [
+          "treeopen"
+        ]
+      },
+      {
+        "worker": 2,
+        "lane": "11-LEFT",
+        "start": 2,
+        "end": 4,
+        "requires": [
+          "worker2free",
+          "Dara write amendment"
+        ]
+      },
+      {
+        "worker": 1,
+        "lane": "11-GS-M(b)",
+        "start": 3,
+        "end": 4,
+        "requires": [
+          "GS-Tbaton",
+          "GS-M(a)",
+          "root~40minfreeze"
+        ]
+      },
+      {
+        "worker": 1,
+        "lane": "11-IT-R(apply)",
+        "start": 4,
+        "end": 6,
+        "requires": [
+          "GS-M(b)",
+          "ReplayITunchangedthroughfreeze",
+          "QAprovisionalD5"
+        ]
+      },
+      {
+        "worker": 2,
+        "lane": "11-IT-S",
+        "start": 4,
+        "end": 6,
+        "requires": [
+          "GS-M(b)",
+          "TransportFaultbaton"
+        ]
+      },
+      {
+        "worker": 3,
+        "lane": "11-GS-T2",
+        "start": 4.5,
+        "end": 6,
+        "requires": [
+          "GS-M(b)",
+          "FOLDprepexit"
+        ]
+      },
+      {
+        "worker": 1,
+        "lane": "11-FOLD-final",
+        "start": 6,
+        "end": 8.5,
+        "requires": [
+          "all5incomingbatons",
+          "QAReplayITnotweaker"
+        ]
+      },
+      {
+        "worker": 2,
+        "lane": "11-FE",
+        "start": 6,
+        "end": 8,
+        "requires": [
+          "sandboxseed",
+          "R08-3rootsign",
+          "Umawriteamendment"
+        ]
+      },
+      {
+        "worker": 3,
+        "lane": "11-RT",
+        "start": 6,
+        "end": 7,
+        "requires": [
+          "sandboxseed",
+          "T0EPbefore2deletions"
+        ]
+      },
+      {
+        "worker": 3,
+        "lane": "11-DOC",
+        "start": 7,
+        "end": 8.5,
+        "requires": [
+          "X6section14present",
+          "nochangeofsection14"
+        ]
+      },
+      {
+        "worker": "root+devops",
+        "lane": "11-MERGE",
+        "start": 8.5,
+        "end": 9,
+        "requires": [
+          "FE/DOC/RT/FOLDfinalexit",
+          "exactcopyback",
+          "oneD011buildandlocalimage"
+        ]
+      },
+      {
+        "worker": "root+QA",
+        "lane": "11-G",
+        "start": 9,
+        "end": 10,
+        "requires": [
+          "MERGEexit",
+          "approvedskips",
+          "quietstabletree"
+        ]
+      }
+    ],
+    "fullEstimatedCriticalPathIncludingT0Days": 10.5,
+    "notes": [
+      "Rootcoordinator is fourthslot; workers<=3",
+      "ITRprep is alreadydone/read-only andnotconcurrentlycounted",
+      "Priorities preserveGST->GSMb->ITR->FOLDfinal; FOLDprep startsimmediately toabsorb4.5day estimate",
+      "At actualruntimewindows permit no otherheavywork; sharedGradlelock andatomicstageunits; sandboxtests do not run alongside timing-sensitivebackend",
+      "Threeworker intervals are arithmeticfeasible; Gradlequeue/resourcecostmayextendestimates",
+      "If FOLDprep late, giveits tailpriority overRT/DOC; preserveIT-Szerofloat",
+      "SourcewritefreezeF1 appliesallworkers; sandbox/evidenceprep only",
+      "Inherited v3schedule/waves stillneedroot amendmentbeforeexecuting thisalternative"
+    ]
+  },
+  "obligations": [
+    {
+      "story": "009",
+      "id": "T0 prerequisite record",
+      "classification": "locally_executable",
+      "remainingWork": "Reconcile already-Done 008, corpus/version pins and all prerequisite states; retain unresolved rows below. Do not equate declared USD500 with measured remaining headroom.",
+      "owner": "PO/QA/architect",
+      "missingInput": "None for documentation; provider admission remains separately blocked.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:484",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T1/P2 one-runner local half",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Credit current-digest regression, runtime identities, chart/deployment tier; implementation is already present.",
+      "owner": "QA + 011 B1/11-G",
+      "missingInput": "B1 terminal output; final current-digest evidence before Done.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:239",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/p2/receipt.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T1/PID-1 local image smoke R6",
+      "classification": "locally_executable",
+      "remainingWork": "After tree opens, rerun existing D2 smoke on obs009-residue-local; preserve local versus deployed proof.",
+      "owner": "root/devops",
+      "missingInput": "Quiet-machine runtime window after B1/B7. U22 already authorizes local Docker under no-pull terms.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:105",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/image/summary.json"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T1/PID-1 deployed identity",
+      "classification": "externally_blocked",
+      "remainingWork": "Record actual deployed pid !=1 and init behavior, plus guided-enabled deployment checks.",
+      "owner": "Platform/SRE + devops",
+      "missingInput": "U4 shared K8s access/internal deployed image; U23 issuer/controller identity; no deployed evidence.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:487"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T1/C-OBS008-4",
+      "classification": "locally_executable",
+      "remainingWork": "Reconcile C9 422/pins/three reachable ambiguity mirrors and unreachable fourth with AC a-g; no second implementation is indicated.",
+      "owner": "PO/architect/QA",
+      "missingInput": "None for read-only reconciliation; independent current-digest validation before Done.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/c9/receipt.md",
+        "docs/specs/studio/openapi.yaml:1417",
+        "frontend/src/services/mocks/studio/guidedHandlers.ts:629"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T2 local transport/dumps/profiles",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Reconcile locally landed TLS/profile controls at B1/final digest; do not mark external Vault/SIEM halves passed.",
+      "owner": "QA + 011 B1/11-G",
+      "missingInput": "B1 terminal output and final digest checks.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:241",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:489"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T2 Vault policy test U5/U21",
+      "classification": "externally_blocked",
+      "remainingWork": "Run policy test against actual dev Vault with required read/create/metadata-list permissions. Local Vault rehearsal cannot close AC.",
+      "owner": "PUT Core/BFF ED-02 + devops",
+      "missingInput": "Dev Vault endpoint/identity/policy and authorization source; external contact is not authorized. U19 pull is separate and forbidden now.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:489"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T2 TF-5 a/c/e U14",
+      "classification": "externally_blocked",
+      "remainingWork": "Confirm migration owner/runtime role per shared environment, apply full V19-through-head grants if non-owner, prove actual audit write as runtime role.",
+      "owner": "Platform DBA/devops",
+      "missingInput": "Named migration/runtime roles, shared environment access and live role-based write evidence.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:490"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T2 SIEM/Q3 retention",
+      "classification": "externally_blocked",
+      "remainingWork": "Prove actual SIEM routing and retention inputs.",
+      "owner": "Platform/SRE",
+      "missingInput": "U6 sink/access and Q3 retention decision.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:489"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T3 schedules subitems 1-4",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Reconcile 18 reinstated cases, acceptance-first race, four interim ports, counts and G-3 controls with current B1/final results.",
+      "owner": "QA + 011 gates",
+      "missingInput": "Current-digest full regression; S mutation-disclosure ruling below.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:491",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:243"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T3 R9-OBS-1",
+      "classification": "locally_executable",
+      "remainingWork": "Carry S receipt explicit statement: acceptedAt/pending_deadline_at and 600s stamping unchanged. Verify current source, record it in story evidence. Do not invent a new clock change.",
+      "owner": "architect/PO",
+      "missingInput": "None for read-only record.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/s/receipt.md:41",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:496"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T3 S-M4/S3 disclosure",
+      "classification": "locally_executable",
+      "remainingWork": "Rule on mutation survival and constraint-triggered S3 red without overstating what the test proves; add named disclosure or demand scoped test.",
+      "owner": "architect/PO + QA",
+      "missingInput": "No external input; independent QA retains coverage decision.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:243",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:218"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 U2/U7/U17/U18 real-provider admission",
+      "classification": "externally_blocked",
+      "remainingWork": "Name gateway owner, supply credentials and exact price/thoughts billing, measured shared-pool headroom R and signed admission before any real call. MODEL-SIZING is already ruled/landed.",
+      "owner": "user + named ED-01 owner",
+      "missingInput": "Owner still TBD; gateway inputs and retention answer; price list; thinking-token billing; actual remaining headroom source; admission signature. USD500 declared ceiling alone supplies none of these.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:497",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/model-sizing/ruling-draft.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 U3 staging login workflow",
+      "classification": "externally_blocked",
+      "remainingWork": "Add approved real staging login case with application-side oracle, approved origins and provisioned test account/secret.",
+      "owner": "user/application owner/Platform-SRE/ED-02",
+      "missingInput": "Staging app/origins/account/test secret and application oracle are not identified.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:497"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 DEPLOY-OBSERVED-01 U4/U23/U24",
+      "classification": "externally_blocked",
+      "remainingWork": "Run catalog producer inside pushed image in CI; render trusted per-environment policy; deploy smoke without runner 503/catalog409. Chart/catalog code already landed.",
+      "owner": "user + Platform/SRE + devops",
+      "missingInput": "U24 policy-content owner/content/approval; UAT controller pin/TLS Secrets; U23 rotating <=300s RS256 issuer; shared K8s access, pushed image/CI execution. Push/deploy unapproved.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:1043",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/chart-observed/receipt.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 AUTHORED-ECHO-01 a-f",
+      "classification": "externally_blocked",
+      "remainingWork": "After U13 acknowledgement: implement source rule/fixtures/joined regression/canaries; remove shipped hint runtime key and test registry together; measure authoredEchoUnobservableTargets in benchmark.",
+      "owner": "Security & Compliance; dev owner of O-AE/C9-AE/FE9",
+      "missingInput": "U13 rule acknowledgement before runner merge. No acknowledgement or transmitted request exists. Later benchmark also needs T4 admission/deployed inputs.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:499",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/ae01-ack-request-draft.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 FOCUS-MUTATION-01 b-d",
+      "classification": "locally_executable",
+      "remainingWork": "Reconcile existing runner effect-safety fix, 68 unit/31 Chromium/2 joined cases and rebuilt dist. Current source contradicts shorthand claiming no FM runner change. FM has no U13 requirement under FM-7.",
+      "owner": "architect/PO/QA",
+      "missingInput": "None for evidence reconciliation; current-digest validation may use B1 and approved G9b carry.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/o-fm/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:244",
+        "studio-runner/src/run/observationCollector.ts"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 FOCUS-MUTATION-01 e-f",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Fill focusMutationRefusedFills denominator from actual benchmark, hand landed dist to 010 per-app probe.",
+      "owner": "T4 benchmark + 010 analyst",
+      "missingInput": "T4 admission/deployed inputs then approved pilot applications.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:500",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/o-fm/receipt.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 RS-1 a-d",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Mark corpus and produce rs1NonScalarReadGaps, keep F03 route/disclosure, include actual denominators.",
+      "owner": "T4 benchmark owner",
+      "missingInput": "Real benchmark not run; provider/deployed inputs above.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:498",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:75"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 core AC-7/8 benchmark",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Execute >=20 cases x3, >=90%, zero false pass/leak, schema probe, 100-replay stability, actual costs/latency/p95 learn limit and pinned identities. No simulated-provider substitution.",
+      "owner": "dev/QA T4",
+      "missingInput": "All T4 external inputs plus AE-01 landing. O-FM local fix must be reconciled, not re-created.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:497",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:535"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 AC-9 oracles/mutations local",
+      "classification": "locally_executable",
+      "remainingWork": "Reconcile landed policy/isolation/oracle cases and prepare fresh scratch C10 plan without running during frozen B1.",
+      "owner": "QA",
+      "missingInput": "None for preparation; actual runtime work after B1.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:501",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:187"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 AC-9 live-model refusals",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Run genuine model guard-refusal cases in deployed stack.",
+      "owner": "T4 + QA",
+      "missingInput": "T4 external admission and deployed stack.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:501"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 AC-10 wire canaries/C-17",
+      "classification": "externally_blocked",
+      "remainingWork": "Inspect real gateway bytes and live login recording with human video reviewer; preserve exact denominators.",
+      "owner": "user/named reviewer/ED-01",
+      "missingInput": "U8 named human C-17 reviewer; U2 gateway/live bytes; U3 approved staging and deployed stack.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:501"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 ADJ-1 + B2/B3 + N-RS1",
+      "classification": "locally_executable",
+      "remainingWork": "Complete architect/PO wording ruling and independent security co-sign; B2 and B3 mutants already went red. Credit joined audit UNKNOWN_OUTCOME with AUTHORIZATION_REVOKED label, never NOT_USED; disclose weak either-value assertion or scope stronger proof. N-RS1 needs exact case or disclosure.",
+      "owner": "architect/PO/QA",
+      "missingInput": "No external input for ruling. Current-digest C10 remains owed; no invented stronger assertion credit.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:244",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:218",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/b/w3/receipt.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 R8.2 d alert preparation",
+      "classification": "locally_executable",
+      "remainingWork": "Prepare/check platform-neutral alert definitions for terminalAbandoned/report.terminal_rejected and retain named Platform ownership; no external message.",
+      "owner": "devops/architect",
+      "missingInput": "None for local specification/evidence audit.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:503",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d2/receipt.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 R8.2 e live reaper bound",
+      "classification": "externally_blocked",
+      "remainingWork": "Prove rejected terminal settles within start_deadline + one recovery poll on real shared stack.",
+      "owner": "Platform/SRE/devops",
+      "missingInput": "U4 deployed pods/access and live controlled revocation/worker credentials.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:244"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 R10c/R10-OBS-2/R10-OBS-1",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Reconcile ruled kill/cancel/logging implementation and mutations with B1/final results; keep control-body-loss carried limitation distinct.",
+      "owner": "QA + 011 gates",
+      "missingInput": "Terminal current-digest regression; no new behavior change indicated by reviewed receipts.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:504",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/i/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w3/pre-g9-rulings.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 R10-rev2-2",
+      "classification": "locally_executable",
+      "remainingWork": "Extract pre-Ready INTERNAL_ERROR/violation-catch/schema-invalid occurrence counts from archived full-class outputs and denominator. Keep armed diagnostic; recurrence requires wrapper-vs-child classification, not silent pass.",
+      "owner": "dev/architect/QA",
+      "missingInput": "None for historical extraction; next full-class result when B1 terminates.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:507",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:249"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 P3",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Reconcile guided startup deadline, grouped browser/reaping, worker-stop teardown, comment repair and survivor proof; test doubles/source pins must retain their stated limits.",
+      "owner": "QA + 011 gates",
+      "missingInput": "Current-digest evidence; no proof of SIGKILL-proof live wedge is claimed.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:508",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/r2/receipt.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 R1 a-e",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Reconcile non-consuming confirmation, v(n)/v(n-1) binding, named mutation and joined playback/seek results; retain known-limit row until independent QA credit.",
+      "owner": "QA + 011 gates/010 rows",
+      "missingInput": "Current-digest full check/C10 and independent acceptance.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:509",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/b/w3/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:244"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 P4/P5",
+      "classification": "locally_executable",
+      "remainingWork": "Keep listener preflight and fresh dist identity for every new run; record G9b missing listener/orphan listing as historical gap, never reconstruct as if observed then.",
+      "owner": "root/dev/QA",
+      "missingInput": "None for future discipline; missing historical observation cannot be manufactured.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:510",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:247"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 TF-3",
+      "classification": "locally_executable",
+      "remainingWork": "Reconcile already-landed authorize-visible-read-before-lock implementation, uniform403 tests and mutation from B receipt. It is local before pilot, not a new external blocker.",
+      "owner": "PO/architect/QA",
+      "missingInput": "None for reconciliation.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:511",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/b/receipt.md",
+        "backend/src/main/java/com/citi/put/checks/studio/StudioService.java:304"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 KL-015-D5 a-f",
+      "classification": "locally_executable",
+      "remainingWork": "Use row-by-row mapping below to fill root start-condition tick; retain exact historical/proven limits and ask independent QA to accept carry/current-digest proof. No new teardown design needed.",
+      "owner": "root/architect/QA",
+      "missingInput": "None external; B1/final output for regression; row mapping below.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:512",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/r2/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/bl/d5-e-backend-stop-record.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 LIFECYCLE-REASON-01 a-c",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Reconcile EXPIRED mapping, DISPATCHING precedence and LR mutant at current digest.",
+      "owner": "11-GS-T + QA",
+      "missingInput": "B1/final results; lane must preserve behavior while refactoring.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:513",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/bl/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:244"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 EDGE-15S-3 optional",
+      "classification": "locally_executable",
+      "remainingWork": "Record not requested at T0; D5 iv did not change backend handling. Do not call optional omission PASS. Revisit only if a later ruling changes that path.",
+      "owner": "QA",
+      "missingInput": "None.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:514",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/bl/receipt.md:6"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 REL-001 pointer / D4 15s classification",
+      "classification": "locally_executable",
+      "remainingWork": "Compute named occurrence/no-recurrence counts from archived guided logs; classify innermost cause and >=15000ms bootstrap edge without treating classified failing run as passed.",
+      "owner": "dev/QA/architect",
+      "missingInput": "None for historical extraction; B1 output after completion.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:515",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:516",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:249"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 AC-12 deployed browser E2E",
+      "classification": "externally_blocked",
+      "remainingWork": "Execute real browser journey on actual deployed stack with real-model learn and named login/video proofs.",
+      "owner": "dev/QA/Platform-SRE",
+      "missingInput": "U2/U3/U4/U13/U23/U24 and T4 admission; external access absent.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:501"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "009 full fresh check/JaCoCo waiver debt",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Wait existing live B1; inspect source/dist/input stability, three executed partitions, check gates and executed fresh coverage tasks; do not restart merely due elapsed time.",
+      "owner": "root + independent QA",
+      "missingInput": "Terminal existing handle obs011-t0-baseline-check01, wrapper88167/daemon88182 at review.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:277",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md:55"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "009 current-digest C10",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Run fresh scratch C10 at digest actually under Done review, including all tiers. 011 edits may require final re-anchor rather than rerunning at an already obsolete digest.",
+      "owner": "QA",
+      "missingInput": "Tree-open runtime slot; final source digest selection. Existing G9 reds are historical carry only.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:225",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:314"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "009 G9-F1 transient watch",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Read armed awaitJoinedVideo diagnostic only if recurrence; carry unresolved rare transient honestly if no recurrence.",
+      "owner": "11-IT-R/dev + QA",
+      "missingInput": "A future recurrence is needed to distinguish the suspected branch; no new artificial root cause.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:296"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "009 G9-F2 mutation proof",
+      "classification": "locally_executable",
+      "remainingWork": "On scratch copy only, introduce stage create/write gap; prove old consumer red and fixed consumer green. No source mutation during B1.",
+      "owner": "QA/dev",
+      "missingInput": "Quiet runtime slot after baseline; scratch source and unchanged target sha.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:277"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "009 PLANFIX-ARCHIVE",
+      "classification": "locally_executable",
+      "remainingWork": "Verify already-archived planfix mutation and spotless/checkstyle logs under post-g9/planfix-archive; link them. Do not rerun simply because QA record still lists historical R9.",
+      "owner": "dev/QA",
+      "missingInput": "None; handoff states archive done, verify file contents before closure.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/post-g9/planfix-archive/",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:296"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "009 RUN-ORPHAN-01 carry",
+      "classification": "externally_blocked",
+      "remainingWork": "In-pod SIGKILL/cgroup check with PID-1; survivors become GA blocker. This accepted carried residue is not a newly invented 009 Done condition.",
+      "owner": "devops/Platform-SRE",
+      "missingInput": "Actual shared guided-enabled pod and approved controlled run; no pod access. Local runner fix is a separate explicit scope decision.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w3/pre-g9-rulings.md:44",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:1058"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "009 SEC-AUDIT-PREREADY-01 carry",
+      "classification": "locally_executable",
+      "remainingWork": "Preserve approved UNKNOWN_OUTCOME disclosure and QA ADJ-1 security state; optional runner correction requires its own owner/gates. This is accepted carry, not new Done gate.",
+      "owner": "dev/QA/PO",
+      "missingInput": "None for disclosure; code correction would require root-authorized nonconflicting runner window.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w3/pre-g9-rulings.md:97",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:1058"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T6 evidence and Done review",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Make evidence current, reconcile every named task/external half, independent QA reproduce critical paths and issue verdict. Only QA transitions Done.",
+      "owner": "QA",
+      "missingInput": "All actual required local+external Done obligations above; carried residues retain prior disposition.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:517",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:314"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T0 OBS009 Done/D-C",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Wait 009 Done and actual >=90%/zero-false-pass/zero-leak D-C pass. Local validation MET only opens T2/011.",
+      "owner": "009 QA + analyst",
+      "missingInput": "009 independent Done and benchmark gate, both absent.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:8",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:120"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T0 participants/access/script",
+      "classification": "externally_blocked",
+      "remainingWork": "Prepare consented >=5 nontechnical users on login+ambiguity+middle-step incremental relearn; freeze script against shipped008 copy. Draft can be prepared now, contact cannot.",
+      "owner": "user/analyst",
+      "missingInput": "U9 >=5 real participants and explicit contact permission; U3 approved app/access/test secrets/origins.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:24",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:120",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T0 FOCUS-MUTATION-01 per-app probe",
+      "classification": "externally_blocked",
+      "remainingWork": "Probe every authored fill target on actual app using pinned runner dist/isolated collector and non-secret placeholder, record mutation types/dist; repeat after app or dist changes; failures block that application.",
+      "owner": "analyst/dev/QA",
+      "missingInput": "Named approved pilot apps/targets/test accounts and intended deployment dist; depends also on009 Done and landed FM evidence.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:26",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:121"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T1 AC2 real pilot",
+      "classification": "externally_blocked",
+      "remainingWork": "Run real consented users through author/login/ambiguity/relearn without developer syntax; record completed/help/abandoned, first-Run time, clarification/edit-copy understanding and unaided login recovery denominators.",
+      "owner": "analyst",
+      "missingInput": "External real participants/access/consent/contact authorization plus T0/D-C gates.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:56",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:122"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T1 AC3 remediation",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Route actual usability failures into scoped stories and rerun affected tasks, preserving failed evidence and promised experience.",
+      "owner": "analyst/PM/dev/QA",
+      "missingInput": "Actual pilot observations; no simulated substitute.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:58",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:122"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T2 OI-25 full runbook",
+      "classification": "locally_executable",
+      "remainingWork": "Prepare all RBR01..19 single-path rows, link dated Live surface list. Actual runbook remains owed despite shorthand T2 complete. Write only after tree opens because runbook is quoted baseline input.",
+      "owner": "analyst/docs owner",
+      "missingInput": "None for draft under t0; final edit after baseline freeze. Include secret provisioning/whole-origin trust, rotation, revocation, retention4096, password limits, dumps, Vault/KVv2, TLS/cert rotation, DB recreation, policy interim, relearn and G1/2/3.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:100",
+        "docs/qa/evidence/STUDIO-OBS-010/live-surface-20261018/finalize-record.md:49"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T2 clock row",
+      "classification": "locally_executable",
+      "remainingWork": "Write runner/API/DB NTP row and symptom AUTHORIZATION_EXPIRED; state bound owed ownerPlatform/SRE until supplied; no invented tolerance.",
+      "owner": "analyst",
+      "missingInput": "No input needed to write honest owed row; actual NTP skew bound remains U11 external.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:111",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:125"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T2 first-learn row",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Prepare exact e1 disclosure now as pendingT4; fill p95 only from actual T4 in same pass as AC4e1; triggerT6 (<15steps) needs re-ruling/PM decision.",
+      "owner": "analyst + T4/PM",
+      "missingInput": "Measured T4 p95 and recalibration outcomes, not available.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:115",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:126"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T2 post009 re-date",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "After009 Done remeasure list, correct g9Record/storyStatusChange, CON25/33 deltas, CHN12 and CHT07/08 anchors, dark vocabulary AX5..8; obtain separate PM acceptance before T3/T4.",
+      "owner": "analyst/architect/PO/PM",
+      "missingInput": "009 Done/final measured tree.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-010/live-surface-20261018/finalize-record.md:30",
+        "docs/qa/evidence/STUDIO-OBS-010/live-surface-20261018/finalize-record.md:102"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 release-readiness artifact/10.34",
+      "classification": "locally_executable",
+      "remainingWork": "Draft fixed rows gate/owner/state/evidence/date and re-cut each 10.34 group as applicable/external/legacy-only with reason; preserve pending states. Full finalization waits009Done.",
+      "owner": "analyst/QA",
+      "missingInput": "None to prepare draft; no release-ready claim authorized.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:60",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:128"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 implementation/deployed/secret/usability/ops evidence",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Link gates007/012A/012B/013/014/015/008,009 deployment/D-C/secret login, this pilot,006 compatibility/drain/rollback and evidence retention.",
+      "owner": "analyst/QA",
+      "missingInput": "Remaining009 gates, actual pilot and current runbook evidence.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:60"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 G1/G2/G3/C2/C3",
+      "classification": "externally_blocked",
+      "remainingWork": "Record guided shared mTLS chain and every secret-bearingTLS hop, production background/secret-use auth sources and Vault provider enablement.",
+      "owner": "Platform-SRE/ED-02/devops",
+      "missingInput": "U4/U5 shared stack and production authorization/Vault inputs, actual hop proofs; cannot activate schedules.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:60",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 OBS014 compliance/retention/R1/R2",
+      "classification": "externally_blocked",
+      "remainingWork": "Record export/retention/gateway retention approvals, indefinite unpruned stores/followup and interim governed-vs-TrustedPolicy decision. Prepare rows locally.",
+      "owner": "Security & Compliance/ED-01/PM/architect",
+      "missingInput": "U10 external approval incl AUDIT-LABEL-PRIVACY/CACHE-REAUTH dispositions; named gateway owner/retention answer; classify policy followup.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:64",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 F04/E1-E8",
+      "classification": "externally_blocked",
+      "remainingWork": "Require artifact HMAC landed before deployed pilot OR external security acceptance of absence as named residual+owner; list all E1-E8 states.",
+      "owner": "Platform-SRE/Security & Compliance/PM",
+      "missingInput": "E1-E8 unconfirmed and no residual acceptance; no silent omission.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:68",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 D-B/devDB/NTP",
+      "classification": "externally_blocked",
+      "remainingWork": "Record no-internal-remote-deployment confirmation; actual devDB recreation evidence; supplied host clock skew bound. Honest owed row is locally writable.",
+      "owner": "user/Platform-SRE",
+      "missingInput": "U11 D-B confirmation, recreation record and NTP skew bound.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:60",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:111",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 KL015R1 and KL015D5",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Use009 R1 a-d and D5 a-e QA credit to close known-limit rows; otherwise retain exact named limits and D4 launch-only timing qualification.",
+      "owner": "analyst +009 QA",
+      "missingInput": "Independent current evidence credit; architecture mapping below is not a QA verdict.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:73",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:79",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:96"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 AE01/RS1/FM01/TF5 rows",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Carry authoredEchoUnobservableTargets/U13, rs1NonScalarReadGaps/F03, per-appFM checks and U14 role/live audit row.",
+      "owner": "analyst +009 T4/Platform owners",
+      "missingInput": "Actual benchmark and application checks; U13 acknowledgement; U14 role evidence. Prepare honest pending rows now.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:74",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:75",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:76",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:78"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 ED05 remainder",
+      "classification": "externally_blocked",
+      "remainingWork": "Prove deployed internal image, non-root user, seccomp and CA bundle separately. Local Node pin closure does not prove them.",
+      "owner": "Platform-SRE",
+      "missingInput": "Actual deployed image and four evidence paths.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:80"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 model-sizing/SEC-AUDIT/RUN-ORPHAN",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Fill e1actualT4 p95/capacity-as-arithmetic; retain e2exact audit disclosure/security state; e3 conditional orphan row or linked runner-hardening story, surviving pod process is GA blocker.",
+      "owner": "analyst/PM/architect/devops",
+      "missingInput": "T4measurements and in-pod result or named current open status; no estimation.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:84",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:90",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:92",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:94"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 U24/policy owner + GA tracked items",
+      "classification": "externally_blocked",
+      "remainingWork": "Name per-environment policy content owner and approvals; preserve path-independent GA CSRF/schedule activation/evidence store/operability/repoCI as tracked states, not closed by010.",
+      "owner": "user/Platform-SRE/PM",
+      "missingInput": "U24 named owner/content/approval; current GA owner evidence.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:129",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T4 handoff/quality gates/Done",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Produce exact-path devops handoff with risks/external states; PM product gate, independent QA traceability, devops release-checklist, configured CodeRabbit or honest fallback; only QA Done, no push/deploy/schedule activation.",
+      "owner": "analyst/PM/QA/devops",
+      "missingInput": "009Done + postDone list/PMacceptance + actual pilot/remediation + required release inputs; PR/push additionally need explicit user authorization.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:118",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:130",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:154"
+      ]
+    },
+    {
+      "story": "008",
+      "id": "SDC historical-state import/admin reconciliation",
+      "classification": "locally_executable",
+      "remainingWork": "After B7, reconcile old local SDC progress with authoritative story QA metadata and recorded review/close proof. Preserve existing Done lifecycle; import historical evidence honestly rather than resetting lifecycle or inventing past verification.",
+      "owner": "root/devops/QA",
+      "missingInput": "Root reports current read-only CLI review008 and close015 PASS, but local SDC files still point at develop from Oct10;008 .ai close artifact absent. Need exact safe import/admin procedure and recorded current evidence.",
+      "evidence": [
+        "parent coordinator read-only CLI observation relayed2026-10-18",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md"
+      ]
+    },
+    {
+      "story": "015",
+      "id": "SDC historical-state import/admin reconciliation",
+      "classification": "locally_executable",
+      "remainingWork": "After B7, reconcile old local SDC progress with authoritative story QA metadata and recorded review/close proof. Preserve existing Done lifecycle; import historical evidence honestly rather than resetting lifecycle or inventing past verification.",
+      "owner": "root/devops/QA",
+      "missingInput": "Root reports current read-only CLI review008 and close015 PASS, but local SDC files still point at develop from Oct10;008 .ai close artifact absent. Need exact safe import/admin procedure and recorded current evidence.",
+      "evidence": [
+        "parent coordinator read-only CLI observation relayed2026-10-18",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md"
+      ]
+    }
+  ],
+  "freezeSafeWork": [
+    "Complete T0DEV JSON/copylists/intersection/foldconfirmation and approvedskips analysis under t0 only",
+    "Prepare foldtransport beforetable (endpoints,credentials,connecttimeout,HTTPversion), constructors/profilewiringmap under t0",
+    "Draft009 B2/B3/NRS1 decisions and D5 mapping/currentledger; extracthistorical denominators withouttouchingquotedfiles",
+    "Draft010 fullrunbook RBR01..19 plus10.34 re-registration/releasependingrows andpilotprotocol under t0; no contacts/recruitment",
+    "Prepare exactexternalinput requests as unsentdrafts; retainall U2..U24states, no ownerinvented",
+    "Root may co-ratifyR083 and updateplan/evidence outsidecaptures aftersamefreezerules check; thisreviewdoesnotchange them"
+  ],
+  "notPerformed": [
+    "NoQAverdict/noDone transition",
+    "No source/tests/specs/helm/dist/story/plan edits",
+    "NoGradle/vitest/helm/Docker/providercalls",
+    "NoGitwrites/processsignals/delegation",
+    "Noexternalmessages"
+  ],
+  "counts": {
+    "locally_executable": 23,
+    "dependent_on_another_lane": 24,
+    "externally_blocked": 21
+  },
+  "t0DevUpdate": {
+    "state": "COMPLETE_AFTER_INITIAL_REVIEW",
+    "evidence": [
+      "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/check.md",
+      "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/check.json"
+    ],
+    "summary": "Root reports52orderedoverlaps/0concurrentconflicts, exact sandboxlists,17main/21test expandedaliases. Read check.md before v4 creation; current v3 remains preserved."
+  },
+  "planNextVersionRecommendation": "Root creates lanes.v4.json/w-brief.v4.md, preservingv3; incorporates N1/P3paths, LEFTretiredfilter/broadgrep/ports, schedule3, exact17/21aliases and per-symbolLivepreservation notes; signature/check references must bindv4hashes."
+}

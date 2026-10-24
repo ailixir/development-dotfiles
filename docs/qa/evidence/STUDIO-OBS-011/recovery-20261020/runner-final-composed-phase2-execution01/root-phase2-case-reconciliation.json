@@ -1,0 +1,42 @@
+{
+  "kind": "ROOT_INDEPENDENT_PRIVATE_FULL_CASE_MULTISETS",
+  "atUtc": "2026-10-20T22:28:49.100544+00:00",
+  "tiers": [
+    {
+      "tier": "unit",
+      "expectedSha256": "97a5c5ff4bc6ba797e9460ba7a2204a2f7a8355f61ad9bc9551d160a84aaaaae",
+      "actualReportSha256": "c3c3465272a9c6fd494b2f12432ba27757628f6a5eabe22df1a7c2cfe79b123e",
+      "identityMultisetExact": true,
+      "perFileOrderExact": true,
+      "statusMultisetExact": true,
+      "actualStatusCounts": {
+        "passed": 2645,
+        "skipped": 25
+      },
+      "actualFileCount": 117,
+      "statusDeltaCount": 0,
+      "failureCasePublicNames": []
+    },
+    {
+      "tier": "fixtures",
+      "expectedSha256": "5bd394428fd1103430184eeeb592484d60951935b72dca01813f603204983e6b",
+      "actualReportSha256": "4b4e9a50bd8125620411b9b581f2269cf1f703cdfabf045dbccad492aa2e3e6b",
+      "identityMultisetExact": true,
+      "perFileOrderExact": true,
+      "statusMultisetExact": false,
+      "actualStatusCounts": {
+        "passed": 297,
+        "skipped": 9,
+        "failed": 1
+      },
+      "actualFileCount": 27,
+      "statusDeltaCount": 1,
+      "failureCasePublicNames": [
+        "uses actual mTLS and native focus for guided secret ownership: lost-body-late-grant"
+      ]
+    }
+  ],
+  "fixtureGate": "FAIL",
+  "rawFailurePreserved": true,
+  "noNewRuntime": true
+}

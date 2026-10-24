@@ -1,0 +1,16 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java
+@@ -3032,6 +3032,13 @@
+       ObjectNode extra = good.deepCopy();
+       ((ObjectNode) extra.path("publicReceipt")).put("unexpected", true);
+       reject(f.c, publicationSql(f, extra, artifact), "publication receipt shape invalid");
++      // RED MUTANT ONLY: preserve all other receipt checks; DDL rolls back with Fixture.
++      exec(
++          f.c,
++          "DO $mut$ BEGIN EXECUTE replace("
++              + "pg_get_functiondef('studio_publication_receipt_guard()'::regprocedure),"
++              + "'AND NEW.document->''publicReceipt''->''artifactHash''=NEW.document->''artifactHash''',"
++              + "'AND true'); END $mut$");
+       ObjectNode wrongHash = good.deepCopy();
+       wrongHash.put("artifactHash", "0".repeat(64));
+       reject(f.c, publicationSql(f, wrongHash, artifact), "publication receipt shape invalid");

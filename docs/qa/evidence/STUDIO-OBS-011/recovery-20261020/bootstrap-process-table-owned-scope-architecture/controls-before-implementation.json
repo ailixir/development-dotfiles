@@ -1,0 +1,38 @@
+{
+  "kind": "PURE_SEMANTIC_CONTROLS_DEFINED_BEFORE_SUCCESSOR_IMPLEMENTATION",
+  "executed": false,
+  "sourceApi": ["captureBootstrapTree", "confirmBootstrapTreeSuspended", "probeBootstrapPid", "bootstrapTreeGone"],
+  "preserveExistingIdentitiesAndAssertions": 37,
+  "candidateDiscoveryIsAuthoritative": true,
+  "proposedAppendOnlyControls": [
+    {
+      "title": "captures the complete owned inventory despite explicitly unknown unrelated process metadata",
+      "definingOldV2Red": true,
+      "sameInputBothSides": true,
+      "input": "Unchanged observer/root/Chrome/ffmpeg/transient graph and commands plus one valid unique unrelated PID with PPID1. In the same bounded test, supply unrelated unknown state, empty command, and C0-bearing command suffix as three explicit metadata variants.",
+      "postcondition": "Exact successful expected owned tree with every original descendant and genuine binary label; no error. The unrelated numeric row remains in the supplied graph, never skipped.",
+      "oldExpectedFailure": "Existing global metadata validation prevents the successful coherent-owned-capture postcondition.",
+      "newExpected": "Successful postcondition under required-population metadata validation.",
+      "redMustNotBe": ["MISSING_EXPORT", "SETUP_FAILURE", "FILTER_OMISSION", "ALTERNATE_INPUT", "REAL_PROCESS_EDGE"]
+    },
+    {
+      "title": "rejects unknown metadata on observer root and every owned descendant",
+      "input": "Place the same explicit UNKNOWN metadata payload in turn on observer self, actual child root and a reachable transient descendant; numeric graph remains valid and complete.",
+      "postcondition": "Each required-population corruption fails closed. No metadata placeholder or row filtering returns a tree. Existing graph/read/root/liveness tests remain unchanged."
+    },
+    {
+      "title": "confirms the exact original stopped inventory despite unrelated unknown metadata",
+      "input": "Capture the valid original tree, then present the same full graph with all original descendants known stopped/live, strict fake signal0 ALIVE, and one unrelated valid-identity UNKNOWN-metadata row.",
+      "postcondition": "One fresh confirmation returns exactly the original observed set, preserving order; no PID substitution, omitted probe, per-PID command query or extra ps read."
+    },
+    {
+      "title": "requires strict metadata for original members after reparenting during confirmation",
+      "input": "Capture valid original tree; reparent the original transient PID to PID1 in the next coherent snapshot. With its original known binary and stopped/live state, strict signal0 ALIVE confirms the full original set. Change only that original member metadata to UNKNOWN, then separately add a new currently reachable descendant with UNKNOWN metadata.",
+      "postcondition": "Valid reparenting retains and confirms the original member. Unknown metadata of either the reparented original member or a currently reachable descendant fails closed; original inventory remains frozen and unchanged."
+    }
+  ],
+  "existingControlsMustRemainGreen": ["strict all-row PID/PPID framing/range/duplicates", "read denial/nonzero/timeout/non-string/empty/truncation", "missing self/root and child direct parent", "unknown owned states and missing actual roles", "legacy transient per-PID ESRCH counterexample on scoped old adapter", "every SIGSTOP error including ESRCH", "running/missing/denied/unknown suspension observations", "changed original binary", "both unsuspended modes empty confirmed set", "all-gone complete original membership including reparented/departed", "only ESRCH is GONE; EPERM present denied and others unknown"],
+  "nativeSixFreshOnceStillRequired": true,
+  "historicalNativeCause": "UNKNOWN",
+  "newNativeAdmission": "NOT_GRANTED"
+}

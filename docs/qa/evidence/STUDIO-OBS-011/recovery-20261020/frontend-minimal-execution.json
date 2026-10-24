@@ -1,0 +1,106 @@
+{
+  "atUtc": "2026-10-20T06:43:00.345482+00:00",
+  "scope": "Three exact reviewed FE targets only; all18 previous cases/49 assertions preserved,2 cases/6 assertions added.",
+  "files": [
+    {
+      "path": "frontend/src/services/mocks/studio/studioHandlers.test.ts",
+      "baseSha256": "f5db5c7b27199f1217e00b70cf9900407bf70c2788d6a2eca613844c983f8d5c",
+      "candidateSha256": "c152b97463de92b0d1239a35255b60946a7bcce1f8887e0137cabb30d231ad5d",
+      "originalDraftPatchSha256": "0e3d914138d2ea69861828e7564245c7742f1de027af8d55c7a84b2f7a86c0ba",
+      "draftPatchReusedByteExactly": true,
+      "matchesPostRecovery": true
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/handlers.ts",
+      "baseSha256": "61df7a979249b91424e6841715b4d9832c91a8833ebe87b7aad6d70eea6415ed",
+      "candidateSha256": "bac98cf15ad693010c80aeed31e9d169c7ed366e1444db07b280ecabce941192",
+      "originalDraftPatchSha256": "17ecd5d6faa99692c581138c90a6aefde94a284d462b1fb8c9819639fe86e9f3",
+      "draftPatchReusedByteExactly": true,
+      "matchesPostRecovery": true
+    },
+    {
+      "path": "frontend/src/pages/ReportsPage/ReportsPage.tsx",
+      "baseSha256": "cc4a8e6b084fac0fe09ce69e4167cce2321d37b0ed972ebb5c787f1128184668",
+      "candidateSha256": "ad2ecfec20e858c35c15f01a8012d004de772bef2aff18dabdcb31eece42a6da",
+      "originalDraftPatchSha256": "3e109c27e9abb0c53eaa7e438ddeaf74eded57b75bb1acf46bd5b8a7ca8b442c",
+      "draftPatchReusedByteExactly": true,
+      "matchesPostRecovery": true
+    }
+  ],
+  "red": "Only newly added name-only undeclared-secretRef report assertion failed; new actual-secretId positive and18 previous cases PASS.",
+  "runs": [
+    {
+      "label": "obs011-recovery-20261020-mirror-red01",
+      "exit": 1,
+      "node": "v24.20.0",
+      "pnpm": "10.33.0",
+      "elapsedSeconds": 6.39,
+      "vitest": {
+        "success": false,
+        "numPassedTests": 19,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "numTotalTests": 20,
+        "numPassedTestSuites": 6,
+        "numFailedTestSuites": 0,
+        "numTotalTestSuites": 6
+      },
+      "sourceDigest": "05151b2e02c4e15d846ab0e86318446dbde82fc2e326701a5a96100ca652dbf0",
+      "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "receiptPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-mirror-red01-results.json",
+      "receiptSha256": "74ff64b2998332bbe4498f2c18bd9dedb41a836fbee970def37fe09dfbf676ee"
+    },
+    {
+      "label": "obs011-recovery-20261020-mirror-green01",
+      "exit": 0,
+      "node": "v24.20.0",
+      "pnpm": "10.33.0",
+      "elapsedSeconds": 5.81,
+      "vitest": {
+        "success": true,
+        "numPassedTests": 20,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTotalTests": 20,
+        "numPassedTestSuites": 6,
+        "numFailedTestSuites": 0,
+        "numTotalTestSuites": 6
+      },
+      "sourceDigest": "507228c984235dee043ec3310d84a04710517c9efe143a4ac70ed2c27d3cef1d",
+      "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "receiptPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-mirror-green01-results.json",
+      "receiptSha256": "5b34ac4262f00a3c599ea9c77f779601cf360b38d070d741a2d45e61945f6d00"
+    },
+    {
+      "label": "obs011-recovery-20261020-unused01",
+      "exit": 0,
+      "node": "v24.20.0",
+      "pnpm": "10.33.0",
+      "elapsedSeconds": 9.75,
+      "vitest": null,
+      "sourceDigest": "507228c984235dee043ec3310d84a04710517c9efe143a4ac70ed2c27d3cef1d",
+      "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "receiptPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-unused01-results.json",
+      "receiptSha256": "fc94adc7ea12de905260058e80d5a7452ccb6d9a0dec13902ffcf7fd768d75b7"
+    },
+    {
+      "label": "obs011-recovery-20261020-fe-lint01",
+      "exit": 0,
+      "node": "v24.20.0",
+      "pnpm": "10.33.0",
+      "elapsedSeconds": 1.37,
+      "vitest": null,
+      "sourceDigest": "507228c984235dee043ec3310d84a04710517c9efe143a4ac70ed2c27d3cef1d",
+      "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "receiptPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-fe-lint01-results.json",
+      "receiptSha256": "39ea5d27641ee37ed8dc5c899ca02550e1f140f5e9810e8993594d41c2792fc1"
+    }
+  ],
+  "sourceAndDistStableEveryRun": true,
+  "strictUnusedTypeScript": "PASS",
+  "changedFileLint": "PASS",
+  "axeArtifactUnchangedEveryRun": true,
+  "allStoriesComplete": false,
+  "finalAffectedGatesStillOwed": true,
+  "noLifecycleCredit": true
+}

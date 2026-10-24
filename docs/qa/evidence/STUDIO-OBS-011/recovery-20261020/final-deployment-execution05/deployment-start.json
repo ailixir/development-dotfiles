@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-final-runner-deployment01",
+    "pnpm",
+    "--dir=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.deployment.config.ts",
+    "--minWorkers=1",
+    "--maxWorkers=1"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T04:03:01.456514+00:00",
+  "driverPid": 47000,
+  "rawCollectorExit": null,
+  "accepted": false,
+  "continuousAwakeClaim": false,
+  "caffeinatePid": 47135,
+  "caffeinateArgv": [
+    "/usr/bin/caffeinate",
+    "-i"
+  ],
+  "collectorPid": 47136
+}

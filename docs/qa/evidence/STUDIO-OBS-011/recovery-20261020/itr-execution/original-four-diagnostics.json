@@ -1,0 +1,722 @@
+{
+  "kind": "ORIGINAL_REPLAY_FOUR_EXPLICIT_METHOD_DIAGNOSTICS",
+  "atUtc": "2026-10-20T16:10:45.165924+00:00",
+  "status": "ALL_FOUR_TERMINAL_ASSERTION_FAILURES_DIAGNOSTIC_ONLY",
+  "sourceApplied": false,
+  "sourcePath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "sourceSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "defaultCeiling": 4000,
+  "fullClassSlotsConsumed": 0,
+  "fullClassGateCredit": false,
+  "test001Applied": false,
+  "rawPrivateValuesOrFailureMessagesExported": false,
+  "runs": [
+    {
+      "exit": 1,
+      "gradleExit": 1,
+      "counts": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "testcases": [
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue()",
+          "status": "FAIL"
+        },
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "executionError",
+          "status": "FAIL"
+        }
+      ],
+      "taskCollectionErrors": [
+        {
+          "task": "test",
+          "reason": "MISSING_FRESH_COHORT_FILE",
+          "file": "audit-final.json"
+        }
+      ],
+      "taskResults": {
+        "test": {
+          "counts": {
+            "total": 2,
+            "passed": 0,
+            "failed": 2,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        }
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "elapsedSeconds": 62.9,
+      "started": "2026-10-20T16:05:36.372806+00:00",
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "label": "obs011-recovery-20261020-itr-original-p7-pool01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-original-p7-pool01-results.json",
+      "resultSha256": "00ee8b68b36bfd42722c752fd5dd8a69ca31be54c4290c90a8bf200f3bf69b80",
+      "sourceDigestBefore": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "sourceDigestAfter": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "fullClassSlotCost": 0,
+      "gateCredit": false,
+      "failureSites": [
+        {
+          "case": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue()",
+          "failureType": "java.lang.AssertionError",
+          "publicSourceFrames": [
+            {
+              "method": "scanCompleteAuditStream",
+              "line": 34431
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "p7CapturedFaultAndRetry",
+              "line": 21942
+            },
+            {
+              "method": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+              "line": 21910
+            }
+          ],
+          "knownCorpusAssertion": true,
+          "knownOrder2PriorPublicationAssertion": false
+        },
+        {
+          "case": "executionError",
+          "failureType": "java.lang.AssertionError",
+          "publicSourceFrames": [
+            {
+              "method": "scanCompleteAuditStream",
+              "line": 34431
+            },
+            {
+              "method": "lambda$scanFinalOwnedSinks$78",
+              "line": 3447
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "scanFinalOwnedSinks",
+              "line": 3444
+            },
+            {
+              "method": "lambda$stopOwnedApplicationJobs$589",
+              "line": 34172
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "stopOwnedApplicationJobs",
+              "line": 34172
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "stop",
+              "line": 34381
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            }
+          ],
+          "knownCorpusAssertion": true,
+          "knownOrder2PriorPublicationAssertion": false
+        }
+      ],
+      "cohorts": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-original-p7-pool01-task-outputs/test/cohorts/b9465248-d651-475d-ae09-6cdacf743b62/7a07ece7-50b8-4a83-b232-6d7dd5b394b6/cohort.json",
+          "sha256": "83de195e47b7af38e1b4f87189388baffae8b274f2989254938afe32d4593eb2",
+          "numericAndBooleanFlags": {
+            "auditComplete": false,
+            "auditEvents": 12,
+            "budgetEvidenceComplete": true,
+            "declaredOutputCeiling": 4000,
+            "finalScansAttempted": true,
+            "modelEvidenceComplete": true,
+            "privacyComplete": true,
+            "producersDrained": true,
+            "responseEvidenceComplete": true,
+            "retentionFailures": 0
+          },
+          "invocations": [
+            {
+              "method": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+              "variant": "singleton",
+              "variantOrdinal": 0,
+              "invocationOrdinal": 1,
+              "passed": false,
+              "afterEachComplete": true
+            }
+          ]
+        }
+      ],
+      "classification": "LOCAL_CAPTURE_CLOSE_CORPUS_ASSERTION_AND_SEPARATE_FINAL_CORPUS_ASSERTION",
+      "setupCompilationOrSelectionFailure": false
+    },
+    {
+      "exit": 1,
+      "gradleExit": 1,
+      "counts": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "testcases": [
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue()",
+          "status": "FAIL"
+        },
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "executionError",
+          "status": "FAIL"
+        }
+      ],
+      "taskCollectionErrors": [
+        {
+          "task": "test",
+          "reason": "MISSING_FRESH_COHORT_FILE",
+          "file": "audit-final.json"
+        }
+      ],
+      "taskResults": {
+        "test": {
+          "counts": {
+            "total": 2,
+            "passed": 0,
+            "failed": 2,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        }
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "elapsedSeconds": 45.74,
+      "started": "2026-10-20T16:07:18.195946+00:00",
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "label": "obs011-recovery-20261020-itr-original-p7-vault01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-original-p7-vault01-results.json",
+      "resultSha256": "62e9ad912a0cc9dc5a43951ed377dd6d4d57311f404e9ff3412b524ab766480a",
+      "sourceDigestBefore": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "sourceDigestAfter": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "fullClassSlotCost": 0,
+      "gateCredit": false,
+      "failureSites": [
+        {
+          "case": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue()",
+          "failureType": "java.lang.AssertionError",
+          "publicSourceFrames": [
+            {
+              "method": "scanCompleteAuditStream",
+              "line": 34431
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "p7CapturedFaultAndRetry",
+              "line": 21942
+            },
+            {
+              "method": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+              "line": 21916
+            }
+          ],
+          "knownCorpusAssertion": true,
+          "knownOrder2PriorPublicationAssertion": false
+        },
+        {
+          "case": "executionError",
+          "failureType": "java.lang.AssertionError",
+          "publicSourceFrames": [
+            {
+              "method": "scanCompleteAuditStream",
+              "line": 34431
+            },
+            {
+              "method": "lambda$scanFinalOwnedSinks$78",
+              "line": 3447
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "scanFinalOwnedSinks",
+              "line": 3444
+            },
+            {
+              "method": "lambda$stopOwnedApplicationJobs$589",
+              "line": 34172
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "stopOwnedApplicationJobs",
+              "line": 34172
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "stop",
+              "line": 34381
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            }
+          ],
+          "knownCorpusAssertion": true,
+          "knownOrder2PriorPublicationAssertion": false
+        }
+      ],
+      "cohorts": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-original-p7-vault01-task-outputs/test/cohorts/a574c148-270e-47be-b80c-06816926a652/630c056c-c558-4a72-b526-3e381bf586d3/cohort.json",
+          "sha256": "9b8c4682ebc277c0b931abde47584bbdadc562ab81561000b244fbe8224a46fa",
+          "numericAndBooleanFlags": {
+            "auditComplete": false,
+            "auditEvents": 7,
+            "budgetEvidenceComplete": true,
+            "declaredOutputCeiling": 4000,
+            "finalScansAttempted": true,
+            "modelEvidenceComplete": true,
+            "privacyComplete": true,
+            "producersDrained": true,
+            "responseEvidenceComplete": true,
+            "retentionFailures": 0
+          },
+          "invocations": [
+            {
+              "method": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+              "variant": "singleton",
+              "variantOrdinal": 0,
+              "invocationOrdinal": 1,
+              "passed": false,
+              "afterEachComplete": true
+            }
+          ]
+        }
+      ],
+      "classification": "LOCAL_CAPTURE_CLOSE_CORPUS_ASSERTION_AND_SEPARATE_FINAL_CORPUS_ASSERTION",
+      "setupCompilationOrSelectionFailure": false
+    },
+    {
+      "exit": 1,
+      "gradleExit": 1,
+      "counts": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "testcases": [
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "queuedAndPreReadyRefusals()",
+          "status": "FAIL"
+        },
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "executionError",
+          "status": "FAIL"
+        }
+      ],
+      "taskCollectionErrors": [
+        {
+          "task": "test",
+          "reason": "MISSING_FRESH_COHORT_FILE",
+          "file": "audit-final.json"
+        }
+      ],
+      "taskResults": {
+        "test": {
+          "counts": {
+            "total": 2,
+            "passed": 0,
+            "failed": 2,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        }
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "elapsedSeconds": 35.25,
+      "started": "2026-10-20T16:08:29.431249+00:00",
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.queuedAndPreReadyRefusals",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "label": "obs011-recovery-20261020-itr-original-order2-01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-original-order2-01-results.json",
+      "resultSha256": "6e634f1b4aabcbbab1bfa38906169052527022766db2d99617b0674b76351713",
+      "sourceDigestBefore": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "sourceDigestAfter": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "fullClassSlotCost": 0,
+      "gateCredit": false,
+      "failureSites": [
+        {
+          "case": "queuedAndPreReadyRefusals()",
+          "failureType": "java.lang.AssertionError",
+          "publicSourceFrames": [
+            {
+              "method": "queuedAndPreReadyRefusals",
+              "line": 17983
+            }
+          ],
+          "knownCorpusAssertion": false,
+          "knownOrder2PriorPublicationAssertion": true
+        },
+        {
+          "case": "executionError",
+          "failureType": "java.lang.AssertionError",
+          "publicSourceFrames": [
+            {
+              "method": "scanCompleteAuditStream",
+              "line": 34431
+            },
+            {
+              "method": "lambda$scanFinalOwnedSinks$78",
+              "line": 3447
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "scanFinalOwnedSinks",
+              "line": 3444
+            },
+            {
+              "method": "lambda$stopOwnedApplicationJobs$589",
+              "line": 34172
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "stopOwnedApplicationJobs",
+              "line": 34172
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "stop",
+              "line": 34381
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            }
+          ],
+          "knownCorpusAssertion": true,
+          "knownOrder2PriorPublicationAssertion": false
+        }
+      ],
+      "cohorts": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-original-order2-01-task-outputs/test/cohorts/b2ba55bf-e878-4838-ba53-4601a19b7b45/8c208b87-7b2c-4ddf-8b48-9746d9cd7a58/cohort.json",
+          "sha256": "35d21233e3ce7a0c9b7c3f060c3cacc1224227d2a82747a6d496a81d69a2e0d4",
+          "numericAndBooleanFlags": {
+            "auditComplete": false,
+            "auditEvents": 0,
+            "budgetEvidenceComplete": true,
+            "declaredOutputCeiling": 4000,
+            "finalScansAttempted": true,
+            "modelEvidenceComplete": true,
+            "privacyComplete": false,
+            "producersDrained": true,
+            "responseEvidenceComplete": true,
+            "retentionFailures": 0
+          },
+          "invocations": [
+            {
+              "method": "queuedAndPreReadyRefusals",
+              "variant": "singleton",
+              "variantOrdinal": 0,
+              "invocationOrdinal": 1,
+              "passed": false,
+              "afterEachComplete": true
+            }
+          ]
+        }
+      ],
+      "classification": "SHARED_PUBLICATION_ASSERTION_IN_SELECTED_BODY_AND_SEPARATE_FINAL_CORPUS_ASSERTION",
+      "setupCompilationOrSelectionFailure": false
+    },
+    {
+      "exit": 1,
+      "gradleExit": 1,
+      "counts": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "testcases": [
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness()",
+          "status": "FAIL"
+        },
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "executionError",
+          "status": "FAIL"
+        }
+      ],
+      "taskCollectionErrors": [
+        {
+          "task": "test",
+          "reason": "MISSING_FRESH_COHORT_FILE",
+          "file": "audit-final.json"
+        }
+      ],
+      "taskResults": {
+        "test": {
+          "counts": {
+            "total": 2,
+            "passed": 0,
+            "failed": 2,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        }
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "elapsedSeconds": 35.99,
+      "started": "2026-10-20T16:09:33.266696+00:00",
+      "command": [
+        "caffeinate",
+        "-i",
+        "./gradlew",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "label": "obs011-recovery-20261020-itr-original-order3-01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-original-order3-01-results.json",
+      "resultSha256": "88ebdf59af83a0f5dc916ddc674149f50ac4ea7c1fc56bb08cdb3c184a3204a6",
+      "sourceDigestBefore": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "sourceDigestAfter": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "fullClassSlotCost": 0,
+      "gateCredit": false,
+      "failureSites": [
+        {
+          "case": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness()",
+          "failureType": "java.lang.AssertionError",
+          "publicSourceFrames": [
+            {
+              "method": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+              "line": 18392
+            }
+          ],
+          "knownCorpusAssertion": false,
+          "knownOrder2PriorPublicationAssertion": false
+        },
+        {
+          "case": "executionError",
+          "failureType": "java.lang.AssertionError",
+          "publicSourceFrames": [
+            {
+              "method": "scanCompleteAuditStream",
+              "line": 34431
+            },
+            {
+              "method": "lambda$scanFinalOwnedSinks$78",
+              "line": 3447
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "scanFinalOwnedSinks",
+              "line": 3444
+            },
+            {
+              "method": "lambda$stopOwnedApplicationJobs$589",
+              "line": 34172
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "stopOwnedApplicationJobs",
+              "line": 34172
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            },
+            {
+              "method": "stop",
+              "line": 34381
+            },
+            {
+              "method": "p3AttemptTeardown",
+              "line": 34252
+            }
+          ],
+          "knownCorpusAssertion": true,
+          "knownOrder2PriorPublicationAssertion": false
+        }
+      ],
+      "cohorts": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-itr-original-order3-01-task-outputs/test/cohorts/f4050b6c-63c4-4a1b-8187-d0f6ddf0f990/133c372b-5e79-4cfe-829b-d9ef7cf3a8c6/cohort.json",
+          "sha256": "12b01db77ef9f95e5a5468024b16b4f04f6d3a7cd279f44aec0c12c295b2cec7",
+          "numericAndBooleanFlags": {
+            "auditComplete": false,
+            "auditEvents": 0,
+            "budgetEvidenceComplete": true,
+            "declaredOutputCeiling": 4000,
+            "finalScansAttempted": true,
+            "modelEvidenceComplete": true,
+            "privacyComplete": false,
+            "producersDrained": true,
+            "responseEvidenceComplete": true,
+            "retentionFailures": 0
+          },
+          "invocations": [
+            {
+              "method": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+              "variant": "singleton",
+              "variantOrdinal": 0,
+              "invocationOrdinal": 1,
+              "passed": false,
+              "afterEachComplete": true
+            }
+          ]
+        }
+      ],
+      "classification": "SHARED_PUBLICATION_ASSERTION_IN_SELECTED_BODY_AND_SEPARATE_FINAL_CORPUS_ASSERTION",
+      "setupCompilationOrSelectionFailure": false
+    }
+  ],
+  "interpretation": {
+    "p7": "Both primary selected-case failures occur at original capture-close corpus assertion; this does not establish a P7 workflow defect. Each also has separate AfterAll executionError with same corpus assertion.",
+    "order2And3": "Each selected case has a genuine shared prior-publication body assertion failure, separate from AfterAll corpus failure.",
+    "nativeCauseOfHistoricalWholeClassFailures": "NOT_ESTABLISHED",
+    "collectorRawStatuses": "All nonzero and taskCollectionComplete=false; missing audit-final.json preserved."
+  },
+  "helpers": {
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py": "2846314e3ab12926bff6eb458d7058c406b983092fb40b1fb5c2fa087c2366df",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py": "799ead7c9c622b7a8b1500d1e89762a689b11e472a8d2bf16101cb9b54f29cd4",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py": "fa90d844d6443285ada1ae1856fdef4bd23ddf607ab97ec21ccd52f2fc30cc3a"
+  }
+}

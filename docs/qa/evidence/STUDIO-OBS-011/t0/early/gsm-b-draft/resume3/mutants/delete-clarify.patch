@@ -1,0 +1,10 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -825,7 +825,6 @@
+         key,
+         request,
+         session -> {
+-          requireTranslation(id);
+           active(session);
+           JsonNode question = session.progress().path("clarification");
+           boolean sourceQuestion = question.path("phase").asText().equals("source");

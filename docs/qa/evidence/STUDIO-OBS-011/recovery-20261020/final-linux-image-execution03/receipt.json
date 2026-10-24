@@ -1,0 +1,71 @@
+{
+  "kind": "FINAL_LINUX_IMAGE_EXECUTION03_STOP_RECEIPT",
+  "atUtc": "2026-10-21T03:34:51.357059+00:00",
+  "outcome": "STOP_OFFLINE_DEPENDENCY_SETUP_FAILURE",
+  "originalBuildToolSession": 31799,
+  "collectorPid": 97173,
+  "rawBuildOuterAndChildExit": 1,
+  "elapsedSeconds": 72.23,
+  "failureCode": "EAI_AGAIN",
+  "failureStep": "runtime4/7 npm ci --omit=dev && npm cache clean --force",
+  "requiredUncachedPackage": "typescript5.9.3",
+  "networkPolicy": "original --pull=false --network=none; no fallback",
+  "cachedBase": {
+    "Id": "sha256:5536bbbd0ffc106a9fdab13fbff6b3abab01418cceff67ff246552b64cf5623d",
+    "User": "",
+    "Cmd": [
+      "/bin/bash"
+    ],
+    "Os": "linux",
+    "Architecture": "arm64"
+  },
+  "freshTagAbsence": "PASS_authoritative_no_such_image_before_build",
+  "publicContext": {
+    "roots": [
+      "Dockerfile",
+      "package.json",
+      "package-lock.json",
+      ".npmrc",
+      "tsconfig.json",
+      "tsconfig.build.json",
+      "src",
+      "scripts",
+      "fixtures/observed-reference",
+      ".nvmrc"
+    ],
+    "regularFiles": 101,
+    "directories": 10,
+    "archiveSha256": "8457b7413e543ff88eea95e7fec554d380e5903e839e0f814c46739833bdb886",
+    "allMemberHashesModesVerified": true,
+    "noSymlinksNonregularOrPrivateInputs": true,
+    "publicInputsStable": true
+  },
+  "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+  "sourceFiles": 1814,
+  "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "distFiles": 238,
+  "allActualInputCatalogCache191Protected21LinksCliBrowserEnvExact": true,
+  "ownedInhibitor": {
+    "pid": 97172,
+    "waitExit": -15,
+    "releasedAtUtc": "2026-10-21T03:34:04.235117+00:00",
+    "postguardAtUtc": "2026-10-21T03:34:04.232002+00:00",
+    "postguardCompletedBeforeRelease": true,
+    "rawHeldThroughPostguardsField": false,
+    "fieldQualification": "Raw field was gated on overall accepted, hence false for build failure. Existing exact control order and persisted postguard timestamp prove completion before finally termination; raw record retained unchanged.",
+    "continuousAwakeClaim": false
+  },
+  "inspectionConcern": {
+    "initialEscapedRenderingConcern": "INCORRECT_CLEARED_WITHOUT_PREPARATION_CHANGE",
+    "actualAstWriteConstantCodepoints": [
+      10
+    ],
+    "initialMetadataOnlyAssertionExit": 1,
+    "noActualCommandRetry": true
+  },
+  "laterImageIdEntrypointPackageLockPinsDeploymentD2G9": "NOT_EXECUTED_UNBOUND",
+  "heavyAndCurrentRReadsReleased": true,
+  "sealMetadataOnly": true,
+  "allHistoricalEvidencePreserved": true,
+  "lifecycle": "ALL3_InProgress_NO_RELEASE_OR_DONE"
+}

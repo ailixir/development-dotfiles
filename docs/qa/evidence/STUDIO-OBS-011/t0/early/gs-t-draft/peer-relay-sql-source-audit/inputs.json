@@ -1,0 +1,56 @@
+{
+  "taskPins": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/interim-finite-diagnostic-projection.json",
+      "sha256": "4dcd5b8b71c584396dd5f804ad6ab15f2fef115ac5db24bee95e96c073349499"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/formatted-candidate-archive/index.json",
+      "sha256": "4c911b927423e491f0e3ca398af0bc2b1a9978a88b31a3a0d81a8fa92746176e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/formatted-candidate-archive/GuidedServiceTransportFaultIT.java",
+      "sha256": "322164060758b36eba7b33a768617032508aa4a533ea6e042d197966eaf64be0"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/formatted-candidate-archive/GuidedSessionIT.java",
+      "sha256": "372310ef566be885eef60b6129974827d754e35aee37ce8925b38fceb2427558"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/formatted-candidate-archive/GuidedLifecycleReasonIT.java",
+      "sha256": "353bc8ebcf75d373203c58b016ead65648661cfdf47fa950d6230ac238ac7aa5"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/resume5-wording-peer/manifest.json",
+      "sha256": "9b0339e075f55afc0b3acfbc73cda0e9c5c16b8cf6d163bd2b606c12d92a1ca8"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/resume5-wording-peer/verify.py",
+      "sha256": "f9bb388c8f0fd5ce429c849d4af02d002d8964ad02ce1289ee1d2adcbb062e3a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gst-unit04-composed-start-review/review.md",
+      "sha256": "12c062e01a91a37b5f71e6be904c0da4a9e80c5f72976846f27aa20e3ceed311"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gst-unit04-peer-sql-source-audit-context.json",
+      "sha256": "b88b5c82fddfb925aa6b49ed66289ed8ed237760aaf8a5d81bff0ebc944a567e"
+    }
+  ],
+  "pureHelper": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/resume5-wording-peer/verify.py",
+    "sha256": "f9bb388c8f0fd5ce429c849d4af02d002d8964ad02ce1289ee1d2adcbb062e3a",
+    "functionNames": [
+      "masked",
+      "method_span",
+      "methods",
+      "assertions",
+      "apply_strict"
+    ]
+  },
+  "originalRoot": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-02/source-original-backups",
+  "unit04ArchiveRoot": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/formatted-candidate-archive",
+  "predecessorRoot": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/resume5-wording-peer",
+  "originalQuery": "SELECT NOT (progress ? 'executionEvidence') FROM studio_guided_sessions WHERE session_id=?",
+  "successorQuery": "SELECT NOT (progress ?? 'executionEvidence') FROM studio_guided_sessions WHERE session_id=?"
+}

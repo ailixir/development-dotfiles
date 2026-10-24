@@ -1,0 +1,58 @@
+--- a/frontend/src/test/a11y/studioWcagAudit.test.tsx
++++ b/frontend/src/test/a11y/studioWcagAudit.test.tsx
+@@ -9,7 +9,7 @@
+ import axe, { type AxeResults, type Result } from 'axe-core';
+ import { studioMockServer } from '@/services/mocks/studio/server';
+ import { resetStudioMocks } from '@/services/mocks/studio/handlers';
+-import { readyDraft, unlearnedDraft } from '@/services/mocks/studio/readinessFixtures';
++import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
+ import {
+   DEV_TRANSPORT_SCENARIO,
+   TERMINAL_EVIDENCE_SETTLED,
+@@ -96,8 +96,6 @@
+   StudioTestsPage: {},
+   StudioRunsPage: {},
+   'ChecksStudioPage/author': {},
+-  'ChecksStudioPage/compile-review': {},
+-  'ChecksStudioPage/confirm': {},
+   'ChecksStudioPage/run-progress': {},
+   'ChecksStudioPage/video-playback': {},
+ };
+@@ -317,36 +315,7 @@
+     expect(drift, drift.join('\n')).toEqual([]);
+   }, SCAN_TIMEOUT_MS);
+ 
+-  // Regression guard only (STUDIO-OBS-012B, cleanup inventory CLN-11): the review panel this surface
+-  // was named for is deleted, so it scans the not-yet-learned author state under its old name and
+-  // key. It is NOT rewritten to a guided state: ADR-SC-006 (functional accessibility only, no new
+-  // audit surfaces) rules that out, so the name and pinned key stay as they are.
+-  it('surface 4 — ChecksStudioPage, compile-review state', async () => {
+-    serveDraft(unlearnedDraft);
+-    renderPage(<ChecksStudioPage />);
+-    await screen.findByRole('button', { name: 'Run Test' });
+-    await waitFor(() => expect(document.body.textContent).toMatch(/step/i));
+-    const drift = await scan('ChecksStudioPage/compile-review');
+-    expect(drift, drift.join('\n')).toEqual([]);
+-  }, SCAN_TIMEOUT_MS);
+-
+-  // Regression guard only (STUDIO-OBS-012B, CLN-11): no confirm affordance exists on the single path,
+-  // so this surface also scans the not-yet-learned author state. Not rewritten (ADR-SC-006).
+-  it('surface 5 — ChecksStudioPage, confirm state', async () => {
+-    serveDraft(unlearnedDraft);
+-    renderPage(<ChecksStudioPage />);
+-    await screen.findByRole('button', { name: 'Run Test' });
+-    const confirm = await screen
+-      .findAllByRole('button', { name: /confirm/i })
+-      .catch(() => [] as HTMLElement[]);
+-    // Recorded rather than asserted: whether the confirm affordance is reachable on the assembled
+-    // page is what this surface is scanning for. Its absence is an audit finding, not a silent pass.
+-    // eslint-disable-next-line no-console -- read into the audit document.
+-    console.log(`[axe] ChecksStudioPage/confirm: confirm affordances found = ${confirm.length}`);
+-    if (confirm.length > 0) await userEvent.hover(confirm[0]);
+-    const drift = await scan('ChecksStudioPage/confirm');
+-    expect(drift, drift.join('\n')).toEqual([]);
+-  }, SCAN_TIMEOUT_MS);
++  // CLN-11 / R-11: duplicate pair, unlearned state no longer scanned, accepted under ADR-SC-006.
+ 
+   it('surface 6 — ChecksStudioPage, run / SSE-progress state', async () => {
+     setExecutionTransportSeam({

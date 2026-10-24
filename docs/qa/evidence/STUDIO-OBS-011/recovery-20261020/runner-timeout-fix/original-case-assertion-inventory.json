@@ -1,0 +1,161 @@
+{
+  "unit": {
+    "historicalReportPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-b2-unit01-vitest.json",
+    "historicalReportSha256": "d10f84e9ad42333f5a25f9096a6c6c3fa3797080e7ad86f6b67124c9e4e486bf",
+    "historicalSourceSha256": "07d9a14d9752bb698cbdacdaeb18872f64450dfd5ce10fc00d95b39122273675",
+    "oldCases": [
+      {
+        "fullName": "authorizes only the exact returned app page after startup removal, with no pending blind window",
+        "status": "passed"
+      },
+      {
+        "fullName": "permanently latches early unexpected page and delivers a late subscription",
+        "status": "passed"
+      },
+      {
+        "fullName": "permanently latches empty unexpected page and delivers a late subscription",
+        "status": "passed"
+      },
+      {
+        "fullName": "permanently latches creation unexpected page and delivers a late subscription",
+        "status": "passed"
+      },
+      {
+        "fullName": "permanently latches wrong-return unexpected page and delivers a late subscription",
+        "status": "passed"
+      },
+      {
+        "fullName": "permanently latches later unexpected page and delivers a late subscription",
+        "status": "passed"
+      },
+      {
+        "fullName": "permanently latches already-closed unexpected page and delivers a late subscription",
+        "status": "passed"
+      },
+      {
+        "fullName": "refuses non-sole startup set {\"pages\":[]}",
+        "status": "passed"
+      },
+      {
+        "fullName": "refuses non-sole startup set {\"pages\":[{},{}]}",
+        "status": "passed"
+      },
+      {
+        "fullName": "refuses an undeleted startup page or unissued app creation",
+        "status": "passed"
+      },
+      {
+        "fullName": "does not extend the absolute deadline across sequential startup work",
+        "status": "passed"
+      },
+      {
+        "fullName": "rejects abort, asynchronous failure and expiry after late work without accepting a page",
+        "status": "passed"
+      }
+    ],
+    "oldCaseCount": 12,
+    "oldFullBufferPreservedAsExactPrefix": true,
+    "oldAssertionLexemeCount": 19,
+    "oldAssertionLines": [
+      "  const startup={},app={},closed:object[]=[];const guard=new BootstrapPageGuard<object>(p=>closed.push(p));expect(guard.inspectStartup([startup])).toBe(startup);guard.opened(startup);guard.startupRemoved([]);guard.beginApp();guard.opened(app);guard.appReturned(app,[app]);expect(guard.ready(app,[app])).toBe(true);guard.opened(app);expect(closed).toEqual([]);",
+      "  if(phase==='early'){g.opened(other);expect(()=>g.inspectStartup([start])).toThrow('TARGET_DRIFT');}",
+      "  else{g.inspectStartup([start]);if(phase==='already-closed'){g.opened(other);expect(()=>{g.startupRemoved([]);}).toThrow();}",
+      "    else{g.startupRemoved([]);if(phase==='empty')g.opened(other);else{g.beginApp();g.opened(app);if(phase==='creation')g.opened(other);else if(phase==='wrong-return')expect(()=>{g.appReturned(other,[other]);}).toThrow();else{g.appReturned(app,[app]);g.opened(other);}}}}",
+      "  expect(()=>{g.check();}).toThrow('TARGET_DRIFT');const notified=vi.fn();g.subscribe(notified);expect(notified).toHaveBeenCalledOnce();expect(g.ready(app,[app])).toBe(false);expect(closed.length).toBeGreaterThan(0);",
+      "it.each([{pages:[]},{pages:[{},{}]}])('refuses non-sole startup set %j',({pages})=>{const g=new BootstrapPageGuard<object>(()=>undefined);expect(()=>g.inspectStartup(pages)).toThrow('TARGET_DRIFT');});",
+      "it('refuses an undeleted startup page or unissued app creation',()=>{const page={},g=new BootstrapPageGuard<object>(()=>undefined);g.inspectStartup([page]);expect(()=>{g.beginApp();}).toThrow();expect(()=>{g.startupRemoved([page]);}).toThrow();});",
+      "it('does not extend the absolute deadline across sequential startup work',async()=>{vi.useFakeTimers();const end=Date.now()+20;await expect(boundedStartup(()=>Promise.resolve('first'),end)).resolves.toBe('first');const pending=boundedStartup(()=>new Promise<string>(()=>undefined),end);const caught=pending.catch((e:unknown)=>e instanceof Error?e.message:'bad');await vi.advanceTimersByTimeAsync(20);expect(await caught).toBe('TIMEOUT');await expect(boundedStartup(()=>Promise.resolve('late'),end)).rejects.toThrow('TIMEOUT');});",
+      "it('rejects abort, asynchronous failure and expiry after late work without accepting a page',async()=>{const controller=new AbortController();controller.abort();await expect(boundedStartup(()=>Promise.resolve('no'),Date.now()+50,controller.signal)).rejects.toThrow('CANCELLED');await expect(boundedStartup(()=>Promise.reject(new Error('probe failed')),Date.now()+50)).rejects.toThrow('probe failed');",
+      "  const next=new AbortController();let done:(value:string)=>void=()=>undefined;const wait=boundedStartup(()=>new Promise<string>(r=>{done=r;}),Date.now()+50,next.signal);await Promise.resolve();const rejected=wait.catch((e:unknown)=>e instanceof Error?e.message:'bad');next.abort();expect(await rejected).toBe('CANCELLED');done('late');"
+    ],
+    "newAppendedCaseCount": 2,
+    "plannedFullFileCaseCount": 14,
+    "newRuntimeCollection": "UNRUN"
+  },
+  "fixture": {
+    "historicalReportPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-b3-fixtures01-vitest.json",
+    "historicalReportSha256": "5d3a55ddf5d8a8b0491fef952703ed293c6b311208a30759251dc9deac2035bd",
+    "historicalSourceSha256": "17b59ff7ad67f2249697c059c266453300f658dc0b9e1846438a34da01fcaef5",
+    "oldCases": [
+      {
+        "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at the deadline with TIMEOUT, and after close() no process, scratch or recording file remains",
+        "status": "passed"
+      },
+      {
+        "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a bare abort'), naming 'CANCELLED', with the same teardown",
+        "status": "passed"
+      },
+      {
+        "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a CANCELLED reason (a stop)'), naming 'CANCELLED', with the same teardown",
+        "status": "passed"
+      },
+      {
+        "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a TIMEOUT reason (the runtime\\'s budg\u2026'), naming 'TIMEOUT', with the same teardown",
+        "status": "passed"
+      },
+      {
+        "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down with a recording on disk: kills the encoder as well, and leaves the recorder's files exactly as they were",
+        "status": "passed"
+      },
+      {
+        "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled",
+        "status": "passed"
+      },
+      {
+        "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down Quinn F5: refuses to confirm the teardown while a process it enumerated is still alive, and leaves the scratch directory in place",
+        "status": "passed"
+      }
+    ],
+    "oldCaseCount": 7,
+    "oldFullBufferPreservedAsExactPrefix": true,
+    "oldAssertionLexemeCount": 43,
+    "oldAssertionLines": [
+      "    expect(watcher.frozen()).toBe(true);",
+      "    expect(failure).toBeInstanceOf(GuidedLaunchFailure);",
+      "    expect(failure).toMatchObject({ message: 'CONTEXT_LOST', cause: { message: 'TIMEOUT' } });",
+      "    expect((failure as GuidedLaunchFailure).phase).not.toBeNull();",
+      "    expect(took).toBeGreaterThanOrEqual(DEADLINE_MS);",
+      "    expect(took).toBeLessThan(DEADLINE_MS + 3_000);",
+      "    expect(watcher.pids.size).toBeGreaterThan(0);",
+      "    expect([...watcher.pids].filter((pid) => isAlive(pid))).toEqual([]);",
+      "    expect(watcher.scratch.size).toBe(1);",
+      "    for (const directory of watcher.scratch) await expect(lstat(directory)).rejects.toMatchObject({ code: 'ENOENT' });",
+      "    expect(await readdir(dir)).toEqual([]);",
+      "    expect(watcher.frozen()).toBe(true);",
+      "    expect(failure).toBeInstanceOf(GuidedLaunchFailure);",
+      "    expect(failure).toMatchObject({ message: 'CONTEXT_LOST', cause: { message: cause } });",
+      "    expect(Date.now() - startedAt).toBeLessThan(10_000 + 3_000);",
+      "    expect(watcher.pids.size).toBeGreaterThan(0);",
+      "    expect([...watcher.pids].filter((pid) => isAlive(pid))).toEqual([]);",
+      "    for (const directory of watcher.scratch) await expect(lstat(directory)).rejects.toMatchObject({ code: 'ENOENT' });",
+      "    expect(await readdir(dir)).toEqual([]);",
+      "    expect(watcher.frozen()).toBe(true);",
+      "    expect(watcher.atFreeze.length).toBeGreaterThan(0);",
+      "    expect(failure).toBeInstanceOf(GuidedLaunchFailure);",
+      "    expect(failure).toMatchObject({ message: 'CONTEXT_LOST', cause: { message: 'TIMEOUT' } });",
+      "    expect(watcher.encoders.size).toBeGreaterThan(0);",
+      "    expect([...watcher.pids].filter((pid) => isAlive(pid))).toEqual([]);",
+      "    for (const directory of watcher.scratch) await expect(lstat(directory)).rejects.toMatchObject({ code: 'ENOENT' });",
+      "    for (const name of watcher.atFreeze) expect(after).toContain(name);",
+      "    expect(await sizes()).toBe(settled);",
+      "    expect(failure).toBeInstanceOf(GuidedLaunchFailure);",
+      "    expect(failure).toMatchObject({ message: 'CONTEXT_LOST', cause: { message: 'TIMEOUT' }, phase: 'PROCESS' });",
+      "    expect(scratch).toHaveLength(1);",
+      "    expect(decoyPid).toBeDefined();",
+      "    expect(decoyAt).toBeGreaterThan(teardownStartedAt + 1_000);",
+      "    expect(closedAt).toBeGreaterThanOrEqual(decoyAt);",
+      "    expect(decoyPid !== undefined && isAlive(decoyPid)).toBe(false);",
+      "    expect(await readdir(root)).toEqual([]);",
+      "    expect(scratch).toBeDefined();",
+      "    expect(decoyPid).toBeDefined();",
+      "    expect(failure).toBeInstanceOf(GuidedLaunchFailure);",
+      "    await expect((failure as GuidedLaunchFailure).close()).rejects.toThrow('CONTEXT_LOST');",
+      "    expect(decoyPid !== undefined && isAlive(decoyPid)).toBe(true);",
+      "    await expect(lstat(join(root, scratch ?? ''))).resolves.toBeDefined();",
+      "    await expect((failure as GuidedLaunchFailure).close()).rejects.toThrow('CONTEXT_LOST');"
+    ],
+    "newAppendedCaseCount": 2,
+    "plannedFullFileCaseCount": 9,
+    "newRuntimeCollection": "UNRUN"
+  }
+}

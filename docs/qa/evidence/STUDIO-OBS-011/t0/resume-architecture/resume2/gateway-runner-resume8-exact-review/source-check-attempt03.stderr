@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway-runner-resume8-exact-review/verify_source.py", line 55, in <module>
+    for name in group['functions']:check('mapped function '+name,name.split('.')[-1] in available)
+                                   ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway-runner-resume8-exact-review/verify_source.py", line 7, in check
+    if ok is not True:raise AssertionError(name)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: mapped function unchanged source06 contracts.assess

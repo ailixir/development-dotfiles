@@ -1,0 +1,45 @@
+{
+  "phase": "host-pins",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-actual-final-host-pins01",
+    "node",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/scripts/check-pins.mjs",
+    "--root",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+    "--json"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T03:22:17.842632+00:00",
+  "sourceExclusions": null,
+  "node": "v24.20.0",
+  "pnpm": "10.33.0",
+  "collectorPid": 79547,
+  "rawOuterExit": 0,
+  "endedAtUtc": "2026-10-21T03:22:18.269904+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "node",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/scripts/check-pins.mjs",
+      "--root",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+      "--json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T03:22:17.999080+00:00",
+    "elapsedSeconds": 0.26,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "dfa4aace2560fc09de1781ee663c426b516cb11f945d0166d7f2ff216a1e4028",
+    "testInputStable": true,
+    "testInputDigestBefore": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "testInputDigestAfter": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc"
+  },
+  "resultSha256": "e6ccdcea7af04a2dc9ee6fe5a025bb4a8d15033a2bc7e049b66575315081296a",
+  "logSha256": "dfa4aace2560fc09de1781ee663c426b516cb11f945d0166d7f2ff216a1e4028",
+  "postGuardComplete": true,
+  "actualInputDelta": [],
+  "fullSourceDependenciesDistProtected21LinksActualCliBrowserEnvStable": true
+}

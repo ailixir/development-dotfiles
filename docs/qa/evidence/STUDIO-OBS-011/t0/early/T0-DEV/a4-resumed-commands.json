@@ -1,0 +1,57 @@
+[
+  {
+    "argv": [
+      "rg",
+      "-n",
+      "poll-interval-ms",
+      "helm-chart"
+    ],
+    "exitCode": 0,
+    "stdout": "helm-chart/put-checks/values-prod.yaml:133:    checks.scheduling.poll-interval-ms: \"10000\"\nhelm-chart/put-checks/values-dev.yaml:97:    checks.scheduling.poll-interval-ms: \"30000\"\nhelm-chart/put-checks/values-uat.yaml:127:    checks.scheduling.poll-interval-ms: \"15000\"\nhelm-chart/put-checks/values.yaml:272:    checks.scheduling.poll-interval-ms: \"10000\"\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "rg",
+      "-n",
+      "dispatcher\\.poll-interval\\b|STUDIO_EXECUTION_DISPATCHER_POLL_INTERVAL\\b|STUDIO_DISPATCHER_POLL_INTERVAL\\b",
+      "helm-chart"
+    ],
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "rg",
+      "-n",
+      "sse\\.read-interval\\b|STUDIO_SSE_READ_INTERVAL\\b",
+      "helm-chart"
+    ],
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "rg",
+      "-n",
+      "pollIntervalOrDefault\\(|readIntervalOrDefault\\(",
+      "backend/src/main"
+    ],
+    "exitCode": 0,
+    "stdout": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java:160:    public Duration pollIntervalOrDefault() {\nbackend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java:212:    public Duration readIntervalOrDefault() {\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "rg",
+      "-n",
+      "\\.pollInterval\\(|\\.readInterval\\(",
+      "backend/src/main"
+    ],
+    "exitCode": 0,
+    "stdout": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingTargetWorker.java:42:    Duration interval = target.pollInterval();\nbackend/src/main/java/com/citi/put/checks/scheduling/SchedulingHeartbeat.java:27:    return targets.stream().mapToLong(t -> Math.max(1, t.pollInterval().toMillis())).min().stream()\n",
+    "stderr": ""
+  }
+]

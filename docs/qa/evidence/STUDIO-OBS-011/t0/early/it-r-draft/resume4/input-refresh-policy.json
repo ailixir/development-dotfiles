@@ -1,0 +1,16 @@
+{
+  "originalInputManifestSha256": "473400471e1b7f553bda020630a284cfa58c66c9619a8280fc35ef7710e91243",
+  "original10InputsNotRecaptured": true,
+  "reviewedChange": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py",
+    "beforeSha256": "1bba89cc35982f8990af4f7112fb740f3fdc95397334a4d3787da08c73009cda",
+    "afterSha256": "fa90d844d6443285ada1ae1856fdef4bd23ddf607ab97ec21ccd52f2fc30cc3a",
+    "reviewPath": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/java21-launcher-review/review.md",
+    "reviewSha256": "fdf779e709ed15dae6f5618fd89bb39ca1d88829d323593a373c5359a3fb5789",
+    "applicationReceiptPath": "docs/qa/evidence/STUDIO-OBS-011/t0/java21-root-application/application-receipt.json",
+    "applicationReceiptSha256": "ca07961b21490533b5c39162aba1fd8f0174b9d4ddaf3a6994a75d0fe2a550bd"
+  },
+  "future": "Before every real use verify frozen10 inputs, exact source/dist, current reviewed fullcheck harness and all helper hashes against root latest explicit baton. Further helper changes require exact before/after diff + named independent review + application receipt and a supplemental refresh here; never recapture a mismatch as baseline.",
+  "currentParentFacts": "DIAG terminal108PASS; originalb8 restored/recompiled, no IT-R class credit. Fresh-check02 refused before collectors on launcher23. Separately reviewed JDK21 launcher fix now applied; fresh fullcheck03 root-owned running at preparation. No terminal inference or class/timing credit.",
+  "authorization": "SUPPLEMENTAL_PROVENANCE_ONLY_NOT_A_LAUNCH_APPROVAL"
+}

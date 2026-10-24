@@ -1,0 +1,74 @@
+{
+  "initialRetainedRun": {
+    "pure": {
+      "exit": 0,
+      "tool": "c81d59"
+    },
+    "admission33": {
+      "exit": 0,
+      "tool": "263edf"
+    },
+    "report24": {
+      "exit": 0,
+      "tool": "15435e"
+    },
+    "boundary": {
+      "exit": 1,
+      "tool": "6ac07a",
+      "reason": "Fresh archived source JSON classified as immutable control JSON; fake assigned source hash differed from raw fixture bytes."
+    },
+    "revision": {
+      "exit": 1,
+      "tool": "d9614e",
+      "reason": "Same archive/control classification issue."
+    }
+  },
+  "fix": "Narrow immutable runtime controls to direct E JSON entries; archived/source/workspace inventories remain fresh as designed. No native/shared/runtime action.",
+  "additionalPresealRuns": [
+    {
+      "tool": "9a76d2",
+      "actualExit": 1,
+      "kind": "FAKE_EXPECTED_PIN_FOR_OWN_GENERATED_PREPARE_RECEIPT_NOT_REFRESHED",
+      "fix": "Fake receipt exact bytes and its own generated input pin now register together."
+    },
+    {
+      "tool": "0913f8",
+      "actualExit": 1,
+      "kind": "FAKE_CAPTURE_CALLBACK_OMITTED_ALLOWED_STATUS_POSITIONAL_PARAMETER",
+      "fix": "Fake capture now accepts the original bounded capture callback signature."
+    },
+    {
+      "tool": "d897f7",
+      "actualExit": 1,
+      "kind": "SAME_ALREADY_STARTED_RUN_CALLBACK_SIGNATURE_FAILURE",
+      "fix": "No new runtime failure; same fake callback signature corrected before final replay."
+    },
+    {
+      "tool": "2658f7",
+      "actualExit": 1,
+      "kind": "FAKE_JSON_WRITE_SPELLING_DIFFERED_FROM_ACTUAL_INDENT2_PENDING_BYTES",
+      "fix": "Fake writer now serializes exact actual write_new payload spelling."
+    },
+    {
+      "tool": "58a9e2",
+      "actualExit": 1,
+      "kind": "FAKE_OS_MISSING_GETPID_IN_COMPLETE_CAPTURE_PATH",
+      "fix": "Bound synthetic getpid500 alongside getppid/uid/umask."
+    }
+  ],
+  "finalFrozenReplay": {
+    "sourcePinCount": 28,
+    "sourcePinFile": "final-test-source-pins.json",
+    "allSourceBytesUnchanged": true,
+    "retainedControls": 248,
+    "newActualFunctionFakeControls": 85,
+    "completions": {
+      "boundary121": "ae9720 actual0",
+      "revision70": "f41ee0 actual0",
+      "report24": "45b5d3 actual0",
+      "admission33": "53ac18 actual0",
+      "new85": "5e845b actual0"
+    },
+    "nativeOrRuntimeActions": 0
+  }
+}

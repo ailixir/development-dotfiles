@@ -1,0 +1,66 @@
+{
+  "story": "STUDIO-OBS-011",
+  "lane": "11-DOC",
+  "author": "Dex",
+  "mode": "off-tree preparation only",
+  "declaredBudgetUsd": 500,
+  "actualSpend": "unavailable",
+  "design": "design.md",
+  "manifest": "manifest.json",
+  "targetCount": 7,
+  "actualTargetWrites": 0,
+  "checks": {
+    "pythonStaticVerifierExit": 0,
+    "strictPatchReconstructionTargets": 7,
+    "patchDryRunExit": 0,
+    "datedLinesRemoved": 0,
+    "inventoryAppendOnly": true,
+    "cln51RangesIdentical": true,
+    "accessibilityScopeBytePreserved": true,
+    "section4ByteIdentical": true,
+    "section14ByteIdentical": true
+  },
+  "preservedSections": [
+    {
+      "section": 4,
+      "originalSha256": "0ec43db021800e114517d66899f827a8cf5e45ebdd23356785e4380a497af259",
+      "outputSha256": "0ec43db021800e114517d66899f827a8cf5e45ebdd23356785e4380a497af259",
+      "bytes": 4265,
+      "byteIdentical": true
+    },
+    {
+      "section": 14,
+      "originalSha256": "4d83b3594c7cab2daa4a4505df1088dbc43c74e55ee4e6f1e9c552ff07880e66",
+      "outputSha256": "4d83b3594c7cab2daa4a4505df1088dbc43c74e55ee4e6f1e9c552ff07880e66",
+      "bytes": 12392,
+      "byteIdentical": true
+    }
+  ],
+  "uatNotePresent": "unchanged runbook14.4",
+  "actualExternalDeployInputs": "existing external prerequisites; not a new11DOC blocker",
+  "rootOnlyMergeTargets": [
+    "AGENTS.md",
+    "studio-runner/README.md"
+  ],
+  "patchSets": {
+    "authoredDocsAfterRootTreeOpen": "patches/authored-docs.patch",
+    "root11MERGEOnly": "patches/root-merge-only.patch",
+    "allSevenForStaticApplicability": "patches/all-documentation.patch"
+  },
+  "sourceReferenceCount": 33,
+  "unresolvedFacts": "unresolved-facts.json",
+  "futureVerification": "future-verification.md",
+  "runtimeOrBuildOrTestRunnerOrFormatterOrNodeOrDockerOrProviderCalls": 0,
+  "signals": 0,
+  "gitMutations": 0,
+  "lifecycleChanges": 0,
+  "qaVerdict": null,
+  "releaseVerdict": null,
+  "applicationGates": [
+    "original B1 terminal reconciliation",
+    "fresh B7/root tree-open",
+    "quoted-writer and file ownership handover",
+    "root confirms CLN51 wording",
+    "root11MERGE for AGENTS/runner README"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "kind": "AUTHOR_PARSE_AND_BYTE_CHECKS_NOT_INDEPENDENT_APPROVAL",
+  "preparedAt": "2026-10-20T23:16:50.495694+00:00",
+  "onlyChangedCommandJsonFields": [
+    "/ipcProjectionArgv/2",
+    "/inlineSha256/ipc"
+  ],
+  "sourceRequiredParentKeys": [
+    "c6",
+    "case",
+    "controlReadCount",
+    "controlReads",
+    "executionId",
+    "exitCode",
+    "exitSignal",
+    "killCount",
+    "kills",
+    "loopDelayMaxMs",
+    "loopDelayP99Ms",
+    "ordinal",
+    "pid",
+    "received",
+    "receivedCount",
+    "resultErrorCode",
+    "resultOk",
+    "resultSchemaValid",
+    "results",
+    "v"
+  ],
+  "sourceRequiredChildKeys": [
+    "executionId",
+    "pid",
+    "readySent",
+    "resultErrorCode",
+    "resultOk",
+    "resultSent",
+    "v"
+  ],
+  "bothArgvFiveElements": true,
+  "bothPayloadsPythonSyntaxParsed": true,
+  "payloadsExecuted": false,
+  "allFourForwardInverseDiffsRegenerateExactly": true,
+  "startFailurePayloadByteIdentical": true,
+  "inputTemplateByteIdenticalUnbound": true,
+  "originalSealedTreeUnchanged": true,
+  "actualReadTimeSourcePinsUnchanged": true,
+  "independentReviewStatus": "REQUIRED_NOT_SELF_APPROVED"
+}

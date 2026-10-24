@@ -1,0 +1,150 @@
+{
+  "kind": "QUALIFIED_EXISTING_FOLD_MUTATION_CARRY_NOT_NEW_EXECUTION",
+  "acceptedPrepReceiptPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-prep-execution/receipt.json",
+  "acceptedPrepReceiptSha256": "6de8cc161bee1e087128d1c69a6c262c9a17ecf925612a281c5ed7dbb20a632b",
+  "mutations": [
+    {
+      "id": "m1-mint",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+      "selector": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+      "acceptedHistoricalTargetSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+      "prospectiveFinalTargetSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+      "sameLiteralMainTarget": true,
+      "restoredGreenResultSha256": "718a64805e8212cb49d4b1e717f6a80b2007cc60cffdf57dea7dac07ec983031",
+      "intendedRedResultSha256": "26d30d503e4e2bb738554987ce1ff5526d1318abd9360413bf57fa8918137357",
+      "acceptedHistoricalRedCounts": {
+        "total": 3,
+        "passed": 1,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "acceptedHistoricalRestoredGreenCounts": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exactHistoricalRestore": true,
+      "finalMutationExecuted": false,
+      "qualification": "Exact main target retained; active oracle logic retained, but final class/source composition still needs ordinary final validation."
+    },
+    {
+      "id": "m2-judge",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+      "selector": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+      "acceptedHistoricalTargetSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+      "prospectiveFinalTargetSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+      "sameLiteralMainTarget": true,
+      "restoredGreenResultSha256": "aec09ddfb9ece429c9c0fdab0fcb6452930fca06f5c3172a9e2ed06991d6e91b",
+      "intendedRedResultSha256": "94f2829cfde7e78bcdb841230e23198e754edeeedb3d4860125cecf5182599ad",
+      "acceptedHistoricalRedCounts": {
+        "total": 3,
+        "passed": 1,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "acceptedHistoricalRestoredGreenCounts": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exactHistoricalRestore": true,
+      "finalMutationExecuted": false,
+      "qualification": "Exact main target retained; active oracle logic retained, but final class/source composition still needs ordinary final validation."
+    },
+    {
+      "id": "m3-claim",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "selector": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+      "acceptedHistoricalTargetSha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+      "prospectiveFinalTargetSha256": "4cdc120830ebea83cac9a93f5d3c89b60166cf8ae834746fb2de536d4f5065e2",
+      "sameLiteralMainTarget": false,
+      "restoredGreenResultSha256": "b8b1248553d9d657b4f1951a2d033100793dcb7ac064ef127fbd37dd40f24e96",
+      "intendedRedResultSha256": "9b4a4cf1791adae6177f859276180721bfe66261b619d86d281703eddf92ffeb",
+      "acceptedHistoricalRedCounts": {
+        "total": 3,
+        "passed": 2,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "acceptedHistoricalRestoredGreenCounts": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exactHistoricalRestore": true,
+      "finalMutationExecuted": false,
+      "qualification": "Publisher final type/constructor/client plumbing differs; original claim clock and validation-budget clock logic retained. Carry historical kill only with this source-isomorphism qualification, never claim a mutant run on final bytes."
+    },
+    {
+      "id": "m4-budget",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "selector": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+      "acceptedHistoricalTargetSha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+      "prospectiveFinalTargetSha256": "4cdc120830ebea83cac9a93f5d3c89b60166cf8ae834746fb2de536d4f5065e2",
+      "sameLiteralMainTarget": false,
+      "restoredGreenResultSha256": "072775042120b87a68917e70d85d7cab90b68a515bd019caaf0c5c98d74f4b24",
+      "intendedRedResultSha256": "80e16ef45614a0fac1983e07c0d4e38a7f225d57766b127e9f23a6c76cd750f9",
+      "acceptedHistoricalRedCounts": {
+        "total": 3,
+        "passed": 2,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "acceptedHistoricalRestoredGreenCounts": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exactHistoricalRestore": true,
+      "finalMutationExecuted": false,
+      "qualification": "Publisher final type/constructor/client plumbing differs; original claim clock and validation-budget clock logic retained. Carry historical kill only with this source-isomorphism qualification, never claim a mutant run on final bytes."
+    },
+    {
+      "id": "m5-worker",
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "selector": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT.workerWithoutPublicationCollaboratorRefusesEveryPublicationOperation",
+      "acceptedHistoricalTargetSha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+      "prospectiveFinalTargetSha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+      "sameLiteralMainTarget": true,
+      "restoredGreenResultSha256": "1cad18e8d2518393c0af2e116d27282d4cdbb9c75fe6a05228bbdf84fd2f4c2b",
+      "intendedRedResultSha256": "e87f3a9e0ea520ed190761e0ba4c06db41bf7af734aaaf7a2a6e95fa3642759d",
+      "acceptedHistoricalRedCounts": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "acceptedHistoricalRestoredGreenCounts": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "exactHistoricalRestore": true,
+      "finalMutationExecuted": false,
+      "qualification": "Exact main target retained; active oracle logic retained, but final class/source composition still needs ordinary final validation."
+    }
+  ],
+  "clockOracle": {
+    "beforeSha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+    "finalSha256": "1bce395fb2204ac1f5ea11175d96288b2e72a4b72dc9030c1a739c324a361af4",
+    "exactDelta": "Remove legacyAuthority injected field and replace inactive legacy-bean fallback with direct existing publicationGrantAuthority bean lookup. All3 test methods/assertion bodies unchanged.",
+    "alreadyActivePath": "Accepted prep configuration/clock mutants used the publicationGrantAuthority bean; no changed clock assertion or new oracle."
+  },
+  "noNewMutantsOrRerunsRequested": true,
+  "finalRuntimeOrMutationCreditGranted": false
+}

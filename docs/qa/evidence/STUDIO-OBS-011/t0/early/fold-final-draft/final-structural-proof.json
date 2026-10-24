@@ -1,0 +1,175 @@
+{
+  "kind": "STATIC_ONLY_NO_COMPILE_RUNTIME_CREDIT",
+  "checks": {
+    "bothOriginalDispatchConstructorsByteIdentical": true,
+    "dispatchRunSendBodyByteIdentical": true,
+    "oneAutowiredProductionCtor": true,
+    "observerStillPackagePrivate": true,
+    "testSetupNoExtraHTTPResources": true,
+    "sourceAll1808BoundUnchanged": true,
+    "allOwnedSQLLiteralListsIdentical": true,
+    "allFiveFinalMutationsReconstructAndRestore": true,
+    "proposedTSOnlyOneTitleTokenNoBodyChange": true
+  },
+  "originalPublicConstructors": [
+    {
+      "signature": "public HttpRunnerDispatchClient(\n      ObjectMapper objectMapper,\n      StudioExecutionProperties properties,\n      StudioRunnerProperties runner)",
+      "bodyAndSignatureByteIdentical": true
+    },
+    {
+      "signature": "public HttpRunnerDispatchClient(\n      ObjectMapper objectMapper,\n      StudioExecutionProperties properties,\n      StudioRunnerProperties runner,\n      StudioRunnerTls tls)",
+      "bodyAndSignatureByteIdentical": true
+    }
+  ],
+  "SQLLiteralProof": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+      "beforeCount": 1,
+      "afterCount": 1,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "beforeCount": 15,
+      "afterCount": 15,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+      "beforeCount": 6,
+      "afterCount": 6,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "beforeCount": 0,
+      "afterCount": 0,
+      "exactLiteralListEqual": true
+    }
+  ],
+  "mutantReconstruction": [
+    {
+      "id": "m1-mint",
+      "exactMutantHash": true,
+      "exactFullVirtualRestore": true
+    },
+    {
+      "id": "m2-judge",
+      "exactMutantHash": true,
+      "exactFullVirtualRestore": true
+    },
+    {
+      "id": "m3-claim",
+      "exactMutantHash": true,
+      "exactFullVirtualRestore": true
+    },
+    {
+      "id": "m4-budget",
+      "exactMutantHash": true,
+      "exactFullVirtualRestore": true
+    },
+    {
+      "id": "m5-worker",
+      "exactMutantHash": true,
+      "exactFullVirtualRestore": true
+    }
+  ],
+  "TSMetadataTokens": [
+    {
+      "path": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+      "sameExecutableTokenCount": true,
+      "differences": [],
+      "exactOnlyLiteralOldTypeRename": true
+    },
+    {
+      "path": "studio-runner/test/guided/runtime.test.ts",
+      "sameExecutableTokenCount": true,
+      "differences": [
+        {
+          "token": 779,
+          "before": "'pins the budget to the backend 15 s transport ceiling minus the 3 s reserve (GuidedRunnerClient.transportDeadline)'",
+          "after": "'pins the budget to the backend 15 s transport ceiling minus the 3 s reserve (HttpRunnerDispatchClient.transportDeadline)'"
+        }
+      ],
+      "exactOnlyLiteralOldTypeRename": true
+    }
+  ]
+}

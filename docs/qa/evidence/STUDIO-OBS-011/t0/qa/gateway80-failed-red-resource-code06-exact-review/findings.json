@@ -1,0 +1,34 @@
+{
+  "reviewer": "Quinn",
+  "subjectManifestSha256": "b751602e38355042033e1a1b86ad0996c30a0377e56fae064f1eb383866e7976",
+  "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+  "mandatoryFindingCount": 1,
+  "mandatoryFindings": [
+    {
+      "id": "FR06-INITIAL-AUTHORIZATION-ACTOR-COMPLETENESS",
+      "mandatory": true,
+      "severity": "HIGH",
+      "title": "Initial authorization declares completeness before outside actor facts can enter the derived roster",
+      "locations": [
+        "install-cli.py:149-152 allowed scope",
+        "install-cli.py:185-195 derived initial authority",
+        "protocol.py:designated_author",
+        "control-author.py:assemble actual_extra_actors",
+        "operator-completion.js:actualActor/request"
+      ],
+      "establishedBehavior": "The installer forbids caller-supplied typedPriorActors/typedActorEvidencePins, has no narrow actualPriorActors input in its allowed scope/candidate graph, and derives the initial authorization as knownPostBaseActors plus its own pending installer row with typedActorRosterComplete:true. New owner-record writers/install-scope authors/source readers necessarily precede installation but can first enter through a later control-author request. The actual source-authored SETUP carrier is implemented and independently exercised, including outside PID901001, original separate tool trace, current-control evidence carrier and a qualifying fake negative. That later union cannot retroactively complete the immutable initial authorization.",
+      "impact": "The initial completeness assertion omits already known external actors under the inherited full-roster obligation. Its source-produced snapshot repeats that incomplete base. This is a missing initial producer/input binding, not a failure of the later pure-memory completion or carrier mechanism. No actual actor omission or unauthorized runtime operation was observed.",
+      "requiredCorrection": "Provide a concrete reviewed initial-install input/producer path for narrow independently captured actual outside/install-scope/owner/source-reader actor facts and their provenance, deriving the initial typed roster/evidence from those facts before declaring it complete. Preserve no root-built binary/code/loader/member/input maps and no future self-completion/hash cycle. Alternatively, an explicitly limited initial record must remain non-complete/non-admitting until a separately defined complete boundary, with the full consumer/factory contract changed accordingly; do not relabel the present assertion by interpretation or treat later setup as retroactive completion. Keep every actual known ID/status meaning, pending designated installer and separately captured completion. All other source/physical/freshness safeguards remain.",
+      "evidence": [
+        "critical-results.json: actual installer and later outside-carrier composition",
+        "operator-results.json: actualActor/request/completion exchanges",
+        "install-cli.py exact closed scope and base.update source graph",
+        "finite-results.json: all258 and exact source/reuse bindings"
+      ],
+      "allMandatoryFindingsTogether": true
+    }
+  ],
+  "allFourSource05CategoriesReviewed": true,
+  "ownerRulingIssued": false,
+  "actualRuntimeAuthority": false
+}

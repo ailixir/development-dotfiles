@@ -1,0 +1,63 @@
+{
+  "created": "2026-10-20T14:26:06.081243+00:00",
+  "authority": "root exact fixture correction approved and execution lane handed back",
+  "originalPackagePreserved": true,
+  "successorPackage": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/gsma-execution/successor-resume3",
+  "manifestSha256": "e7a094d039228a5d964edf6de6629305af4b6047d5a06b25488cc7e8d588c7dc",
+  "artifactHashesSha256": "ef68d0c5ad534b07fcf23d78fc20b9f666c56fa2fe55e76a344defa99344f6f0",
+  "manifestDeltaOnly": "files[3].draftSha256",
+  "correctedTestSha256": "3b5a9735736b5b12e6e2f041fef1cf58182d4eda70db78e322cbb688ffc045f6",
+  "byteIdenticalCopies": [
+    {
+      "path": "run-stage.py",
+      "sha256": "219680ca1a4c49ae0d3036fd63ffe198762babe5ee5ecdb4d948f88abf03d9cd"
+    },
+    {
+      "path": "run-mutation.py",
+      "sha256": "8782e67f741c0f18f109124f940f427e5a6ccbe6536deda521951d37e3485873"
+    },
+    {
+      "path": "staging_common.py",
+      "sha256": "3ce162a989750c366dea8af6fd7c0ba52954647a26613770e81bd7cc0891007a"
+    },
+    {
+      "path": "red-seam-reference.java.txt",
+      "sha256": "1ea5e530549af861bd93fdbce5eb59a5b79ebcd7abcbaad55107d65967ffca79"
+    },
+    {
+      "path": "warn-every-call.patch",
+      "sha256": "5feac4dd93b254ae6e9683df2d506bd7033b47fc4cd5ce437b1cc7643600c5a6"
+    },
+    {
+      "path": "warn-never.patch",
+      "sha256": "60a1cc5a827ec638fd1ef395e8a30dba25dcc33c2a8f067eb05b5eee2dc0fddd"
+    },
+    {
+      "path": "refused-to-pending.patch",
+      "sha256": "fe73b8640132ce38a757a43dec103dea2c39ed29def6c00e5609a64045f49f9d"
+    },
+    {
+      "path": "actual-base-removed.patch",
+      "sha256": "d9839031b625612d482671717384a15e8915a430973c895ac3218f838c550162"
+    },
+    {
+      "path": "repo/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "sha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8"
+    },
+    {
+      "path": "repo/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "sha256": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd"
+    },
+    {
+      "path": "repo/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e"
+    },
+    {
+      "path": "repo/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "sha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a"
+    }
+  ],
+  "runtimeHelperCodeChanged": false,
+  "mainCandidateBytesChanged": false,
+  "readOnlyPrunerPinUnchanged": true
+}

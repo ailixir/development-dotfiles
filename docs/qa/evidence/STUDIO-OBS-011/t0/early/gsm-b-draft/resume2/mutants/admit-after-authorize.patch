@@ -1,0 +1,18 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -1311,7 +1311,6 @@
+         key,
+         proposal,
+         session -> {
+-          requireTranslation(id);
+           require(
+               Set.of("PROPOSING", "REPLAYING_PREFIX").contains(state(session)),
+               "STALE_GENERATION",
+@@ -1437,6 +1436,7 @@
+           JsonNode proof =
+               preparations.authorize(session.document(), proposal, context, clock.instant());
+           String policyHash = access.authorizeAction(session.document(), proposal, proof);
++          requireTranslation(id);
+ 
+           reserve(session, "actions", 1, "maxActions");
+           ObjectNode action =

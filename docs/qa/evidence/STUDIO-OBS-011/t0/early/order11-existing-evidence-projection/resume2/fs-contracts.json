@@ -1,0 +1,446 @@
+{
+  "scope": "AST_EXTRACTED_ACTUAL_FD_CORE_SYNTHETIC_FILESYSTEM_ONLY",
+  "parserSha256": "dc9dd58361c17f2efd4e298a925b3b6e891991963072dcdca5a01cf81d0f39f5",
+  "checks": 43,
+  "accepted": 7,
+  "rejected": 36,
+  "results": [
+    {
+      "name": "ordinary-anchored-root-and-descendants",
+      "accepted": true,
+      "expected": true,
+      "reason": "SOURCE_FD_CORE_ACCEPTED_SYNTHETIC_ONLY",
+      "syntheticContentReadCalls": 6,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "approved-macos-var-private-var-relative-target",
+      "accepted": true,
+      "expected": true,
+      "reason": "SOURCE_FD_CORE_ACCEPTED_SYNTHETIC_ONLY",
+      "syntheticContentReadCalls": 6,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "approved-macos-var-private-var-absolute-target",
+      "accepted": true,
+      "expected": true,
+      "reason": "SOURCE_FD_CORE_ACCEPTED_SYNTHETIC_ONLY",
+      "syntheticContentReadCalls": 6,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "arbitrary-macos-alias-target-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNAPPROVED_MACOS_ALIAS",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "root-symlink-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_SYMLINK_OR_TYPE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "ancestor-symlink-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_SYMLINK_OR_TYPE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "root-approved-inode-mismatch",
+      "accepted": false,
+      "expected": false,
+      "reason": "PRIVATE_ROOT_IDENTITY_OR_MODE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "root-approved-owner-mismatch",
+      "accepted": false,
+      "expected": false,
+      "reason": "PRIVATE_ROOT_IDENTITY_OR_MODE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "root-approved-mode-mismatch",
+      "accepted": false,
+      "expected": false,
+      "reason": "PRIVATE_ROOT_IDENTITY_OR_MODE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "root-component-swap-between-stat-open",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_OPEN_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "ancestor-replaced-after-open",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_ENTRY_SUBSTITUTED",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "leaf-symlink-before-read-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_LEAF_SYMLINK_OR_TYPE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "descendant-symlink-before-native-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_SYMLINK_OR_TYPE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "private-manifest-same-opened-owner-mode-positive",
+      "accepted": true,
+      "expected": true,
+      "reason": "SOURCE_FD_CORE_ACCEPTED_SYNTHETIC_ONLY",
+      "syntheticContentReadCalls": 2,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "manifest-stat-open-uid-mismatch-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "manifest-stat-open-mode-mismatch-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "manifest-stat-open-dev-mismatch-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "manifest-stat-open-ino-mismatch-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "manifest-preexisting-wrong-owner-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_OWNER_MODE_SIZE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "release-file-stat-open-owner-mismatch",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "release-parent-mode-rejected-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "RELEASE_DIRECTORY_NOT_PRIVATE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "approved-xml-fd-binding-positive",
+      "accepted": true,
+      "expected": true,
+      "reason": "SOURCE_FD_CORE_ACCEPTED_SYNTHETIC_ONLY",
+      "syntheticContentReadCalls": 2,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "xml-stat-open-device-mismatch-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "leaf-replaced-during-read-is-incomplete",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_LEAF_SUBSTITUTED",
+      "syntheticContentReadCalls": 2,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "retained-output-fd-positive",
+      "accepted": true,
+      "expected": true,
+      "reason": "SOURCE_FD_CORE_ACCEPTED_SYNTHETIC_ONLY",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 1,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "partial-write-completes-without-retry",
+      "accepted": true,
+      "expected": true,
+      "reason": "SOURCE_FD_CORE_ACCEPTED_SYNTHETIC_ONLY",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 126,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "zero-write-fails-no-success",
+      "accepted": false,
+      "expected": false,
+      "reason": "OUTPUT_WRITE_FAILURE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 1,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "claimed-output-parent-swapped-before-write-refused",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_ENTRY_SUBSTITUTED",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "output-parent-swapped-during-write-detected-no-alternate-write",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_ENTRY_SUBSTITUTED",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 1,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "claimed-package-ancestor-swapped-before-write-refused",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_ENTRY_SUBSTITUTED",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "output-before-write-failure-no-success",
+      "accepted": false,
+      "expected": false,
+      "reason": "OUTPUT_WRITE_OR_SYNC_FAILED",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 1,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "output-fsync-failure-no-success",
+      "accepted": false,
+      "expected": false,
+      "reason": "OUTPUT_WRITE_OR_SYNC_FAILED",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 1,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "output-file-close-failure-no-success",
+      "accepted": false,
+      "expected": false,
+      "reason": "OUTPUT_CLOSE_FAILURE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 1,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "retained-directory-close-failure-no-success",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_CLOSE_FAILURE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 1,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "release-stat-open-mode-mismatch-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "xml-stat-open-uid-mismatch-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "xml-stat-open-mode-mismatch-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "xml-stat-open-ino-mismatch-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "opened-output-leaf-substituted-before-write-refused",
+      "accepted": false,
+      "expected": false,
+      "reason": "OUTPUT_LEAF_SUBSTITUTED",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "opened-output-uid-mismatch-before-write",
+      "accepted": false,
+      "expected": false,
+      "reason": "OUTPUT_FILE_OWNER_MODE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "opened-output-mode-mismatch-before-write",
+      "accepted": false,
+      "expected": false,
+      "reason": "OUTPUT_FILE_OWNER_MODE",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "input-close-failure-is-not-success",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_CLOSE_FAILURE",
+      "syntheticContentReadCalls": 2,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    },
+    {
+      "name": "approved-alias-changed-during-traversal-refused",
+      "accepted": false,
+      "expected": false,
+      "reason": "MACOS_ALIAS_CHANGED",
+      "syntheticContentReadCalls": 0,
+      "syntheticWriteCalls": 0,
+      "actualPrivateIO": 0,
+      "actualOsCalls": 0
+    }
+  ],
+  "actualParserMainCli": 0,
+  "actualPrivateEnumerationStatReadGlobCopyExport": 0,
+  "actualOsIO": 0,
+  "sourceExtractedActualNewExactIOExercised": true,
+  "noAlternateOutputParentWritten": true,
+  "alternateWriteCheck": "Each actual modeled write fd creation-parent object compared with original mkdir-created claimed directory, not a constant witness",
+  "broadSameUidHardeningClaim": false
+}

@@ -1,0 +1,87 @@
+"""Bounded finite exact public source/reuse binding. No target execution."""
+from pathlib import Path
+import ast,hashlib,json,shlex,stat,copy
+S=Path('docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7')
+O=Path('docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code07-exact-review')
+checks=[];pins=[]
+def sha(b):return hashlib.sha256(b).hexdigest()
+def check(n,v):
+    checks.append(dict(id=n,passed=bool(v)))
+    if not v:raise AssertionError(n)
+def bind(p,r):
+    b=p.read_bytes();mode=stat.S_IMODE(p.stat().st_mode)
+    check('PIN-'+str(p),sha(b)==r['sha256'] and len(b)==r['bytes'] and ('mode' not in r or mode==r['mode']))
+    pins.append(dict(path=str(p),sha256=sha(b),bytes=len(b),mode=mode))
+    if p.suffix=='.json':json.loads(b)
+    return b
+def packet(p,expected,count):
+    raw=(p/'manifest.json').read_bytes();check('MANIFEST-'+str(p),sha(raw)==expected)
+    m=json.loads(raw);check('MEMBER-COUNT-'+str(p),len(m['files'])==count and len({r['path'] for r in m['files']})==count)
+    return {r['path']:bind(p/r['path'],r) for r in m['files']}
+cache=packet(S,'045c5121ff25966eff78d741894684c776448e35c553cceb7765591ff70dd9b1',53)
+check('EXACT-SUBJECT-MEMBERSHIP',{str(p.relative_to(S)) for p in S.rglob('*') if p.is_file()}==set(cache)|{'manifest.json','SHA256SUMS'})
+cs={}
+for line in (S/'SHA256SUMS').read_text().splitlines():
+    h,n=line.split('  ',1);check('CHECKSUM-'+n,sha((S/n).read_bytes())==h);cs[n]=h
+check('54-ACYCLIC-CHECKSUMS',len(cs)==54 and set(cs)==set(cache)|{'manifest.json'})
+refs=json.loads(cache['input-read-receipt.json'])['references']
+for r in refs:
+    check('PUBLIC-REFERENCE-'+r['path'],'/runtime/' not in r['path']);bind(Path(r['path']),r)
+old=packet(S.parent/'resume6',refs[0]['sha256'],258)
+for i,count in ((1,14),(2,13)):packet(Path(refs[i]['path']).parent,refs[i]['sha256'],count)
+root=json.loads(Path(refs[3]['path']).read_bytes())
+check('COMPLETE-ROOT-ADOPTION',root['canonicalFindingIds']==['FR06-INITIAL-AUTHORIZATION-ACTOR-COMPLETENESS'] and set(root['reviews'])=={'Aria','Quinn'})
+check('ROOT7ABC-EXACT',sha(old['complete-root-all-findings-adoption.json'])=='7abc98e0eb0dadbff1a21476cc38faff0c551e4ea59bff78c288ebd785560b7d')
+def node(b,symbol):
+    tree=ast.parse(b)
+    for part in symbol.split('.'):
+        tree=next(n for n in tree.body if isinstance(n,(ast.FunctionDef,ast.ClassDef,ast.AsyncFunctionDef)) and n.name==part)
+    return tree
+def segment(b,symbol):return ast.get_source_segment(b.decode(),node(b,symbol))
+class Generation(ast.NodeTransformer):
+    def visit_Constant(self,n):
+        if type(n.value)is str:
+            v=n.value
+            for a,b in [('source07','source06'),('SOURCE07','SOURCE06'),('resume7','resume6'),('code07','code06')]:v=v.replace(a,b)
+            return ast.copy_location(ast.Constant(v),n)
+        if type(n.value)is int and n.value==7:return ast.copy_location(ast.Constant(6),n)
+        return n
+def normalized(n):return ast.dump(Generation().visit(copy.deepcopy(n)),include_attributes=False)
+final=json.loads(cache['final-bindings.json'])
+for row in final['components']:
+    n=row['path']
+    if 'subject' not in row:check('WHOLE-LITERAL-'+n,cache[n]==old[n]);continue
+    x,y=segment(cache[n],row['subject']),segment(old[n],row['subject'])
+    if row['literalBytesExact']:check('LITERAL-COMPONENT-'+n+'-'+row['subject'],x==y)
+    else:check('DECLARED-GENERATION-AST-'+n+'-'+row['subject'],normalized(node(cache[n],row['subject']))==ast.dump(node(old[n],row['subject']),include_attributes=False))
+for n,h in final['currentSourceHashes'].items():check('FINAL-14-HASH-'+n,sha(cache[n])==h)
+attempt=json.loads(cache['critical-attempt04.json'])
+check('AUTHOR31-3-FAKE-OBSERVED',attempt['passed']==31 and attempt['failure'] is None and len(attempt['operatorSteps'])==3 and attempt['realBoundaryCalls']==[] and attempt['actualTargetEffects']==0)
+for n,h in attempt['sourceHashes'].items():check('EXECUTED-14-HASH-'+n,sha(cache[n])==h)
+check('AUTHOR-FIXTURE-EXACT',sha((S.parent/'resume5/source05_checks.py').read_bytes())==attempt['fixtureSourceSha256'] and cache['critical_check.py']==cache['critical-attempt04.py.txt'])
+def assignments(tree):return {t.id:ast.dump(n.value,include_attributes=False) for n in tree.body if isinstance(n,ast.Assign) for t in n.targets if isinstance(t,ast.Name)}
+pt=ast.parse(cache['protocol.py']);pa=assignments(pt)
+for r in final['shellArguments']:
+    n=r['path'];text=cache[n].decode();argument=shlex.split(text.split('-B -c ',1)[1])[0];tree=ast.parse(argument);aa=assignments(tree)
+    check('ACTUAL-SHELL-ARGUMENT-'+n,sha(argument.encode())==r['PythonArgumentSha256'] and len(argument.encode())==r['bytes'])
+    check('SHELL-SINK-'+n,ast.dump(node(argument.encode(),'FailureSink'),include_attributes=False)==ast.dump(node(cache['protocol.py'],'FailureSink'),include_attributes=False))
+    check('SHELL-CLOSED-REGISTRY-'+n,all(aa[k]==pa[k] for k in ('STAGES','REASON_REGISTRY')))
+check('JS-9627-HISTORICAL-DEPENDENCY',cache['operator-completion.js'][:9627].replace(b'FR07Operator',b'FR06Operator')==old['operator-completion.js'][:9627])
+k=json.loads(cache['contract.json']);ko=json.loads(old['contract.json'])
+for n in ('typedRoleContract','limits','unit','knownPostBaseActors'):
+    check('ORIGINAL-CONTRACT-'+n,k[n]==ko[n])
+check('ACTOR-CAP-8192-PRESERVED',b'len(rows)<=8192' in cache['protocol.py'] and b'len(rows)<=8192' in old['protocol.py'])
+check('INITIAL64-AND-RAWBOUND',b'1<=len(facts)<=64' in cache['protocol.py'] and b'len(raw)<=65536' in cache['protocol.py'])
+cli=segment(cache['install-cli.py'],'execute')
+check('COMPLETE-FIRST-PRODUCER-ORDER',cli.index('P.initial_actor_facts(')<cli.index('typedActorRosterComplete=True')<cli.index('I.install('))
+check('AUTHORITY-CONSUMER-REVALIDATES','validate_initial_actor_facts(a,k)' in segment(cache['protocol.py'],'authority_shape'))
+check('FACTORY-STRICT-AUTHORITY-REVALIDATION',b'P.authority_shape(a,k)' in cache['factory.py'])
+check('OWN-PENDING-AND-NO-DERIVED-MAPS',"P.pending_author(" in cli and "'typedPriorActors'" in cli and "'typedActorEvidencePins'" in cli)
+check('ORIGINAL-TRACE-TYPE-BINDING',b"originalTrace" in cache['initial-facts-functions.py.txt'] and b'type(trace[key])is type(expected[key])' in cache['initial-facts-functions.py.txt'])
+check('CANONICAL-SAME-RAW-BUFFER',b'packed(value)==raw' in cache['protocol.py'] and b'INITIAL_FACT_DERIVED_ROSTER' in cache['protocol.py'])
+check('TRUST-SUBJECT-EXPLICIT',b'trusted' in cache['PRECODE-DESIGN.md'] and b'cannot discover' in cache['PRECODE-DESIGN.md'])
+own=json.loads((O/'critical-results.json').read_bytes());js=json.loads((O/'operator-results.json').read_bytes())
+check('OWN-12-CURRENT-3-GROUPS',own['passed']==12 and own['caseGroups']==3 and own['realBoundaryCalls']==[] and own['actualTargetEffects']==0)
+check('OWN-3-PURE-JS',js['passed']==3 and js['actualTargetEffects']==0)
+for n,h in own['sourceHashes'].items():check('OWN-EXECUTED-HASH-'+n,sha(cache[n])==h)
+print(json.dumps(dict(kind='ARIA07_FINITE_EXACT_SOURCE_REUSE',passed=len(checks),failed=0,checks=checks,pins=pins,uniqueNamedPins=len({r['path'] for r in pins}),sourceTargetFunctionsExecuted=0,actualTargetEffects=0,source06HistoricalComponentEvidenceOnly=True),indent=2))

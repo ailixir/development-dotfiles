@@ -1,0 +1,108 @@
+{
+  "kind": "RT_CANONICAL_LAUNCHER_CONTINUATION_UNIT_STOP",
+  "createdAt": "2026-10-20T14:55:13.998958+00:00",
+  "commandCorrection": "Only absolute canonical copied executables invoked through pnpm; .bin links/dependencies unchanged",
+  "runs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-types02-results.json",
+      "sha256": "dd1326066dec2f4a2b8d8d506b333dcaf5d462cbe97885d021e101b40489cb56",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs011-rt-recovery-20261020-root01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs011-rt-recovery-20261020-root01/repo/studio-runner/node_modules/typescript/bin/tsc",
+          "-p",
+          "tsconfig.json",
+          "--noEmit"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T14:52:56.597114+00:00",
+        "elapsedSeconds": 7.95,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+        "testInputStable": true,
+        "testInputDigestBefore": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+        "testInputDigestAfter": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116"
+      }
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-lint01-results.json",
+      "sha256": "a622fe7fbeb9ee1b56366d3fefd443fe67cdfbad95ac77931bc3efb71f000e31",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs011-rt-recovery-20261020-root01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs011-rt-recovery-20261020-root01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+          "."
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T14:53:15.585388+00:00",
+        "elapsedSeconds": 13.05,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+        "testInputStable": true,
+        "testInputDigestBefore": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+        "testInputDigestAfter": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116"
+      }
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-unit01-results.json",
+      "sha256": "c535397e2daf2b31debdf3590083b322766dafe17bd860238f89f8f40d004136",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs011-rt-recovery-20261020-root01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs011-rt-recovery-20261020-root01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+          "run",
+          "--coverage.enabled=false",
+          "--minWorkers=1",
+          "--maxWorkers=2",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-unit01-vitest.json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T14:53:40.211318+00:00",
+        "elapsedSeconds": 34.52,
+        "exit": 1,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "6a226a7cf03000089047725681e65b60ac2c76e8500a3adab5287a9877fe9d0d",
+        "testInputStable": true,
+        "testInputDigestBefore": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+        "testInputDigestAfter": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+        "vitest": {
+          "success": false,
+          "numPassedTests": 2643,
+          "numFailedTests": 0,
+          "numPendingTests": 25,
+          "numTotalTests": 2668,
+          "numPassedTestSuites": 412,
+          "numFailedTestSuites": 5
+        },
+        "vitestReportSha256": "0adee6294792580cad8b20861d6f7b6be5f5fc4130d8f96f0d97b66b2346e444"
+      }
+    }
+  ],
+  "firstUnexpectedFailure": "Two pointer-only describe blocks became empty; Vitest No test found in suite errors",
+  "unitAssertions": "2643passed/0failed/25skipped with exact4pointer omissions; fullcommand nonetheless exit1",
+  "reconciliationPath": "unit-case-reconciliation.json",
+  "smallestProposedCorrection": "Unwrap only the2comment-only describe callbacks, retaining all4 exact historical pointer comments and15 genuine criterion skips; requires root scope before edit. No dummy tests or empty-suite opt-out.",
+  "repairApplied": false,
+  "compilerEmitOrCompareRun": false,
+  "fixturesOrCopybackRun": false,
+  "sandboxAndActualSourceDistStable": true,
+  "rootDispositionRequired": true,
+  "runningJobs": false,
+  "productionCredit": false
+}

@@ -1,0 +1,38 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java
+@@ -1,5 +1,6 @@
+ package com.citi.put.checks.studio.guided.publication;
+ 
++import com.citi.put.checks.studio.dispatch.DispatchAuthorization;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.ArgumentMatchers.anyString;
+@@ -174,8 +175,8 @@
+     }
+ 
+     @Bean
+-    GuidedPublicationAuthorization authority() {
+-      return mock(GuidedPublicationAuthorization.class);
++    DispatchAuthorization authority() {
++      return mock(DispatchAuthorization.class);
+     }
+ 
+     @Bean
+@@ -205,7 +206,7 @@
+         JdbcTemplate jdbc,
+         ObservedRevisionVerifier verifier,
+         ObservedReplayPins pins,
+-        GuidedPublicationAuthorization authority,
++        DispatchAuthorization authority,
+         com.citi.put.checks.studio.dispatch.StudioReferenceResolver references,
+         ObservedReplayProperties properties,
+         StudioExecutionProperties execution) {
+@@ -247,7 +248,7 @@
+   @Autowired private StrictInternalBodyReader reader;
+   @Autowired private com.citi.put.checks.studio.dispatch.StudioReferenceResolver references;
+   @Autowired private ObservedRevisionVerifier verifier;
+-  @Autowired private GuidedPublicationAuthorization authority;
++  @Autowired private DispatchAuthorization authority;
+   @MockBean private ProgressReportService progress;
+   @MockBean private ExecutionControlService control;
+   private final HttpClient http =

@@ -1,0 +1,278 @@
+{
+  "kind": "C6_RESUME2_TERMINAL_HANDOFF",
+  "atUtc": "2026-10-20T17:53:40.782281+00:00",
+  "status": "CONTROLLED_CLASSIFICATION_PROVED_AND_ONE_ORIGINAL_NATIVE_CASE_PASS",
+  "executionReceiptPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/c6-observation-resume2-execution/execution.json",
+  "executionReceiptSha256": "4da335c970b6d10089949beb0f90d50adf5b60b62e4a3e917e739470255f71bf",
+  "finalReplaySha256": "ab429398f750bb493982be321bea550f16823d5b5a58111a1a3d180bff2ece1c",
+  "finalSourceDigest": "88dd7947d36447519c51361c0b77bc3b91db91a213d02f023515ceb67a9003d5",
+  "finalDistDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "actualChangedPaths": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+  ],
+  "allOtherCapturedInputsUnchanged": true,
+  "distUnchanged": true,
+  "fullClassSlotsConsumed": 0,
+  "fullClassAttemptsTotalRemains": 3,
+  "fullClassGateCredit": false,
+  "originalSlot3FailurePreserved": true,
+  "historicalC6CauseProved": false,
+  "nativeReproductionDisposition": "One current green affected method PASS; no retrospective cause finding or full-class guarantee.",
+  "genuineRedPublicLine": 20888,
+  "newCaseCount": 0,
+  "existingSupportControls": 9,
+  "existingControlAssertions": 18,
+  "runs": [
+    {
+      "id": "r2-red-compile01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-c6-observation-r2-red-compile01-results.json",
+      "resultSha256": "ccc2faca420b4c17760e1ccd785779cca40ba7bebbb72b50d7b534c1e5c30925",
+      "exit": 0,
+      "elapsedSeconds": 9.43,
+      "counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true
+    },
+    {
+      "id": "r2-red-support01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-c6-observation-r2-red-support01-results.json",
+      "resultSha256": "89f8dc8b3ad75f2cc95883bc9d9a38f09bb7658e97352910155ce83309a55a6d",
+      "exit": 1,
+      "elapsedSeconds": 39.24,
+      "counts": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskResults": {
+        "test": {
+          "counts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        }
+      },
+      "testcases": [
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls()",
+          "status": "FAIL"
+        }
+      ],
+      "freshXmlHashes": [
+        "58cc9a96e03d523a4c7bf0d5aaabc468b27e74220d4936f5440f10772082ba6b"
+      ],
+      "cohorts": [
+        {
+          "sha256": "f9c0f1a1c37fdf8f15b3471e3aee74e1623770998b469dd7d0d1b95ce0c44d7c",
+          "flags": {
+            "auditComplete": true,
+            "auditEvents": 0,
+            "budgetEvidenceComplete": true,
+            "declaredOutputCeiling": 4000,
+            "finalScansAttempted": true,
+            "modelEvidenceComplete": true,
+            "privacyComplete": true,
+            "producersDrained": true,
+            "responseEvidenceComplete": true,
+            "retentionFailures": 0
+          },
+          "invocations": [
+            {
+              "method": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+              "variant": "singleton",
+              "variantOrdinal": 0,
+              "invocationOrdinal": 1,
+              "passed": false,
+              "afterEachComplete": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "r2-green-compile01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-c6-observation-r2-green-compile01-results.json",
+      "resultSha256": "4b721c0d555ec378b0a6c2f9592c42ab115980365345d8db9422ef16ded592a8",
+      "exit": 0,
+      "elapsedSeconds": 8.65,
+      "counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true
+    },
+    {
+      "id": "r2-green-support01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-c6-observation-r2-green-support01-results.json",
+      "resultSha256": "bc700729bc75c956cd2a0ab531e53405d42eb2774908405d314aee9ae2029393",
+      "exit": 0,
+      "elapsedSeconds": 36.96,
+      "counts": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskResults": {
+        "test": {
+          "counts": {
+            "total": 1,
+            "passed": 1,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        }
+      },
+      "testcases": [
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls()",
+          "status": "PASS"
+        }
+      ],
+      "freshXmlHashes": [
+        "49ed3c6388200644d6222e455c0e5dd6cdef0a7e3e9e049b687067b233107e76"
+      ],
+      "cohorts": [
+        {
+          "sha256": "b70211b2f8473ef1ff1b8fe1d8ccc8d6939a705c54d2c067582139226a730f78",
+          "flags": {
+            "auditComplete": true,
+            "auditEvents": 0,
+            "budgetEvidenceComplete": true,
+            "declaredOutputCeiling": 4000,
+            "finalScansAttempted": true,
+            "modelEvidenceComplete": true,
+            "privacyComplete": true,
+            "producersDrained": true,
+            "responseEvidenceComplete": true,
+            "retentionFailures": 0
+          },
+          "invocations": [
+            {
+              "method": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+              "variant": "singleton",
+              "variantOrdinal": 0,
+              "invocationOrdinal": 1,
+              "passed": true,
+              "afterEachComplete": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "r2-original-affected-native01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-c6-observation-r2-affected-native01-results.json",
+      "resultSha256": "ddfe288fc722bc25716072abed1c214f61717ed702834e4181b15a4f4eed40fd",
+      "exit": 0,
+      "elapsedSeconds": 43.31,
+      "counts": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskResults": {
+        "test": {
+          "counts": {
+            "total": 1,
+            "passed": 1,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        }
+      },
+      "testcases": [
+        {
+          "task": "test",
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending()",
+          "status": "PASS"
+        }
+      ],
+      "freshXmlHashes": [
+        "37b4accd7f8f64562b383782d6524eb937c1da907f34932a8cefbb8447f9c5cd"
+      ],
+      "cohorts": [
+        {
+          "sha256": "ba325037e76bd63d6b5c1f5b6c2beea6414eba5918eb422154452615fbc08d28",
+          "flags": {
+            "auditComplete": true,
+            "auditEvents": 3,
+            "budgetEvidenceComplete": true,
+            "declaredOutputCeiling": 4000,
+            "finalScansAttempted": true,
+            "modelEvidenceComplete": true,
+            "privacyComplete": true,
+            "producersDrained": true,
+            "responseEvidenceComplete": true,
+            "retentionFailures": 0
+          },
+          "invocations": [
+            {
+              "method": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending",
+              "variant": "singleton",
+              "variantOrdinal": 0,
+              "invocationOrdinal": 1,
+              "passed": true,
+              "afterEachComplete": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sourceCompositionRequirement": "Preserve accepted seam/setup/fresh-liveness decision. Compose future waits/types by bounded deltas against current ab429398; do not restore old complete snapshots. Unapplied packet predictions B4abb47730 and finalFOLDcf38d0c1 require actual incoming/hash review."
+}

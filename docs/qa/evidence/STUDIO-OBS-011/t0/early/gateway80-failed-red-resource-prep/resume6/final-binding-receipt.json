@@ -1,0 +1,151 @@
+{
+  "actualTargetEffects": 0,
+  "callerBindingsVerified": true,
+  "currentExecution": {
+    "assertions": 39,
+    "attempt": 13,
+    "executedSourceHashes": {
+      "contract.json": "b414708277087c728914332573543da7c888d41992591d0c71473986916f7974",
+      "control-author-cli.py": "2bb7c62043bad2273b6a57c01a6e8d858df21fd678f2a669e90ce75621995127",
+      "control-author-loader.bash": "9bc7ff73b9a75812985530c91059de980c2a7432cadf963ae58d30766181050e",
+      "control-author.py": "a42995d1519e7c12eb6916b1a0d56481b667a78640e0dd5a5bf694229c2d9228",
+      "custody.py": "e81ae1a019c78161863700bfe34f9abb71d9fb9040e464a7b3eaa5c73c8bddda",
+      "entry.py": "3d110c53d0cf376ae3dfb81077b2dd4a7f936cd3ead9153b78126fff8f7f267d",
+      "factory.py": "b2b5531818dd20f06efff41b254acb93435be4bc0d8de779535d51fb3b7bfa8d",
+      "failed_gateway.py": "f3468b14ac8a22c8fb6228b8be3ddd85ba43ad82c293b93647ee4c901f99a03d",
+      "guard-failed-red.bash": "32f9d26019832a027ef185bc4ae44652e71921ef4393dff7c066f61c842a50fa",
+      "install-cli.py": "d7d0207c3372195988ae8b3db8c0c87078a0c3701bac6550c427154889fe3cd6",
+      "installer.py": "014c9693a8e4524f6007e07df53ff3cc1cc7cab68433d4e144bf757fdb0ba28c",
+      "operator-completion.js": "ac43df7caec7ddb1341f92b197cb3861af7b3292133bb3f5bc29d530e628a506",
+      "protocol.py": "8c3e6ed8771e220ae23ad7eb405b11668529fca68aea1e198ca9ceba32ac95ac"
+    },
+    "exit": 0,
+    "finalGuardPythonASTExact": true,
+    "guardBytesChangedAfterRun": true,
+    "operatorExchanges": 13
+  },
+  "custodySource05LiteralSha256": "e81ae1a019c78161863700bfe34f9abb71d9fb9040e464a7b3eaa5c73c8bddda",
+  "fourHistoricalDenials": [
+    {
+      "cleanup": [],
+      "fault": "allow_io",
+      "mode": "gate",
+      "primary": {
+        "namespace": "PROTOCOL_HOLD",
+        "reason": "FRESHNESS_OR_CLOCK_REVERSE",
+        "stage": "FINAL_GUARDED_ACCEPTANCE"
+      },
+      "status": 1
+    },
+    {
+      "cleanup": [],
+      "fault": "unit_close",
+      "mode": "gate",
+      "primary": {
+        "namespace": "PROTOCOL_HOLD",
+        "reason": "FRESHNESS_OR_CLOCK_REVERSE",
+        "stage": "FINAL_GUARDED_ACCEPTANCE"
+      },
+      "status": 1
+    },
+    {
+      "cleanup": [],
+      "fault": "outer_close",
+      "mode": "gate",
+      "primary": {
+        "namespace": "PROTOCOL_HOLD",
+        "reason": "FRESHNESS_OR_CLOCK_REVERSE",
+        "stage": "FINAL_GUARDED_ACCEPTANCE"
+      },
+      "status": 1
+    },
+    {
+      "cleanup": [],
+      "fault": "delivery",
+      "mode": "gate",
+      "primary": {
+        "namespace": "PROTOCOL_HOLD",
+        "reason": "FRESHNESS_OR_CLOCK_REVERSE",
+        "stage": "FINAL_GUARDED_ACCEPTANCE"
+      },
+      "status": 1
+    }
+  ],
+  "inlineFailureSinkASTAndConstantsExact": true,
+  "kind": "STATIC_FINAL_SOURCE_CALLER_BINDING_NOT_NEW_TARGET_EXECUTION",
+  "lateDenialComponentReuse": {
+    "changedConsumerRevalidatedByCurrentPositivePostclose": true,
+    "currentRuntimeSha256": "f3468b14ac8a22c8fb6228b8be3ddd85ba43ad82c293b93647ee4c901f99a03d",
+    "historicalRuntimeSha256": "8be6155809a6634c819de5c16ccfc135e828a448ea39bc445f14f4b56dd79ff0",
+    "kind": "EXACT_COMPONENT_REUSE_NOT_WHOLE_RUNTIME",
+    "onlyRuntimeDelta": "Unit.require_setup immediate strict actor_union instead of duplicate accumulation; all unchanged unique rows/conflict-HOLD/caps",
+    "unchangedFinalGuardDependencies": [
+      "protocol.py",
+      "entry.py",
+      "guard-failed-red.bash",
+      "custody.py",
+      "contract.json",
+      "operator-completion.js"
+    ],
+    "unchangedRuntimeRemainderExact": true
+  },
+  "parentSchedulingIntervalProved": false,
+  "pureJSReuse": {
+    "checks": 10,
+    "currentAdoptStateAndRequestExercisedInAttempt13": true,
+    "currentHelperSha256": "ac43df7caec7ddb1341f92b197cb3861af7b3292133bb3f5bc29d530e628a506",
+    "executedHistoricalHelperSha256": "bca72f3b446de486f520d4e9ca6f78379c02c8f7a531e1c5761de01677e429c6",
+    "prefixExact": true,
+    "unchangedFunctionDependencyPrefixBytes": 9627
+  },
+  "shellTokens": [
+    {
+      "FailureSinkASTExact": true,
+      "actualArgumentSha256": "a496c65d5882e83ae72bf0d9c430cd5a29671c380e43d90a98bd9a0cacac59b2",
+      "actualSingleQuotedArgumentBytes": 27075,
+      "finalSha256": "b44d934dfe9f2e84c895d513981aa6e38ab9cd79a7eac53a9458c0b38622a804",
+      "intendedPythonASTExact": true,
+      "method": "stdlib shlex POSIX lexical singlequote token; no Bash or target execution",
+      "noExpansionInsideSingleQuote": true,
+      "oldSha256": "32f9d26019832a027ef185bc4ae44652e71921ef4393dff7c066f61c842a50fa",
+      "path": "guard-failed-red.bash",
+      "stagesAndRegistryExact": true
+    },
+    {
+      "FailureSinkASTExact": true,
+      "actualArgumentSha256": "a496c65d5882e83ae72bf0d9c430cd5a29671c380e43d90a98bd9a0cacac59b2",
+      "actualSingleQuotedArgumentBytes": 27075,
+      "finalSha256": "b44d934dfe9f2e84c895d513981aa6e38ab9cd79a7eac53a9458c0b38622a804",
+      "intendedPythonASTExact": true,
+      "method": "stdlib shlex POSIX lexical singlequote token; no Bash or target execution",
+      "noExpansionInsideSingleQuote": true,
+      "oldSha256": "32f9d26019832a027ef185bc4ae44652e71921ef4393dff7c066f61c842a50fa",
+      "path": "binding-functions.bash",
+      "stagesAndRegistryExact": true
+    },
+    {
+      "FailureSinkASTExact": true,
+      "actualArgumentSha256": "a496c65d5882e83ae72bf0d9c430cd5a29671c380e43d90a98bd9a0cacac59b2",
+      "actualSingleQuotedArgumentBytes": 27075,
+      "finalSha256": "6cc2638563a371ca1f27b7c68d73e42e6da0bcac5a1550f3859c56aae2513dc3",
+      "intendedPythonASTExact": true,
+      "method": "stdlib shlex POSIX lexical singlequote token; no Bash or target execution",
+      "noExpansionInsideSingleQuote": true,
+      "oldSha256": "07455591a5dd88221eb88577500731e301ab43dbbf2d19c15d05b7d2ab06dbc7",
+      "path": "bind-command.template.bash",
+      "stagesAndRegistryExact": true
+    },
+    {
+      "FailureSinkASTExact": true,
+      "actualArgumentSha256": "a278f7c38886e79a1203ea399be234ca56ecfa226d5e834dc9dbdaf7dfcb9e22",
+      "actualSingleQuotedArgumentBytes": 26709,
+      "finalSha256": "ae159fff14621496206ea701e3c23a6618bc603a52d4263c518cda37583859b6",
+      "intendedPythonASTExact": true,
+      "method": "stdlib shlex POSIX lexical singlequote token; no Bash or target execution",
+      "noExpansionInsideSingleQuote": true,
+      "oldSha256": "87e792059adf48cbe8d742af5b3d58a6acf4dffb46f726806e1f3aa8bded69e6",
+      "path": "install-loader.bash",
+      "stagesAndRegistryExact": true
+    }
+  ]
+}

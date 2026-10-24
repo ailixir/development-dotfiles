@@ -1,0 +1,85 @@
+{
+  "allActualBoundaries": 0,
+  "authorEditingFailures": [
+    {
+      "attempt": 1,
+      "operation": "apply_patch",
+      "failure": "Expected file_key context not found due hunk ordering",
+      "sourceMutation": false
+    },
+    {
+      "attempt": 2,
+      "operation": "apply_patch",
+      "failure": "Dispatch/capture context not found due hunk ordering",
+      "sourceMutation": false
+    },
+    {
+      "attempt": 3,
+      "operation": "metadata author script",
+      "failure": "relative_to received relative approved packet path against absolute root",
+      "sourceMutation": false,
+      "metadataWrittenBeforeFailure": false
+    },
+    {
+      "attempt": 4,
+      "operation": "static author checker",
+      "failure": "Case-sensitive expected text did not match Actual caller-shell acceptance remains owed; checker corrected to lowercase.",
+      "sourceMutation": false,
+      "metadataWrittenBeforeFailure": false
+    }
+  ],
+  "guardedAttempts": [
+    {
+      "attempt": "01",
+      "status": 0,
+      "semanticChecks": 159,
+      "currentEvidence": false,
+      "launchTool": "add3c5",
+      "session": 83196,
+      "completionTool": "235325",
+      "result": "history/attempt01.stdout.json",
+      "sources": [
+        "history/attempt01-runtime.py",
+        "history/attempt01-entry.py",
+        "history/attempt01-controls.py"
+      ]
+    },
+    {
+      "attempt": "02-retained",
+      "status": 0,
+      "semanticChecks": 159,
+      "currentEvidence": true,
+      "launchTool": "308529",
+      "session": 97573,
+      "completionTool": "e52895",
+      "result": "history/attempt02-retained.stdout.json"
+    },
+    {
+      "attempt": "02-six-fix",
+      "status": 0,
+      "executedChecks": 237,
+      "repeatedWholeFlow": 25,
+      "newTargeted": 212,
+      "currentEvidence": true,
+      "launchTool": "dc6f4b",
+      "session": 74628,
+      "completionTool": "1a3407",
+      "result": "history/attempt02-six-fix.stdout.json"
+    }
+  ],
+  "guardInstrumentation": "Preloaded stdlib; -B; closed in-memory effect fakes in same compiled namespace; persistent unchanged deny audit; actual target main/import/helper fallthrough forbidden; no safety AST removal. Synthetic source/tool/controller/baseline authority explicitly declared; literal banks/profile/case-map/assessor.",
+  "currentExecuted": 396,
+  "currentUniqueIds": 371,
+  "intermediateChecksNotAdded": 159,
+  "priorSource8FailedHistory": "Preserved in immutable source8; not copied as source9 current proof.",
+  "priorEvidenceReusedNotReplayed": {
+    "source6Attribution": 333,
+    "source8Author": 159,
+    "source8QaIndependentReplay": 159,
+    "source8QaFinitePairs": 480,
+    "source8AriaStatic": 774,
+    "source8AriaPins": 112,
+    "source8AriaGuarded": 40
+  },
+  "laterChanges": "After passing complete attempt02, only schemas/docs/maps/provenance/static/seal metadata and four exact entry literal/template conditional status updates. No further subject target-test expansion."
+}

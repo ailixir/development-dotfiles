@@ -1,0 +1,34 @@
+--- candidate/prepare-current-sandbox.py
++++ before/prepare-current-sandbox.py
+@@ -31,8 +31,8 @@
+ require(sha(profile) == 'ab9105a7e6b0cf27a9d512b0a6fb84efd65f3f28425a56ee5208d0806b97d9b1',
+         'Approved COPY/MKDIR profile changed')
+ binding_path = root / ('docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/'
+-                       'runner-functional-base-successor-preparation/candidate/copy-back-binding.json')
+-require(sha(binding_path) == '95427bbdaf0cc709d50341a7c9d2f7d5e223c56ff54bc6c48ec2e52f7a2cf621',
++                       'runner-execution/empty-wrapper-correction/copy-back-binding.json')
++require(sha(binding_path) == '0ceb51bb6ec7c21947bb61d80fb3e6fc2b25010bd78cc7902d7f554e2638ceb7',
+         'Corrected seven-file binding changed')
+ binding = json.loads(binding_path.read_text())
+ copy_paths, empty_paths = [], []
+@@ -72,9 +72,6 @@
+         require(sha(root / row['candidatePath']) == row['afterSha256'], 'RT candidate drift: ' + row['path'])
+     for row in binding['carriedUntouched']:
+         require(sha(root / row['path']) == row['sha256'], 'Protected input drift: ' + row['path'])
+-    for row in binding['businessPredecessors']:
+-        require(sha(root / row['path']) == row['sha256'],
+-                'Separate009 functional predecessor has not landed: ' + row['path'])
+     accepted = root / ('docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/'
+                        'runner-timeout-fix/execution01/validated-four-file-application-binding.json')
+     require(sha(accepted) == 'a8ece9d9f506d574ddd9ad1b629bb6541ee7b2d8911b4feb68dc916ec4fd852f',
+@@ -91,9 +88,7 @@
+     for name, digest in fold_ports.items():
+         require(sha(root / name) == digest, 'Final FOLD runner port has not landed: ' + name)
+     return {'copyProfileSha256': sha(profile), 'sevenFileBindingSha256': sha(binding_path),
+-            'accepted009BindingSha256': sha(accepted), 'finalFoldRunnerPorts': fold_ports,
+-            'separate009FunctionalPredecessors': {row['path']: row['sha256']
+-                                                   for row in binding['businessPredecessors']}}
++            'accepted009BindingSha256': sha(accepted), 'finalFoldRunnerPorts': fold_ports}
+ 
+ 
+ pins = verify_fixed_inputs()

@@ -1,0 +1,59 @@
+{
+  "kind": "SEALED_DOCS_ONLY_SUCCESSOR_ALL_THREE_RUNBOOK_FINDINGS",
+  "status": "PREPARATION_ONLY_UNAPPLIED_UNAPPROVED_PENDING_INDEPENDENT_REVIEW",
+  "predecessorManifestSha256": "8b445844b7e1a9f089d622e65f5e58a7e449365671b567118702d72ed1e4189f",
+  "reviewManifestSha256": "665dbfd07ea99b83e789c1957548b4b3995d87931bcbd829d1454c7e42a47f9a",
+  "mandatoryFindingsPrepared": [
+    "DOC-RB-01",
+    "DOC-RB-02",
+    "DOC-RB-03"
+  ],
+  "conditionsRetained": 8,
+  "files": [
+    {
+      "path": "audit.md",
+      "sha256": "401f87d9aa51864cbb997266c1bf3a9717a4fce0a5bb5a3f63a771926e8d86ad",
+      "bytes": 18389
+    },
+    {
+      "path": "correction-delta.json",
+      "sha256": "68854b02c30bab16c140a33e96165a9c6ec449b63eeb15453616c892d6a98ac8",
+      "bytes": 5546
+    },
+    {
+      "path": "inputs.json",
+      "sha256": "5a6ea46bb0f7e0d561f84f33f980b9a68cc1918b2fa874d1eba0a7d4644e2065",
+      "bytes": 51900
+    },
+    {
+      "path": "preparation.json",
+      "sha256": "f06f9d4b7ed48763a36bb06d3abd4eda2d97d694916fbf9e707c106d12117637",
+      "bytes": 1202
+    },
+    {
+      "path": "preview/docs/runbooks/studio-runner.md",
+      "sha256": "edef74f59e9f1e52f8b1195e90ef99ff900cc35cfb92e1ac1909da7a5e5f3c0c",
+      "bytes": 87386
+    },
+    {
+      "path": "receipt.md",
+      "sha256": "e22c34094f0ad3da26ca39fe26e9868ed408eeee3aa347b0c3d3387ad3658c64",
+      "bytes": 5658
+    },
+    {
+      "path": "seal.md",
+      "sha256": "a103db2a82802fe932ec1e15ad1487aef716f1d8e45902ee53a1e244f6f46eb8",
+      "bytes": 959
+    },
+    {
+      "path": "studio-runner.patch",
+      "sha256": "2d79f10c9683e200dc4df8f0b9995b12166d49db2c553af347e2dae3e5b1c3ec",
+      "bytes": 59105
+    }
+  ],
+  "target": "docs/runbooks/studio-runner.md",
+  "targetCount": 1,
+  "exactInMemoryReconstruction": true,
+  "sharedTargetWrites": 0,
+  "allActualGatesAnd21InputsRemainOwed": true
+}

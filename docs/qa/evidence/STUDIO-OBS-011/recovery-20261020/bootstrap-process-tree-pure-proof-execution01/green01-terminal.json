@@ -1,0 +1,84 @@
+{
+  "id": "green01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs009-recovery-20261020-bootstrap-observation-green01",
+    "pnpm",
+    "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "test/run/bootstrapProcessTreeObservation.test.ts",
+    "--coverage.enabled=false",
+    "--minWorkers=1",
+    "--maxWorkers=1"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T00:50:19.195834+00:00",
+  "collectorPid": 28710,
+  "rawOuterExit": 0,
+  "endedAtUtc": "2026-10-21T00:50:20.305436+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "test/run/bootstrapProcessTreeObservation.test.ts",
+      "--coverage.enabled=false",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-bootstrap-observation-green01-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T00:50:19.562729+00:00",
+    "elapsedSeconds": 0.74,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "f016e8370f4da75ac280a48dea22115e4eb7a97458364638e30f930c91c04232",
+    "testInputStable": true,
+    "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "vitest": {
+      "success": true,
+      "numPassedTests": 37,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTests": 37,
+      "numPassedTestSuites": 2,
+      "numFailedTestSuites": 0
+    },
+    "vitestReportSha256": "7befe5242f6bdb66f06b902be560a07a55953026c9af8e9e6b0c3159d82058fc"
+  },
+  "resultSha256": "d0040bd3c5c495f9238a24ba7b6c7661557c8221787f632adf7d88d5a6263310",
+  "logSha256": "f016e8370f4da75ac280a48dea22115e4eb7a97458364638e30f930c91c04232",
+  "privateSourceDependencyDelta": [
+    {
+      "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+      "before": {
+        "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+        "sha256": "d8afccf69091dbe5f7c04dfbe2cd94d8babfd0ce0ad07345991829273a80483a",
+        "bytes": 16207
+      },
+      "after": {
+        "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+        "sha256": "0ac1281b4e48655c09d388cc86bc8582334cb28fe0d22b0b4ab81eea49a79cf1",
+        "bytes": 16207
+      }
+    }
+  ],
+  "onlyBoundedGeneratedCacheMayChange": true,
+  "actualFullSelectedInputsStable": true,
+  "beforeCopyUnchanged": true
+}

@@ -1,0 +1,13 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java
+@@ -420,6 +420,10 @@
+   void historicalExecutionCannotBeRelabelledAsFullEvidence() throws SQLException {
+     UUID revision = publish("latest-retained-publication").revisionId();
+     try (Connection c = transaction()) {
++      // RED MUTANT ONLY: dropping the partial index is rollback-scoped.
++      try (Statement mutant = c.createStatement()) {
++        mutant.execute("DROP INDEX idx_ui_test_exec_full_baseline");
++      }
+       assertThat(
+               scalar(
+                   c,

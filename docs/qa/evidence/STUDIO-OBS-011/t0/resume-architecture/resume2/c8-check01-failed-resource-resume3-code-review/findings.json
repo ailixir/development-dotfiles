@@ -1,0 +1,41 @@
+{
+  "decision": "FAIL_HOLD_NEW_AUTHOR_PACKET_REQUIRED",
+  "subjectManifestSha256": "fd4195e7ec23851b6bd6b50529a8656cb17b29cd83f85ddcc4f270b85e06236f",
+  "mandatoryFindings": [
+    {
+      "id": "C8-FR3-01",
+      "severity": "HIGH",
+      "status": "OPEN_MANDATORY",
+      "title": "Reused inherited-baseline JSON is still interpreted without verifying its consumed buffer",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume3/failed_resource.py",
+      "lines": [
+        307,
+        309,
+        310,
+        311,
+        319,
+        320,
+        393
+      ],
+      "relatedSource": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fullcheck-harness/resume3/harness.py",
+        "sha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+        "lines": [
+          44,
+          54,
+          155,
+          157
+        ]
+      },
+      "baselinePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/diag-start1-harness/resume2/preexisting-baseline.json",
+      "expectedBaselineSha256": "fd39b45fd27689034742d5a3205461e9aa4a316baa810f8488216f8f49b7101a",
+      "facts": "helpers wraps capture and table, and wraps old.safe_bytes for the original source observer, but retains the CORE regular function used by boundary_inventory. boundary_inventory calls json.loads(regular(ROOT / plan.baselinePath)); this regular returns file bytes without comparing them to the bound baseline digest. The earlier source observer hashes that helper in a separate read. The later baseline interpretation is not routed through verified_read or a required exact baseline pin.",
+      "pairedEvidence": "independent-check-results.json: actual extracted helpers plus exact pinned CORE regular/boundary_inventory, explicit in-memory file/census/identity/capture/time boundaries. Unchanged and changed baseline buffers each yield inheritedMatched6 and no changed/absent flags. Actual verified_read rejects the same changed buffer before JSON parsing. Four explicit real OS/file/fcntl/process guard proofs also pass.",
+      "impact": "The declared same-buffer immutable-JSON fix remains incomplete at a live resource-boundary consumer. Changed baseline bytes can define which six identities are treated as inherited before any guarantee that those are the reviewed six. This is a source/fake-boundary counterexample, not actual evidence tampering or a demonstrated real gate allow.",
+      "requiredFix": "Bind the baseline path and digest from the verified exact plan, require that binding before interpretation, and route the reused boundary reader through safe fresh returned-buffer verification. Reject an unbound/changed target before json.loads, with no stale cache and no original-core/source/runtime modification. Add faithful valid/changed/unbound-baseline paired cases and reseal a new author packet."
+    }
+  ],
+  "ordinaryRoute": "IMMUTABLE_HARD_HOLD",
+  "newRootOperationalAuthority": false,
+  "C8Credit": false
+}

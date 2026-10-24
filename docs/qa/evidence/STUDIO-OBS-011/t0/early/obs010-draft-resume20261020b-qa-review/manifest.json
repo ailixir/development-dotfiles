@@ -1,0 +1,33 @@
+{
+  "kind": "BOUNDED_AFFECTED_CORRECTION_QA_REVIEW_MANIFEST",
+  "subjectManifestSha256": "834450ec1f7da042d0629cf1d649351c9f8a1006357a75af12cb312a53adfbe5",
+  "payloads": [
+    {
+      "path": "check_correction.py",
+      "bytes": 9393,
+      "sha256": "af38ff6afd63c3af614aa40d4e079f9bfac91a9b12ea0e371be2d55f0172bd83"
+    },
+    {
+      "path": "findings.json",
+      "bytes": 1341,
+      "sha256": "8a777a741a005783e3fde756e0647aba0222ae536e68cac0c3fe3bdc52d48ca1"
+    },
+    {
+      "path": "integrity.json",
+      "bytes": 3331,
+      "sha256": "fca510a799f0980d0c1ac3069028a9692591ef0d779c7d62764ae81895776d01"
+    },
+    {
+      "path": "review.md",
+      "bytes": 8266,
+      "sha256": "9bfd9c7490e9670c64960359cdecc37a27838c1a35666bcd03bc296c6298b513"
+    }
+  ],
+  "manifestExcludes": [
+    "manifest.json",
+    "SHA256SUMS"
+  ],
+  "checksumExcludes": [
+    "SHA256SUMS"
+  ]
+}

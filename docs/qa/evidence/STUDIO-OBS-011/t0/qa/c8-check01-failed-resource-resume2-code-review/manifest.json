@@ -1,0 +1,38 @@
+{
+  "kind": "INDEPENDENT_QUINN_FAILED_RESOURCE_CODE02_REVIEW",
+  "decision": "FAIL_HOLD_NEW_SEALED_SUCCESSOR_REQUIRED",
+  "subjectManifestSha256": "38c5d4cc0ae6477dc0f60a63d3c76792953daca72ab4233e54ae271405728b0b",
+  "members": [
+    {
+      "path": "reproduce.py",
+      "sha256": "276cb22fbc2358d593b580f52ef40aede0277ecbd73b153281d6c2cc74a1de00",
+      "bytes": 10596
+    },
+    {
+      "path": "input-pins.json",
+      "sha256": "cf406b133f0559951c7d42f53c2f734c9f67387f88cedf3a697abb2e8869d762",
+      "bytes": 22979
+    },
+    {
+      "path": "independent-results.json",
+      "sha256": "7d4788ab21e3d6d9076d25d5de3e909d08a59e51a70a5cf68c7a6260a6ca5ead",
+      "bytes": 4422
+    },
+    {
+      "path": "review.md",
+      "sha256": "1d191cf48c460b9cc55725dd153deac7ecbb541e522d65bf307214568d3ddfed",
+      "bytes": 8397
+    },
+    {
+      "path": "findings.json",
+      "sha256": "e1b1e7b94688378684eaef6eeb54007bee740858a2ab38136a97ec157c29f5f3",
+      "bytes": 1534
+    }
+  ],
+  "mandatoryFindings": 3,
+  "authorCasesReproduced": 164,
+  "independentResults": 12,
+  "actualRuntimeImportsMainsOsNativePrivateActions": 0,
+  "noCredit": true,
+  "sealRule": "Manifest seals listed members, no self-hash."
+}

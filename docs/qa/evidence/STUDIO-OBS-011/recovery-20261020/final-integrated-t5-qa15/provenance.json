@@ -1,0 +1,66 @@
+{
+  "scope": "DURABLE_QA15_STORY_BOUND_GATE_PROVENANCE",
+  "verdict": "PASS",
+  "reviewer": "Quinn (@qa; independent SDC reviewer)",
+  "story": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+  "statusBefore": "InReview",
+  "statusAfter": "Done",
+  "inputLatestVersion": "0.2.18",
+  "outputLatestVersion": "0.2.19",
+  "rawInputSha256": "0e4ad7f2220c9cecd0d24adad1515c61085e30dda4fad5015bd154e6989c41ff",
+  "rawOutputSha256": "1322576cf6065d0035b61bb3e91eb739a3ee125debd58092af0699154725d092",
+  "rawInputOutputDifferent": true,
+  "reviewed_revision": "story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee",
+  "recipe": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/story-content-revision-v1.py",
+    "sha256": "1fc0b7b7a8dbac78223afa0bbcbf527d0c84b38f4e4f1b83554556eb5ec7c8ed",
+    "bytes": 1246
+  },
+  "canonicalInputRevision": "story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee",
+  "canonicalOutputCurrentRevision": "story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee",
+  "canonicalBeforeAfterEqual": true,
+  "canonicalInputRetainedBytes": 109890,
+  "before": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/story-before.md",
+    "sha256": "0e4ad7f2220c9cecd0d24adad1515c61085e30dda4fad5015bd154e6989c41ff",
+    "bytes": 129649
+  },
+  "after": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/story-after.md",
+    "sha256": "1322576cf6065d0035b61bb3e91eb739a3ee125debd58092af0699154725d092",
+    "bytes": 134262
+  },
+  "gate": {
+    "path": "docs/qa/gates/STUDIO-OBS-011-final-sweep-inventory-re-run-leftover-removal-and-code-health-refactors.yml",
+    "sha256": "ed5da84a069da7cf87f94a72964359f369b7576f99d0990d9c06ecf71ffd2e3b",
+    "bytes": 3910
+  },
+  "gateCopy": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/gate-copy.yml",
+    "sha256": "ed5da84a069da7cf87f94a72964359f369b7576f99d0990d9c06ecf71ffd2e3b",
+    "bytes": 3910
+  },
+  "guardReport": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/field-scope-guards.json",
+    "sha256": "d679fe9149660fbdf7acab19515ba08fd33cc776d4545ded0795da80d64a70dd",
+    "bytes": 870
+  },
+  "pureDocumentInvarianceAndSensitivityChecks": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/revision-operation-checks.json",
+    "sha256": "02d92eb83231e5036c9081e3b6f4590b45417969765a7b1f12e832ff5a41c8b7",
+    "bytes": 779
+  },
+  "rawFileListStoryPinQualification": "Developer14 supplement pins the reviewed raw0e4 developer input. QA output raw SHA is separately bound here. The public content revision remains stable under permitted QA/PO/status/checklist administrative changes; retained-body changes require review.",
+  "poVerificationCommand": [
+    "python3",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-integrated-t5-qa15/story-content-revision-v1.py",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md"
+  ],
+  "poMustVerifyRecipeShaBeforeExecutingAndCheckTasksSeparately": true,
+  "gateAndQaResultsRevisionMatch": true,
+  "qaResultsGateLineExact": true,
+  "waiverActive": false,
+  "postGateDeveloperQualityChecklistBookkeepingRequired": true,
+  "qaDidNotPerformPoCloseOrRemotePublication": true,
+  "nativeTestProjectionCompilerProviderCalls": 0
+}

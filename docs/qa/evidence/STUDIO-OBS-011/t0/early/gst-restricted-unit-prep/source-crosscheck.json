@@ -1,0 +1,54 @@
+{
+  "meaning": "Read-only current SOURCE comparison to original immutable S011 inventory, never replacement baseline",
+  "sourceCount": 1808,
+  "sourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+  "distCount": 238,
+  "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "mainCount": 506,
+  "mainJava": 473,
+  "resources": 33,
+  "versionedSqlMigrations": 22,
+  "seedSql": 1,
+  "allSqlPreserved": 23,
+  "helm": 22,
+  "quoted": 20,
+  "helpers": 6,
+  "allCurrentExactHashesMatched": true,
+  "writerBindings": [
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "beforeSha256": "4d47ad6f8d67bfd3278b0d3f3930085e90f190d0ea500875272082eb97a7754e",
+      "afterSha256": "8f84ec18bf522d09e2afbbc1b885b2a98bb58072ced14ba54c9e27497209d70d",
+      "compileVerified": false,
+      "runtimeVerified": false,
+      "currentMode": "0644"
+    },
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "beforeSha256": "8e5e4473c54e3884008ca63a3c87888ba6dcca514b5165f9dc40f8f20991613b",
+      "afterSha256": "2213e3884cc81d6ff609257933bf6f7a4e9a3110e80f6a3d94c221d75b42be2d",
+      "compileVerified": false,
+      "runtimeVerified": false,
+      "currentMode": "0644"
+    },
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "beforeSha256": "97162010003856cdc7f55f411e286a70f381a664c78c2e5b5cde7d5415784db9",
+      "afterSha256": "10d3706043430730edc921804dd1b8eb06a5326eb690f8c33f2571d7300fe1b5",
+      "compileVerified": false,
+      "runtimeVerified": false,
+      "currentMode": "0644"
+    }
+  ],
+  "sourceMethods": 80,
+  "ModeVariants": 9,
+  "fullFiveClassExpandedCases": 99,
+  "caseCounts": {
+    "com.citi.put.checks.studio.guided.session.GuidedCommittedRefreshStateTest": 3,
+    "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT": 8,
+    "com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT": 5,
+    "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT": 39,
+    "com.citi.put.checks.studio.guided.session.GuidedSessionIT": 44
+  },
+  "formatterCompilerJavaNativeExecuted": false
+}

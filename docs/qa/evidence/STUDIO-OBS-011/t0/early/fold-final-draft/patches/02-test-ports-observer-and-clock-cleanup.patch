@@ -1,0 +1,1247 @@
+--- /dev/null
++++ b/backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchTestAccess.java
+@@ -0,0 +1,11 @@
++package com.citi.put.checks.studio.dispatch;
++
++/** Test-only access to the package-private owned-byte observer; no production SPI is added. */
++public final class DispatchTestAccess {
++  private DispatchTestAccess() {}
++
++  public static void observeRequestBytes(HttpRunnerDispatchClient client,
++      java.util.function.Consumer<byte[]> observer) {
++    client.observeRequestBytes(observer);
++  }
++}
+--- a/backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java
+@@ -6,8 +6,7 @@
+ 
+ import com.citi.put.checks.ChecksApplication;
+ import com.citi.put.checks.studio.StudioExecutionProperties;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
+-import com.citi.put.checks.studio.guided.publication.ObservedValidationClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.session.GuidedContracts;
+ import com.citi.put.checks.studio.guided.session.GuidedSessionConfiguration;
+ import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+@@ -76,7 +75,7 @@
+  *
+  * <ul>
+  *   <li>Submission ({@code POST /v2/runs}), cancel ({@code DELETE /v2/runs/{id}}) and bridge
+- *       traffic ({@code GuidedRunnerClient}) succeed only with the CA-issued backend certificate
++ *       traffic ({@code HttpRunnerDispatchClient}) succeed only with the CA-issued backend certificate
+  *       and a runner that the CA issued.
+  *   <li>No certificate, a certificate the CA did not issue, a server the CA did not issue, a
+  *       certificate for another host, and plaintext in either direction are each refused.
+@@ -234,7 +233,7 @@
+ 
+     assertThat(refused.kind()).isEqualTo(DispatchOutcome.Kind.AMBIGUOUS);
+     assertThat(bridge.getMessage()).isEqualTo("UNKNOWN_OUTCOME");
+-    assertThat(GuidedRunnerClient.definiteContextRefusal(bridge)).isFalse();
++    assertThat(HttpRunnerDispatchClient.definiteContextRefusal(bridge)).isFalse();
+     assertThat(elsewhere.calls()).hasValue(0);
+     // The one different input: the same flow against a certificate that names this host.
+     TlsPeer runner = start(Identity.RUNNER, true);
+@@ -243,7 +242,7 @@
+                 .send(RunJobFixtures.conformingJob())
+                 .kind())
+         .isEqualTo(DispatchOutcome.Kind.ACCEPTED);
+-    assertThat(GuidedRunnerClient.definiteContextRefusal(contextPush(backend, runner.url())))
++    assertThat(HttpRunnerDispatchClient.definiteContextRefusal(contextPush(backend, runner.url())))
+         .isTrue();
+   }
+ 
+@@ -255,7 +254,7 @@
+ 
+     GuidedSessionException withBackend = contextPush(CA.backendTls(), runner.url());
+     // The runner's closed refusal reached the client: the application layer was reached over mTLS.
+-    assertThat(GuidedRunnerClient.definiteContextRefusal(withBackend)).isTrue();
++    assertThat(HttpRunnerDispatchClient.definiteContextRefusal(withBackend)).isTrue();
+     assertThat(runner.calls()).hasValue(1);
+     assertThat(runner.peers()).containsExactly(BACKEND_SUBJECT);
+     assertThat(runner.requests())
+@@ -271,7 +270,7 @@
+ 
+     for (GuidedSessionException refused : List.of(noCertificate, rogueCertificate)) {
+       assertThat(refused.getMessage()).isEqualTo("UNKNOWN_OUTCOME");
+-      assertThat(GuidedRunnerClient.definiteContextRefusal(refused)).isFalse();
++      assertThat(HttpRunnerDispatchClient.definiteContextRefusal(refused)).isFalse();
+     }
+     assertThat(runner.calls()).as("neither refused call reached the runner").hasValue(1);
+   }
+@@ -471,8 +470,8 @@
+ 
+     @Autowired StudioRunnerTls tls;
+     @Autowired HttpRunnerDispatchClient dispatch;
+-    @Autowired GuidedRunnerClient bridge;
+-    @Autowired ObservedValidationClient validation;
++    @Autowired HttpRunnerDispatchClient bridge;
++    @Autowired HttpRunnerDispatchClient validation;
+     @Autowired GuidedTranslationCoordinator coordinator;
+ 
+     @Test
+@@ -482,8 +481,8 @@
+       for (Object client :
+           List.of(
+               field(dispatch, "httpClient"),
+-              field(bridge, "client"),
+-              field(validation, "client"),
++              field(bridge, "guidedClient"),
++              field(validation, "validationClient"),
+               field(coordinator, "http"))) {
+         assertThat(((HttpClient) client).sslContext()).isSameAs(tls.sslContext());
+       }
+@@ -491,7 +490,7 @@
+       for (Object client :
+           List.of(
+               field(dispatch, "httpClient"),
+-              field(validation, "client"),
++              field(validation, "validationClient"),
+               field(coordinator, "http"))) {
+         assertThat(((HttpClient) client).sslParameters().getEndpointIdentificationAlgorithm())
+             .isEqualTo("HTTPS");
+@@ -514,7 +513,7 @@
+                           .put("ownerFence", 1)),
+               GuidedSessionException.class);
+ 
+-      assertThat(GuidedRunnerClient.definiteContextRefusal(refusal)).isTrue();
++      assertThat(HttpRunnerDispatchClient.definiteContextRefusal(refusal)).isTrue();
+       assertThat(runner.peers()).containsOnly(BACKEND_SUBJECT);
+       assertThat(runner.requests()).contains("POST /v2/runs");
+     }
+@@ -737,8 +736,8 @@
+ 
+   /** One {@code context} push; the double answers a closed refusal the client classifies. */
+   private static GuidedSessionException contextPush(StudioRunnerTls tls, String url) {
+-    GuidedRunnerClient bridge =
+-        new GuidedRunnerClient(
++    HttpRunnerDispatchClient bridge =
++        new HttpRunnerDispatchClient(
+             URI.create(url),
+             tls.sslContext(),
+             () -> "synthetic-controller-token",
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
+@@ -10,7 +10,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
+ import com.citi.put.checks.studio.support.RunnerProcessHarness;
+ import com.citi.put.checks.studio.support.RunnerTestTls.Identity;
+@@ -170,8 +170,8 @@
+     }
+ 
+     @Bean
+-    GuidedRunnerClient runner() {
+-      return new GuidedRunnerClient(
++    HttpRunnerDispatchClient runner() {
++      return new HttpRunnerDispatchClient(
+           URI.create("https://127.0.0.1:" + ENV.runnerPort),
+           ENV.tls,
+           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -182,7 +182,7 @@
+     GuidedDispatchService dispatch(
+         GuidedSessionService sessions,
+         GuidedMaterializationService materialization,
+-        GuidedRunnerClient runner) {
++        HttpRunnerDispatchClient runner) {
+       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
+       sessions.installStopSender(dispatch::stop);
+       return dispatch;
+@@ -342,7 +342,7 @@
+   @Autowired GuidedSessionRepository repository;
+   @Autowired GuidedMaterializationService materialization;
+   @Autowired GuidedDispatchService dispatch;
+-  @Autowired GuidedRunnerClient runner;
++  @Autowired HttpRunnerDispatchClient runner;
+   @Autowired JdbcTemplate jdbc;
+   @Autowired DataSource fixtureDataSource;
+   final Authentication controller =
+@@ -442,7 +442,7 @@
+             com.citi.put.checks.studio.guided.session.GuidedSessionException.class,
+             refused -> {
+               assertThat(refused).hasMessage("RUNTIME_INCOMPATIBLE");
+-              assertThat(refused.messageCode()).isEqualTo(GuidedRunnerClient.CONTEXT_REFUSED);
++              assertThat(refused.messageCode()).isEqualTo(HttpRunnerDispatchClient.CONTEXT_REFUSED);
+               assertThat(refused.retryable()).isFalse();
+             });
+     ObjectNode wrong = context.deepCopy();
+@@ -494,7 +494,7 @@
+     dispatch.pushContext(controller, id, 1);
+     var digests = new java.util.concurrent.CopyOnWriteArrayList<String>();
+     var observer =
+-        GuidedRunnerClient.class.getDeclaredMethod(
++        HttpRunnerDispatchClient.class.getDeclaredMethod(
+             "observeRequestBytes", java.util.function.Consumer.class);
+     observer.setAccessible(true);
+     observer.invoke(
+@@ -1341,7 +1341,7 @@
+     proxy.start();
+     try {
+       var client =
+-          new GuidedRunnerClient(
++          new HttpRunnerDispatchClient(
+               URI.create("https://localhost:" + proxy.getAddress().getPort()),
+               ENV.tls,
+               () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java
+@@ -18,7 +18,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.translation.CredentialPatternScreen;
+ import com.citi.put.checks.studio.guided.translation.GenAiGuidedLlmGatewayClient;
+ import com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore;
+@@ -339,8 +339,8 @@
+     }
+ 
+     @Bean
+-    GuidedRunnerClient runner() {
+-      return new GuidedRunnerClient(
++    HttpRunnerDispatchClient runner() {
++      return new HttpRunnerDispatchClient(
+           URI.create("https://127.0.0.1:" + ENV.runnerPort),
+           ENV.tls,
+           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -351,7 +351,7 @@
+     GuidedDispatchService dispatch(
+         GuidedSessionService sessions,
+         GuidedMaterializationService materialization,
+-        GuidedRunnerClient runner) {
++        HttpRunnerDispatchClient runner) {
+       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
+       sessions.installStopSender(dispatch::stop);
+       return dispatch;
+@@ -521,7 +521,7 @@
+   @Autowired GuidedSessionRepository repository;
+   @Autowired GuidedMaterializationService materialization;
+   @Autowired GuidedDispatchService dispatch;
+-  @Autowired GuidedRunnerClient runner;
++  @Autowired HttpRunnerDispatchClient runner;
+   @Autowired JdbcTemplate jdbc;
+   @Autowired DataSource fixtureDataSource;
+   @Autowired GuidedTranslationStore store;
+@@ -1678,7 +1678,7 @@
+     proxy.start();
+     try {
+       var faultClient =
+-          new GuidedRunnerClient(
++          new HttpRunnerDispatchClient(
+               URI.create("https://localhost:" + proxy.getAddress().getPort()),
+               ENV.tls,
+               () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java
+@@ -1,5 +1,6 @@
+ package com.citi.put.checks.studio.guided.bridge;
+ 
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.ArgumentMatchers.anyLong;
+@@ -29,7 +30,7 @@
+   private final GuidedContracts contracts = new GuidedContracts();
+   private final Authentication controller = mock(Authentication.class);
+   private final GuidedSessionService sessions = mock(GuidedSessionService.class);
+-  private final GuidedRunnerClient runner = mock(GuidedRunnerClient.class);
++  private final HttpRunnerDispatchClient runner = mock(HttpRunnerDispatchClient.class);
+   private final GuidedDispatchService dispatch =
+       new GuidedDispatchService(sessions, mock(GuidedMaterializationService.class), runner);
+   private final ObjectNode context =
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextRefusalTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextRefusalTest.java
+@@ -1,5 +1,6 @@
+ package com.citi.put.checks.studio.guided.bridge;
+ 
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.assertj.core.api.Assertions.catchThrowableOfType;
+ import static org.mockito.ArgumentMatchers.any;
+@@ -40,7 +41,7 @@
+  * STUDIO-OBS-014, ar-2-r14-stops ruling 2, prepare/admit: a definite runner refusal of the context
+  * re-push ends the session {@code FAILED RUNTIME_INCOMPATIBLE} before {@code prepare} is sent, so
+  * no preparation, admission or ledger row can exist. An uncertain reply keeps today's {@code
+- * UNKNOWN_OUTCOME} and fails nothing. Real {@link GuidedRunnerClient} over HTTPS against a stub
++ * UNKNOWN_OUTCOME} and fails nothing. Real {@link HttpRunnerDispatchClient} over HTTPS against a stub
+  * runner; the session service and materialization are test doubles.
+  */
+ class GuidedDispatchContextRefusalTest {
+@@ -74,7 +75,7 @@
+         });
+     server.start();
+     var runner =
+-        new GuidedRunnerClient(
++        new HttpRunnerDispatchClient(
+             URI.create("https://localhost:" + server.getAddress().getPort()),
+             tls,
+             () -> "synthetic-controller-token",
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java
+@@ -1,5 +1,6 @@
+ package com.citi.put.checks.studio.guided.bridge;
+ 
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.ArgumentMatchers.eq;
+@@ -22,7 +23,7 @@
+  */
+ class GuidedDispatchStopKeyTest {
+   private final GuidedContracts contracts = new GuidedContracts();
+-  private final GuidedRunnerClient runner = mock(GuidedRunnerClient.class);
++  private final HttpRunnerDispatchClient runner = mock(HttpRunnerDispatchClient.class);
+   private final GuidedMaterializationService materialization =
+       mock(GuidedMaterializationService.class);
+   private final GuidedDispatchService dispatch =
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java
+@@ -1,5 +1,6 @@
+ package com.citi.put.checks.studio.guided.bridge;
+ 
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.assertj.core.api.Assertions.assertThatThrownBy;
+ 
+@@ -18,7 +19,7 @@
+   /** The real accepted-body bound, read from {@code BoundedResponse.LIMIT} (not hard-coded). */
+   private static final int LIMIT = limit("$BoundedResponse", "LIMIT");
+ 
+-  /** The real definite-refusal reply bound, read from {@code GuidedRunnerClient.REFUSAL_LIMIT}. */
++  /** The real definite-refusal reply bound, read from {@code HttpRunnerDispatchClient.REFUSAL_LIMIT}. */
+   private static final int REFUSAL_LIMIT = limit("", "REFUSAL_LIMIT");
+ 
+   @Test
+@@ -129,7 +130,7 @@
+   @Test
+   void requestCloseWaitsForOwnedReadMonitorAndRefusesSubsequentReads() throws Exception {
+     byte[] owned = new byte[] {101, 102, 103};
+-    Class<?> type = Class.forName(GuidedRunnerClient.class.getName() + "$OwnedRequestBody");
++    Class<?> type = Class.forName(HttpRunnerDispatchClient.class.getName() + "$OwnedRequestBody");
+     var constructor = type.getDeclaredConstructor(byte[].class);
+     constructor.setAccessible(true);
+     InputStream stream = (InputStream) constructor.newInstance((Object) owned);
+@@ -171,7 +172,7 @@
+   }
+ 
+   private static Object response(int limit) throws Exception {
+-    Class<?> type = Class.forName(GuidedRunnerClient.class.getName() + "$BoundedResponse");
++    Class<?> type = Class.forName(HttpRunnerDispatchClient.class.getName() + "$BoundedResponse");
+     var constructor = type.getDeclaredConstructor(boolean.class, int.class);
+     constructor.setAccessible(true);
+     return constructor.newInstance(true, limit);
+@@ -180,7 +181,7 @@
+   private static int limit(String nested, String name) {
+     try {
+       Field field =
+-          Class.forName(GuidedRunnerClient.class.getName() + nested).getDeclaredField(name);
++          Class.forName(HttpRunnerDispatchClient.class.getName() + nested).getDeclaredField(name);
+       field.setAccessible(true);
+       return field.getInt(null);
+     } catch (ReflectiveOperationException failure) {
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java
+@@ -1,5 +1,6 @@
+ package com.citi.put.checks.studio.guided.bridge;
+ 
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.assertj.core.api.Assertions.catchThrowableOfType;
+ 
+@@ -45,7 +46,7 @@
+   private final AtomicReference<Integer> status = new AtomicReference<>(409);
+   private final ListAppender<ILoggingEvent> logs = new ListAppender<>();
+   private HttpsServer server;
+-  private GuidedRunnerClient client;
++  private HttpRunnerDispatchClient client;
+ 
+   @BeforeEach
+   void start() throws Exception {
+@@ -65,18 +66,18 @@
+         });
+     server.start();
+     client =
+-        new GuidedRunnerClient(
++        new HttpRunnerDispatchClient(
+             URI.create("https://localhost:" + server.getAddress().getPort()),
+             tls,
+             () -> "synthetic-controller-token",
+             contracts);
+     logs.start();
+-    ((Logger) LoggerFactory.getLogger(GuidedRunnerClient.class)).addAppender(logs);
++    ((Logger) LoggerFactory.getLogger(HttpRunnerDispatchClient.class)).addAppender(logs);
+   }
+ 
+   @AfterEach
+   void stop() {
+-    ((Logger) LoggerFactory.getLogger(GuidedRunnerClient.class)).detachAppender(logs);
++    ((Logger) LoggerFactory.getLogger(HttpRunnerDispatchClient.class)).detachAppender(logs);
+     server.stop(0);
+   }
+ 
+@@ -87,7 +88,7 @@
+       assertThat(refusal.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
+       assertThat(refusal.status()).isEqualTo(409);
+       assertThat(refusal.retryable()).isFalse();
+-      assertThat(GuidedRunnerClient.definiteContextRefusal(refusal)).isTrue();
++      assertThat(HttpRunnerDispatchClient.definiteContextRefusal(refusal)).isTrue();
+     }
+     assertThat(logs.list).hasSize(2);
+     assertThat(logs.list.getFirst().getFormattedMessage()).contains("IDENTITY_MISMATCH");
+@@ -101,9 +102,9 @@
+     assertThat(busy.getMessage()).isEqualTo("UNKNOWN_OUTCOME");
+     assertThat(busy.status()).isEqualTo(409);
+     assertThat(busy.retryable()).isFalse();
+-    assertThat(busy.messageCode()).isEqualTo(GuidedRunnerClient.CONTEXT_CLOSED_REFUSAL);
+-    assertThat(GuidedRunnerClient.definiteContextRefusal(busy)).isFalse();
+-    assertThat(GuidedRunnerClient.closedContextRefusal(busy)).isTrue();
++    assertThat(busy.messageCode()).isEqualTo(HttpRunnerDispatchClient.CONTEXT_CLOSED_REFUSAL);
++    assertThat(HttpRunnerDispatchClient.definiteContextRefusal(busy)).isFalse();
++    assertThat(HttpRunnerDispatchClient.closedContextRefusal(busy)).isTrue();
+     assertThat(logs.list).hasSize(1);
+     assertThat(logs.list.getFirst().getFormattedMessage()).contains("BUSY");
+     for (String body :
+@@ -117,15 +118,15 @@
+       assertThat(refusal.getMessage())
+           .as(body.length() > 60 ? "oversize" : body)
+           .isEqualTo("UNKNOWN_OUTCOME");
+-      assertThat(GuidedRunnerClient.definiteContextRefusal(refusal)).isFalse();
+-      assertThat(GuidedRunnerClient.closedContextRefusal(refusal)).isFalse();
++      assertThat(HttpRunnerDispatchClient.definiteContextRefusal(refusal)).isFalse();
++      assertThat(HttpRunnerDispatchClient.closedContextRefusal(refusal)).isFalse();
+     }
+     status.set(503);
+     var unavailable = refused("context", "{\"code\":\"IDENTITY_MISMATCH\"}");
+     assertThat(unavailable.getMessage())
+         .as("only a 409 can be a definite refusal")
+         .isEqualTo("UNKNOWN_OUTCOME");
+-    assertThat(GuidedRunnerClient.closedContextRefusal(unavailable)).isFalse();
++    assertThat(HttpRunnerDispatchClient.closedContextRefusal(unavailable)).isFalse();
+     assertThat(logs.list).as("only the closed BUSY refusal is logged").hasSize(1);
+     assertThat(rendered()).doesNotContain(CANARY);
+   }
+@@ -134,7 +135,7 @@
+   void aPrepareRefusalIsNeverWidenedIntoADefiniteOne() {
+     var refusal = refused("prepare", "{\"code\":\"IDENTITY_MISMATCH\"}");
+     assertThat(refusal.getMessage()).isEqualTo("UNKNOWN_OUTCOME");
+-    assertThat(GuidedRunnerClient.definiteContextRefusal(refusal)).isFalse();
++    assertThat(HttpRunnerDispatchClient.definiteContextRefusal(refusal)).isFalse();
+   }
+ 
+   private GuidedSessionException refused(String operation, String body) {
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java
+@@ -1,5 +1,7 @@
+ package com.citi.put.checks.studio.guided.bridge;
+ 
++import com.citi.put.checks.studio.dispatch.DispatchTestAccess;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.assertj.core.api.Assertions.assertThatThrownBy;
+ 
+@@ -61,7 +63,7 @@
+     server.start();
+     try {
+       var client =
+-          new GuidedRunnerClient(
++          new HttpRunnerDispatchClient(
+               URI.create("https://localhost:" + server.getAddress().getPort()),
+               tls,
+               () -> "synthetic-controller-token",
+@@ -69,7 +71,7 @@
+       for (int reply : new int[] {200, 503}) {
+         status.set(reply);
+         var bytes = new AtomicReference<byte[]>();
+-        client.observeRequestBytes(bytes::set);
++        DispatchTestAccess.observeRequestBytes(client, bytes::set);
+         char[] chars = canary.toCharArray();
+         var secret = new SecretValue(chars);
+         if (reply == 200) {
+@@ -176,12 +178,12 @@
+     var failed = new AtomicReference<Throwable>();
+     var interrupted = new java.util.concurrent.atomic.AtomicBoolean();
+     var client =
+-        new GuidedRunnerClient(
++        new HttpRunnerDispatchClient(
+             URI.create("https://localhost:" + server.getAddress().getPort()),
+             tls,
+             () -> "synthetic-controller-token",
+             contracts);
+-    client.observeRequestBytes(owned::set);
++    DispatchTestAccess.observeRequestBytes(client, owned::set);
+     long started = System.nanoTime();
+     Thread caller =
+         Thread.ofVirtual()
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java
++++ /dev/null
+@@ -1,193 +0,0 @@
+-package com.citi.put.checks.studio.guided.publication;
+-
+-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+-import static com.github.tomakehurst.wiremock.client.WireMock.get;
+-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+-import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+-import static org.assertj.core.api.Assertions.assertThat;
+-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+-
+-import com.citi.put.checks.config.CoreServiceProperties;
+-import com.citi.put.checks.security.BffAuthenticationToken;
+-import com.citi.put.checks.security.CoreServiceClient;
+-import com.citi.put.checks.security.CsiOwnershipEntry;
+-import com.citi.put.checks.security.CsiOwnershipEvaluator;
+-import com.citi.put.checks.security.UserIdentity;
+-import com.citi.put.checks.studio.guided.session.GuidedContracts;
+-import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+-import com.fasterxml.jackson.databind.ObjectMapper;
+-import com.github.tomakehurst.wiremock.WireMockServer;
+-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+-import jakarta.servlet.http.Cookie;
+-import java.time.Clock;
+-import java.time.Instant;
+-import java.time.ZoneOffset;
+-import java.util.List;
+-import org.junit.jupiter.api.AfterEach;
+-import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+-import org.springframework.mock.web.MockHttpServletRequest;
+-
+-/**
+- * Real uncached Core HTTP calls; cached BFF ownership cannot replace current publication authority.
+- */
+-class GuidedPublicationAuthorizationIT {
+-  private static final String COOKIE = "synthetic-core-cookie-only";
+-  private final GuidedContracts contracts = new GuidedContracts();
+-  private final Instant now = Instant.parse("2026-10-09T12:00:00.123456789Z");
+-  private WireMockServer core;
+-  private GuidedPublicationAuthorization authorization;
+-  private BffAuthenticationToken owner;
+-  private MockHttpServletRequest request;
+-
+-  @BeforeEach
+-  void start() {
+-    core = new WireMockServer(WireMockConfiguration.options().dynamicPort());
+-    core.start();
+-    authorization =
+-        new GuidedPublicationAuthorization(
+-            new CoreServiceClient(
+-                new CoreServiceProperties(
+-                    core.baseUrl(), new CoreServiceProperties.Timeout(500, 500)),
+-                new ObjectMapper()),
+-            new CsiOwnershipEvaluator(),
+-            Clock.fixed(now, ZoneOffset.UTC),
+-            new GuidedPublicationProperties(
+-                true, 3, 15000, 5000, PublicationContracts.MAX_VALIDATION_BYTES));
+-    owner =
+-        new BffAuthenticationToken(
+-            new UserIdentity(
+-                "owner",
+-                "owner@example.invalid",
+-                "Owner",
+-                "test",
+-                List.of(),
+-                List.of(new CsiOwnershipEntry("1234", "owner"))));
+-    request = new MockHttpServletRequest();
+-    request.setCookies(new Cookie("put_session", COOKIE));
+-  }
+-
+-  @AfterEach
+-  void stop() {
+-    core.stop();
+-  }
+-
+-  private void current(String principal, String role) {
+-    core.stubFor(
+-        get(urlEqualTo("/api/v1/users/me"))
+-            .withHeader("Cookie", equalTo("put_session=" + COOKIE))
+-            .willReturn(
+-                okJson(
+-                    "{\"user_id\":\""
+-                        + principal
+-                        + "\",\"roles\":[],\"csi_ownership\":[{\"csi_id\":\"1234\",\"role\":\""
+-                        + role
+-                        + "\"}]}")));
+-  }
+-
+-  private PublicationContracts.Receipt receipt() {
+-    return new PublicationContracts.Receipt(
+-        contracts.object().put("originalPrincipalId", "owner").put("csiId", "1234"));
+-  }
+-
+-  @Test
+-  void historicalReceiptNeedsFreshReadButNoExecuteSessionOrAccountAuthority() {
+-    current("owner", "viewer");
+-    authorization.authorizeReceiptRead(owner, request, receipt());
+-    authorization.authorizeReceiptRead(owner, request, receipt());
+-    core.verify(2, getRequestedFor(urlEqualTo("/api/v1/users/me")));
+-    assertThatThrownBy(() -> authorization.fresh(owner, request, "owner", "1234", true))
+-        .isInstanceOf(GuidedSessionException.class)
+-        .hasMessage("FORBIDDEN_SCOPE");
+-  }
+-
+-  @Test
+-  void changedPrincipalCannotUseCachedOriginalOwner() {
+-    current("intruder", "owner");
+-    assertThatThrownBy(() -> authorization.authorizeReceiptRead(owner, request, receipt()))
+-        .isInstanceOf(GuidedSessionException.class)
+-        .hasMessage("FORBIDDEN_SCOPE");
+-    core.verify(1, getRequestedFor(urlEqualTo("/api/v1/users/me")));
+-  }
+-
+-  @Test
+-  void revokedReadAndMissingCookieRefuseWithoutCookiePersistence() {
+-    current("owner", "none");
+-    assertThatThrownBy(() -> authorization.authorizeReceiptRead(owner, request, receipt()))
+-        .hasMessage("FORBIDDEN_SCOPE");
+-    MockHttpServletRequest missing = new MockHttpServletRequest();
+-    assertThatThrownBy(() -> authorization.authorizeReceiptRead(owner, missing, receipt()))
+-        .hasMessage("UNAUTHENTICATED");
+-    core.verify(1, getRequestedFor(urlEqualTo("/api/v1/users/me")));
+-    assertThat(receipt().document().toString()).doesNotContain(COOKIE);
+-  }
+-
+-  @Test
+-  void expiredCookieAndUnavailableCoreNeverFallBackToCachedIdentity() {
+-    core.stubFor(get(urlEqualTo("/api/v1/users/me")).willReturn(aResponse().withStatus(401)));
+-    assertThatThrownBy(() -> authorization.authorizeReceiptRead(owner, request, receipt()))
+-        .hasMessage("UNAUTHENTICATED");
+-    core.resetAll();
+-    core.stubFor(get(urlEqualTo("/api/v1/users/me")).willReturn(aResponse().withStatus(503)));
+-    assertThatThrownBy(() -> authorization.authorizeReceiptRead(owner, request, receipt()))
+-        .hasMessage("AUTHORITY_UNAVAILABLE");
+-  }
+-
+-  @Test
+-  void publishGrantIsBoundToOriginalCapturedDeadlineAndNeverExtendedByRenewal() {
+-    current("owner", "owner");
+-    var identity = contracts.object();
+-    identity
+-        .putObject("base")
+-        .put("sessionId", "s")
+-        .put("originalPrincipalId", "owner")
+-        .put("csiId", "1234");
+-    identity.put("validationDeadline", "2026-10-09T12:00:01.000Z");
+-    var snapshot = new PublicationContracts.Snapshot(identity, contracts.object());
+-    var session = contracts.object().put("expiresAt", "2026-10-09T12:05:00.000Z");
+-    session.putObject("owner").put("leaseExpiresAt", "2026-10-09T12:04:00.000Z");
+-    var grant = authorization.authorizePublication(owner, request, snapshot, session);
+-    assertThat(grant.expiresAt()).isEqualTo(Instant.parse("2026-10-09T12:00:01.000Z"));
+-    assertThat(grant.snapshotHash()).isEqualTo(snapshot.hash());
+-    identity.put("validationDeadline", "2026-10-09T11:59:59.000Z");
+-    assertThatThrownBy(
+-            () ->
+-                authorization.authorizePublication(
+-                    owner,
+-                    request,
+-                    new PublicationContracts.Snapshot(identity, contracts.object()),
+-                    session))
+-        .hasMessage("EXPIRED");
+-  }
+-
+-  @Test
+-  void observedTimeUsesExactMillisecondsAndFloorsAuthorityDeadlines() {
+-    assertThat(PublicationContracts.time(Instant.parse("2026-10-09T12:00:00Z")))
+-        .isEqualTo("2026-10-09T12:00:00.000Z");
+-    assertThat(PublicationContracts.time(now)).isEqualTo("2026-10-09T12:00:00.123Z");
+-    assertThat(PublicationContracts.millisecond(now)).isBefore(now);
+-  }
+-
+-  @Test
+-  void packagedObservedArtifactsResolveDefinitionsWithoutRecursingOrRelaxingClosure()
+-      throws Exception {
+-    for (String name : List.of("fresh-order-reference", "control-value-reference")) {
+-      var fixture =
+-          contracts.parse(
+-              java.nio.file.Files.readString(
+-                  java.nio.file.Path.of(
+-                      "../studio-runner/fixtures/observed-reference/" + name + ".json")));
+-      var artifact = fixture.path("artifact");
+-      contracts.validate("v3/replay-artifact", artifact);
+-      var mutated = (com.fasterxml.jackson.databind.node.ObjectNode) artifact.deepCopy();
+-      ((com.fasterxml.jackson.databind.node.ObjectNode)
+-              mutated.path("steps").get(0).path("operations").get(0))
+-          .put("source", "unsolicited-code");
+-      assertThatThrownBy(() -> contracts.validate("v3/replay-artifact", mutated))
+-          .isInstanceOf(GuidedSessionException.class)
+-          .hasMessage("INVALID_CONTRACT");
+-    }
+-  }
+-}
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -1,5 +1,6 @@
+ package com.citi.put.checks.studio.guided.publication;
+ 
++import com.citi.put.checks.studio.dispatch.DispatchAuthorization;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.assertj.core.api.Assertions.assertThatThrownBy;
+ 
+@@ -1707,7 +1708,7 @@
+             java.util.Arrays.stream(Thread.currentThread().getStackTrace())
+                 .anyMatch(
+                     f ->
+-                        f.getClassName().endsWith("GuidedRunnerClient")
++                        f.getClassName().endsWith("HttpRunnerDispatchClient")
+                             && f.getMethodName().equals("send"));
+         if (!client) {
+           return false;
+@@ -6182,7 +6183,7 @@
+     final org.springframework.transaction.support.TransactionTemplate outside;
+     final GuidedPublicationEvidenceRepository reader;
+     final GuidedPublicationRepository writer;
+-    final ObservedValidationClient validator;
++    final HttpRunnerDispatchClient validator;
+     final AtomicInteger reads = new AtomicInteger();
+     final PublicationContracts.Base base;
+     final ObjectNode genuine;
+@@ -6203,12 +6204,12 @@
+           ownedApplicationContext.getBean(
+               org.springframework.transaction.PlatformTransactionManager.class);
+       tx = new org.springframework.transaction.support.TransactionTemplate(manager);
+-      // ObservedValidationClient.validate refuses any active transaction (RUNTIME_INCOMPATIBLE),
++      // HttpRunnerDispatchClient.validate refuses any active transaction (RUNTIME_INCOMPATIBLE),
+       // exactly as GuidedPlanPublisher calls it between transactions; the staged call suspends.
+       outside = new org.springframework.transaction.support.TransactionTemplate(manager);
+       outside.setPropagationBehavior(
+           org.springframework.transaction.TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
+-      validator = ownedApplicationContext.getBean(ObservedValidationClient.class);
++      validator = ownedApplicationContext.getBean(HttpRunnerDispatchClient.class);
+       // Package-private production constructor; the counting supplier is the stored-reader stage.
+       writer =
+           new GuidedPublicationRepository(
+@@ -6318,7 +6319,9 @@
+                   new PublicationBudget(attempt.validationDeadline(), java.time.Clock.systemUTC());
+               JsonNode verdict;
+               try {
+-                verdict = outside.execute(ignored -> validator.validate(outgoing, budget));
++                verdict = outside.execute(ignored -> validator.validate(outgoing, budget,
++                    ownedApplicationContext.getBean(GuidedPublicationProperties.class).maxValidationBytes(),
++                    ownedApplicationContext.getBean(GuidedPublicationProperties.class).validationTimeoutMs()));
+               } catch (GuidedSessionException failure) {
+                 stage[0] = "VALIDATOR_FAILURE";
+                 stage[1] = failure.getMessage();
+@@ -10167,7 +10170,7 @@
+         new com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore(jdbc, C);
+     var runner =
+         ownedApplicationContext.getBean(
+-            com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.class);
++            com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.class);
+     // ---- Phase A: a real unexpired, unconsumed preparation blocks the append (A46-1) ----
+     assertThat(hold.entered.await(60, java.util.concurrent.TimeUnit.SECONDS))
+         .as("suffix SOURCE_PLAN in flight")
+@@ -36896,9 +36899,9 @@
+         StackTraceElement frame = stack[i];
+         if (frame
+                 .getClassName()
+-                .equals("com.citi.put.checks.studio.guided.publication.ObservedValidationClient")
++                .equals("com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient")
+             && frame.getMethodName().equals("validate")
+-            && "ObservedValidationClient.java".equals(frame.getFileName())) {
++            && "HttpRunnerDispatchClient.java".equals(frame.getFileName())) {
+           if (client >= 0) {
+             return;
+           }
+@@ -38420,7 +38423,7 @@
+               List.of(
+                           "com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization",
+                           "com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver",
+-                          "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorization")
++                          "com.citi.put.checks.studio.guided.publication.PublicationGrantAuthority")
+                       .indexOf(frame.getClassName())
+                   + 1;
+           if (candidate > 0) {
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java
+@@ -1,5 +1,6 @@
+ package com.citi.put.checks.studio.guided.publication;
+ 
++import com.citi.put.checks.studio.dispatch.DispatchAuthorization;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.ArgumentMatchers.anyString;
+@@ -174,8 +175,8 @@
+     }
+ 
+     @Bean
+-    GuidedPublicationAuthorization authority() {
+-      return mock(GuidedPublicationAuthorization.class);
++    DispatchAuthorization authority() {
++      return mock(DispatchAuthorization.class);
+     }
+ 
+     @Bean
+@@ -205,7 +206,7 @@
+         JdbcTemplate jdbc,
+         ObservedRevisionVerifier verifier,
+         ObservedReplayPins pins,
+-        GuidedPublicationAuthorization authority,
++        DispatchAuthorization authority,
+         com.citi.put.checks.studio.dispatch.StudioReferenceResolver references,
+         ObservedReplayProperties properties,
+         StudioExecutionProperties execution) {
+@@ -247,7 +248,7 @@
+   @Autowired private StrictInternalBodyReader reader;
+   @Autowired private com.citi.put.checks.studio.dispatch.StudioReferenceResolver references;
+   @Autowired private ObservedRevisionVerifier verifier;
+-  @Autowired private GuidedPublicationAuthorization authority;
++  @Autowired private DispatchAuthorization authority;
+   @MockBean private ProgressReportService progress;
+   @MockBean private ExecutionControlService control;
+   private final HttpClient http =
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java
+@@ -1,5 +1,7 @@
+ package com.citi.put.checks.studio.guided.publication;
+ 
++import com.citi.put.checks.studio.dispatch.DispatchAuthorization;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.C;
+ import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.array;
+ import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.at;
+@@ -114,37 +116,35 @@
+         .thenReturn(java.net.http.HttpClient.Redirect.NEVER);
+     var tokenCalls = new java.util.concurrent.atomic.AtomicInteger();
+     var client =
+-        new ObservedValidationClient(
++        new HttpRunnerDispatchClient(
+             java.net.URI.create("http://localhost"),
+             http,
+             () -> {
+               tokenCalls.incrementAndGet();
+               return "controlled-local-token";
+             },
+-            checked,
+-            new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608));
++            checked);
+     org.mockito.Mockito.clearInvocations(http);
+     var now = Instant.parse("2026-10-12T12:00:00Z");
+     var expired =
+         new PublicationBudget(
+             now.minusMillis(1), java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
+-    assertThatThrownBy(() -> client.validate(request, expired)).hasMessage("EXPIRED");
++    assertThatThrownBy(() -> client.validate(request, expired, 8388608, 15000)).hasMessage("EXPIRED");
+     assertThat(tokenCalls.get()).isEqualTo(1);
+-    assertThatThrownBy(() -> client.validate(request.deepCopy().put("unexpected", true), expired))
++    assertThatThrownBy(() -> client.validate(request.deepCopy().put("unexpected", true), expired, 8388608, 15000))
+         .hasMessage("INVALID_CONTRACT");
+     assertThat(tokenCalls.get()).isEqualTo(1);
+     var tight =
+-        new ObservedValidationClient(
++        new HttpRunnerDispatchClient(
+             java.net.URI.create("http://localhost"),
+             http,
+             () -> {
+               tokenCalls.incrementAndGet();
+               return "controlled-local-token";
+             },
+-            checked,
+-            new GuidedPublicationProperties(true, 3, 15000, 5000, 1));
++            checked);
+     org.mockito.Mockito.clearInvocations(http);
+-    assertThatThrownBy(() -> tight.validate(request, expired)).hasMessage("BUDGET_EXCEEDED");
++    assertThatThrownBy(() -> tight.validate(request, expired, 1, 15000)).hasMessage("BUDGET_EXCEEDED");
+     assertThat(tokenCalls.get()).isEqualTo(1);
+     org.mockito.Mockito.verifyNoInteractions(http);
+   }
+@@ -162,18 +162,17 @@
+     org.mockito.Mockito.when(http.followRedirects())
+         .thenReturn(java.net.http.HttpClient.Redirect.NEVER);
+     var client =
+-        new ObservedValidationClient(
++        new HttpRunnerDispatchClient(
+             java.net.URI.create("http://localhost"),
+             http,
+             () -> "controlled-local-token",
+-            checked,
+-            new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608));
++            checked);
+     var now = Instant.parse("2026-10-12T12:00:00Z");
+     var expired =
+         new PublicationBudget(
+             now.minusMillis(1), java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
+     org.mockito.Mockito.clearInvocations(http);
+-    assertThatThrownBy(() -> client.validate(checked.object(), expired))
++    assertThatThrownBy(() -> client.validate(checked.object(), expired, 8388608, 15000))
+         .hasMessage("INVALID_CONTRACT");
+     // Existing void-path refusal stub must still win over an already-expired budget.
+     org.mockito.Mockito.doThrow(new GuidedSessionException("INVALID_CONTRACT", 422))
+@@ -182,7 +181,7 @@
+             org.mockito.ArgumentMatchers.eq("v3/replay-validation"),
+             org.mockito.ArgumentMatchers.any());
+     org.mockito.Mockito.clearInvocations(http);
+-    assertThatThrownBy(() -> client.validate(checked.object(), expired))
++    assertThatThrownBy(() -> client.validate(checked.object(), expired, 8388608, 15000))
+         .hasMessage("INVALID_CONTRACT");
+     org.mockito.Mockito.verify(checked, org.mockito.Mockito.times(2))
+         .validate(
+@@ -386,7 +385,7 @@
+             })
+         .when(access)
+         .checkCurrent(org.mockito.ArgumentMatchers.any());
+-    var validator = org.mockito.Mockito.mock(ObservedValidationClient.class);
++    var validator = org.mockito.Mockito.mock(HttpRunnerDispatchClient.class);
+     var publisher =
+         new GuidedPlanPublisher(
+             sessions,
+@@ -398,7 +397,7 @@
+             checked,
+             pins,
+             validator,
+-            org.mockito.Mockito.mock(GuidedPublicationAuthorization.class),
++            org.mockito.Mockito.mock(DispatchAuthorization.class),
+             access,
+             new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608),
+             new ObservedReplayProperties(
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java
+@@ -109,7 +109,7 @@
+   private record Event(String kind, Instant value) {}
+ 
+   @SpyBean private JdbcTemplate jdbc;
+-  @SpyBean private GuidedPublicationAuthorization accounts;
++  @SpyBean private PublicationGrantAuthority accounts;
+   @SpyBean private ObservedReplayAuthorizer authorizer;
+   @Autowired private StudioService studio;
+   @Autowired private StudioAcceptanceService acceptance;
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java
+@@ -1,5 +1,6 @@
+ package com.citi.put.checks.studio.guided.publication;
+ 
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.assertj.core.api.Assertions.assertThatThrownBy;
+ 
+@@ -233,7 +234,7 @@
+                 GuidedPlanPublisher.class,
+                 GuidedPublicationController.class,
+                 GuidedPublicationResultProjector.class,
+-                ObservedValidationClient.class,
++                HttpRunnerDispatchClient.class,
+                 ObservedRevisionVerifier.class,
+                 ObservedReplayAuthorization.class,
+                 ExecutionReadinessService.class,
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java
+@@ -79,7 +79,6 @@
+   @Autowired private GuidedPlanPublisher publisher;
+   @Autowired private GuidedSessionRepository sessions;
+   @Autowired private GuidedPublicationBaseRepository bases;
+-  @Autowired private GuidedPublicationAuthorization legacyAuthority;
+   @Autowired private ApplicationContext context;
+   @Autowired private TransactionTemplate tx;
+   @Autowired private OffsetClock jvm;
+@@ -102,9 +101,7 @@
+   }
+ 
+   private Object authority() {
+-    // Compiles before the new class exists, allowing a genuine red-first run on JVM-clock main.
+-    return context.containsBean("publicationGrantAuthority")
+-        ? context.getBean("publicationGrantAuthority") : legacyAuthority;
++    return context.getBean("publicationGrantAuthority");
+   }
+ 
+   private PublicationContracts.Snapshot snapshot(Instant deadline) {
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
+@@ -20,7 +20,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.evidence.GuidedRecordingKeys;
+ import com.citi.put.checks.studio.guided.evidence.GuidedRecordingProperties;
+ import com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceInternalController;
+@@ -501,8 +501,8 @@
+     }
+ 
+     @Bean
+-    GuidedRunnerClient runner() {
+-      return new GuidedRunnerClient(
++    HttpRunnerDispatchClient runner() {
++      return new HttpRunnerDispatchClient(
+           URI.create("https://127.0.0.1:" + RUNNER_PORT),
+           TLS,
+           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -513,7 +513,7 @@
+     GuidedDispatchService dispatch(
+         GuidedSessionService sessions,
+         GuidedMaterializationService materialization,
+-        GuidedRunnerClient runner) {
++        HttpRunnerDispatchClient runner) {
+       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
+       sessions.installStopSender(dispatch::stop);
+       return dispatch;
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -18,7 +18,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
+ import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
+ import com.citi.put.checks.studio.secrets.SecretAuditLifecycle;
+@@ -467,7 +467,7 @@
+                     && secret.equals("PASS")));
+     sessions.installStopSender(dispatch::stop);
+     var observer =
+-        GuidedRunnerClient.class.getDeclaredMethod(
++        HttpRunnerDispatchClient.class.getDeclaredMethod(
+             "observeRequestBytes", java.util.function.Consumer.class);
+     observer.setAccessible(true);
+     observer.invoke(
+@@ -744,7 +744,7 @@
+         sessions.installStopSender(
+             (contextToStop, reason) -> stopWork.send(dispatch, contextToStop, reason));
+         var observer =
+-            GuidedRunnerClient.class.getDeclaredMethod(
++            HttpRunnerDispatchClient.class.getDeclaredMethod(
+                 "observeRequestBytes", java.util.function.Consumer.class);
+         observer.setAccessible(true);
+         observer.invoke(
+@@ -2275,7 +2275,7 @@
+     sessions.installStopSender(
+         (contextToStop, reason) -> stopWork.send(dispatch, contextToStop, reason));
+     var observer =
+-        GuidedRunnerClient.class.getDeclaredMethod(
++        HttpRunnerDispatchClient.class.getDeclaredMethod(
+             "observeRequestBytes", java.util.function.Consumer.class);
+     observer.setAccessible(true);
+     observer.invoke(
+@@ -3497,7 +3497,7 @@
+       SSLContext tls = SSLContext.getInstance("TLS");
+       tls.init(km.getKeyManagers(), tm.getTrustManagers(), new SecureRandom());
+       var receiver =
+-          new GuidedRunnerClient(
++          new HttpRunnerDispatchClient(
+               URI.create(cfg.path("runner").asText()),
+               tls,
+               () -> cfg.path("runnerToken").asText(),
+@@ -5605,8 +5605,8 @@
+     }
+   }
+ 
+-  private static GuidedRunnerClient client() {
+-    return new GuidedRunnerClient(
++  private static HttpRunnerDispatchClient client() {
++    return new HttpRunnerDispatchClient(
+         URI.create("https://localhost:" + RELAY.getAddress().getPort()),
+         TLS,
+         () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -13,14 +13,14 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+ import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
+ import com.citi.put.checks.studio.guided.publication.GuidedPlanPublisher;
+-import com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorization;
++import com.citi.put.checks.studio.dispatch.DispatchAuthorization;
+ import com.citi.put.checks.studio.guided.publication.GuidedPublicationBaseRepository;
+ import com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceRepository;
+ import com.citi.put.checks.studio.guided.publication.GuidedPublicationProperties;
+ import com.citi.put.checks.studio.guided.publication.GuidedPublicationRepository;
+ import com.citi.put.checks.studio.guided.publication.ObservedReplayPins;
+ import com.citi.put.checks.studio.guided.publication.ObservedReplayProperties;
+-import com.citi.put.checks.studio.guided.publication.ObservedValidationClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.fasterxml.jackson.databind.JsonNode;
+ import com.fasterxml.jackson.databind.ObjectMapper;
+ import com.fasterxml.jackson.databind.node.ObjectNode;
+@@ -1705,7 +1705,7 @@
+   }
+ 
+   private JsonNode publish(String id, String key, JsonNode request) {
+-    var validator = org.mockito.Mockito.mock(ObservedValidationClient.class);
++    var validator = org.mockito.Mockito.mock(HttpRunnerDispatchClient.class);
+     var publisher =
+         new GuidedPlanPublisher(
+             repository,
+@@ -1716,7 +1716,7 @@
+             contracts,
+             org.mockito.Mockito.mock(ObservedReplayPins.class),
+             validator,
+-            org.mockito.Mockito.mock(GuidedPublicationAuthorization.class),
++            org.mockito.Mockito.mock(DispatchAuthorization.class),
+             access,
+             new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608),
+             new ObservedReplayProperties(
+@@ -1897,7 +1897,7 @@
+ 
+   private PlanningPath planner(String id) {
+     return planningPaths.computeIfAbsent(id, ignored -> {
+-      var runner = org.mockito.Mockito.mock(com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.class);
++      var runner = org.mockito.Mockito.mock(com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.class);
+       org.mockito.stubbing.Answer<JsonNode> contextReply = call -> {
+         JsonNode context = call.getArgument(1);
+         if (repository.transaction(() -> !repository.lock(id).progress().has("executionEvidence"))) {
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java
+@@ -17,7 +17,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.session.GuidedContracts;
+ import com.citi.put.checks.studio.guided.session.GuidedInternalController;
+ import com.citi.put.checks.studio.guided.session.GuidedInternalSecurity;
+@@ -644,8 +644,8 @@
+     }
+ 
+     @Bean
+-    GuidedRunnerClient runner() {
+-      return new GuidedRunnerClient(
++    HttpRunnerDispatchClient runner() {
++      return new HttpRunnerDispatchClient(
+           URI.create("https://127.0.0.1:" + RUNNER_PORT),
+           TLS,
+           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -656,7 +656,7 @@
+     GuidedDispatchService dispatch(
+         GuidedSessionService sessions,
+         GuidedMaterializationService materialization,
+-        GuidedRunnerClient runner) {
++        HttpRunnerDispatchClient runner) {
+       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
+       sessions.installStopSender(dispatch::stop);
+       return dispatch;
+@@ -865,7 +865,7 @@
+   @Autowired GuidedSessionRepository repository;
+   @Autowired GuidedMaterializationService materialization;
+   @Autowired GuidedDispatchService dispatch;
+-  @Autowired GuidedRunnerClient runner;
++  @Autowired HttpRunnerDispatchClient runner;
+   @Autowired JdbcTemplate jdbc;
+   @Autowired DataSource fixtureDataSource;
+   @Autowired GuidedTranslationStore store;
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -17,7 +17,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.translation.CredentialPatternScreen;
+ import com.citi.put.checks.studio.guided.translation.GenAiGuidedLlmGatewayClient;
+ import com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore;
+@@ -458,8 +458,8 @@
+     }
+ 
+     @Bean
+-    GuidedRunnerClient runner() {
+-      return new GuidedRunnerClient(
++    HttpRunnerDispatchClient runner() {
++      return new HttpRunnerDispatchClient(
+           URI.create("https://127.0.0.1:" + Environment.RUNNER_PORT),
+           Environment.TLS,
+           () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -470,7 +470,7 @@
+     GuidedDispatchService dispatch(
+         GuidedSessionService sessions,
+         GuidedMaterializationService materialization,
+-        GuidedRunnerClient runner) {
++        HttpRunnerDispatchClient runner) {
+       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
+       sessions.installStopSender(dispatch::stop);
+       return dispatch;
+@@ -2136,7 +2136,7 @@
+             String.class,
+             id);
+     var realClient =
+-        new GuidedRunnerClient(
++        new HttpRunnerDispatchClient(
+             URI.create("https://127.0.0.1:" + Environment.RUNNER_PORT),
+             Environment.TLS,
+             () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -2179,7 +2179,7 @@
+     var log = new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();
+     log.start();
+     var logger =
+-        (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(GuidedRunnerClient.class);
++        (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(HttpRunnerDispatchClient.class);
+     logger.addAppender(log);
+     try {
+       var refusal =
+@@ -2192,7 +2192,7 @@
+       assertThat(refusal.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
+       assertThat(refusal.status()).isEqualTo(409);
+       assertThat(refusal.retryable()).isFalse();
+-      assertThat(refusal.messageCode()).isEqualTo(GuidedRunnerClient.CONTEXT_REFUSED);
++      assertThat(refusal.messageCode()).isEqualTo(HttpRunnerDispatchClient.CONTEXT_REFUSED);
+       assertThat(contextCalls.get()).isEqualTo(1);
+       assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
+       assertThat(log.list)
+@@ -2329,7 +2329,7 @@
+    * refuses the first bootstrap context with IDENTITY_MISMATCH. Exactly one context request is
+    * made, the session is FAILED with errorCode RUNTIME_INCOMPATIBLE, the caller gets 409
+    * retryable:false, and a second continuation makes zero runner (and zero model) requests and
+-   * returns the terminal session. The real GuidedRunnerClient classifies the stub's reply.
++   * returns the terminal session. The real HttpRunnerDispatchClient classifies the stub's reply.
+    */
+   @Test
+   void aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried() throws Exception {
+@@ -2466,7 +2466,7 @@
+       return new GuidedDispatchService(
+           sessions,
+           materialization,
+-          new GuidedRunnerClient(
++          new HttpRunnerDispatchClient(
+               URI.create("https://localhost:" + server.getAddress().getPort()),
+               Environment.TLS,
+               () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSuffixMaterializationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSuffixMaterializationTest.java
+@@ -15,7 +15,7 @@
+ import static org.mockito.Mockito.when;
+ 
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.session.GuidedContracts;
+ import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+ import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
+@@ -124,14 +124,14 @@
+   void closedNonDefiniteAppendRefusalIsTerminalOnFirstReceipt() {
+     assertAppendRefusalIsTerminal(
+         new GuidedSessionException(
+-            "UNKNOWN_OUTCOME", 409, GuidedRunnerClient.CONTEXT_CLOSED_REFUSAL, false, null));
++            "UNKNOWN_OUTCOME", 409, HttpRunnerDispatchClient.CONTEXT_CLOSED_REFUSAL, false, null));
+   }
+ 
+   @Test
+   void definiteAppendRefusalIsTerminal() {
+     assertAppendRefusalIsTerminal(
+         new GuidedSessionException(
+-            "RUNTIME_INCOMPATIBLE", 409, GuidedRunnerClient.CONTEXT_REFUSED, false, null));
++            "RUNTIME_INCOMPATIBLE", 409, HttpRunnerDispatchClient.CONTEXT_REFUSED, false, null));
+   }
+ 
+   @Test
+@@ -191,7 +191,7 @@
+     when(sessions.contextDeliveryId(controller, ID, FENCE)).thenReturn(null);
+     var refusal =
+         new GuidedSessionException(
+-            "RUNTIME_INCOMPATIBLE", 409, GuidedRunnerClient.CONTEXT_REFUSED, false, null);
++            "RUNTIME_INCOMPATIBLE", 409, HttpRunnerDispatchClient.CONTEXT_REFUSED, false, null);
+     when(dispatch.pushContext(controller, ID, FENCE)).thenThrow(refusal);
+ 
+     assertThat(failure()).isSameAs(refusal);
+@@ -221,7 +221,7 @@
+     assertThat(failure.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
+     assertThat(failure.status()).isEqualTo(409);
+     assertThat(failure.retryable()).isFalse();
+-    assertThat(failure.messageCode()).isEqualTo(GuidedRunnerClient.CONTEXT_REFUSED);
++    assertThat(failure.messageCode()).isEqualTo(HttpRunnerDispatchClient.CONTEXT_REFUSED);
+   }
+ 
+   private GuidedSessionException failure() {

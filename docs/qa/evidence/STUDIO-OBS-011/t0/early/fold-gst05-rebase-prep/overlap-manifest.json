@@ -1,0 +1,149 @@
+{
+  "status": "CONTINGENT_OVERLAP_PREVIEW_NOT_ATOMIC_APPLICATION_READY",
+  "originalAtomicManifestPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/atomic-manifest.json",
+  "originalAtomicManifestSha256": "d857284d9cf38d78572cd43f40914db1997edf6edcfad196305b068094508593",
+  "originalOperationCount": 37,
+  "rebasedOverlapCount": 2,
+  "remainingOperationsUnchangedCount": 35,
+  "overlaps": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "originalAtomicOperation": {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+        "operation": "edit",
+        "preimageSha256": "7e58a455aa98d5f036cda36f109d4a0fcd49b90b8e769a7799f8ddafcfb84804",
+        "candidateSha256": "b490f2aba25e69319b80b1541d966b16b5304af8d58ddb980895d6b716c3f8fd",
+        "preimageMode": "0o644",
+        "candidateMode": "0o644",
+        "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedSessionIT.java.patch",
+        "patchSha256": "0594ed703b36687bf3418df02cce300d03474ede5edffa6b629047ca41df7293",
+        "ownership": "v7 exact FOLD-final"
+      },
+      "preparedPreimagePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/virtual-pre-final/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "preparedFOLDPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/final-candidates/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "gs05ArchivePath": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-05/formatted-candidate-archive/GuidedSessionIT.java",
+      "gs05PreimageSha256": "372310ef566be885eef60b6129974827d754e35aee37ce8925b38fceb2427558",
+      "previewPath": "preview/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "previewSha256": "7c47be9e01a309f3f44a4227e441de2ee6fbeb00e388b9bc9325ca233f8abbaf",
+      "mode": "0o644",
+      "portMapping": [
+        {
+          "before": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+          "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+          "replacements": 1
+        },
+        {
+          "before": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorization",
+          "after": "com.citi.put.checks.studio.dispatch.DispatchAuthorization",
+          "replacements": 1
+        },
+        {
+          "before": "com.citi.put.checks.studio.guided.publication.ObservedValidationClient",
+          "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+          "replacements": 1
+        },
+        {
+          "before": "GuidedPublicationAuthorization",
+          "after": "DispatchAuthorization",
+          "replacements": 1
+        },
+        {
+          "before": "ObservedValidationClient",
+          "after": "HttpRunnerDispatchClient",
+          "replacements": 1
+        }
+      ],
+      "foldPreparedMapping": [
+        {
+          "before": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+          "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+          "replacements": 1
+        },
+        {
+          "before": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorization",
+          "after": "com.citi.put.checks.studio.dispatch.DispatchAuthorization",
+          "replacements": 1
+        },
+        {
+          "before": "com.citi.put.checks.studio.guided.publication.ObservedValidationClient",
+          "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+          "replacements": 1
+        },
+        {
+          "before": "GuidedPublicationAuthorization",
+          "after": "DispatchAuthorization",
+          "replacements": 1
+        },
+        {
+          "before": "ObservedValidationClient",
+          "after": "HttpRunnerDispatchClient",
+          "replacements": 1
+        }
+      ],
+      "exactFoldDeltaIsOnlyMapping": true,
+      "additionalGsFrameMatcherPort": false,
+      "patch": "patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedSessionIT.java.patch",
+      "patchSha256": "34c29904f8baaef106ea8c02f04e57e5f0b5b6c5188e88209a0cd22d493af545",
+      "runtimeVerified": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "originalAtomicOperation": {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+        "operation": "edit",
+        "preimageSha256": "c8d6a2ca64fcd79ffd94bec8f454ffe1b3ccb2ae18282e2cce46f41d51cf8aea",
+        "candidateSha256": "01d280ca1456d526f91928c6fd0e72a80da61ab93ee2e67fcb849b76314c0a5a",
+        "preimageMode": "0o644",
+        "candidateMode": "0o644",
+        "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedServiceTransportFaultIT.java.patch",
+        "patchSha256": "fccef3a194eca2fc47dc5f4d19e011a424ba822ad6a120d50dcea09b06db39a0",
+        "ownership": "v7 exact FOLD-final"
+      },
+      "preparedPreimagePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/virtual-pre-final/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "preparedFOLDPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/final-candidates/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "gs05ArchivePath": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-05/formatted-candidate-archive/GuidedServiceTransportFaultIT.java",
+      "gs05PreimageSha256": "7856020f0fb27e9bca9c1d1f235bd9a0c2eecd3bf135b7c16c6c7aa4ad4f269d",
+      "previewPath": "preview/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "previewSha256": "f01487887422fc7bfb94f83542ec986a4818c4b41ec31acda86f7a71a7438475",
+      "mode": "0o644",
+      "portMapping": [
+        {
+          "before": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+          "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+          "replacements": 2
+        },
+        {
+          "before": "GuidedRunnerClient",
+          "after": "HttpRunnerDispatchClient",
+          "replacements": 6
+        }
+      ],
+      "foldPreparedMapping": [
+        {
+          "before": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+          "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+          "replacements": 1
+        },
+        {
+          "before": "GuidedRunnerClient",
+          "after": "HttpRunnerDispatchClient",
+          "replacements": 6
+        }
+      ],
+      "exactFoldDeltaIsOnlyMapping": true,
+      "additionalGsFrameMatcherPort": true,
+      "patch": "patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedServiceTransportFaultIT.java.patch",
+      "patchSha256": "cf441aac6d45133ab5492afb53552a8c4c45b7673b816a841a139f4742921df6",
+      "runtimeVerified": false
+    }
+  ],
+  "remainingOperationsFile": "unchanged-35-operations.json",
+  "remainingPatchAuthority": "Original sealed FOLD package; exact37 per-path patch hashes verified, none edited/copied",
+  "unresolved": [
+    "FOLD-GST05-LIFECYCLE-OWNERSHIP-01"
+  ],
+  "requiresAcceptedGsT05AndLaterPrerequisiteRebases": true,
+  "actualNativeOutcome": "UNKNOWN",
+  "fullFoldOrApplicationReady": false,
+  "runtimeOrLaneCredit": false
+}

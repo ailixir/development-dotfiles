@@ -1,0 +1,36 @@
+{
+  "kind": "INDEPENDENT_QUINN_EXACT_TERMINAL_FAILED_RESOURCE_DESIGN_REVIEW",
+  "subjectManifestSha256": "2250bd3c5f20cde5682d0d20959c76a28de44b09ed953192f10d2308d96f9c5a",
+  "decision": "CONDITIONAL_SUPPORT_EXACT_FAILED_RESOURCE_IMPLEMENTATION_PREPARATION_ONLY",
+  "members": [
+    {
+      "path": "check_supplied_design.py",
+      "sha256": "f1b9572f8e9d33f98741be115e24447d99d2988016e283e57348e04ca85ceca4",
+      "bytes": 7124
+    },
+    {
+      "path": "input-pins.json",
+      "sha256": "9721ffb30badd8b2542ed5249da9ed592aad86b44283c68e6001d07bf7fb57c8",
+      "bytes": 3560
+    },
+    {
+      "path": "supplied-data-results.json",
+      "sha256": "efc7dc4a1bc5c5bd6a675678062dc8eedab60fbc4f310f738341fedd0feb133c",
+      "bytes": 3815
+    },
+    {
+      "path": "findings.json",
+      "sha256": "7bb3fcac513880aeb3c1ebb96cb0d5fdeac5bbd9d81d35c2650260aaa28ccae1",
+      "bytes": 739
+    },
+    {
+      "path": "review.md",
+      "sha256": "745e32ae2ac0ca32514cb85b4f1abad6efb05fbf4e756cefc6f5c6c468ed009d",
+      "bytes": 5667
+    }
+  ],
+  "mandatoryFindings": 0,
+  "suppliedDataChecks": 40,
+  "noActualActionsOrCredit": true,
+  "sealRule": "Manifest seals listed members and does not self-hash."
+}

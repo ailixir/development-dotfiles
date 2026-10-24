@@ -1,0 +1,40 @@
+{
+  "kind": "QUINN_EXISTING_009_GATEWAY_DRAFT_ALL_SOURCE_FINDINGS",
+  "reviewer": "Quinn",
+  "subject": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/manifest.json",
+    "sha256": "2fb7008ce20c4a5de47c17b790daa0bfb66e25a00452351b4b08ed6a944ea516",
+    "bytes": 1065
+  },
+  "combinedPatch": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/gateway-chart-draft.patch",
+    "sha256": "30080476f4b6fdf3a7c1ec3dd7ad06ef050ff6342f5cca6a73000110bff68b0d",
+    "bytes": 8249
+  },
+  "ariaAssessmentManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway-config-protection-gap-20261020/manifest.json",
+    "sha256": "990b104e59214fb4aa5f725ef1ce10d32edb1ef1a1d56f7de767bf1e4415635d",
+    "bytes": 1211
+  },
+  "verdict": "ACCEPT_BOUNDED_SOURCE_PROPOSAL_ALL_EXECUTION_GATES_OWED",
+  "mandatoryFindingCount": 0,
+  "mandatoryFindings": [],
+  "allFindingsTogether": true,
+  "sourceProposalOnly": true,
+  "existing009Owners": [
+    "Gage @devops",
+    "Dex @dev"
+  ],
+  "sourceEditOrApplyAuthorized": false,
+  "draftApprovalTransfer": false,
+  "new011SourceScope": false,
+  "actualRuntimeAuthority": false,
+  "credit": false,
+  "storyLifecycleChanged": false,
+  "qualifications": [
+    "Exact error matching plus positive controls are meaningful source designs; actual fixtures/red-green results remain unexecuted.",
+    "Dev provider=disabled equality does not prove a file-credential mount. Existing Vertex mount/routing assertions remain separate.",
+    "Canonical environment precedence and generic env/secret alias-policy disclosure remain; no complete configuration-closure or deployed exploit claim.",
+    "Aria historical npm example is superseded for future work by established pnpm collector/config invocation."
+  ]
+}

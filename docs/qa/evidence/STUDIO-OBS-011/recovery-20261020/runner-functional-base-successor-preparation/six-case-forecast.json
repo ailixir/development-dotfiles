@@ -1,0 +1,103 @@
+{
+  "kind": "UNEXECUTED_FULL_SUITE_FORECAST_FROM_EXECUTED_BASELINE_AND_EXACT_NEW_IDENTITIES",
+  "baselineReport": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-current-unit01-vitest.json",
+    "sha256": "c3c3465272a9c6fd494b2f12432ba27757628f6a5eabe22df1a7c2cfe79b123e",
+    "total": 2670,
+    "passed": 2645,
+    "skipped": 25
+  },
+  "benchmarkCaseSource": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-hard-gate-execution01/green-reconciliation.json",
+    "sha256": "970b3091c1e1913e409b08710264a9a5dc886874343bd67240ce07c076c262aa",
+    "allOriginal20Retained": true,
+    "added2": [
+      {
+        "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+        "ancestorTitles": [
+          "hard gates"
+        ],
+        "title": "retains an earlier 'false pass' after a clean final attempt is credited",
+        "fullName": "hard gates retains an earlier 'false pass' after a clean final attempt is credited",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+        "ancestorTitles": [
+          "hard gates"
+        ],
+        "title": "retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+        "fullName": "hard gates retains an earlier 'secret or PII leak' after a clean final attempt is credited",
+        "status": "passed"
+      }
+    ]
+  },
+  "renewalCaseSource": {
+    "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-candidate/expected-test-counters.json",
+    "sha256": "ebe746ff20c9590499b9eddafe723a7fbc472c3c28cf230b7fb21ec561bd842d",
+    "allOriginal24OwnershipRetained": true,
+    "stopReason26Unchanged": true,
+    "added4": [
+      {
+        "file": "studio-runner/test/guided/ownership.test.ts",
+        "ancestorTitles": [
+          "009 secret renewal keeps its original claim-phase endpoint"
+        ],
+        "title": "does not install an otherwise valid late grant after a delayed renewal phase has ended",
+        "fullName": "009 secret renewal keeps its original claim-phase endpoint does not install an otherwise valid late grant after a delayed renewal phase has ended",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/guided/ownership.test.ts",
+        "ancestorTitles": [
+          "009 secret renewal keeps its original claim-phase endpoint"
+        ],
+        "title": "rechecks the captured phase after grant validation and a delayed caller continuation",
+        "fullName": "009 secret renewal keeps its original claim-phase endpoint rechecks the captured phase after grant validation and a delayed caller continuation",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/guided/ownership.test.ts",
+        "ancestorTitles": [
+          "009 secret renewal keeps its original claim-phase endpoint"
+        ],
+        "title": "starts no claim and loses authority when the delayed phase has ended inside the session margin",
+        "fullName": "009 secret renewal keeps its original claim-phase endpoint starts no claim and loses authority when the delayed phase has ended inside the session margin",
+        "status": "passed"
+      },
+      {
+        "file": "studio-runner/test/guided/ownership.test.ts",
+        "ancestorTitles": [
+          "009 secret renewal keeps its original claim-phase endpoint"
+        ],
+        "title": "treats a cadence and session-lease-margin tie as LEASE_LOST rather than deferring it to expiry",
+        "fullName": "009 secret renewal keeps its original claim-phase endpoint treats a cadence and session-lease-margin tie as LEASE_LOST rather than deferring it to expiry",
+        "status": "passed"
+      }
+    ],
+    "finalExecutionQa": "UNBOUND"
+  },
+  "forecast": {
+    "total": 2676,
+    "passed": 2651,
+    "failed": 0,
+    "skipped": 25,
+    "runtimeErrors": 0,
+    "newBenchmarkCases": 2,
+    "newRenewalCases": 4
+  },
+  "allOriginalCaseIdentityStatusMultiplicitiesPreserved": true,
+  "perFileOrderRequired": true,
+  "schedulerGlobalFileCompletionOrderNotCaseOrder": true,
+  "exactOriginalPointerRetirementsAnd15DeferredCallbacksCarryFromExistingRtProof": true,
+  "futureFixtureForecast": {
+    "total": 307,
+    "passed": 298,
+    "failed": 0,
+    "skipped": 9,
+    "unchangedExpectedCaseSourcePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-composed-phase2-execution01/fixtures-expected-identities.json",
+    "sourceSha256": "5bd394428fd1103430184eeeb592484d60951935b72dca01813f603204983e6b",
+    "historicalActual297Passed1Failed9SkippedNotRewritten": true
+  },
+  "countsAreForecastsNotCurrentPassOrRuntimeAdmission": true
+}

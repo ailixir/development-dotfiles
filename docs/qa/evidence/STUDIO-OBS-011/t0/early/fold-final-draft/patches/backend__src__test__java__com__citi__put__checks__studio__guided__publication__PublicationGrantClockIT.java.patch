@@ -1,0 +1,21 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java
+@@ -79,7 +79,6 @@
+   @Autowired private GuidedPlanPublisher publisher;
+   @Autowired private GuidedSessionRepository sessions;
+   @Autowired private GuidedPublicationBaseRepository bases;
+-  @Autowired private GuidedPublicationAuthorization legacyAuthority;
+   @Autowired private ApplicationContext context;
+   @Autowired private TransactionTemplate tx;
+   @Autowired private OffsetClock jvm;
+@@ -102,9 +101,7 @@
+   }
+ 
+   private Object authority() {
+-    // Compiles before the new class exists, allowing a genuine red-first run on JVM-clock main.
+-    return context.containsBean("publicationGrantAuthority")
+-        ? context.getBean("publicationGrantAuthority") : legacyAuthority;
++    return context.getBean("publicationGrantAuthority");
+   }
+ 
+   private PublicationContracts.Snapshot snapshot(Instant deadline) {

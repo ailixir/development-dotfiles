@@ -1,0 +1,410 @@
+{
+  "atUtc": "2026-10-19T10:15:28.705864+00:00",
+  "status": "FRESH_COLLECTED_XML_FINITE_SOURCE_FRAME_PROJECTION",
+  "counts": {
+    "total": 99,
+    "passed": 91,
+    "failed": 8,
+    "errors": 0,
+    "skipped": 0
+  },
+  "taskCollectionComplete": true,
+  "xmlCases": 99,
+  "sourceStable": true,
+  "distStable": true,
+  "publicArchivedXmlPins": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-gst-provisional-05-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedCommittedRefreshStateTest.xml",
+      "sha256": "26e84036228d56bc91f81d3be57172ff1dca9729c3b7aabd90ce0960d9bc574a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-gst-provisional-05-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT.xml",
+      "sha256": "a6226ea8437a805b46254facaa00f9c98e5c8780737f4e2e1dade6a707edfc5b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-gst-provisional-05-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT.xml",
+      "sha256": "c666a376eb83935e80406b69232b8205d26fc626f8ca6642b32a8105b4a52b00"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-gst-provisional-05-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.xml",
+      "sha256": "dcd1ed9a181a48f8971a583f706a2e1ebd2ec975b27bccb15dee5da78ee7b91b"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-gst-provisional-05-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedSessionIT.xml",
+      "sha256": "6a2c6b30bb1a7e9a0572186b1f0eb4d0cfe7483dfac3c81499a25fbfb83dd288"
+    }
+  ],
+  "failures": [
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost()",
+      "failureFamily": "ASSERTION",
+      "projectSourceFrames": [
+        {
+          "class": "studio.guided.session.GuidedServiceTransportFaultIT",
+          "method": "runGuidedControllerCut",
+          "file": "GuidedServiceTransportFaultIT.java",
+          "line": 2846
+        },
+        {
+          "class": "studio.guided.session.GuidedServiceTransportFaultIT",
+          "method": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost",
+          "file": "GuidedServiceTransportFaultIT.java",
+          "line": 2607
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost()",
+      "failureFamily": "ASSERTION",
+      "projectSourceFrames": [
+        {
+          "class": "studio.guided.session.GuidedServiceTransportFaultIT",
+          "method": "runGuidedControllerCut",
+          "file": "GuidedServiceTransportFaultIT.java",
+          "line": 2846
+        },
+        {
+          "class": "studio.guided.session.GuidedServiceTransportFaultIT",
+          "method": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost",
+          "file": "GuidedServiceTransportFaultIT.java",
+          "line": 2601
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "clarificationSelectionAndPauseChangeRollBackTogether()",
+      "failureFamily": "ASSERTION",
+      "projectSourceFrames": [
+        {
+          "class": "studio.guided.session.GuidedSessionException",
+          "method": "require",
+          "file": "GuidedSessionException.java",
+          "line": 67
+        },
+        {
+          "class": "studio.guided.translation.GuidedClarificationContextStore",
+          "method": "accept",
+          "file": "GuidedClarificationContextStore.java",
+          "line": 223
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$clarify$16",
+          "file": "GuidedSessionService.java",
+          "line": 881
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$publicCommand$18",
+          "file": "GuidedSessionService.java",
+          "line": 935
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "lambda$transaction$0",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "transaction",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "publicCommand",
+          "file": "GuidedSessionService.java",
+          "line": 922
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "clarify",
+          "file": "GuidedSessionService.java",
+          "line": 793
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer()",
+      "failureFamily": "GUIDED_SESSION",
+      "projectSourceFrames": [
+        {
+          "class": "studio.guided.session.GuidedSessionException",
+          "method": "require",
+          "file": "GuidedSessionException.java",
+          "line": 67
+        },
+        {
+          "class": "studio.guided.translation.GuidedClarificationContextStore",
+          "method": "accept",
+          "file": "GuidedClarificationContextStore.java",
+          "line": 223
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$clarify$16",
+          "file": "GuidedSessionService.java",
+          "line": 881
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$publicCommand$18",
+          "file": "GuidedSessionService.java",
+          "line": 935
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "lambda$transaction$0",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "transaction",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "publicCommand",
+          "file": "GuidedSessionService.java",
+          "line": 922
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "clarify",
+          "file": "GuidedSessionService.java",
+          "line": 793
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "clarificationIsBoundToGenerationChoiceAndOriginalDeadline()",
+      "failureFamily": "GUIDED_SESSION",
+      "projectSourceFrames": [
+        {
+          "class": "studio.guided.session.GuidedSessionException",
+          "method": "require",
+          "file": "GuidedSessionException.java",
+          "line": 67
+        },
+        {
+          "class": "studio.guided.translation.GuidedClarificationContextStore",
+          "method": "accept",
+          "file": "GuidedClarificationContextStore.java",
+          "line": 223
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$clarify$16",
+          "file": "GuidedSessionService.java",
+          "line": 881
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$publicCommand$18",
+          "file": "GuidedSessionService.java",
+          "line": 935
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "lambda$transaction$0",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "transaction",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "publicCommand",
+          "file": "GuidedSessionService.java",
+          "line": 922
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "clarify",
+          "file": "GuidedSessionService.java",
+          "line": 793
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "concurrentConflictingStartsHaveOneWinner()",
+      "failureFamily": "GUIDED_SESSION",
+      "projectSourceFrames": [
+        {
+          "class": "studio.guided.session.GuidedSessionException",
+          "method": "require",
+          "file": "GuidedSessionException.java",
+          "line": 67
+        },
+        {
+          "class": "studio.guided.publication.ObservedReplayPins",
+          "method": "policy",
+          "file": "ObservedReplayPins.java",
+          "line": 77
+        },
+        {
+          "class": "studio.guided.policy.ObservationPolicyService",
+          "method": "activeForStart",
+          "file": "ObservationPolicyService.java",
+          "line": 191
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$start$13",
+          "file": "GuidedSessionService.java",
+          "line": 657
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "lambda$transaction$0",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "transaction",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "start",
+          "file": "GuidedSessionService.java",
+          "line": 633
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionIT",
+          "method": "concurrentConflictingStartsHaveOneWinner",
+          "file": "GuidedSessionIT.java",
+          "line": 200
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping()",
+      "failureFamily": "GUIDED_SESSION",
+      "projectSourceFrames": [
+        {
+          "class": "studio.guided.session.GuidedSessionException",
+          "method": "require",
+          "file": "GuidedSessionException.java",
+          "line": 67
+        },
+        {
+          "class": "studio.guided.translation.GuidedClarificationContextStore",
+          "method": "accept",
+          "file": "GuidedClarificationContextStore.java",
+          "line": 223
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$clarify$16",
+          "file": "GuidedSessionService.java",
+          "line": 881
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$publicCommand$18",
+          "file": "GuidedSessionService.java",
+          "line": 935
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "lambda$transaction$0",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "transaction",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "publicCommand",
+          "file": "GuidedSessionService.java",
+          "line": 922
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "clarify",
+          "file": "GuidedSessionService.java",
+          "line": 793
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState()",
+      "failureFamily": "GUIDED_SESSION",
+      "projectSourceFrames": [
+        {
+          "class": "studio.guided.session.GuidedSessionException",
+          "method": "require",
+          "file": "GuidedSessionException.java",
+          "line": 67
+        },
+        {
+          "class": "studio.guided.translation.GuidedClarificationContextStore",
+          "method": "accept",
+          "file": "GuidedClarificationContextStore.java",
+          "line": 223
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$clarify$16",
+          "file": "GuidedSessionService.java",
+          "line": 881
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "lambda$publicCommand$18",
+          "file": "GuidedSessionService.java",
+          "line": 935
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "lambda$transaction$0",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionRepository",
+          "method": "transaction",
+          "file": "GuidedSessionRepository.java",
+          "line": 35
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "publicCommand",
+          "file": "GuidedSessionService.java",
+          "line": 922
+        },
+        {
+          "class": "studio.guided.session.GuidedSessionService",
+          "method": "clarify",
+          "file": "GuidedSessionService.java",
+          "line": 793
+        }
+      ]
+    }
+  ],
+  "rawMessagesBodiesStackTextExported": false,
+  "actualPrivateRowValuesSqlStateOrRuntimeFirstCauseProven": false,
+  "credit": false
+}

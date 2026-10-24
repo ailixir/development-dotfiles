@@ -1,0 +1,17 @@
+{
+  "ancestorBindingSha256": "d10a5abcb9557b0e80e0229f81cfded6fb219d899e3337d1b035153da84ff365",
+  "ancestorSourceCount": 493,
+  "derivativeSourceCount": 492,
+  "ancestorSourceAllReverified": true,
+  "derivative": "/private/tmp/obs011-runner-deadline-20261020-diag02",
+  "baseSelectedSourceDigest": "2ab9c15d83196485664958cbf803474e3c8f5d1efe84e6509329c35a7665558e",
+  "instrumentedSelectedSourceDigest": "4b58845d9e3135166c51326d23b688b67819e8dca2f56bdc34327b9e5a77c31b",
+  "omittedExactRuntimeOutput": {
+    "path": "studio-runner/short.webm",
+    "sha256": "5fd872525fa77d054b86ca7b50927b4d1f860b21ab2b166fdf6c3ed3c4b5d0bc",
+    "bytes": 4,
+    "publicProducer": "studio-runner/test/guided/evidence.test.ts:111 writes WEBM_MAGIC-only truncated output; no input reference found",
+    "copyPlanAlreadyExcludedIt": true
+  },
+  "reason": "Failed seed01 correctly omitted the known runtime output but incorrectly validated the original493-row catalog. This492-row derivative catalog follows the already-reviewed copy profile; all real copied source inputs remain literal checked. No instrumentation logic change or gate credit."
+}

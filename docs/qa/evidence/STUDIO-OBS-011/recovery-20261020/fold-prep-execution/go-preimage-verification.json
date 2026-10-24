@@ -1,0 +1,377 @@
+{
+  "atUtc": "2026-10-20T14:37:38.128737+00:00",
+  "status": "ROOT_GO_PREIMAGES_VERIFIED",
+  "preflight": {
+    "exit": 0,
+    "safe": true,
+    "threats": [],
+    "budgetCeilingUsd": 500
+  },
+  "checks": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+      "expected": "29eb7654f173c097929f5a32dcf8d6eb092e859e1fc41a59628adfc223ade44e",
+      "actual": "29eb7654f173c097929f5a32dcf8d6eb092e859e1fc41a59628adfc223ade44e",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "expected": "7eeaa3b49107bc1436adf7d0107dedede12f6ad364a756bc41c716ad828c99ae",
+      "actual": "7eeaa3b49107bc1436adf7d0107dedede12f6ad364a756bc41c716ad828c99ae",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "expected": "3da9f5b25e98f28097c587488a408abb149deee2496a9cb440d9710fa27111b0",
+      "actual": "3da9f5b25e98f28097c587488a408abb149deee2496a9cb440d9710fa27111b0",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+      "expected": "24c4c76fed7a4bb71e3773ed744f3507cf25f9762d227da6df2f6ded46bf2278",
+      "actual": "24c4c76fed7a4bb71e3773ed744f3507cf25f9762d227da6df2f6ded46bf2278",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "expected": "aeb3973501558664b2446a40afa760a92b6e4eb45ba0397448c9ad0d5fab4b75",
+      "actual": "aeb3973501558664b2446a40afa760a92b6e4eb45ba0397448c9ad0d5fab4b75",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "expected": "b1ae740ad17255f8c2d80aaaf3edbb621227858996c8aa4dfd1ef313f58fbe50",
+      "actual": "b1ae740ad17255f8c2d80aaaf3edbb621227858996c8aa4dfd1ef313f58fbe50",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+      "expected": "b55a5224cfaf90dc7776c244142e048a52ea23f63b92ca0ff4f7c29afa367dda",
+      "actual": "b55a5224cfaf90dc7776c244142e048a52ea23f63b92ca0ff4f7c29afa367dda",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "expected": "07e6d6cb8043fbd7541a5db39ef2aac5c4747d0129fb8d66f16114db09dbbdc1",
+      "actual": "07e6d6cb8043fbd7541a5db39ef2aac5c4747d0129fb8d66f16114db09dbbdc1",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "expected": "c06279a35213c8b1eea5aca1e84b3b968cba20392e7cb06d6bae21a4d66b967b",
+      "actual": "c06279a35213c8b1eea5aca1e84b3b968cba20392e7cb06d6bae21a4d66b967b",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "expected": "8ac947325e24a16590710eb77ba949c02328f97f0227dac0355f796a0798b90a",
+      "actual": "8ac947325e24a16590710eb77ba949c02328f97f0227dac0355f796a0798b90a",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+      "expected": "ec6448d6baef417ffb69366be9f01bd5da13fa87859a2d8c73a1e83956ce6792",
+      "actual": "ec6448d6baef417ffb69366be9f01bd5da13fa87859a2d8c73a1e83956ce6792",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java",
+      "expected": null,
+      "actual": null,
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "expected": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871",
+      "actual": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+      "expected": null,
+      "actual": null,
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "expected": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660",
+      "actual": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+      "expected": "6d96bb1525ab19828f18d872c375851812923e165b6d40bc0f3b36f4af745cb2",
+      "actual": "6d96bb1525ab19828f18d872c375851812923e165b6d40bc0f3b36f4af745cb2",
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "expected": "58c846b4f5a0a0029cddcc49a7b46431f2f44d4dedb9a86102c4684064944b86",
+      "actual": "58c846b4f5a0a0029cddcc49a7b46431f2f44d4dedb9a86102c4684064944b86",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java",
+      "expected": null,
+      "actual": null,
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "expected": "5b7e47a78f4559ce552bc70d36bc00bc1d3fc15324785b274688173cd5bd5788",
+      "actual": "5b7e47a78f4559ce552bc70d36bc00bc1d3fc15324785b274688173cd5bd5788",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "expected": null,
+      "actual": null,
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/01-red-first-clock.patch",
+      "expected": "ceab6439448d271ed839fdc482dcfc046859fae1164a75528818fc747e6558b7",
+      "actual": "ceab6439448d271ed839fdc482dcfc046859fae1164a75528818fc747e6558b7",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+      "expected": "5a53f4ad07906a35759a75e597f372fd83edbf3b824e58cd7eb4ac4a4546fd71",
+      "actual": "5a53f4ad07906a35759a75e597f372fd83edbf3b824e58cd7eb4ac4a4546fd71",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/03-prep-tests.patch",
+      "expected": "752325ed18bbe295cff9a76f1ee42acd348932a3e7eef27c6846b02949b9eb6f",
+      "actual": "752325ed18bbe295cff9a76f1ee42acd348932a3e7eef27c6846b02949b9eb6f",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/04-PROPOSED-final-wiring-baton.patch",
+      "expected": "5958e52da188ad35e1e9124dcb05a6f5d9d3bb1970a96aabab66886b931adf78",
+      "actual": "5958e52da188ad35e1e9124dcb05a6f5d9d3bb1970a96aabab66886b931adf78",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/05-FINAL-ONLY-clock-fallback-removal.patch",
+      "expected": "7e74b0da39bd032f2989f02e405c09c08f6644668203909df5d94586fc235d7d",
+      "actual": "7e74b0da39bd032f2989f02e405c09c08f6644668203909df5d94586fc235d7d",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/m1-mint.patch",
+      "expected": "1d4c328e00239f9aa6ee5325f1a3174a4064029cf1714bfd5d4221d75094d567",
+      "actual": "1d4c328e00239f9aa6ee5325f1a3174a4064029cf1714bfd5d4221d75094d567",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/m2-judge.patch",
+      "expected": "ee8d58938f8bb7484c85dbea6a9950d7ba13a59c62b93b4b1cb0874a13699d54",
+      "actual": "ee8d58938f8bb7484c85dbea6a9950d7ba13a59c62b93b4b1cb0874a13699d54",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/m3-claim.patch",
+      "expected": "8e8f8535d41c21b5af95fb49f9bb7b9583326121cbb2a6dcd075f29c4c588f45",
+      "actual": "8e8f8535d41c21b5af95fb49f9bb7b9583326121cbb2a6dcd075f29c4c588f45",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/m4-budget.patch",
+      "expected": "1319b4f5f87a863c0c2d4d4dba2645d8d8e77bca565aecd21f27253eb0d4ad77",
+      "actual": "1319b4f5f87a863c0c2d4d4dba2645d8d8e77bca565aecd21f27253eb0d4ad77",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/m5-worker.patch",
+      "expected": "8c368f5d7cdcecab4dc83fed973be479ba4c1cd814df77d2ed855197d34ef168",
+      "actual": "8c368f5d7cdcecab4dc83fed973be479ba4c1cd814df77d2ed855197d34ef168",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "expected": "f85bf21c5efc68a213ce0ac418b2ebd3f4884610513d4a1a68eded71f0c85205",
+      "actual": "f85bf21c5efc68a213ce0ac418b2ebd3f4884610513d4a1a68eded71f0c85205",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "expected": "94f4a7bde4ffc5928f5bd98659e03d592a931edfbe976db50d32c9c4fc63d447",
+      "actual": "94f4a7bde4ffc5928f5bd98659e03d592a931edfbe976db50d32c9c4fc63d447",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java",
+      "expected": "40e83b12314d9656575270ca7c827490d16b383312778104faf8a35f2674974b",
+      "actual": "40e83b12314d9656575270ca7c827490d16b383312778104faf8a35f2674974b",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java",
+      "expected": "cc9407be238952b82562707a32290fb73004cef988722aef9984739677a0ff21",
+      "actual": "cc9407be238952b82562707a32290fb73004cef988722aef9984739677a0ff21",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "expected": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+      "actual": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java",
+      "expected": "25cd088252ce9a4e0437448d6645a58738ff7b9f9fc069c3883bc26f30aa73b5",
+      "actual": "25cd088252ce9a4e0437448d6645a58738ff7b9f9fc069c3883bc26f30aa73b5",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "expected": "9c68ac5bcdc79fba476177cf6bbbab12ee5583e9bfd3fe2c9449fb3a92d41aa9",
+      "actual": "9c68ac5bcdc79fba476177cf6bbbab12ee5583e9bfd3fe2c9449fb3a92d41aa9",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSuffixMaterializationTest.java",
+      "expected": "710ccd98a04751a574940d8f5e5517005692c37b7750f950dc3f50e7fc6718cb",
+      "actual": "710ccd98a04751a574940d8f5e5517005692c37b7750f950dc3f50e7fc6718cb",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "expected": "3ece2d6301108590089dc015886dc4aab940ae418e38af4941ceca586f1acbb8",
+      "actual": "3ece2d6301108590089dc015886dc4aab940ae418e38af4941ceca586f1acbb8",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "expected": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+      "actual": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java",
+      "expected": "98144848bbc5c41db604cd6ed5c1bc6e889737c2c62b9c3f2d652b5e368e47f8",
+      "actual": "98144848bbc5c41db604cd6ed5c1bc6e889737c2c62b9c3f2d652b5e368e47f8",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java",
+      "expected": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416",
+      "actual": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java",
+      "expected": "7efd8bb612de9f9673f2489c8e08e90b44dcf544c144ab201ced442bc7132bfa",
+      "actual": "7efd8bb612de9f9673f2489c8e08e90b44dcf544c144ab201ced442bc7132bfa",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "expected": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+      "actual": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java",
+      "expected": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+      "actual": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextRefusalTest.java",
+      "expected": "594a90d0b11e9203054e485fae52cef28c80796179ed67a58375f586ef4e6681",
+      "actual": "594a90d0b11e9203054e485fae52cef28c80796179ed67a58375f586ef4e6681",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java",
+      "expected": "a1d66073ec6e2d1f72bf2f564136f5db1ceee8c1186c9505581b5109f57dd8af",
+      "actual": "a1d66073ec6e2d1f72bf2f564136f5db1ceee8c1186c9505581b5109f57dd8af",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "expected": "a910868c92c01ce4ec95a6ed3d158fc7ee2d944de3801475fa49ccafdbf49fd8",
+      "actual": "a910868c92c01ce4ec95a6ed3d158fc7ee2d944de3801475fa49ccafdbf49fd8",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "expected": "1daad099ea5fbf23cf4108b00fe3266f08a2c34fba88dcf098851003832023d4",
+      "actual": "1daad099ea5fbf23cf4108b00fe3266f08a2c34fba88dcf098851003832023d4",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "expected": "7270cbfb450faa992cf6dc4d22e90f6b856645cf4b5f22779e7a036b83bdb3df",
+      "actual": "7270cbfb450faa992cf6dc4d22e90f6b856645cf4b5f22779e7a036b83bdb3df",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java",
+      "expected": "3467a465c5e3cc430275bed877a1d1923dcff60df26b9f2531418f5964cf6da3",
+      "actual": "3467a465c5e3cc430275bed877a1d1923dcff60df26b9f2531418f5964cf6da3",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "expected": null,
+      "actual": null,
+      "matches": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/DatabaseClock.java",
+      "expected": "7cffcd144671e2c82cb9645818905fb17688997b8893687b1afa6ad7ec4d505c",
+      "actual": "7cffcd144671e2c82cb9645818905fb17688997b8893687b1afa6ad7ec4d505c",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java",
+      "expected": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+      "actual": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java",
+      "expected": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416",
+      "actual": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "expected": "a910868c92c01ce4ec95a6ed3d158fc7ee2d944de3801475fa49ccafdbf49fd8",
+      "actual": "a910868c92c01ce4ec95a6ed3d158fc7ee2d944de3801475fa49ccafdbf49fd8",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "expected": "7270cbfb450faa992cf6dc4d22e90f6b856645cf4b5f22779e7a036b83bdb3df",
+      "actual": "7270cbfb450faa992cf6dc4d22e90f6b856645cf4b5f22779e7a036b83bdb3df",
+      "matches": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "expected": "a156ff590e975a66e22d52a01357452f8be9787cf30da4c2f204207e9050bbc5",
+      "actual": "a156ff590e975a66e22d52a01357452f8be9787cf30da4c2f204207e9050bbc5",
+      "matches": true
+    }
+  ],
+  "freshLabels": [
+    "obs011-recovery-20261020-foldp-red01",
+    "obs011-recovery-20261020-foldp-01-01",
+    "obs011-recovery-20261020-foldp-02-01",
+    "obs011-recovery-20261020-foldp-03-01",
+    "obs011-recovery-20261020-foldp-overloads01",
+    "obs011-recovery-20261020-foldp-m1-mint-red01",
+    "obs011-recovery-20261020-foldp-m1-mint-green01",
+    "obs011-recovery-20261020-foldp-m2-judge-red01",
+    "obs011-recovery-20261020-foldp-m2-judge-green01",
+    "obs011-recovery-20261020-foldp-m3-claim-red01",
+    "obs011-recovery-20261020-foldp-m3-claim-green01",
+    "obs011-recovery-20261020-foldp-m4-budget-red01",
+    "obs011-recovery-20261020-foldp-m4-budget-green01",
+    "obs011-recovery-20261020-foldp-m5-worker-red01",
+    "obs011-recovery-20261020-foldp-m5-worker-green01"
+  ]
+}

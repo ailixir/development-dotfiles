@@ -1,0 +1,12 @@
+{
+  "finding": "Numeric identity tail dot excludes CR/U2028 and wrongly fails unrelated metadata as ROW_IDENTITY.",
+  "resolution": "CANDIDATE_SOURCE_CORRECTED_PENDING_INDEPENDENT_QA_AND_RUNTIME",
+  "helperChange": "One suffix characterclass [\\s\\S] only.",
+  "coverageCandidate": "Within same4 existing control identities, unrelated capture/confirmation CR+U2028 success and required capture/reparented/currentreachable CR+U2028 rejection.",
+  "all37OldControlsAndFixtureExact": true,
+  "noHistoricalOSCauseClaim": true,
+  "noRuleSuppressionOrTimeoutChange": true,
+  "runtimeProofs": "UNEXECUTED",
+  "actualApplication": "UNEXECUTED",
+  "newCandidateQARequired": true
+}

@@ -1,0 +1,596 @@
+{
+  "purpose": "EXACT_ADOPTED_TERMINAL_DESIGN_NO_LIVE_AUTHORITY",
+  "records": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fullcheck-harness/resume3/harness.py",
+      "sha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+      "bytes": 35979
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-actual-unit-review/manifest.json",
+      "sha256": "c58fac633ab3003e7c1ca07f38aa884776d86887602e984353307c23feda852e",
+      "bytes": 1331
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-terminal-failed-resource-design-review/manifest.json",
+      "sha256": "815738c59684e12628eb26cf8aa18726666d97e4047e93c5cb140bc12acbaf21",
+      "bytes": 1205
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-terminal-failed-resource-design/design.md",
+      "sha256": "e8482fdaabc8dbf0f63f69da8b7f2ef914272865a58eef36c8045f3f0ea13e79",
+      "bytes": 14746
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-terminal-failed-resource-design/evidence-analysis.json",
+      "sha256": "9850e25dc1d541e006123f16c5f326ab2aef0a99fc83cfd2d9e366081a027809",
+      "bytes": 2569
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-terminal-failed-resource-design/findings.json",
+      "sha256": "c58e76fe620cdebed0bb00ad6882902a81170a7a064e75f506807759c2cea4f3",
+      "bytes": 1087
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-terminal-failed-resource-design/input-pins.json",
+      "sha256": "bdf1261008b472bf2f479d23387154d55989bb7483b494205d935e7e28ab8901",
+      "bytes": 7147
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-terminal-failed-resource-design/manifest.json",
+      "sha256": "2250bd3c5f20cde5682d0d20959c76a28de44b09ed953192f10d2308d96f9c5a",
+      "bytes": 1287
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-terminal-failed-resource-design/native-task-build-marker-projection.json",
+      "sha256": "e8ba2328d8650ce84d91af89c9967858401da39bd9fb1c850e05fb204cde780d",
+      "bytes": 5203
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-terminal-failed-resource-design/protocol-contract.json",
+      "sha256": "dadf9e2ae11c3a400fa499463d284d76695f08e88f98d812b531b81d0e58008d",
+      "bytes": 1314
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-terminal-failed-resource-design/retained-errors.json",
+      "sha256": "84bd4b200ef5675dcddadf441e36b34f4e5d9c8770c30e6e229167250cd1d086",
+      "bytes": 17529
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-c8-check01-failed-resource-preparation-root-adoption.json",
+      "sha256": "5eb8c0bce86711684d2c7115356a3f7377085180c1d27b53707901af0961f6a3",
+      "bytes": 3433
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01/root-terminal-evidence-index-01.json",
+      "sha256": "f3d5b283f86fe0196d570f0a04002c758a292689203ddb93a6fe1a4c8d62ebcb",
+      "bytes": 9207
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01/root-terminal-readonly-facts-01.json",
+      "sha256": "0234d4a9e229a49ea5a4659eca7bcaebfb5dbdcff6d8e02b73e36f484a81dfce",
+      "bytes": 743427
+    }
+  ],
+  "retainedContract": {
+    "summary": {
+      "actualPhaseStatus": 1,
+      "nativeGradleExit": 1,
+      "collectorExit": 1,
+      "rawHarnessExit": 1,
+      "phaseExit": 1,
+      "taskCounts": {
+        "test": 2710,
+        "guidedIncrementalTest": 62,
+        "crossReplicaTest": 2
+      },
+      "statusCounts": {
+        "PASS": 2762,
+        "SKIP": 11,
+        "FAIL": 1
+      },
+      "allStickyFlags": {
+        "ownedIdentityObservationGap": true,
+        "ownershipOrLockObservationGap": false,
+        "drainObservationGap": false,
+        "waitObservationGap": false,
+        "receiptWriteFailed": false,
+        "prematureUnlockGap": false,
+        "resourceObservationGap": false,
+        "interrupted": false,
+        "sourceObservationGap": false
+      },
+      "assessmentEvidenceErrorCodes": [
+        "EXACT_NINE_SKIP_MULTISET_MISMATCH",
+        "CURRENT_XML_DYNAMIC_INVENTORY_UNPROVEN",
+        "REQUIRED_TASK_NOT_EXECUTED",
+        "COVERAGE_mergedSessionsExactExecUnion",
+        "COVERAGE_dynamicArtifactsFresh",
+        "COVERAGE_dynamicInventoryComplete",
+        "COVERAGE_dynamicLinksValid",
+        "COVERAGE_allExpectedDynamicFresh",
+        "COVERAGE_freshReport",
+        "COVERAGE_nativeReportAndVerificationSuccessful",
+        "STATIC_OUTPUT_SCOPE_MISMATCH",
+        "MISSING_LINE_RATIO:bundle",
+        "MISSING_LINE_RATIO:compile.gateway",
+        "MISSING_LINE_RATIO:dispatch",
+        "MISSING_LINE_RATIO:internal",
+        "MISSING_LINE_RATIO:recovery",
+        "MISSING_LINE_RATIO:sse",
+        "MISSING_LINE_RATIO:compile",
+        "CURRENT_STICKY_OWNERSHIP_OR_SOURCE_GAP",
+        "TASK_COLLECTION_INCOMPLETE",
+        "DYNAMIC_JACOCO_REPORT_INCOMPLETE",
+        "EXACT_SKIP_POLICY_MISMATCH"
+      ],
+      "assessmentValidationErrors": [
+        "CATALOG_STATUS_FAILURE",
+        "JOIN_COHORT_VALIDATION_FAILED:test",
+        "ACTUAL_NATIVE_GRADLE_NONZERO",
+        "ACTUAL_COLLECTOR_NONZERO",
+        "ACTUAL_OWNED_FOREGROUND_NONZERO"
+      ],
+      "currentRecordedPlusKeeperUnionCount": 2439,
+      "currentRecordedProofCounts": {
+        "PID_ABSENT": 2439
+      },
+      "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+      "ordinaryRoute": "HARD_HOLD",
+      "C8Credit": false
+    },
+    "errors": {
+      "assessmentSha256": "3d46965a41406a463fdf0e86e597cca804a07f925b8bfd8282ee077c65298292",
+      "validationOutcome": "INCOMPLETE",
+      "rawExits": {
+        "nativeGradleExit": 1,
+        "collectorExit": 1,
+        "rawHarnessExit": 1,
+        "phaseExit": 1
+      },
+      "assessmentValidationErrors": [
+        "CATALOG_STATUS_FAILURE",
+        "JOIN_COHORT_VALIDATION_FAILED:test",
+        "ACTUAL_NATIVE_GRADLE_NONZERO",
+        "ACTUAL_COLLECTOR_NONZERO",
+        "ACTUAL_OWNED_FOREGROUND_NONZERO"
+      ],
+      "assessmentEvidenceErrors": [
+        "EXACT_NINE_SKIP_MULTISET_MISMATCH",
+        "CURRENT_XML_DYNAMIC_INVENTORY_UNPROVEN",
+        "REQUIRED_TASK_NOT_EXECUTED",
+        "COVERAGE_mergedSessionsExactExecUnion",
+        "COVERAGE_dynamicArtifactsFresh",
+        "COVERAGE_dynamicInventoryComplete",
+        "COVERAGE_dynamicLinksValid",
+        "COVERAGE_allExpectedDynamicFresh",
+        "COVERAGE_freshReport",
+        "COVERAGE_nativeReportAndVerificationSuccessful",
+        "STATIC_OUTPUT_SCOPE_MISMATCH",
+        "MISSING_LINE_RATIO:bundle",
+        "MISSING_LINE_RATIO:compile.gateway",
+        "MISSING_LINE_RATIO:dispatch",
+        "MISSING_LINE_RATIO:internal",
+        "MISSING_LINE_RATIO:recovery",
+        "MISSING_LINE_RATIO:sse",
+        "MISSING_LINE_RATIO:compile",
+        "CURRENT_STICKY_OWNERSHIP_OR_SOURCE_GAP",
+        "TASK_COLLECTION_INCOMPLETE",
+        "DYNAMIC_JACOCO_REPORT_INCOMPLETE",
+        {
+          "reason": "EXACT_SKIP_POLICY_MISMATCH",
+          "expected": [
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+              "name": "AC-18b \u2014 ranged reads against real Sonic (ED-03 / SPK-03 / 10.18 / 10.19)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+              "name": "AC-19b \u2014 the media route through the real ingress (ED-06 / SPK-02 / 10.18 / 10.19)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.translation.GuidedProviderEvaluationTest",
+              "name": "approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration(TestReporter)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.translation.GuidedSchemaProbeIT",
+              "name": "approvedGatewayProbeAcceptsEveryGuidedProjectionSchema(TestReporter)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.readiness.ExecutionReadinessTest",
+              "name": "targetPolicySelectionAdvancesTheConfigurationRevision()"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+              "name": "AC-13b \u2014 canaries through the integrated path with real material (ED-02 / 10.19)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+              "name": "AC-5b \u2014 resolution confined by the real vault's own policy (ED-02 / 10.18 / 10.19)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+              "name": "AC-7b \u2014 real revocation through a non-bypassed session (ED-02 / 10.18 / 10.19)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.secrets.VaultPolicyIT",
+              "name": "AC-4 Vault policy test (U5, ED-02): UNRUN, owner PUT Core/BFF; a local container is REHEARSAL_ONLY_NON_CREDITING and the image pull is not authorized (U19)"
+            }
+          ],
+          "actual": [
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+              "name": "AC-18b \u2014 ranged reads against real Sonic (ED-03 / SPK-03 / 10.18 / 10.19)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+              "name": "AC-19b \u2014 the media route through the real ingress (ED-06 / SPK-02 / 10.18 / 10.19)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest$ApiRole",
+              "name": "theApiContextHasNeitherScheduledGuidedBean()"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest$WorkerRole",
+              "name": "theWorkerContextBuildsTheReaperAndCoordinatorGraphAndRunsAReaperPass()"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.translation.GuidedProviderEvaluationTest",
+              "name": "approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration(TestReporter)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.translation.GuidedSchemaProbeIT",
+              "name": "approvedGatewayProbeAcceptsEveryGuidedProjectionSchema(TestReporter)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.readiness.ExecutionReadinessTest",
+              "name": "targetPolicySelectionAdvancesTheConfigurationRevision()"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+              "name": "AC-13b \u2014 canaries through the integrated path with real material (ED-02 / 10.19)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+              "name": "AC-7b \u2014 real revocation through a non-bypassed session (ED-02 / 10.18 / 10.19)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+              "name": "AC-5b \u2014 resolution confined by the real vault's own policy (ED-02 / 10.18 / 10.19)"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.secrets.VaultPolicyIT",
+              "name": "AC-4 Vault policy test (U5, ED-02): UNRUN, owner PUT Core/BFF; a local container is REHEARSAL_ONLY_NON_CREDITING and the image pull is not authorized (U19)"
+            }
+          ]
+        }
+      ],
+      "classificationRecords": [
+        {
+          "rawError": "EXACT_NINE_SKIP_MULTISET_MISMATCH",
+          "code": "EXACT_NINE_SKIP_MULTISET_MISMATCH",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:EXACT_NINE_SKIP_MULTISET_MISMATCH"
+        },
+        {
+          "rawError": "CATALOG_STATUS_FAILURE",
+          "code": "CATALOG_STATUS_FAILURE",
+          "disposition": "VALIDATION",
+          "sourceSite": "assessor.validationErrors:CATALOG_STATUS_FAILURE"
+        },
+        {
+          "rawError": "JOIN_COHORT_VALIDATION_FAILED:test",
+          "code": "JOIN_COHORT_VALIDATION_FAILED",
+          "disposition": "VALIDATION",
+          "sourceSite": "assessor.validationErrors:JOIN_COHORT_VALIDATION_FAILED"
+        },
+        {
+          "rawError": "CURRENT_XML_DYNAMIC_INVENTORY_UNPROVEN",
+          "code": "CURRENT_XML_DYNAMIC_INVENTORY_UNPROVEN",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:CURRENT_XML_DYNAMIC_INVENTORY_UNPROVEN"
+        },
+        {
+          "rawError": "REQUIRED_TASK_NOT_EXECUTED",
+          "code": "REQUIRED_TASK_NOT_EXECUTED",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:REQUIRED_TASK_NOT_EXECUTED"
+        },
+        {
+          "rawError": "COVERAGE_mergedSessionsExactExecUnion",
+          "code": "COVERAGE_mergedSessionsExactExecUnion",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:COVERAGE_mergedSessionsExactExecUnion"
+        },
+        {
+          "rawError": "COVERAGE_dynamicArtifactsFresh",
+          "code": "COVERAGE_dynamicArtifactsFresh",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:COVERAGE_dynamicArtifactsFresh"
+        },
+        {
+          "rawError": "COVERAGE_dynamicInventoryComplete",
+          "code": "COVERAGE_dynamicInventoryComplete",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:COVERAGE_dynamicInventoryComplete"
+        },
+        {
+          "rawError": "COVERAGE_dynamicLinksValid",
+          "code": "COVERAGE_dynamicLinksValid",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:COVERAGE_dynamicLinksValid"
+        },
+        {
+          "rawError": "COVERAGE_allExpectedDynamicFresh",
+          "code": "COVERAGE_allExpectedDynamicFresh",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:COVERAGE_allExpectedDynamicFresh"
+        },
+        {
+          "rawError": "COVERAGE_freshReport",
+          "code": "COVERAGE_freshReport",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:COVERAGE_freshReport"
+        },
+        {
+          "rawError": "COVERAGE_nativeReportAndVerificationSuccessful",
+          "code": "COVERAGE_nativeReportAndVerificationSuccessful",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:COVERAGE_nativeReportAndVerificationSuccessful"
+        },
+        {
+          "rawError": "STATIC_OUTPUT_SCOPE_MISMATCH",
+          "code": "STATIC_OUTPUT_SCOPE_MISMATCH",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:STATIC_OUTPUT_SCOPE_MISMATCH"
+        },
+        {
+          "rawError": "MISSING_LINE_RATIO:bundle",
+          "code": "MISSING_LINE_RATIO",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:MISSING_LINE_RATIO"
+        },
+        {
+          "rawError": "MISSING_LINE_RATIO:compile.gateway",
+          "code": "MISSING_LINE_RATIO",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:MISSING_LINE_RATIO"
+        },
+        {
+          "rawError": "MISSING_LINE_RATIO:dispatch",
+          "code": "MISSING_LINE_RATIO",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:MISSING_LINE_RATIO"
+        },
+        {
+          "rawError": "MISSING_LINE_RATIO:internal",
+          "code": "MISSING_LINE_RATIO",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:MISSING_LINE_RATIO"
+        },
+        {
+          "rawError": "MISSING_LINE_RATIO:recovery",
+          "code": "MISSING_LINE_RATIO",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:MISSING_LINE_RATIO"
+        },
+        {
+          "rawError": "MISSING_LINE_RATIO:sse",
+          "code": "MISSING_LINE_RATIO",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:MISSING_LINE_RATIO"
+        },
+        {
+          "rawError": "MISSING_LINE_RATIO:compile",
+          "code": "MISSING_LINE_RATIO",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.validationErrors:MISSING_LINE_RATIO"
+        },
+        {
+          "rawError": "ACTUAL_NATIVE_GRADLE_NONZERO",
+          "code": "ACTUAL_NATIVE_GRADLE_NONZERO",
+          "disposition": "VALIDATION",
+          "sourceSite": "assessor.validationErrors:ACTUAL_NATIVE_GRADLE_NONZERO"
+        },
+        {
+          "rawError": "ACTUAL_COLLECTOR_NONZERO",
+          "code": "ACTUAL_COLLECTOR_NONZERO",
+          "disposition": "VALIDATION",
+          "sourceSite": "assessor.validationErrors:ACTUAL_COLLECTOR_NONZERO"
+        },
+        {
+          "rawError": "ACTUAL_OWNED_FOREGROUND_NONZERO",
+          "code": "ACTUAL_OWNED_FOREGROUND_NONZERO",
+          "disposition": "VALIDATION",
+          "sourceSite": "assessor.validationErrors:ACTUAL_OWNED_FOREGROUND_NONZERO"
+        },
+        {
+          "rawError": "CURRENT_STICKY_OWNERSHIP_OR_SOURCE_GAP",
+          "code": "CURRENT_STICKY_OWNERSHIP_OR_SOURCE_GAP",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.evidenceErrors:CURRENT_STICKY_OWNERSHIP_OR_SOURCE_GAP"
+        },
+        {
+          "rawError": "TASK_COLLECTION_INCOMPLETE",
+          "code": "TASK_COLLECTION_INCOMPLETE",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.evidenceErrors:TASK_COLLECTION_INCOMPLETE"
+        },
+        {
+          "rawError": "DYNAMIC_JACOCO_REPORT_INCOMPLETE",
+          "code": "DYNAMIC_JACOCO_REPORT_INCOMPLETE",
+          "disposition": "EVIDENCE",
+          "sourceSite": "assessor.evidenceErrors:DYNAMIC_JACOCO_REPORT_INCOMPLETE"
+        },
+        {
+          "rawError": {
+            "reason": "EXACT_SKIP_POLICY_MISMATCH",
+            "expected": [
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+                "name": "AC-18b \u2014 ranged reads against real Sonic (ED-03 / SPK-03 / 10.18 / 10.19)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+                "name": "AC-19b \u2014 the media route through the real ingress (ED-06 / SPK-02 / 10.18 / 10.19)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.guided.translation.GuidedProviderEvaluationTest",
+                "name": "approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration(TestReporter)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.guided.translation.GuidedSchemaProbeIT",
+                "name": "approvedGatewayProbeAcceptsEveryGuidedProjectionSchema(TestReporter)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.readiness.ExecutionReadinessTest",
+                "name": "targetPolicySelectionAdvancesTheConfigurationRevision()"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+                "name": "AC-13b \u2014 canaries through the integrated path with real material (ED-02 / 10.19)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+                "name": "AC-5b \u2014 resolution confined by the real vault's own policy (ED-02 / 10.18 / 10.19)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+                "name": "AC-7b \u2014 real revocation through a non-bypassed session (ED-02 / 10.18 / 10.19)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.secrets.VaultPolicyIT",
+                "name": "AC-4 Vault policy test (U5, ED-02): UNRUN, owner PUT Core/BFF; a local container is REHEARSAL_ONLY_NON_CREDITING and the image pull is not authorized (U19)"
+              }
+            ],
+            "actual": [
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+                "name": "AC-18b \u2014 ranged reads against real Sonic (ED-03 / SPK-03 / 10.18 / 10.19)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+                "name": "AC-19b \u2014 the media route through the real ingress (ED-06 / SPK-02 / 10.18 / 10.19)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest$ApiRole",
+                "name": "theApiContextHasNeitherScheduledGuidedBean()"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest$WorkerRole",
+                "name": "theWorkerContextBuildsTheReaperAndCoordinatorGraphAndRunsAReaperPass()"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.guided.translation.GuidedProviderEvaluationTest",
+                "name": "approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration(TestReporter)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.guided.translation.GuidedSchemaProbeIT",
+                "name": "approvedGatewayProbeAcceptsEveryGuidedProjectionSchema(TestReporter)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.readiness.ExecutionReadinessTest",
+                "name": "targetPolicySelectionAdvancesTheConfigurationRevision()"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+                "name": "AC-13b \u2014 canaries through the integrated path with real material (ED-02 / 10.19)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+                "name": "AC-7b \u2014 real revocation through a non-bypassed session (ED-02 / 10.18 / 10.19)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+                "name": "AC-5b \u2014 resolution confined by the real vault's own policy (ED-02 / 10.18 / 10.19)"
+              },
+              {
+                "task": "test",
+                "class": "com.citi.put.checks.studio.secrets.VaultPolicyIT",
+                "name": "AC-4 Vault policy test (U5, ED-02): UNRUN, owner PUT Core/BFF; a local container is REHEARSAL_ONLY_NON_CREDITING and the image pull is not authorized (U19)"
+              }
+            ]
+          },
+          "code": "EXACT_SKIP_POLICY_MISMATCH",
+          "disposition": "EVIDENCE",
+          "sourceSite": "run-backend-tasked.py/taskCollectionErrors:EXACT_SKIP_POLICY_MISMATCH"
+        }
+      ],
+      "unknownClassifications": [],
+      "additionalRawTaskOutcomes": {
+        "checkstyleTest": "FAILED_TERMINAL",
+        "spotbugsTest": "EXPLICIT_SKIPPED"
+      },
+      "noErrorErasedOrReclassified": true,
+      "C8Credit": false
+    },
+    "build": {
+      "overall": "FAILED",
+      "nativeExit": 1,
+      "compileTaskEvent": "HEADER_ONLY",
+      "standaloneCompileZero": false,
+      "bytecodeGuarantee": false
+    },
+    "limits": {
+      "historicalUnknown": 145,
+      "operationalFullFingerprint": false,
+      "unrecordedForkAbsence": false,
+      "globalQuiet": false
+    },
+    "coverage": {
+      "reportDisposition": "NO_CURRENT_REPORT_ESTABLISHED",
+      "lineRatios": {},
+      "staleMetadataOnly": 987,
+      "currentReportClaim": false
+    },
+    "ordinaryRoute": "HARD_HOLD",
+    "newNativePhases": 0,
+    "compileState": "NOT_STARTED",
+    "C8Credit": false
+  },
+  "architectureAndQaAdoptionPending": false,
+  "preparationRootAdoptionSha256": "5eb8c0bce86711684d2c7115356a3f7377085180c1d27b53707901af0961f6a3",
+  "scopeLimits": {
+    "onlyPublicPinnedMetadataAndSource": true,
+    "noRuntimeOrPrivateAction": true
+  }
+}

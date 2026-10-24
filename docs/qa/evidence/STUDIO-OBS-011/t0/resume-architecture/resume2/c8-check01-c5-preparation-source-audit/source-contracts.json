@@ -1,0 +1,163 @@
+{
+  "kind": "SOURCE_CONTRACT_MAP_NOT_RUNTIME_EVIDENCE",
+  "caseSource": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "caseSourceSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "sequence": [
+    {
+      "lines": [
+        3761,
+        3775,
+        24022,
+        24054
+      ],
+      "stage": "Fixture identity and authority",
+      "establishedBySource": "BeforeEach restores owner role and requires original CSI/no prior cleanup gap; p3Case allocates fresh CSI before minting owned Core cookie, seeds user/CSI rows and approved policies, conditionally starts registered workers.",
+      "notEstablished": "Actual current runtime values, listener liveness, scheduling or acknowledgement."
+    },
+    {
+      "lines": [
+        3250,
+        3260,
+        27001,
+        27020
+      ],
+      "stage": "Separate secret-use entitlement",
+      "establishedBySource": "Primary fixture authorization explicitly permits either fixture principal for primaryCsi/fixture/PASS; p3Entitled is an additional branch for other explicit tuples. No separate p3Grant is required on this selected primary tuple.",
+      "notEstablished": "An observed authorization result at the failing invocation."
+    },
+    {
+      "lines": [
+        26823,
+        26833,
+        26951,
+        27052
+      ],
+      "stage": "Positive learning setup",
+      "establishedBySource": "LOGIN source has navigate, USER plain and PASS secretRef fill, then sign-in/link/visible-heading obligations. Exact test scope is seeded with the expected site password and bound origin before authenticated public start202 and one explicit awaitFinalizing.",
+      "notEstablished": "Actual bootstrap context, observation, accepted model result or final state."
+    },
+    {
+      "lines": [
+        23994,
+        24008,
+        2787,
+        2821
+      ],
+      "stage": "Governance",
+      "establishedBySource": "Trusted fixture application policy allows structural discovery; approved origins include the fixture origin. ensurePolicy receives ALLOW, materializes/approves governed policy, so a missing side-effect-confirmation interaction is not statically implied by the default CLARIFY_FIRST guard.",
+      "notEstablished": "The actually frozen policy/guard outcome for this session."
+    },
+    {
+      "lines": [
+        29211,
+        29410,
+        29157,
+        29174
+      ],
+      "stage": "Model and page alignment",
+      "establishedBySource": "Normal P3 source plan uses authentic configuration references and exact step/occurrence/input mapping. Navigation targets page; USER uses observed textbox, password uses secretRef/passwordControl, Sign in button and Reports link/heading use observed exact role/name. The normal fixture page has one eligible password field in a same-origin POST form; successful login issues a native session then exposes Reports link/heading.",
+      "notEstablished": "Actual DOM/current generation, unique observed nodes, neutral case-only fixture selectors or native invocation result."
+    },
+    {
+      "lines": [
+        27102,
+        27124,
+        27368,
+        27380
+      ],
+      "stage": "Publication acknowledgement boundary",
+      "establishedBySource": "Finalize200 follows FINALIZING wait, expects source/config revisions1, independently checks artifact hash, no publication model or Vault-value read, then awaits teardown CONFIRMED.",
+      "notEstablished": "Actual publication200, persisted artifact or teardown acknowledgement."
+    },
+    {
+      "lines": [
+        26834,
+        26853,
+        26877,
+        26924
+      ],
+      "stage": "Wrong-password ordinary replay",
+      "establishedBySource": "After publication/teardown, capture baselines are taken, native login sessions/receipts reset, protected mode set and only scoped Vault is rotated to distinct wrong password; site expected value is left intact. Execute202, artifact/scope binding and one explicit dispatch precede ordinary FAILED/LOGIN_REQUIRED/earlier-secret-use oracles.",
+      "notEstablished": "This phase was actually reached, current wrong-password result or final ordinary outcome."
+    }
+  ],
+  "productionContracts": [
+    {
+      "path": "GuidedSessionService.java",
+      "lines": [
+        620,
+        755,
+        1490,
+        1524
+      ],
+      "need": "Authenticated scoped creation, current revisions/approved policy/budget; FINALIZING after successful exactly-once admitted actions and semantic step completion."
+    },
+    {
+      "path": "GuidedTranslationService.java",
+      "lines": [
+        130,
+        339,
+        681,
+        759,
+        2553,
+        2631
+      ],
+      "need": "Plan/input/dependency admission; materialization/allocation; frozen context delivery with matching acknowledgement plus initialBlank execution evidence before READY; current observation acquisition, exact accepted secret reference and one password count before inference."
+    },
+    {
+      "path": "GuidedTranslationCoordinator.java",
+      "lines": [
+        114,
+        210
+      ],
+      "need": "Scheduled asynchronous continuations choose plans before READY and proposals only after readiness; public202 is not acknowledgement or completion."
+    },
+    {
+      "path": "GuidedProposalValidator.java",
+      "lines": [
+        311,
+        418
+      ],
+      "need": "Coordinate/current evidence/generation/provenance-derived input identity; secret fill only passwordControl/same-step fill.value, exactly one password count."
+    },
+    {
+      "path": "GuidedDispatchService.java + VaultStudioReferenceResolver.java",
+      "lines": [
+        45,
+        110,
+        75,
+        95,
+        139,
+        181
+      ],
+      "need": "Names-only preflight and independent secret entitlement, fresh dispatch-time Vault read and entitlement rechecks; retained scoped references are not embedded secret values."
+    },
+    {
+      "path": "GuidedPlanPublisher.java",
+      "lines": [
+        78,
+        105,
+        344,
+        368,
+        430,
+        465
+      ],
+      "need": "Publication enabled, correct caller/current scope/source/revisions, FINALIZING and genuine evidence/lowering; no blank or helper-only setup substitutes."
+    },
+    {
+      "path": "studio-runner/src/guided/runtime.ts + run/passwordControl.ts + run/observationCollector.ts",
+      "lines": [
+        295,
+        330,
+        19,
+        41,
+        577,
+        601
+      ],
+      "need": "Matching context/evidence/generation/document/action order; live unique eligible password element pinned at prepare, unchanged on fill, current/approved origin and form action permitted. Counts alone are not write authority."
+    }
+  ],
+  "unrelatedAcceptedGstSetupCopied": false,
+  "genericQuestionMeaningAssumed": false,
+  "actualResourceOrRuntimeAction": false
+}

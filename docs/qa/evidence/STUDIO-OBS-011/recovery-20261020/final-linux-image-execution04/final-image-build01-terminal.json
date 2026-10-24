@@ -1,0 +1,59 @@
+{
+  "id": "final-image-build01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-final-runner-image-build02",
+    "docker",
+    "build",
+    "--pull=false",
+    "--network=default",
+    "--build-arg",
+    "IMAGE_TAG=put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "-t",
+    "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "-"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T03:38:56.719606+00:00",
+  "pid": 7466,
+  "accepted": true,
+  "caffeinatePid": 7465,
+  "caffeinateArgv": [
+    "/usr/bin/caffeinate",
+    "-i"
+  ],
+  "continuousAwakeClaim": false,
+  "rawExit": 0,
+  "terminalAtUtc": "2026-10-21T03:39:04.296994+00:00",
+  "collectorResult": {
+    "command": [
+      "docker",
+      "build",
+      "--pull=false",
+      "--network=default",
+      "--build-arg",
+      "IMAGE_TAG=put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+      "-t",
+      "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+      "-"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T03:38:56.875938+00:00",
+    "elapsedSeconds": 7.41,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "8fb3fcc962b9f18f58f69fb82430dc20924563fa3467039992326ebc2f0ea8fc",
+    "testInputStable": true,
+    "testInputDigestBefore": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "testInputDigestAfter": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc"
+  },
+  "collectorResultSha256": "2d46c813bc32bcd8f56eecc48e65c30ba0871328ecac54a26bc554fe66a3ce3d",
+  "sourceTestInputDistFullCatalogCache191Protected21CliBrowserEnvStable": true,
+  "logSha256": "3c5070cc2a63753a661b5da593f75b94efbc81e6ba1bc3120058e6b9b2e57f94",
+  "caffeinateHeldThroughPostguards": true,
+  "caffeinateExit": -15,
+  "caffeinateReleased": true,
+  "caffeinateReleasedAtUtc": "2026-10-21T03:39:05.470662+00:00"
+}

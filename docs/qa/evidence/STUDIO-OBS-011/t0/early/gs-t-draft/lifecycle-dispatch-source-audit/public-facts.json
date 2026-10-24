@@ -1,0 +1,59 @@
+{
+  "sourceProjectionSha256": "e6f52ce3ae8f51b09c24113bfc1c447011d51ca65f3b35baa01f5fc856ae7fcb",
+  "lifecycleRecords": [
+    {
+      "class": "GuidedLifecycleReasonIT",
+      "caseLabel": "everyOtherReasonStillEndsFailed()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedLifecycleReasonIT",
+      "caseLabel": "aDispatchingActionStillEndsUnknownOutcomeWhateverTheReason()",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedLifecycleReasonIT.java",
+      "sourceLine": 402
+    },
+    {
+      "class": "GuidedLifecycleReasonIT",
+      "caseLabel": "anExpiredReportAcceptedBeforeTheBackendExpiryEndsExpired()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedLifecycleReasonIT",
+      "caseLabel": "theContextIdentityIsStillCheckedWhateverTheReason()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedLifecycleReasonIT",
+      "caseLabel": "aCallbackPastTheLeaseIsStillRefusedStaleFenceAndNothingIsStopped()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    }
+  ],
+  "partialToolCounts": {
+    "PASS": 32,
+    "FAIL": 14
+  },
+  "completedXmlOr99Proof": false,
+  "sourceGuardNotRuntimeCodeInference": true,
+  "stickyUnit03Qualifications": {
+    "status": "CLOSED_FAILED_ABORTED_INCOMPLETE_WITH_STICKY_FORMAT_GAP_AND_PREMATURE_UNLOCK_INCIDENT_POST_RECONCILED",
+    "oldPreunlockProof": false,
+    "oldTemporalGapRepaired": false,
+    "stickyFormatOwnedIdentityObservationGap": true,
+    "sourceOriginalBytesAndModesVerifiedAfterIncident": true
+  },
+  "noNewCustodyProcessOrLockVerification": true
+}

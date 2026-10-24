@@ -1,0 +1,102 @@
+{
+  "kind": "INERT_SOURCE05_FIXED_CONTROL_INSTALLATION",
+  "unitMode": 448,
+  "controlMode": 448,
+  "members": [
+    {
+      "source": "Replay.postimage.java",
+      "destination": "control/Replay.postimage.java",
+      "sha256": "0d98bb1931d3e6a2e433cfa8609867dd017a4331424a07de676117ab8db3d436",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "Replay.preimage.java",
+      "destination": "control/Replay.preimage.java",
+      "sha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "guard-public-observe.bash",
+      "destination": "control/guard-public-observe.bash",
+      "sha256": "fdca02a2c4c6955f6acf30be215d989e409d2475f85e14c489a9b795124d8af0",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "observer.patch",
+      "destination": "control/observer.patch",
+      "sha256": "ed53e34e186e3e6d65de2bed692ed2b873be6efca79221a1d78e41583348cc57",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "observer.reverse.patch",
+      "destination": "control/observer.reverse.patch",
+      "sha256": "6aa148a8015f199e065f628f4961c64673e9c2899fa350828cae2105d41a7e45",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "public-observation.schema.json",
+      "destination": "control/public-observation.schema.json",
+      "sha256": "6163ac272c70305f7e8bc8545fc1994570b70676dbbde905357cd51e9c42e9d0",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "public-policy.json",
+      "destination": "control/public-policy.json",
+      "sha256": "bd25e3f51548ce05ad54d470652883e73d32a510463476b6f1c4a1eaa9cb499b",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "public_contract.py",
+      "destination": "control/public_contract.py",
+      "sha256": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "public_observation_unit.py",
+      "destination": "control/public_observation_unit.py",
+      "sha256": "8dd3bd21ddcf1bb446cc52c3510d58a1c21d734263bec389026c9875391d03d6",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "public_relay.py",
+      "destination": "control/public_relay.py",
+      "sha256": "0c3287e37bb06c037b27b84f349e16de1d42e36c44bee773e1e13fca0ac88c79",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "source-binding.json",
+      "destination": "control/source-binding.json",
+      "sha256": "0bd6e2582f92a327c7d9c2d6e48002fc994253aee22c636d913b35e713055c01",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    },
+    {
+      "source": "unit_policy.py",
+      "destination": "control/unit_policy.py",
+      "sha256": "757122dd9dbf2d1cadd85547db2c1f0058088f2f9a9f496c7360f329392e1f53",
+      "sourceMode": 420,
+      "runtimeMode": 384
+    }
+  ],
+  "copyOnlyListed12Payloads": true,
+  "doNotInstallTestsTemplatesOrHarness": true,
+  "perEntryControls": "Root-created immutable entry-NNNN-pins.json plus independently supplied operator raw SHA; never copy unbound templates",
+  "commonAdapterLoader": {
+    "preparedSource": "entry-loader.py.txt",
+    "installation": "NOT_AN_EXTRA_INSTALLED_MEMBER; exact reviewed operator literal, also readonly guard literal",
+    "sha256": "a8d2f3980983b5aa9d6a8e58c2fb2e729f4f9cc60dfa000cde80291a24e8b22e"
+  },
+  "futureExclusiveShortNamespace": "/private/tmp/obs011-pub-observe01",
+  "futureSocket": "/private/tmp/obs011-pub-observe01/r.sock",
+  "actualShortNamespaceAuthorizedOrObserved": false
+}

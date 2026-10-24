@@ -1,0 +1,10 @@
+while (jdbc.queryForObject(
+            "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+                + " AND ordinal=0 AND document->>'state'='SUCCEEDED'",
+            Integer.class,
+            id,
+            b1Step(stepIndex))
+        == 0) {
+      assertThat(Clock.nanoTime()).as("S(%s)#0 SUCCEEDED", stepIndex).isLessThan(end);
+      Clock.startElapsed(); probeIntervalEntered.countDown(); Thread.sleep(20); if (noAwaitGap) Clock.advance(1_000_000_000L);
+    }

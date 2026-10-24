@@ -1,0 +1,74 @@
+{
+  "kind": "TEST001_EXISTING_FIVE_REVERSIBLE_FOCUSED_CONTROLS",
+  "fullClassSlotsConsumed": 0,
+  "fullClassGateCredit": false,
+  "runs": [
+    {
+      "index": 1,
+      "label": "obs011-recovery-20261020-itr-test001-reverse01",
+      "kind": "reverse-order-only",
+      "candidateSha256": "c441abc23e67760b892998f96d26edd093b60f641ec85618a68d147281ddcad7",
+      "startedUtc": "2026-10-20T16:26:37.160182+00:00",
+      "status": "PASS_CANONICAL_RESTORED_COMPILED",
+      "collectorExit": 0,
+      "canonicalRestored": true,
+      "restoredCompileExit": 0,
+      "restoredCompileLogSha256": "b9c3b9092949d795ac0e8bdf0ea5e037acb70d546c77f2d4e5083549d71f62d1",
+      "endedUtc": "2026-10-20T16:28:33.999996+00:00"
+    },
+    {
+      "index": 2,
+      "label": "obs011-recovery-20261020-itr-test001-negative-canary01",
+      "kind": "audit-content-negative-subset",
+      "candidateSha256": "ca85692b138c4aeeca435cdb046ecf13624f24fc98b8e72899165486b2fdf90b",
+      "startedUtc": "2026-10-20T16:28:34.015206+00:00",
+      "status": "PASS_CANONICAL_RESTORED_COMPILED",
+      "collectorExit": 0,
+      "canonicalRestored": true,
+      "restoredCompileExit": 0,
+      "restoredCompileLogSha256": "b9c3b9092949d795ac0e8bdf0ea5e037acb70d546c77f2d4e5083549d71f62d1",
+      "endedUtc": "2026-10-20T16:29:27.484968+00:00"
+    },
+    {
+      "index": 3,
+      "label": "obs011-recovery-20261020-itr-test001-negative-key01",
+      "kind": "audit-content-negative-subset",
+      "candidateSha256": "852306520952239d81e9a83b2cbc1b6ab29a1206f1ecdd5ed6582a71bd9460ce",
+      "startedUtc": "2026-10-20T16:29:27.500673+00:00",
+      "status": "PASS_CANONICAL_RESTORED_COMPILED",
+      "collectorExit": 0,
+      "canonicalRestored": true,
+      "restoredCompileExit": 0,
+      "restoredCompileLogSha256": "b9c3b9092949d795ac0e8bdf0ea5e037acb70d546c77f2d4e5083549d71f62d1",
+      "endedUtc": "2026-10-20T16:30:21.368944+00:00"
+    },
+    {
+      "index": 4,
+      "label": "obs011-recovery-20261020-itr-test001-negative-size01",
+      "kind": "audit-content-negative-subset",
+      "candidateSha256": "9926774381f889a1702dd72112526e933786b327cf1f78b975b3108b31e4102f",
+      "startedUtc": "2026-10-20T16:30:21.384495+00:00",
+      "status": "PASS_CANONICAL_RESTORED_COMPILED",
+      "collectorExit": 0,
+      "canonicalRestored": true,
+      "restoredCompileExit": 0,
+      "restoredCompileLogSha256": "b9c3b9092949d795ac0e8bdf0ea5e037acb70d546c77f2d4e5083549d71f62d1",
+      "endedUtc": "2026-10-20T16:31:13.848924+00:00"
+    },
+    {
+      "index": 5,
+      "label": "obs011-recovery-20261020-itr-test001-force-true01",
+      "kind": "force-gate-subset-negative",
+      "candidateSha256": "6a10fca7681b6d11d5cc82927fe6b632025abe85554884975ca1378b2e6b6b36",
+      "startedUtc": "2026-10-20T16:31:13.864405+00:00",
+      "status": "UNEXPECTED_NEGATIVE_PROOF_STOPPED",
+      "collectorExit": 1,
+      "canonicalRestored": true,
+      "restoredCompileExit": 0,
+      "restoredCompileLogSha256": "b9c3b9092949d795ac0e8bdf0ea5e037acb70d546c77f2d4e5083549d71f62d1",
+      "endedUtc": "2026-10-20T16:32:03.357974+00:00",
+      "verifierExit": 2,
+      "verifierSha256": "6c2fae595cca1db30126e92a2079abab350fec2e00ac6b55ed6de28974c62538"
+    }
+  ]
+}

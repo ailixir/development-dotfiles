@@ -1,0 +1,255 @@
+{
+  "kind": "FINAL_BACKEND_THREE_RESERVED_CALLS04_PREPARATION_ONLY",
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "env": {
+    "PATHPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+    "JAVA_HOME": "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home"
+  },
+  "allRuntimeAndReadersUnexecuted": true,
+  "rootReleaseRequired": true,
+  "jobs": [
+    {
+      "slot": 4,
+      "label": "obs011-lean-ir-final01",
+      "status": "UNEXECUTED_REQUIRES_SEPARATE_ROOT_RELEASE",
+      "freshLabelAbsentAtPreparation": true,
+      "collectorArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-lean-ir-final01",
+        "--test-tasks",
+        "test,guidedIncrementalTest",
+        "--require-exec-tasks",
+        "test,guidedIncrementalTest",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "guidedIncrementalTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "readerArgvAfterActualTerminal": [
+        "python3",
+        "-B",
+        "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-replay-reader-preparation/bound-reader/verify_future_run.py",
+        "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final01-results.json",
+        "--stage",
+        "04-b4"
+      ],
+      "readerScope": "Exact raw two-task full-Replay receipt only",
+      "expected": {
+        "test": 46,
+        "guidedIncrementalTest": 62,
+        "total": 108,
+        "PASS": 108,
+        "SKIP": 0,
+        "variants": 35
+      },
+      "bindingReady": false,
+      "freshLabelAbsentAtThisPreparation": true
+    },
+    {
+      "slot": 5,
+      "label": "obs011-lean-ir-final02",
+      "status": "UNEXECUTED_REQUIRES_SEPARATE_ROOT_RELEASE",
+      "freshLabelAbsentAtPreparation": true,
+      "collectorArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-lean-ir-final02",
+        "--test-tasks",
+        "test,guidedIncrementalTest",
+        "--require-exec-tasks",
+        "test,guidedIncrementalTest",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "guidedIncrementalTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "readerArgvAfterActualTerminal": [
+        "python3",
+        "-B",
+        "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-replay-reader-preparation/bound-reader/verify_future_run.py",
+        "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final02-results.json",
+        "--stage",
+        "04-b4"
+      ],
+      "readerScope": "Exact raw two-task full-Replay receipt only",
+      "expected": {
+        "test": 46,
+        "guidedIncrementalTest": 62,
+        "total": 108,
+        "PASS": 108,
+        "SKIP": 0,
+        "variants": 35
+      },
+      "bindingReady": false,
+      "freshLabelAbsentAtThisPreparation": true
+    },
+    {
+      "slot": 6,
+      "label": "obs011-lean-ir-integrated01",
+      "status": "UNEXECUTED_REQUIRES_SEPARATE_ROOT_RELEASE",
+      "freshLabelAbsentAtPreparation": true,
+      "collectorArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-lean-ir-integrated01",
+        "--test-tasks",
+        "test,guidedIncrementalTest,crossReplicaTest",
+        "--require-exec-tasks",
+        "test,guidedIncrementalTest,crossReplicaTest",
+        "--allowed-skips-file",
+        "docs/qa/evidence/STUDIO-OBS-011/t0/qa/approved-skips.json",
+        "--",
+        "--continue",
+        "check",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "readerArgvAfterActualTerminal": null,
+      "readerScope": "Pair reader is inapplicable to the raw three-task/2792-case receipt. Preserve actual receipt and perform separate acceptance analysis from existing outputs.",
+      "expected": {
+        "test": 2728,
+        "guidedIncrementalTest": 62,
+        "crossReplicaTest": 2,
+        "total": 2792,
+        "PASS": 2783,
+        "SKIP": 9,
+        "uniqueTaskClassDisplayStatusKeys": 2768
+      },
+      "bindingReady": false,
+      "freshLabelAbsentAtThisPreparation": true
+    }
+  ],
+  "byteIdenticalPairReaderFutureBinding": {
+    "argv": [
+      "python3",
+      "-c",
+      "import sys,json,hashlib,shutil\nfrom pathlib import Path\nsource=Path(sys.argv[1]);dest=Path(sys.argv[2]);facts=Path(sys.argv[3]);assert not dest.exists()\nh=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()\npins={'verify_future_run.py':'825f91516352ac1877a254990e6cdf5ab2e37460c2c778dd9723f9949ec50f40','expected-cases.json':'fda33efa440799c23af34fd7ee34715782a1e50fec8602f2686ee4486b1e4c8d'}\nfor name,pin in pins.items():assert h(source/name)==pin\ndata=json.loads(facts.read_text())\nassert data['actualFormattedReplaySha256']=='5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8'\nassert data['clientSha256']=='072ce61b3c0f94d94076ef18c7acd170a4331e53d0968a132c08c85f15628c9c'\nassert data['actualFinalGlobalSourceDigest']=='a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc'\nassert data['actualFinalDistDigest']=='e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1'\nassert data['actualFinalImageContentId']=='sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753'\nfor key in ['sourceBindingReviewReference','finalConfiguredBuildReceipt','finalImagePinsQaReference','finalDeployment722QaReference','finalD2QaReference']:\n    assert isinstance(data[key],str) and data[key] and 'UNBOUND' not in data[key]\nstages=json.loads((source/'stages.json').read_text());assert stages==[{'stage':'04-b4','candidateSha256':'UNBOUND_ACTUAL_FINAL_FORMATTED_REPLAY_SHA256'}]\nstages[0]['candidateSha256']=data['actualFormattedReplaySha256']\ndest.mkdir()\nfor name,pin in pins.items():shutil.copyfile(source/name,dest/name);assert h(dest/name)==pin\n(dest/'stages.json').write_text(json.dumps(stages,indent=2)+'\\n')\nreceipt={'kind':'DATA_ONLY_FINAL_PAIR_READER_BINDING_NOT_RUNTIME_RELEASE','sourceFactsPath':str(facts),'sourceFactsSha256':h(facts),'files':[{'path':name,'sha256':h(dest/name)} for name in ['verify_future_run.py','expected-cases.json','stages.json']],'runtimeRelease':False}\n(dest/'binding.json').write_text(json.dumps(receipt,indent=2)+'\\n')\n",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-replay-reader-preparation/reader-template",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-replay-reader-preparation/bound-reader",
+      "<REVIEWED_FINAL_READER_BINDING_FACTS_JSON>"
+    ],
+    "executed": false,
+    "changes": "fresh directory only; copy reader/cases exact; only stages candidateSha data replacement; provenance receipt",
+    "bindingPrerequisitesDistinctFromRuntimeGo": "reviewed final source/input/accepted image/deployment/D2 facts permit reversible data-binding; root later requires prerequisiteCount0/clock/ledger and releases runtime last"
+  },
+  "correctedDiagnosticCommandsByteIdentical": {
+    "status": "PREPARED_DATA_ONLY_NOT_EXECUTED",
+    "noNativeInvocationOrReaderChange": true,
+    "noFinalReplayShaBinding": true,
+    "ipcProjectionArgv": [
+      "python3",
+      "-c",
+      "import sys,json,os,stat,hashlib\nfrom pathlib import Path\nfrom collections import Counter\ndef main():\n root=Path(sys.argv[1]); task=sys.argv[2]; assert task in ('test','guidedIncrementalTest') and root.is_dir() and not root.is_symlink()\n errors=Counter(); facts={}\n parentRequired={'v','ordinal','pid','case','c6','executionId','received','receivedCount','results','resultOk','resultErrorCode','resultSchemaValid','kills','killCount','exitCode','exitSignal','loopDelayMaxMs','loopDelayP99Ms','controlReads','controlReadCount'}\n childRequired={'v','pid','executionId','readySent','resultSent','resultOk','resultErrorCode'}\n def read(name):\n  try:\n   p=root/name; assert not p.is_symlink(); fd=os.open(p,os.O_RDONLY|os.O_NOFOLLOW)\n   with os.fdopen(fd,'rb') as f:\n    a=os.fstat(f.fileno()); assert stat.S_ISREG(a.st_mode) and a.st_size<=16777216; raw=f.read(); b=os.fstat(f.fileno()); assert (a.st_size,a.st_mtime_ns)==(b.st_size,b.st_mtime_ns)\n   facts[name]={'bytes':len(raw),'physicalLines':len(raw.splitlines()),'sha256':hashlib.sha256(raw).hexdigest()}; rows=[]\n   for line in raw.splitlines():\n    try:\n     d=json.loads(line); assert isinstance(d,dict) and type(d.get('v')) is int and d['v']==1\n     if name=='ordinary-ipc-parent.jsonl':\n      assert d.get('diagnosticFailed') is True or parentRequired<=d.keys()\n     else:\n      assert childRequired<=d.keys()\n      assert type(d['pid']) is int and d['pid']>0\n      assert d['executionId'] is None or isinstance(d['executionId'],str) and __import__('re').fullmatch('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',d['executionId'])\n     rows.append(d)\n    except Exception: errors['MALFORMED_IPC_RECORD']+=1\n   return rows\n  except Exception: errors['IPC_FILE_UNAVAILABLE_UNSAFE_OR_CHANGED']+=1; return []\n parents=read('ordinary-ipc-parent.jsonl'); children=read('ordinary-ipc-child.jsonl'); safe=[]; joined=set()\n codes=set('INVALID_CONTRACT PROFILE_MISMATCH AUTHORIZATION_EXPIRED POLICY_REFUSED TARGET_DRIFT READ_REFUSED REFERENCE_REFUSED ASSERTION_FAILED CANCELLED TIMEOUT OUTCOME_UNKNOWN INTERNAL_ERROR LOGIN_REQUIRED PASSWORD_CONTROL_READ_REFUSED REFERENCE_MISMATCH'.split())\n signals=set('SIGKILL SIGTERM SIGABRT SIGSEGV SIGTRAP SIGINT SIGHUP SIGILL SIGBUS SIGPIPE SIGQUIT SIGFPE SIGSYS SIGXCPU SIGXFSZ SIGSTOP SIGCONT SIGUSR1 SIGUSR2'.split())\n for p in parents:\n  try:\n   if p.get('diagnosticFailed') is True: errors['WRAPPER_DIAGNOSTIC_FAILED']+=1; continue\n   assert type(p.get('pid')) is int and p['pid']>0\n   assert p.get('executionId') is None or isinstance(p['executionId'],str) and __import__('re').fullmatch('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',p['executionId'])\n   r={}\n   for k in ('ordinal','case','c6','receivedCount','results','killCount','controlReadCount','exitCode','loopDelayMaxMs','loopDelayP99Ms'):\n    v=p.get(k); assert v is None or type(v) is int; r[k]=v\n   for k in ('ordinal','case','c6','receivedCount','results','killCount','controlReadCount'): assert type(r[k]) is int\n   for k in ('resultOk','resultSchemaValid'): assert p.get(k) is None or type(p[k]) is bool; r[k]=p.get(k)\n   assert p.get('resultErrorCode') is None or p['resultErrorCode'] in codes; r['resultErrorCode']=p.get('resultErrorCode')\n   assert p.get('exitSignal') is None or p['exitSignal'] in signals; r['exitSignal']=p.get('exitSignal')\n   assert isinstance(p.get('received'),list) and all(k in ('ready','result','step-started','step-finished','other') for k in p['received']); r['received']=p['received']\n   assert isinstance(p.get('kills'),list) and all(k in ('violation-catch','performStop-grace','other') for k in p['kills']); r['kills']=p['kills']\n   assert r['receivedCount']==len(r['received']) and r['killCount']==len(r['kills'])\n   reads=p['controlReads']; assert isinstance(reads,list) and len(reads)<=512 and r['controlReadCount']==len(reads)\n   for read in reads:\n    assert isinstance(read,list) and len(read)==4\n    assert all(type(n) is int and 0<=n<=9007199254740991 for n in read[:2])\n    assert all(type(n) is int and n in (0,1) for n in read[2:])\n   r['controlReads']=reads\n   matches=[(i,c) for i,c in enumerate(children) if c.get('pid')==p.get('pid') and (c.get('executionId') is None or c.get('executionId')==p.get('executionId'))]; joined.update(i for i,c in matches); r['childLineCount']=len(matches); r['children']=[]\n   for i,c in matches:\n    assert type(c.get('pid')) is int and c['pid']>0 and type(c.get('readySent')) is bool and type(c.get('resultSent')) is bool\n    x={}\n    for k in ('readySent','resultSent','resultOk'): assert c.get(k) is None or type(c[k]) is bool; x[k]=c.get(k)\n    assert c.get('resultErrorCode') is None or c['resultErrorCode'] in codes; x['resultErrorCode']=c.get('resultErrorCode'); r['children'].append(x)\n   if len(matches)>1: errors['AMBIGUOUS_CHILD_JOIN']+=1\n   safe.append(r)\n  except Exception: errors['UNEXPECTED_IPC_SHAPE_OR_LABEL']+=1\n if not parents or not children: errors['MISSING_NONEMPTY_DIAGNOSTIC_STREAM']+=1\n orphan=len(children)-len(joined)\n if orphan: errors['UNMATCHED_CHILD_RECORDS']+=orphan\n counts={'parentRecords':len(parents),'childRecords':len(children),'projectedParents':len(safe),'parentInternalErrorResults':sum(r['resultErrorCode']=='INTERNAL_ERROR' for r in safe),'parentInternalErrorPreReadyEnds':sum(r['resultErrorCode']=='INTERNAL_ERROR' and 'ready' not in r['received'] for r in safe),'violationCatchKills':sum(r['kills'].count('violation-catch') for r in safe),'performStopGraceKills':sum(r['kills'].count('performStop-grace') for r in safe),'otherKills':sum(r['kills'].count('other') for r in safe),'schemaInvalidResults':sum(r['resultSchemaValid'] is False for r in safe),'noResultRecords':sum(r['results']==0 for r in safe),'preReadyEnds':sum('ready' not in r['received'] for r in safe),'parentWithoutChildLine':sum(r['childLineCount']==0 for r in safe),'unmatchedChildRecords':orphan}\n print(json.dumps({'scope':'REPLAY_ONE_TASK_WRAPPER_IPC_ONLY','task':task,'inputFacts':facts,'observedCounts':counts,'records':safe,'projectionErrors':dict(errors),'projectionComplete':not errors,'notClassificationOrQaVerdict':True},separators=(',',':')))\ntry: main()\nexcept Exception: print(json.dumps({'projectionComplete':False,'reason':'CLOSED_IPC_PROJECTION_UNAVAILABLE'})); sys.exit(2)\n",
+      "UNBOUND_EXACT_OWNER_TEMP_ROOT",
+      "UNBOUND_TASK_test_OR_guidedIncrementalTest"
+    ],
+    "startFailureProjectionArgv": [
+      "python3",
+      "-c",
+      "import sys,json,os,stat,hashlib,re\nfrom pathlib import Path\nfrom collections import Counter\ndef main():\n root=Path(sys.argv[1]); task=sys.argv[2]; assert task in ('test','guidedIncrementalTest') and root.is_dir() and not root.is_symlink(); errors=Counter(); records=[]; facts=[]\n def read(p):\n  assert not p.is_symlink() and p.resolve().is_relative_to(root.resolve()); fd=os.open(p,os.O_RDONLY|os.O_NOFOLLOW)\n  with os.fdopen(fd,'rb') as f:\n   a=os.fstat(f.fileno()); assert stat.S_ISREG(a.st_mode) and a.st_size<=16777216; raw=f.read(); b=os.fstat(f.fileno()); assert (a.st_size,a.st_mtime_ns)==(b.st_size,b.st_mtime_ns)\n  return raw\n generations=set()\n for line in read(root/'owned-worker-generations.jsonl').splitlines():\n  d=json.loads(line)\n  if d.get('role')=='guided': assert type(d.get('generation')) is int and d['generation']>0 and d.get('ownedTemp')==str(root); generations.add(d['generation'])\n assert generations and sorted(generations)==list(range(1,max(generations)+1))\n allow={'name':set('Error GuidedStartFailure TypeError RangeError AbortError TimeoutError NonError'.split()),'code':set('CONTEXT_LOST TIMEOUT CANCELLED POLICY_DENIED AUTH_DENIED CAPACITY SCHEMA IDENTITY_MISMATCH INITIAL_BLANK POLICY_REFUSED INVALID_CONTRACT'.split()),'phase':set('VALIDATE JOURNAL RECORDER LAUNCH WITHHOLD BLANK_MATCH BOOTSTRAP_CALLBACK STARTED PROFILE PROCESS PROBE STARTUP_PAGE APP_PAGE ROUTING BLANK_DOCUMENT'.split()),'loss':set('PAGE_CRASH EXTRA_PAGE BROWSER_DISCONNECTED ROUTE_FAILURE'.split()),'kind':{'TIMEOUT','TARGET_CLOSED'},'errno':set('EACCES EPERM ENOENT EAGAIN EMFILE ENFILE ENOMEM EADDRINUSE EADDRNOTAVAIL ECONNREFUSED ECONNRESET ETIMEDOUT EPIPE EIO ENOSPC EINVAL ENOTDIR ENOEXEC'.split()),'signal':set('SIGKILL SIGTERM SIGABRT SIGSEGV SIGTRAP SIGINT SIGHUP SIGILL SIGBUS SIGPIPE SIGQUIT SIGFPE SIGSYS SIGXCPU SIGXFSZ SIGSTOP SIGCONT SIGUSR1 SIGUSR2'.split())}\n for g in sorted(generations):\n  p=root/'guided.log' if g==max(generations) else root/'owned-generations'/('generation-'+str(g))/'guided.log'\n  try:\n   raw=read(p); facts.append({'generation':g,'finalRootLog':g==max(generations),'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()})\n   for line in raw.splitlines():\n    prefix=b'GUIDED_START_FAILED '\n    if not line.startswith(prefix):\n     if prefix in line: errors['NONANCHORED_MARKER_REQUIRES_REVIEW']+=1\n     continue\n    try:\n     d=json.loads(line[len(prefix):]); assert set(d)=={'operation','session','elapsedMs','links'} and d['operation'] in ('assign','context','other') and type(d['elapsedMs']) is int and d['elapsedMs']>=0 and isinstance(d['session'],str) and re.fullmatch('[a-f0-9]{16}',d['session']) and isinstance(d['links'],list) and 1<=len(d['links'])<=6\n     links=[]\n     for link in d['links']:\n      assert isinstance(link,dict) and 'name' in link and set(link)<=set(allow)|{'exitCode'}; x={}\n      for k,v in link.items():\n       if k=='exitCode': assert v is None or type(v) is int; x[k]=v\n       elif k=='signal' and v is None: x[k]=None\n       elif v in allow[k]: x[k]=v\n       else: x[k]='OTHER'; errors['UNALLOWLISTED_LABEL_REQUIRES_REVIEW']+=1\n      links.append(x)\n     records.append({'generation':g,'operation':d['operation'],'sessionHashPrefix':d['session'],'elapsedMs':d['elapsedMs'],'links':links})\n    except Exception: errors['MALFORMED_START_FAILURE_RECORD']+=1\n  except Exception: errors['GUIDED_LOG_UNAVAILABLE_UNSAFE_OR_CHANGED']+=1\n print(json.dumps({'scope':'REPLAY_ONE_TASK_GUIDED_START_FAILURE_LINES_ONLY','task':task,'guidedGenerationDenominator':len(generations),'logs':facts,'observedStartFailedLines':len(records),'records':records,'projectionErrors':dict(errors),'lineProjectionComplete':not errors,'bootstrapUnknownOutcomePairing':None,'earlierSameSessionStopChronology':None,'startupHangAttribution':None,'notClassificationOrQaVerdict':True},separators=(',',':')))\ntry: main()\nexcept Exception: print(json.dumps({'lineProjectionComplete':False,'reason':'CLOSED_START_FAILURE_PROJECTION_UNAVAILABLE'})); sys.exit(2)\n",
+      "UNBOUND_EXACT_OWNER_TEMP_ROOT",
+      "UNBOUND_TASK_test_OR_guidedIncrementalTest"
+    ],
+    "inlineSha256": {
+      "ipc": "6dd83d18a659190bdfbe5c3f51f9d37a08083e03209c14c2daa9d9f9d982e357",
+      "startFailure": "776fd232946cfeaf5c1f4a35006e441d08b320bf00bc9bf164027ff5e88a8094"
+    },
+    "use": "Use only after actual runtime/writers are terminal and owner maps exact TEMP to the receipt/task. Run once per task for slots4,5,6; capture only stdout JSON in a fresh evidence file. Keep argv structured. No raw source-file/log-body export. These are one-use closed projections in command data, not permanent executables or acceptance validators.",
+    "counterCaveat": "Observed counts from an incomplete projection do not prove zero recurrences. Apply README classification over all closed records; no automatic QA approval."
+  },
+  "diagnosticSubstitutionOnly": {
+    "ipcProjectionArgv/3": "actual reviewed exact terminal owner TEMP root",
+    "ipcProjectionArgv/4": "test or guidedIncrementalTest bound by originalowner evidence",
+    "startFailureProjectionArgv/3": "same actual reviewed owner TEMP root",
+    "startFailureProjectionArgv/4": "same bound task"
+  },
+  "diagnosticInputTemplate": {
+    "path": "reader-input-template.json",
+    "sha256": "0c9d308bd9daf8098a7430d8c6663029c7c81ea72b00b944d36678ba7f2d6da7",
+    "scope": "post-terminal receipt/owner/cohort data is genuinely future; not an impossible pre-launch outcome prerequisite"
+  },
+  "noReaderOrCollectorCodeChanges": true,
+  "whole6Acceptance": {
+    "expectedIdentitiesPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-case-reconciliation-preparation/backend-expected-identities.json",
+    "expectedIdentitiesSha256": "dc2d66e3ad0f7464332c804ec6e82dc0bc888e1d8b2aa1a507109d126d34090d",
+    "projectionManifestSha256": "3fd31c42500b15431a5e024bacd09c0f79c2aadf5749b48c98d1cbff3aa8f6d0",
+    "expectedRowsField": "expectedCaseIdentities",
+    "expectedCounterFields": [
+      "task",
+      "class",
+      "name",
+      "expectedStatus"
+    ],
+    "actualCounterFields": [
+      "task",
+      "class",
+      "name",
+      "status"
+    ],
+    "requireActualXmlCounterEqualsRawCollectorCounterEqualsProjectedExpectedCounter": true,
+    "rows": 2792,
+    "distinctKeys": 2768,
+    "duplicatesMustRemain": true,
+    "exactSkipPolicyPath": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/approved-skips.json",
+    "exactSkipPolicySha256": "6bd2a808a40a707397757b3ff4f1a78e5eff8ee37666c7b26271582b14457cac",
+    "exactSkips": 9,
+    "skipTask": "test",
+    "ReplaySubsetStill": {
+      "test": 46,
+      "guidedIncrementalTest": 62,
+      "variants": 35,
+      "defaultOrder39BodyRequired": true,
+      "incrementalOrder39BodyExpected": false,
+      "Order17Unchanged": true,
+      "defaultDeclaredOutputCeiling": 4000,
+      "incrementalDeclaredOutputCeiling": 2048
+    },
+    "requiredExecutedTasks": [
+      "test",
+      "guidedIncrementalTest",
+      "crossReplicaTest",
+      "requireFreshGuidedPartitions",
+      "jacocoTestReport",
+      "jacocoTestCoverageVerification",
+      "check"
+    ],
+    "freshMergedCoverage": "Original XML/HTML and all three fresh nonempty exec sources; report session provenance lies in the actual run; existing coverage floors unchanged; actual report/verification/check executed successfully. Archive and hash actual outputs, no claim from stale reports.",
+    "cohorts": "One fresh task-bound full Replay cohort per test/guidedIncrementalTest; exact method/variant/ordinal Counter, all108 PASS/AfterEach complete, all privacy/audit/model/budget/response/drain/finalscan flags true, retention0, actual final corpus controls at both boundaries and owned context closure.",
+    "scopeLimitation": "Existing tasked collector archives task outputs and exact skip policy; its exit0 alone does not reconcile projected2792 multiset or merged coverage. Root agreed separate acceptance analysis of actual existing outputs; no new validation script/harness/unsupported flag is introduced.",
+    "actualOriginalCoverageWiringQualification": {
+      "freshArchivedExecPartitions": [
+        "test",
+        "guidedIncrementalTest",
+        "crossReplicaTest"
+      ],
+      "mergedReportAndVerificationExecutionData": [
+        "test.exec",
+        "guidedIncrementalTest.exec"
+      ],
+      "crossReplicaExecArchivedButNotMerged": true,
+      "buildGradleKtsMustRemainUnchanged": true,
+      "globalLineFloor": "0.70",
+      "dispatchInternalRecoverySseLineFloors": "0.75",
+      "emptyCompileRulesAlreadyRetiredUnderR_J": true
+    }
+  }
+}

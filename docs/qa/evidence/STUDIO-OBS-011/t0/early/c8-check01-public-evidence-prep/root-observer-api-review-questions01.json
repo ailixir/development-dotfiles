@@ -1,0 +1,27 @@
+{
+  "kind": "ROOT_SOURCE_REVIEW_QUESTIONS_FOR_OBSERVER_NO_RUNTIME_PROBE",
+  "candidateManifestSha256": "8949bd8b929db701e4da798db04ddc1d025c8cb7d3e831eb155a307d10ddebe7",
+  "localSourceObservation": "observer.patch checks response.body().length only after synchronous BodyHandlers.ofByteArray send completes. Check whether producer actually bounds collection, full response completion and cleanup within the plan15s overhead.",
+  "primaryReferences": [
+    {
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.net.http/java/net/http/HttpRequest.Builder.html",
+      "basis": "Request timeout API describes response timeout; body-stage semantics need implementation qualification."
+    },
+    {
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.net.http/java/net/http/HttpResponse.BodyHandlers.html",
+      "basis": "The byte-array handler accepts and collects the response body; later length validation is not a streaming limit."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/openjdk/jdk21u/jdk-21.0.10%2B7/src/java.net.http/share/classes/jdk/internal/net/http/MultiExchange.java",
+      "basis": "Pinned upstream21.0.10+7 reference cancels the response timer before body consumption; GET retry paths also exist. These are source-based questions, not an installed-runtime probe or proof any retry occurred."
+    }
+  ],
+  "independentQuestions": [
+    "Does the exact observer satisfy a total one-read15s bound and262144-byte collection bound, including body stalls/oversize/observer cleanup?",
+    "What does one send prove about application operation versus actual transport attempts? Keep the adopted no-retry/one-read claim honest without changing globalordinaryfixture behavior.",
+    "Does Java output custody/owned-subject/singleflight/failurehandling preserve exact original oracle/privacy/hooks?"
+  ],
+  "actualJavaHttpOrPublicPrivateRead": false,
+  "runtimeEffectsAdapter02BeingAuthoredSeparately": true,
+  "candidate01OrSourceGateApproved": false
+}

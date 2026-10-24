@@ -1,0 +1,105 @@
+{
+  "kind": "PROPOSED_ONLY_N02_CODE_CONTROL_FREEZE_READSET",
+  "actualExecutionAuthorized": false,
+  "existingNamespaceLabel": "failed-red-resource-disposition02",
+  "postFailureMembershipObserved": false,
+  "expectedMemberCountToVerify": 8,
+  "knownInstalledDirectoryAncestry": {
+    "dev": 16777229,
+    "ino": 219229306,
+    "uid": 501,
+    "mode": "0700"
+  },
+  "directoryAncestryIsFreshEvidence": false,
+  "expectedMembers": [
+    {
+      "name": "failed_gateway.py",
+      "sha256": "acf923c8d401c377540e1de190bfc5b5dd5c1e96e9e40033ce0ae8c2889e6e25",
+      "expectedBytes": 52635,
+      "expectedMode": 384,
+      "expectedUid": 501,
+      "expectedNlink": 1
+    },
+    {
+      "name": "custody.py",
+      "sha256": "e81ae1a019c78161863700bfe34f9abb71d9fb9040e464a7b3eaa5c73c8bddda",
+      "expectedBytes": 10839,
+      "expectedMode": 384,
+      "expectedUid": 501,
+      "expectedNlink": 1
+    },
+    {
+      "name": "protocol.py",
+      "sha256": "faa72ca1b55fccca78394a796cdf468af06b3393bb4d94d2510865983a8d055e",
+      "expectedBytes": 27005,
+      "expectedMode": 384,
+      "expectedUid": 501,
+      "expectedNlink": 1
+    },
+    {
+      "name": "guard-failed-red.bash",
+      "sha256": "24dbc6c27564afc6c8194db70140e3a8100f22b712f56d34beeadfa11ccd29ad",
+      "expectedBytes": 25523,
+      "expectedMode": 384,
+      "expectedUid": 501,
+      "expectedNlink": 1
+    },
+    {
+      "name": "contract.json",
+      "sha256": "f049cc0ada8ed8ac67a450ee7a058f20ef4888e5303e5232b02976d52051b528",
+      "expectedBytes": 528359,
+      "expectedMode": 384,
+      "expectedUid": 501,
+      "expectedNlink": 1
+    },
+    {
+      "name": "entry.py",
+      "sha256": "202279536f18b61ae8a3b32471e90d15c371872234498ce47dbec181b4e1cc19",
+      "expectedBytes": 4695,
+      "expectedMode": 384,
+      "expectedUid": 501,
+      "expectedNlink": 1
+    },
+    {
+      "name": "root-authorization.json",
+      "sha256": "d81ab9688986609f3d3ab9c323743da11a3f1fb7b248b26cc1750aaf9b1781dd",
+      "expectedBytes": 16089,
+      "expectedMode": 384,
+      "expectedUid": 501,
+      "expectedNlink": 1
+    },
+    {
+      "name": "root-setup-ownership.json",
+      "sha256": "7cc83a4de79cc29d67cd49dab0d2ab427c2f4fc33ce2204cfecc9892ba11243d",
+      "expectedBytes": null,
+      "expectedMode": 384,
+      "expectedUid": 501,
+      "expectedNlink": 1
+    }
+  ],
+  "limits": {
+    "directNameCensusMaximum": 9,
+    "perMemberBytes": 1048576,
+    "aggregateAcquiredBytes": 8388608
+  },
+  "checksBeforeBody": [
+    "Retain approved ancestors and exact N02 existing directory via nofollow openedFD; freshly match declared dev/inode/current owner/mode.",
+    "Bounded direct-name-only census must equal precisely the eight expected names. Extra/missing/link/unsupported type is HOLD before any extra body.",
+    "On each actual opened regular leaf check UID501/mode0600/nlink1/expected known bytes or explicitcap before body; bounded actual remaining acquisition; final named/FD identity and same-byte hash.",
+    "Close outcomes are actual per-acquisition records; UNKNOWN is retained/no bareFDretry. Final trace follows complete outer cleanup."
+  ],
+  "output": "Only outside-E independently scoped code/control index with hashes/bytes/modes/UID/dev/inode and closed read/close outcome; no raw control body.",
+  "forbidden": [
+    "oldE membership enumeration",
+    "N01 body acquisition",
+    "unknown member body",
+    "recursive discovery",
+    "raw/private/business reports",
+    "helper journals",
+    "source or namespace mutation",
+    "runtime qualification or cap reset",
+    "cleanup/signals"
+  ],
+  "actualHelperRoster": "All actual reader/setup/verifier/current client/utility IDs and separate statuses must join future finite history; missing starts/fullFP stay null.",
+  "newRuntimeNamespaceOrInstallerSelected": false
+}

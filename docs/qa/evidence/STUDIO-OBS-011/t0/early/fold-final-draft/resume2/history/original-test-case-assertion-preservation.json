@@ -1,0 +1,4747 @@
+{
+  "normalization": "Only bound class/package names, observer test-side receiver, explicit validation constructor-to-call limits and TLS reflection field names; comments/whitespace excluded. No other operators/literals/statements ignored.",
+  "cases": [
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "operation": "edit",
+      "oldClass": "ObservedArtifactLowererTest",
+      "newClass": "ObservedArtifactLowererTest",
+      "oldMethods": [
+        [
+          "Test",
+          "validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes"
+        ],
+        [
+          "Test",
+          "unsupportedNullCanonicalDependencyRetainsOriginalValidationAndBudgetOrder"
+        ],
+        [
+          "Test",
+          "separateOwnedLoweringCopiesRetainCutAndIndependentArtifact"
+        ],
+        [
+          "ParameterizedTest",
+          "publicPublisherUsesOnlyMatchingDetachedSuccessWithFreshInputs"
+        ],
+        [
+          "ParameterizedTest",
+          "reproducesIndependentNodeArtifactAndEveryCanonicalHash"
+        ],
+        [
+          "Test",
+          "reproducesIndependentCanonicalUnicodeAndNumericVectors"
+        ],
+        [
+          "Test",
+          "recipeBoundariesAndAuthoritativePlacementAreNotSilentlyNormalized"
+        ],
+        [
+          "Test",
+          "policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle"
+        ],
+        [
+          "Test",
+          "correctedCompleteBasisPreimagesKeepExactlyTheOriginalEvidenceEnvelope"
+        ],
+        [
+          "ParameterizedTest",
+          "effectiveAdmissionArrayAndFinalPlanHaveTheirExactIndependentPreimages"
+        ],
+        [
+          "Test",
+          "lawfulJoinedSemanticBasisAcceptsExactlySixMiBBeforeOneLegalByteIsRefused"
+        ],
+        [
+          "Test",
+          "defensiveCandidateCannotBeChangedThroughCallerJson"
+        ],
+        [
+          "Test",
+          "reproducesIndependentPythonObservedChoiceArtifactAndAllHashes"
+        ],
+        [
+          "Test",
+          "compiledNodeIndependentlyValidatesChoiceAgainstCurrentPackagedBuild"
+        ],
+        [
+          "Test",
+          "choiceCanonicalHashesPreserveUnicodeAndOriginalInstantWithoutNormalization"
+        ],
+        [
+          "Test",
+          "originalZeroAndSourceOnlyProofsOmitChoiceAndKeepReferenceBytes"
+        ],
+        [
+          "Test",
+          "independentUtf8LimitsDoNotBorrowTheLargerTransportAllowance"
+        ],
+        [
+          "ParameterizedTest",
+          "bothIndependentValidatorsRejectTheSameCoherentProofMutation"
+        ],
+        [
+          "Test",
+          "providerAuditLabelsAndIdsNeverBecomeExecutableSelectors"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes"
+        ],
+        [
+          "Test",
+          "unsupportedNullCanonicalDependencyRetainsOriginalValidationAndBudgetOrder"
+        ],
+        [
+          "Test",
+          "separateOwnedLoweringCopiesRetainCutAndIndependentArtifact"
+        ],
+        [
+          "ParameterizedTest",
+          "publicPublisherUsesOnlyMatchingDetachedSuccessWithFreshInputs"
+        ],
+        [
+          "ParameterizedTest",
+          "reproducesIndependentNodeArtifactAndEveryCanonicalHash"
+        ],
+        [
+          "Test",
+          "reproducesIndependentCanonicalUnicodeAndNumericVectors"
+        ],
+        [
+          "Test",
+          "recipeBoundariesAndAuthoritativePlacementAreNotSilentlyNormalized"
+        ],
+        [
+          "Test",
+          "policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle"
+        ],
+        [
+          "Test",
+          "correctedCompleteBasisPreimagesKeepExactlyTheOriginalEvidenceEnvelope"
+        ],
+        [
+          "ParameterizedTest",
+          "effectiveAdmissionArrayAndFinalPlanHaveTheirExactIndependentPreimages"
+        ],
+        [
+          "Test",
+          "lawfulJoinedSemanticBasisAcceptsExactlySixMiBBeforeOneLegalByteIsRefused"
+        ],
+        [
+          "Test",
+          "defensiveCandidateCannotBeChangedThroughCallerJson"
+        ],
+        [
+          "Test",
+          "reproducesIndependentPythonObservedChoiceArtifactAndAllHashes"
+        ],
+        [
+          "Test",
+          "compiledNodeIndependentlyValidatesChoiceAgainstCurrentPackagedBuild"
+        ],
+        [
+          "Test",
+          "choiceCanonicalHashesPreserveUnicodeAndOriginalInstantWithoutNormalization"
+        ],
+        [
+          "Test",
+          "originalZeroAndSourceOnlyProofsOmitChoiceAndKeepReferenceBytes"
+        ],
+        [
+          "Test",
+          "independentUtf8LimitsDoNotBorrowTheLargerTransportAllowance"
+        ],
+        [
+          "ParameterizedTest",
+          "bothIndependentValidatorsRejectTheSameCoherentProofMutation"
+        ],
+        [
+          "Test",
+          "providerAuditLabelsAndIdsNeverBecomeExecutableSelectors"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 260,
+      "assertionMarkerCountAfter": 260,
+      "methods": [
+        {
+          "name": "validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "8164674ffb6b4199b7c2b092d3cc3c6c86248172e98726d2ede967394c121dfb",
+          "newBodySha256": "b5fbb32b2b3260e76fe877fae8404028ef97f4be628eb7f32a474c46748aa9b0"
+        },
+        {
+          "name": "unsupportedNullCanonicalDependencyRetainsOriginalValidationAndBudgetOrder",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d15ed2f34b2a03b05231f3440b36725bd7e72a8c841a43235196feddc5c782be",
+          "newBodySha256": "32c799e833e2e2fdcd7c498c545cfea1b0ce41cbbb8fd3df8751a040c78f3362"
+        },
+        {
+          "name": "separateOwnedLoweringCopiesRetainCutAndIndependentArtifact",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d431284be74dfffd6a5edc7721e3b99c71ee07a8fbc5ad2b980e24c05abe08fd",
+          "newBodySha256": "d431284be74dfffd6a5edc7721e3b99c71ee07a8fbc5ad2b980e24c05abe08fd"
+        },
+        {
+          "name": "publicPublisherUsesOnlyMatchingDetachedSuccessWithFreshInputs",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "20fb05c4162d288e10433e50e301db8603f108ee6b34ba93caaecaf0caca6a18",
+          "newBodySha256": "20fb05c4162d288e10433e50e301db8603f108ee6b34ba93caaecaf0caca6a18"
+        },
+        {
+          "name": "reproducesIndependentNodeArtifactAndEveryCanonicalHash",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "03db19e24b4552f67043ac67fd1b13195f4683cf89bcdc2c89fcfe8ac7680be6",
+          "newBodySha256": "03db19e24b4552f67043ac67fd1b13195f4683cf89bcdc2c89fcfe8ac7680be6"
+        },
+        {
+          "name": "reproducesIndependentCanonicalUnicodeAndNumericVectors",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "e2435c14332bb1af52a0afc156528100869cd9a137facf601364185fadc6170d",
+          "newBodySha256": "e2435c14332bb1af52a0afc156528100869cd9a137facf601364185fadc6170d"
+        },
+        {
+          "name": "recipeBoundariesAndAuthoritativePlacementAreNotSilentlyNormalized",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a3d4a13ff98afc36454fbeb9f9aef75cce7818a56099179b69ae273e3fe6227e",
+          "newBodySha256": "a3d4a13ff98afc36454fbeb9f9aef75cce7818a56099179b69ae273e3fe6227e"
+        },
+        {
+          "name": "policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6601b6e84bb031bf37ac9a02dc63066b925a20f88f26128568cbe305120ecf96",
+          "newBodySha256": "6601b6e84bb031bf37ac9a02dc63066b925a20f88f26128568cbe305120ecf96"
+        },
+        {
+          "name": "correctedCompleteBasisPreimagesKeepExactlyTheOriginalEvidenceEnvelope",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "cfbe1b7acf19d0ebb83602c2ab47ae3d42aa4b92ff8cdc2f2dd0910accc24cf7",
+          "newBodySha256": "cfbe1b7acf19d0ebb83602c2ab47ae3d42aa4b92ff8cdc2f2dd0910accc24cf7"
+        },
+        {
+          "name": "effectiveAdmissionArrayAndFinalPlanHaveTheirExactIndependentPreimages",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a00644508de97e85263c9d0cd67e63d3c3b5d733bcaddc65b110e501ad5a7b73",
+          "newBodySha256": "a00644508de97e85263c9d0cd67e63d3c3b5d733bcaddc65b110e501ad5a7b73"
+        },
+        {
+          "name": "lawfulJoinedSemanticBasisAcceptsExactlySixMiBBeforeOneLegalByteIsRefused",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1900514ae42cf71759fa1953fa5233f33186620f2511146b13f20d2bfb94aa16",
+          "newBodySha256": "1900514ae42cf71759fa1953fa5233f33186620f2511146b13f20d2bfb94aa16"
+        },
+        {
+          "name": "defensiveCandidateCannotBeChangedThroughCallerJson",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "0cf53853be1cdb011e40a226412e7a76a8c526122330a7bb4facc0a5b4343f6d",
+          "newBodySha256": "0cf53853be1cdb011e40a226412e7a76a8c526122330a7bb4facc0a5b4343f6d"
+        },
+        {
+          "name": "reproducesIndependentPythonObservedChoiceArtifactAndAllHashes",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "fb412e9730cd9171ee4a3724040e00190bea122422f6587eccd94d1d78e8cbbd",
+          "newBodySha256": "fb412e9730cd9171ee4a3724040e00190bea122422f6587eccd94d1d78e8cbbd"
+        },
+        {
+          "name": "compiledNodeIndependentlyValidatesChoiceAgainstCurrentPackagedBuild",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "07d3c2987a9d6cf79d8a0fcdc492b351fcdbd6b945f12ca825ee650914c578c5",
+          "newBodySha256": "07d3c2987a9d6cf79d8a0fcdc492b351fcdbd6b945f12ca825ee650914c578c5"
+        },
+        {
+          "name": "choiceCanonicalHashesPreserveUnicodeAndOriginalInstantWithoutNormalization",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "edfdadba14c898cd470e6b8f0d53392053d699b84b10b943dd8a36204d202463",
+          "newBodySha256": "edfdadba14c898cd470e6b8f0d53392053d699b84b10b943dd8a36204d202463"
+        },
+        {
+          "name": "originalZeroAndSourceOnlyProofsOmitChoiceAndKeepReferenceBytes",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "c24bc3e85b7f9a066d2f963bf19aea5d7e78acee0247dadbc3b5c08d7c86873f",
+          "newBodySha256": "c24bc3e85b7f9a066d2f963bf19aea5d7e78acee0247dadbc3b5c08d7c86873f"
+        },
+        {
+          "name": "independentUtf8LimitsDoNotBorrowTheLargerTransportAllowance",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "e97f8c13df7b9abcaa11ddfd212981c3c20e7beaeb9656606f476565909d56b3",
+          "newBodySha256": "e97f8c13df7b9abcaa11ddfd212981c3c20e7beaeb9656606f476565909d56b3"
+        },
+        {
+          "name": "bothIndependentValidatorsRejectTheSameCoherentProofMutation",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a00644508de97e85263c9d0cd67e63d3c3b5d733bcaddc65b110e501ad5a7b73",
+          "newBodySha256": "a00644508de97e85263c9d0cd67e63d3c3b5d733bcaddc65b110e501ad5a7b73"
+        },
+        {
+          "name": "providerAuditLabelsAndIdsNeverBecomeExecutableSelectors",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "902d9474a1e0c07097c1f7f5c6e946a5da8f185c5cc1df83df48f73c861fd36a",
+          "newBodySha256": "902d9474a1e0c07097c1f7f5c6e946a5da8f185c5cc1df83df48f73c861fd36a"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "operation": "edit",
+      "oldClass": "ObservedAdmissionSecurityIT",
+      "newClass": "ObservedAdmissionSecurityIT",
+      "oldMethods": [
+        [
+          "ParameterizedTest",
+          "ordinaryIdentityIsRequiredBeforeParsingOrAnyAdmissionWork"
+        ],
+        [
+          "Test",
+          "bffCookieAndForgedCertificateOrForwardedIdentityGrantNothing"
+        ],
+        [
+          "Test",
+          "queryCredentialIsNotAnOrdinaryServiceCredential"
+        ],
+        [
+          "ParameterizedTest",
+          "validTokenCannotSkipAnyClosedObservedIdentityField"
+        ],
+        [
+          "ParameterizedTest",
+          "extraIdentityOrPrivateMetadataCannotBeSmuggledIntoObservedBody"
+        ],
+        [
+          "ParameterizedTest",
+          "rawMalformedAndDuplicateJsonRefuseBeforeStoredAuthority"
+        ],
+        [
+          "Test",
+          "malformedUtf8CannotTurnIntoReplacementCharacterAuthority"
+        ],
+        [
+          "Test",
+          "crossExecutionRequestRefusesBeforeDatabaseLookup"
+        ],
+        [
+          "ParameterizedTest",
+          "authenticatedCallerCannotChangeStoredExecutionTuple"
+        ],
+        [
+          "ParameterizedTest",
+          "authenticatedCallerCannotReplacePinnedRuntime"
+        ],
+        [
+          "Test",
+          "otherwiseValidTupleReachesTheLockedAdmissionTransactionButNeverCasOrSecretResolution"
+        ],
+        [
+          "Test",
+          "storedActorGrantMismatchIsNotOverriddenByRequestHeaders"
+        ],
+        [
+          "Test",
+          "expiredGrantAndCancelledExecutionStopBeforeAccountOrCas"
+        ],
+        [
+          "Test",
+          "unknownBindingDoesNotReturnExecutionOrAccountMetadata"
+        ],
+        [
+          "Test",
+          "observedByteBoundDoesNotExposeTheBodyAndUnauthenticatedCallerStillGetsIdentityRefusal"
+        ],
+        [
+          "Test",
+          "ordinaryProgressCallbackRetainsRealTokenAndStrictReaderBoundary"
+        ],
+        [
+          "Test",
+          "strictParserMustNotQuotePrivateMalformedIdentityValues"
+        ]
+      ],
+      "newMethods": [
+        [
+          "ParameterizedTest",
+          "ordinaryIdentityIsRequiredBeforeParsingOrAnyAdmissionWork"
+        ],
+        [
+          "Test",
+          "bffCookieAndForgedCertificateOrForwardedIdentityGrantNothing"
+        ],
+        [
+          "Test",
+          "queryCredentialIsNotAnOrdinaryServiceCredential"
+        ],
+        [
+          "ParameterizedTest",
+          "validTokenCannotSkipAnyClosedObservedIdentityField"
+        ],
+        [
+          "ParameterizedTest",
+          "extraIdentityOrPrivateMetadataCannotBeSmuggledIntoObservedBody"
+        ],
+        [
+          "ParameterizedTest",
+          "rawMalformedAndDuplicateJsonRefuseBeforeStoredAuthority"
+        ],
+        [
+          "Test",
+          "malformedUtf8CannotTurnIntoReplacementCharacterAuthority"
+        ],
+        [
+          "Test",
+          "crossExecutionRequestRefusesBeforeDatabaseLookup"
+        ],
+        [
+          "ParameterizedTest",
+          "authenticatedCallerCannotChangeStoredExecutionTuple"
+        ],
+        [
+          "ParameterizedTest",
+          "authenticatedCallerCannotReplacePinnedRuntime"
+        ],
+        [
+          "Test",
+          "otherwiseValidTupleReachesTheLockedAdmissionTransactionButNeverCasOrSecretResolution"
+        ],
+        [
+          "Test",
+          "storedActorGrantMismatchIsNotOverriddenByRequestHeaders"
+        ],
+        [
+          "Test",
+          "expiredGrantAndCancelledExecutionStopBeforeAccountOrCas"
+        ],
+        [
+          "Test",
+          "unknownBindingDoesNotReturnExecutionOrAccountMetadata"
+        ],
+        [
+          "Test",
+          "observedByteBoundDoesNotExposeTheBodyAndUnauthenticatedCallerStillGetsIdentityRefusal"
+        ],
+        [
+          "Test",
+          "ordinaryProgressCallbackRetainsRealTokenAndStrictReaderBoundary"
+        ],
+        [
+          "Test",
+          "strictParserMustNotQuotePrivateMalformedIdentityValues"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 13,
+      "assertionMarkerCountAfter": 13,
+      "methods": [
+        {
+          "name": "ordinaryIdentityIsRequiredBeforeParsingOrAnyAdmissionWork",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "9224bbb4ad4a92415a7f43bb2e96b7041fe3b2bad16a8c97ab08c8f0662069a8",
+          "newBodySha256": "9224bbb4ad4a92415a7f43bb2e96b7041fe3b2bad16a8c97ab08c8f0662069a8"
+        },
+        {
+          "name": "bffCookieAndForgedCertificateOrForwardedIdentityGrantNothing",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1fbe46891aaced2952ef4d5a7e324620c928058b758c5d2e2cb225fa1fcbdd0c",
+          "newBodySha256": "1fbe46891aaced2952ef4d5a7e324620c928058b758c5d2e2cb225fa1fcbdd0c"
+        },
+        {
+          "name": "queryCredentialIsNotAnOrdinaryServiceCredential",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1d2445bc93d31f6dc0d2da550065464d9591ac9b2d9c07aaee11b2f762dc482d",
+          "newBodySha256": "1d2445bc93d31f6dc0d2da550065464d9591ac9b2d9c07aaee11b2f762dc482d"
+        },
+        {
+          "name": "validTokenCannotSkipAnyClosedObservedIdentityField",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "626be10ae32f44abf725919c8c69a3c055cd256dc155934a58ec0897e4c04c86",
+          "newBodySha256": "626be10ae32f44abf725919c8c69a3c055cd256dc155934a58ec0897e4c04c86"
+        },
+        {
+          "name": "extraIdentityOrPrivateMetadataCannotBeSmuggledIntoObservedBody",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "994f04fd3ad58ad9acea738c768897cabb174e571ddbe169f5eca065d84f41f6",
+          "newBodySha256": "994f04fd3ad58ad9acea738c768897cabb174e571ddbe169f5eca065d84f41f6"
+        },
+        {
+          "name": "rawMalformedAndDuplicateJsonRefuseBeforeStoredAuthority",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d9b10ef0b3eeedf91afcef55d23358647301ec027c4c1fa60ee2b6fbcc58d625",
+          "newBodySha256": "d9b10ef0b3eeedf91afcef55d23358647301ec027c4c1fa60ee2b6fbcc58d625"
+        },
+        {
+          "name": "malformedUtf8CannotTurnIntoReplacementCharacterAuthority",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "570fd47b0bd6f07167861ff9a0c7547e1095de2534b97542573e6220ab8a5641",
+          "newBodySha256": "570fd47b0bd6f07167861ff9a0c7547e1095de2534b97542573e6220ab8a5641"
+        },
+        {
+          "name": "crossExecutionRequestRefusesBeforeDatabaseLookup",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "53c3fd2ff2f226f0ef6ca466bf85a21d8cb6f079fe8ddedd24c8d839cdb19144",
+          "newBodySha256": "53c3fd2ff2f226f0ef6ca466bf85a21d8cb6f079fe8ddedd24c8d839cdb19144"
+        },
+        {
+          "name": "authenticatedCallerCannotChangeStoredExecutionTuple",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "466dac78ebeb3d6a9753bcae7e1f806db2f5d47f881e06edb9fab53e53ef3db8",
+          "newBodySha256": "466dac78ebeb3d6a9753bcae7e1f806db2f5d47f881e06edb9fab53e53ef3db8"
+        },
+        {
+          "name": "authenticatedCallerCannotReplacePinnedRuntime",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "14c8472419665791a4706242f396d4b46746186f0f9cb9c76659cb37e4347180",
+          "newBodySha256": "14c8472419665791a4706242f396d4b46746186f0f9cb9c76659cb37e4347180"
+        },
+        {
+          "name": "otherwiseValidTupleReachesTheLockedAdmissionTransactionButNeverCasOrSecretResolution",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b839ac8535fc311b93c530248820e6d5319c0951375bc52c9bfac5be2b538a6e",
+          "newBodySha256": "b839ac8535fc311b93c530248820e6d5319c0951375bc52c9bfac5be2b538a6e"
+        },
+        {
+          "name": "storedActorGrantMismatchIsNotOverriddenByRequestHeaders",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "fe4fe43f1b213fc418d1087b8bf8a1957cb4f8b14fe862b2d2e5c6951dad98b5",
+          "newBodySha256": "fe4fe43f1b213fc418d1087b8bf8a1957cb4f8b14fe862b2d2e5c6951dad98b5"
+        },
+        {
+          "name": "expiredGrantAndCancelledExecutionStopBeforeAccountOrCas",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "34110584da87e8b3f8bd0d4484621371a8391f6a1e4fc2482fe40d591f8e3496",
+          "newBodySha256": "34110584da87e8b3f8bd0d4484621371a8391f6a1e4fc2482fe40d591f8e3496"
+        },
+        {
+          "name": "unknownBindingDoesNotReturnExecutionOrAccountMetadata",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "0124a5cba83db2cef1d248f306a416c3477b96b80e84a2dcf7d7e85f5f00fe63",
+          "newBodySha256": "0124a5cba83db2cef1d248f306a416c3477b96b80e84a2dcf7d7e85f5f00fe63"
+        },
+        {
+          "name": "observedByteBoundDoesNotExposeTheBodyAndUnauthenticatedCallerStillGetsIdentityRefusal",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ee6ad420d2d2306725656e8dbfc7e4ed74a16229eeec4f81234336fc5c815293",
+          "newBodySha256": "ee6ad420d2d2306725656e8dbfc7e4ed74a16229eeec4f81234336fc5c815293"
+        },
+        {
+          "name": "ordinaryProgressCallbackRetainsRealTokenAndStrictReaderBoundary",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "444aae010b15c8c8124ea7019cfbaed32dcd5f5071e463e074a68041aff81594",
+          "newBodySha256": "444aae010b15c8c8124ea7019cfbaed32dcd5f5071e463e074a68041aff81594"
+        },
+        {
+          "name": "strictParserMustNotQuotePrivateMalformedIdentityValues",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "c882fccf186dbb645a73f45d900434e78218b744826b792a4aeda986cbbe5fb8",
+          "newBodySha256": "c882fccf186dbb645a73f45d900434e78218b744826b792a4aeda986cbbe5fb8"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java",
+      "operation": "edit",
+      "oldClass": "ObservedProfileDriftTest",
+      "newClass": "ObservedProfileDriftTest",
+      "oldMethods": [
+        [
+          "ParameterizedTest",
+          "realApplicationComposesAllFlagPairsAndRetainsProfileBoundaries"
+        ]
+      ],
+      "newMethods": [
+        [
+          "ParameterizedTest",
+          "realApplicationComposesAllFlagPairsAndRetainsProfileBoundaries"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 34,
+      "assertionMarkerCountAfter": 34,
+      "methods": [
+        {
+          "name": "realApplicationComposesAllFlagPairsAndRetainsProfileBoundaries",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a00644508de97e85263c9d0cd67e63d3c3b5d733bcaddc65b110e501ad5a7b73",
+          "newBodySha256": "a00644508de97e85263c9d0cd67e63d3c3b5d733bcaddc65b110e501ad5a7b73"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java",
+      "operation": "edit",
+      "oldClass": "ObservedGrantClockIT",
+      "newClass": "ObservedGrantClockIT",
+      "oldMethods": [
+        [
+          "Test",
+          "theGrantIsMintedFromAClockTimestampReadAfterAccountFreshness"
+        ],
+        [
+          "Test",
+          "acceptanceSucceedsWhateverTheApplicationClockSays"
+        ],
+        [
+          "Test",
+          "aGrantExpiredByTheDatabaseClockIsRefusedBeforeTheWrite"
+        ],
+        [
+          "Test",
+          "theTriggerJudgesGrantsOnTheDatabaseClockWithoutTolerance"
+        ],
+        [
+          "Test",
+          "theDatabaseClockReadsClockTimestampInAndOutOfATransaction"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "theGrantIsMintedFromAClockTimestampReadAfterAccountFreshness"
+        ],
+        [
+          "Test",
+          "acceptanceSucceedsWhateverTheApplicationClockSays"
+        ],
+        [
+          "Test",
+          "aGrantExpiredByTheDatabaseClockIsRefusedBeforeTheWrite"
+        ],
+        [
+          "Test",
+          "theTriggerJudgesGrantsOnTheDatabaseClockWithoutTolerance"
+        ],
+        [
+          "Test",
+          "theDatabaseClockReadsClockTimestampInAndOutOfATransaction"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 25,
+      "assertionMarkerCountAfter": 25,
+      "methods": [
+        {
+          "name": "theGrantIsMintedFromAClockTimestampReadAfterAccountFreshness",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "28f12fa5dc79662453b76224ff64490be73edcd4cfb988bd7dcb6374525a8fd7",
+          "newBodySha256": "28f12fa5dc79662453b76224ff64490be73edcd4cfb988bd7dcb6374525a8fd7"
+        },
+        {
+          "name": "acceptanceSucceedsWhateverTheApplicationClockSays",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "f432dbcc8a31bcb59e392d923f446b1652e178646ca1e338d959d16e45210d05",
+          "newBodySha256": "f432dbcc8a31bcb59e392d923f446b1652e178646ca1e338d959d16e45210d05"
+        },
+        {
+          "name": "aGrantExpiredByTheDatabaseClockIsRefusedBeforeTheWrite",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "9c523eb129f58d489b86e5e61375cd427f3502cc30b363256b4ffb2dcd9e57cb",
+          "newBodySha256": "9c523eb129f58d489b86e5e61375cd427f3502cc30b363256b4ffb2dcd9e57cb"
+        },
+        {
+          "name": "theTriggerJudgesGrantsOnTheDatabaseClockWithoutTolerance",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d38eaa2e687ee2b1733a524cb84a9c639ccd490e1dee7c3818e68f0b0c3ba4e2",
+          "newBodySha256": "d38eaa2e687ee2b1733a524cb84a9c639ccd490e1dee7c3818e68f0b0c3ba4e2"
+        },
+        {
+          "name": "theDatabaseClockReadsClockTimestampInAndOutOfATransaction",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "faf404e61bdfb6ece48742b7a22d37fc9978e6080b5fec04be79feb4e2844e52",
+          "newBodySha256": "faf404e61bdfb6ece48742b7a22d37fc9978e6080b5fec04be79feb4e2844e52"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "operation": "edit",
+      "oldClass": "GuidedPublicationReplayIT",
+      "newClass": "GuidedPublicationReplayIT",
+      "oldMethods": [
+        [
+          "Test",
+          "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache"
+        ],
+        [
+          "Test",
+          "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof"
+        ],
+        [
+          "Test",
+          "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+        ],
+        [
+          "Test",
+          "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution"
+        ],
+        [
+          "Test",
+          "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne"
+        ],
+        [
+          "Test",
+          "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear"
+        ],
+        [
+          "Test",
+          "incrementalPartialDriftStepReadPublishesAndReplaysTwice"
+        ],
+        [
+          "Test",
+          "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek"
+        ],
+        [
+          "Test",
+          "incrementalStartCannotWidenTrustedOriginCeiling"
+        ],
+        [
+          "Test",
+          "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest"
+        ],
+        [
+          "Test",
+          "prefixProducerContextDefiniteRefusalsStopBeforePreparation"
+        ],
+        [
+          "Test",
+          "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch"
+        ],
+        [
+          "Test",
+          "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence"
+        ],
+        [
+          "Test",
+          "incrementalSecretPrefixPreservesEveryVaultFaultOracle"
+        ],
+        [
+          "Test",
+          "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck"
+        ],
+        [
+          "Test",
+          "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent"
+        ],
+        [
+          "Test",
+          "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation"
+        ],
+        [
+          "Test",
+          "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority"
+        ],
+        [
+          "Test",
+          "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication"
+        ],
+        [
+          "Test",
+          "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce"
+        ],
+        [
+          "Test",
+          "incrementalPrefixCallbacksKeepStateAndFenceBothReservations"
+        ],
+        [
+          "Test",
+          "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate"
+        ],
+        [
+          "Test",
+          "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch"
+        ],
+        [
+          "Test",
+          "incrementalDriftAuthorityRejectsEveryExactJoin"
+        ],
+        [
+          "Test",
+          "incrementalExcludedAttemptCannotHideOtherUnsettledActions"
+        ],
+        [
+          "Test",
+          "incrementalPrefixContinuationMatrixDoneAndRefreshRows"
+        ],
+        [
+          "Test",
+          "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned"
+        ],
+        [
+          "Test",
+          "incrementalPrefixPolicyRefusalsNeverBecomeDrift"
+        ],
+        [
+          "Test",
+          "incrementalFreshPostConsentGuardsDenyDangerousProposals"
+        ],
+        [
+          "Test",
+          "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry"
+        ],
+        [
+          "Test",
+          "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery"
+        ],
+        [
+          "Test",
+          "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary"
+        ],
+        [
+          "Test",
+          "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+        ],
+        [
+          "Test",
+          "queuedAndPreReadyRefusals"
+        ],
+        [
+          "Test",
+          "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness"
+        ],
+        [
+          "Test",
+          "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays"
+        ],
+        [
+          "Test",
+          "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance"
+        ],
+        [
+          "Test",
+          "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork"
+        ],
+        [
+          "Test",
+          "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays"
+        ],
+        [
+          "Test",
+          "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall"
+        ],
+        [
+          "Test",
+          "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay"
+        ],
+        [
+          "Test",
+          "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel"
+        ],
+        [
+          "Test",
+          "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes"
+        ],
+        [
+          "Test",
+          "actualCoreMayUseDenialStartsNoSessionAndNoBrowser"
+        ],
+        [
+          "Test",
+          "actualCoreGuidedSameSecretIdStaysWithinPersistedScope"
+        ],
+        [
+          "Test",
+          "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope"
+        ],
+        [
+          "Test",
+          "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure"
+        ],
+        [
+          "Test",
+          "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch"
+        ],
+        [
+          "Test",
+          "actualGuidedRegistrationPassingAssertRemainsPassed"
+        ],
+        [
+          "Test",
+          "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection"
+        ],
+        [
+          "Test",
+          "actualPublishedWrongPasswordAnnotatesEarlierSecretFill"
+        ],
+        [
+          "Test",
+          "actualPublishedRegistrationPassingAssertRemainsPassed"
+        ],
+        [
+          "Test",
+          "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls"
+        ],
+        [
+          "Test",
+          "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead"
+        ],
+        [
+          "Test",
+          "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead"
+        ],
+        [
+          "Test",
+          "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution"
+        ],
+        [
+          "Test",
+          "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution"
+        ],
+        [
+          "Test",
+          "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds"
+        ],
+        [
+          "Test",
+          "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds"
+        ],
+        [
+          "Test",
+          "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper"
+        ],
+        [
+          "Test",
+          "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect"
+        ],
+        [
+          "Test",
+          "actualPublishedPublicCancelWhileNativePasswordWorldPending"
+        ],
+        [
+          "Test",
+          "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending"
+        ],
+        [
+          "Test",
+          "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks"
+        ],
+        [
+          "Test",
+          "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending"
+        ],
+        [
+          "Test",
+          "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue"
+        ],
+        [
+          "Test",
+          "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue"
+        ],
+        [
+          "Test",
+          "actualSecretControlWindowLossBeforeReadyReachesTerminalError"
+        ],
+        [
+          "Test",
+          "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead"
+        ],
+        [
+          "Test",
+          "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead"
+        ],
+        [
+          "Test",
+          "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead"
+        ],
+        [
+          "Test",
+          "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion"
+        ],
+        [
+          "Test",
+          "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache"
+        ],
+        [
+          "Test",
+          "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof"
+        ],
+        [
+          "Test",
+          "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays"
+        ],
+        [
+          "Test",
+          "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution"
+        ],
+        [
+          "Test",
+          "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne"
+        ],
+        [
+          "Test",
+          "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear"
+        ],
+        [
+          "Test",
+          "incrementalPartialDriftStepReadPublishesAndReplaysTwice"
+        ],
+        [
+          "Test",
+          "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek"
+        ],
+        [
+          "Test",
+          "incrementalStartCannotWidenTrustedOriginCeiling"
+        ],
+        [
+          "Test",
+          "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest"
+        ],
+        [
+          "Test",
+          "prefixProducerContextDefiniteRefusalsStopBeforePreparation"
+        ],
+        [
+          "Test",
+          "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch"
+        ],
+        [
+          "Test",
+          "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence"
+        ],
+        [
+          "Test",
+          "incrementalSecretPrefixPreservesEveryVaultFaultOracle"
+        ],
+        [
+          "Test",
+          "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck"
+        ],
+        [
+          "Test",
+          "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent"
+        ],
+        [
+          "Test",
+          "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation"
+        ],
+        [
+          "Test",
+          "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority"
+        ],
+        [
+          "Test",
+          "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication"
+        ],
+        [
+          "Test",
+          "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce"
+        ],
+        [
+          "Test",
+          "incrementalPrefixCallbacksKeepStateAndFenceBothReservations"
+        ],
+        [
+          "Test",
+          "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate"
+        ],
+        [
+          "Test",
+          "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch"
+        ],
+        [
+          "Test",
+          "incrementalDriftAuthorityRejectsEveryExactJoin"
+        ],
+        [
+          "Test",
+          "incrementalExcludedAttemptCannotHideOtherUnsettledActions"
+        ],
+        [
+          "Test",
+          "incrementalPrefixContinuationMatrixDoneAndRefreshRows"
+        ],
+        [
+          "Test",
+          "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned"
+        ],
+        [
+          "Test",
+          "incrementalPrefixPolicyRefusalsNeverBecomeDrift"
+        ],
+        [
+          "Test",
+          "incrementalFreshPostConsentGuardsDenyDangerousProposals"
+        ],
+        [
+          "Test",
+          "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry"
+        ],
+        [
+          "Test",
+          "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery"
+        ],
+        [
+          "Test",
+          "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary"
+        ],
+        [
+          "Test",
+          "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues"
+        ],
+        [
+          "Test",
+          "queuedAndPreReadyRefusals"
+        ],
+        [
+          "Test",
+          "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness"
+        ],
+        [
+          "Test",
+          "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays"
+        ],
+        [
+          "Test",
+          "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance"
+        ],
+        [
+          "Test",
+          "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork"
+        ],
+        [
+          "Test",
+          "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays"
+        ],
+        [
+          "Test",
+          "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall"
+        ],
+        [
+          "Test",
+          "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay"
+        ],
+        [
+          "Test",
+          "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel"
+        ],
+        [
+          "Test",
+          "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes"
+        ],
+        [
+          "Test",
+          "actualCoreMayUseDenialStartsNoSessionAndNoBrowser"
+        ],
+        [
+          "Test",
+          "actualCoreGuidedSameSecretIdStaysWithinPersistedScope"
+        ],
+        [
+          "Test",
+          "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope"
+        ],
+        [
+          "Test",
+          "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure"
+        ],
+        [
+          "Test",
+          "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch"
+        ],
+        [
+          "Test",
+          "actualGuidedRegistrationPassingAssertRemainsPassed"
+        ],
+        [
+          "Test",
+          "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection"
+        ],
+        [
+          "Test",
+          "actualPublishedWrongPasswordAnnotatesEarlierSecretFill"
+        ],
+        [
+          "Test",
+          "actualPublishedRegistrationPassingAssertRemainsPassed"
+        ],
+        [
+          "Test",
+          "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls"
+        ],
+        [
+          "Test",
+          "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead"
+        ],
+        [
+          "Test",
+          "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead"
+        ],
+        [
+          "Test",
+          "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution"
+        ],
+        [
+          "Test",
+          "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution"
+        ],
+        [
+          "Test",
+          "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds"
+        ],
+        [
+          "Test",
+          "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds"
+        ],
+        [
+          "Test",
+          "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper"
+        ],
+        [
+          "Test",
+          "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect"
+        ],
+        [
+          "Test",
+          "actualPublishedPublicCancelWhileNativePasswordWorldPending"
+        ],
+        [
+          "Test",
+          "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending"
+        ],
+        [
+          "Test",
+          "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks"
+        ],
+        [
+          "Test",
+          "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending"
+        ],
+        [
+          "Test",
+          "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue"
+        ],
+        [
+          "Test",
+          "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue"
+        ],
+        [
+          "Test",
+          "actualSecretControlWindowLossBeforeReadyReachesTerminalError"
+        ],
+        [
+          "Test",
+          "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead"
+        ],
+        [
+          "Test",
+          "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead"
+        ],
+        [
+          "Test",
+          "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead"
+        ],
+        [
+          "Test",
+          "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion"
+        ],
+        [
+          "Test",
+          "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 2696,
+      "assertionMarkerCountAfter": 2696,
+      "methods": [
+        {
+          "name": "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "292b6b46de4f68a9dba5b0c7e247470b4bbe559b9bb8bb699110891e24a822dd",
+          "newBodySha256": "292b6b46de4f68a9dba5b0c7e247470b4bbe559b9bb8bb699110891e24a822dd"
+        },
+        {
+          "name": "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "428f4a8067d6dfa227ee8eed5f53ded0348985bf90bb0bcc5369a187bf01d4ca",
+          "newBodySha256": "428f4a8067d6dfa227ee8eed5f53ded0348985bf90bb0bcc5369a187bf01d4ca"
+        },
+        {
+          "name": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "69a49a547c54e3383bad0aa1c4d24fc502dc4fe5713dcaefb7ea3429237ca220",
+          "newBodySha256": "69a49a547c54e3383bad0aa1c4d24fc502dc4fe5713dcaefb7ea3429237ca220"
+        },
+        {
+          "name": "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "9d1da29695d5c04bf6d0e899893b6c61e7f3f34d858f68adaa89a29556393839",
+          "newBodySha256": "9d1da29695d5c04bf6d0e899893b6c61e7f3f34d858f68adaa89a29556393839"
+        },
+        {
+          "name": "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "f496a915e724eccafbf4ff6ac758fc89dd795f5340d6219db2950e3d70cb8444",
+          "newBodySha256": "f496a915e724eccafbf4ff6ac758fc89dd795f5340d6219db2950e3d70cb8444"
+        },
+        {
+          "name": "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6c65894ab2a251d85e62e6734049ee4f36f6cd38b4e056669fb20ce302c2c98b",
+          "newBodySha256": "6c65894ab2a251d85e62e6734049ee4f36f6cd38b4e056669fb20ce302c2c98b"
+        },
+        {
+          "name": "incrementalPartialDriftStepReadPublishesAndReplaysTwice",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "893e1b73502163bc0eb067bd4e83d657c5879c93f6f7598f723fe240edbca0c7",
+          "newBodySha256": "893e1b73502163bc0eb067bd4e83d657c5879c93f6f7598f723fe240edbca0c7"
+        },
+        {
+          "name": "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "181a6a74dd298733b6d7e17bd603c360fed2869b19038b9a49a058e56d12f7c7",
+          "newBodySha256": "181a6a74dd298733b6d7e17bd603c360fed2869b19038b9a49a058e56d12f7c7"
+        },
+        {
+          "name": "incrementalStartCannotWidenTrustedOriginCeiling",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "7e0104139b330924850b9f7168e474b6b210f74c71edbd980198bfa21765fa56",
+          "newBodySha256": "7e0104139b330924850b9f7168e474b6b210f74c71edbd980198bfa21765fa56"
+        },
+        {
+          "name": "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "abef086db0cb4bbe2a438f395c8d285b6b4f8d88a4d526612442cc8426a680e2",
+          "newBodySha256": "abef086db0cb4bbe2a438f395c8d285b6b4f8d88a4d526612442cc8426a680e2"
+        },
+        {
+          "name": "prefixProducerContextDefiniteRefusalsStopBeforePreparation",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "092bea82433dd7e7fe6ddc567ea5ee69b0f6c9c01c4955721dd1bd7406f762a5",
+          "newBodySha256": "092bea82433dd7e7fe6ddc567ea5ee69b0f6c9c01c4955721dd1bd7406f762a5"
+        },
+        {
+          "name": "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "034c611c60fa03a4fa50dcc7839179fc349e3878686918c2f95dab09ea6f5d4b",
+          "newBodySha256": "034c611c60fa03a4fa50dcc7839179fc349e3878686918c2f95dab09ea6f5d4b"
+        },
+        {
+          "name": "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6e33a63b085e6c55ebf4c27e8bfeebc9a55a47c07b46434878d3452fbdf66ffe",
+          "newBodySha256": "6e33a63b085e6c55ebf4c27e8bfeebc9a55a47c07b46434878d3452fbdf66ffe"
+        },
+        {
+          "name": "incrementalSecretPrefixPreservesEveryVaultFaultOracle",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1ae4f5a343e80b5ab3257678957de160b0e7b334fd62ab975df6307cf2b36945",
+          "newBodySha256": "1ae4f5a343e80b5ab3257678957de160b0e7b334fd62ab975df6307cf2b36945"
+        },
+        {
+          "name": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "198d3c19b70d2df8663811b8062fad4a0737374bceb0792b206ce2c1418dce8e",
+          "newBodySha256": "198d3c19b70d2df8663811b8062fad4a0737374bceb0792b206ce2c1418dce8e"
+        },
+        {
+          "name": "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "342731bb3c17cca5adfe6572f410d318044202db6a46062304a991da592a36da",
+          "newBodySha256": "342731bb3c17cca5adfe6572f410d318044202db6a46062304a991da592a36da"
+        },
+        {
+          "name": "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a08beb76849cf0db7a207c4e1d7a84de20ca6c00be1ee125a1024a05e2ffe8f6",
+          "newBodySha256": "a08beb76849cf0db7a207c4e1d7a84de20ca6c00be1ee125a1024a05e2ffe8f6"
+        },
+        {
+          "name": "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "14c27e001b83e6a369692a0a98c206318b624f695cd43340eb01ebcb00358949",
+          "newBodySha256": "14c27e001b83e6a369692a0a98c206318b624f695cd43340eb01ebcb00358949"
+        },
+        {
+          "name": "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "99ee965c2e99c3ff003b43831917e5eeb9a4fc5b136aee9e3117948738d79b94",
+          "newBodySha256": "99ee965c2e99c3ff003b43831917e5eeb9a4fc5b136aee9e3117948738d79b94"
+        },
+        {
+          "name": "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "72abd47a1c8379da6a5fa97182a507f5a424ea2df09ee522fcbaa93ffb0df47d",
+          "newBodySha256": "72abd47a1c8379da6a5fa97182a507f5a424ea2df09ee522fcbaa93ffb0df47d"
+        },
+        {
+          "name": "incrementalPrefixCallbacksKeepStateAndFenceBothReservations",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "41fd5be50f975e07f823751e1ffdecd30be864f1c10d2144a71f8adf6c96a96b",
+          "newBodySha256": "41fd5be50f975e07f823751e1ffdecd30be864f1c10d2144a71f8adf6c96a96b"
+        },
+        {
+          "name": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "73c042cc67e89b8e7c7525477faa15fec23c4fa84a72d88b81ba143f1de9907c",
+          "newBodySha256": "73c042cc67e89b8e7c7525477faa15fec23c4fa84a72d88b81ba143f1de9907c"
+        },
+        {
+          "name": "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "69e7fdff560cddcb3342cba29183d945d18a194b439eb3285babf29f76b6c5e4",
+          "newBodySha256": "69e7fdff560cddcb3342cba29183d945d18a194b439eb3285babf29f76b6c5e4"
+        },
+        {
+          "name": "incrementalDriftAuthorityRejectsEveryExactJoin",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d8d2e6d604e3bece9e401894f98360f845f9b152f4a93ecf5d507b5cd01bd53b",
+          "newBodySha256": "d8d2e6d604e3bece9e401894f98360f845f9b152f4a93ecf5d507b5cd01bd53b"
+        },
+        {
+          "name": "incrementalExcludedAttemptCannotHideOtherUnsettledActions",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "298217b07a52aec6b3b4a4b728eb2b1a0f157f131057797a2f69657f67f629bf",
+          "newBodySha256": "298217b07a52aec6b3b4a4b728eb2b1a0f157f131057797a2f69657f67f629bf"
+        },
+        {
+          "name": "incrementalPrefixContinuationMatrixDoneAndRefreshRows",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "bcb5f556488c1f41d15e63002f972573a60198368b5d4a1c99409919a393a69d",
+          "newBodySha256": "bcb5f556488c1f41d15e63002f972573a60198368b5d4a1c99409919a393a69d"
+        },
+        {
+          "name": "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d9365aa841862d83b3eeedd28cfc2c64a6db6732e22c4278a6073065594ee746",
+          "newBodySha256": "d9365aa841862d83b3eeedd28cfc2c64a6db6732e22c4278a6073065594ee746"
+        },
+        {
+          "name": "incrementalPrefixPolicyRefusalsNeverBecomeDrift",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "493b9760a751954f1b6d15621f7c8aadb088bbccdcbde5532365ffce9c1a6630",
+          "newBodySha256": "493b9760a751954f1b6d15621f7c8aadb088bbccdcbde5532365ffce9c1a6630"
+        },
+        {
+          "name": "incrementalFreshPostConsentGuardsDenyDangerousProposals",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "62c8944cb905b3a1deefc144e998671a5973f82b93221472bc5d25378c9fb0d4",
+          "newBodySha256": "62c8944cb905b3a1deefc144e998671a5973f82b93221472bc5d25378c9fb0d4"
+        },
+        {
+          "name": "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "80876627d402efff504d58807ea8808e91373049535152a98d6aef6bd037f34b",
+          "newBodySha256": "80876627d402efff504d58807ea8808e91373049535152a98d6aef6bd037f34b"
+        },
+        {
+          "name": "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "4f36c58f152002b384664ca5e72651488374c9002f82e1209588e921f44183fa",
+          "newBodySha256": "4f36c58f152002b384664ca5e72651488374c9002f82e1209588e921f44183fa"
+        },
+        {
+          "name": "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "98cf1f460c3760f14a4ac3ecd10b962c9385578be70fe63cc642c5b02821dc1d",
+          "newBodySha256": "98cf1f460c3760f14a4ac3ecd10b962c9385578be70fe63cc642c5b02821dc1d"
+        },
+        {
+          "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "8f8d3b3a73f7831de85e583db7c4614b050b6d14efb04ea1c82512908c9c090e",
+          "newBodySha256": "8f8d3b3a73f7831de85e583db7c4614b050b6d14efb04ea1c82512908c9c090e"
+        },
+        {
+          "name": "queuedAndPreReadyRefusals",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ccf5d4b2fdd3d2df3b70f215c2753c51f7f41e200a08e0d80862c1e51ac5f3a2",
+          "newBodySha256": "ccf5d4b2fdd3d2df3b70f215c2753c51f7f41e200a08e0d80862c1e51ac5f3a2"
+        },
+        {
+          "name": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "77e53c900445a983e92aaba0395d0321f39933834c2b7e92a0aec2b5baee4db5",
+          "newBodySha256": "77e53c900445a983e92aaba0395d0321f39933834c2b7e92a0aec2b5baee4db5"
+        },
+        {
+          "name": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "152cf0d5985b6d0c2bd16305f9d2b373e33644a2a3f49d8c98c9ef09ef9e56c8",
+          "newBodySha256": "152cf0d5985b6d0c2bd16305f9d2b373e33644a2a3f49d8c98c9ef09ef9e56c8"
+        },
+        {
+          "name": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6a7d75d1029305f7ac045d380e977665f2fde633cd16d1200e3fd4fc7e8c4a41",
+          "newBodySha256": "6a7d75d1029305f7ac045d380e977665f2fde633cd16d1200e3fd4fc7e8c4a41"
+        },
+        {
+          "name": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "79eb1ecf6d2e9484b25073445f63e9a2fbd1d0cf70af8878201a3550cf2cd074",
+          "newBodySha256": "79eb1ecf6d2e9484b25073445f63e9a2fbd1d0cf70af8878201a3550cf2cd074"
+        },
+        {
+          "name": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ea59d2e2142b97ed8c31af13d1950c8bf114e6951fa01957bb64c70bfb8a8a89",
+          "newBodySha256": "ea59d2e2142b97ed8c31af13d1950c8bf114e6951fa01957bb64c70bfb8a8a89"
+        },
+        {
+          "name": "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "e6a1a0445304230b3248c4403eac403ea59cee6dce73df7dada0d2031e8baa7b",
+          "newBodySha256": "e6a1a0445304230b3248c4403eac403ea59cee6dce73df7dada0d2031e8baa7b"
+        },
+        {
+          "name": "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "e705e106b8c20a81ff14a92cd1cf223f78a5c1b57ec6a03c1cb2698d6cc6d7d4",
+          "newBodySha256": "e705e106b8c20a81ff14a92cd1cf223f78a5c1b57ec6a03c1cb2698d6cc6d7d4"
+        },
+        {
+          "name": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "2a51a8231d18692e9d42475ce81c0afc9dc51822efc4573bc9a5b7784ae3bbef",
+          "newBodySha256": "2a51a8231d18692e9d42475ce81c0afc9dc51822efc4573bc9a5b7784ae3bbef"
+        },
+        {
+          "name": "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "96f5d19019dc987dad090adacf1e88ca56831d0c42e3c77698b1a05171ad6569",
+          "newBodySha256": "96f5d19019dc987dad090adacf1e88ca56831d0c42e3c77698b1a05171ad6569"
+        },
+        {
+          "name": "actualCoreMayUseDenialStartsNoSessionAndNoBrowser",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "f8e8e22f5ffeb01cfc9b9ac9586e0031ac5496b70c73df9f4f24a8f670e00c3e",
+          "newBodySha256": "f8e8e22f5ffeb01cfc9b9ac9586e0031ac5496b70c73df9f4f24a8f670e00c3e"
+        },
+        {
+          "name": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "bfd91c1b51d2cd0a01f6e037de2d67a92c8f06b63e6a4e4d99ecda1a1c598b51",
+          "newBodySha256": "bfd91c1b51d2cd0a01f6e037de2d67a92c8f06b63e6a4e4d99ecda1a1c598b51"
+        },
+        {
+          "name": "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "02dfb83ec64416cb61cbc7661c6705cb3b41d63bd74f696b19afc9c96212ffaa",
+          "newBodySha256": "02dfb83ec64416cb61cbc7661c6705cb3b41d63bd74f696b19afc9c96212ffaa"
+        },
+        {
+          "name": "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "cd6a35d30ec0b3f0033e360aabf20591f9801bd0b50e8d5ee605f1429893b1c2",
+          "newBodySha256": "cd6a35d30ec0b3f0033e360aabf20591f9801bd0b50e8d5ee605f1429893b1c2"
+        },
+        {
+          "name": "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "0f285ad906e0a2f9a5881f891c9d390c087d16e99031b1ab65c46ef7f985af62",
+          "newBodySha256": "0f285ad906e0a2f9a5881f891c9d390c087d16e99031b1ab65c46ef7f985af62"
+        },
+        {
+          "name": "actualGuidedRegistrationPassingAssertRemainsPassed",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b098b465c2b4807a52c91259422c684d203b35471fb5dc414c1838a376e9eaf1",
+          "newBodySha256": "b098b465c2b4807a52c91259422c684d203b35471fb5dc414c1838a376e9eaf1"
+        },
+        {
+          "name": "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "4aefde250348f75c499345a2b09e23bb1aeefa8faa7aa31faa5ceb51f70a287a",
+          "newBodySha256": "4aefde250348f75c499345a2b09e23bb1aeefa8faa7aa31faa5ceb51f70a287a"
+        },
+        {
+          "name": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "dbbe744aae8c2898f20e40e9e50fb6d4ff6175993858624731a703e3e9f12fa4",
+          "newBodySha256": "dbbe744aae8c2898f20e40e9e50fb6d4ff6175993858624731a703e3e9f12fa4"
+        },
+        {
+          "name": "actualPublishedRegistrationPassingAssertRemainsPassed",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d0bab847f0fc462d79e00613a08d2c8aaafbe55b4e005d3e90eb0ecfc69adf4f",
+          "newBodySha256": "d0bab847f0fc462d79e00613a08d2c8aaafbe55b4e005d3e90eb0ecfc69adf4f"
+        },
+        {
+          "name": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "8918c585f4882a6e634024d953d24c662ae6238c2952b9e2c12934fde0455247",
+          "newBodySha256": "8918c585f4882a6e634024d953d24c662ae6238c2952b9e2c12934fde0455247"
+        },
+        {
+          "name": "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "5f9f0c9c762cdef76bab4893d81efa08d185ff354b3b52258dd528813e9570ce",
+          "newBodySha256": "5f9f0c9c762cdef76bab4893d81efa08d185ff354b3b52258dd528813e9570ce"
+        },
+        {
+          "name": "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "552e16a27550f466b452946f0cc04f057d7225611865fd9dd4cdbfcb67f34a11",
+          "newBodySha256": "552e16a27550f466b452946f0cc04f057d7225611865fd9dd4cdbfcb67f34a11"
+        },
+        {
+          "name": "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "06de6d22e34e07df7ca6f415f95eb83f38daf184a08b0d086dae293ba482269c",
+          "newBodySha256": "06de6d22e34e07df7ca6f415f95eb83f38daf184a08b0d086dae293ba482269c"
+        },
+        {
+          "name": "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1699a76755163e559a9c8e8c2c62f0e46e18c1b5a0367388860100fc369389af",
+          "newBodySha256": "1699a76755163e559a9c8e8c2c62f0e46e18c1b5a0367388860100fc369389af"
+        },
+        {
+          "name": "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "2351e1a31d14c38e3d7ad8fc362352fd39439e7485f10188f82169654cdd565a",
+          "newBodySha256": "2351e1a31d14c38e3d7ad8fc362352fd39439e7485f10188f82169654cdd565a"
+        },
+        {
+          "name": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "fb6bf1d975850e41533b61f1cd0825bf239bc2a7727def4328e2ea8a134b4659",
+          "newBodySha256": "fb6bf1d975850e41533b61f1cd0825bf239bc2a7727def4328e2ea8a134b4659"
+        },
+        {
+          "name": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "bbcd0829054bfcda23c10b100acdecbe7eb72e195a6e29e2453f223d4b98b43c",
+          "newBodySha256": "bbcd0829054bfcda23c10b100acdecbe7eb72e195a6e29e2453f223d4b98b43c"
+        },
+        {
+          "name": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "503b3247e0d9050b1beb41fca11995bbbdb11fe2050c74590eb606c4ffc1560c",
+          "newBodySha256": "503b3247e0d9050b1beb41fca11995bbbdb11fe2050c74590eb606c4ffc1560c"
+        },
+        {
+          "name": "actualPublishedPublicCancelWhileNativePasswordWorldPending",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "0bc2915465281fe4a2cffabc450ab56dbd1d0685b594cd68787fd98183a01f1c",
+          "newBodySha256": "0bc2915465281fe4a2cffabc450ab56dbd1d0685b594cd68787fd98183a01f1c"
+        },
+        {
+          "name": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b9766946863592fa808d7301f823022d7e7b9a88014f4139278eb968f0b4c552",
+          "newBodySha256": "b9766946863592fa808d7301f823022d7e7b9a88014f4139278eb968f0b4c552"
+        },
+        {
+          "name": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "fbccc18013000320b18fdabf8640a6b5c5818cb4968e03d81f3295041a0143cf",
+          "newBodySha256": "fbccc18013000320b18fdabf8640a6b5c5818cb4968e03d81f3295041a0143cf"
+        },
+        {
+          "name": "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "5511b84bdf2774f269227765a4ab10594fe3b1b43fb35c7c2fee5722212a3ee8",
+          "newBodySha256": "5511b84bdf2774f269227765a4ab10594fe3b1b43fb35c7c2fee5722212a3ee8"
+        },
+        {
+          "name": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "fb843e0da73fe3228057b1e5120d4f46cc4abb88e98844feb58ae7fa24ac6afe",
+          "newBodySha256": "fb843e0da73fe3228057b1e5120d4f46cc4abb88e98844feb58ae7fa24ac6afe"
+        },
+        {
+          "name": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "3a9d7efc68b14949b7deeb5a352f84767c89d1aa49a9f19f571d26e6bcc4405f",
+          "newBodySha256": "3a9d7efc68b14949b7deeb5a352f84767c89d1aa49a9f19f571d26e6bcc4405f"
+        },
+        {
+          "name": "actualSecretControlWindowLossBeforeReadyReachesTerminalError",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "60ac0757e11d18d74207e1caf280dec0f245a2c783e09c0fecf13441db716afc",
+          "newBodySha256": "60ac0757e11d18d74207e1caf280dec0f245a2c783e09c0fecf13441db716afc"
+        },
+        {
+          "name": "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b3b8d432309ab95d52b1543f3e1a5dc841fd1ddc7d4c900a6a5b3ba24bd44111",
+          "newBodySha256": "b3b8d432309ab95d52b1543f3e1a5dc841fd1ddc7d4c900a6a5b3ba24bd44111"
+        },
+        {
+          "name": "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "735e7d6531ef951a1586acdf155dc80a05475dc771374926f05dd1e9c41d06a3",
+          "newBodySha256": "735e7d6531ef951a1586acdf155dc80a05475dc771374926f05dd1e9c41d06a3"
+        },
+        {
+          "name": "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d8073859a58a8b8a8059db383e0176152f94c1412d7260eb4e51f15cf62bcdfa",
+          "newBodySha256": "d8073859a58a8b8a8059db383e0176152f94c1412d7260eb4e51f15cf62bcdfa"
+        },
+        {
+          "name": "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "8249103f6794c6e2a3f6b5d6a67181951cbbff26fa7f16a319f221ccc3705de7",
+          "newBodySha256": "8249103f6794c6e2a3f6b5d6a67181951cbbff26fa7f16a319f221ccc3705de7"
+        },
+        {
+          "name": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ea45a0a0db761591c9bccf1bccfbcc55344b9e0b6792ac6e263303bff3fa39be",
+          "newBodySha256": "ea45a0a0db761591c9bccf1bccfbcc55344b9e0b6792ac6e263303bff3fa39be"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java",
+      "operation": "delete",
+      "oldClass": "GuidedPublicationAuthorizationIT",
+      "newClass": "DispatchAuthorizationIT",
+      "oldMethods": [
+        [
+          "Test",
+          "historicalReceiptNeedsFreshReadButNoExecuteSessionOrAccountAuthority"
+        ],
+        [
+          "Test",
+          "changedPrincipalCannotUseCachedOriginalOwner"
+        ],
+        [
+          "Test",
+          "revokedReadAndMissingCookieRefuseWithoutCookiePersistence"
+        ],
+        [
+          "Test",
+          "expiredCookieAndUnavailableCoreNeverFallBackToCachedIdentity"
+        ],
+        [
+          "Test",
+          "publishGrantIsBoundToOriginalCapturedDeadlineAndNeverExtendedByRenewal"
+        ],
+        [
+          "Test",
+          "observedTimeUsesExactMillisecondsAndFloorsAuthorityDeadlines"
+        ],
+        [
+          "Test",
+          "packagedObservedArtifactsResolveDefinitionsWithoutRecursingOrRelaxingClosure"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "historicalReceiptNeedsFreshReadButNoExecuteSessionOrAccountAuthority"
+        ],
+        [
+          "Test",
+          "changedPrincipalCannotUseCachedOriginalOwner"
+        ],
+        [
+          "Test",
+          "revokedReadAndMissingCookieRefuseWithoutCookiePersistence"
+        ],
+        [
+          "Test",
+          "expiredCookieAndUnavailableCoreNeverFallBackToCachedIdentity"
+        ],
+        [
+          "Test",
+          "publishGrantIsBoundToOriginalCapturedDeadlineAndNeverExtendedByRenewal"
+        ],
+        [
+          "Test",
+          "observedTimeUsesExactMillisecondsAndFloorsAuthorityDeadlines"
+        ],
+        [
+          "Test",
+          "packagedObservedArtifactsResolveDefinitionsWithoutRecursingOrRelaxingClosure"
+        ],
+        [
+          "Test",
+          "workerWithoutPublicationCollaboratorRefusesEveryPublicationOperation"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": null,
+      "assertionMarkerCountBefore": 16,
+      "assertionMarkerCountAfter": 19,
+      "methods": [
+        {
+          "name": "historicalReceiptNeedsFreshReadButNoExecuteSessionOrAccountAuthority",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "0dbfb4403e8202cec5fc79c260a4f7085a92fa16cf4166c6373bed2723e644cf",
+          "newBodySha256": "0dbfb4403e8202cec5fc79c260a4f7085a92fa16cf4166c6373bed2723e644cf"
+        },
+        {
+          "name": "changedPrincipalCannotUseCachedOriginalOwner",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b0cab0cf1d0236e1345d0caa5582d83af77971c4eaa8a8840e4ae32201ecb7c5",
+          "newBodySha256": "b0cab0cf1d0236e1345d0caa5582d83af77971c4eaa8a8840e4ae32201ecb7c5"
+        },
+        {
+          "name": "revokedReadAndMissingCookieRefuseWithoutCookiePersistence",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "aa74a35f165a80962a2c33758023fd303f2ed72974942608cedfb18a617795c1",
+          "newBodySha256": "aa74a35f165a80962a2c33758023fd303f2ed72974942608cedfb18a617795c1"
+        },
+        {
+          "name": "expiredCookieAndUnavailableCoreNeverFallBackToCachedIdentity",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "7800eceff0f989cee31d3212549c57281236007990c83456c6a5a7024971371a",
+          "newBodySha256": "7800eceff0f989cee31d3212549c57281236007990c83456c6a5a7024971371a"
+        },
+        {
+          "name": "publishGrantIsBoundToOriginalCapturedDeadlineAndNeverExtendedByRenewal",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "9cd302a5ebaa0b6a02f9b5238f6e4499d5050ab13466a26bcb5e64735d5ee98f",
+          "newBodySha256": "9cd302a5ebaa0b6a02f9b5238f6e4499d5050ab13466a26bcb5e64735d5ee98f"
+        },
+        {
+          "name": "observedTimeUsesExactMillisecondsAndFloorsAuthorityDeadlines",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "5ba84f92f430c5ada50d8877abff893bb120a17db081df645f11948ec06763c2",
+          "newBodySha256": "5ba84f92f430c5ada50d8877abff893bb120a17db081df645f11948ec06763c2"
+        },
+        {
+          "name": "packagedObservedArtifactsResolveDefinitionsWithoutRecursingOrRelaxingClosure",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "f9e0f2248e27707c567c94283ef35261cbd269162474e54d62b4048908ea6078",
+          "newBodySha256": "f9e0f2248e27707c567c94283ef35261cbd269162474e54d62b4048908ea6078"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "operation": "edit",
+      "oldClass": "GuidedPlanningIntegrationTest",
+      "newClass": "GuidedPlanningIntegrationTest",
+      "oldMethods": [
+        [
+          "Test",
+          "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue"
+        ],
+        [
+          "Test",
+          "optionalChargedVerificationCannotOverrideMissingExecution"
+        ],
+        [
+          "Test",
+          "sourceChangeDuringProviderCallCannotRestampAndLateUsageRetainsReservation"
+        ],
+        [
+          "Test",
+          "malformedProviderReplyRepairsThroughDurableChargedAttemptsWithoutEcho"
+        ],
+        [
+          "Test",
+          "typedUnsupportedOutcomeStopsWithoutInventingAnAction"
+        ],
+        [
+          "Test",
+          "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch"
+        ],
+        [
+          "Test",
+          "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch"
+        ],
+        [
+          "Test",
+          "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence"
+        ],
+        [
+          "Test",
+          "anAuthoredDeleteStillFailsTheGovernedDenyStance"
+        ],
+        [
+          "Test",
+          "governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues"
+        ],
+        [
+          "Test",
+          "governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit"
+        ],
+        [
+          "Test",
+          "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend"
+        ],
+        [
+          "Test",
+          "chosenSourceCannotBeAppendedUnusedWhileTheRejectedDestinationIsUsed"
+        ],
+        [
+          "Test",
+          "futureNonzeroSourceQuestionCannotBeRedefinedByChangingItsOperation"
+        ],
+        [
+          "Test",
+          "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference"
+        ],
+        [
+          "Test",
+          "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall"
+        ],
+        [
+          "Test",
+          "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch"
+        ],
+        [
+          "Test",
+          "aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried"
+        ],
+        [
+          "Test",
+          "aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries"
+        ],
+        [
+          "Test",
+          "acknowledgedOlderSnapshotCannotMarkChangedAllocationsReady"
+        ],
+        [
+          "Test",
+          "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority"
+        ],
+        [
+          "Test",
+          "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop"
+        ],
+        [
+          "Test",
+          "reportedThoughtOutputOverageStopsBeforeMaterializationDespiteSmallVisibleOutput"
+        ],
+        [
+          "Test",
+          "thoughtAndToolUsageOnStaleReplyRemainInImmutableLateAudit"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue"
+        ],
+        [
+          "Test",
+          "optionalChargedVerificationCannotOverrideMissingExecution"
+        ],
+        [
+          "Test",
+          "sourceChangeDuringProviderCallCannotRestampAndLateUsageRetainsReservation"
+        ],
+        [
+          "Test",
+          "malformedProviderReplyRepairsThroughDurableChargedAttemptsWithoutEcho"
+        ],
+        [
+          "Test",
+          "typedUnsupportedOutcomeStopsWithoutInventingAnAction"
+        ],
+        [
+          "Test",
+          "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch"
+        ],
+        [
+          "Test",
+          "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch"
+        ],
+        [
+          "Test",
+          "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence"
+        ],
+        [
+          "Test",
+          "anAuthoredDeleteStillFailsTheGovernedDenyStance"
+        ],
+        [
+          "Test",
+          "governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues"
+        ],
+        [
+          "Test",
+          "governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit"
+        ],
+        [
+          "Test",
+          "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend"
+        ],
+        [
+          "Test",
+          "chosenSourceCannotBeAppendedUnusedWhileTheRejectedDestinationIsUsed"
+        ],
+        [
+          "Test",
+          "futureNonzeroSourceQuestionCannotBeRedefinedByChangingItsOperation"
+        ],
+        [
+          "Test",
+          "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference"
+        ],
+        [
+          "Test",
+          "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall"
+        ],
+        [
+          "Test",
+          "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch"
+        ],
+        [
+          "Test",
+          "aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried"
+        ],
+        [
+          "Test",
+          "aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries"
+        ],
+        [
+          "Test",
+          "acknowledgedOlderSnapshotCannotMarkChangedAllocationsReady"
+        ],
+        [
+          "Test",
+          "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority"
+        ],
+        [
+          "Test",
+          "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop"
+        ],
+        [
+          "Test",
+          "reportedThoughtOutputOverageStopsBeforeMaterializationDespiteSmallVisibleOutput"
+        ],
+        [
+          "Test",
+          "thoughtAndToolUsageOnStaleReplyRemainInImmutableLateAudit"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 296,
+      "assertionMarkerCountAfter": 296,
+      "methods": [
+        {
+          "name": "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "7ea46aca551a80420cd1b47053ff358b6e9fbcd52bc389c9d063bdc0c30cbfee",
+          "newBodySha256": "7ea46aca551a80420cd1b47053ff358b6e9fbcd52bc389c9d063bdc0c30cbfee"
+        },
+        {
+          "name": "optionalChargedVerificationCannotOverrideMissingExecution",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "bb045f9e2cb229b23bc1ac6caedc87da8d8fd9d263c256491a327c56e7877fb9",
+          "newBodySha256": "bb045f9e2cb229b23bc1ac6caedc87da8d8fd9d263c256491a327c56e7877fb9"
+        },
+        {
+          "name": "sourceChangeDuringProviderCallCannotRestampAndLateUsageRetainsReservation",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "505860ba8e29fa8a02ccf8559933cc7e46a5709c89c50a32576a71c45d69a770",
+          "newBodySha256": "505860ba8e29fa8a02ccf8559933cc7e46a5709c89c50a32576a71c45d69a770"
+        },
+        {
+          "name": "malformedProviderReplyRepairsThroughDurableChargedAttemptsWithoutEcho",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b91f82555db6dd75168b0b28087e33a86595e99e9edaf6c4f29e673c86846aa6",
+          "newBodySha256": "b91f82555db6dd75168b0b28087e33a86595e99e9edaf6c4f29e673c86846aa6"
+        },
+        {
+          "name": "typedUnsupportedOutcomeStopsWithoutInventingAnAction",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "e54edf65a6a1d05518a7097d45d03a2b0c99c9406659817b2405492df353ab13",
+          "newBodySha256": "e54edf65a6a1d05518a7097d45d03a2b0c99c9406659817b2405492df353ab13"
+        },
+        {
+          "name": "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "9ca73fee9f7815ff0880fa609521c4601be003cbd9c616bdf90f995585a3c908",
+          "newBodySha256": "9ca73fee9f7815ff0880fa609521c4601be003cbd9c616bdf90f995585a3c908"
+        },
+        {
+          "name": "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "98001bd706998d2417b30e4ba94accf68b0962107c7ff18e420a520c86bdcf7c",
+          "newBodySha256": "98001bd706998d2417b30e4ba94accf68b0962107c7ff18e420a520c86bdcf7c"
+        },
+        {
+          "name": "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "5e5d31e751d3bd4e99ff9106e8e3abe94c6c37b6f84a3dd64d8c0764642fd2d9",
+          "newBodySha256": "5e5d31e751d3bd4e99ff9106e8e3abe94c6c37b6f84a3dd64d8c0764642fd2d9"
+        },
+        {
+          "name": "anAuthoredDeleteStillFailsTheGovernedDenyStance",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "2f7201321731ff32832aa913c844bd1d966a704bae3e428a2728f00b55a833ca",
+          "newBodySha256": "2f7201321731ff32832aa913c844bd1d966a704bae3e428a2728f00b55a833ca"
+        },
+        {
+          "name": "governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "4d95416280d3d6adf4188686eff52805280eee1c5fc9eb8f2aa8951a27e7f6d4",
+          "newBodySha256": "4d95416280d3d6adf4188686eff52805280eee1c5fc9eb8f2aa8951a27e7f6d4"
+        },
+        {
+          "name": "governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "7d07282b0565b5c43cfd4159e07bd8d5e938b43384937c001e01ae3489bd6680",
+          "newBodySha256": "7d07282b0565b5c43cfd4159e07bd8d5e938b43384937c001e01ae3489bd6680"
+        },
+        {
+          "name": "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "448f3589ec21f896e1c27356f46658ec30462e537f34da5f40d32d6392b895b4",
+          "newBodySha256": "448f3589ec21f896e1c27356f46658ec30462e537f34da5f40d32d6392b895b4"
+        },
+        {
+          "name": "chosenSourceCannotBeAppendedUnusedWhileTheRejectedDestinationIsUsed",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "522dc9129a1aedf13dd165d4fe37f29c9da8da08781e1b8e0c87785c04562967",
+          "newBodySha256": "522dc9129a1aedf13dd165d4fe37f29c9da8da08781e1b8e0c87785c04562967"
+        },
+        {
+          "name": "futureNonzeroSourceQuestionCannotBeRedefinedByChangingItsOperation",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "54c1df8afc7e5747a2d89c4e42c53bdee7f5569b63131a9de62f741e2b6c011b",
+          "newBodySha256": "54c1df8afc7e5747a2d89c4e42c53bdee7f5569b63131a9de62f741e2b6c011b"
+        },
+        {
+          "name": "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d1e560e6734ceb9a5d2e0d4a3c696419b7809dbfcba42857778c1212e3872677",
+          "newBodySha256": "d1e560e6734ceb9a5d2e0d4a3c696419b7809dbfcba42857778c1212e3872677"
+        },
+        {
+          "name": "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "4389d3da2fd743fd1c9b2746bfed9ad4bfb11c0d185dc852a590f8f7f71a9fb9",
+          "newBodySha256": "4389d3da2fd743fd1c9b2746bfed9ad4bfb11c0d185dc852a590f8f7f71a9fb9"
+        },
+        {
+          "name": "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "44952e2f9680bc6a7187fe4b0f48d1fdb2e60ad05f3b02ea167669731484581f",
+          "newBodySha256": "ed597aba7eac3038fc91a0827e42b456c5e67cbdf63dd46463a3974d54b9a934"
+        },
+        {
+          "name": "aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1ab4a2a53e61f60c6817f45a527ac3f1768a927d2be9c2b180ed6d22d5754326",
+          "newBodySha256": "1ab4a2a53e61f60c6817f45a527ac3f1768a927d2be9c2b180ed6d22d5754326"
+        },
+        {
+          "name": "aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "9d6aa70361397bab0a3d4fcc6748b8e836e91b7b7b7a47f0af33debf1b5c6342",
+          "newBodySha256": "9d6aa70361397bab0a3d4fcc6748b8e836e91b7b7b7a47f0af33debf1b5c6342"
+        },
+        {
+          "name": "acknowledgedOlderSnapshotCannotMarkChangedAllocationsReady",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "886d4f3c1d1843167da4b78b88af21ee395e60b74309091f4c4965680aaf0909",
+          "newBodySha256": "886d4f3c1d1843167da4b78b88af21ee395e60b74309091f4c4965680aaf0909"
+        },
+        {
+          "name": "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "8b9755386d2cd848b78758b5285fb449f809bf4286569ba68b5cd13221cf103a",
+          "newBodySha256": "8b9755386d2cd848b78758b5285fb449f809bf4286569ba68b5cd13221cf103a"
+        },
+        {
+          "name": "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "50ca1cf75b2b844960ba36e0dddc018334860b164f602af1793a99634f78b081",
+          "newBodySha256": "50ca1cf75b2b844960ba36e0dddc018334860b164f602af1793a99634f78b081"
+        },
+        {
+          "name": "reportedThoughtOutputOverageStopsBeforeMaterializationDespiteSmallVisibleOutput",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "035bfe2f2de54ec6b725d164485f600611c47e012c86ba933440e0190224f848",
+          "newBodySha256": "035bfe2f2de54ec6b725d164485f600611c47e012c86ba933440e0190224f848"
+        },
+        {
+          "name": "thoughtAndToolUsageOnStaleReplyRemainInImmutableLateAudit",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "2a581eb012cb772e56e33751cab02558c6f4d0c8d9a587b38e2f65cd47fc54d3",
+          "newBodySha256": "2a581eb012cb772e56e33751cab02558c6f4d0c8d9a587b38e2f65cd47fc54d3"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSuffixMaterializationTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSuffixMaterializationTest.java",
+      "operation": "edit",
+      "oldClass": "GuidedSuffixMaterializationTest",
+      "newClass": "GuidedSuffixMaterializationTest",
+      "oldMethods": [
+        [
+          "Test",
+          "appendIsPrecededBySameVersionSync"
+        ],
+        [
+          "Test",
+          "retriedContinuationWithPendingDeliverySkipsSync"
+        ],
+        [
+          "Test",
+          "closedNonDefiniteAppendRefusalIsTerminalOnFirstReceipt"
+        ],
+        [
+          "Test",
+          "definiteAppendRefusalIsTerminal"
+        ],
+        [
+          "Test",
+          "uncertainAppendResendsSameDeliveryAtMostThreeTimes"
+        ],
+        [
+          "Test",
+          "appendAtOrAfterFrozenLeaseFailsWithoutSending"
+        ],
+        [
+          "Test",
+          "acknowledgedAppendMovesToRefresh"
+        ],
+        [
+          "Test",
+          "presyncDefiniteRefusalIsTerminal"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "appendIsPrecededBySameVersionSync"
+        ],
+        [
+          "Test",
+          "retriedContinuationWithPendingDeliverySkipsSync"
+        ],
+        [
+          "Test",
+          "closedNonDefiniteAppendRefusalIsTerminalOnFirstReceipt"
+        ],
+        [
+          "Test",
+          "definiteAppendRefusalIsTerminal"
+        ],
+        [
+          "Test",
+          "uncertainAppendResendsSameDeliveryAtMostThreeTimes"
+        ],
+        [
+          "Test",
+          "appendAtOrAfterFrozenLeaseFailsWithoutSending"
+        ],
+        [
+          "Test",
+          "acknowledgedAppendMovesToRefresh"
+        ],
+        [
+          "Test",
+          "presyncDefiniteRefusalIsTerminal"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 19,
+      "assertionMarkerCountAfter": 19,
+      "methods": [
+        {
+          "name": "appendIsPrecededBySameVersionSync",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "21358b3186ab4789470334692e46ee3a0ca768d5a095da867a43d42b5dcd36a3",
+          "newBodySha256": "21358b3186ab4789470334692e46ee3a0ca768d5a095da867a43d42b5dcd36a3"
+        },
+        {
+          "name": "retriedContinuationWithPendingDeliverySkipsSync",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "f6de0dbfcd0718979b22427e9d2f600d1d38d3c4266132f7090d7f9c601aef97",
+          "newBodySha256": "f6de0dbfcd0718979b22427e9d2f600d1d38d3c4266132f7090d7f9c601aef97"
+        },
+        {
+          "name": "closedNonDefiniteAppendRefusalIsTerminalOnFirstReceipt",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "415673af6b89a333ec554461d1fbf60506937892210c84e04445ffd94b95cfe5",
+          "newBodySha256": "4393d2157e065b9d05d46dac7a373981321667b118465525cb3254bc6ff8f345"
+        },
+        {
+          "name": "definiteAppendRefusalIsTerminal",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "536b546daabf6e238dc0f3d652d428211c99b0b7d7ebfae7e3e3f007ef84e526",
+          "newBodySha256": "0012d649256c6eefde9872c441dcc275b4990fa957fdbf4162bf83ba9accdcd7"
+        },
+        {
+          "name": "uncertainAppendResendsSameDeliveryAtMostThreeTimes",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "c8d62f4e33ea353108c2da102b3ce1292f877282636226df51df15ba047ad3a8",
+          "newBodySha256": "c8d62f4e33ea353108c2da102b3ce1292f877282636226df51df15ba047ad3a8"
+        },
+        {
+          "name": "appendAtOrAfterFrozenLeaseFailsWithoutSending",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "caee604a707eb19526e4349f32af90d54da6c9aa427ab1cc65f30aaa3365d958",
+          "newBodySha256": "caee604a707eb19526e4349f32af90d54da6c9aa427ab1cc65f30aaa3365d958"
+        },
+        {
+          "name": "acknowledgedAppendMovesToRefresh",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a4093f00f4d87c07baf0273e801dbf9031c94302dee7ed139ab85697e67e4fe8",
+          "newBodySha256": "a4093f00f4d87c07baf0273e801dbf9031c94302dee7ed139ab85697e67e4fe8"
+        },
+        {
+          "name": "presyncDefiniteRefusalIsTerminal",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "49d1569943a315815f624271ea550375fd7a6d939f513fda7de365e81af6c79d",
+          "newBodySha256": "7ffc616d9713de9ada0355c929b33d4aad0b4bcd6ebed195b1e4b3093f1b7702"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "operation": "edit",
+      "oldClass": "GuidedFocusMutationJoinedIT",
+      "newClass": "GuidedFocusMutationJoinedIT",
+      "oldMethods": [
+        [
+          "Test",
+          "aFillWhoseFocusHandlerInsertsHelperTextElsewhereWritesAndTheSessionContinues"
+        ],
+        [
+          "Test",
+          "aFocusHandlerThatChangesTheTargetItselfStillStopsTheSessionAndWritesNothing"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "aFillWhoseFocusHandlerInsertsHelperTextElsewhereWritesAndTheSessionContinues"
+        ],
+        [
+          "Test",
+          "aFocusHandlerThatChangesTheTargetItselfStillStopsTheSessionAndWritesNothing"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 23,
+      "assertionMarkerCountAfter": 23,
+      "methods": [
+        {
+          "name": "aFillWhoseFocusHandlerInsertsHelperTextElsewhereWritesAndTheSessionContinues",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ab9dff1ffb8d4e4d8dad88ae43329b1263499c445e041e9ab08bd35db5087b9f",
+          "newBodySha256": "ab9dff1ffb8d4e4d8dad88ae43329b1263499c445e041e9ab08bd35db5087b9f"
+        },
+        {
+          "name": "aFocusHandlerThatChangesTheTargetItselfStillStopsTheSessionAndWritesNothing",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "41f5ecabb724d4bcb182cc1c5337aacdf929c5a9bc0b97c0f3d9f4ebe1f0214f",
+          "newBodySha256": "41f5ecabb724d4bcb182cc1c5337aacdf929c5a9bc0b97c0f3d9f4ebe1f0214f"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "operation": "edit",
+      "oldClass": "GuidedBridgePlannedIT",
+      "newClass": "GuidedBridgePlannedIT",
+      "oldMethods": [
+        [
+          "Test",
+          "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch"
+        ],
+        [
+          "Test",
+          "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission"
+        ],
+        [
+          "Test",
+          "concurrentSameAndNewKeysHaveOneRealDispatch"
+        ],
+        [
+          "Test",
+          "nestedRollbackAndLostWinnerNeverManufactureSendAuthority"
+        ],
+        [
+          "Test",
+          "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption"
+        ],
+        [
+          "Test",
+          "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased"
+        ],
+        [
+          "Test",
+          "actualApplicationReplacementAfterPrepareNeverActsOnReplacement"
+        ],
+        [
+          "Test",
+          "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay"
+        ],
+        [
+          "Test",
+          "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly"
+        ],
+        [
+          "Test",
+          "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction"
+        ],
+        [
+          "Test",
+          "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue"
+        ],
+        [
+          "Test",
+          "lateRenewalResponseAfterStopCannotReviveContextOrOwnership"
+        ],
+        [
+          "Test",
+          "committedObservationRecoversLostHttpResponseWithoutAnotherCollection"
+        ],
+        [
+          "Test",
+          "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation"
+        ],
+        [
+          "Test",
+          "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration"
+        ],
+        [
+          "Test",
+          "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch"
+        ],
+        [
+          "Test",
+          "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission"
+        ],
+        [
+          "Test",
+          "concurrentSameAndNewKeysHaveOneRealDispatch"
+        ],
+        [
+          "Test",
+          "nestedRollbackAndLostWinnerNeverManufactureSendAuthority"
+        ],
+        [
+          "Test",
+          "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption"
+        ],
+        [
+          "Test",
+          "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased"
+        ],
+        [
+          "Test",
+          "actualApplicationReplacementAfterPrepareNeverActsOnReplacement"
+        ],
+        [
+          "Test",
+          "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay"
+        ],
+        [
+          "Test",
+          "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly"
+        ],
+        [
+          "Test",
+          "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction"
+        ],
+        [
+          "Test",
+          "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue"
+        ],
+        [
+          "Test",
+          "lateRenewalResponseAfterStopCannotReviveContextOrOwnership"
+        ],
+        [
+          "Test",
+          "committedObservationRecoversLostHttpResponseWithoutAnotherCollection"
+        ],
+        [
+          "Test",
+          "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation"
+        ],
+        [
+          "Test",
+          "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration"
+        ],
+        [
+          "Test",
+          "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 137,
+      "assertionMarkerCountAfter": 137,
+      "methods": [
+        {
+          "name": "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "f6f32a24426441c462b191a291e20ee76c00c167eb7b6b64ec812992bc53717b",
+          "newBodySha256": "f6f32a24426441c462b191a291e20ee76c00c167eb7b6b64ec812992bc53717b"
+        },
+        {
+          "name": "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "29f35b7d0e5086bd0a7fcf9d5063b29f08d13607752672754f6bd6d0a2e49be5",
+          "newBodySha256": "29f35b7d0e5086bd0a7fcf9d5063b29f08d13607752672754f6bd6d0a2e49be5"
+        },
+        {
+          "name": "concurrentSameAndNewKeysHaveOneRealDispatch",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "0a1e6ef51c93ac912d15af2c013bf673f6848f7f2ebc880692719b0d9f418f5c",
+          "newBodySha256": "0a1e6ef51c93ac912d15af2c013bf673f6848f7f2ebc880692719b0d9f418f5c"
+        },
+        {
+          "name": "nestedRollbackAndLostWinnerNeverManufactureSendAuthority",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "7000fc8821fbb35014fd7a19025f677cd4032d56d0592941f61ee79b51597aa6",
+          "newBodySha256": "7000fc8821fbb35014fd7a19025f677cd4032d56d0592941f61ee79b51597aa6"
+        },
+        {
+          "name": "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "9274b5c7a5edb9fa6e04617c145f068bdd6219439abcbf062cbfa4c92d8fedbc",
+          "newBodySha256": "9274b5c7a5edb9fa6e04617c145f068bdd6219439abcbf062cbfa4c92d8fedbc"
+        },
+        {
+          "name": "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "8895879e8d45e45e0e57097222e23a7cedd4a106d4338edaf9c7fe2cc6d71c81",
+          "newBodySha256": "8895879e8d45e45e0e57097222e23a7cedd4a106d4338edaf9c7fe2cc6d71c81"
+        },
+        {
+          "name": "actualApplicationReplacementAfterPrepareNeverActsOnReplacement",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ceef52587ad19e8eed757595748232f61dec87579a5cf24ce94e461430c95bfe",
+          "newBodySha256": "ceef52587ad19e8eed757595748232f61dec87579a5cf24ce94e461430c95bfe"
+        },
+        {
+          "name": "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "c23ee312cc4270e9e8ef404a58783e68b1a11f5499fcf869550ac34bd80ee8ec",
+          "newBodySha256": "c23ee312cc4270e9e8ef404a58783e68b1a11f5499fcf869550ac34bd80ee8ec"
+        },
+        {
+          "name": "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "0bd0a6fa565493cf8a1a5aed10ce3aaf29517d7b8cdb5566a7062a1844a8b228",
+          "newBodySha256": "0bd0a6fa565493cf8a1a5aed10ce3aaf29517d7b8cdb5566a7062a1844a8b228"
+        },
+        {
+          "name": "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "3c0bb3fcb99b692549bc3f3b7a2531f61a523af7f95ecf240aad323563091b6f",
+          "newBodySha256": "3c0bb3fcb99b692549bc3f3b7a2531f61a523af7f95ecf240aad323563091b6f"
+        },
+        {
+          "name": "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "3fe9769b743b9c2804b2720976a4b3100f43345924d8acafac67dd63a8b5f3db",
+          "newBodySha256": "3fe9769b743b9c2804b2720976a4b3100f43345924d8acafac67dd63a8b5f3db"
+        },
+        {
+          "name": "lateRenewalResponseAfterStopCannotReviveContextOrOwnership",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "3b1bef8c1ec1e9f3c1ae1bf3caf7c2749c19eee6cdc4ddbc62b61c15f8ac6517",
+          "newBodySha256": "3b1bef8c1ec1e9f3c1ae1bf3caf7c2749c19eee6cdc4ddbc62b61c15f8ac6517"
+        },
+        {
+          "name": "committedObservationRecoversLostHttpResponseWithoutAnotherCollection",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "43a019d0c764f17feab1f0d25ef04a28f030b459e56494f8c1a38f8d096e88bc",
+          "newBodySha256": "06fec4233840ace61c4854b7806f7960c9d9a0aa85b55c0a4ba9d4da84adee0b"
+        },
+        {
+          "name": "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b1cb5ee6cfda9a952f63caad0d8edd39b91cb2c6488ea057cd1009e16c23e578",
+          "newBodySha256": "b1cb5ee6cfda9a952f63caad0d8edd39b91cb2c6488ea057cd1009e16c23e578"
+        },
+        {
+          "name": "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "4542e42b4deb098d89c4c02b8b508e550990219a7931c4452aeff913c9c09632",
+          "newBodySha256": "4542e42b4deb098d89c4c02b8b508e550990219a7931c4452aeff913c9c09632"
+        },
+        {
+          "name": "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "9e8cef33302a82421b48603ecce593a6df721deb1cce00c86e21db3d511854df",
+          "newBodySha256": "9e8cef33302a82421b48603ecce593a6df721deb1cce00c86e21db3d511854df"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java",
+      "operation": "edit",
+      "oldClass": "GuidedRunnerContextRefusalTest",
+      "newClass": "GuidedRunnerContextRefusalTest",
+      "oldMethods": [
+        [
+          "Test",
+          "identityMismatchAndSchemaRefusalsOfAContextAreDefinite"
+        ],
+        [
+          "Test",
+          "anyOtherContextReplyStaysAnUnknownOutcome"
+        ],
+        [
+          "Test",
+          "aPrepareRefusalIsNeverWidenedIntoADefiniteOne"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "identityMismatchAndSchemaRefusalsOfAContextAreDefinite"
+        ],
+        [
+          "Test",
+          "anyOtherContextReplyStaysAnUnknownOutcome"
+        ],
+        [
+          "Test",
+          "aPrepareRefusalIsNeverWidenedIntoADefiniteOne"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 27,
+      "assertionMarkerCountAfter": 27,
+      "methods": [
+        {
+          "name": "identityMismatchAndSchemaRefusalsOfAContextAreDefinite",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "544a21e8361ca02e753f4290336b0aba9e2badac9d2920495160cc58d232b23f",
+          "newBodySha256": "e87ee9767a7a9115bc8db0c61039306638938d6477977b66047fae34910e6761"
+        },
+        {
+          "name": "anyOtherContextReplyStaysAnUnknownOutcome",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b18f0bda9ac9908727400bccd9c7ba5199e2e081e2aa6c16e65c7e30e5542caf",
+          "newBodySha256": "27909799739377b595566429935727f24a1672fd8f9d784bb386ea0e2efa2330"
+        },
+        {
+          "name": "aPrepareRefusalIsNeverWidenedIntoADefiniteOne",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "e1dc7109a5482fd4d8393256f3f50564e51a504237c1990b5dff82244dc08676",
+          "newBodySha256": "414438253f8c231b9152098fca651adc357243de7ce27214c6c993cb80fdae19"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java",
+      "operation": "edit",
+      "oldClass": "GuidedDispatchContextDeadlineTest",
+      "newClass": "GuidedDispatchContextDeadlineTest",
+      "oldMethods": [
+        [
+          "Test",
+          "keyedAppendIsSentWithTheFrozenLeaseAsCallerDeadline"
+        ],
+        [
+          "Test",
+          "unkeyedContextPushPassesNoCallerDeadline"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "keyedAppendIsSentWithTheFrozenLeaseAsCallerDeadline"
+        ],
+        [
+          "Test",
+          "unkeyedContextPushPassesNoCallerDeadline"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 2,
+      "assertionMarkerCountAfter": 2,
+      "methods": [
+        {
+          "name": "keyedAppendIsSentWithTheFrozenLeaseAsCallerDeadline",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "dc9dfaee32ec1ff0936db4d6ca658b6bf6dcefb431dcf1a36129f91ca24b8068",
+          "newBodySha256": "dc9dfaee32ec1ff0936db4d6ca658b6bf6dcefb431dcf1a36129f91ca24b8068"
+        },
+        {
+          "name": "unkeyedContextPushPassesNoCallerDeadline",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "3becb0d390fce1f31a132d7fe4fe726ece7d46655f166a3dbb29d8546b34fb1f",
+          "newBodySha256": "3becb0d390fce1f31a132d7fe4fe726ece7d46655f166a3dbb29d8546b34fb1f"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java",
+      "operation": "edit",
+      "oldClass": "GuidedOwnedBufferBoundaryTest",
+      "newClass": "GuidedOwnedBufferBoundaryTest",
+      "oldMethods": [
+        [
+          "Test",
+          "exactResponseLimitCompletesAndAllOwnedArraysAreErased"
+        ],
+        [
+          "Test",
+          "oneByteBeyondLimitCancelsAndOwnerCloseErasesAccumulation"
+        ],
+        [
+          "Test",
+          "refusalReplyLimitCompletesExactlyAndCancelsOneByteBeyond"
+        ],
+        [
+          "Test",
+          "closeBeforeSubscriptionRefusesLateChunksWithoutConsumingThem"
+        ],
+        [
+          "Test",
+          "requestCloseWaitsForOwnedReadMonitorAndRefusesSubsequentReads"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "exactResponseLimitCompletesAndAllOwnedArraysAreErased"
+        ],
+        [
+          "Test",
+          "oneByteBeyondLimitCancelsAndOwnerCloseErasesAccumulation"
+        ],
+        [
+          "Test",
+          "refusalReplyLimitCompletesExactlyAndCancelsOneByteBeyond"
+        ],
+        [
+          "Test",
+          "closeBeforeSubscriptionRefusesLateChunksWithoutConsumingThem"
+        ],
+        [
+          "Test",
+          "requestCloseWaitsForOwnedReadMonitorAndRefusesSubsequentReads"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 36,
+      "assertionMarkerCountAfter": 36,
+      "methods": [
+        {
+          "name": "exactResponseLimitCompletesAndAllOwnedArraysAreErased",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1e5de2a94fcdf1d347c677d484deb1a0704fea617723d68285daad3fd39c9e11",
+          "newBodySha256": "1e5de2a94fcdf1d347c677d484deb1a0704fea617723d68285daad3fd39c9e11"
+        },
+        {
+          "name": "oneByteBeyondLimitCancelsAndOwnerCloseErasesAccumulation",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "c9da4d286a9661c72e27c95dce6c9ad157f89ae451cc53fe4d85f4ccd24c0b01",
+          "newBodySha256": "c9da4d286a9661c72e27c95dce6c9ad157f89ae451cc53fe4d85f4ccd24c0b01"
+        },
+        {
+          "name": "refusalReplyLimitCompletesExactlyAndCancelsOneByteBeyond",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "eaeec8b438e01dd989cbbf711f2a2b731f32a1677830c2c8918355a5d30a3612",
+          "newBodySha256": "eaeec8b438e01dd989cbbf711f2a2b731f32a1677830c2c8918355a5d30a3612"
+        },
+        {
+          "name": "closeBeforeSubscriptionRefusesLateChunksWithoutConsumingThem",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "f2f8e58b2b3ffcf1912441db9d547384a619c3c1caca741895e2235038e243fd",
+          "newBodySha256": "f2f8e58b2b3ffcf1912441db9d547384a619c3c1caca741895e2235038e243fd"
+        },
+        {
+          "name": "requestCloseWaitsForOwnedReadMonitorAndRefusesSubsequentReads",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6918608ee595ed8a46c908215ca95e361c112d93bb51448cd1dad1b3b7f0892a",
+          "newBodySha256": "01c36b3a021f7dac7523a9041c450ebcd5ab261e5f030182ab2b8026e552a9e0"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "operation": "edit",
+      "oldClass": "GuidedBridgeIntegrationTest",
+      "newClass": "GuidedBridgeIntegrationTest",
+      "oldMethods": [
+        [
+          "Test",
+          "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple"
+        ],
+        [
+          "Test",
+          "callbackAcceptsValidUnicodeSessionLargerThan64KiB"
+        ],
+        [
+          "Test",
+          "stopRetryAfterCloseCompletesConfirmsWithSameKey"
+        ],
+        [
+          "Test",
+          "aWedgedGuidedBrowserIsTerminatedInsideTheBackendDeadlineAndTheSlotIsReleased"
+        ],
+        [
+          "Test",
+          "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot"
+        ],
+        [
+          "Test",
+          "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim"
+        ],
+        [
+          "Test",
+          "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition"
+        ],
+        [
+          "Test",
+          "legacyClarificationAnswerCannotResumeObservedV2Session"
+        ],
+        [
+          "Test",
+          "actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims"
+        ],
+        [
+          "Test",
+          "actualRunnerResponseBoundaryRejectsMalformedUtf8DuplicatesTrailingAndTimestampProfiles"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple"
+        ],
+        [
+          "Test",
+          "callbackAcceptsValidUnicodeSessionLargerThan64KiB"
+        ],
+        [
+          "Test",
+          "stopRetryAfterCloseCompletesConfirmsWithSameKey"
+        ],
+        [
+          "Test",
+          "aWedgedGuidedBrowserIsTerminatedInsideTheBackendDeadlineAndTheSlotIsReleased"
+        ],
+        [
+          "Test",
+          "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot"
+        ],
+        [
+          "Test",
+          "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim"
+        ],
+        [
+          "Test",
+          "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition"
+        ],
+        [
+          "Test",
+          "legacyClarificationAnswerCannotResumeObservedV2Session"
+        ],
+        [
+          "Test",
+          "actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims"
+        ],
+        [
+          "Test",
+          "actualRunnerResponseBoundaryRejectsMalformedUtf8DuplicatesTrailingAndTimestampProfiles"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 63,
+      "assertionMarkerCountAfter": 63,
+      "methods": [
+        {
+          "name": "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "10e3eba851c050fbdaf78bd23657148fc08b4217670f4c104ee7a7fa381ae966",
+          "newBodySha256": "20084f7ffbfd8fef48ba958d6854b8d7d40b0516d62cca720cb5f92f2072d0f8"
+        },
+        {
+          "name": "callbackAcceptsValidUnicodeSessionLargerThan64KiB",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "65c1d9aedb77e64218fca182e66880cd848e24bf04c15f690a828ed641d0ddc4",
+          "newBodySha256": "65c1d9aedb77e64218fca182e66880cd848e24bf04c15f690a828ed641d0ddc4"
+        },
+        {
+          "name": "stopRetryAfterCloseCompletesConfirmsWithSameKey",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "54823ef003e718c60be067d2cfccbf9f6ccfc1515e455dc550bbcf128e5e76f5",
+          "newBodySha256": "4f529cc5212b435e4669da0cee50d06a2bbaee65d5030fc782ad6fafeab824ff"
+        },
+        {
+          "name": "aWedgedGuidedBrowserIsTerminatedInsideTheBackendDeadlineAndTheSlotIsReleased",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "225034b911a74ebf4668fb5e649a932380ae86aa28ecf69fdd3c627fcaf1318f",
+          "newBodySha256": "225034b911a74ebf4668fb5e649a932380ae86aa28ecf69fdd3c627fcaf1318f"
+        },
+        {
+          "name": "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "035c6cb09bf0431ca2fb43513d6090f1f7974d5c0edc38a7c2045dba43f334b0",
+          "newBodySha256": "035c6cb09bf0431ca2fb43513d6090f1f7974d5c0edc38a7c2045dba43f334b0"
+        },
+        {
+          "name": "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ca406bdbf88f89c3ce65830e623c16b54060b67f988878389419c960e25ed763",
+          "newBodySha256": "ca406bdbf88f89c3ce65830e623c16b54060b67f988878389419c960e25ed763"
+        },
+        {
+          "name": "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "33026e35d313e9ae64e7a1408af7bacd6e3977e7cebafeaf9d09bb7d1f3567ea",
+          "newBodySha256": "33026e35d313e9ae64e7a1408af7bacd6e3977e7cebafeaf9d09bb7d1f3567ea"
+        },
+        {
+          "name": "legacyClarificationAnswerCannotResumeObservedV2Session",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "7d676a6f813069ab60f2bf0c320df68e5516a307e46910ac2336738e59de45b5",
+          "newBodySha256": "7d676a6f813069ab60f2bf0c320df68e5516a307e46910ac2336738e59de45b5"
+        },
+        {
+          "name": "actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1a82e036d81b5e8baaf8562f66f378a065af68c090f75907000c2e6c6da3ad81",
+          "newBodySha256": "1a82e036d81b5e8baaf8562f66f378a065af68c090f75907000c2e6c6da3ad81"
+        },
+        {
+          "name": "actualRunnerResponseBoundaryRejectsMalformedUtf8DuplicatesTrailingAndTimestampProfiles",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6630ad2244a6c7039dbdeab6ac8cd4a2b0aac8afba871fa24440a268036b72fc",
+          "newBodySha256": "c50f21679abfeb3e5b9b90b8de4ad33cbfca6e1f2e536da05b344195bc711b9c"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java",
+      "operation": "edit",
+      "oldClass": "GuidedDispatchStopKeyTest",
+      "newClass": "GuidedDispatchStopKeyTest",
+      "oldMethods": [
+        [
+          "Test",
+          "assignmentStopKeyIsTheTeardownHashOfTheUnchangedBodyOnEveryCall"
+        ],
+        [
+          "Test",
+          "contextStopKeyFollowsTheIdentityBodyAndItsReason"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "assignmentStopKeyIsTheTeardownHashOfTheUnchangedBodyOnEveryCall"
+        ],
+        [
+          "Test",
+          "contextStopKeyFollowsTheIdentityBodyAndItsReason"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 6,
+      "assertionMarkerCountAfter": 6,
+      "methods": [
+        {
+          "name": "assignmentStopKeyIsTheTeardownHashOfTheUnchangedBodyOnEveryCall",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "229d9406111efeafefa80afa107cb317dfb74edca077fa0211a93ebb59e18e19",
+          "newBodySha256": "229d9406111efeafefa80afa107cb317dfb74edca077fa0211a93ebb59e18e19"
+        },
+        {
+          "name": "contextStopKeyFollowsTheIdentityBodyAndItsReason",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "750df2ae38b35c4fe06524076290ef7bb70d29633d4df31cd44335ea85b93876",
+          "newBodySha256": "750df2ae38b35c4fe06524076290ef7bb70d29633d4df31cd44335ea85b93876"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextRefusalTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextRefusalTest.java",
+      "operation": "edit",
+      "oldClass": "GuidedDispatchContextRefusalTest",
+      "newClass": "GuidedDispatchContextRefusalTest",
+      "oldMethods": [
+        [
+          "Test",
+          "aDefiniteContextRefusalFailsTheSessionBeforePrepare"
+        ],
+        [
+          "Test",
+          "anUncertainContextReplyKeepsUnknownOutcomeAndFailsNothing"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "aDefiniteContextRefusalFailsTheSessionBeforePrepare"
+        ],
+        [
+          "Test",
+          "anUncertainContextReplyKeepsUnknownOutcomeAndFailsNothing"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 7,
+      "assertionMarkerCountAfter": 7,
+      "methods": [
+        {
+          "name": "aDefiniteContextRefusalFailsTheSessionBeforePrepare",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b59ded2c980317bbf552c165c115425cd15d183fe24b2b05c94273bface809d7",
+          "newBodySha256": "b59ded2c980317bbf552c165c115425cd15d183fe24b2b05c94273bface809d7"
+        },
+        {
+          "name": "anUncertainContextReplyKeepsUnknownOutcomeAndFailsNothing",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "abbb0d631ff2b9764849ee62aeb0344131759cb4fbaee1741a83747a671b466d",
+          "newBodySha256": "abbb0d631ff2b9764849ee62aeb0344131759cb4fbaee1741a83747a671b466d"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java",
+      "operation": "edit",
+      "oldClass": "GuidedSecretByteBodyTest",
+      "newClass": "GuidedSecretByteBodyTest",
+      "oldMethods": [
+        [
+          "Test",
+          "guidedPublisherUsesOwnedBytesAndErasesBothBuffersAfterAckAndLostAck"
+        ],
+        [
+          "Test",
+          "actualProductionHttpsInterruptionClosesPartialResponseAndErasesOwnedBuffers"
+        ],
+        [
+          "Test",
+          "actualProductionHttpsDefaultFifteenSecondBoundIncludesTheResponseBody"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "guidedPublisherUsesOwnedBytesAndErasesBothBuffersAfterAckAndLostAck"
+        ],
+        [
+          "Test",
+          "actualProductionHttpsInterruptionClosesPartialResponseAndErasesOwnedBuffers"
+        ],
+        [
+          "Test",
+          "actualProductionHttpsDefaultFifteenSecondBoundIncludesTheResponseBody"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 22,
+      "assertionMarkerCountAfter": 22,
+      "methods": [
+        {
+          "name": "guidedPublisherUsesOwnedBytesAndErasesBothBuffersAfterAckAndLostAck",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d0abfea8ae8ee0974bdfdf4f468c43f8fec58c6f10e3e5cbe8f7074dff34d817",
+          "newBodySha256": "50fe5be454e36d7486df31ab3e29258f3a3462a052205c1fb374055781977daf"
+        },
+        {
+          "name": "actualProductionHttpsInterruptionClosesPartialResponseAndErasesOwnedBuffers",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b6c79435415feabc41fb14b20e41babebc1ebbe6fd07861879ffe9265eaa27e2",
+          "newBodySha256": "b6c79435415feabc41fb14b20e41babebc1ebbe6fd07861879ffe9265eaa27e2"
+        },
+        {
+          "name": "actualProductionHttpsDefaultFifteenSecondBoundIncludesTheResponseBody",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "5283b7dc106eade6dfa2b0739f8cac1892f2c180f78cc844ce47919a505d5efb",
+          "newBodySha256": "5283b7dc106eade6dfa2b0739f8cac1892f2c180f78cc844ce47919a505d5efb"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "operation": "edit",
+      "oldClass": "GuidedServiceTransportFaultIT",
+      "newClass": "GuidedServiceTransportFaultIT",
+      "oldMethods": [
+        [
+          "ParameterizedTest",
+          "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery"
+        ],
+        [
+          "Test",
+          "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit"
+        ],
+        [
+          "Test",
+          "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased"
+        ],
+        [
+          "Test",
+          "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork"
+        ],
+        [
+          "Test",
+          "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent"
+        ],
+        [
+          "Test",
+          "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop"
+        ],
+        [
+          "Test",
+          "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback"
+        ],
+        [
+          "Test",
+          "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost"
+        ],
+        [
+          "Test",
+          "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost"
+        ],
+        [
+          "Test",
+          "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose"
+        ],
+        [
+          "Test",
+          "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose"
+        ],
+        [
+          "Test",
+          "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation"
+        ],
+        [
+          "Test",
+          "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose"
+        ],
+        [
+          "Test",
+          "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout"
+        ],
+        [
+          "Test",
+          "expiredTeardownConfirmsOnSweepAfterResendsExhausted"
+        ],
+        [
+          "Test",
+          "teardownWithoutAckNeverConfirmsAndStopsAfterWindow"
+        ],
+        [
+          "Test",
+          "abandonedTeardownReportQueriesOncePerIntervalAndIsSilentWhenNone"
+        ],
+        [
+          "Test",
+          "concurrentAfterCompletionAndSweepSendOneStopAtATime"
+        ],
+        [
+          "Test",
+          "legacyPendingWithoutRequestIsNotRedriven"
+        ],
+        [
+          "Test",
+          "publicationConflictTeardownTargetsTheAssignmentAndConfirms"
+        ],
+        [
+          "Test",
+          "publicationConflictedIsIdempotentAndFailsClosed"
+        ],
+        [
+          "Test",
+          "publicationConflictTeardownIsRedrivenAfterResendsExhausted"
+        ],
+        [
+          "Test",
+          "pendingAppendPublicationConflictTargetsTheAssignment"
+        ],
+        [
+          "Test",
+          "stopWithoutAStopTargetRecordsNoPendingTeardown"
+        ],
+        [
+          "Test",
+          "pendingAppendDeliveryTeardownTargetsTheAssignment"
+        ],
+        [
+          "Test",
+          "noPendingDeliveryKeepsIdentityTarget"
+        ],
+        [
+          "Test",
+          "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing"
+        ],
+        [
+          "Test",
+          "lifecycleAtLastAcknowledgedIdentityEndsSession"
+        ],
+        [
+          "Test",
+          "lifecycleAtAnyOtherIdentityIsRefusedWhilePending"
+        ],
+        [
+          "Test",
+          "consumingVerificationStaysRefusedWhilePending"
+        ],
+        [
+          "Test",
+          "lifecycleWithoutPendingDeliveryIsExactlyVerify"
+        ]
+      ],
+      "newMethods": [
+        [
+          "ParameterizedTest",
+          "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery"
+        ],
+        [
+          "Test",
+          "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit"
+        ],
+        [
+          "Test",
+          "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased"
+        ],
+        [
+          "Test",
+          "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork"
+        ],
+        [
+          "Test",
+          "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent"
+        ],
+        [
+          "Test",
+          "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop"
+        ],
+        [
+          "Test",
+          "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback"
+        ],
+        [
+          "Test",
+          "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost"
+        ],
+        [
+          "Test",
+          "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost"
+        ],
+        [
+          "Test",
+          "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose"
+        ],
+        [
+          "Test",
+          "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose"
+        ],
+        [
+          "Test",
+          "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation"
+        ],
+        [
+          "Test",
+          "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose"
+        ],
+        [
+          "Test",
+          "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout"
+        ],
+        [
+          "Test",
+          "expiredTeardownConfirmsOnSweepAfterResendsExhausted"
+        ],
+        [
+          "Test",
+          "teardownWithoutAckNeverConfirmsAndStopsAfterWindow"
+        ],
+        [
+          "Test",
+          "abandonedTeardownReportQueriesOncePerIntervalAndIsSilentWhenNone"
+        ],
+        [
+          "Test",
+          "concurrentAfterCompletionAndSweepSendOneStopAtATime"
+        ],
+        [
+          "Test",
+          "legacyPendingWithoutRequestIsNotRedriven"
+        ],
+        [
+          "Test",
+          "publicationConflictTeardownTargetsTheAssignmentAndConfirms"
+        ],
+        [
+          "Test",
+          "publicationConflictedIsIdempotentAndFailsClosed"
+        ],
+        [
+          "Test",
+          "publicationConflictTeardownIsRedrivenAfterResendsExhausted"
+        ],
+        [
+          "Test",
+          "pendingAppendPublicationConflictTargetsTheAssignment"
+        ],
+        [
+          "Test",
+          "stopWithoutAStopTargetRecordsNoPendingTeardown"
+        ],
+        [
+          "Test",
+          "pendingAppendDeliveryTeardownTargetsTheAssignment"
+        ],
+        [
+          "Test",
+          "noPendingDeliveryKeepsIdentityTarget"
+        ],
+        [
+          "Test",
+          "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing"
+        ],
+        [
+          "Test",
+          "lifecycleAtLastAcknowledgedIdentityEndsSession"
+        ],
+        [
+          "Test",
+          "lifecycleAtAnyOtherIdentityIsRefusedWhilePending"
+        ],
+        [
+          "Test",
+          "consumingVerificationStaysRefusedWhilePending"
+        ],
+        [
+          "Test",
+          "lifecycleWithoutPendingDeliveryIsExactlyVerify"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 543,
+      "assertionMarkerCountAfter": 543,
+      "methods": [
+        {
+          "name": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery",
+          "kind": "ParameterizedTest",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "827220822b9b5bcb204b83bb737e708ad8672a56107cf00ba01a8c1dd09dfcd8",
+          "newBodySha256": "9a6b9bfeb9860c9f7260239553ff02be402adf9ff53908528d9a8bbfabc6822f"
+        },
+        {
+          "name": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "68a7614c11bfc549fc12e1f0a569095c1d888313511d4a1f621d926bc1dfb1ce",
+          "newBodySha256": "5aeb0e38d4202b2f0fa5d677cfeee89faae9249113a317fcb9e52e0f3e9c3753"
+        },
+        {
+          "name": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "24a929c6e1db1bc76e21c149d1b168551eb643b9d47dc44cd3e6765ccbf8ef9e",
+          "newBodySha256": "24a929c6e1db1bc76e21c149d1b168551eb643b9d47dc44cd3e6765ccbf8ef9e"
+        },
+        {
+          "name": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "e464dc852bdb6c2620362f7491bec75ea9141c2925a2902d1752965c50213511",
+          "newBodySha256": "e464dc852bdb6c2620362f7491bec75ea9141c2925a2902d1752965c50213511"
+        },
+        {
+          "name": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "39efe2da2c783fffe1bc42f0ef1f17d60c99dd0ba4810ff37f1e613af5b7eea7",
+          "newBodySha256": "39efe2da2c783fffe1bc42f0ef1f17d60c99dd0ba4810ff37f1e613af5b7eea7"
+        },
+        {
+          "name": "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "4c6b29a3d8159af967119f91c69401bfefcf725f1a47b96349b9b83a8fe8c12b",
+          "newBodySha256": "4c6b29a3d8159af967119f91c69401bfefcf725f1a47b96349b9b83a8fe8c12b"
+        },
+        {
+          "name": "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "0297efa8519421544dcdaf61a5b46acca51d0f05e569d285c0b0b9c6b4f37792",
+          "newBodySha256": "0297efa8519421544dcdaf61a5b46acca51d0f05e569d285c0b0b9c6b4f37792"
+        },
+        {
+          "name": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ecaa094ad9de70c82ac1ba4bb9294488569f32e5d4cf3306f9702870442afb7b",
+          "newBodySha256": "ecaa094ad9de70c82ac1ba4bb9294488569f32e5d4cf3306f9702870442afb7b"
+        },
+        {
+          "name": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "c45c22a74bcff61c021e06650ea591a835c28fb568923556e467bf642479b34e",
+          "newBodySha256": "c45c22a74bcff61c021e06650ea591a835c28fb568923556e467bf642479b34e"
+        },
+        {
+          "name": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "802a300347c78d99009521dba25587f9be1a3b504e80531a004473176abe9b2e",
+          "newBodySha256": "802a300347c78d99009521dba25587f9be1a3b504e80531a004473176abe9b2e"
+        },
+        {
+          "name": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "92640760fa6664186c0278511db1db509ab0e31c9f949531f44287e0c6027dce",
+          "newBodySha256": "92640760fa6664186c0278511db1db509ab0e31c9f949531f44287e0c6027dce"
+        },
+        {
+          "name": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "73386ec024b9c7b1db12c5d663000e12f13ad843ce533b2e74039bcdc744c2f0",
+          "newBodySha256": "73386ec024b9c7b1db12c5d663000e12f13ad843ce533b2e74039bcdc744c2f0"
+        },
+        {
+          "name": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "4af87a84dea4fb9972d3bdd600d06e523c4148013f7665b5c8f7eff69259f4cd",
+          "newBodySha256": "4af87a84dea4fb9972d3bdd600d06e523c4148013f7665b5c8f7eff69259f4cd"
+        },
+        {
+          "name": "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a4183b9a6fe2dcffd26d47c06570fd82304ac13908b70dbe9bd8d480c48360bd",
+          "newBodySha256": "a4183b9a6fe2dcffd26d47c06570fd82304ac13908b70dbe9bd8d480c48360bd"
+        },
+        {
+          "name": "expiredTeardownConfirmsOnSweepAfterResendsExhausted",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "803cc32bd85e169247d4f6f81525058b5da3f85db5656af73147a65c9e521237",
+          "newBodySha256": "803cc32bd85e169247d4f6f81525058b5da3f85db5656af73147a65c9e521237"
+        },
+        {
+          "name": "teardownWithoutAckNeverConfirmsAndStopsAfterWindow",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "08a25e50c5fbe97f662254e181c36d3e4dd8be31277ebcbfe2628026acdbe43c",
+          "newBodySha256": "08a25e50c5fbe97f662254e181c36d3e4dd8be31277ebcbfe2628026acdbe43c"
+        },
+        {
+          "name": "abandonedTeardownReportQueriesOncePerIntervalAndIsSilentWhenNone",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "06af2be7313a4fdf19f6321923bf6f2cdb55a9d49fd293726ed60990880d5903",
+          "newBodySha256": "06af2be7313a4fdf19f6321923bf6f2cdb55a9d49fd293726ed60990880d5903"
+        },
+        {
+          "name": "concurrentAfterCompletionAndSweepSendOneStopAtATime",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ef4a1ac0b30eb088dcfa27faccc548bcce276663fa42c2078dfdfb27400a77e3",
+          "newBodySha256": "ef4a1ac0b30eb088dcfa27faccc548bcce276663fa42c2078dfdfb27400a77e3"
+        },
+        {
+          "name": "legacyPendingWithoutRequestIsNotRedriven",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "8f5b3d6872b4b97e8322c6b704f44f74998a44790d2c397486ff4853a85e05ab",
+          "newBodySha256": "8f5b3d6872b4b97e8322c6b704f44f74998a44790d2c397486ff4853a85e05ab"
+        },
+        {
+          "name": "publicationConflictTeardownTargetsTheAssignmentAndConfirms",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "bc38e2f804b05df7ea1bbbaea45b6fa6d93e5c69d4930b0648fcc5b7b0de46ea",
+          "newBodySha256": "bc38e2f804b05df7ea1bbbaea45b6fa6d93e5c69d4930b0648fcc5b7b0de46ea"
+        },
+        {
+          "name": "publicationConflictedIsIdempotentAndFailsClosed",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "f6d49b07e00bcb22b39e7be0c31b74e9d537c296c40f62c33e588d38872691f4",
+          "newBodySha256": "f6d49b07e00bcb22b39e7be0c31b74e9d537c296c40f62c33e588d38872691f4"
+        },
+        {
+          "name": "publicationConflictTeardownIsRedrivenAfterResendsExhausted",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "cfaa7feb6fcf7c8833bf09c55bc1c39b32090450d65e4a9f6d24a31fd40b4d52",
+          "newBodySha256": "cfaa7feb6fcf7c8833bf09c55bc1c39b32090450d65e4a9f6d24a31fd40b4d52"
+        },
+        {
+          "name": "pendingAppendPublicationConflictTargetsTheAssignment",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "314fcea4a70e982474ce709df099ad27d03a1aff6c95c5aae0c6406b911d0d72",
+          "newBodySha256": "314fcea4a70e982474ce709df099ad27d03a1aff6c95c5aae0c6406b911d0d72"
+        },
+        {
+          "name": "stopWithoutAStopTargetRecordsNoPendingTeardown",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "0d9c92e3c39dcfdafea3be6b40a70abc782d13b92288c95b4562101770d3d360",
+          "newBodySha256": "0d9c92e3c39dcfdafea3be6b40a70abc782d13b92288c95b4562101770d3d360"
+        },
+        {
+          "name": "pendingAppendDeliveryTeardownTargetsTheAssignment",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "eada66f6a1c25dfc8c65c96e4f6c4629c0c1a450c85132d08edf70d707759160",
+          "newBodySha256": "eada66f6a1c25dfc8c65c96e4f6c4629c0c1a450c85132d08edf70d707759160"
+        },
+        {
+          "name": "noPendingDeliveryKeepsIdentityTarget",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "bb1409ebe4e5998ed5716fa5c52a82d0e92c4437f4ce67459587ce322c54a03b",
+          "newBodySha256": "bb1409ebe4e5998ed5716fa5c52a82d0e92c4437f4ce67459587ce322c54a03b"
+        },
+        {
+          "name": "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1a4fd67bf3ff5c9340323bc7283f5dd83265551e3e5658d8e81b5e7b76af9c0c",
+          "newBodySha256": "1a4fd67bf3ff5c9340323bc7283f5dd83265551e3e5658d8e81b5e7b76af9c0c"
+        },
+        {
+          "name": "lifecycleAtLastAcknowledgedIdentityEndsSession",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b265cb58083bf8b4a58a551309d62a6ae83ac4013e4c892d3879176cbefe9c0e",
+          "newBodySha256": "b265cb58083bf8b4a58a551309d62a6ae83ac4013e4c892d3879176cbefe9c0e"
+        },
+        {
+          "name": "lifecycleAtAnyOtherIdentityIsRefusedWhilePending",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "d156e55d7c7e998ac50b0a8988e524a8b83b567072b696cfd6d74de470fdaf85",
+          "newBodySha256": "d156e55d7c7e998ac50b0a8988e524a8b83b567072b696cfd6d74de470fdaf85"
+        },
+        {
+          "name": "consumingVerificationStaysRefusedWhilePending",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ce671658de6af3919166028e9e79b6a7577964ee6adb1750d46b3c835e2df21a",
+          "newBodySha256": "ce671658de6af3919166028e9e79b6a7577964ee6adb1750d46b3c835e2df21a"
+        },
+        {
+          "name": "lifecycleWithoutPendingDeliveryIsExactlyVerify",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a6d594dbf19eaa7b3f1c7e2d4380ae8da41819bc091d426bb805b1e7a34dca0f",
+          "newBodySha256": "a6d594dbf19eaa7b3f1c7e2d4380ae8da41819bc091d426bb805b1e7a34dca0f"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "operation": "edit",
+      "oldClass": "GuidedEvidencePendingAppendJoinedIT",
+      "newClass": "GuidedEvidencePendingAppendJoinedIT",
+      "oldMethods": [
+        [
+          "Test",
+          "aSessionEndedWhileAnAppendIsPendingKeepsARecordingThatSettlesPlaysAndSeeks"
+        ],
+        [
+          "Test",
+          "aSessionLosingItsBrowserWhileAnAppendIsPendingStillRecordsTheRunnersOwnFact"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "aSessionEndedWhileAnAppendIsPendingKeepsARecordingThatSettlesPlaysAndSeeks"
+        ],
+        [
+          "Test",
+          "aSessionLosingItsBrowserWhileAnAppendIsPendingStillRecordsTheRunnersOwnFact"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 59,
+      "assertionMarkerCountAfter": 59,
+      "methods": [
+        {
+          "name": "aSessionEndedWhileAnAppendIsPendingKeepsARecordingThatSettlesPlaysAndSeeks",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "e02833d199e8743a966d4435e1059b45ba702e8bb81a44e7f2354eb5181a97c8",
+          "newBodySha256": "e02833d199e8743a966d4435e1059b45ba702e8bb81a44e7f2354eb5181a97c8"
+        },
+        {
+          "name": "aSessionLosingItsBrowserWhileAnAppendIsPendingStillRecordsTheRunnersOwnFact",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "dde8640fb3930f2940142fad157baa1598c2ae1bf4ce5306508e04819a8ad690",
+          "newBodySha256": "dde8640fb3930f2940142fad157baa1598c2ae1bf4ce5306508e04819a8ad690"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "operation": "edit",
+      "oldClass": "GuidedSessionIT",
+      "newClass": "GuidedSessionIT",
+      "oldMethods": [
+        [
+          "Test",
+          "migrationPreservesExistingDataAndFreshInstallWorks"
+        ],
+        [
+          "Test",
+          "canonicalUnicodeParityAndClosedSchema"
+        ],
+        [
+          "Test",
+          "concurrentIdenticalStartsAndChangedDigestAreDurable"
+        ],
+        [
+          "Test",
+          "concurrentConflictingStartsHaveOneWinner"
+        ],
+        [
+          "Test",
+          "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch"
+        ],
+        [
+          "Test",
+          "conflictingAdmissionAndUniqueCoordinatesFail"
+        ],
+        [
+          "Test",
+          "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge"
+        ],
+        [
+          "Test",
+          "accessIsolationRechecksPrincipalCsiAccountAndScope"
+        ],
+        [
+          "Test",
+          "workerSubjectFenceAndLeaseAreIndependent"
+        ],
+        [
+          "Test",
+          "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown"
+        ],
+        [
+          "Test",
+          "lostAckNeverRetriesAndDelayedCallbackCannotRevive"
+        ],
+        [
+          "Test",
+          "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence"
+        ],
+        [
+          "Test",
+          "expiryCannotBeExtendedAndTrustedReaperRevokes"
+        ],
+        [
+          "Test",
+          "entireSessionBudgetsAreReservedAndMissingUsageIsConservative"
+        ],
+        [
+          "Test",
+          "observationBudgetAndGenerationAreSharedAcrossActions"
+        ],
+        [
+          "Test",
+          "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent"
+        ],
+        [
+          "Test",
+          "noStateCanPublishWithoutExactVerifier"
+        ],
+        [
+          "Test",
+          "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed"
+        ],
+        [
+          "Test",
+          "clarificationIsBoundToGenerationChoiceAndOriginalDeadline"
+        ],
+        [
+          "Test",
+          "successfulLedgerStillCannotPublishWithoutExactPlanVerifier"
+        ],
+        [
+          "Test",
+          "actionBudgetAndFalseAssertionReportsFailClosed"
+        ],
+        [
+          "Test",
+          "gatewayOverrunIsDurablyChargedAndStopsFurtherWork"
+        ],
+        [
+          "Test",
+          "evidenceReferencesAreScopedAndDoNotClaimReplay"
+        ],
+        [
+          "Test",
+          "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping"
+        ],
+        [
+          "Test",
+          "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState"
+        ],
+        [
+          "Test",
+          "clarificationSelectionAndPauseChangeRollBackTogether"
+        ],
+        [
+          "Test",
+          "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer"
+        ],
+        [
+          "Test",
+          "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery"
+        ],
+        [
+          "Test",
+          "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot"
+        ],
+        [
+          "Test",
+          "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate"
+        ],
+        [
+          "Test",
+          "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit"
+        ],
+        [
+          "Test",
+          "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand"
+        ],
+        [
+          "Test",
+          "liveOwnerRenewalPreservesAdmittedAndDispatchedActions"
+        ],
+        [
+          "Test",
+          "takeoverCannotReopenFinalizingAfterExecutedEffects"
+        ],
+        [
+          "Test",
+          "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict"
+        ],
+        [
+          "Test",
+          "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack"
+        ],
+        [
+          "Test",
+          "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal"
+        ],
+        [
+          "Test",
+          "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults"
+        ],
+        [
+          "Test",
+          "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation"
+        ],
+        [
+          "Test",
+          "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority"
+        ],
+        [
+          "Test",
+          "unsupportedObservationEnvelopeUsesOriginalLockedValidation"
+        ],
+        [
+          "Test",
+          "unavailableObservationPreparationFallsBackAndFatalRemainsEarly"
+        ],
+        [
+          "Test",
+          "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite"
+        ],
+        [
+          "Test",
+          "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "migrationPreservesExistingDataAndFreshInstallWorks"
+        ],
+        [
+          "Test",
+          "canonicalUnicodeParityAndClosedSchema"
+        ],
+        [
+          "Test",
+          "concurrentIdenticalStartsAndChangedDigestAreDurable"
+        ],
+        [
+          "Test",
+          "concurrentConflictingStartsHaveOneWinner"
+        ],
+        [
+          "Test",
+          "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch"
+        ],
+        [
+          "Test",
+          "conflictingAdmissionAndUniqueCoordinatesFail"
+        ],
+        [
+          "Test",
+          "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge"
+        ],
+        [
+          "Test",
+          "accessIsolationRechecksPrincipalCsiAccountAndScope"
+        ],
+        [
+          "Test",
+          "workerSubjectFenceAndLeaseAreIndependent"
+        ],
+        [
+          "Test",
+          "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown"
+        ],
+        [
+          "Test",
+          "lostAckNeverRetriesAndDelayedCallbackCannotRevive"
+        ],
+        [
+          "Test",
+          "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence"
+        ],
+        [
+          "Test",
+          "expiryCannotBeExtendedAndTrustedReaperRevokes"
+        ],
+        [
+          "Test",
+          "entireSessionBudgetsAreReservedAndMissingUsageIsConservative"
+        ],
+        [
+          "Test",
+          "observationBudgetAndGenerationAreSharedAcrossActions"
+        ],
+        [
+          "Test",
+          "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent"
+        ],
+        [
+          "Test",
+          "noStateCanPublishWithoutExactVerifier"
+        ],
+        [
+          "Test",
+          "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed"
+        ],
+        [
+          "Test",
+          "clarificationIsBoundToGenerationChoiceAndOriginalDeadline"
+        ],
+        [
+          "Test",
+          "successfulLedgerStillCannotPublishWithoutExactPlanVerifier"
+        ],
+        [
+          "Test",
+          "actionBudgetAndFalseAssertionReportsFailClosed"
+        ],
+        [
+          "Test",
+          "gatewayOverrunIsDurablyChargedAndStopsFurtherWork"
+        ],
+        [
+          "Test",
+          "evidenceReferencesAreScopedAndDoNotClaimReplay"
+        ],
+        [
+          "Test",
+          "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping"
+        ],
+        [
+          "Test",
+          "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState"
+        ],
+        [
+          "Test",
+          "clarificationSelectionAndPauseChangeRollBackTogether"
+        ],
+        [
+          "Test",
+          "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer"
+        ],
+        [
+          "Test",
+          "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery"
+        ],
+        [
+          "Test",
+          "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot"
+        ],
+        [
+          "Test",
+          "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate"
+        ],
+        [
+          "Test",
+          "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit"
+        ],
+        [
+          "Test",
+          "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand"
+        ],
+        [
+          "Test",
+          "liveOwnerRenewalPreservesAdmittedAndDispatchedActions"
+        ],
+        [
+          "Test",
+          "takeoverCannotReopenFinalizingAfterExecutedEffects"
+        ],
+        [
+          "Test",
+          "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict"
+        ],
+        [
+          "Test",
+          "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack"
+        ],
+        [
+          "Test",
+          "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal"
+        ],
+        [
+          "Test",
+          "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults"
+        ],
+        [
+          "Test",
+          "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation"
+        ],
+        [
+          "Test",
+          "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority"
+        ],
+        [
+          "Test",
+          "unsupportedObservationEnvelopeUsesOriginalLockedValidation"
+        ],
+        [
+          "Test",
+          "unavailableObservationPreparationFallsBackAndFatalRemainsEarly"
+        ],
+        [
+          "Test",
+          "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite"
+        ],
+        [
+          "Test",
+          "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 235,
+      "assertionMarkerCountAfter": 235,
+      "methods": [
+        {
+          "name": "migrationPreservesExistingDataAndFreshInstallWorks",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "64a695effb1ead964d7b0b7e7c220a3a021d78684d25f39a51bb296ee2f0f603",
+          "newBodySha256": "64a695effb1ead964d7b0b7e7c220a3a021d78684d25f39a51bb296ee2f0f603"
+        },
+        {
+          "name": "canonicalUnicodeParityAndClosedSchema",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "4a123a43cdaab6ce12898eb600f06075ae4363c0e545bcf019b519cc9c078d35",
+          "newBodySha256": "4a123a43cdaab6ce12898eb600f06075ae4363c0e545bcf019b519cc9c078d35"
+        },
+        {
+          "name": "concurrentIdenticalStartsAndChangedDigestAreDurable",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a4beba6018372a72afc073742db2739de94fe81e39f55ab1ba681b47009c4929",
+          "newBodySha256": "a4beba6018372a72afc073742db2739de94fe81e39f55ab1ba681b47009c4929"
+        },
+        {
+          "name": "concurrentConflictingStartsHaveOneWinner",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "647e51c9bd4eb7b762acc616fe38ba84ee874081b5028a508b268e6b8a4b8c98",
+          "newBodySha256": "647e51c9bd4eb7b762acc616fe38ba84ee874081b5028a508b268e6b8a4b8c98"
+        },
+        {
+          "name": "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "4f371e0815dd00e37fe0eecb1bcd1230f148f729808076bbe1e62f6a0f6f52a7",
+          "newBodySha256": "4f371e0815dd00e37fe0eecb1bcd1230f148f729808076bbe1e62f6a0f6f52a7"
+        },
+        {
+          "name": "conflictingAdmissionAndUniqueCoordinatesFail",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "7f7cc09968524dd6ebeefc0565729d62eaecc8be20d676c330e53c09cbd646bb",
+          "newBodySha256": "7f7cc09968524dd6ebeefc0565729d62eaecc8be20d676c330e53c09cbd646bb"
+        },
+        {
+          "name": "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "0c8e22d9995529a0de87c421fde8b20b45d52fbc5b41543c43b3cd8cfba37ce7",
+          "newBodySha256": "0c8e22d9995529a0de87c421fde8b20b45d52fbc5b41543c43b3cd8cfba37ce7"
+        },
+        {
+          "name": "accessIsolationRechecksPrincipalCsiAccountAndScope",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "914848374340ed06aeb55d3ac53106b4635a42dbe601cf4ee447de7de413960c",
+          "newBodySha256": "914848374340ed06aeb55d3ac53106b4635a42dbe601cf4ee447de7de413960c"
+        },
+        {
+          "name": "workerSubjectFenceAndLeaseAreIndependent",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "512d502da10f72b3fdd45a448c8f16983ed15285930a30138d85b1cbe624edcc",
+          "newBodySha256": "512d502da10f72b3fdd45a448c8f16983ed15285930a30138d85b1cbe624edcc"
+        },
+        {
+          "name": "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6b84565b74d191f4e0acb1934ab72c810ec33244c20c970acaac118db0bbf23c",
+          "newBodySha256": "6b84565b74d191f4e0acb1934ab72c810ec33244c20c970acaac118db0bbf23c"
+        },
+        {
+          "name": "lostAckNeverRetriesAndDelayedCallbackCannotRevive",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "8c0c1611b901e37fb1d087179e559e709768336f9ee712c7113a35524a69a8a2",
+          "newBodySha256": "8c0c1611b901e37fb1d087179e559e709768336f9ee712c7113a35524a69a8a2"
+        },
+        {
+          "name": "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b705fe1ba0c7c13c863961bc5c8e328d892e32af7dab29485d638b3bedae35cd",
+          "newBodySha256": "b705fe1ba0c7c13c863961bc5c8e328d892e32af7dab29485d638b3bedae35cd"
+        },
+        {
+          "name": "expiryCannotBeExtendedAndTrustedReaperRevokes",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "93973726e44d40b3c064f3893faca22f9547b8df34643fafc1ed79d333ffc7c1",
+          "newBodySha256": "93973726e44d40b3c064f3893faca22f9547b8df34643fafc1ed79d333ffc7c1"
+        },
+        {
+          "name": "entireSessionBudgetsAreReservedAndMissingUsageIsConservative",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "c56037484f05077bded6df2a51ceba4de67ffe65ec7db718762b932f11be13a6",
+          "newBodySha256": "c56037484f05077bded6df2a51ceba4de67ffe65ec7db718762b932f11be13a6"
+        },
+        {
+          "name": "observationBudgetAndGenerationAreSharedAcrossActions",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b433f17e7602515d007a2cbc2062b3f1a4105c5f7d8a6eb368c947698afc8b1c",
+          "newBodySha256": "b433f17e7602515d007a2cbc2062b3f1a4105c5f7d8a6eb368c947698afc8b1c"
+        },
+        {
+          "name": "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ed08cbb15020ef1f0d361eaad2ab145a4625efc2989edb65c41c8a1eabbe0c66",
+          "newBodySha256": "ed08cbb15020ef1f0d361eaad2ab145a4625efc2989edb65c41c8a1eabbe0c66"
+        },
+        {
+          "name": "noStateCanPublishWithoutExactVerifier",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ec0885dce6f8b6c2f19d58a0e26c0f9d2b7943302ade29a37c1869b7c2461b98",
+          "newBodySha256": "ec0885dce6f8b6c2f19d58a0e26c0f9d2b7943302ade29a37c1869b7c2461b98"
+        },
+        {
+          "name": "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "fec82bfee37f21eb1ada7fe7ad43825aa1fa9fbf1c09f65aeb945452fb9c5303",
+          "newBodySha256": "fec82bfee37f21eb1ada7fe7ad43825aa1fa9fbf1c09f65aeb945452fb9c5303"
+        },
+        {
+          "name": "clarificationIsBoundToGenerationChoiceAndOriginalDeadline",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "258aa3b7346933c7c63079e89145544810f70d3c4418b1c50f065ad90ef600a2",
+          "newBodySha256": "258aa3b7346933c7c63079e89145544810f70d3c4418b1c50f065ad90ef600a2"
+        },
+        {
+          "name": "successfulLedgerStillCannotPublishWithoutExactPlanVerifier",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "9b0911bdab89d66f79684d062d7c4828e83e951d85ebebf5dfd8853f8047d947",
+          "newBodySha256": "9b0911bdab89d66f79684d062d7c4828e83e951d85ebebf5dfd8853f8047d947"
+        },
+        {
+          "name": "actionBudgetAndFalseAssertionReportsFailClosed",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "16bb6da0baf453813e507b8b2414d43f0d952b2883ebc0e32bebb2338a16e376",
+          "newBodySha256": "16bb6da0baf453813e507b8b2414d43f0d952b2883ebc0e32bebb2338a16e376"
+        },
+        {
+          "name": "gatewayOverrunIsDurablyChargedAndStopsFurtherWork",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6a7f80f2d874b790b92ba4bdcb85fdd7fc1cb15180f31af69bfdc76bede54e1a",
+          "newBodySha256": "6a7f80f2d874b790b92ba4bdcb85fdd7fc1cb15180f31af69bfdc76bede54e1a"
+        },
+        {
+          "name": "evidenceReferencesAreScopedAndDoNotClaimReplay",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "48251377bdf0678e6e20e43572f1444be867576297089f6e43ecdce77b5c763a",
+          "newBodySha256": "48251377bdf0678e6e20e43572f1444be867576297089f6e43ecdce77b5c763a"
+        },
+        {
+          "name": "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "51386c450217639379b0a602a366602e6023933b2ea867d4a133d1a849004f61",
+          "newBodySha256": "51386c450217639379b0a602a366602e6023933b2ea867d4a133d1a849004f61"
+        },
+        {
+          "name": "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "10591775bef9b1d1dd0812d9683d143de7310f563a9c3c7fcf6323f60e71e366",
+          "newBodySha256": "10591775bef9b1d1dd0812d9683d143de7310f563a9c3c7fcf6323f60e71e366"
+        },
+        {
+          "name": "clarificationSelectionAndPauseChangeRollBackTogether",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "3b47e0652471101457b0d59ecfeab9b292958e823149552464d32bb11171a32a",
+          "newBodySha256": "3b47e0652471101457b0d59ecfeab9b292958e823149552464d32bb11171a32a"
+        },
+        {
+          "name": "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "7121eac6481a4aeed55e251abdd32035799c7d920fa86a4396eb9b9651d24812",
+          "newBodySha256": "7121eac6481a4aeed55e251abdd32035799c7d920fa86a4396eb9b9651d24812"
+        },
+        {
+          "name": "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "c4c0a1f0be385a6c25007d10a2dfcd5458899b008f15e5b3ab47ed6c7f804023",
+          "newBodySha256": "c4c0a1f0be385a6c25007d10a2dfcd5458899b008f15e5b3ab47ed6c7f804023"
+        },
+        {
+          "name": "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a0933e0beffb95437e35ac1f7b71f76b1e1e76132d7383cf262a2338a4e7a870",
+          "newBodySha256": "a0933e0beffb95437e35ac1f7b71f76b1e1e76132d7383cf262a2338a4e7a870"
+        },
+        {
+          "name": "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a4e7c063fd3f26ef9fcce78092bfec11cfca1243d74e2ed9fccc9fde0f99d24f",
+          "newBodySha256": "a4e7c063fd3f26ef9fcce78092bfec11cfca1243d74e2ed9fccc9fde0f99d24f"
+        },
+        {
+          "name": "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a47785332d986d6a034175062acb1da5a1d1ef55f17544286c7226dd238e1457",
+          "newBodySha256": "a47785332d986d6a034175062acb1da5a1d1ef55f17544286c7226dd238e1457"
+        },
+        {
+          "name": "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "22e108dd4ad35321e1a638621a656f643c22726697d9ddf598814ef285568c99",
+          "newBodySha256": "22e108dd4ad35321e1a638621a656f643c22726697d9ddf598814ef285568c99"
+        },
+        {
+          "name": "liveOwnerRenewalPreservesAdmittedAndDispatchedActions",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "c4d8b746228bcb9258c470b52a750ff65df274a93512f575f7010df36ef7d8f4",
+          "newBodySha256": "c4d8b746228bcb9258c470b52a750ff65df274a93512f575f7010df36ef7d8f4"
+        },
+        {
+          "name": "takeoverCannotReopenFinalizingAfterExecutedEffects",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6274bd1f19c84622578fc6f13eaed659755a8ecad807ab0e8538d38d5a3c79ee",
+          "newBodySha256": "6274bd1f19c84622578fc6f13eaed659755a8ecad807ab0e8538d38d5a3c79ee"
+        },
+        {
+          "name": "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "f84b5cdd21f7c62345c9617e658e6f56bb0faabab9506af5d295ce5a533eb2a3",
+          "newBodySha256": "f84b5cdd21f7c62345c9617e658e6f56bb0faabab9506af5d295ce5a533eb2a3"
+        },
+        {
+          "name": "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "65005bdbb3556a5c0b0367d9298158bc043beec7bbd1d052d1efb1c8bdcc5101",
+          "newBodySha256": "65005bdbb3556a5c0b0367d9298158bc043beec7bbd1d052d1efb1c8bdcc5101"
+        },
+        {
+          "name": "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6bb3ec1c5e5d27a52ba04c67bf02d11fb6a5fd1af620847bf5d1fd004563bf69",
+          "newBodySha256": "6bb3ec1c5e5d27a52ba04c67bf02d11fb6a5fd1af620847bf5d1fd004563bf69"
+        },
+        {
+          "name": "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "6a75d4d6666751df23c7ff0829b3a8fb4a93becb1b9a7ddce19e711d501bf849",
+          "newBodySha256": "6a75d4d6666751df23c7ff0829b3a8fb4a93becb1b9a7ddce19e711d501bf849"
+        },
+        {
+          "name": "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1692408185538794ba0722f7b27bb67f2e1aed15159cb63ef29cc5442590d961",
+          "newBodySha256": "1692408185538794ba0722f7b27bb67f2e1aed15159cb63ef29cc5442590d961"
+        },
+        {
+          "name": "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "83f870a8bc124f662fb0ea04c2db97912126a94f5289ea9ac8c6be7c7c55ead5",
+          "newBodySha256": "83f870a8bc124f662fb0ea04c2db97912126a94f5289ea9ac8c6be7c7c55ead5"
+        },
+        {
+          "name": "unsupportedObservationEnvelopeUsesOriginalLockedValidation",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "21a0fb902cadac39132b5f8a1b6a094d3a5aaf4c34ac56c948cdd03485651116",
+          "newBodySha256": "21a0fb902cadac39132b5f8a1b6a094d3a5aaf4c34ac56c948cdd03485651116"
+        },
+        {
+          "name": "unavailableObservationPreparationFallsBackAndFatalRemainsEarly",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "8c5a3d3f39e8d9f9b90ca21f91625e0d809b9982623c72fde0b616a30c80bf08",
+          "newBodySha256": "8c5a3d3f39e8d9f9b90ca21f91625e0d809b9982623c72fde0b616a30c80bf08"
+        },
+        {
+          "name": "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "e6aa02e1f7f8c270782ec65f9d50c170875c55110800b82957fb687f6f0c37ac",
+          "newBodySha256": "e6aa02e1f7f8c270782ec65f9d50c170875c55110800b82957fb687f6f0c37ac"
+        },
+        {
+          "name": "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "89398a4e94228e1d9915499d2d15827f1db783c5dc5c3c87364bbda1a923e2f0",
+          "newBodySha256": "89398a4e94228e1d9915499d2d15827f1db783c5dc5c3c87364bbda1a923e2f0"
+        }
+      ]
+    },
+    {
+      "source": "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java",
+      "target": "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java",
+      "operation": "edit",
+      "oldClass": "RunnerTlsClientCertIT",
+      "newClass": "RunnerTlsClientCertIT",
+      "oldMethods": [
+        [
+          "Test",
+          "submissionAndCancelSucceedOnlyWithTheBackendCertificateAndTheRunnerIssuer"
+        ],
+        [
+          "Test",
+          "aClientWithNoCertificateIsRefusedByTheHandshakeAndNothingReachesTheRunner"
+        ],
+        [
+          "Test",
+          "aClientCertificateTheCaDidNotIssueIsRefusedAndNothingReachesTheRunner"
+        ],
+        [
+          "Test",
+          "aServerTheCaDidNotIssueIsRefusedByTheClientAndNothingReachesIt"
+        ],
+        [
+          "Test",
+          "plaintextIsRefusedInBothDirections"
+        ],
+        [
+          "Test",
+          "theBearerIsStillRequiredOverTls"
+        ],
+        [
+          "Test",
+          "aCertificateForAnotherHostIsRefusedByTheDispatchAndTheBridgeClients"
+        ],
+        [
+          "Test",
+          "bridgeTrafficGetsThroughOnlyWithTheBackendCertificate"
+        ],
+        [
+          "Test",
+          "theCoordinatorsControllerHopPresentsTheBackendCertificateAndRefusesAStrayServer"
+        ],
+        [
+          "Test",
+          "theGuidedConnectorDemandsAClientCertificateAndServesTheBackendCertificate"
+        ],
+        [
+          "Test",
+          "aBackendCertificateWithoutServerAuthCannotServeTheConnector"
+        ],
+        [
+          "Test",
+          "theDenyAllIdentityHoldsNoCertificateNoTrustAndNoSecret"
+        ],
+        [
+          "Test",
+          "allFourRunnerFacingClientsHoldTheOneConfiguredContext"
+        ],
+        [
+          "Test",
+          "theSpringManagedClientsReachTheRunnerOverMutualTls"
+        ],
+        [
+          "Test",
+          "theConnectorBringsTheClientCertificateToTheGuidedChainAndNothingElseDoes"
+        ],
+        [
+          "Test",
+          "theConnectorServesOnlyTheGuidedPathsAndThePlainPortIsUnchanged"
+        ]
+      ],
+      "newMethods": [
+        [
+          "Test",
+          "submissionAndCancelSucceedOnlyWithTheBackendCertificateAndTheRunnerIssuer"
+        ],
+        [
+          "Test",
+          "aClientWithNoCertificateIsRefusedByTheHandshakeAndNothingReachesTheRunner"
+        ],
+        [
+          "Test",
+          "aClientCertificateTheCaDidNotIssueIsRefusedAndNothingReachesTheRunner"
+        ],
+        [
+          "Test",
+          "aServerTheCaDidNotIssueIsRefusedByTheClientAndNothingReachesIt"
+        ],
+        [
+          "Test",
+          "plaintextIsRefusedInBothDirections"
+        ],
+        [
+          "Test",
+          "theBearerIsStillRequiredOverTls"
+        ],
+        [
+          "Test",
+          "aCertificateForAnotherHostIsRefusedByTheDispatchAndTheBridgeClients"
+        ],
+        [
+          "Test",
+          "bridgeTrafficGetsThroughOnlyWithTheBackendCertificate"
+        ],
+        [
+          "Test",
+          "theCoordinatorsControllerHopPresentsTheBackendCertificateAndRefusesAStrayServer"
+        ],
+        [
+          "Test",
+          "theGuidedConnectorDemandsAClientCertificateAndServesTheBackendCertificate"
+        ],
+        [
+          "Test",
+          "aBackendCertificateWithoutServerAuthCannotServeTheConnector"
+        ],
+        [
+          "Test",
+          "theDenyAllIdentityHoldsNoCertificateNoTrustAndNoSecret"
+        ],
+        [
+          "Test",
+          "allFourRunnerFacingClientsHoldTheOneConfiguredContext"
+        ],
+        [
+          "Test",
+          "theSpringManagedClientsReachTheRunnerOverMutualTls"
+        ],
+        [
+          "Test",
+          "theConnectorBringsTheClientCertificateToTheGuidedChainAndNothingElseDoes"
+        ],
+        [
+          "Test",
+          "theConnectorServesOnlyTheGuidedPathsAndThePlainPortIsUnchanged"
+        ]
+      ],
+      "namesAndKindsPreserved": true,
+      "wholeSourceEqualAfterListedPortsExcludingImports": true,
+      "assertionMarkerCountBefore": 89,
+      "assertionMarkerCountAfter": 89,
+      "methods": [
+        {
+          "name": "submissionAndCancelSucceedOnlyWithTheBackendCertificateAndTheRunnerIssuer",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "630a0a81869ad25fd37aae34816df6280006ad6cb904dc644118f0338eaaf1d1",
+          "newBodySha256": "630a0a81869ad25fd37aae34816df6280006ad6cb904dc644118f0338eaaf1d1"
+        },
+        {
+          "name": "aClientWithNoCertificateIsRefusedByTheHandshakeAndNothingReachesTheRunner",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "066cb95cc506a6e66c7efcb3f41cfe127f3faed0c283fb68ed75a1870e58a1f9",
+          "newBodySha256": "066cb95cc506a6e66c7efcb3f41cfe127f3faed0c283fb68ed75a1870e58a1f9"
+        },
+        {
+          "name": "aClientCertificateTheCaDidNotIssueIsRefusedAndNothingReachesTheRunner",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "a1d8eb84de6b7470fddcf54f86eb22e6a35f25567a7b269614408cfd41d2da4b",
+          "newBodySha256": "a1d8eb84de6b7470fddcf54f86eb22e6a35f25567a7b269614408cfd41d2da4b"
+        },
+        {
+          "name": "aServerTheCaDidNotIssueIsRefusedByTheClientAndNothingReachesIt",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "2ec17949b0cac2b57e9504b7c6316b93fb8b98e7d2a075a3aca0e241f7b4cdae",
+          "newBodySha256": "2ec17949b0cac2b57e9504b7c6316b93fb8b98e7d2a075a3aca0e241f7b4cdae"
+        },
+        {
+          "name": "plaintextIsRefusedInBothDirections",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "56dedb76d9e5c23407b8b822fe05dfb77d6270fe867952204ef33b23b50dff12",
+          "newBodySha256": "56dedb76d9e5c23407b8b822fe05dfb77d6270fe867952204ef33b23b50dff12"
+        },
+        {
+          "name": "theBearerIsStillRequiredOverTls",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "fba9c59f7c2adbc350f2669247762a369e156e533acc2e86ed4425fd41605ce1",
+          "newBodySha256": "fba9c59f7c2adbc350f2669247762a369e156e533acc2e86ed4425fd41605ce1"
+        },
+        {
+          "name": "aCertificateForAnotherHostIsRefusedByTheDispatchAndTheBridgeClients",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "38191494f015a735adf079889c7bf032a506df6223871067b2e0966100ed7aaf",
+          "newBodySha256": "23441998898d58a23b80b1eebc506240227387c014079e543a3b29156da7e86f"
+        },
+        {
+          "name": "bridgeTrafficGetsThroughOnlyWithTheBackendCertificate",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "ffb2a2de8e0aea983b23a954d9f63641b3fe583f5e55ffec49894ea7b51cfd60",
+          "newBodySha256": "04f0c678087e91d3da0f45fe83b3b1ee968ad82ae5b16faeeb7725b8844e20bc"
+        },
+        {
+          "name": "theCoordinatorsControllerHopPresentsTheBackendCertificateAndRefusesAStrayServer",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "348f3ca0c3765f1e187950978c799de9178ef821258c2a137afae471460933d7",
+          "newBodySha256": "348f3ca0c3765f1e187950978c799de9178ef821258c2a137afae471460933d7"
+        },
+        {
+          "name": "theGuidedConnectorDemandsAClientCertificateAndServesTheBackendCertificate",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "57f752135da866e0972e3cc45482495144d9eb70f11ec372008a867d3d10d311",
+          "newBodySha256": "57f752135da866e0972e3cc45482495144d9eb70f11ec372008a867d3d10d311"
+        },
+        {
+          "name": "aBackendCertificateWithoutServerAuthCannotServeTheConnector",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "1b34e14d0775ccaf2c146a50b00f59ef69cde62edb1dff6ffa945dc890c6abf9",
+          "newBodySha256": "1b34e14d0775ccaf2c146a50b00f59ef69cde62edb1dff6ffa945dc890c6abf9"
+        },
+        {
+          "name": "theDenyAllIdentityHoldsNoCertificateNoTrustAndNoSecret",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "fd77b2c2cec9bc48b571af671df125ba462f699ad43a16eb54a4b50fd7f16cf9",
+          "newBodySha256": "fd77b2c2cec9bc48b571af671df125ba462f699ad43a16eb54a4b50fd7f16cf9"
+        },
+        {
+          "name": "allFourRunnerFacingClientsHoldTheOneConfiguredContext",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "7bd7c11efa797f7456968048a9ad014f032f9dbf0495b56bdfc9295441832707",
+          "newBodySha256": "7f3d25da410e9a18bc63ef9bb9e4505a442b4e97ab1fe8be76ce39a654693e56"
+        },
+        {
+          "name": "theSpringManagedClientsReachTheRunnerOverMutualTls",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "bc806c1be61fdd4f30e6753354fa7d574294b87621eb710f6ab98e43ad2d95a0",
+          "newBodySha256": "efdc02d1cf0631450001b1204f20e49c05f20698c01a6ccd29d45046597dc321"
+        },
+        {
+          "name": "theConnectorBringsTheClientCertificateToTheGuidedChainAndNothingElseDoes",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "b23d5901f559a1e2b4feb338357fc904fb4546caf6a81e4a7a39603c6aaa9e42",
+          "newBodySha256": "b23d5901f559a1e2b4feb338357fc904fb4546caf6a81e4a7a39603c6aaa9e42"
+        },
+        {
+          "name": "theConnectorServesOnlyTheGuidedPathsAndThePlainPortIsUnchanged",
+          "kind": "Test",
+          "bodyEqualAfterListedMechanicalPorts": true,
+          "oldBodySha256": "3e4ac307e0655c36bc5aba6c893b1ac2f2fbef7fb3c26013aa5e3030f3a77a11",
+          "newBodySha256": "3e4ac307e0655c36bc5aba6c893b1ac2f2fbef7fb3c26013aa5e3030f3a77a11"
+        }
+      ]
+    }
+  ],
+  "failures": []
+}

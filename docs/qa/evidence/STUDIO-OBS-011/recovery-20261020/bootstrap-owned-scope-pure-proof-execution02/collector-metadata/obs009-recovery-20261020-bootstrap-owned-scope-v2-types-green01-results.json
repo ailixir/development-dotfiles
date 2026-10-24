@@ -1,0 +1,22 @@
+{
+  "command": [
+    "pnpm",
+    "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/typescript/bin/tsc",
+    "-p",
+    "tsconfig.json",
+    "--noEmit"
+  ],
+  "cwd": "studio-runner",
+  "started": "2026-10-21T02:08:57.219349+00:00",
+  "elapsedSeconds": 7.77,
+  "exit": 0,
+  "sourceStable": true,
+  "distStable": true,
+  "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+  "testInputStable": true,
+  "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+  "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f"
+}

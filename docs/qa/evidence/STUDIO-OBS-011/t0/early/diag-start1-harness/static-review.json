@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-19T02:25:16.675934+00:00",
+  "preparationOnly": true,
+  "harnessExecuted": false,
+  "sourceStaged": false,
+  "staticPythonAst": "PASS",
+  "exactPatchReconstruction": "PASS",
+  "patchSha256": "c38d9a696ea5a34d8358441e3327a8f6957579c69dcb28fe118b98feee91fe83",
+  "reviewSha256": "ebaa08722435958b4f53cadf18001d2e38683ff6820c44ed6a9d52c69a53c70d",
+  "candidateSha256": "d5cafe9818f29587cd646d2ac96c70c9b2c9c47c6433645fc0b80ec84d880d6d",
+  "frozenFiles": 1230,
+  "treeFiles": 1192,
+  "planSha256": "778ad943ec2a27b1e5edcbdf408c976118c3d0ea0eba2a61c133ddd56951967d",
+  "sourceUnchanged": true,
+  "rootStateObservedSha256": "d37801271e4f5e9e43644b7e37b148ad140c9ceba84d09024fda837f636999f0",
+  "checksNotRun": [
+    "live parent lock/lsof proof",
+    "listener/orphan scan",
+    "source stage/restore",
+    "compileTestJava",
+    "one both-task ReplayIT run",
+    "restored compile",
+    "runtime receipt or diagnostic interpretation"
+  ],
+  "harnessSha256": "2b690522e8f9920208dd256ddad24e57320dcde99edddacd7fd8326be1423c0c",
+  "harnessLines": 427,
+  "staticNoSignalCalls": true,
+  "staticSingleCollectorSite": true,
+  "staticExactTaskQualifiedClassSelectors": true,
+  "staticZeroSubsetHistoricalSkips": true,
+  "staticSourceRestorationAndCompileFinally": true
+}

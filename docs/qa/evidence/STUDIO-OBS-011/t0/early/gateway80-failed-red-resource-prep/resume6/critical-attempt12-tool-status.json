@@ -1,0 +1,11 @@
+{
+  "attempt": 12,
+  "finalTool": {
+    "chunk_id": "3fbfee",
+    "wall_time_seconds": 0.000022,
+    "exit_code": 1,
+    "original_token_count": 71,
+    "output": "{\"ok\":false,\"error\":\"OPERATOR_ORCHESTRATION_INTERRUPTED_PENDING_EXCHANGE_NOT_CUSTODIED\"}\r\nFR06_END\r\nFR06_DONE:{\"passed\": 14, \"failure\": {\"type\": \"AssertionError\", \"args\": [\"OPERATOR_REJECTED:OPERATOR_ORCHESTRATION_INTERRUPTED_PENDING_EXCHANGE_NOT_CUSTODIED\"]}, \"operatorSteps\": 2}\r\n"
+  },
+  "interruption": "Operator orchestration cell terminated; its intermediate stores did not commit. Two exchanges were reported; source result records14 assertions and2 operator steps. Deliberate negative operator reply closed the fake harness without target signal; no source failure classification."
+}

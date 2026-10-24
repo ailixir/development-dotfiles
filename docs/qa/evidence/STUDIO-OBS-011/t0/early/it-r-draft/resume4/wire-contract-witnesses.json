@@ -1,0 +1,1733 @@
+{
+  "scope": "ACTUAL_CORRECTED_CHECKER_CORE_IN_MEMORY_WIRE_CONTRACTS_ONLY",
+  "checkerSha256": "8e8c7e3e6ec91ff2638d7b4248429368b2df446ef238349d9b1b92b08b5449d1",
+  "results": [
+    {
+      "name": "raw-compatible-controlled-positive",
+      "mutation": "M-empty-canaries",
+      "task": null,
+      "accepted": true,
+      "expected": true,
+      "reason": "ACCEPTED_EXACT_RAW_COMPATIBLE_FAKE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-prefix-type",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-type-prefix",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "legacy-artificial-bare-message",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicated-type-prefix",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-colon-space",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-before-prefix",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-type",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-assertion-subtype",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "attribute-body-disagreement",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "stack-body-disagreement",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-extra-primary-preamble",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-duplicate-type-prefix",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-wrong-description",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-missing-description-format-space",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-leading-description-space",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "unrelated-cause",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-unrelated-suppressed",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-matching-assertion",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-primary",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-second-boundary",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "EXPECTED_TWO_BOUNDARY_THROWABLES",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-source-frame",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_ASSERTION_LOCATION",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-prefix-type",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-type-prefix",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "legacy-artificial-bare-message",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicated-type-prefix",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-colon-space",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-before-prefix",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-type",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-assertion-subtype",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "attribute-body-disagreement",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "stack-body-disagreement",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-extra-primary-preamble",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-duplicate-type-prefix",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-wrong-description",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-missing-description-format-space",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-leading-description-space",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "unrelated-cause",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-unrelated-suppressed",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-matching-assertion",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-primary",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-second-boundary",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "EXPECTED_TWO_BOUNDARY_THROWABLES",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-source-frame",
+      "mutation": "M-empty-canaries",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_ASSERTION_LOCATION",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "raw-compatible-controlled-positive",
+      "mutation": "M-missing-admitted",
+      "task": null,
+      "accepted": true,
+      "expected": true,
+      "reason": "ACCEPTED_EXACT_RAW_COMPATIBLE_FAKE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-prefix-type",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-type-prefix",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "legacy-artificial-bare-message",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicated-type-prefix",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-colon-space",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-before-prefix",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-type",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-assertion-subtype",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "attribute-body-disagreement",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "stack-body-disagreement",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-extra-primary-preamble",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-duplicate-type-prefix",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-wrong-description",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-missing-description-format-space",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-leading-description-space",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "unrelated-cause",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-unrelated-suppressed",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-matching-assertion",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-primary",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-second-boundary",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "EXPECTED_TWO_BOUNDARY_THROWABLES",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-source-frame",
+      "mutation": "M-missing-admitted",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_ASSERTION_LOCATION",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-prefix-type",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-type-prefix",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "legacy-artificial-bare-message",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicated-type-prefix",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-colon-space",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-before-prefix",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-type",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-assertion-subtype",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "attribute-body-disagreement",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "stack-body-disagreement",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-extra-primary-preamble",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-duplicate-type-prefix",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-wrong-description",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-missing-description-format-space",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-leading-description-space",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "unrelated-cause",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-unrelated-suppressed",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-matching-assertion",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-primary",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-second-boundary",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "EXPECTED_TWO_BOUNDARY_THROWABLES",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-source-frame",
+      "mutation": "M-missing-admitted",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_ASSERTION_LOCATION",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "raw-compatible-controlled-positive",
+      "mutation": "M-missing-dispatch",
+      "task": null,
+      "accepted": true,
+      "expected": true,
+      "reason": "ACCEPTED_EXACT_RAW_COMPATIBLE_FAKE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-prefix-type",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-type-prefix",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "legacy-artificial-bare-message",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicated-type-prefix",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-colon-space",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-before-prefix",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-type",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-assertion-subtype",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "attribute-body-disagreement",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "stack-body-disagreement",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-extra-primary-preamble",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-duplicate-type-prefix",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-wrong-description",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-missing-description-format-space",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-leading-description-space",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "unrelated-cause",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-unrelated-suppressed",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-matching-assertion",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-primary",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-second-boundary",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "EXPECTED_TWO_BOUNDARY_THROWABLES",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-source-frame",
+      "mutation": "M-missing-dispatch",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_ASSERTION_LOCATION",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-prefix-type",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-type-prefix",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "legacy-artificial-bare-message",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicated-type-prefix",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-colon-space",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-before-prefix",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-type",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-assertion-subtype",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "attribute-body-disagreement",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "stack-body-disagreement",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-extra-primary-preamble",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-duplicate-type-prefix",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-wrong-description",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-missing-description-format-space",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-leading-description-space",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "unrelated-cause",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-unrelated-suppressed",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-matching-assertion",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-primary",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-second-boundary",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "EXPECTED_TWO_BOUNDARY_THROWABLES",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-source-frame",
+      "mutation": "M-missing-dispatch",
+      "task": "guidedIncrementalTest",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_ASSERTION_LOCATION",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "raw-compatible-controlled-positive",
+      "mutation": "M-gate-true-subset",
+      "task": null,
+      "accepted": true,
+      "expected": true,
+      "reason": "ACCEPTED_EXACT_RAW_COMPATIBLE_FAKE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-prefix-type",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-type-prefix",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "legacy-artificial-bare-message",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicated-type-prefix",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-colon-space",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-before-prefix",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_WRONG_EXACT_THROWABLE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-type",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-xml-assertion-subtype",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "attribute-body-disagreement",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "stack-body-disagreement",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "ATTRIBUTE_PRIMARY_BODY_DISAGREEMENT",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-extra-primary-preamble",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-duplicate-type-prefix",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_THROWABLE_MESSAGE_PREFIX",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-wrong-description",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-missing-description-format-space",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "synchronized-leading-description-space",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_PRIMARY_MESSAGE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "unrelated-cause",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-unrelated-suppressed",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-matching-assertion",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-primary",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_FAILURE_TREE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-second-boundary",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "EXPECTED_TWO_BOUNDARY_THROWABLES",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-source-frame",
+      "mutation": "M-gate-true-subset",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_ASSERTION_LOCATION",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "historical-B1-failure-not-controlled-mutant",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNRELATED_THROWABLE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    },
+    {
+      "name": "historical-B1-failure-not-controlled-mutant",
+      "mutation": "M-empty-canaries",
+      "task": "test",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNEXPECTED_PRIMARY_FAILURE_TYPE",
+      "rawStatusUnchanged": true,
+      "fakeOnly": true
+    }
+  ],
+  "accepted": 4,
+  "rejected": 149,
+  "historicalReceiptSha256": "914dcb06ea1d074f0bb3497a84e8b586752f63127717fc9fb12372bd6a8deb7a",
+  "historicalWireClosedFacts": [
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": true,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": true,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": false,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    },
+    {
+      "task": "test",
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "synthetic": true,
+      "allowedType": false,
+      "messageStartsExactOwnTypeColonSpace": true,
+      "textStartsExactOwnTypeColonSpace": true,
+      "printHeaderOneTerminatorRemovedEqualsAttribute": true,
+      "allowedPrefixPrimitiveRecognized": false,
+      "rawExported": false
+    }
+  ],
+  "historicalFailureTransplants": [
+    {
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "allowedType": true,
+      "synthetic": false,
+      "fullCorrectedCoreRejected": true,
+      "rawExported": false
+    },
+    {
+      "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "allowedType": false,
+      "synthetic": true,
+      "fullCorrectedCoreRejected": true,
+      "rawExported": false
+    }
+  ],
+  "formatter": {
+    "jarSha256": "7fbdffa1996d43cc08e2576e01008b07e57bbad2b4741aa6c3ab73ce8511130e",
+    "classSha256": "a4cecd09b567e76fbb7772135893e9c4cec1a313259dbffe86832ab368591787",
+    "exactDescriptionFormatConstant": "[%s] ",
+    "inspection": "Python ZIP/classfile bytes only; no Java",
+    "typeExpansionAuthorized": false
+  },
+  "actualHistoricalB1ValidMutant": false,
+  "rawPrivateTextExported": false,
+  "nativeCompilerProbeExecution": "NOT_RUN",
+  "notQaVerdict": true
+}

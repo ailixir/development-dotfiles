@@ -1,0 +1,1224 @@
+{
+  "kind": "OFFTREE_FOLD_FINAL_ATOMIC_COMPOSITION_STYLE03_REFRESH",
+  "status": "EXACT_DELTAS_COMPOSED_REVIEW_AND_RUNTIME_OWED",
+  "sourceApplied": false,
+  "compilerTestsOrRuntimeExecuted": false,
+  "sourceUnchangedForAllNamedPaths": true,
+  "globalSourceStabilityClaimed": false,
+  "acceptedStyle03AlreadyApplied": true,
+  "incomingAlreadyApplied": false,
+  "finalPairScheduledAfterComposition": true,
+  "prematureGreenBaton": false,
+  "unresolvedHunks": [],
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+      "realPreimageSha256": "29eb7654f173c097929f5a32dcf8d6eb092e859e1fc41a59628adfc223ade44e",
+      "incomingSha256": "60e84ab27c1039cda193ae8124cc724d76451bf679fe4c46918d11e2b8c78418",
+      "candidateSha256": "60e84ab27c1039cda193ae8124cc724d76451bf679fe4c46918d11e2b8c78418",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "29eb7654f173c097929f5a32dcf8d6eb092e859e1fc41a59628adfc223ade44e",
+          "afterSha256": "60e84ab27c1039cda193ae8124cc724d76451bf679fe4c46918d11e2b8c78418"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "realPreimageSha256": "7eeaa3b49107bc1436adf7d0107dedede12f6ad364a756bc41c716ad828c99ae",
+      "incomingSha256": "4eb8933ac540773c9526109076e412396cfc9e6163e36cd1e3bf777f039b2f24",
+      "candidateSha256": "abea933dbeb42d41403629a293007f952064621751ee1ade98389a8460c36f60",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "7eeaa3b49107bc1436adf7d0107dedede12f6ad364a756bc41c716ad828c99ae",
+          "afterSha256": "4eb8933ac540773c9526109076e412396cfc9e6163e36cd1e3bf777f039b2f24"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__dispatch__HttpRunnerDispatchClient.java.patch",
+          "beforeSha256": "4eb8933ac540773c9526109076e412396cfc9e6163e36cd1e3bf777f039b2f24",
+          "afterSha256": "abea933dbeb42d41403629a293007f952064621751ee1ade98389a8460c36f60"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "realPreimageSha256": "3da9f5b25e98f28097c587488a408abb149deee2496a9cb440d9710fa27111b0",
+      "incomingSha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+      "candidateSha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "3da9f5b25e98f28097c587488a408abb149deee2496a9cb440d9710fa27111b0",
+          "afterSha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+      "realPreimageSha256": "24c4c76fed7a4bb71e3773ed744f3507cf25f9762d227da6df2f6ded46bf2278",
+      "incomingSha256": "876d4f38cc416055162baa3ee3b4d5a8b72aa77a05b983176e109476021cd407",
+      "candidateSha256": "876d4f38cc416055162baa3ee3b4d5a8b72aa77a05b983176e109476021cd407",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "24c4c76fed7a4bb71e3773ed744f3507cf25f9762d227da6df2f6ded46bf2278",
+          "afterSha256": "876d4f38cc416055162baa3ee3b4d5a8b72aa77a05b983176e109476021cd407"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "realPreimageSha256": "aeb3973501558664b2446a40afa760a92b6e4eb45ba0397448c9ad0d5fab4b75",
+      "incomingSha256": "0719e4f633f8fcca251fb77852e2ec064b89bcf11294fc369d11b6e2c69ef55e",
+      "candidateSha256": "0719e4f633f8fcca251fb77852e2ec064b89bcf11294fc369d11b6e2c69ef55e",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "aeb3973501558664b2446a40afa760a92b6e4eb45ba0397448c9ad0d5fab4b75",
+          "afterSha256": "0719e4f633f8fcca251fb77852e2ec064b89bcf11294fc369d11b6e2c69ef55e"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "realPreimageSha256": "b1ae740ad17255f8c2d80aaaf3edbb621227858996c8aa4dfd1ef313f58fbe50",
+      "incomingSha256": "b110f81571abf182f88254053792fdefa2554f792d871cd3b674925d47a6aa08",
+      "candidateSha256": "18e55d0bf7123e1178bec58d145ce7099bc3506a5ad139c3dbca1dd484e7a4a7",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "b1ae740ad17255f8c2d80aaaf3edbb621227858996c8aa4dfd1ef313f58fbe50",
+          "afterSha256": "b110f81571abf182f88254053792fdefa2554f792d871cd3b674925d47a6aa08"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchService.java.patch",
+          "beforeSha256": "b110f81571abf182f88254053792fdefa2554f792d871cd3b674925d47a6aa08",
+          "afterSha256": "18e55d0bf7123e1178bec58d145ce7099bc3506a5ad139c3dbca1dd484e7a4a7"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+      "realPreimageSha256": "b55a5224cfaf90dc7776c244142e048a52ea23f63b92ca0ff4f7c29afa367dda",
+      "incomingSha256": "39ed4e0b080aab54449dc4845e0fbee167b57b02ffa4121886a2c91b71a8aa6f",
+      "candidateSha256": "39ed4e0b080aab54449dc4845e0fbee167b57b02ffa4121886a2c91b71a8aa6f",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "b55a5224cfaf90dc7776c244142e048a52ea23f63b92ca0ff4f7c29afa367dda",
+          "afterSha256": "39ed4e0b080aab54449dc4845e0fbee167b57b02ffa4121886a2c91b71a8aa6f"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "realPreimageSha256": "9823a4d4c907fdb4a7b64449cc8a727b2de9b1160897058f5a6823590f42987d",
+      "incomingSha256": "9823a4d4c907fdb4a7b64449cc8a727b2de9b1160897058f5a6823590f42987d",
+      "candidateSha256": null,
+      "realMode": "0o644",
+      "candidateMode": null,
+      "operation": "delete",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__bridge__GuidedRunnerClient.java.patch",
+          "beforeSha256": "9823a4d4c907fdb4a7b64449cc8a727b2de9b1160897058f5a6823590f42987d",
+          "afterSha256": null
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "realPreimageSha256": "07e6d6cb8043fbd7541a5db39ef2aac5c4747d0129fb8d66f16114db09dbbdc1",
+      "incomingSha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+      "candidateSha256": "4cdc120830ebea83cac9a93f5d3c89b60166cf8ae834746fb2de536d4f5065e2",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "07e6d6cb8043fbd7541a5db39ef2aac5c4747d0129fb8d66f16114db09dbbdc1",
+          "afterSha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPlanPublisher.java.patch",
+          "beforeSha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+          "afterSha256": "4cdc120830ebea83cac9a93f5d3c89b60166cf8ae834746fb2de536d4f5065e2"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java",
+      "realPreimageSha256": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e",
+      "incomingSha256": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e",
+      "candidateSha256": null,
+      "realMode": "0o644",
+      "candidateMode": null,
+      "operation": "delete",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationAuthorization.java.patch",
+          "beforeSha256": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e",
+          "afterSha256": null
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "realPreimageSha256": "c06279a35213c8b1eea5aca1e84b3b968cba20392e7cb06d6bae21a4d66b967b",
+      "incomingSha256": "0a6e7299e32c6aeeda9f1d91fdb3ee8d886964e3e72114c50f47156ce2c04575",
+      "candidateSha256": "ac2043acdb7a75e7facd1bd45f023bcb0e3ebfd64fc6413fbcede81410906b83",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "c06279a35213c8b1eea5aca1e84b3b968cba20392e7cb06d6bae21a4d66b967b",
+          "afterSha256": "0a6e7299e32c6aeeda9f1d91fdb3ee8d886964e3e72114c50f47156ce2c04575"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationConfiguration.java.patch",
+          "beforeSha256": "0a6e7299e32c6aeeda9f1d91fdb3ee8d886964e3e72114c50f47156ce2c04575",
+          "afterSha256": "ac2043acdb7a75e7facd1bd45f023bcb0e3ebfd64fc6413fbcede81410906b83"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "realPreimageSha256": "72cdc69c1471eb37f388946619fb5770226ed5512e8a8f5caf5ec8606d560835",
+      "incomingSha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8",
+      "candidateSha256": "c3564b01efb0641a4d4d7bb90b45df7fa2797d3c5ae3e836fcdac576bbe18c9f",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-gsm-a-resume2",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/part-a.patch",
+          "beforeSha256": "72cdc69c1471eb37f388946619fb5770226ed5512e8a8f5caf5ec8606d560835",
+          "afterSha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationResultProjector.java.patch",
+          "beforeSha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8",
+          "afterSha256": "c3564b01efb0641a4d4d7bb90b45df7fa2797d3c5ae3e836fcdac576bbe18c9f"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "realPreimageSha256": "8ac947325e24a16590710eb77ba949c02328f97f0227dac0355f796a0798b90a",
+      "incomingSha256": "7c4adda1e4d8c2debec77e612147f528ffbd856df9fecf48208ff2289b15befe",
+      "candidateSha256": "7c4adda1e4d8c2debec77e612147f528ffbd856df9fecf48208ff2289b15befe",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "8ac947325e24a16590710eb77ba949c02328f97f0227dac0355f796a0798b90a",
+          "afterSha256": "7c4adda1e4d8c2debec77e612147f528ffbd856df9fecf48208ff2289b15befe"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+      "realPreimageSha256": "ec6448d6baef417ffb69366be9f01bd5da13fa87859a2d8c73a1e83956ce6792",
+      "incomingSha256": "340eb5b7e8af6482aef63ebf0ea387f4d1650ae3cfe073fad117a5dfb79fdbaf",
+      "candidateSha256": "386bcdc33645aad940814d62ce0d06f5fcaf621c086db65a075d17ac005849e4",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "ec6448d6baef417ffb69366be9f01bd5da13fa87859a2d8c73a1e83956ce6792",
+          "afterSha256": "340eb5b7e8af6482aef63ebf0ea387f4d1650ae3cfe073fad117a5dfb79fdbaf"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__ObservedReplayAuthorizer.java.patch",
+          "beforeSha256": "340eb5b7e8af6482aef63ebf0ea387f4d1650ae3cfe073fad117a5dfb79fdbaf",
+          "afterSha256": "386bcdc33645aad940814d62ce0d06f5fcaf621c086db65a075d17ac005849e4"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java",
+      "realPreimageSha256": null,
+      "incomingSha256": "f9b529587d78b9927f1c0334bde7676f0e923bacf00d4628465bf5d4298c3670",
+      "candidateSha256": "f9b529587d78b9927f1c0334bde7676f0e923bacf00d4628465bf5d4298c3670",
+      "realMode": null,
+      "candidateMode": "0o644",
+      "operation": "add",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": null,
+          "afterSha256": "f9b529587d78b9927f1c0334bde7676f0e923bacf00d4628465bf5d4298c3670"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "realPreimageSha256": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871",
+      "incomingSha256": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871",
+      "candidateSha256": "b70d3122822f83acbdbcaa2e7a0bab4a2c913a967432153b095650cf5339fad1",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__ObservedReplayConfiguration.java.patch",
+          "beforeSha256": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871",
+          "afterSha256": "b70d3122822f83acbdbcaa2e7a0bab4a2c913a967432153b095650cf5339fad1"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "realPreimageSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+      "incomingSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+      "candidateSha256": null,
+      "realMode": "0o644",
+      "candidateMode": null,
+      "operation": "delete",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__ObservedValidationClient.java.patch",
+          "beforeSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+          "afterSha256": null
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+      "realPreimageSha256": null,
+      "incomingSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+      "candidateSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+      "realMode": null,
+      "candidateMode": "0o644",
+      "operation": "add",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": null,
+          "afterSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "realPreimageSha256": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660",
+      "incomingSha256": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660",
+      "candidateSha256": "dca229b97a65fc31aae67a357cc09c99b165d34ef06059f117f8fb1b647a5f10",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__session__GuidedSessionConfiguration.java.patch",
+          "beforeSha256": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660",
+          "afterSha256": "dca229b97a65fc31aae67a357cc09c99b165d34ef06059f117f8fb1b647a5f10"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "realPreimageSha256": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+      "incomingSha256": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd",
+      "candidateSha256": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-gsm-a-resume2",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/part-a.patch",
+          "beforeSha256": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+          "afterSha256": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "realPreimageSha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5",
+      "incomingSha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e",
+      "candidateSha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-gsm-a-resume2",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/part-a.patch",
+          "beforeSha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5",
+          "afterSha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+      "realPreimageSha256": "6d96bb1525ab19828f18d872c375851812923e165b6d40bc0f3b36f4af745cb2",
+      "incomingSha256": "36b4b3c9d517fe4579bbf6f0f0dfae595c55084135e1aeda1a68f898212a68da",
+      "candidateSha256": "bfccc4e83b259f5bd34f9ad3336ed65fa3252fb542550de034e183de42953a50",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "6d96bb1525ab19828f18d872c375851812923e165b6d40bc0f3b36f4af745cb2",
+          "afterSha256": "36b4b3c9d517fe4579bbf6f0f0dfae595c55084135e1aeda1a68f898212a68da"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__session__README.md.patch",
+          "beforeSha256": "36b4b3c9d517fe4579bbf6f0f0dfae595c55084135e1aeda1a68f898212a68da",
+          "afterSha256": "bfccc4e83b259f5bd34f9ad3336ed65fa3252fb542550de034e183de42953a50"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "realPreimageSha256": "58c846b4f5a0a0029cddcc49a7b46431f2f44d4dedb9a86102c4684064944b86",
+      "incomingSha256": "a02318fffffc71827bca03a3dd49145e7dc89effa960b688b07c4080f7037bd5",
+      "candidateSha256": "a02318fffffc71827bca03a3dd49145e7dc89effa960b688b07c4080f7037bd5",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+          "beforeSha256": "58c846b4f5a0a0029cddcc49a7b46431f2f44d4dedb9a86102c4684064944b86",
+          "afterSha256": "a02318fffffc71827bca03a3dd49145e7dc89effa960b688b07c4080f7037bd5"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java",
+      "realPreimageSha256": null,
+      "incomingSha256": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1",
+      "candidateSha256": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1",
+      "realMode": null,
+      "candidateMode": "0o644",
+      "operation": "add",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/03-prep-tests.patch",
+          "beforeSha256": null,
+          "afterSha256": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchTestAccess.java",
+      "realPreimageSha256": null,
+      "incomingSha256": null,
+      "candidateSha256": "2e6509a98e7c31da25e60d9f0b0509a600f52b069e794bca31c2651997f7e1cb",
+      "realMode": null,
+      "candidateMode": "0o644",
+      "operation": "add",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__dispatch__DispatchTestAccess.java.patch",
+          "beforeSha256": null,
+          "afterSha256": "2e6509a98e7c31da25e60d9f0b0509a600f52b069e794bca31c2651997f7e1cb"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "realPreimageSha256": "5b7e47a78f4559ce552bc70d36bc00bc1d3fc15324785b274688173cd5bd5788",
+      "incomingSha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad",
+      "candidateSha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/03-prep-tests.patch",
+          "beforeSha256": "5b7e47a78f4559ce552bc70d36bc00bc1d3fc15324785b274688173cd5bd5788",
+          "afterSha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java",
+      "realPreimageSha256": "3467a465c5e3cc430275bed877a1d1923dcff60df26b9f2531418f5964cf6da3",
+      "incomingSha256": "3467a465c5e3cc430275bed877a1d1923dcff60df26b9f2531418f5964cf6da3",
+      "candidateSha256": "f9d39f9ed283187576b0e265fb2d1f169abc76d59f0ea1ddb3fba96de727b6f1",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__dispatch__RunnerTlsClientCertIT.java.patch",
+          "beforeSha256": "3467a465c5e3cc430275bed877a1d1923dcff60df26b9f2531418f5964cf6da3",
+          "afterSha256": "f9d39f9ed283187576b0e265fb2d1f169abc76d59f0ea1ddb3fba96de727b6f1"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "realPreimageSha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+      "incomingSha256": "4bafbc3c281a4d7f87312a11840facf8538819de76d0938e28498721352eff07",
+      "candidateSha256": "2e5d98fc8fb701c069efd041c8a83dcb89f61c5beebc651603ba8be912c2242f",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-gs-t2-resume2",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidate.patch",
+          "beforeSha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+          "afterSha256": "4bafbc3c281a4d7f87312a11840facf8538819de76d0938e28498721352eff07"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedBridgeIntegrationTest.java.patch",
+          "beforeSha256": "4bafbc3c281a4d7f87312a11840facf8538819de76d0938e28498721352eff07",
+          "afterSha256": "2e5d98fc8fb701c069efd041c8a83dcb89f61c5beebc651603ba8be912c2242f"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "realPreimageSha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+      "incomingSha256": "1c5091bf059b4098960f50ce4b244f35b7866ca99c6c086392c36b7f11a2d51f",
+      "candidateSha256": "75c35dc791836aa5a46d359a848a23e3f1cf3b8bae5ddb28adf6d472f6a1f1ff",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-gs-t2-resume2",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidate.patch",
+          "beforeSha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+          "afterSha256": "1c5091bf059b4098960f50ce4b244f35b7866ca99c6c086392c36b7f11a2d51f"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedBridgePlannedIT.java.patch",
+          "beforeSha256": "1c5091bf059b4098960f50ce4b244f35b7866ca99c6c086392c36b7f11a2d51f",
+          "afterSha256": "75c35dc791836aa5a46d359a848a23e3f1cf3b8bae5ddb28adf6d472f6a1f1ff"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java",
+      "realPreimageSha256": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416",
+      "incomingSha256": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416",
+      "candidateSha256": "c2f32ec312cd30c6f48ab78fbd4a2a690b928a4b4af06f109e9c076fda94d25f",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchContextDeadlineTest.java.patch",
+          "beforeSha256": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416",
+          "afterSha256": "c2f32ec312cd30c6f48ab78fbd4a2a690b928a4b4af06f109e9c076fda94d25f"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextRefusalTest.java",
+      "realPreimageSha256": "594a90d0b11e9203054e485fae52cef28c80796179ed67a58375f586ef4e6681",
+      "incomingSha256": "594a90d0b11e9203054e485fae52cef28c80796179ed67a58375f586ef4e6681",
+      "candidateSha256": "1403a3c4467e2c7630bc0d8f78cf0d7c69a203440e469109a78ea6ad8769e51f",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchContextRefusalTest.java.patch",
+          "beforeSha256": "594a90d0b11e9203054e485fae52cef28c80796179ed67a58375f586ef4e6681",
+          "afterSha256": "1403a3c4467e2c7630bc0d8f78cf0d7c69a203440e469109a78ea6ad8769e51f"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java",
+      "realPreimageSha256": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+      "incomingSha256": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+      "candidateSha256": "19f09dd1d3d45dc6d55231de7feecb10e9db77b98f3f7e9db5cc40760d6e0d43",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchStopKeyTest.java.patch",
+          "beforeSha256": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+          "afterSha256": "19f09dd1d3d45dc6d55231de7feecb10e9db77b98f3f7e9db5cc40760d6e0d43"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java",
+      "realPreimageSha256": "7efd8bb612de9f9673f2489c8e08e90b44dcf544c144ab201ced442bc7132bfa",
+      "incomingSha256": "7efd8bb612de9f9673f2489c8e08e90b44dcf544c144ab201ced442bc7132bfa",
+      "candidateSha256": "42f7323d9af5da04c18b99770e7b482e5034e46918e5f4d2cdaa09ec1233546c",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedOwnedBufferBoundaryTest.java.patch",
+          "beforeSha256": "7efd8bb612de9f9673f2489c8e08e90b44dcf544c144ab201ced442bc7132bfa",
+          "afterSha256": "42f7323d9af5da04c18b99770e7b482e5034e46918e5f4d2cdaa09ec1233546c"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java",
+      "realPreimageSha256": "98144848bbc5c41db604cd6ed5c1bc6e889737c2c62b9c3f2d652b5e368e47f8",
+      "incomingSha256": "98144848bbc5c41db604cd6ed5c1bc6e889737c2c62b9c3f2d652b5e368e47f8",
+      "candidateSha256": "7851c0ca5dc081b123e90398da87caf30653716f6bdc31f73f30a4ec9a969f2d",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedRunnerContextRefusalTest.java.patch",
+          "beforeSha256": "98144848bbc5c41db604cd6ed5c1bc6e889737c2c62b9c3f2d652b5e368e47f8",
+          "afterSha256": "7851c0ca5dc081b123e90398da87caf30653716f6bdc31f73f30a4ec9a969f2d"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java",
+      "realPreimageSha256": "a1d66073ec6e2d1f72bf2f564136f5db1ceee8c1186c9505581b5109f57dd8af",
+      "incomingSha256": "a1d66073ec6e2d1f72bf2f564136f5db1ceee8c1186c9505581b5109f57dd8af",
+      "candidateSha256": "86df833069d4aac0123a48222ab5b532550e30482546cf85a3716e4414d79152",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedSecretByteBodyTest.java.patch",
+          "beforeSha256": "a1d66073ec6e2d1f72bf2f564136f5db1ceee8c1186c9505581b5109f57dd8af",
+          "afterSha256": "86df833069d4aac0123a48222ab5b532550e30482546cf85a3716e4414d79152"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java",
+      "realPreimageSha256": null,
+      "incomingSha256": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463",
+      "candidateSha256": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463",
+      "realMode": null,
+      "candidateMode": "0o644",
+      "operation": "add",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-gs-t2-resume2",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidate.patch",
+          "beforeSha256": null,
+          "afterSha256": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java",
+      "realPreimageSha256": "25cd088252ce9a4e0437448d6645a58738ff7b9f9fc069c3883bc26f30aa73b5",
+      "incomingSha256": "25cd088252ce9a4e0437448d6645a58738ff7b9f9fc069c3883bc26f30aa73b5",
+      "candidateSha256": null,
+      "realMode": "0o644",
+      "candidateMode": null,
+      "operation": "delete",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationAuthorizationIT.java.patch",
+          "beforeSha256": "25cd088252ce9a4e0437448d6645a58738ff7b9f9fc069c3883bc26f30aa73b5",
+          "afterSha256": null
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "realPreimageSha256": "2aaef85fbdb885996029e9610416aa13ff93bdec703f3c233418f1ca62cfc532",
+      "incomingSha256": "2d5400d275d30730bb1ff71b5daca41434289fb1b57af59275c6ecc72ba83dd8",
+      "candidateSha256": "2d5400d275d30730bb1ff71b5daca41434289fb1b57af59275c6ecc72ba83dd8",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-it-s-composed",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/it-s-after-style03.patch",
+          "beforeSha256": "2aaef85fbdb885996029e9610416aa13ff93bdec703f3c233418f1ca62cfc532",
+          "afterSha256": "2d5400d275d30730bb1ff71b5daca41434289fb1b57af59275c6ecc72ba83dd8"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "realPreimageSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+      "incomingSha256": "98aec4f908d92c89a5d50155e35702eb8b8e3c98270d82655f212b328ca0e42c",
+      "candidateSha256": "83c7c738fb00ad0a9c7de72cec6da14510dbc76f140c136563e31b0341c60aec",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-ir-test001-and-b1-b4",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/stages/04-b4/from-original.patch",
+          "beforeSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+          "afterSha256": "98aec4f908d92c89a5d50155e35702eb8b8e3c98270d82655f212b328ca0e42c"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationReplayIT.java.patch",
+          "beforeSha256": "98aec4f908d92c89a5d50155e35702eb8b8e3c98270d82655f212b328ca0e42c",
+          "afterSha256": "83c7c738fb00ad0a9c7de72cec6da14510dbc76f140c136563e31b0341c60aec"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "realPreimageSha256": "94f4a7bde4ffc5928f5bd98659e03d592a931edfbe976db50d32c9c4fc63d447",
+      "incomingSha256": "94f4a7bde4ffc5928f5bd98659e03d592a931edfbe976db50d32c9c4fc63d447",
+      "candidateSha256": "13f8c9b55bc08224b904bcdcf7ef70518cba15028db37c07554b5cccd050deeb",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedAdmissionSecurityIT.java.patch",
+          "beforeSha256": "94f4a7bde4ffc5928f5bd98659e03d592a931edfbe976db50d32c9c4fc63d447",
+          "afterSha256": "13f8c9b55bc08224b904bcdcf7ef70518cba15028db37c07554b5cccd050deeb"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "realPreimageSha256": "f85bf21c5efc68a213ce0ac418b2ebd3f4884610513d4a1a68eded71f0c85205",
+      "incomingSha256": "f85bf21c5efc68a213ce0ac418b2ebd3f4884610513d4a1a68eded71f0c85205",
+      "candidateSha256": "ebb3d0e9bb9a3584bb3066763256a0b59d4dcbdc7e6c0464f77e65d812f16d61",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedArtifactLowererTest.java.patch",
+          "beforeSha256": "f85bf21c5efc68a213ce0ac418b2ebd3f4884610513d4a1a68eded71f0c85205",
+          "afterSha256": "ebb3d0e9bb9a3584bb3066763256a0b59d4dcbdc7e6c0464f77e65d812f16d61"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java",
+      "realPreimageSha256": "cc9407be238952b82562707a32290fb73004cef988722aef9984739677a0ff21",
+      "incomingSha256": "cc9407be238952b82562707a32290fb73004cef988722aef9984739677a0ff21",
+      "candidateSha256": "17599a87f05eb04cd7263a4d84bdae18981759cb6c186a49f9e156768acc765e",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedGrantClockIT.java.patch",
+          "beforeSha256": "cc9407be238952b82562707a32290fb73004cef988722aef9984739677a0ff21",
+          "afterSha256": "17599a87f05eb04cd7263a4d84bdae18981759cb6c186a49f9e156768acc765e"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java",
+      "realPreimageSha256": "40e83b12314d9656575270ca7c827490d16b383312778104faf8a35f2674974b",
+      "incomingSha256": "40e83b12314d9656575270ca7c827490d16b383312778104faf8a35f2674974b",
+      "candidateSha256": "480f5f9ba3cab2b7bcd45d6463c7cd48806f719ef9741888b11afe1df79db17f",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedProfileDriftTest.java.patch",
+          "beforeSha256": "40e83b12314d9656575270ca7c827490d16b383312778104faf8a35f2674974b",
+          "afterSha256": "480f5f9ba3cab2b7bcd45d6463c7cd48806f719ef9741888b11afe1df79db17f"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "realPreimageSha256": null,
+      "incomingSha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+      "candidateSha256": "1bce395fb2204ac1f5ea11175d96288b2e72a4b72dc9030c1a739c324a361af4",
+      "realMode": null,
+      "candidateMode": "0o644",
+      "operation": "add",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-fold-prep",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/01-red-first-clock.patch",
+          "beforeSha256": null,
+          "afterSha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__PublicationGrantClockIT.java.patch",
+          "beforeSha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+          "afterSha256": "1bce395fb2204ac1f5ea11175d96288b2e72a4b72dc9030c1a739c324a361af4"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "realPreimageSha256": "280e2d1768ee41c9be34e3b10659b1afa7714f5aa4e33de9dba75bb89f0bbeaa",
+      "incomingSha256": "74ed1658684b7ce272eb256600c13cda367afd20e186c4617eb68177d32f9f91",
+      "candidateSha256": "74ed1658684b7ce272eb256600c13cda367afd20e186c4617eb68177d32f9f91",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-it-s-composed",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/it-s-after-style03.patch",
+          "beforeSha256": "280e2d1768ee41c9be34e3b10659b1afa7714f5aa4e33de9dba75bb89f0bbeaa",
+          "afterSha256": "74ed1658684b7ce272eb256600c13cda367afd20e186c4617eb68177d32f9f91"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "realPreimageSha256": "1daad099ea5fbf23cf4108b00fe3266f08a2c34fba88dcf098851003832023d4",
+      "incomingSha256": "da5fb5916e21f3cb149ab4c46a1d6484e37168cbf92c7b51f0e814477b1c273a",
+      "candidateSha256": "6d64b45946771f392a89467290b7c0b0cb94d2abe2afa1b38fbcdf3c13a9a5f5",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-it-s-composed",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/it-s-after-style03.patch",
+          "beforeSha256": "1daad099ea5fbf23cf4108b00fe3266f08a2c34fba88dcf098851003832023d4",
+          "afterSha256": "da5fb5916e21f3cb149ab4c46a1d6484e37168cbf92c7b51f0e814477b1c273a"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedEvidencePendingAppendJoinedIT.java.patch",
+          "beforeSha256": "da5fb5916e21f3cb149ab4c46a1d6484e37168cbf92c7b51f0e814477b1c273a",
+          "afterSha256": "6d64b45946771f392a89467290b7c0b0cb94d2abe2afa1b38fbcdf3c13a9a5f5"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "realPreimageSha256": "a156ff590e975a66e22d52a01357452f8be9787cf30da4c2f204207e9050bbc5",
+      "incomingSha256": "a156ff590e975a66e22d52a01357452f8be9787cf30da4c2f204207e9050bbc5",
+      "candidateSha256": "cd503d8d65e17cc2e36a3e73a39a2dc30a9865931e52905094bcb89455b976aa",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold-retained-lifecycle",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-gst06-accepted-overlap-prep/patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedLifecycleReasonIT.java.patch",
+          "beforeSha256": "a156ff590e975a66e22d52a01357452f8be9787cf30da4c2f204207e9050bbc5",
+          "afterSha256": "cd503d8d65e17cc2e36a3e73a39a2dc30a9865931e52905094bcb89455b976aa"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "realPreimageSha256": null,
+      "incomingSha256": "f480ce7be1a36985332286052768e62cb065090526e04e6a5f31a801a6345195",
+      "candidateSha256": "f480ce7be1a36985332286052768e62cb065090526e04e6a5f31a801a6345195",
+      "realMode": null,
+      "candidateMode": "0o644",
+      "operation": "add",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-gsm-a-resume2",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/part-a.patch",
+          "beforeSha256": null,
+          "afterSha256": "f480ce7be1a36985332286052768e62cb065090526e04e6a5f31a801a6345195"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "realPreimageSha256": "a910868c92c01ce4ec95a6ed3d158fc7ee2d944de3801475fa49ccafdbf49fd8",
+      "incomingSha256": "475820d678e16853e0759398e4be6cb7ff7791b8c9dbf78a7951f74f63191182",
+      "candidateSha256": "61267e48a0bf66de82c47cb868c0dcb9d0bc2d3eeb4cc898abe3e0f90ec75f33",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-it-s-composed",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/it-s-after-style03.patch",
+          "beforeSha256": "a910868c92c01ce4ec95a6ed3d158fc7ee2d944de3801475fa49ccafdbf49fd8",
+          "afterSha256": "475820d678e16853e0759398e4be6cb7ff7791b8c9dbf78a7951f74f63191182"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-gst06-accepted-overlap-prep/patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedServiceTransportFaultIT.java.patch",
+          "beforeSha256": "475820d678e16853e0759398e4be6cb7ff7791b8c9dbf78a7951f74f63191182",
+          "afterSha256": "61267e48a0bf66de82c47cb868c0dcb9d0bc2d3eeb4cc898abe3e0f90ec75f33"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "realPreimageSha256": "7270cbfb450faa992cf6dc4d22e90f6b856645cf4b5f22779e7a036b83bdb3df",
+      "incomingSha256": "7270cbfb450faa992cf6dc4d22e90f6b856645cf4b5f22779e7a036b83bdb3df",
+      "candidateSha256": "28d96b4649838bb0ed71ee7309f4831911a66bb967d4f77e88bbc0e07de8ba62",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-gst06-accepted-overlap-prep/patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedSessionIT.java.patch",
+          "beforeSha256": "7270cbfb450faa992cf6dc4d22e90f6b856645cf4b5f22779e7a036b83bdb3df",
+          "afterSha256": "28d96b4649838bb0ed71ee7309f4831911a66bb967d4f77e88bbc0e07de8ba62"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "realPreimageSha256": null,
+      "incomingSha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a",
+      "candidateSha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a",
+      "realMode": null,
+      "candidateMode": "0o644",
+      "operation": "add",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-gsm-a-resume2",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/part-a.patch",
+          "beforeSha256": null,
+          "afterSha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "realPreimageSha256": "3ece2d6301108590089dc015886dc4aab940ae418e38af4941ceca586f1acbb8",
+      "incomingSha256": "389389d2413f5090bcd985309b06a614c93869d31ed98e1672bbe2237d0f5174",
+      "candidateSha256": "7cc652e8ca50c488307a62206ea2d58db3c2a6cc850e8ff0c690e3d425ca785b",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-it-s-composed",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/it-s-after-style03.patch",
+          "beforeSha256": "3ece2d6301108590089dc015886dc4aab940ae418e38af4941ceca586f1acbb8",
+          "afterSha256": "389389d2413f5090bcd985309b06a614c93869d31ed98e1672bbe2237d0f5174"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__translation__GuidedFocusMutationJoinedIT.java.patch",
+          "beforeSha256": "389389d2413f5090bcd985309b06a614c93869d31ed98e1672bbe2237d0f5174",
+          "afterSha256": "7cc652e8ca50c488307a62206ea2d58db3c2a6cc850e8ff0c690e3d425ca785b"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "realPreimageSha256": "9c68ac5bcdc79fba476177cf6bbbab12ee5583e9bfd3fe2c9449fb3a92d41aa9",
+      "incomingSha256": "cf44fc4c52706ff56370204af17281045b3b794ded792fb4c8022886b599c1eb",
+      "candidateSha256": "f430d0fe9646f5ff4b8f916861f64f9920faead685e665e98a97ab22a102880d",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "incoming-it-s-composed",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/it-s-after-style03.patch",
+          "beforeSha256": "9c68ac5bcdc79fba476177cf6bbbab12ee5583e9bfd3fe2c9449fb3a92d41aa9",
+          "afterSha256": "cf44fc4c52706ff56370204af17281045b3b794ded792fb4c8022886b599c1eb"
+        },
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__translation__GuidedPlanningIntegrationTest.java.patch",
+          "beforeSha256": "cf44fc4c52706ff56370204af17281045b3b794ded792fb4c8022886b599c1eb",
+          "afterSha256": "f430d0fe9646f5ff4b8f916861f64f9920faead685e665e98a97ab22a102880d"
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSuffixMaterializationTest.java",
+      "realPreimageSha256": "710ccd98a04751a574940d8f5e5517005692c37b7750f950dc3f50e7fc6718cb",
+      "incomingSha256": "710ccd98a04751a574940d8f5e5517005692c37b7750f950dc3f50e7fc6718cb",
+      "candidateSha256": "d7f6aa200bf5ef8ba761c1ab3f8985fbf4097e1bce87d5ea3410a9a0b85743da",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__translation__GuidedSuffixMaterializationTest.java.patch",
+          "beforeSha256": "710ccd98a04751a574940d8f5e5517005692c37b7750f950dc3f50e7fc6718cb",
+          "afterSha256": "d7f6aa200bf5ef8ba761c1ab3f8985fbf4097e1bce87d5ea3410a9a0b85743da"
+        }
+      ]
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+      "realPreimageSha256": "16aaebe6db8386b06aedbc58b347bb57b3ff937989afa49db0eb8f4b4d99a588",
+      "incomingSha256": "16aaebe6db8386b06aedbc58b347bb57b3ff937989afa49db0eb8f4b4d99a588",
+      "candidateSha256": "940554cdb7499eac57d8eb0dbe36341336e2943e826abb8e2c7fa81eced15aea",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/studio-runner__test__fixtures-tier__guidedCloseBound.test.ts.patch",
+          "beforeSha256": "16aaebe6db8386b06aedbc58b347bb57b3ff937989afa49db0eb8f4b4d99a588",
+          "afterSha256": "940554cdb7499eac57d8eb0dbe36341336e2943e826abb8e2c7fa81eced15aea"
+        }
+      ]
+    },
+    {
+      "path": "studio-runner/test/guided/runtime.test.ts",
+      "realPreimageSha256": "ad6ad7e20730e1dd775d15301450738ed227964057ab6edfeca36fd1307bc629",
+      "incomingSha256": "ad6ad7e20730e1dd775d15301450738ed227964057ab6edfeca36fd1307bc629",
+      "candidateSha256": "53169404baaf3d8e2e52e87fdabd42f73e07566422a7017e74fb064720ae37ea",
+      "realMode": "0o644",
+      "candidateMode": "0o644",
+      "operation": "edit",
+      "incomingAlreadyApplied": false,
+      "steps": [
+        {
+          "owner": "final-fold",
+          "patch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/studio-runner__test__guided__runtime.test.ts.patch",
+          "beforeSha256": "ad6ad7e20730e1dd775d15301450738ed227964057ab6edfeca36fd1307bc629",
+          "afterSha256": "53169404baaf3d8e2e52e87fdabd42f73e07566422a7017e74fb064720ae37ea"
+        }
+      ]
+    }
+  ],
+  "inputArtifacts": {
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/checkstyle-repair/preservation.json": "b79956479d8f268e1fb12b794a6ea96f2b853493b6fb9f112345bce35ef3aa91",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/checkstyle-switch-layout-correction.json": "66c13b307a3271d0eb7127bb2ef540d167de68e86e7a4e6e8fb0960b36e254ab",
+    "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-style03-results.json": "352a8255e6fa8eb9821215ae5b189fa907d821b4d3ca58e668e4826af4aaefea",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/draft-manifest.json": "eb0a1903b850c606cbfe1266928410f13b86fedbe99cc84ff6aa378101e2b47e",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/01-red-first-clock.patch": "ceab6439448d271ed839fdc482dcfc046859fae1164a75528818fc747e6558b7",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch": "5a53f4ad07906a35759a75e597f372fd83edbf3b824e58cd7eb4ac4a4546fd71",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/03-prep-tests.patch": "752325ed18bbe295cff9a76f1ee42acd348932a3e7eef27c6846b02949b9eb6f",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java": "60e84ab27c1039cda193ae8124cc724d76451bf679fe4c46918d11e2b8c78418",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java": "4eb8933ac540773c9526109076e412396cfc9e6163e36cd1e3bf777f039b2f24",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java": "876d4f38cc416055162baa3ee3b4d5a8b72aa77a05b983176e109476021cd407",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java": "0719e4f633f8fcca251fb77852e2ec064b89bcf11294fc369d11b6e2c69ef55e",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "b110f81571abf182f88254053792fdefa2554f792d871cd3b674925d47a6aa08",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java": "39ed4e0b080aab54449dc4845e0fbee167b57b02ffa4121886a2c91b71a8aa6f",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java": "0a6e7299e32c6aeeda9f1d91fdb3ee8d886964e3e72114c50f47156ce2c04575",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "7c4adda1e4d8c2debec77e612147f528ffbd856df9fecf48208ff2289b15befe",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java": "340eb5b7e8af6482aef63ebf0ea387f4d1650ae3cfe073fad117a5dfb79fdbaf",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java": "f9b529587d78b9927f1c0334bde7676f0e923bacf00d4628465bf5d4298c3670",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md": "36b4b3c9d517fe4579bbf6f0f0dfae595c55084135e1aeda1a68f898212a68da",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "a02318fffffc71827bca03a3dd49145e7dc89effa960b688b07c4080f7037bd5",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/manifest.json": "508aa9c4edc8b916c16db856c1a65be64f40913f46c3240b28727eb1e2f9bd01",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/part-a.patch": "3b7f00a65431350124e6f4bbf5ed87a137ef9ef7e2ccad8507a3fd5a82ccf0f4",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/repo/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/repo/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/repo/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/repo/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java": "f480ce7be1a36985332286052768e62cb065090526e04e6a5f31a801a6345195",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/repo/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/manifest.json": "6b9d4f8c9f65e7cf10e13e7e0e5fb7059bb9fc16ce069b7030ca00914051c46f",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidate.patch": "fe9568cfdcc9e1c6f4401447a86efb6f2b2d9a2294e5b480778ced20a2cad11f",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java": "4bafbc3c281a4d7f87312a11840facf8538819de76d0938e28498721352eff07",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java": "1c5091bf059b4098960f50ce4b244f35b7866ca99c6c086392c36b7f11a2d51f",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/stages.json": "c9f4489717db4f0494c0e531c75ef00a57bff7f8a752e1f4cafed099e4491799",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/ReplayIT.original.java": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/stages/04-b4/from-original.patch": "b2ad9874d82a2402b0e6782f28d928ebbad7be80edab79a09ec898d1282fc0a0",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/stages/04-b4/repo/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "98aec4f908d92c89a5d50155e35702eb8b8e3c98270d82655f212b328ca0e42c",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/manifest.json": "ff210efb14792e8f5d76bcd0599e2cd10c381b3374b8698326beef96eb685798",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "475820d678e16853e0759398e4be6cb7ff7791b8c9dbf78a7951f74f63191182",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java": "cf44fc4c52706ff56370204af17281045b3b794ded792fb4c8022886b599c1eb",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java": "74ed1658684b7ce272eb256600c13cda367afd20e186c4617eb68177d32f9f91",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java": "2d5400d275d30730bb1ff71b5daca41434289fb1b57af59275c6ecc72ba83dd8",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java": "389389d2413f5090bcd985309b06a614c93869d31ed98e1672bbe2237d0f5174",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java": "da5fb5916e21f3cb149ab4c46a1d6484e37168cbf92c7b51f0e814477b1c273a",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/it-s-after-style03.patch": "993d7c920549a50fdd1aa085ea3af61a9ee6c0ca4bd859fb2f14354ee52f2ef5",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/atomic-manifest.json": "d857284d9cf38d78572cd43f40914db1997edf6edcfad196305b068094508593",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__dispatch__HttpRunnerDispatchClient.java.patch": "5e2b635494faf4587e0487d5d0ef47cc0244c02f12dd81be881802b304eac682",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchService.java.patch": "3aa28f55ea1360bcb8d994a1de282c0cbd74263d7f04a1df97174636ba6b5030",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__bridge__GuidedRunnerClient.java.patch": "d2f27803cf56b16b3b30093257b2070b42c8900d608731848428568b14538f1f",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPlanPublisher.java.patch": "14514e7e2d86fe931cadadd26dc54b1f2fc3d0c5afdd4b7bae3d24b4ac7c2639",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationAuthorization.java.patch": "4adde97989c6791bbae9602e2f0d60d83183b550189b72a25b89c99255d64f49",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationConfiguration.java.patch": "5cc3762bcb018eaaee6f01d0bae7c722352a8103a7d59daf03fffaf3201ca8a3",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationResultProjector.java.patch": "575d4535aad93f403bd102c9b45320e5cee74abf889092493a4f4ed086988f4a",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__ObservedReplayAuthorizer.java.patch": "1d089027d72e8664561912b04ab304ac09011ac2902c4fd6f8f319f528ed705f",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__ObservedReplayConfiguration.java.patch": "0101ec397e8d884f9153f0f1c5f4afd088cc5132f795f61758ea86389ebfca49",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__publication__ObservedValidationClient.java.patch": "bf2614e2828534952233417dba5d5735f9bf64f0625cc6ad3374046ad063cf29",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__session__GuidedSessionConfiguration.java.patch": "4c10f529a01531f3837b795e69cdc0136dabd03408ea0b010ea3ff7f0d97ac41",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__main__java__com__citi__put__checks__studio__guided__session__README.md.patch": "bc254f131f0e09f50c16feb0ea733a6302e8d5ba741a75c9472f4d6142c4a73c",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__dispatch__DispatchTestAccess.java.patch": "fa62732e58bc731bf75858976cc9a057a6652847793b4e7f8fa4d495be5cb515",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__dispatch__RunnerTlsClientCertIT.java.patch": "f0fcf45725084d5c975a4576878c9ee32babb645277e3f6d70cceddd49b470f8",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedBridgeIntegrationTest.java.patch": "910a8ee2010fc4fd6237cd8fba2efd2723b81ce2944c022e68f371dbc85d5f8f",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedBridgePlannedIT.java.patch": "cd7c91a40b3cb3dc16be629b217d87e7b96292784c6c7e3689aa2653a13aeac9",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchContextDeadlineTest.java.patch": "fc989aade4a9c269df344286ac0b5e5c1894373d86ee0155e1db070471e76497",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchContextRefusalTest.java.patch": "8c29fa40f715a82dc8636f0658213bcaa6f0e10c85de62c507965bf048724618",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedDispatchStopKeyTest.java.patch": "c3b7aa2ea7b994f8eda859c1255966a103cffc3cabe67e861b71d1097133cbc4",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedOwnedBufferBoundaryTest.java.patch": "b7ba0ecb2028a866ff47b89b2c413a2ab198ee9262a9eae611add16f46935230",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedRunnerContextRefusalTest.java.patch": "a298a147f213ea3189a58a3fcc4dd621e58bdf87c687d995fa8701c430bb768c",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__bridge__GuidedSecretByteBodyTest.java.patch": "bf86cf8e4fd3b5d119223fbf2af726c08364904377b89c47325db258b4ba6cee",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationAuthorizationIT.java.patch": "5042dba7e2adba8b15162f0407c6590f6850a050256f56121635c63e08fead76",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationReplayIT.java.patch": "31af27e4128a3bd7d7f465f4600abe54454c0f3f38c6af666339f134c75d2bfc",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedAdmissionSecurityIT.java.patch": "a45485c10ac9f47fc15b9b3f01b4276e30b9d9f1f4b52a8727b4ed7fffe5bd1d",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedArtifactLowererTest.java.patch": "9bd2eeb961ed85893b65d6b13aa1be2ef0fb9e08f554d9c4cebd23cf99e6996e",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedGrantClockIT.java.patch": "c938c630ff16a15f2a00a548564f4e5868f8dd4db6fefd2fdb6fbba4a02b2353",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__ObservedProfileDriftTest.java.patch": "4b6f040ad134c0ebc556dc28b333bffbdb3b77aed664d12039a202a07b1d32c9",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__publication__PublicationGrantClockIT.java.patch": "7e74b0da39bd032f2989f02e405c09c08f6644668203909df5d94586fc235d7d",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedEvidencePendingAppendJoinedIT.java.patch": "b393f0aa6ab9a761f24e426e8f4d1cb5caf9673fcafaf67f9b886dc355768af1",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-gst06-accepted-overlap-prep/patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedServiceTransportFaultIT.java.patch": "5708324611976a60de7b8bbe04ec718d2baa146fc0000d19ca9e6dd6c3b91ffe",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-gst06-accepted-overlap-prep/patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedSessionIT.java.patch": "84697d7d8dac5dfb0fcf207ccc806a5945cd5893c95658e3c45d15937a04735c",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__translation__GuidedFocusMutationJoinedIT.java.patch": "87bfdaef771c82562232b4277c180a2bb98e52b3889b1b64b36e77f22876f3a7",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__translation__GuidedPlanningIntegrationTest.java.patch": "a0f637bc71d3145aa79c2587a749fd7ba7d84706d4963390585a3d1430da6eae",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/backend__src__test__java__com__citi__put__checks__studio__guided__translation__GuidedSuffixMaterializationTest.java.patch": "219e402f55191ae64e18b3e6425dba10538ebb391907eb9a3546939d4b92eec7",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/studio-runner__test__fixtures-tier__guidedCloseBound.test.ts.patch": "a66c716c491d765257bd5ee14a9c744033d8c384e55330ee2c159b1a30db7310",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/patches/studio-runner__test__guided__runtime.test.ts.patch": "c3058ecb59555f96019e3ec8d2549cd4808f0204df80cb41dd4ca36daea06fec",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-gst06-accepted-overlap-prep/patches/backend__src__test__java__com__citi__put__checks__studio__guided__session__GuidedLifecycleReasonIT.java.patch": "8b7ea849814c387abadcaea519523e16d9dab487e5895ea59770746a30eaf5c1",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-gst06-accepted-overlap-prep/type-port-map.json": "cec1402b81950ff7244f4aaedc09c7e9eb0ccd75e478ec745619f122f80730b9",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/preservation-map.json": "c93f1c630662f19adc4ef79552db91b95eb35e4dff88b26c04d1af8fce21c521",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/DatabaseClock.java": "7cffcd144671e2c82cb9645818905fb17688997b8893687b1afa6ad7ec4d505c",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretValue.java": "d1663040d620f4998ae205e7a61c3c22756b66a9367946cbff486453978ec601",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretWireWriter.java": "14dfb2bee9f4c1fcff936a5e89a392b0c33c0f48dab3eb51fca4c71baed1c954",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-composed/manifest.json": "c47ff6077db971a206498726c94fc2bef74e8df399fa2cc49085c40d1aedaa86",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-composed/static-preservation.json": "7391cf9e26451d4bd782fbd1aa17a9bb83b9595dd9f7d657224e02ef76b88b4a",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-composed/compose.py": "59e98cff36c877f8b8ede1cb66be5ac6533f99f5ec7548e8282b2a5c478b1dbc",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-composed/incoming/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "e537ebbc00ae2751178044ca9483cfb330ee0251898f3342342f68bdaa5ef324",
+    "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-composed/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "16e5cfca5d0a02282ef61cb371aa80c774381da53598d5290befb0882c4c62b0"
+  },
+  "patchSha256": {
+    "incoming-from-current.patch": "db0bc47d1c372c064d5bdca27700c93c5a1a53def7452f857024818444dc197e",
+    "final-from-incoming.patch": "ed94cb9cc847c0e772eeef633829a6613b149c6c38f1e665c07a3f1b20111f32",
+    "atomic-from-current.patch": "5924898c01533f4541e6498fe745b261b7a13a03be49b95adfd7f77b075c808e"
+  },
+  "exactHunkCount": 451,
+  "noFuzzOrRelaxedContext": true,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

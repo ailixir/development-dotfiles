@@ -1,0 +1,642 @@
+{
+  "kind": "B1_B4_WAIT_BATCH_TERMINAL_HANDOFF",
+  "atUtc": "2026-10-20T18:20:28.626943+00:00",
+  "status": "ALL_FOCUSED_PASS_B4_APPLIED_NO_CLASS_GREEN",
+  "executionReceiptSha256": "5304c09b2095ee17f011bf74510555fa69c2d707398e4de059b19815d2ae81c6",
+  "preparedSequenceSha256": "33a83d12728400a0191436fea22160048e7390c4a6bf6db3fde5785d334b4bb1",
+  "actualB4Sha256": "abb4773016aa3499b76cf1aae3ac0da0f0b820ac4df19fb66887188c7dfe53f4",
+  "actualSourceDigest": "8761c67c340fadce2c9f6d7188726671ca81e36b00d979a196d4cb8ec9aa54e7",
+  "actualDistDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "scopeOnlyChangedReplay": true,
+  "allOther1814CapturedInputsUnchanged": true,
+  "distUnchanged": true,
+  "compileCollectorsPassed": 4,
+  "focusedCollectorCounts": {
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "focusedTaskCounts": {
+    "test": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "guidedIncrementalTest": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "nativeFocusedCollectorsPassed": 4,
+  "pollRowsConverted": 74,
+  "pollLoopSitesConverted": 73,
+  "deliberateSleepCallsRetained": 21,
+  "originalC6AndBusinessAssertionsPreserved": 2712,
+  "orderedAnnotatedMethodsRetained": 74,
+  "embeddedTextBlocksByteIdentical": 10,
+  "acceptedC6SupportAndHelperByteIdentical": true,
+  "noNewJUnitCasesProfilesSkipsOrDependencies": true,
+  "pairedScratchProofsRerun": false,
+  "fullClassSlotsConsumed": 0,
+  "fullClassAttemptsTotalRemains": 3,
+  "classGreenOrFinalBatonCredit": false,
+  "historicalSlot3FailureUnchanged": true,
+  "noHistoricalCauseOrPerformanceClaim": true,
+  "sourceBindingMetadataSha256": "5f110f67ce8f2f6d20ac1cfceee21bc9cd908202e7f1c477d32bf30d3e366f26",
+  "stages": [
+    {
+      "stage": "01-b1",
+      "sourceSha256": "06c27bb65d1db346e5ded7ebbdcb9c0f7ffd008df6a048a75697dea7dcdf8629",
+      "selectors": {
+        "test": [
+          "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+          "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays"
+        ],
+        "guidedIncrementalTest": [
+          "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate"
+        ]
+      },
+      "remainingOriginalSleeps": 80,
+      "remainingDeliberateSequencePreserved": true,
+      "runs": [
+        {
+          "kind": "compile",
+          "label": "obs011-recovery-20261020-itr-b1-compile01",
+          "resultSha256": "9e84cc28c3cff0c3728b8a138a25a86429eddb934aaf9c85062b19bbd26ff6b7",
+          "exit": 0,
+          "elapsedSeconds": 9.24,
+          "counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "testInputStable": true,
+          "distStable": true
+        },
+        {
+          "kind": "focused",
+          "label": "obs011-recovery-20261020-itr-b1-focused01",
+          "resultSha256": "ce986e6ccbc943b7331becc847229a6e2959fe5f6d0c1269890d7096eb39e6de",
+          "exit": 0,
+          "elapsedSeconds": 124.13,
+          "counts": {
+            "total": 3,
+            "passed": 3,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "testInputStable": true,
+          "distStable": true,
+          "taskCollectionComplete": true,
+          "taskCollectionErrors": [],
+          "testcases": [
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+              "status": "PASS"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays()",
+              "status": "PASS"
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate()",
+              "status": "PASS"
+            }
+          ],
+          "taskResults": {
+            "test": {
+              "counts": {
+                "total": 2,
+                "passed": 2,
+                "failed": 0,
+                "errors": 0,
+                "skipped": 0
+              },
+              "freshXmlFiles": 1,
+              "freshHtmlIndex": true,
+              "freshExec": true,
+              "execRequired": true,
+              "joinCasesPresent": true,
+              "freshJoinCohorts": 1
+            },
+            "guidedIncrementalTest": {
+              "counts": {
+                "total": 1,
+                "passed": 1,
+                "failed": 0,
+                "errors": 0,
+                "skipped": 0
+              },
+              "freshXmlFiles": 1,
+              "freshHtmlIndex": true,
+              "freshExec": true,
+              "execRequired": true,
+              "joinCasesPresent": true,
+              "freshJoinCohorts": 1
+            }
+          },
+          "cohorts": [
+            {
+              "task": "test",
+              "sha256": "a2c364399943eae5c6ea6123ea07e8092eb657e953fa28dadd8835a30e6d5530",
+              "invocationCount": 2,
+              "allRequiredFlagsTrue": true,
+              "retentionFailures": 0
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "00e8a8f78a1746a39793feaa059e070d1af6c7392b7b3655b10dccade242512b",
+              "invocationCount": 1,
+              "allRequiredFlagsTrue": true,
+              "retentionFailures": 0
+            }
+          ],
+          "freshXml": [
+            {
+              "task": "test",
+              "sha256": "af4bc56403b5f0f98a59b2bf0a866cfbc20b50c021f7911fc984dfce317f424a",
+              "fresh": true
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "1244466c6163a7d3d277e238fb5e09d587fb72ded72373a1f3bb7163ebb87065",
+              "fresh": true
+            }
+          ],
+          "freshExecs": [
+            {
+              "task": "test",
+              "sha256": "6c957576fd7554fe7f328378d256d892b8828cd425080615ec482f13d5a6b6a4",
+              "freshNonempty": true
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "0e9a6923c21497527353ff0deab22bc041e66f55f1794c8eacc5f95959199de7",
+              "freshNonempty": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "02-b2",
+      "sourceSha256": "52fdebd2f39ee82a6cc6888c5399f2969a4b49cdea830bb1c29534447521d42d",
+      "selectors": {
+        "test": [
+          "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck"
+        ],
+        "guidedIncrementalTest": [
+          "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+          "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest"
+        ]
+      },
+      "remainingOriginalSleeps": 57,
+      "remainingDeliberateSequencePreserved": true,
+      "runs": [
+        {
+          "kind": "compile",
+          "label": "obs011-recovery-20261020-itr-b2-compile01",
+          "resultSha256": "8995e3ea9b36f04810a9d1345043d725b207fb20b740ad59f3abc1a0b18c0270",
+          "exit": 0,
+          "elapsedSeconds": 8.85,
+          "counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "testInputStable": true,
+          "distStable": true
+        },
+        {
+          "kind": "focused",
+          "label": "obs011-recovery-20261020-itr-b2-focused01",
+          "resultSha256": "c1b184d22ec0c419bef9ab00cd369eb13d97bc41a333194f4f8d4b31e4d08109",
+          "exit": 0,
+          "elapsedSeconds": 132.95,
+          "counts": {
+            "total": 3,
+            "passed": 3,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "testInputStable": true,
+          "distStable": true,
+          "taskCollectionComplete": true,
+          "taskCollectionErrors": [],
+          "testcases": [
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck()",
+              "status": "PASS"
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate()",
+              "status": "PASS"
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest()",
+              "status": "PASS"
+            }
+          ],
+          "taskResults": {
+            "test": {
+              "counts": {
+                "total": 1,
+                "passed": 1,
+                "failed": 0,
+                "errors": 0,
+                "skipped": 0
+              },
+              "freshXmlFiles": 1,
+              "freshHtmlIndex": true,
+              "freshExec": true,
+              "execRequired": true,
+              "joinCasesPresent": true,
+              "freshJoinCohorts": 1
+            },
+            "guidedIncrementalTest": {
+              "counts": {
+                "total": 2,
+                "passed": 2,
+                "failed": 0,
+                "errors": 0,
+                "skipped": 0
+              },
+              "freshXmlFiles": 1,
+              "freshHtmlIndex": true,
+              "freshExec": true,
+              "execRequired": true,
+              "joinCasesPresent": true,
+              "freshJoinCohorts": 1
+            }
+          },
+          "cohorts": [
+            {
+              "task": "test",
+              "sha256": "21fad415ec1531ac0b8bd63e288d36ab0b83494db8431712d338f5cb9cecc25d",
+              "invocationCount": 1,
+              "allRequiredFlagsTrue": true,
+              "retentionFailures": 0
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "b4f36e0b12951753c9543a3a65db46db7e35ba3425e878627826db23b4954673",
+              "invocationCount": 2,
+              "allRequiredFlagsTrue": true,
+              "retentionFailures": 0
+            }
+          ],
+          "freshXml": [
+            {
+              "task": "test",
+              "sha256": "b50f683682f8452a627954284cdebd9a80cae07aaa6548d6fb3dff410da99be3",
+              "fresh": true
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "c166795d67a2da725afab758bf9a00118cd58c7ad5b931560e93f49820c1999b",
+              "fresh": true
+            }
+          ],
+          "freshExecs": [
+            {
+              "task": "test",
+              "sha256": "bfde799cf4da6c2a27c3b5da62838c76f95adc0117351361bd702af0ab3f4501",
+              "freshNonempty": true
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "3fbc95cc9d94ef0c7dc088ae8273275d6a034d25745df22d2203742c6b0d31c0",
+              "freshNonempty": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "03-b3",
+      "sourceSha256": "5edc4f1a922967de8031de23689332f35ab39a5a502f9862941627bdfcf2722d",
+      "selectors": {
+        "test": [
+          "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
+          "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
+          "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending"
+        ],
+        "guidedIncrementalTest": [
+          "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate"
+        ]
+      },
+      "remainingOriginalSleeps": 33,
+      "remainingDeliberateSequencePreserved": true,
+      "runs": [
+        {
+          "kind": "compile",
+          "label": "obs011-recovery-20261020-itr-b3-compile01",
+          "resultSha256": "4071fb88dd20afb738aa8b7b88b2e41a8e5f34111c7b2973435561464b4b1f84",
+          "exit": 0,
+          "elapsedSeconds": 8.66,
+          "counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "testInputStable": true,
+          "distStable": true
+        },
+        {
+          "kind": "focused",
+          "label": "obs011-recovery-20261020-itr-b3-focused01",
+          "resultSha256": "bce96bdcc025ad3a562e36ef6e549f17e29d260ba04b0ccc0a3e63faf572860b",
+          "exit": 0,
+          "elapsedSeconds": 112.09,
+          "counts": {
+            "total": 4,
+            "passed": 4,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "testInputStable": true,
+          "distStable": true,
+          "taskCollectionComplete": true,
+          "taskCollectionErrors": [],
+          "testcases": [
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays()",
+              "status": "PASS"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork()",
+              "status": "PASS"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending()",
+              "status": "PASS"
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate()",
+              "status": "PASS"
+            }
+          ],
+          "taskResults": {
+            "test": {
+              "counts": {
+                "total": 3,
+                "passed": 3,
+                "failed": 0,
+                "errors": 0,
+                "skipped": 0
+              },
+              "freshXmlFiles": 1,
+              "freshHtmlIndex": true,
+              "freshExec": true,
+              "execRequired": true,
+              "joinCasesPresent": true,
+              "freshJoinCohorts": 1
+            },
+            "guidedIncrementalTest": {
+              "counts": {
+                "total": 1,
+                "passed": 1,
+                "failed": 0,
+                "errors": 0,
+                "skipped": 0
+              },
+              "freshXmlFiles": 1,
+              "freshHtmlIndex": true,
+              "freshExec": true,
+              "execRequired": true,
+              "joinCasesPresent": true,
+              "freshJoinCohorts": 1
+            }
+          },
+          "cohorts": [
+            {
+              "task": "test",
+              "sha256": "9e49d045f680d556c8cca4802db1f3d06d0b382c5639f99ddc97659e946e67e2",
+              "invocationCount": 3,
+              "allRequiredFlagsTrue": true,
+              "retentionFailures": 0
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "ad2d8db7094ea6c281483903e25b433abcab4c81b3aded3fdf395571b7f0a228",
+              "invocationCount": 1,
+              "allRequiredFlagsTrue": true,
+              "retentionFailures": 0
+            }
+          ],
+          "freshXml": [
+            {
+              "task": "test",
+              "sha256": "4ddb137fe3ba5143f6b70f285bbecb721dbca3b07090a4de173d005ff44d8e04",
+              "fresh": true
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "90255b54946ab278143f2b66f02a500106dcf5a03ecc3c2a4766d3bf9e08e8cb",
+              "fresh": true
+            }
+          ],
+          "freshExecs": [
+            {
+              "task": "test",
+              "sha256": "7820a569c55936330a1f500bb5b49fde13c0011ad37263cf353b087f05dc85b6",
+              "freshNonempty": true
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "4a08eb04a6e7e898ecc4d3871d825ccdb596894023d73cf9932c286812be73ea",
+              "freshNonempty": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "04-b4",
+      "sourceSha256": "abb4773016aa3499b76cf1aae3ac0da0f0b820ac4df19fb66887188c7dfe53f4",
+      "selectors": {
+        "test": [
+          "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper",
+          "actualSecretControlWindowLossBeforeReadyReachesTerminalError"
+        ],
+        "guidedIncrementalTest": [
+          "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate"
+        ]
+      },
+      "remainingOriginalSleeps": 21,
+      "remainingDeliberateSequencePreserved": true,
+      "runs": [
+        {
+          "kind": "compile",
+          "label": "obs011-recovery-20261020-itr-b4-compile01",
+          "resultSha256": "093418a177f0ddeeb4b2c37a6629054afd5036f1171d93772ef757843818afab",
+          "exit": 0,
+          "elapsedSeconds": 8.65,
+          "counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "testInputStable": true,
+          "distStable": true
+        },
+        {
+          "kind": "focused",
+          "label": "obs011-recovery-20261020-itr-b4-focused01",
+          "resultSha256": "7ae9ebe6d9601ff7c92cb594a13f1c25fa759854e99d21639173ca11a749cf90",
+          "exit": 0,
+          "elapsedSeconds": 713.77,
+          "counts": {
+            "total": 3,
+            "passed": 3,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "sourceStable": true,
+          "testInputStable": true,
+          "distStable": true,
+          "taskCollectionComplete": true,
+          "taskCollectionErrors": [],
+          "testcases": [
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper()",
+              "status": "PASS"
+            },
+            {
+              "task": "test",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "actualSecretControlWindowLossBeforeReadyReachesTerminalError()",
+              "status": "PASS"
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+              "name": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate()",
+              "status": "PASS"
+            }
+          ],
+          "taskResults": {
+            "test": {
+              "counts": {
+                "total": 2,
+                "passed": 2,
+                "failed": 0,
+                "errors": 0,
+                "skipped": 0
+              },
+              "freshXmlFiles": 1,
+              "freshHtmlIndex": true,
+              "freshExec": true,
+              "execRequired": true,
+              "joinCasesPresent": true,
+              "freshJoinCohorts": 1
+            },
+            "guidedIncrementalTest": {
+              "counts": {
+                "total": 1,
+                "passed": 1,
+                "failed": 0,
+                "errors": 0,
+                "skipped": 0
+              },
+              "freshXmlFiles": 1,
+              "freshHtmlIndex": true,
+              "freshExec": true,
+              "execRequired": true,
+              "joinCasesPresent": true,
+              "freshJoinCohorts": 1
+            }
+          },
+          "cohorts": [
+            {
+              "task": "test",
+              "sha256": "18803d802abd59239fa8d2a73a711433263eb14ffbe4a79b367029d4ac9cdef3",
+              "invocationCount": 2,
+              "allRequiredFlagsTrue": true,
+              "retentionFailures": 0
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "3a4d894121714bebd7bd0459f13d08ec1ea453d0036cc949a74bd6c9bdbce8d0",
+              "invocationCount": 1,
+              "allRequiredFlagsTrue": true,
+              "retentionFailures": 0
+            }
+          ],
+          "freshXml": [
+            {
+              "task": "test",
+              "sha256": "da6efc07dd97a6cdb90e9347be59ed1dd374502dece485cd89f3809aace4ced2",
+              "fresh": true
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "093008a8922b586d9e116d71bac67fe5ff471663101917f57d7941b52b102ce6",
+              "fresh": true
+            }
+          ],
+          "freshExecs": [
+            {
+              "task": "test",
+              "sha256": "1b60cdfc7cc992e8e0d5ba1d9086c446e0522fbb1857cafec021459ef351acc3",
+              "freshNonempty": true
+            },
+            {
+              "task": "guidedIncrementalTest",
+              "sha256": "e6dccc9bcb654f288974645451ab2138500e8840280870202f3711024abdc2b6",
+              "freshNonempty": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

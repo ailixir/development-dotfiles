@@ -1,0 +1,9 @@
+while (fixtureAnnouncement.isBlank() && Clock.nanoTime() < fixtureDeadline) {
+        if (!SECRET_FIXTURE.isAlive()) {
+          throw new IllegalStateException("Secret fixture exited before readiness");
+        }
+        fixtureAnnouncement = Files.readString(TEMP.resolve("secret-fixture-origin.json")).strip();
+        if (fixtureAnnouncement.isBlank()) {
+          Clock.startElapsed(); probeIntervalEntered.countDown(); Thread.sleep(20); if (noAwaitGap) Clock.advance(1_000_000_000L);
+        }
+      }

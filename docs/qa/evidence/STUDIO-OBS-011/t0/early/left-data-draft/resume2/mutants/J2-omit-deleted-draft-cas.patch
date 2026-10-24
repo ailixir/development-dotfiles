@@ -1,0 +1,11 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java
+@@ -402,7 +402,7 @@
+             "UPDATE ui_tests SET confirmed_revision_id=?"
+                 + " WHERE id=? AND source_revision=? AND configuration_revision=? AND"
+                 + " publication_epoch=? AND"
+-                + " confirmed_revision_id IS NOT DISTINCT FROM ?::uuid AND deleted_at IS NULL AND"
++                + " confirmed_revision_id IS NOT DISTINCT FROM ?::uuid AND"
+                 + " quarantined_at IS NULL AND clock_timestamp()<? AND EXISTS(SELECT 1 FROM"
+                 + " studio_guided_sessions WHERE session_id=? AND state='FINALIZING' AND"
+                 + " expires_at>clock_timestamp() AND"

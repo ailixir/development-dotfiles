@@ -1,0 +1,68 @@
+{
+  "kind": "ARIA07_COMPLETE_ATTEMPTS_AND_LIMITS",
+  "currentTargetBatch": {
+    "attempts": 1,
+    "actualExit": 0,
+    "sourceSafetyEdits": false,
+    "restarted": false,
+    "operatorRequests": 3,
+    "initialRequestRecording": "Initial request emitted in tool8752d0; transcript starts at its reply. original-initial-envelope.json reconstructs the exact emitted envelope fields for the pure-memory response; raw response SHA checked by the actual target."
+  },
+  "finiteAttempts": [
+    {
+      "attempt": 1,
+      "actualExit": 1,
+      "reason": "Reviewer confused author fixtureSourceSha256 (raw inherited Source05 fixture) with current critical_check.py; no source or target issue."
+    },
+    {
+      "attempt": 2,
+      "actualExit": 1,
+      "reason": "Reviewer looked for nonexistent contract.unit instead of subject label; no source or target issue."
+    },
+    {
+      "attempt": 3,
+      "actualExit": 1,
+      "reason": "Reviewer string check used parameter k instead of actual contract in authority_shape; no source or target issue."
+    },
+    {
+      "attempt": 4,
+      "actualExit": 0,
+      "checks": 511
+    }
+  ],
+  "metadataReadErrors": [
+    {
+      "tool": "320ef0",
+      "reason": "Read attempted historical final-binding-receipt filename instead of current final-bindings.json; corrected."
+    },
+    {
+      "tool": "f22756",
+      "reason": "Read attempted finite_checks.py instead of existing verify_source.py in immutable prior review; corrected."
+    }
+  ],
+  "source07AuthorAttemptsRetained": [
+    {
+      "attempt": 1,
+      "actualExit": 1,
+      "reason": "Missed namespace injection; concrete memory-only self-text conversion with fake PID/parent/OS, no raw text/resource operation; incidental unqualified memory is not a witness or metadata authority."
+    },
+    {
+      "attempt": 2,
+      "actualExit": 1,
+      "reason": "Old unselected adverse fixture/generation mismatch."
+    },
+    {
+      "attempt": 3,
+      "actualExit": 1,
+      "reason": "Valid expected negative1 then stale publication marker StopIteration."
+    },
+    {
+      "attempt": 4,
+      "actualExit": 0,
+      "checks": 31,
+      "operatorExchanges": 3
+    }
+  ],
+  "rootCheckerHistory": "Prior Source06 root membership/misextraction attempts retained through exact immutable packets; corrected root ec0772/f95377/a2d894 are independent static observations, not target executions.",
+  "noPriorEvidenceRewritten": true
+}

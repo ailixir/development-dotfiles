@@ -1,0 +1,190 @@
+{
+  "acceptedBaseline": {
+    "plain": 2055,
+    "parameterizedMethods": 101,
+    "parameterizedInvocations": 719,
+    "sourceIdentities": 2774,
+    "tasks": {
+      "test": 2710,
+      "guidedIncrementalTest": 62,
+      "crossReplicaTest": 2
+    },
+    "nestedBinaryNames": [
+      "com.citi.put.checks.config.IdentityBypassProfileGuardTest$AllowedUnderDevelopment",
+      "com.citi.put.checks.config.IdentityBypassProfileGuardTest$DeployedProfileFiles",
+      "com.citi.put.checks.config.IdentityBypassProfileGuardTest$FailClosedByDefault",
+      "com.citi.put.checks.config.IdentityBypassProfileGuardTest$RefusedOutsideDevelopment",
+      "com.citi.put.checks.scheduling.DstBoundaryTest$FallBack",
+      "com.citi.put.checks.scheduling.DstBoundaryTest$SpringForward",
+      "com.citi.put.checks.security.BffSessionBypassClosureTest$CoreServiceBypass",
+      "com.citi.put.checks.security.BffSessionBypassClosureTest$CsiReadBypass",
+      "com.citi.put.checks.security.BffSessionBypassClosureTest$IdentityHeaders",
+      "com.citi.put.checks.security.BffSessionBypassClosureTest$Watch",
+      "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT$GuidedConnectorInARealContext",
+      "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT$OneIdentityInARealContext",
+      "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest$ApiRole",
+      "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest$WorkerRole",
+      "com.citi.put.checks.studio.guided.translation.GuidedTranslationDefaultsTest$KillSwitch"
+    ],
+    "secondaryClasses": [
+      "com.citi.put.checks.studio.guided.translation.GuidedDisabledWiringTest",
+      "com.citi.put.checks.studio.guided.translation.GuidedProductionWiringTest"
+    ]
+  },
+  "scopedFinalSourceProjection": {
+    "total": 637,
+    "tasks": {
+      "test": 575,
+      "guidedIncrementalTest": 62
+    },
+    "origins": {
+      "accepted S011 exact identity retained": 623,
+      "explicit original7 authority class relocation": 7,
+      "separately source-derived prepared/new verification case (not inherited S011 ID)": 7
+    },
+    "old7AuthorityIDs": "Port to dispatch.DispatchAuthorizationIT exactly once; old class removed. Prep physically had both old/new7 temporarily; no duplicate final credit.",
+    "new7Cases": "Three folded-client, three ClockIT, one worker refusal; each source-derived independently, not inherited accepted old IDs."
+  },
+  "threeRecoveredFileCounts": {
+    "GuidedPublicationReplayIT.java": {
+      "methodCount": 74,
+      "plainMethodCount": 73,
+      "parameterizedMethodCount": 1,
+      "sourceProjectedInvocations": 108,
+      "parameterizedInvocations": 35
+    },
+    "GuidedPlanningIntegrationTest.java": {
+      "methodCount": 35,
+      "plainMethodCount": 24,
+      "parameterizedMethodCount": 11,
+      "sourceProjectedInvocations": 57,
+      "parameterizedInvocations": 33
+    },
+    "GuidedSecretByteBodyTest.java": {
+      "methodCount": 4,
+      "plainMethodCount": 3,
+      "parameterizedMethodCount": 1,
+      "sourceProjectedInvocations": 5,
+      "parameterizedInvocations": 2
+    }
+  },
+  "all35ReplayVariants": [
+    [
+      "insert4"
+    ],
+    [
+      "delete4"
+    ],
+    [
+      "reorder4"
+    ],
+    [
+      "config"
+    ],
+    [
+      "tail1"
+    ],
+    [
+      "tail7"
+    ],
+    [
+      "append11"
+    ],
+    [
+      "ready6"
+    ],
+    [
+      "confirm-prefix"
+    ],
+    [
+      "empty"
+    ],
+    [
+      "drift2"
+    ],
+    [
+      "admitted-drift2"
+    ],
+    [
+      "unknown2"
+    ],
+    [
+      "assert-fail"
+    ],
+    [
+      "policy-prefix"
+    ],
+    [
+      "confirm-long-wait"
+    ],
+    [
+      "confirm-cancel"
+    ],
+    [
+      "confirm-expire"
+    ],
+    [
+      "confirm-source-change"
+    ],
+    [
+      "confirm-recover"
+    ],
+    [
+      "confirm-owner-loss"
+    ],
+    [
+      "append-input"
+    ],
+    [
+      "deleted-consumers"
+    ],
+    [
+      "admitted-literal2"
+    ],
+    [
+      "pre-literal2"
+    ],
+    [
+      "same-pair-literal"
+    ],
+    [
+      "unused-declaration"
+    ],
+    [
+      "drift-plan-fail"
+    ],
+    [
+      "drift-first"
+    ],
+    [
+      "confirm-edit4"
+    ],
+    [
+      "confirm-race"
+    ],
+    [
+      "drift-auth"
+    ],
+    [
+      "drift-auth-pre"
+    ],
+    [
+      "before4at2"
+    ],
+    [
+      "equal4"
+    ]
+  ],
+  "actualLiveFailIdentityRetained": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope()",
+      "method": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "origin": "accepted S011 exact identity retained"
+    }
+  ],
+  "runtimeMeaning": "Source method/provider projection only; no actual fresh JUnit discovery/native pass/failure exclusion. All live failures remain in collection and QA disposition.",
+  "TSDisplayTitle": "Exactly one explicit full-title rename, zero additions/drops; source bytes and token/body proof unchanged."
+}

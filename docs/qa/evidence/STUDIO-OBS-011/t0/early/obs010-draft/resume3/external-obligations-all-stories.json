@@ -1,0 +1,266 @@
+{
+  "source": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/review.json",
+  "sourceSha256": "32c4cf0e53368eedfcbff4237af00c252f6662a16911cd4a1474d3b825c24e7f",
+  "scope": "all 21 externally_blocked rows across all stories, verbatim",
+  "count": 21,
+  "isVerdict": false,
+  "obligations": [
+    {
+      "story": "009",
+      "id": "T1/PID-1 deployed identity",
+      "classification": "externally_blocked",
+      "remainingWork": "Record actual deployed pid !=1 and init behavior, plus guided-enabled deployment checks.",
+      "owner": "Platform/SRE + devops",
+      "missingInput": "U4 shared K8s access/internal deployed image; U23 issuer/controller identity; no deployed evidence.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:487"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T2 Vault policy test U5/U21",
+      "classification": "externally_blocked",
+      "remainingWork": "Run policy test against actual dev Vault with required read/create/metadata-list permissions. Local Vault rehearsal cannot close AC.",
+      "owner": "PUT Core/BFF ED-02 + devops",
+      "missingInput": "Dev Vault endpoint/identity/policy and authorization source; external contact is not authorized. U19 pull is separate and forbidden now.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:489"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T2 TF-5 a/c/e U14",
+      "classification": "externally_blocked",
+      "remainingWork": "Confirm migration owner/runtime role per shared environment, apply full V19-through-head grants if non-owner, prove actual audit write as runtime role.",
+      "owner": "Platform DBA/devops",
+      "missingInput": "Named migration/runtime roles, shared environment access and live role-based write evidence.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/receipt.md",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:490"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T2 SIEM/Q3 retention",
+      "classification": "externally_blocked",
+      "remainingWork": "Prove actual SIEM routing and retention inputs.",
+      "owner": "Platform/SRE",
+      "missingInput": "U6 sink/access and Q3 retention decision.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:489"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 U2/U7/U17/U18 real-provider admission",
+      "classification": "externally_blocked",
+      "remainingWork": "Name gateway owner, supply credentials and exact price/thoughts billing, measured shared-pool headroom R and signed admission before any real call. MODEL-SIZING is already ruled/landed.",
+      "owner": "user + named ED-01 owner",
+      "missingInput": "Owner still TBD; gateway inputs and retention answer; price list; thinking-token billing; actual remaining headroom source; admission signature. USD500 declared ceiling alone supplies none of these.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:497",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/model-sizing/ruling-draft.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 U3 staging login workflow",
+      "classification": "externally_blocked",
+      "remainingWork": "Add approved real staging login case with application-side oracle, approved origins and provisioned test account/secret.",
+      "owner": "user/application owner/Platform-SRE/ED-02",
+      "missingInput": "Staging app/origins/account/test secret and application oracle are not identified.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:497"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 DEPLOY-OBSERVED-01 U4/U23/U24",
+      "classification": "externally_blocked",
+      "remainingWork": "Run catalog producer inside pushed image in CI; render trusted per-environment policy; deploy smoke without runner 503/catalog409. Chart/catalog code already landed.",
+      "owner": "user + Platform/SRE + devops",
+      "missingInput": "U24 policy-content owner/content/approval; UAT controller pin/TLS Secrets; U23 rotating <=300s RS256 issuer; shared K8s access, pushed image/CI execution. Push/deploy unapproved.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:1043",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/chart-observed/receipt.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T4 AUTHORED-ECHO-01 a-f",
+      "classification": "externally_blocked",
+      "remainingWork": "After U13 acknowledgement: implement source rule/fixtures/joined regression/canaries; remove shipped hint runtime key and test registry together; measure authoredEchoUnobservableTargets in benchmark.",
+      "owner": "Security & Compliance; dev owner of O-AE/C9-AE/FE9",
+      "missingInput": "U13 rule acknowledgement before runner merge. No acknowledgement or transmitted request exists. Later benchmark also needs T4 admission/deployed inputs.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:499",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/t0-rulings/ae01-ack-request-draft.md"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 AC-10 wire canaries/C-17",
+      "classification": "externally_blocked",
+      "remainingWork": "Inspect real gateway bytes and live login recording with human video reviewer; preserve exact denominators.",
+      "owner": "user/named reviewer/ED-01",
+      "missingInput": "U8 named human C-17 reviewer; U2 gateway/live bytes; U3 approved staging and deployed stack.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:501"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 R8.2 e live reaper bound",
+      "classification": "externally_blocked",
+      "remainingWork": "Prove rejected terminal settles within start_deadline + one recovery poll on real shared stack.",
+      "owner": "Platform/SRE/devops",
+      "missingInput": "U4 deployed pods/access and live controlled revocation/worker credentials.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md:244"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "T5 AC-12 deployed browser E2E",
+      "classification": "externally_blocked",
+      "remainingWork": "Execute real browser journey on actual deployed stack with real-model learn and named login/video proofs.",
+      "owner": "dev/QA/Platform-SRE",
+      "missingInput": "U2/U3/U4/U13/U23/U24 and T4 admission; external access absent.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:501"
+      ]
+    },
+    {
+      "story": "009",
+      "id": "009 RUN-ORPHAN-01 carry",
+      "classification": "externally_blocked",
+      "remainingWork": "In-pod SIGKILL/cgroup check with PID-1; survivors become GA blocker. This accepted carried residue is not a newly invented 009 Done condition.",
+      "owner": "devops/Platform-SRE",
+      "missingInput": "Actual shared guided-enabled pod and approved controlled run; no pod access. Local runner fix is a separate explicit scope decision.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w3/pre-g9-rulings.md:44",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md:1058"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T0 participants/access/script",
+      "classification": "externally_blocked",
+      "remainingWork": "Prepare consented >=5 nontechnical users on login+ambiguity+middle-step incremental relearn; freeze script against shipped008 copy. Draft can be prepared now, contact cannot.",
+      "owner": "user/analyst",
+      "missingInput": "U9 >=5 real participants and explicit contact permission; U3 approved app/access/test secrets/origins.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:24",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:120",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T0 FOCUS-MUTATION-01 per-app probe",
+      "classification": "externally_blocked",
+      "remainingWork": "Probe every authored fill target on actual app using pinned runner dist/isolated collector and non-secret placeholder, record mutation types/dist; repeat after app or dist changes; failures block that application.",
+      "owner": "analyst/dev/QA",
+      "missingInput": "Named approved pilot apps/targets/test accounts and intended deployment dist; depends also on009 Done and landed FM evidence.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:26",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:121"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T1 AC2 real pilot",
+      "classification": "externally_blocked",
+      "remainingWork": "Run real consented users through author/login/ambiguity/relearn without developer syntax; record completed/help/abandoned, first-Run time, clarification/edit-copy understanding and unaided login recovery denominators.",
+      "owner": "analyst",
+      "missingInput": "External real participants/access/consent/contact authorization plus T0/D-C gates.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:56",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:122"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 G1/G2/G3/C2/C3",
+      "classification": "externally_blocked",
+      "remainingWork": "Record guided shared mTLS chain and every secret-bearingTLS hop, production background/secret-use auth sources and Vault provider enablement.",
+      "owner": "Platform-SRE/ED-02/devops",
+      "missingInput": "U4/U5 shared stack and production authorization/Vault inputs, actual hop proofs; cannot activate schedules.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:60",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 OBS014 compliance/retention/R1/R2",
+      "classification": "externally_blocked",
+      "remainingWork": "Record export/retention/gateway retention approvals, indefinite unpruned stores/followup and interim governed-vs-TrustedPolicy decision. Prepare rows locally.",
+      "owner": "Security & Compliance/ED-01/PM/architect",
+      "missingInput": "U10 external approval incl AUDIT-LABEL-PRIVACY/CACHE-REAUTH dispositions; named gateway owner/retention answer; classify policy followup.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:64",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 F04/E1-E8",
+      "classification": "externally_blocked",
+      "remainingWork": "Require artifact HMAC landed before deployed pilot OR external security acceptance of absence as named residual+owner; list all E1-E8 states.",
+      "owner": "Platform-SRE/Security & Compliance/PM",
+      "missingInput": "E1-E8 unconfirmed and no residual acceptance; no silent omission.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:68",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 D-B/devDB/NTP",
+      "classification": "externally_blocked",
+      "remainingWork": "Record no-internal-remote-deployment confirmation; actual devDB recreation evidence; supplied host clock skew bound. Honest owed row is locally writable.",
+      "owner": "user/Platform-SRE",
+      "missingInput": "U11 D-B confirmation, recreation record and NTP skew bound.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:60",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:111",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 ED05 remainder",
+      "classification": "externally_blocked",
+      "remainingWork": "Prove deployed internal image, non-root user, seccomp and CA bundle separately. Local Node pin closure does not prove them.",
+      "owner": "Platform-SRE",
+      "missingInput": "Actual deployed image and four evidence paths.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:80"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 U24/policy owner + GA tracked items",
+      "classification": "externally_blocked",
+      "remainingWork": "Name per-environment policy content owner and approvals; preserve path-independent GA CSRF/schedule activation/evidence store/operability/repoCI as tracked states, not closed by010.",
+      "owner": "user/Platform-SRE/PM",
+      "missingInput": "U24 named owner/content/approval; current GA owner evidence.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:129",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    }
+  ]
+}

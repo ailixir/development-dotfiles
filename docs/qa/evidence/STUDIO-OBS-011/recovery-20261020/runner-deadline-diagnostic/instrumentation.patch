@@ -1,0 +1,148 @@
+--- a/studio-runner/src/run/browser.ts
++++ b/studio-runner/src/run/browser.ts
+@@ -54,6 +54,14 @@
+ import type { ObservationConfig, ObservationSession, Observation, GuidedInvocationResult, AcquisitionResult } from './observationTypes.js';
+ import { SCRATCH_SUBDIRECTORIES, prepareBrowserProfile, requireBrowserPreferences,assertEffectiveBrowserPreferences,browserProfileConfinement,releaseBrowserProfile } from './scratchLayout.js';
+ import type {BrowserPreferenceEvidence} from './scratchLayout.js';
++
++// Disposable diagnostic derivative only; no RT/product copyback.
++type DeadlineDiagnosticSink = { failed: boolean; emit: (event: number, a: number, b: number, c: number, flagA: boolean, flagB: boolean) => void };
++const recordDeadlineDiagnostic = (...values: Parameters<DeadlineDiagnosticSink['emit']>): void => {
++  let sink: DeadlineDiagnosticSink | undefined;
++  try { sink = (globalThis as typeof globalThis & { __obs011DeadlineDiagnostic?: DeadlineDiagnosticSink }).__obs011DeadlineDiagnostic; sink?.emit(...values); }
++  catch { try { if (sink) sink.failed = true; } catch { /* A conflicting sink is already incomplete; never alter the original path. */ } }
++};
+ 
+ /** Fixed trusted startup probe, before app routing/evidence/secret delivery. No model callback,
+  * additional page or arbitrary preference export; restore the required initial blank document. */
+@@ -549,7 +557,7 @@
+   let preparedProfile=join(scratchDirectory,SCRATCH_SUBDIRECTORIES.profile);
+   // Run once: the graceful close, the hard teardown and a failed launch's cleanup can all reach it (KL-015-D5).
+   let scratchDisposal:Promise<void>|null=null;
+-  const disposeScratchOnce=async():Promise<void>=>{releaseBrowserProfile(preparedProfile);await rm(scratchDirectory,{recursive:true,force:true});};
++  const disposeScratchOnce=async():Promise<void>=>{releaseBrowserProfile(preparedProfile);await rm(scratchDirectory,{recursive:true,force:true});recordDeadlineDiagnostic(4,0,0,0,false,false);};
+   const disposeScratch=():Promise<void>=>scratchDisposal??=disposeScratchOnce();
+   try {
+   const profile = prepareBrowserProfile(scratchDirectory);preparedProfile=profile;requireBrowserPreferences(profile);
+@@ -677,7 +685,11 @@
+     const settled=hardClose().then(()=>undefined,()=>undefined);
+     // Past the deadline, or stopped: reject now, the runtime waits for the teardown through `close`. Any other failure rejects once the
+     // teardown has settled, so a launch that rejects has already cleared its scratch (its `close` is then only the memo of that outcome).
+-    if(signal?.aborted!==true&&Date.now()<deadline)await settled;
++    const diagnosticAborted = signal?.aborted === true;
++    let diagnosticCatchNow = 0;
++    const diagnosticAwaitSelected = diagnosticAborted !== true && (diagnosticCatchNow = Date.now()) < deadline;
++    recordDeadlineDiagnostic(3,diagnosticAborted?0:diagnosticCatchNow-deadline,phase==='PROCESS'?1:0,0,diagnosticAborted,diagnosticAwaitSelected);
++    if(diagnosticAwaitSelected)await settled;
+     // A wait the signal ended says CANCELLED; the abort reason says whether that was the deadline or a stop. Any other error is the cause as it is.
+     throw new GuidedLaunchFailure(hardClose,launchFailureCause(error,signal),phase);
+   }
+--- a/studio-runner/src/run/observedBootstrap.ts
++++ b/studio-runner/src/run/observedBootstrap.ts
+@@ -1,3 +1,11 @@
++// Disposable diagnostic derivative only; no RT/product copyback.
++type DeadlineDiagnosticSink = { failed: boolean; emit: (event: number, a: number, b: number, c: number, flagA: boolean, flagB: boolean) => void };
++const recordDeadlineDiagnostic = (...values: Parameters<DeadlineDiagnosticSink['emit']>): void => {
++  let sink: DeadlineDiagnosticSink | undefined;
++  try { sink = (globalThis as typeof globalThis & { __obs011DeadlineDiagnostic?: DeadlineDiagnosticSink }).__obs011DeadlineDiagnostic; sink?.emit(...values); }
++  catch { try { if (sink) sink.failed = true; } catch { /* A conflicting sink is already incomplete; never alter the original path. */ } }
++};
++
+ /** Exact page identity through the sequential bootstrap; no Playwright or wire capability. */
+ export class BootstrapPageGuard<T> {
+   private phase:'startup'|'empty'|'creating'|'app'='startup';
+@@ -21,7 +29,12 @@
+ export function boundedStartup<T>(work:()=>Promise<T>,deadline:number,signal?:AbortSignal,maxMs=30000):Promise<T>{
+   if(signal?.aborted)return Promise.reject(new Error('CANCELLED'));
+   if(Date.now()>=deadline)return Promise.reject(new Error('TIMEOUT'));
+-  return new Promise<T>((resolve,reject)=>{const abort=()=>{reject(new Error('CANCELLED'));};const timer=setTimeout(()=>{reject(new Error('TIMEOUT'));},Math.max(1,Math.min(maxMs,deadline-Date.now())));signal?.addEventListener('abort',abort,{once:true});
++  return new Promise<T>((resolve,reject)=>{const abort=()=>{reject(new Error('CANCELLED'));};
++    const diagnosticDelayNow=Date.now();
++    const diagnosticSelectedDelay=Math.max(1,Math.min(maxMs,deadline-diagnosticDelayNow));
++    const timer=setTimeout(()=>{recordDeadlineDiagnostic(2,Date.now()-deadline,maxMs,diagnosticSelectedDelay,false,false);reject(new Error('TIMEOUT'));},diagnosticSelectedDelay);
++    recordDeadlineDiagnostic(1,maxMs,diagnosticSelectedDelay,deadline-diagnosticDelayNow,false,false);
++    signal?.addEventListener('abort',abort,{once:true});
+     const clear=()=>{clearTimeout(timer);signal?.removeEventListener('abort',abort);};
+     Promise.resolve().then(work).then(value=>{clear();if(signal?.aborted)reject(new Error('CANCELLED'));else if(Date.now()>=deadline)reject(new Error('TIMEOUT'));else resolve(value);},(error:unknown)=>{clear();reject(error instanceof Error?error:new Error('BOOTSTRAP_FAILED'));});
+   });
+--- a/studio-runner/test/fixtures-tier/guided-start-deadline.test.ts
++++ b/studio-runner/test/fixtures-tier/guided-start-deadline.test.ts
+@@ -23,7 +23,7 @@
+ // eslint-disable-next-line no-restricted-imports -- Stand-in "Chrome" for the late-spawn case: a fixed `node -e` helper whose only input is a path this test built.
+ import { spawn } from 'node:child_process';
+ import { readdirSync } from 'node:fs';
+-import { lstat, mkdir, mkdtemp, readdir, rm, stat } from 'node:fs/promises';
++import { lstat, mkdir, mkdtemp, readdir, rm, stat, writeFile } from 'node:fs/promises';
+ import { tmpdir } from 'node:os';
+ import { join } from 'node:path';
+ // eslint-disable-next-line no-restricted-imports -- Launch-promise fault oracle: the launch is held pending while a stand-in Chrome appears late.
+@@ -165,35 +165,68 @@
+   });
+ 
+   it('kills a Chrome that spawns after the teardown\'s first listing, and holds the close open until the launch has settled', async () => {
++    // Derivative-only <=32 closed numeric records. No I/O or awaits in this sink.
++    const diagnosticRows: { event: number; order: number; monoMs: number; a: number; b: number; c: number; flagA: boolean; flagB: boolean }[] = [];
++    let diagnosticOverflow = false, diagnosticOriginalFailed = false, diagnosticInstalled = false, diagnosticMonoStart = 0, diagnosticDeadline = 0;
++    const diagnosticSink = { failed: false, emit: (event: number, a: number, b: number, c: number, flagA: boolean, flagB: boolean): void => {
++      try {
++        if (diagnosticRows.length >= 32) { diagnosticOverflow = true; return; }
++        const monoMs = performance.now() - diagnosticMonoStart;
++        if (!Number.isInteger(event) || event < 1 || event > 9 || ![monoMs,a,b,c].every(Number.isFinite) || typeof flagA !== 'boolean' || typeof flagB !== 'boolean') { diagnosticSink.failed = true; return; }
++        diagnosticRows.push({ event, order: diagnosticRows.length + 1, monoMs, a, b, c, flagA, flagB });
++      } catch { diagnosticSink.failed = true; }
++    } };
++    const diagnosticGlobal = globalThis as typeof globalThis & { __obs011DeadlineDiagnostic?: typeof diagnosticSink };
++    try {
++      diagnosticMonoStart = performance.now();
++      if (Object.getOwnPropertyDescriptor(globalThis,'__obs011DeadlineDiagnostic')) diagnosticSink.failed = true;
++      else { Object.defineProperty(globalThis,'__obs011DeadlineDiagnostic',{ value: diagnosticSink, configurable: true }); diagnosticInstalled = true; }
++    } catch { diagnosticSink.failed = true; }
++    try {
+     const root = await mkdtemp(join(tmpdir(), 'guided-d4-late-'));
+     cleanup.push(() => rm(root, { recursive: true, force: true }));
+     vi.stubEnv('TMPDIR', root);
+     let failLaunch: (error: Error) => void = () => undefined;
+     const pending = new Promise<Awaited<ReturnType<typeof chromium.launchPersistentContext>>>((_resolve, reject) => { failLaunch = reject; });
+     vi.spyOn(chromium, 'launchPersistentContext').mockReturnValue(pending);
+-    const failure = await launchGuidedBrowser(config, 'd4-late', () => undefined, undefined, { deadlineEpochMs: Date.now() + 1_000, signal: new AbortController().signal }).then(() => null, (error: unknown) => error);
++    const failure = await launchGuidedBrowser(config, 'd4-late', () => undefined, undefined, { deadlineEpochMs: (diagnosticDeadline = Date.now() + 1_000), signal: new AbortController().signal }).then(() => null, (error: unknown) => error);
+     const teardownStartedAt = Date.now();
++    diagnosticSink.emit(5,teardownStartedAt-diagnosticDeadline,0,0,failure!==null,false);
+     expect(failure).toBeInstanceOf(GuidedLaunchFailure);
+     expect(failure).toMatchObject({ message: 'CONTEXT_LOST', cause: { message: 'TIMEOUT' }, phase: 'PROCESS' });
+     // The scratch directory is the launch\'s own; a stand-in "Chrome" will name it exactly as Chrome names its profile.
++    diagnosticSink.emit(6,0,0,0,false,false);
+     const scratch = (await readdir(root)).filter((name) => name.startsWith('checks-guided-')).map((name) => join(root, name));
++    diagnosticSink.emit(7,scratch.length,0,0,false,false);
+     expect(scratch).toHaveLength(1);
+     let decoyPid: number | undefined, decoyAt = 0;
+     // Later than the first listing and later than the one second the teardown waits when it has already killed something.
+     setTimeout(() => {
+       const decoy = spawn(process.execPath, ['-e', 'setTimeout(() => undefined, 60000)', '--', `--user-data-dir=${scratch[0] ?? ''}/browser-profile`], { stdio: 'ignore' });
+       decoyPid = decoy.pid; decoyAt = Date.now();
++      diagnosticSink.emit(8,decoyAt-diagnosticDeadline,0,0,false,false);
+       cleanup.push(() => { decoy.kill('SIGKILL'); return Promise.resolve(); });
+     }, 1_500);
+     setTimeout(() => { failLaunch(new Error('Target page, context or browser has been closed')); }, 1_800);
+     await (failure as GuidedLaunchFailure).close();
+     const closedAt = Date.now();
++    diagnosticSink.emit(9,closedAt-diagnosticDeadline,0,0,false,false);
+     // The close waited for the launch (not for a fixed second), saw the late process, and killed it before it released anything.
+     expect(decoyPid).toBeDefined();
+     expect(decoyAt).toBeGreaterThan(teardownStartedAt + 1_000);
+     expect(closedAt).toBeGreaterThanOrEqual(decoyAt);
+     expect(decoyPid !== undefined && isAlive(decoyPid)).toBe(false);
+     expect(await readdir(root)).toEqual([]);
++    } catch (diagnosticOriginalError) { diagnosticOriginalFailed = true; throw diagnosticOriginalError; }
++    finally {
++      try {
++        try { if (diagnosticInstalled) delete diagnosticGlobal.__obs011DeadlineDiagnostic; } catch { diagnosticSink.failed = true; }
++        const minimumEventsSeen = [1,2,3,4,5,6,7].every(event => diagnosticRows.some(row => row.event === event));
++        const trace = { complete: diagnosticInstalled && !diagnosticOverflow && !diagnosticSink.failed && minimumEventsSeen, overflow: diagnosticOverflow, instrumentationFailed: diagnosticSink.failed || !diagnosticInstalled, minimumEventsSeen, originalTestFailed: diagnosticOriginalFailed, records: diagnosticRows };
++        // Exactly one flush after the original timed path; a missing file is incomplete, never a passing diagnostic.
++        await writeFile(new URL('../../../late-spawn-diagnostic.json',import.meta.url),JSON.stringify(trace,null,2)+'\n',{ flag: 'wx', mode: 0o600 });
++      } catch { /* Preserve the original assertion/error; reader rejects missing/incomplete output. */ }
++    }
+   });
+ 
+   it('Quinn F5: refuses to confirm the teardown while a process it enumerated is still alive, and leaves the scratch directory in place', async () => {

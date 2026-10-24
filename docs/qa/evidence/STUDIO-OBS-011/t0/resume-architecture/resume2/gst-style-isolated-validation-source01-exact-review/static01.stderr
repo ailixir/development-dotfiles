@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gst-style-isolated-validation-source01-exact-review/verify_source.py", line 33, in <module>
+    packet(candidate,'b6a935f9235b8b80cbaf5ddff4502631290668fe12334dccd1caba1dd612473e')
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gst-style-isolated-validation-source01-exact-review/verify_source.py", line 18, in packet
+    for row in value['files']:
+               ~~~~~^^^^^^^^^
+KeyError: 'files'

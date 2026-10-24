@@ -1,0 +1,52 @@
+{{- if and (include "put-checks.studioRunner.guidedEnabled" .) .Values.studioRunner.networkPolicy.enabled }}
+# Ingress policy for the API pods, rendered ONLY while guided mode is on (STUDIO-OBS-009; architect
+# pre-F-merge ruling 4(i) b). It narrows who may reach the guided TLS connector, and leaves every
+# other API port exactly as it is without this policy.
+#
+# Why it exists: the connector port serves the whole servlet application, not only
+# `/internal/v2/studio/guided-sessions/**` (the backend also filters by path; this is the network
+# half of the same defence in depth). The client certificate is the transport gate, and this policy
+# is the second one: only the pods that legitimately dial the connector may open a connection to it.
+#   - runner pods: the guided callback and claim (`callback-api` egress);
+#   - worker pods: the translation coordinator's controller hop (`@Profile("!api | worker")`).
+#
+# **Policy semantics that make rule 1 necessary.** A pod selected by ANY ingress policy denies all
+# ingress that no rule lists. Selecting the API pods for the connector therefore also selects their
+# ordinary port, so rule 1 re-admits it from every source, which is today's behaviour. Rule 1 lists
+# every API container port other than `guided-tls`: a port added to the API Deployment without being
+# added here would be closed by this policy, and the deployment test derives the set from the
+# rendered Deployment so that omission fails the test.
+#
+# **Not claimed:** enforcement. It depends on the cluster CNI (SPK-05 is open). Egress is not
+# touched. The trust store behind the connector must hold only the issuer of the Studio service
+# plane (see docs/runbooks/studio-runner.md), since the certificate is the other gate.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "put-checks.api.fullname" . }}-guided-tls-ingress
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.api.selectorLabels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "put-checks.api.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+    # Rule 1: every API port except the connector, from all sources (unchanged from today).
+    - ports:
+        - port: {{ .Values.backend.service.port }}
+          protocol: TCP
+    # Rule 2: the connector, from the runner and the worker pods only.
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "put-checks.studioRunner.selectorLabels" . | nindent 14 }}
+        - podSelector:
+            matchLabels:
+              {{- include "put-checks.worker.selectorLabels" . | nindent 14 }}
+      ports:
+        - port: {{ .Values.studioRunner.guided.tlsConnector.port }}
+          protocol: TCP
+{{- end }}

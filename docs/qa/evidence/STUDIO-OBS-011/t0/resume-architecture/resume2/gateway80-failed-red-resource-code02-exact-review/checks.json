@@ -1,0 +1,57 @@
+{
+  "kind": "INDEPENDENT_ARIA_CODE02_SOURCE_EVIDENCE_SUMMARY",
+  "subjectManifestSha256": "aaeb967ecc7eb279c70fb50e69218898295094b96fea23f7fdf82c99ce224558",
+  "independentFocusedControlsPassed": 83,
+  "independentFocusedControlsFailed": 0,
+  "independentCompleteDispatcherFlowOutcomesPassed": 6,
+  "flowOutcomesOverlapRetainedVocabulary": true,
+  "finiteSourceChecksPassed": 1322,
+  "uniqueNamedPublicPins": 363,
+  "retained114SemanticIdsVerified": true,
+  "priorAria114Replay": "Exact code01 seal d77de630c3411ff232f7e8788d67113609160bfee224c14dded0f7ed642b5b42; not claimed as current code02 execution",
+  "currentAuthorResult": "197 passed attributed to exact sealed code02 author results; not substituted for independent replay",
+  "independentQaStatusAtAriaSeal": {
+    "full197ReplayAndSeal": "PENDING_SEPARATE_REQUIRED_QA_REVIEW",
+    "communicatedCompletedControls": {
+      "focused": 83,
+      "extra": 19,
+      "optimized": 6
+    },
+    "full89": "RUNNING_WHEN_LAST_REPORTED",
+    "notClaimedAsCompleteAriaOrSealedQaEvidence": true
+  },
+  "evidence": [
+    {
+      "path": "focused-results.json",
+      "sha256": "c433e6be99436a0987515e1ff59125086a9fc5140c2f281f3992aa7c6326d205",
+      "bytes": 9029,
+      "mode": 420
+    },
+    {
+      "path": "flow-results.json",
+      "sha256": "999e98aee5067394bfaac20fbfd1fbb715b86e86bd53348aa50c1b2692185936",
+      "bytes": 1687,
+      "mode": 420
+    },
+    {
+      "path": "source-checks.json",
+      "sha256": "0e6af993fca52b4b70a23c7d10882b207186f967a9e867c4b5850f837b72e2c4",
+      "bytes": 202480,
+      "mode": 420
+    },
+    {
+      "path": "pins.json",
+      "sha256": "57b0d0ca65437f2775a38a098f1d122465b2df43e9744667b3eaa6db16e39331",
+      "bytes": 114295,
+      "mode": 420
+    }
+  ],
+  "reviewerFailures": 0,
+  "reviewerFixtureCorrections": [],
+  "authorFailuresAndOldReviewLimitationsPreserved": true,
+  "testsOrConcernExpansionAfterBoundedChecks": false,
+  "mandatoryFindingCount": 0,
+  "verdict": "CONDITIONAL_EXACT_SOURCE_ONLY_SUPPORT",
+  "actualOperationalActions": 0,
+  "actualInstallationClosingOrCreditAuthority": false
+}

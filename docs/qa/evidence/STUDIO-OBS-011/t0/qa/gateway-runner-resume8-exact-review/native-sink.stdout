@@ -1,0 +1,78 @@
+{
+  "kind": "ACTUAL_NATIVE_PHASE_DURABLE_FAILURE_SINK_PAIR",
+  "results": [
+    {
+      "case": "positive-native-phase",
+      "collectorExit": 0,
+      "accepted": true,
+      "nativePid": 2143,
+      "actualFakeHandleWaitConfirmed": true,
+      "nativeWaits": 1,
+      "durableDirectWaitRecord": {
+        "actualExit": 1,
+        "launchId": "red",
+        "pid": 2143,
+        "source": "ACTUAL_DIRECT_POPEN_HANDLE_WAIT",
+        "terminalWaitConfirmed": true
+      },
+      "durableRunnerCompletion": {
+        "completed": true,
+        "returnedExit": 1
+      },
+      "journalFields": [
+        "C8",
+        "claimSet",
+        "cleanupAuthorized",
+        "client",
+        "credit",
+        "currentObserverCompletion",
+        "frozenLedgerSegments",
+        "guarantees",
+        "historicalIdentityUncertainty",
+        "ownerRulingPins",
+        "protocol",
+        "sourceWrites",
+        "unsupportedEvidence",
+        "utilityClientJournals"
+      ],
+      "directEncounterPersisted": true,
+      "ownerFinishReturnedNormally": true,
+      "failureCode": null,
+      "actualActions": 0
+    },
+    {
+      "case": "native-first-encounter-write-failure",
+      "collectorExit": 1,
+      "accepted": false,
+      "nativePid": 2143,
+      "actualFakeHandleWaitConfirmed": true,
+      "nativeWaits": 1,
+      "durableDirectWaitRecord": null,
+      "durableRunnerCompletion": null,
+      "journalFields": [
+        "C8",
+        "claimSet",
+        "cleanupAuthorized",
+        "client",
+        "credit",
+        "currentObserverCompletion",
+        "frozenLedgerSegments",
+        "guarantees",
+        "historicalIdentityUncertainty",
+        "ownerRulingPins",
+        "protocol",
+        "sourceWrites",
+        "unsupportedEvidence",
+        "utilityClientJournals"
+      ],
+      "directEncounterPersisted": false,
+      "ownerFinishReturnedNormally": true,
+      "failureCode": "PHASE_CONTROL_FAILURE",
+      "actualActions": 0
+    }
+  ],
+  "boundaryAttempts": [],
+  "actualActions": 0,
+  "subjectSafetyStatementsRemoved": false,
+  "adaptation": "Definitions only; ordinary fake predecessor setup. Adverse fake OS write fails first native encounter, all actual phase/wait/publication logic unchanged."
+}

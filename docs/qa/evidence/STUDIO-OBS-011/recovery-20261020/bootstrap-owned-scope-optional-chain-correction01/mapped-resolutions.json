@@ -1,0 +1,29 @@
+{
+  "findings": [
+    {
+      "file": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "line": 82,
+      "column": 7,
+      "severity": "error",
+      "rule": "@typescript-eslint/prefer-optional-chain",
+      "message": "Prefer using an optional chain expression instead, as it is more concise and easier to read.",
+      "candidateResolution": "REPLACED_ONLY_MISSING_OR_KIND_WITH_OPTIONAL_CHAIN_KIND",
+      "verification": "SOURCE_ONLY_EQUIVALENCE; ACTUAL_LINT_AND_TYPES_PENDING"
+    },
+    {
+      "file": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "line": 99,
+      "column": 9,
+      "severity": "error",
+      "rule": "@typescript-eslint/prefer-optional-chain",
+      "message": "Prefer using an optional chain expression instead, as it is more concise and easier to read.",
+      "candidateResolution": "REPLACED_ONLY_MISSING_OR_KIND_WITH_OPTIONAL_CHAIN_KIND",
+      "verification": "SOURCE_ONLY_EQUIVALENCE; ACTUAL_LINT_AND_TYPES_PENDING"
+    }
+  ],
+  "total": 2,
+  "noAdditionalChanges": true,
+  "previousTypes45421Pass": "HISTORICAL_NOT_NEW_SOURCE_PROOF",
+  "previousLint49293Fail": "PRESERVED_RAW_FAILURE",
+  "selfApproval": false
+}

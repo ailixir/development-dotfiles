@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "D2 inspection failure only; never satisfies D2_ACTIVE or D2_AFTER",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event",
+    "mode",
+    "stage",
+    "reason",
+    "facts"
+  ],
+  "properties": {
+    "event": {
+      "const": "D2_INSPECTION_FAILED"
+    },
+    "mode": {
+      "enum": [
+        "inspect",
+        "inspect-after"
+      ]
+    },
+    "stage": {
+      "enum": [
+        "recording-walk",
+        "after-recording-assert",
+        "journal-walk",
+        "node-pid",
+        "browser-enumeration",
+        "browser-assert",
+        "core-limits",
+        "recording-fds",
+        "tls-key",
+        "readonly-probes",
+        "filesystem-assert"
+      ]
+    },
+    "reason": {
+      "enum": [
+        "D2_INSPECTION_BOUND",
+        "D2_SCRATCH_NOT_REMOVED",
+        "D2_NODE_PID",
+        "D2_NO_ACTIVE_OWNED_BROWSER",
+        "D2_CORE_LIMIT",
+        "D2_TLS_MODE",
+        "D2_ROOT_WRITABLE",
+        "D2_FILESYSTEM_PROOF",
+        "IO_ENOENT",
+        "IO_EACCES",
+        "IO_EPERM",
+        "IO_EIO",
+        "IO_ENOTDIR",
+        "IO_ELOOP",
+        "IO_EROFS",
+        "IO_EMFILE",
+        "IO_ENFILE",
+        "UNKNOWN"
+      ]
+    },
+    "facts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activeRecordingDirectories",
+        "journals",
+        "nonemptyJournals",
+        "owners",
+        "liveOwnedBrowserLeaders",
+        "recordingDirectoryHandles",
+        "readonlyRefusals",
+        "coreSoftZero",
+        "coreHardZero",
+        "tlsMode0440",
+        "tlsGid1001",
+        "linux"
+      ],
+      "properties": {
+        "activeRecordingDirectories": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "journals": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "nonemptyJournals": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "owners": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "liveOwnedBrowserLeaders": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "recordingDirectoryHandles": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "readonlyRefusals": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "coreSoftZero": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "coreHardZero": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "tlsMode0440": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "tlsGid1001": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "linux": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1481 @@
+---
+# Source: put-checks/templates/studio-runner-networkpolicy.yaml
+# Default-deny egress for the runner pods, plus exactly the destination classes the runner itself
+# declares in `PERMITTED_DESTINATIONS` (`studio-runner/src/server/config.ts`): `callback-api`,
+# `object-store` and `target-page`. DNS is permitted separately because a policy without it turns
+# every destination into a silent hang rather than a refusal — and a hang is the failure mode that
+# looks like a runner bug for a day.
+#
+# **The limit §9.3 names, stated here rather than discovered in staging:** *"Standard Kubernetes
+# NetworkPolicy operates at network layers, not URL paths."* If SPK-05 finds only static L3/L4
+# policy exists, per-run destination checks in the runner become the primary control and Security
+# must accept that limitation explicitly (AC-8b, ED-04).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: release-name-put-checks-studio-runner
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-studio-runner
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: studio-runner
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: put-checks-studio-runner
+      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/component: studio-runner
+  # Naming both types is what makes this default-deny: a policy that lists only Egress leaves
+  # ingress wide open, and vice versa.
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # From the worker (POST /v1/runs — the dispatcher runs on the worker profile only) and the API
+    # (POST /v1/validate — the compile pipeline runs on the API). §8.4: the internal routes are not
+    # public, and the MFE never talks to the runner.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: put-checks-worker
+              app.kubernetes.io/instance: release-name
+              app.kubernetes.io/component: worker
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: put-checks-api
+              app.kubernetes.io/instance: release-name
+              app.kubernetes.io/component: api
+      ports:
+        - port: 8090
+          protocol: TCP
+  egress:
+    # 1. `callback-api` — admission and progress back to the API (§5.1.4, §5.3).
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: put-checks-api
+              app.kubernetes.io/instance: release-name
+              app.kubernetes.io/component: api
+      ports:
+        - port: 8080
+          protocol: TCP
+    # 2. `object-store` — the private evidence store (§6.2). ED-03 supplies the real endpoint; the
+    #    port is a values key so the spike's answer lands in one place.
+    - ports:
+        - port: 443
+          protocol: TCP
+      to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              # Cloud/cluster metadata, link-local and private ranges stay unreachable even on the
+              # store rule (§9.3, SPK-05 question 4). The store's own address is added by ED-04 as
+              # a narrower rule; until then this rule is deliberately broad and is recorded as such
+              # in the runbook rather than presented as enforcement.
+              - 169.254.0.0/16
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+    # 3. `target-page` — the approved destinations of ED-04 / SPK-05. **Empty until the spike
+    #    rules**, which is default-deny for this class and the correct failing direction.
+    # DNS. Not a destination class — it is what makes the three above resolvable at all.
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+
+---
+# Source: put-checks/templates/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: release-name-put-checks-api
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-api
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: put-checks-api
+      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/component: api
+---
+# Source: put-checks/templates/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: release-name-put-checks-worker
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-worker
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: worker
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: put-checks-worker
+      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/component: worker
+---
+# Source: put-checks/templates/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: release-name-put-checks-studio-runner
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-studio-runner
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: studio-runner
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: put-checks-studio-runner
+      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/component: studio-runner
+
+---
+# Source: put-checks/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: release-name-put-checks
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+automountServiceAccountToken: false
+---
+# Source: put-checks/templates/serviceaccount.yaml
+# The runner's **dedicated** service account (ADR-001 §9: "should get its own service account when
+# RBAC differs … decided in 10.18"; architecture §9.3 "restricted service-account access").
+#
+# Sharing the chart's account would give the process that opens untrusted pages whatever the API's
+# account is granted next, silently and at the moment it is granted. The runner calls no Kubernetes
+# API at all, so its token is not merely unnecessary — it is a credential §9.2 says it must not
+# hold.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: release-name-put-checks-studio-runner
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-studio-runner
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: studio-runner
+automountServiceAccountToken: false
+
+---
+# Source: put-checks/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: release-name-put-checks-api-config
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-api
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: api
+data:
+  SERVER_PORT: "8080"
+---
+# Source: put-checks/templates/configmap.yaml
+# Spring property names belong in configuration data, not environment-variable names.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: release-name-put-checks-api-properties
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+data:
+  application.yaml: |
+    checks.scheduling.min-interval-seconds: "60"
+    checks.sources.UI_TEST: "true"
+    spring.datasource.hikari.maximum-pool-size: "20"
+    studio.runner.tls.key-store: /etc/studio/runner-tls/keystore.p12
+    studio.runner.tls.key-store-password-file: /etc/studio/runner-tls/keystore.password
+    studio.runner.tls.key-store-type: PKCS12
+    studio.runner.tls.trust-store: /etc/studio/runner-tls/truststore.p12
+    studio.runner.tls.trust-store-password-file: /etc/studio/runner-tls/truststore.password
+    studio.runner.tls.trust-store-type: PKCS12
+---
+# Source: put-checks/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: release-name-put-checks-worker-config
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-worker
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: worker
+data:
+  SERVER_PORT: "8080"
+---
+# Source: put-checks/templates/configmap.yaml
+# Spring property names belong in configuration data, not environment-variable names.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: release-name-put-checks-worker-properties
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+data:
+  application.yaml: |
+    STUDIO_GATEWAY_PROVIDER: override
+    checks.executor.max-concurrency: "250"
+    checks.executor.source-limits.APPDYNAMICS: "75"
+    checks.executor.source-limits.GRAFANA: "75"
+    checks.executor.source-limits.HTTP: "150"
+    checks.executor.source-limits.ITRS: "75"
+    checks.executor.source-limits.SPLUNK: "75"
+    checks.executor.source-limits.TCP: "150"
+    checks.executor.source-limits.UI_TEST: "25"
+    checks.scheduling.batch-size: "500"
+    checks.scheduling.min-interval-seconds: "60"
+    checks.scheduling.poll-interval-ms: "10000"
+    checks.scheduling.shutdown-timeout-sec: "30"
+    spring.datasource.hikari.maximum-pool-size: "30"
+    studio.runner.tls.key-store: /etc/studio/runner-tls/keystore.p12
+    studio.runner.tls.key-store-password-file: /etc/studio/runner-tls/keystore.password
+    studio.runner.tls.key-store-type: PKCS12
+    studio.runner.tls.trust-store: /etc/studio/runner-tls/truststore.p12
+    studio.runner.tls.trust-store-password-file: /etc/studio/runner-tls/truststore.password
+    studio.runner.tls.trust-store-type: PKCS12
+---
+# Source: put-checks/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: release-name-put-checks-frontend-config
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-frontend
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: frontend
+data:
+  REACT_APP_API_BASE_URL: "http://checks-api.dev.citi.com/api/v1"
+  VITE_API_BASE_URL: "/api/v1"
+  VITE_API_URL: "http://checks-api.dev.citi.com"
+  VITE_DEBUG_MODE: "false"
+  VITE_ENABLE_REPORTS: "true"
+  VITE_ENABLE_STUDIO: "true"
+---
+# Source: put-checks/templates/configmap.yaml
+# The object-store lifecycle declaration (§6.2, ED-03 / SPK-03).
+#
+# **Logical expiry is what the API enforces**, at `videoExpiresAt`, and it renders from the same
+# `objectStore.retention` key as the API's and worker's `STUDIO_EVIDENCE_RETENTION` — one key, two
+# rendered values, compared to each other rather than each to a literal (AC-12).
+#
+# This ConfigMap declares the window the bucket's lifecycle rule must be set to; it does not apply
+# it, and applying it is Platform/SRE's under ED-03. **No claim of exact-time physical deletion is
+# made here or anywhere else in this chart**: whether lifecycle expiry is prompt, whether
+# noncurrent versions and delete markers are collected, and whether a GET on an expired object
+# still serves are all SPK-03's to measure (AC-11, blocked).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: release-name-put-checks-studio-object-store
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+data:
+  STUDIO_OBJECT_STORE_LIFECYCLE: "30d"
+  STUDIO_OBJECT_STORE_KEY_PREFIX: "studio/"
+
+---
+# Source: put-checks/templates/studio-object-store-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: release-name-put-checks-studio-object-store-local
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "10Gi"
+
+---
+# Source: put-checks/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-put-checks-api
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-api
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: put-checks-api
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: api
+---
+# Source: put-checks/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-put-checks-worker
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-worker
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: worker
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: put-checks-worker
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: worker
+---
+# Source: put-checks/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-put-checks-frontend
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-frontend
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: frontend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: put-checks-frontend
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: frontend
+
+---
+# Source: put-checks/templates/studio-runner-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: release-name-put-checks-studio-runner
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-studio-runner
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: studio-runner
+spec:
+  # ClusterIP only, and no Ingress anywhere names this Service: architecture §8.4's internal
+  # routes are not exposed publicly, and the MFE never talks to the runner.
+  type: ClusterIP
+  ports:
+    - name: https
+      # The one key. `STUDIO_RUNNER_PORT` on the pod and `STUDIO_RUNNER_BASE_URL` on the worker
+      # are rendered from this same value, which is what closes the 8080/8090 disagreement
+      # between `application.yml` and `studio-runner/src/server/config.ts` — by removing the
+      # second derivation rather than by editing one of the two defaults into agreement.
+      port: 8090
+      # The runner serves TLS only (ruling A3); the port name says so, in step with the container.
+      targetPort: https
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: put-checks-studio-runner
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: studio-runner
+
+---
+# Source: put-checks/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-put-checks-api
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-api
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: put-checks-api
+      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/component: api
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/config: d5f0b1abf99bcf7d0ff001bde5ac544cea0e5df7d7691df6e59abc1a85d62201
+      labels:
+        helm.sh/chart: put-checks-0.1.0
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: put-platform
+        app.kubernetes.io/version: "0.1.0"
+        app.kubernetes.io/name: put-checks-api
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/component: api
+    spec:
+      serviceAccountName: release-name-put-checks
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: put-checks-api
+              app.kubernetes.io/instance: release-name
+              app.kubernetes.io/component: api
+      containers:
+        - name: api
+          image: "registry.citi.com/put/checks-backend:0.1.0"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/etc/put-checks/config/application.yaml"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "api,prod"
+            # The same single retention key as the worker and the object-store lifecycle
+            # declaration (§6.2, AC-12).
+            - name: STUDIO_EVIDENCE_RETENTION
+              value: "30d"
+            - name: STUDIO_EVIDENCE_PROVIDER
+              value: "local"
+            - name: STUDIO_EVIDENCE_DIRECTORY
+              value: "/var/lib/studio-objects"
+            - name: STUDIO_EVIDENCE_ENDPOINT
+              value: ""
+            - name: STUDIO_EVIDENCE_REGION
+              value: "us-east-1"
+            - name: STUDIO_EVIDENCE_BUCKET
+              value: "put-checks-studio-evidence"
+            - name: STUDIO_EVIDENCE_PATH_STYLE_ACCESS
+              value: "true"
+            - name: STUDIO_EVIDENCE_ACCESS_KEY_ID_FILE
+              value: "/etc/studio/object-store/accessKeyId"
+            - name: STUDIO_EVIDENCE_SECRET_ACCESS_KEY_FILE
+              value: "/etc/studio/object-store/secretAccessKey"
+            - name: STUDIO_EVIDENCE_CONNECT_TIMEOUT
+              value: "2s"
+            - name: STUDIO_EVIDENCE_REQUEST_TIMEOUT
+              value: "10s"
+            - name: STUDIO_VAULT_PROVIDER
+              value: "none"
+            - name: STUDIO_VAULT_ADDRESS
+              value: ""
+            - name: STUDIO_VAULT_NAMESPACE
+              value: ""
+            - name: STUDIO_VAULT_MOUNT
+              value: "secret"
+            - name: STUDIO_VAULT_PATH_TEMPLATE
+              value: "studio/{csiId}/{environment}/{testId}/{kind}/{referenceName}"
+            - name: STUDIO_VAULT_VALUE_KEY
+              value: "value"
+            - name: STUDIO_VAULT_TOKEN_FILE
+              value: "/etc/studio/vault/token"
+            - name: STUDIO_VAULT_CONNECT_TIMEOUT
+              value: "2s"
+            - name: STUDIO_VAULT_REQUEST_TIMEOUT
+              value: "5s"
+            - name: STUDIO_VAULT_MAX_RESPONSE_BYTES
+              value: "65536"
+            - name: STUDIO_GATEWAY_PROVIDER
+              value: "vertex"
+            - name: STUDIO_GATEWAY_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: "checks-studio-vertex"
+                  key: "endpoint"
+            - name: STUDIO_GATEWAY_PROJECT
+              valueFrom:
+                configMapKeyRef:
+                  name: "checks-studio-vertex"
+                  key: "project"
+            - name: STUDIO_GATEWAY_LOCATION
+              valueFrom:
+                configMapKeyRef:
+                  name: "checks-studio-vertex"
+                  key: "location"
+            - name: STUDIO_GATEWAY_MODEL
+              value: "gemini-3.8-flash"
+            - name: STUDIO_GATEWAY_CREDENTIALS_MODE
+              value: "application-default"
+            - name: STUDIO_GATEWAY_CREDENTIALS_KEY_FILE
+              value: "/etc/studio/gateway/service-account.json"
+            # ── The kill switch and the dispatcher, on the API (story 10.18b, AC-23a) ─────
+            #
+            # The kill switch comes from its own values key. The dispatcher is `false` here as a
+            # LITERAL and not a values key, because the API never dispatches in any configuration:
+            # `StudioDispatcher` is a worker-profile bean, and a values key that appeared to turn
+            # it on would be a control that does nothing — which is worse than no control, because
+            # somebody would rely on it. Written explicitly rather than left to a default because
+            # `application.yml` (`false`) and `Dispatcher.enabledOrDefault()` (`true`) disagree.
+            - name: STUDIO_EXECUTION_ENABLED
+              value: "true"
+            - name: STUDIO_DISPATCHER_ENABLED
+              value: "false"
+            # ── The SSE bounds the edge is configured against (story 10.18b, AC-13a) ──────
+            #
+            # These two are the ONLY values SnapshotBroadcaster reads, and the streaming Ingress's
+            # `proxy-read-timeout` is derived from `studioSse.lifetimeSeconds` — the same key that
+            # renders `STUDIO_SSE_LIFETIME` here. A test compares the rendered annotation against
+            # these rendered values in the SAME manifest, so the proxy bound and the application
+            # bound cannot drift apart unobserved. Raising the heartbeat above the timeout is M11.
+            - name: STUDIO_SSE_HEARTBEAT
+              value: "15s"
+            - name: STUDIO_SSE_LIFETIME
+              value: "60s"
+            # ── ED-02: the three identity bypasses, closed in the deployed profile (AC-19a) ─────
+            #
+            # ⚠ **THE CODE PATHS STILL EXIST. THEY ARE CLOSED HERE BY CONFIGURATION, NOT REMOVED.**
+            # `BffSessionAuthenticationFilter` carries three ways to obtain an identity the
+            # platform never vouched for: the hardcoded Core-service bypass, the client-supplied
+            # `X-User-Id` header path (which is checked FIRST, so closing the bypass alone closes
+            # nothing for a client that sends a header), and the `/api/v1/csi` read bypass that
+            # appends `checks-admin`. All three now read a property whose default is `false`, and
+            # all three are rendered `false` here so that the value is deliberate and visible in
+            # the manifest rather than inherited from a default somebody may change.
+            #
+            # **No credentialed pilot may run until ED-02 has linked completed tickets.** ED-02's
+            # owner is the PUT Core platform (Core BFF), but no external ticket is linked and an
+            # owner is not a delivery. The real vault is ALSO still a stub: `SecretsService`
+            # returns `REDACTED`. See `docs/runbooks/studio-runner.md` §9.
+            - name: CHECKS_BYPASS_CORE_SERVICE
+              value: "false"
+            - name: CHECKS_BYPASS_IDENTITY_HEADERS
+              value: "false"
+            - name: CHECKS_BYPASS_CSI_READ
+              value: "false"
+            # ── The API's two runner-facing identities (Studio v1 gaps) ─────────────────────────
+            #
+            # The API talks to the runner in both directions, and without these a chart-deployed
+            # API refused every runner callback (the internal chain refuses all callers when its
+            # token is empty) and reported VALIDATOR_UNAVAILABLE for every compile.
+            #
+            # 1. Inbound: the runner's admission/progress callbacks. The token the API accepts is
+            #    the SAME Secret key the runner presents as STUDIO_RUNNER_CALLBACK_IDENTITY.
+            - name: STUDIO_CALLBACK_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: checks-studio-runner-identity
+                  key: callbackIdentity
+            # 2. Outbound: POST /v1/validate from the compile pipeline, which runs on the API
+            #    (StudioController is `!worker`). Same address and bearer as the worker's
+            #    POST /v1/runs, from the same keys, so the three pods cannot be configured apart.
+            - name: STUDIO_RUNNER_BASE_URL
+              value: "https://release-name-put-checks-studio-runner:8090"
+            - name: STUDIO_RUNNER_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: checks-studio-runner-identity
+                  key: serviceIdentity
+            - name: CHECKS_CORE_SERVICE_URL
+              value: "http://checks-core:8081"
+            - name: CHECKS_CORS_ALLOWED_ORIGINS
+              value: "https://checks.dev.citi.com,http://localhost:3000"
+            - name: JAVA_OPTS
+              value: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError -XX:-HeapDumpOnOutOfMemoryError -XX:-CreateCoredumpOnCrash"
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: checks-db-credentials
+                  key: SPRING_DATASOURCE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: checks-db-credentials
+                  key: SPRING_DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: checks-db-credentials
+                  key: SPRING_DATASOURCE_PASSWORD
+          envFrom:
+            - configMapRef:
+                name: release-name-put-checks-api-config
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 768Mi
+          volumeMounts:
+            - name: spring-config
+              mountPath: /etc/put-checks/config
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            # **The read-only store principal**, and a *different* Kubernetes Secret from the
+            # runner's write-only one (§6.2, ED-03): the runner writes only the `studio/` prefix
+            # and holds no Get or List permission; the API and the recovery path read and never
+            # write. Two principals, asserted unequal in the rendered manifest rather than each
+            # matched against a literal (AC-10a).
+            - name: local-object-store
+              mountPath: /var/lib/studio-objects
+            
+            - name: runner-tls
+              mountPath: /etc/studio/runner-tls
+              readOnly: true
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 5"]
+      volumes:
+        - name: spring-config
+          configMap:
+            name: release-name-put-checks-api-properties
+        - name: tmp
+          emptyDir: {}
+        - name: local-object-store
+          persistentVolumeClaim:
+            claimName: release-name-put-checks-studio-object-store-local
+        
+        - name: runner-tls
+          secret:
+            secretName: checks-studio-backend-runner-tls
+            defaultMode: 288
+            items:
+              - key: keystore.p12
+                path: keystore.p12
+              - key: keystore.password
+                path: keystore.password
+              - key: truststore.p12
+                path: truststore.p12
+              - key: truststore.password
+                path: truststore.password
+---
+# Source: put-checks/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-put-checks-worker
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-worker
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: put-checks-worker
+      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/component: worker
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/config: 6147c6dbe6916da698a0c71be266ab76930b98d71134a6645b23ce91294cedf2
+      labels:
+        helm.sh/chart: put-checks-0.1.0
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: put-platform
+        app.kubernetes.io/version: "0.1.0"
+        app.kubernetes.io/name: put-checks-worker
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/component: worker
+    spec:
+      serviceAccountName: release-name-put-checks
+      terminationGracePeriodSeconds: 45
+      securityContext:
+        fsGroup: 1000
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: put-checks-worker
+              app.kubernetes.io/instance: release-name
+              app.kubernetes.io/component: worker
+      containers:
+        - name: worker
+          image: "registry.citi.com/put/checks-backend:0.1.0"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/etc/put-checks/config/application.yaml"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "worker,prod"
+            # **Actuator on the container port the probes use.** `application-worker.yml` sets
+            # `management.server.port: 8081` while the ConfigMap's SERVER_PORT moves the main port
+            # to `worker.service.port`; with the two apart, /actuator/health/* is served only on the
+            # management port and the http-port probes (and the prometheus scrape) find nothing.
+            - name: MANAGEMENT_SERVER_PORT
+              value: "8080"
+            # **Derived from the runner's own Service, never restated.** `application.yml` has no
+            # default for this (`STUDIO_RUNNER_BASE_URL` falls back to empty, and an empty base URL
+            # closes every dispatch DISPATCH_FAILED), while `studio-runner/src/server/config.ts`
+            # defaults its listener to 8080. The chart is therefore the single source of the
+            # address: both the worker's URL and the runner's listener render from
+            # `studioRunner.service.port` (AC-1).
+            - name: STUDIO_RUNNER_BASE_URL
+              value: "https://release-name-put-checks-studio-runner:8090"
+            # **The bearer the worker presents on POST /v1/runs (DEF-05, Studio v1 WP2).** Without
+            # it `HttpRunnerDispatchClient` refuses every dispatch before sending. It is read from
+            # the SAME Secret and key the runner reads its inbound `STUDIO_RUNNER_SERVICE_IDENTITY`
+            # from (`studioRunner.identity.*`), so the two sides cannot be configured apart, and the
+            # value never appears in values or in the manifest.
+            - name: STUDIO_RUNNER_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: checks-studio-runner-identity
+                  key: serviceIdentity
+            # **The runner's cancel-path bounds, from the runner's own values keys (Studio v1
+            # WP16).** The running reaper here waits `RunnerCancelBudget.effectiveMargin()` before
+            # closing a cancel the runner never finished, and that margin is derived from these
+            # four bounds. Rendered from `studioRunner.runnerEnv` — the map the runner Deployment
+            # renders its environment from — so the worker derives its margin from the values the
+            # deployed runner actually runs with, never from defaults. A key the runner does not
+            # receive is not rendered here either: both then fall back to the same default, which
+            # `RunnerCancelBudgetTest` pins against the runner's `config.ts`.
+            - name: STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS
+              value: "15000"
+            - name: STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS
+              value: "15000"
+            - name: STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS
+              value: "30000"
+            # ── The kill switch and the dispatcher, on the WORKER (story 10.18b, AC-23a) ──
+            #
+            # Two distinct values keys, because they are two distinct decisions. Engaging the kill
+            # switch must NOT also stop the dispatcher: BRD §9 requires queued undispatched work to
+            # be closed EXPLICITLY when the switch goes off, and `StudioDispatcher.dispatchOnce()`
+            # is what closes it — a worker with the dispatcher off would leave that work queued
+            # until its deadline, which is the opposite of what the switch promises.
+            #
+            # This is the ONLY component with the dispatcher enabled.
+            - name: STUDIO_EXECUTION_ENABLED
+              value: "true"
+            - name: STUDIO_DISPATCHER_ENABLED
+              value: "true"
+            # Logical expiry, which is what the API enforces at `videoExpiresAt` (§6.2). The
+            # object-store lifecycle window renders from this same key; physical deletion on the
+            # store is asynchronous and nothing in this chart claims otherwise.
+            - name: STUDIO_EVIDENCE_RETENTION
+              value: "30d"
+            - name: STUDIO_EVIDENCE_PROVIDER
+              value: "local"
+            - name: STUDIO_EVIDENCE_DIRECTORY
+              value: "/var/lib/studio-objects"
+            - name: STUDIO_EVIDENCE_ENDPOINT
+              value: ""
+            - name: STUDIO_EVIDENCE_REGION
+              value: "us-east-1"
+            - name: STUDIO_EVIDENCE_BUCKET
+              value: "put-checks-studio-evidence"
+            - name: STUDIO_EVIDENCE_PATH_STYLE_ACCESS
+              value: "true"
+            - name: STUDIO_EVIDENCE_ACCESS_KEY_ID_FILE
+              value: "/etc/studio/object-store/accessKeyId"
+            - name: STUDIO_EVIDENCE_SECRET_ACCESS_KEY_FILE
+              value: "/etc/studio/object-store/secretAccessKey"
+            - name: STUDIO_EVIDENCE_CONNECT_TIMEOUT
+              value: "2s"
+            - name: STUDIO_EVIDENCE_REQUEST_TIMEOUT
+              value: "10s"
+            - name: STUDIO_VAULT_PROVIDER
+              value: "none"
+            - name: STUDIO_VAULT_ADDRESS
+              value: ""
+            - name: STUDIO_VAULT_NAMESPACE
+              value: ""
+            - name: STUDIO_VAULT_MOUNT
+              value: "secret"
+            - name: STUDIO_VAULT_PATH_TEMPLATE
+              value: "studio/{csiId}/{environment}/{testId}/{kind}/{referenceName}"
+            - name: STUDIO_VAULT_VALUE_KEY
+              value: "value"
+            - name: STUDIO_VAULT_TOKEN_FILE
+              value: "/etc/studio/vault/token"
+            - name: STUDIO_VAULT_CONNECT_TIMEOUT
+              value: "2s"
+            - name: STUDIO_VAULT_REQUEST_TIMEOUT
+              value: "5s"
+            - name: STUDIO_VAULT_MAX_RESPONSE_BYTES
+              value: "65536"
+            - name: CHECKS_CORE_SERVICE_URL
+              value: "http://checks-core:8081"
+            - name: JAVA_OPTS
+              value: "-Xms512m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError -XX:-HeapDumpOnOutOfMemoryError -XX:-CreateCoredumpOnCrash"
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: checks-db-credentials
+                  key: SPRING_DATASOURCE_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: checks-db-credentials
+                  key: SPRING_DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: checks-db-credentials
+                  key: SPRING_DATASOURCE_PASSWORD
+          envFrom:
+            - configMapRef:
+                name: release-name-put-checks-worker-config
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: "2"
+              memory: 1536Mi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: spring-config
+              mountPath: /etc/put-checks/config
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            - name: local-object-store
+              mountPath: /var/lib/studio-objects
+            
+            - name: runner-tls
+              mountPath: /etc/studio/runner-tls
+              readOnly: true
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+      volumes:
+        - name: spring-config
+          configMap:
+            name: release-name-put-checks-worker-properties
+        - name: tmp
+          emptyDir: {}
+        - name: local-object-store
+          persistentVolumeClaim:
+            claimName: release-name-put-checks-studio-object-store-local
+        
+        - name: runner-tls
+          secret:
+            secretName: checks-studio-backend-runner-tls
+            defaultMode: 288
+            items:
+              - key: keystore.p12
+                path: keystore.p12
+              - key: keystore.password
+                path: keystore.password
+              - key: truststore.p12
+                path: truststore.p12
+              - key: truststore.password
+                path: truststore.password
+---
+# Source: put-checks/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-put-checks-frontend
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-frontend
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: put-checks-frontend
+      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/component: frontend
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/config: 159150f6e56ee6afca65688fe4013d34247807da3e6ea1f27ecc39cf41e84e6c
+      labels:
+        helm.sh/chart: put-checks-0.1.0
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: put-platform
+        app.kubernetes.io/version: "0.1.0"
+        app.kubernetes.io/name: put-checks-frontend
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/component: frontend
+    spec:
+      serviceAccountName: release-name-put-checks
+      securityContext:
+        fsGroup: 101
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: frontend
+          image: "registry.citi.com/put/checks-frontend:0.1.0"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: release-name-put-checks-frontend-config
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+
+---
+# Source: put-checks/templates/studio-runner-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-name-put-checks-studio-runner
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-studio-runner
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: studio-runner
+spec:
+  # No CPU-based HorizontalPodAutoscaler anywhere for this component: a saturated runner answers
+  # 429/503 and stays ready, so CPU-driven scaling would fight the capacity gate instead of
+  # relieving it (§5.2, §8.4). The only scaler is the backlog-driven ScaledObject
+  # (studio-runner-scaledobject.yaml), and while it is on it owns the count, so none renders here:
+  # a rendered count would be reapplied by every upgrade and fight the scaler.
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: put-checks-studio-runner
+      app.kubernetes.io/instance: release-name
+      app.kubernetes.io/component: studio-runner
+  template:
+    metadata:
+      annotations:
+        checksum/runner-env: 07c0301601b7e4cd4dfe6dc69fafdd4a71a23357620acfd99bfb5555f6690645
+      labels:
+        helm.sh/chart: put-checks-0.1.0
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: put-platform
+        app.kubernetes.io/version: "0.1.0"
+        app.kubernetes.io/name: put-checks-studio-runner
+        app.kubernetes.io/instance: release-name
+        app.kubernetes.io/component: studio-runner
+    spec:
+      # **Process reaping (AC-5a, architecture §9.3, ADR-001 §1.1), and the mechanism is named
+      # rather than blurred.**
+      #
+      # Node as PID 1 reaps only its own known children, so an orphaned grandchild — a Chromium
+      # helper whose parent died — is re-parented to PID 1 and becomes a zombie. Observed against
+      # the built image by reading `/proc/*/status`: with `node` as PID 1 a zombie `sh` accumulates
+      # within three seconds; with an init as PID 1 none does.
+      #
+      # The alternative was an in-image init, and it is declined: the `Dockerfile`'s CMD keeps
+      # `SIGTERM` reaching the process directly so the drain runs, and adding an ENTRYPOINT wrapper
+      # to the image ED-05 is going to replace would be work thrown away. Since A6 the CMD is
+      # `sh -c "ulimit -c 0 && exec node dist/main.js"`: the `exec` is what keeps that property
+      # (a shell that did not `exec` would sit in front of node and never forward the signal;
+      # `docker stop` would then wait out its full timeout and emit neither `runner.draining` nor
+      # `runner.drained`). That the new CMD still drains is the image smoke's property, owed.
+      #
+      # **PID-1 b (STUDIO-OBS-009, guided mode).** Guided mode refuses to start as PID 1: its kill
+      # selects only direct children of the worker and that selection is unsafe at PID 1. This
+      # field is what keeps node off PID 1 in the pod, so `put-checks.studioRunner.guidedGuard`
+      # fails the render when guided mode is on and this is not true, and the chart test asserts it
+      # for the guided value sets too.
+      #
+      # `shareProcessNamespace` makes the infrastructure pause container PID 1, and the pause
+      # container reaps. **This moves AC-5a's reaping half to AC-5b**, where SPK-04 question 6
+      # already asks it in-cluster: a pause container exists only in a real pod, so the property
+      # cannot be proven here. Stated, not blurred.
+      shareProcessNamespace: true
+      serviceAccountName: release-name-put-checks-studio-runner
+      automountServiceAccountToken: false
+      # One derivation (AC-6): the browser runtime cap plus the stop, upload and delivery margins
+      # the pod itself is configured with, plus the preStop flip and the configured headroom.
+      terminationGracePeriodSeconds: 215
+      securityContext:
+        fsGroup: 1001
+        runAsGroup: 1001
+        runAsNonRoot: true
+        runAsUser: 1001
+        seccompProfile:
+          # SPK-04 / ADR-001 O-4. One key, never Unconfined, and never silently inherited: a
+          # values file that omits it fails the render rather than picking up the backend's.
+          type: RuntimeDefault
+      containers:
+        - name: studio-runner
+          image: "registry.citi.com/put/checks-studio-runner:0.1.0"
+          imagePullPolicy: IfNotPresent
+          # No `command` and no `args`. The image's CMD is `sh -c "ulimit -c 0 && exec node
+          # dist/main.js"` (A6), whose `exec` keeps node as the container's main process so SIGTERM
+          # still reaches it directly and the drain runs; overriding it here — in any form, and with
+          # any flag — is how a sandbox-disabling argument would reach Chromium.
+          #
+          # Startup refusals (exit 78 and 69, `CONFIGURATION_DENIED <reason>`) are ONE value-free
+          # stderr line each, which the launch contract guarantees (no path, no variable value). In
+          # a pod they surface as CrashLoopBackOff, and with this policy `kubectl describe pod`
+          # shows the line, so a pod refusing for PID 1 is not confused with one refusing for
+          # `NODE_OPTIONS`.
+          terminationMessagePolicy: FallbackToLogsOnError
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+          ports:
+            # The one TLS listener. The port keeps its `https` name together with the Service's
+            # targetPort, so a reviewer cannot read it as plaintext.
+            - name: https
+              containerPort: 8090
+              protocol: TCP
+          env:
+            # The Service port and the container port are the same single key, so the worker's
+            # runner-base-url and the port the runner binds cannot drift apart (AC-1).
+            - name: STUDIO_RUNNER_PORT
+              value: "8090"
+            # The scratch path is the single source: this value and the volumeMount below are the
+            # same key, compared to each other in the assertion rather than each to a literal.
+            - name: STUDIO_RUNNER_SCRATCH_DIR
+              value: "/scratch/studio-runner"
+            # The object store follows `objectStore.provider`, the same key the API and worker read:
+            # `local` writes to the shared RWX claim at `objectStore.localDirectory`; `s3` requires a
+            # real endpoint and bucket (the render fails without them) and reads its credentials
+            # from the mounted write-only Secret. No shipped value set selects `s3` yet.
+            #
+            # In s3 mode the directory is a SIBLING of the scratch directory inside the same
+            # `scratch` emptyDir, not a child of it: the loader refuses an object-store directory
+            # nested inside scratch ("Object storage and scratch directories must be disjoint;
+            # scratch is deleted on restart"). `dev.sh` already lays the two out this way.
+            - name: STUDIO_RUNNER_OBJECT_STORE_DIR
+              value: "/var/lib/studio-objects"
+            - name: STUDIO_RUNNER_OBJECT_STORE_PROVIDER
+              value: "local"
+            - name: STUDIO_RUNNER_OBJECT_STORE_ENDPOINT
+              value: ""
+            - name: STUDIO_RUNNER_OBJECT_STORE_REGION
+              value: "us-east-1"
+            - name: STUDIO_RUNNER_OBJECT_STORE_BUCKET
+              value: "put-checks-studio-evidence"
+            - name: STUDIO_RUNNER_OBJECT_STORE_FORCE_PATH_STYLE
+              value: "true"
+            - name: STUDIO_RUNNER_OBJECT_STORE_ACCESS_KEY_ID_FILE
+              value: "/etc/studio/object-store/accessKeyId"
+            - name: STUDIO_RUNNER_OBJECT_STORE_SECRET_ACCESS_KEY_FILE
+              value: "/etc/studio/object-store/secretAccessKey"
+            - name: STUDIO_RUNNER_CALLBACK_BASE_URL
+              value: "http://release-name-put-checks-api:8080"
+            - name: STUDIO_RUNNER_SERVICE_IDENTITY
+              valueFrom:
+                secretKeyRef:
+                  name: checks-studio-runner-identity
+                  key: serviceIdentity
+            - name: STUDIO_RUNNER_CALLBACK_IDENTITY
+              valueFrom:
+                secretKeyRef:
+                  name: checks-studio-runner-identity
+                  key: callbackIdentity
+            # ── The one TLS listener, in every deployment (STUDIO-OBS-009, ruling A3) ───────────────
+            #
+            # File paths come from the same keys as the Secret mount below, so the env value and
+            # the mount cannot drift. The exec probe reads all three files and the port on every
+            # run (a new process, so it sees this container's environment). The fingerprint is
+            # ONE values key with no default and is validated at render time.
+            - name: STUDIO_RUNNER_TLS_KEY_FILE
+              value: "/etc/studio/tls/tls.key"
+            - name: STUDIO_RUNNER_TLS_CERT_FILE
+              value: "/etc/studio/tls/tls.crt"
+            - name: STUDIO_RUNNER_TLS_CA_FILE
+              value: "/etc/studio/tls/ca.crt"
+            - name: STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256
+              value: "0B:12:19:20:27:2E:35:3C:43:4A:51:58:5F:66:6D:74:7B:82:89:90:97:9E:A5:AC:B3:BA:C1:C8:CF:D6:DD:E4"
+            # ── Guided mode: a mode of this process, not another process (ruling A2) ──────────────
+            #
+            # The switch is rendered in both directions so the manifest says what it means. The
+            # other seven are rendered ONLY while it is on: with the switch off the runner refuses
+            # any non-empty `STUDIO_RUNNER_GUIDED_*` key ("no half configuration"). Not one of them
+            # may be set through `runnerEnv` (chart-managed), and no `TMPDIR` or `NODE_OPTIONS` is
+            # rendered anywhere: `/tmp` is mounted instead (ruling Q4), and the runner refuses
+            # `NODE_OPTIONS` outright when guided mode is on.
+            - name: STUDIO_RUNNER_GUIDED_ENABLED
+              value: "false"
+            # ── Observed replay: chart-managed, single-sourced from `studioObserved` ─────────────────
+            #
+            # Both flags are rendered in both directions (the runner accepts only "true", "false" or
+            # unset). The three file/digest keys render ONLY while either flag is on, like the guided
+            # keys: no half configuration. The digest is DERIVED from the catalog, never a second value.
+            - name: STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED
+              value: "false"
+            - name: STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED
+              value: "false"
+            
+            - name: STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS
+              value: "15000"
+            - name: STUDIO_RUNNER_DRAIN_TIMEOUT_MS
+              value: "150000"
+            - name: STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS
+              value: "120000"
+            - name: STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS
+              value: "120000"
+            - name: STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS
+              value: "15000"
+            - name: STUDIO_RUNNER_POOL_SIZE
+              value: "1"
+            - name: STUDIO_RUNNER_RECORDING_HEIGHT
+              value: "720"
+            - name: STUDIO_RUNNER_RECORDING_WIDTH
+              value: "1280"
+            - name: STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS
+              value: "0"
+            - name: STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS
+              value: "30000"
+          # **No envFrom.** A ConfigMap or Secret reference here injects whatever keys it carries,
+          # which is precisely the open half SEC-2 exploits: the enumerated list above is the only
+          # way a variable reaches this container.
+          readinessProbe:
+            exec:
+              command: ["node", "dist/probe.js", "/ready"]
+            timeoutSeconds: 3
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["node", "dist/probe.js", "/health"]
+            timeoutSeconds: 3
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            # A liveness restart destroys the in-memory guided session, so a guided-enabled pod
+            # tolerates more consecutive misses. UNMEASURED in a cluster [I]; owner @devops/@qa.
+            failureThreshold: 3
+          resources:
+            # One replay browser, or one replay browser PLUS one guided browser (A2.6 a). The basis
+            # is recorded in values.yaml and the measurement is owed (GA plan G-4).
+            limits:
+              cpu: "2"
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            # Every writable mount is disjoint from the image's browser registry
+            # (PLAYWRIGHT_BROWSERS_PATH) and from $HOME (/home/pwuser). That disjointness is what
+            # makes readOnlyRootFilesystem a browser-integrity control rather than tidiness.
+            - name: scratch
+              # Mounted at the **parent** of the runner's scratch directory. Mounting at the
+              # directory itself makes it a mount point, and the runner's start-up `clearAll()`
+              # cannot remove a mount point whose parent is read-only — observed as
+              # `EROFS … rmdir` against the built image, before the server ever listened.
+              mountPath: /scratch
+            - name: dev-shm
+              mountPath: /dev/shm
+            - name: local-object-store
+              mountPath: /var/lib/studio-objects
+            # The runner's key, certificate and CA: read-only, a DIRECTORY mount (no `subPath`, so
+            # a Secret update propagates), mode 0440 on the volume below. Required in every
+            # deployment, guided or not.
+            - name: tls
+              mountPath: /etc/studio/tls
+              readOnly: true
+          lifecycle:
+            preStop:
+              # Flip readiness before the drain: the endpoint leaves the Service while admitted
+              # work finishes, rather than being killed with a browser open (§5.2, §8.4).
+              exec:
+                command: ["sleep", "5"]
+      volumes:
+        - name: scratch
+          emptyDir:
+            sizeLimit: 4Gi
+        - name: dev-shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+        - name: local-object-store
+          persistentVolumeClaim:
+            claimName: release-name-put-checks-studio-object-store-local
+        - name: tls
+          # ⚠ Coupled to `shareProcessNamespace` above, like the object-store credential (QA MED-1):
+          # this Secret holds the runner's PRIVATE KEY, and a second container in this pod would
+          # read it through /proc/1/root whatever its own mounts say. The one-container bound
+          # (`sharedNamespaceViolations`) covers any Secret volume generically and is asserted on
+          # guided sets too. Adding a container here is a security decision, not a convenience.
+          secret:
+            secretName: checks-studio-runner-tls
+            defaultMode: 288
+            items:
+              - key: tls.key
+                path: tls.key
+              - key: tls.crt
+                path: tls.crt
+              - key: ca.crt
+                path: ca.crt
+
+---
+# Source: put-checks/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: release-name-put-checks-api
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-api
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: api
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: "checks-api.dev.citi.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: release-name-put-checks-api
+                port:
+                  number: 8080
+---
+# Source: put-checks/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: release-name-put-checks-frontend
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-frontend
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: frontend
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: "checks.dev.citi.com"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: release-name-put-checks-frontend
+                port:
+                  number: 80
+
+---
+# Source: put-checks/templates/studio-sse-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: release-name-put-checks-api-studio-stream
+  labels:
+    helm.sh/chart: put-checks-0.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: put-platform
+    app.kubernetes.io/version: "0.1.0"
+    app.kubernetes.io/name: put-checks-api
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/component: api
+    put-checks.citi.com/route: studio-stream
+  annotations:
+    # Regex paths: this Ingress must cover the two streaming routes and nothing else.
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # §5.5 and the SSE assessment: "disable buffering for this route throughout the proxy chain".
+    # The controller also honours the `X-Accel-Buffering: no` header ExecutionEventsController
+    # already sets, unless it is configured to ignore it — which is SPK-02's to establish.
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    # Strictly greater than the heartbeat and not less than the bounded lifetime — derived from the
+    # lifetime, asserted against the heartbeat in the same rendered manifest (AC-13a, M11).
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+spec:
+  ingressClassName: nginx
+  rules:
+    # The same host and the same Service as the API Ingress, read from the same values keys. A
+    # second copy of the host is a second thing to get wrong, and a streaming route pointed at the
+    # wrong backend fails in the least visible way there is: it works, buffered.
+    - host: "checks-api.dev.citi.com"
+      http:
+        paths:
+          - path: "/api/v1/studio/executions/[^/]+/events"
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: release-name-put-checks-api
+                port:
+                  number: 8080
+          # The media route is configured here and PROVEN elsewhere. `<video>` Range requests
+          # through the real ingress were moved to story 10.19 by @po at wave-6 validation
+          # (AC-17); the route implementation is story 10.15's. This chart owns the edge
+          # configuration for it, which is why the path is here before the handler exists.
+          - path: "/api/v1/studio/executions/[^/]+/video"
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: release-name-put-checks-api
+                port:
+                  number: 8080

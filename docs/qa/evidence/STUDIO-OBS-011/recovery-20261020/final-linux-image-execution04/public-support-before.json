@@ -1,0 +1,373 @@
+{
+  "phase": "before",
+  "mountSupportFiles": [
+    {
+      "path": "studio-runner/scripts/browser-provenance.d.mts",
+      "targetMount": "/proof/scripts",
+      "sha256": "a56ea0aaedf24021be59f187ba3d07ee7ee32c002cdf19da8278b91289e90901",
+      "bytes": 571,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/scripts/browser-provenance.mjs",
+      "targetMount": "/proof/scripts",
+      "sha256": "ea0dcc15b943a935766ba5cb953a0c6b6b1cdfc94c0520e20f99d04e9171dc42",
+      "bytes": 1793,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/scripts/check-pins.d.mts",
+      "targetMount": "/proof/scripts",
+      "sha256": "290a5510d412f78fde0956c1fd7db1525389fc9f1b3523f5674723c1510de1ef",
+      "bytes": 1769,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/scripts/check-pins.mjs",
+      "targetMount": "/proof/scripts",
+      "sha256": "4d1da390e9266789e30e2e2a12f8a9b4293c9acb78484b780900be6f9b9a4815",
+      "bytes": 19960,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/scripts/print-observed-catalog.d.mts",
+      "targetMount": "/proof/scripts",
+      "sha256": "cf3eeeba4d9b7454743cd9e398c39ab96f737976c96b098631bd940b4fba6b61",
+      "bytes": 1730,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/scripts/print-observed-catalog.mjs",
+      "targetMount": "/proof/scripts",
+      "sha256": "cc954c63ae34d7c23916652f5e22b4b4c003d656c7f68198ec6ad1816cf1a091",
+      "bytes": 9990,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/scripts/upgrade-observed-fixtures.mjs",
+      "targetMount": "/proof/scripts",
+      "sha256": "b8830160cfbbe493887d6c0c313fce29320d09ce38e9eddf6e1ff127ea9434e5",
+      "bytes": 4536,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/scripts/write-runtime-versions.d.mts",
+      "targetMount": "/proof/scripts",
+      "sha256": "d0bf46e4f1a584a9ab3c33efe21f586d2e7bcd3c6c6e8163c088177b1cb3ed3d",
+      "bytes": 1159,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/scripts/write-runtime-versions.mjs",
+      "targetMount": "/proof/scripts",
+      "sha256": "6c3e64064184a494092c5de56f69dba818913f293b3b8a3c2d2ba86a54d94f26",
+      "bytes": 8771,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/Dockerfile",
+      "targetMount": "/app/Dockerfile",
+      "sha256": "70881264ddda3a7f71da1f1da74794cfea7c19287fa05ddd1bff9bb8ef4489eb",
+      "bytes": 4599,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/.nvmrc",
+      "targetMount": "/app/.nvmrc",
+      "sha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53",
+      "bytes": 3,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/src/validator/observedSchemas.json",
+      "targetMount": "/app/src/validator/observedSchemas.json",
+      "sha256": "42a804fc6216aaaa9643f0455db5b7a420c7070219289fdfe512b260f1b21f02",
+      "bytes": 314009,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/accepted-observed-choice.json",
+      "targetMount": "/app/fixtures/observed-reference",
+      "sha256": "a863775ca803d112d18f7f98c883d0aa1766070ce211df632fead110693ac820",
+      "bytes": 89985,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/control-value-reference.json",
+      "targetMount": "/app/fixtures/observed-reference",
+      "sha256": "373bcd657e2f45b0a71284bed81e66c0e5c5de0f5608d8aab1d1dd6731ceeba1",
+      "bytes": 74138,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/fresh-order-reference.json",
+      "targetMount": "/app/fixtures/observed-reference",
+      "sha256": "9de3139c8b5896f364cfcfca4a4492c91ba74c5754ba9519facb5ece9b582152",
+      "bytes": 68855,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/manifest.json",
+      "targetMount": "/app/fixtures/observed-reference",
+      "sha256": "ce5a79081ad7c95f7a44ac912232eee639f3d079b19d0208b4e587b3f71e1b0f",
+      "bytes": 530923,
+      "mode": "0o644"
+    },
+    {
+      "path": "studio-runner/fixtures/observed-reference/operation-mutations.json",
+      "targetMount": "/app/fixtures/observed-reference",
+      "sha256": "6df9810b016e10eee3be490da2763c97807243649069e57c99fb167f111778c5",
+      "bytes": 320,
+      "mode": "0o644"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "targetMount": "/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "sha256": "c573e50bb3fb6cbf2ea39e269888dbb07f8da2b193de769da167cc7998d072b6",
+      "bytes": 22741315,
+      "mode": "0o644"
+    }
+  ],
+  "canonicalV3Files": [
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/action-timing.schema.json",
+      "sha256": "d2cb597f799dfac20a020d26142e568524eed7c24986eb4ae1566c569c729e7d"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/action.schema.json",
+      "sha256": "cf6844f8eb31169c343af9c19d34458169b50aa6404af793b3989fb4e66b9608"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/allocation.schema.json",
+      "sha256": "8261aca9be0cfdda5081e0e8d15e29b25f2dc3b1be8b385b2d5524fd2498a3e6"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/assignment-lifecycle.schema.json",
+      "sha256": "52a37865db75a8e264e8b2c09fec1ba3298d09991422e18940fd7b31abf57ee6"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/assignment-receipt.schema.json",
+      "sha256": "7efac7f0b31dff859715c77d54124e794bc09350b64ea46dc0daaa7b29fe1ca9"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/assignment-stop.schema.json",
+      "sha256": "358e6d151e4fb7b2edfa7b06bf399168af8c3dbd0bbfb61bd990f4ad9e4ede8a"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/assignment.schema.json",
+      "sha256": "ced834f01f4f346f622b8e87500b7a5f4644cc34ad8d2e8ea90fc9c24d3bedad"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/authored-inputs.schema.json",
+      "sha256": "9ff02b3dd33bfb2c27e012adb3c0fd421085e67bbc5371e43bda9accd043b2e5"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/authoring-snapshot.schema.json",
+      "sha256": "dc212b318aee6076acef74e17aee488af61a907a16a71e21bf5672fb99a1330b"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/availability.schema.json",
+      "sha256": "e286e88762d4e3018eba697f2b59480218b6b8f5e9f8cf96d00c978b8f02685a"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/binding.schema.json",
+      "sha256": "78ba6b131343ec5b41c9e8f38a70907264875e8702a3a5cb80b7dfefbf892657"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json",
+      "sha256": "039ad4017a8256481d4109d37dfcfc919767094fd1610988d16706fef1065817"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/clarification.schema.json",
+      "sha256": "8ec215edc4334d4b4410c44ec3d6ca8da8ec69c3fe4e743093f842f7def17cca"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/commands.schema.json",
+      "sha256": "7a8dbc6c5af455dce04304b33183187c001e95440978ef6aaf47da4fded9c0df"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/consumer-edge.schema.json",
+      "sha256": "921982d21c7a8151d66fc947b114ea0c695d718e1d85db352c171bbaff85ffbf"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/current-synthetic-worlds.json",
+      "sha256": "88abb9cb08689f2e96aa509fb3710f4da1b62cf25e44fd02c94fb66fa2fe4ad8"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/error.schema.json",
+      "sha256": "4bf2846a3bafdc9fdee29d3bbd9c1dcbda53bffeae3406666d1857a7af355f3d"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/execution-evidence.schema.json",
+      "sha256": "5f9eda27221c948decd17ff876cb110dc3f9df9195a521bf5dac97ba8187edd9"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json",
+      "sha256": "fb1f9856353fef07825bf28ce72b4ed69e54f1cd5b78dc1d9fbb097c06ef2fc6"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/guided-model-response.schema.json",
+      "sha256": "2d986c098548b604d6fe75a3597397eabe325705550a78286e76ae5ae2a176ca"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/guided-planning-commands.schema.json",
+      "sha256": "7229d5841845c04509dd28e4874e415e349b928d2ce1576912b9e98d9926433b"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/guided-policy.schema.json",
+      "sha256": "9536507b5a3b6fe68f1afbcffaeb26fee26bd18e1c854a0d51024407ce1bb276"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/learned-plan.schema.json",
+      "sha256": "404ec2ea1ee733371d7d36f379f9203721a3aba60f00f7fb256bed8a0280cdff"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/ledger.schema.json",
+      "sha256": "081f1c4f45386a52a4263b98475544c919db7a4a1311bc6dae48772ae861d150"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/limits.schema.json",
+      "sha256": "736791305cf68723c01cb2b144cfb14f45b817c95e5954609d2517e680e6ba3e"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/observation-refresh.schema.json",
+      "sha256": "66d7a4591ac4fae47830e178b5685a02d4ff97216de5f4a1eccd2b1b85414ff2"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/observation.schema.json",
+      "sha256": "31afe5aa601b10ea1c81434797ff401ceef16ef5df90d49ffb700dfe7ff58963"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/planning-context.schema.json",
+      "sha256": "aa83c37a4b647daea1087987dac4a03667c149cde5342b8b53d946a5043c0747"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/planning-fixtures.json",
+      "sha256": "f642159fd4947430c08514bfe1615585499cf2fc2c286e84de41777af2d8e046"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/producer.schema.json",
+      "sha256": "9a71f3e82034bc7b7244b2ffc43dc6fb238df831e6ab829d9cae4a41cdc407c2"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/public-ui-projections.schema.json",
+      "sha256": "a435e034f7dd0910dc8fe583f5c8592ae9a75797f50619dbc545998412fffb9d"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-canonical-vectors.json",
+      "sha256": "995458217fdd08ae0454e8045077d7c14a0dbb3842d9e3c35a2271109d4a6185"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "sha256": "c573e50bb3fb6cbf2ea39e269888dbb07f8da2b193de769da167cc7998d072b6"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication.schema.json",
+      "sha256": "f5314de5d45dd277945f820b9cb5526f88df0da2d49e36ab3a2b42fb81c75b36"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-artifact.schema.json",
+      "sha256": "590e3d79a0d4b6ef5705083950324bc962b536958d6878b97b13859e1c2ff989"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-ipc.schema.json",
+      "sha256": "6bbf2c36dafb970fc1874c0c1ab31538a30d4e5222b1f5244000ccf0bc8b47cf"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-job.schema.json",
+      "sha256": "f1c850dedcc62e7e1cc9cce1b88942d8975d28ae6cadcc39a96075b94ecf501f"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-operation.schema.json",
+      "sha256": "1e5035d1badbe7c742149425257924a6308bb96ec996b23cd8afdf36fe8f2fd5"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-policy.schema.json",
+      "sha256": "045ee1bd22bd654c3fa462d4a0dd7d6b660d17181d41d4a2b4265dec8fbcb7e0"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-profile.schema.json",
+      "sha256": "adf91ed11e9d878ef31d4ee87902e76e27e8ec53b14cf61e79acb8717102fbe4"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+      "sha256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+      "sha256": "22ce88aeeac00de3f5e1202bdfa58e62c756e9cb39e72e00deb7b2e216c41b55"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/revision.schema.json",
+      "sha256": "e37b2bd9869d42af323b2ad321e731a2556a8c44ebdc86f52c2e505fc1ea3531"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/runner-context.schema.json",
+      "sha256": "7db2628f53fb646c495c538a2e74bc93634ae89efafe08efdc49c8d8cfe53beb"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json",
+      "sha256": "38dd5dddc4e48003b93a674a90f03ee70c4c89094aafe97dca4bd55f044069e8"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/session.schema.json",
+      "sha256": "3651dc302709f3b140e6543238cf0f04f7326ddab422fb7d4465b03faf42f6e8"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/source-reference.schema.json",
+      "sha256": "184a99cc4018f5899eb8dc743dcb0a9283c19f3ff7371da99098eeee432e229c"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/source-selection.schema.json",
+      "sha256": "df429534e7b827b556d52b7d39790e62d6d40360884d0e388ab70787ed53558f"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/timing-order-vectors.json",
+      "sha256": "28a2171311f37dc57bb30cbbb4559271b448b91c60487095a6587decfa17dae3"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/versions.schema.json",
+      "sha256": "02bc1bbc453daea97962b4ec330599bc66f7632e69a19b7780a610b96a320eb8"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/wire-parity.fixtures.json",
+      "sha256": "38d30dc9fa01b7148bacf81be786f260457dfa59f283e116d38cef2dcde45629"
+    }
+  ],
+  "canonicalFileCount": 51,
+  "mountsExactlyReviewed": [
+    {
+      "source": "studio-runner/scripts",
+      "target": "/proof/scripts"
+    },
+    {
+      "source": "studio-runner/Dockerfile",
+      "target": "/app/Dockerfile"
+    },
+    {
+      "source": "studio-runner/.nvmrc",
+      "target": "/app/.nvmrc"
+    },
+    {
+      "source": "studio-runner/src/validator/observedSchemas.json",
+      "target": "/app/src/validator/observedSchemas.json"
+    },
+    {
+      "source": "studio-runner/fixtures/observed-reference",
+      "target": "/app/fixtures/observed-reference"
+    },
+    {
+      "source": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "target": "/docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json"
+    }
+  ],
+  "allSourceHashesMatchAcceptedA1": true,
+  "allRunnerMountsMatchQualifiedPublicContext": true,
+  "imageOwnNotMounted": [
+    "/app/dist",
+    "/app/package.json",
+    "/app/package-lock.json",
+    "browser installation",
+    "compiled launcher"
+  ]
+}

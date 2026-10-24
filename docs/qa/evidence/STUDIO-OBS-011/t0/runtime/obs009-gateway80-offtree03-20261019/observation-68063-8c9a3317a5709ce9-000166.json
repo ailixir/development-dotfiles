@@ -1,0 +1,44 @@
+{
+  "kind": "UTILITY",
+  "client": {
+    "pid": 68063,
+    "ppid": 3749,
+    "launchArgv": [
+      "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+      "-B",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-proof-prep/resume6/run-private.py",
+      "prepare",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree03-20261019/root-authorization.json",
+      "43ff6885ad33d1084a6a60ccb94390a099e097fd31b35496442b46ebce24ce71",
+      "64ee9c2267832b7071cf829112e51ff92edaaf17aa3a8a83443101c95c940fdf"
+    ],
+    "launchArgvSha256": "36461830db89a63df020ea769df6676fa91f3e514c74a04e1cf2e39ee4a00736",
+    "start": "Mon Oct 19 14:15:30 2026",
+    "identityComplete": false,
+    "identityLimitation": "PID_START_ARGV_PARENT_CENSUS_BOUND_BINARY_NOT_FULLY_FINGERPRINTED",
+    "argvHash": "8f6706682eeada19e847f93d7f990b179f0b38d390174ea925aa3a54ed52420c",
+    "censusParent": 3749
+  },
+  "childPid": 68818,
+  "command": [
+    "/bin/ps",
+    "-ww",
+    "-p",
+    "18340",
+    "-o",
+    "comm="
+  ],
+  "executableSha256": "f2211a1d7ff5e5c2e034df4acf450e30ffeec4e5ed632f21948d7181a1c493b6",
+  "actualExit": 0,
+  "terminalWaitConfirmed": true,
+  "stdoutComplete": true,
+  "stderrComplete": true,
+  "stderrEmpty": true,
+  "stdoutSha256": "4aa556554dea480a19564bbfdbb75d179d811379c5c49e2582d7b528f81af2c9",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdoutBytes": 63,
+  "stderrBytes": 0,
+  "identityStatus": "KNOWN_POPEN_CHILD_PID_ARGV_BINARY_START_UNOBSERVED",
+  "timeoutSignalSent": false,
+  "classification": "WAITED_POPEN_CHILD"
+}

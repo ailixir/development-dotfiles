@@ -1,0 +1,67 @@
+{
+  "atUtc": "2026-10-20T14:47:47.180191+00:00",
+  "verdict": "INTENDED_ASSERTION_KILL_EXACT_RESTORE_GREEN",
+  "id": "m4-budget",
+  "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+  "patchSha256": "1319b4f5f87a863c0c2d4d4dba2645d8d8e77bca565aecd21f27253eb0d4ad77",
+  "selector": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+  "oneExistingLockHold": true,
+  "exactPatchReverseRestore": true,
+  "runs": [
+    {
+      "label": "obs011-recovery-20261020-foldp-m4-budget-red01",
+      "phase": "red",
+      "resultSha256": "80e16ef45614a0fac1983e07c0d4e38a7f225d57766b127e9f23a6c76cd750f9",
+      "counts": {
+        "total": 3,
+        "passed": 2,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 22.19,
+      "sourceDigestBefore": "07e8c6235cf8f091ff131b97092560dc7a0f02e2c7bd51d21f448fad5b766d8c",
+      "sourceDigestAfter": "07e8c6235cf8f091ff131b97092560dc7a0f02e2c7bd51d21f448fad5b766d8c",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "targetSha256": "57457251f354a361f1d1136db6076684bb807978c8e95f0d1122b25cd352ea02"
+    },
+    {
+      "label": "obs011-recovery-20261020-foldp-m4-budget-green01",
+      "phase": "green",
+      "resultSha256": "072775042120b87a68917e70d85d7cab90b68a515bd019caaf0c5c98d74f4b24",
+      "counts": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 22.82,
+      "sourceDigestBefore": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+      "sourceDigestAfter": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "targetSha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21"
+    }
+  ],
+  "publicAssertionFailures": [
+    {
+      "name": "publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget()",
+      "type": "java.lang.AssertionError",
+      "message": "java.lang.AssertionError: \nExpecting actual throwable to be an instance of:\n  com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.ValidationReached\nbut was:\n  java.lang.AssertionError: \nExpecting actual:\n  SystemClock[Z]\nto be an instance of:\n  com.citi.put.checks.studio.guided.publication.DatabaseClock\nbut was instance of:\n  java.time.Clock.SystemClock\n\tat com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.lambda$publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget$8(PublicationGrantClockIT.java:197)\n\tat org.mockito.internal.handler.MockHandlerImpl.handle(MockHandlerImpl.java:111)\n\tat org.mockito.internal.handler.NullResultGuardian.handle(NullResultGuardian.java:29)\n\t...(88 remaining lines not displayed - this can be changed with Assertions.setMaxStackTraceElementsDisplayed)",
+      "sites": [
+        "at com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.lambda$publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget$8(PublicationGrantClockIT.java:197)",
+        "at com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget(PublicationGrantClockIT.java:214)"
+      ]
+    }
+  ]
+}

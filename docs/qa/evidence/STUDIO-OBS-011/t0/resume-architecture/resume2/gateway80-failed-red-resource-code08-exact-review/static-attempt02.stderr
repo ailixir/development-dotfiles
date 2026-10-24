@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code08-exact-review/verify_source.py", line 69, in <module>
+    check('JS-ONLY-OWN-LABELS',OwnGeneration().visit(ast.Constant(cache['operator-completion.js'].decode())).value==old['operator-completion.js'].decode())
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code08-exact-review/verify_source.py", line 9, in check
+    if not v:raise AssertionError(n)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: JS-ONLY-OWN-LABELS

@@ -1,0 +1,45 @@
+{
+  "rootSafeAttestation": {
+    "tool": "ef4122",
+    "actualExit": 0,
+    "inspection": "8cac60",
+    "safe": true,
+    "threats": []
+  },
+  "minimalDesignSavedBeforeLiterals": true,
+  "priorFakeHarnessInspected": "04c990",
+  "guardedAttempts": [
+    {
+      "tool": "fccde4",
+      "actualExit": 0,
+      "fakeChecks": 186,
+      "fakeCases": 17,
+      "bodyFakeExecutions": 16,
+      "bootstrapFakeExecutions": 2,
+      "stderrEmpty": true,
+      "boundaryAttempts": []
+    }
+  ],
+  "finiteChecks": [
+    {
+      "tool": "89f466",
+      "actualExit": 0,
+      "checks": 190,
+      "pinRecords": 38
+    },
+    {
+      "tool": "81fd0e",
+      "actualExit": 0,
+      "addedChecks": 2,
+      "scope": "Exact prior body/bootstrap independent-ID AST reuse; no target execution"
+    }
+  ],
+  "currentStaticTotal": 192,
+  "targetScenarioExpansionAfterPass": 0,
+  "failedAttempts": [],
+  "actual05Diagnostics": 0,
+  "actual04": "Prior exact approved record only; its scope/cap consumed. Raw reported text unknown; no field/cause reconstruction.",
+  "priorProof": "Design02/QA and source04 graph exact-bound where unchanged; no old suites/underlying186 source rows rerun/reacquired.",
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

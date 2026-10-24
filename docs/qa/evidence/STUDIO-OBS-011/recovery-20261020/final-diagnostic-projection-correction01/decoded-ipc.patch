@@ -1,0 +1,40 @@
+--- a/ipcProjectionArgv[2]
++++ b/ipcProjectionArgv[2]
+@@ -4,6 +4,8 @@
+ def main():
+  root=Path(sys.argv[1]); task=sys.argv[2]; assert task in ('test','guidedIncrementalTest') and root.is_dir() and not root.is_symlink()
+  errors=Counter(); facts={}
++ parentRequired={'v','ordinal','pid','case','c6','executionId','received','receivedCount','results','resultOk','resultErrorCode','resultSchemaValid','kills','killCount','exitCode','exitSignal','loopDelayMaxMs','loopDelayP99Ms','controlReads','controlReadCount'}
++ childRequired={'v','pid','executionId','readySent','resultSent','resultOk','resultErrorCode'}
+  def read(name):
+   try:
+    p=root/name; assert not p.is_symlink(); fd=os.open(p,os.O_RDONLY|os.O_NOFOLLOW)
+@@ -12,7 +14,14 @@
+    facts[name]={'bytes':len(raw),'physicalLines':len(raw.splitlines()),'sha256':hashlib.sha256(raw).hexdigest()}; rows=[]
+    for line in raw.splitlines():
+     try:
+-     d=json.loads(line); assert isinstance(d,dict) and d.get('v')==1; rows.append(d)
++     d=json.loads(line); assert isinstance(d,dict) and type(d.get('v')) is int and d['v']==1
++     if name=='ordinary-ipc-parent.jsonl':
++      assert d.get('diagnosticFailed') is True or parentRequired<=d.keys()
++     else:
++      assert childRequired<=d.keys()
++      assert type(d['pid']) is int and d['pid']>0
++      assert d['executionId'] is None or isinstance(d['executionId'],str) and __import__('re').fullmatch('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',d['executionId'])
++     rows.append(d)
+     except Exception: errors['MALFORMED_IPC_RECORD']+=1
+    return rows
+   except Exception: errors['IPC_FILE_UNAVAILABLE_UNSAFE_OR_CHANGED']+=1; return []
+@@ -34,6 +43,12 @@
+    assert isinstance(p.get('received'),list) and all(k in ('ready','result','step-started','step-finished','other') for k in p['received']); r['received']=p['received']
+    assert isinstance(p.get('kills'),list) and all(k in ('violation-catch','performStop-grace','other') for k in p['kills']); r['kills']=p['kills']
+    assert r['receivedCount']==len(r['received']) and r['killCount']==len(r['kills'])
++   reads=p['controlReads']; assert isinstance(reads,list) and len(reads)<=512 and r['controlReadCount']==len(reads)
++   for read in reads:
++    assert isinstance(read,list) and len(read)==4
++    assert all(type(n) is int and 0<=n<=9007199254740991 for n in read[:2])
++    assert all(type(n) is int and n in (0,1) for n in read[2:])
++   r['controlReads']=reads
+    matches=[(i,c) for i,c in enumerate(children) if c.get('pid')==p.get('pid') and (c.get('executionId') is None or c.get('executionId')==p.get('executionId'))]; joined.update(i for i,c in matches); r['childLineCount']=len(matches); r['children']=[]
+    for i,c in matches:
+     assert type(c.get('pid')) is int and c['pid']>0 and type(c.get('readySent')) is bool and type(c.get('resultSent')) is bool

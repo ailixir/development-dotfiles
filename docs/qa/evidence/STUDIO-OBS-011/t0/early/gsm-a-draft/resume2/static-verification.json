@@ -1,0 +1,102 @@
+{
+  "status": "STATIC_PACKAGE_CONSISTENCY_ONLY_NOT_RUNTIME_PROOF",
+  "runtimeExecuted": false,
+  "allFiveBaseFilesMatchRecordedS011": true,
+  "unchangedReadOnlyPrunerPin": true,
+  "originalPackageInputsUnchanged": true,
+  "originalSixOrderedMethodNamesPreserved": true,
+  "originalMethods": [
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "names": [
+        "nonTerminalHttpResultIsAcceptedAndConformsToV3Result",
+        "terminalSucceededHttpResultRefusesPublicationInsteadOfSavingForever",
+        "manualEnabledFallbackRetainsTerminalSucceededPendingAndHttp200",
+        "disabledPublicationKeepsResultReadAuthorityChecks"
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedTeardownShedTest",
+      "names": [
+        "shedWarnsOncePerIntervalAndTheNextTickKeepsOneDurableAttempt",
+        "anIdAlreadyQueuedOrInFlightIsNeverSubmittedTwice"
+      ]
+    }
+  ],
+  "newMethodCount": 11,
+  "a01MethodCount": 14,
+  "exactPatchReconstruction": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "baseToFinalExact": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "baseToFinalExact": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "baseToFinalExact": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "baseToFinalExact": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "baseToFinalExact": true
+    }
+  ],
+  "neutralSeamExactOriginal": true,
+  "fourMutationPatchesExact": true,
+  "pythonHelpersAstParsedNotExecuted": [
+    "staging_common.py",
+    "run-mutation.py",
+    "run-stage.py"
+  ],
+  "unvalidated": [
+    "Java compilation/API/Spring/SpyBean wiring",
+    "real disabled start/base/receipt fixture setup",
+    "runtime schemas/defaults/member order",
+    "red01/red02/a01/four mutation kills",
+    "format/static analysis/final gates/independent QA"
+  ],
+  "originalSixMethodBodiesPreservedAsOrderedLines": [
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "nonTerminalHttpResultIsAcceptedAndConformsToV3Result",
+      "allOriginalMethodLinesRemainInOrder": true
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "terminalSucceededHttpResultRefusesPublicationInsteadOfSavingForever",
+      "allOriginalMethodLinesRemainInOrder": true
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "manualEnabledFallbackRetainsTerminalSucceededPendingAndHttp200",
+      "allOriginalMethodLinesRemainInOrder": true
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "disabledPublicationKeepsResultReadAuthorityChecks",
+      "allOriginalMethodLinesRemainInOrder": true
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedTeardownShedTest",
+      "name": "shedWarnsOncePerIntervalAndTheNextTickKeepsOneDurableAttempt",
+      "allOriginalMethodLinesRemainInOrder": true
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedTeardownShedTest",
+      "name": "anIdAlreadyQueuedOrInFlightIsNeverSubmittedTwice",
+      "allOriginalMethodLinesRemainInOrder": true
+    }
+  ],
+  "completeFilesByteIdenticalToOriginalDraft": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java"
+  ],
+  "basePredicateOccursOnceAfterExistingDirectReadAuthority": true
+}

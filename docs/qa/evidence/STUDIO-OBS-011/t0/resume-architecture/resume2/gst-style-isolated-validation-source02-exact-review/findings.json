@@ -1,0 +1,43 @@
+{
+  "reviewer":"Aria",
+  "verdict":"HOLD_EXACT_INACTIVE_PROTOCOL_CORRECTION_REQUIRED",
+  "subjectManifestSha256":"0bac75fdd932a1858aef8dfb9e67d1769025966c707bfe9dd28122545b2534b2",
+  "mandatoryFindingCount":1,
+  "mandatoryFindings":[
+    {
+      "id":"GSTISO02-ARCH-01",
+      "severity":"HIGH",
+      "mandatory":true,
+      "priorCategory":"GSTISO01-ARCH-01 / QA-01 same-permit complete nondecreasing gate clock",
+      "location":"pure_controller.py Controller._gates / Controller._gate_inner / Controller._permit_time",
+      "establishedBehavior":"guarded_gate sets gate_in_progress before _gate_inner. Its initial _gates consumes an admitted clock while gate_permit is stillNone, so _gates does not retain/check it with _permit_time. Independent actual-controller input clocks150 then120, followed by120, all inside the original signed interval[100,160), produce acceptedtrue/phaseStatus0/GATE_OK. The original permit raw pin and once gate cap remain unchanged.",
+      "impact":"A contradictory earlier clock fact consumed during this active gate can be discarded when binding initializes the permit clock. The source protocol therefore does not enforce its stated nondecreasing history across every active-gate admission fact. No real clock, installed Port/guard, actual permit use or close was observed.",
+      "requiredCorrection":"Retain and validate every admitted clock observation from the beginning of the active gate, including its initial pre-binding admission, against the same original permit once bound. Binding must not reset or erase that earlier history. Reversed/unknown/out-of-window evidence must latch HOLD with consumed cap and no qualifying publication, without rereading a new permit, refresh, extension or retry.",
+      "requiredPairs":["Timely nondecreasing complete gate remains positive.","Initial active admission150 followed by PRE120 inside[100,160) rejects and preserves the original permit/cap/known failed history."],
+      "evidence":["critical_checks.py","critical.stdout: initial_active_gate_clock_reversal"]
+    }
+  ],
+  "nonmandatoryObservations":[
+    {"severity":"LOW","location":"RECIPE.md opening read list","observation":"The current recipe still names IMPLEMENTATION-DESIGN.json; the current manifest instead contains SOURCE02-DESIGN.json and historical source01-IMPLEMENTATION-DESIGN.json.","correction":"Point the operator to the current design and explicitly label the historical one. No absent-file read or runtime action was attempted by this review."}
+  ],
+  "correctedAtSourceLevel":[
+    "Previously bound permit POST/body-drain/final-source/publication expiry and post-binding reverse/unknown facts now reject; original scalar tuple/rawpin is frozen and no replacement is reread.",
+    "One owned final_source_observation after body finish covers gate/postclose and ordinary invoke; strict ownership/completion and finite R checks reject late drift/incomplete/failed observations before success eligibility.",
+    "Formatted adoption stages project/pending eligibility until exactTrue review/same-expiry lease/final admission/owned R proof/qualified publication; false/throw/unknown preserves accepted project/pending candidate/Port refs/history and sticky HOLD blocks repaired-fact verify."
+  ],
+  "conditions":[
+    "Support remains limited to the honestly inactive Controller/selected-buffer/hooks/protocol scope. Real ordinary custody/ownership/native/wait/report/archive/main-object/shell guard/root caller and publication atomicity are explicitly OWED and need separate complete implementation/review/actual qualification; DefaultOwedPort/noCLI stays fail-closed. This is not a hidden additional completeness finding.",
+    "The future publication completion contract must actually run the frozen-permit callback at the qualified boundary after all fallible preparation/cleanup. False, missing, thrown or uncertain publication cannot yield gate authority; partial artifacts remain failed/unknown. A callback interface, fake hash or typed Boolean is not actual filesystem/kernel/ownership evidence.",
+    "Owned final_source_observation must retain the same phase context, account and close all own observer/FD/helper resources before return, no second collector or infinite finalizer loop. Unknown final source or observer completion remains sticky HOLD with separate primary/cleanup.",
+    "All original design1080e081/QA9c79d0a5/root9b45d5d8 and full source01 all-three conditions02177a09 remain. Same verified buffers, selected named pure/XML definitions only, exact hooks/buildSrc exception/output regex and all immutable history remain.",
+    "Current Gateway proper failed archiveQA/final/separate60s permit/wrapper1/postclose0/actualQAroot precedes heavy work. Narrow NONCREDIT step6/withheld-signature/root731 Aria/Quinn/root/preF1/NONIR/exclusive max12h3destination lease precedes actual copy/overlay and format; no shared R writer or reused holder/cap/exception.",
+    "Readonly R/f9/source/main506/Replay/dist/non-target facts need actual fresh proof.2092 literal rows and284NULL modes are ancestry only; all284 actual modes before copy/no0644 default. Offline Gradle8.10.2 seed/closure/JDK/caffeinate/property/PGarm64/Java fixture remain UNKNOWN; no cache/home/vendor scan/download/pull/retag/symlink/skip/Ryuk fallback.",
+    "Format900/verify3600/regression7200 each cap1 including setup/launch/parse failure; no signals/synthetic timeout/unresolved-native promotion. Changed hashes require exact new source equivalence/AriaQAroot/same-expiry lease adoption before unused separately decided verify. Full Spotless check/checkstyleMainTest/compileTestJava/fresh bothXML/non-skipped tasks and exact5classes99PASS0skip/fresh test.exec remain actual obligations.",
+    "Actual finite private archive contract/QAroot/standalone final0/separate actual status/inspection/exact60sPREPOST permit/guarded wrapper0/outerpostclose0/actualQAroot remain owed. No Source09 profile borrowing, old C8 compile exception, naked exit, retry/refresh, source apply or cleanup.",
+    "Author74 final unique controls are43 retained+31new/24cases; prior73 candidate is historical, total147 actual assertions not147 currentunique. Author20 static includes15 retained; old4552/624/reviewer43 are bound reuse, not rerun. Original failed attempt2 inner cause remains UNKNOWN.",
+    "C8-before-credit/mainW1/Replay/default4000/IRclocks/order/skips/cohorts/T0/root731/source-window/21 external human/lifecycle/private-baseline/cleanup holds remain unchanged. USD500 shared ceiling, aggregate usage UNKNOWN. No actual source-window/lease/copy/overlay/formatter/compiler/native/installation/permit/cleanup/credit authority."
+  ],
+  "evidence":{"independentCriticalChecks":25,"independentCriticalCases":12,"staticChecks":530,"pinRecords":150,"targetActions":0,"author74And20Reused":true,"oldSuitesReplayed":false},
+  "actualAuthority":false,
+  "credit":false
+}

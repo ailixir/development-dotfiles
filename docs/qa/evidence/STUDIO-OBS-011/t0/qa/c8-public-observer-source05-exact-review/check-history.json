@@ -1,0 +1,29 @@
+{
+  "kind": "REVIEWER_ONLY_STATIC_METADATA_ASSUMPTION_CORRECTIONS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "actualStatus": 1,
+      "reason": "Incorrectly assumed public-policy literal despite declared generation4->5; corrected exact generation-only semantic comparison. No subject/fake boundary action reached."
+    },
+    {
+      "attempt": 2,
+      "actualStatus": 1,
+      "reason": "Incorrectly required full candidate digest in both recipes; RUNTIME-RECIPE delegates it. Corrected current digest in RECIPE, stale digest absence and exact entry API both; no subject/fake boundary action reached."
+    },
+    {
+      "attempt": 3,
+      "actualStatus": 0,
+      "reason": "2290 source/pin/AST and independent loader/closure checks passed; no subject or audit change."
+    }
+  ],
+  "separateGuardedReplays": "374 checks passed once; not repeated for metadata assumptions",
+  "constructorCounterexample": {
+    "actualStatus": 0,
+    "checks": 12,
+    "cases": 3,
+    "mandatoryCounterexamples": 2
+  },
+  "subjectCodeChanges": 0,
+  "actualRuntimeOrNativeActions": 0
+}

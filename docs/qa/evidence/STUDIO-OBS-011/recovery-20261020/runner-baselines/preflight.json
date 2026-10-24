@@ -1,0 +1,982 @@
+{
+  "capturedAt": "2026-10-20T14:10:21.092476+00:00",
+  "versions": {
+    "node": "v24.20.0",
+    "pnpm": "10.33.0",
+    "helm": "v4.2.0+g0646808"
+  },
+  "image": {
+    "requested": "sha256:f8bcb56378b9277f5947a915b25bfdd483e3898ea6dd31681c3ad39d3b616cdf",
+    "exit": 0,
+    "safeIdentityConfig": "\"sha256:f8bcb56378b9277f5947a915b25bfdd483e3898ea6dd31681c3ad39d3b616cdf\" \"pwuser\" [\"sh\",\"-c\",\"ulimit -c 0 && exec node dist/main.js\"]"
+  },
+  "files": [
+    {
+      "path": "docs/specs/studio/openapi.yaml",
+      "sha256": "bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4"
+    },
+    {
+      "path": "helm-chart/put-checks/.helmignore",
+      "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6"
+    },
+    {
+      "path": "helm-chart/put-checks/Chart.yaml",
+      "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/NOTES.txt",
+      "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+      "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/configmap.yaml",
+      "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/deployment.yaml",
+      "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/hpa.yaml",
+      "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/ingress.yaml",
+      "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/pdb.yaml",
+      "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/service.yaml",
+      "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/serviceaccount.yaml",
+      "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+      "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+      "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+      "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+      "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-runner-service.yaml",
+      "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+      "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06"
+    },
+    {
+      "path": "helm-chart/put-checks/values-dev.yaml",
+      "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1"
+    },
+    {
+      "path": "helm-chart/put-checks/values-prod.yaml",
+      "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9"
+    },
+    {
+      "path": "helm-chart/put-checks/values-uat.yaml",
+      "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33"
+    },
+    {
+      "path": "helm-chart/put-checks/values.yaml",
+      "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80"
+    },
+    {
+      "path": "studio-runner/.nvmrc",
+      "sha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53"
+    },
+    {
+      "path": "studio-runner/Dockerfile",
+      "sha256": "70881264ddda3a7f71da1f1da74794cfea7c19287fa05ddd1bff9bb8ef4489eb"
+    },
+    {
+      "path": "studio-runner/README.md",
+      "sha256": "4184d77764d72842d9bc4f5de5f39bafb491ea5f0987bead437b59e51f0bc9cd"
+    },
+    {
+      "path": "studio-runner/ci/stages.md",
+      "sha256": "4ca78b97f007eed935ef9d6fb43ddf621beb05296dc3346369ccd380df9489d2"
+    },
+    {
+      "path": "studio-runner/package-lock.json",
+      "sha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613"
+    },
+    {
+      "path": "studio-runner/package.json",
+      "sha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e"
+    },
+    {
+      "path": "studio-runner/scripts/check-pins.mjs",
+      "sha256": "4d1da390e9266789e30e2e2a12f8a9b4293c9acb78484b780900be6f9b9a4815"
+    },
+    {
+      "path": "studio-runner/test/browser-provenance.test.ts",
+      "sha256": "616b7b797e6e5a23bd7eb3e4131afbe95a12ef171f36a94f7f51778a51969e9d"
+    },
+    {
+      "path": "studio-runner/test/compat.test.ts",
+      "sha256": "14c6e7dedf9a74d9d311abdf477c685ae9b88bed110e24364bb396a4aa1292c6"
+    },
+    {
+      "path": "studio-runner/test/contract-integrity.test.ts",
+      "sha256": "88deda7667bd71ffd70a649279626c2598be510e6786e8e8a8d178978f488ffb"
+    },
+    {
+      "path": "studio-runner/test/contract.test.ts",
+      "sha256": "2b378ec1c051ec7824f332c0788b5479421cd1248aae9e77df8d0fb869eabeff"
+    },
+    {
+      "path": "studio-runner/test/controlReferencePreservation.test.ts",
+      "sha256": "86a2d54b5dd4d6603d643812391ea2b9d59211c312b176e0e3da4e4bc7cca0bd"
+    },
+    {
+      "path": "studio-runner/test/currentWorldFactories.test.ts",
+      "sha256": "c1e5ead9c29157187857d17ab4c435fc6a95ecdcfb1203d817bbe75f3bc45d14"
+    },
+    {
+      "path": "studio-runner/test/deferred.test.ts",
+      "sha256": "ddcf66b2d50bdbf2be169138868db406a84ec1bacc54dcedf929ac87ec4c431f"
+    },
+    {
+      "path": "studio-runner/test/deployment/backend-env.test.ts",
+      "sha256": "925e0bfd589ada54feb4d72074e5596e0b1379a00a84278d471edfacb4d0cd02"
+    },
+    {
+      "path": "studio-runner/test/deployment/cancel-budget-env.test.ts",
+      "sha256": "18ec676a9ced03456c29bd1f76ebbd5ca76186173fb28a56f4e213e67b53e1a4"
+    },
+    {
+      "path": "studio-runner/test/deployment/chart.test.ts",
+      "sha256": "df34bc91f2e4b86335c5fbec5f58e7a40eeaa03d037561729a2bf46c5a5efd2c"
+    },
+    {
+      "path": "studio-runner/test/deployment/dump-settings.test.ts",
+      "sha256": "89b040b5c2dab1317bce041ea0b4ac59805bb45d555710a41ea3bf9203eef690"
+    },
+    {
+      "path": "studio-runner/test/deployment/edge.test.ts",
+      "sha256": "69691306e0d9c0fb373fb65ab136ab376fb06d65d84a526b13d78de687f2e92f"
+    },
+    {
+      "path": "studio-runner/test/deployment/envfrom-keys.test.ts",
+      "sha256": "87b82dbb8186fbf08885e36794785e477419b9fbc7c28408d1a6a923a237c840"
+    },
+    {
+      "path": "studio-runner/test/deployment/integrations.test.ts",
+      "sha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907"
+    },
+    {
+      "path": "studio-runner/test/deployment/scaling.test.ts",
+      "sha256": "d831f6f1e4308052e20ba0b4ee04e52512f796d326e551adcb3ee180309a37cf"
+    },
+    {
+      "path": "studio-runner/test/deployment/sec2.test.ts",
+      "sha256": "fc8bdeefc0c4038e767c41acc2b7b5dbe6fd0265ed3d4c90b16cf468ea446577"
+    },
+    {
+      "path": "studio-runner/test/deployment/tls-client-cert.test.ts",
+      "sha256": "ec1a25c4d2ced07e43d75fa4c2e4d8351debeebbeb83258d3378fcc8cca015fd"
+    },
+    {
+      "path": "studio-runner/test/deployment-tier-wiring.test.ts",
+      "sha256": "653e4da4edc12ae1b4f1feeb8399ac1028a0baab18b46a7dd1143cc7adc7e6dd"
+    },
+    {
+      "path": "studio-runner/test/disclosure.test.ts",
+      "sha256": "954c0ab3f7d60e480df37f004936204384500d5147332d3eb4657235f89ecbe0"
+    },
+    {
+      "path": "studio-runner/test/documentJson.test.ts",
+      "sha256": "0ec384914250541f410c9e0a63ddacd3ce12257aa6fe7ab06019a25db27de393"
+    },
+    {
+      "path": "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+      "sha256": "fb26b89354d30274361a45996dccf74df3353cfd8d99f44d8584b92b8479a93b"
+    },
+    {
+      "path": "studio-runner/test/evaluation/budgetAdmission.test.ts",
+      "sha256": "0217f2b5230ad5a81d22ec90bc229ee54fa1550868a0f933c2bce736e580d549"
+    },
+    {
+      "path": "studio-runner/test/evaluation/corpusManifest.test.ts",
+      "sha256": "db7189d40e751949ef8714a880a5e9ff8d743f51c0e34637e37e2b44a541da6a"
+    },
+    {
+      "path": "studio-runner/test/evaluation/corpusPages.test.ts",
+      "sha256": "f619e79b21653e7b93d9bbddf919327d5d2140569e2c5f519dc6bdb403d721e1"
+    },
+    {
+      "path": "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+      "sha256": "4e6b86e4bf1a09eee46570eca97a8f2e8504a1756a1c91636459e9d77884e7dd"
+    },
+    {
+      "path": "studio-runner/test/evaluation/observedOracle.test.ts",
+      "sha256": "35b949761de8446629740de19a078aa750150379383c3fc993f6f88bf3e0655d"
+    },
+    {
+      "path": "studio-runner/test/evaluation/report.test.ts",
+      "sha256": "4f8df23c42edd421fc884a13093761576be6dbe6f549c6fa21139a035197a92a"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "sha256": "5f0930fb516f0c04e23769165148bb2ce4c726fee3e69c2288c670f4d8e3e3ea"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/deadline-cleanup.test.ts",
+      "sha256": "f87cc1f867e67114fc8188f5af6cec2613898669ca3e3885037ac19879e19b85"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+      "sha256": "e2922593a02faadda8a452c093714de397e7228d1335cdea39577ede24985560"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/globalSetup.ts",
+      "sha256": "48ed6f54da59ea71fdecbd6273bb08a3ae0644710a02501d1d9fe48aa95abbcd"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+      "sha256": "bdd6b60ae66a687b19f2e10af760d0cfd2b84d8ee359ff1d301be6d494012def"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-observation-boundary.test.ts",
+      "sha256": "d33157144bc95611f3f45932e8e7c707562035fc1f10c9307696ad3115a298b0"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-recording-kill.test.ts",
+      "sha256": "fb9e1b2336ab2023fc7396c24c164da7185a768eac91bc30740e3260c3d13c1a"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-recording.test.ts",
+      "sha256": "0444ce2da554087645a076f67e4acb9f9cdb5bcbe4ee8d1c9ca5ab47b33a1270"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-secret-isolation.test.ts",
+      "sha256": "10d97ab585a5af13a69b128a231eab0c6fd5e18780aec17cb3abcb803f752fd6"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts",
+      "sha256": "bd0e0f1b48aa941a58b8aacbd611d6d26940de9daf0be86c8f261e7004edec98"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-secret-stale-grant.test.ts",
+      "sha256": "d6af50904a1a3187ae5b9b49478dd4232b28cf0b44e97807db765609876194d8"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "sha256": "17b59ff7ad67f2249697c059c266453300f658dc0b9e1846438a34da01fcaef5"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "sha256": "4b9ae41d55efb26cd464b506ece8ad89de0e69737b9df3afdd26eff12d4de903"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-wire.test.ts",
+      "sha256": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+      "sha256": "16aaebe6db8386b06aedbc58b347bb57b3ff937989afa49db0eb8f4b4d99a588"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/mixed-mode-prefix.test.ts",
+      "sha256": "adf11ab62de6cade54be1427daf60519ae270dceb5ee08b382c828b75b6622a2"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/native-blank-surface-controls.test.ts",
+      "sha256": "99c56e2f9d8f29709b63bb2975782d0d5901b91faef6afbab40a8c92b679f734"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "sha256": "0db862586fc67fce8f1b98956f98f53366f3fc6ee77f6c9ae9751f2053a9b821"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "sha256": "7b928dc51eef99343cdeefdb1cbf8055c70b7d46c2ed086073ec380f92c17fb1"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-refusal.test.ts",
+      "sha256": "0140a36d0da940d55ff321b1346c5b00311d6ebb7044cd2b6226ca324ed5ad0a"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+      "sha256": "cf94fb1aa1383eaf44a8f276325bb5bcc6a41bc613806eecf58091b4099691a7"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-contains-text-parity.test.ts",
+      "sha256": "689454b02324a146f575bf740e6c560c07d94ce6d1a765a5e50134a3b0fb0ca9"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "sha256": "91129c744068c21780243b3f86c2e54e318d985fba3b25169dcdc4252b6836f5"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "sha256": "f2b53e1dcfb195d9f2c72996a67e2ce7d0043617c83fb986b94c0daf558399f9"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-secret-control.test.ts",
+      "sha256": "15f81d2591c5226db6144ea716be60c76a1cc4b431c12dae81e583927feccb8b"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/secret-login.test.ts",
+      "sha256": "c65db8941e89822efba639e9ea36d65405bef5d4732317750734d27f86c9a57d"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/seek-measurement.test.ts",
+      "sha256": "7b6cf4223e4f7bfeb40790d5cd1a356bd747c24930d679b8df2dfbe9a578adf9"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/upload-evidence.test.ts",
+      "sha256": "0dacd02b27bde26b5ecb12587111359edeadee99c1fba829ff416f7e0b3e9e47"
+    },
+    {
+      "path": "studio-runner/test/generated-contracts.test.ts",
+      "sha256": "90a28ffcc33799533fc87931b35d5fef45151f6646d676f31dd8c314d22c37a7"
+    },
+    {
+      "path": "studio-runner/test/guided/browser.test.ts",
+      "sha256": "73d359901693ab2fd355932d9344d48c7dfd0b800e5e8f54e23c2cdc73ba86ea"
+    },
+    {
+      "path": "studio-runner/test/guided/diagnostics.test.ts",
+      "sha256": "fdb84efff07a859dd25a36772a3a492fe2747fc4b8094a4eaedf649d751c20c5"
+    },
+    {
+      "path": "studio-runner/test/guided/evidence.test.ts",
+      "sha256": "ce99f61179a40712993622fd488234f25386584a3cf5453c9052ccdf25910247"
+    },
+    {
+      "path": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "sha256": "fafbe9d6a79c4b17a1cb2f94fcdeb9455c7d40133144c1b82f8cc371daa12f83"
+    },
+    {
+      "path": "studio-runner/test/guided/ownership.test.ts",
+      "sha256": "436b45e61faab72efd9ec5d801f7e720ae8801872702c80286c31af37f5d8e19"
+    },
+    {
+      "path": "studio-runner/test/guided/policyHash.test.ts",
+      "sha256": "00a235472b87858f29205c4483e16d2599eb0c986da94caa4ba9fbe115cb1d76"
+    },
+    {
+      "path": "studio-runner/test/guided/runtime.test.ts",
+      "sha256": "ad6ad7e20730e1dd775d15301450738ed227964057ab6edfeca36fd1307bc629"
+    },
+    {
+      "path": "studio-runner/test/guided/schemaAudit.test.ts",
+      "sha256": "c37d834a4956e379d289951e50365ac654c2f004c9df8b40bdef7e22de2e2f39"
+    },
+    {
+      "path": "studio-runner/test/guided/stopReason.test.ts",
+      "sha256": "f2d703d0d5d7b01b77c779c63ecd45cbe32fe97eeeb437837d982eb377ab9bcf"
+    },
+    {
+      "path": "studio-runner/test/guided/transport.test.ts",
+      "sha256": "7f3c6d5f7317f31ac9be5ba282b99301f6702b1ad0abd4b7b7280a1391809ed0"
+    },
+    {
+      "path": "studio-runner/test/isolation.test.ts",
+      "sha256": "2ed21df415d2b3e4e37479a9f470df708dc1d9319ee733c5ecb109eb4d3db3d5"
+    },
+    {
+      "path": "studio-runner/test/lint-boundary.test.ts",
+      "sha256": "87319dd679b688bf5316bfba2f6ba67f412465d7bf57c7764624d814a0255bf3"
+    },
+    {
+      "path": "studio-runner/test/nativeBlankSurface.test.ts",
+      "sha256": "d96c65ca4b8f9cba29145db9b927554026bf9dc9b4ac8a8e058321471d8142a1"
+    },
+    {
+      "path": "studio-runner/test/nativeControlReadiness.test.ts",
+      "sha256": "38563802b99df93b54ad4c7367eb991da9bc912379977adfe264a879b54cc967"
+    },
+    {
+      "path": "studio-runner/test/no-dynamic-evaluation.test.ts",
+      "sha256": "1e0d733b42476719c10c6c21e7842b69ba4b283125a4d06429036abda8b696d9"
+    },
+    {
+      "path": "studio-runner/test/observedIncrementalValidation.test.ts",
+      "sha256": "17a779b91e16a6d92e230dc18eff79efd587c5407a05e1b84fd88f624f9654e9"
+    },
+    {
+      "path": "studio-runner/test/observedReplayEquivalence.test.ts",
+      "sha256": "db1a5c223a71400996dd88bcfb80e63ae0fbbce8187b2fb65958d13178169e15"
+    },
+    {
+      "path": "studio-runner/test/observedReplayExecutor.test.ts",
+      "sha256": "92672ba590eef959ecd52b6e55b2d8829ea61207b76cb19142a249f088a055ae"
+    },
+    {
+      "path": "studio-runner/test/observedReplayValidation.test.ts",
+      "sha256": "4464978cf6c7f50ce6767a653e4434f728e989be98049bc611641488813c9059"
+    },
+    {
+      "path": "studio-runner/test/observedSnapshotPreimages.test.ts",
+      "sha256": "5a312191328ece71ca84f28a600b068b8ce6d50524360fd6e481bbf5e14b91aa"
+    },
+    {
+      "path": "studio-runner/test/observedV3TupleValidation.test.ts",
+      "sha256": "5be2eb9060fa9844b6ce447e9f57f905a7a90024440215f54c62052b98f1eeaa"
+    },
+    {
+      "path": "studio-runner/test/pins.test.ts",
+      "sha256": "a846c1e5e32a81c20051fbf4892cfc7790187da34f134990a0dd3d3f2b42b3ca"
+    },
+    {
+      "path": "studio-runner/test/print-observed-catalog.test.ts",
+      "sha256": "bc22c3278634c07243b6368a54ef3fb4e0e68c528eddced1f4a36cb13353e96e"
+    },
+    {
+      "path": "studio-runner/test/profileSafetyFixture.test.ts",
+      "sha256": "ca9e020334ef1c6db194660f55a85f2c59bbd89b35419105c6007778125dd6ee"
+    },
+    {
+      "path": "studio-runner/test/redaction.test.ts",
+      "sha256": "3aa56429daa8996ceb3c0f638db7efaeb2479cbf26967579e7f3f53941096bd3"
+    },
+    {
+      "path": "studio-runner/test/reporting/httpClient.test.ts",
+      "sha256": "a6d19b5dbc7f73b4def8168e6cda0436aa1c7f88f7f9c0c5f977b030cdffe9ac"
+    },
+    {
+      "path": "studio-runner/test/reporting/observedProgressUse.test.ts",
+      "sha256": "dbe25b1954cd3d5949e9551ab7baa02133d61eadc3e75875cd99f74386db3911"
+    },
+    {
+      "path": "studio-runner/test/reporting/reporting.test.ts",
+      "sha256": "a43c0ef8b7bb90db3ee0cd3561f7dea03edda9ba20afd0eeef83c7b70390d09c"
+    },
+    {
+      "path": "studio-runner/test/reporting/terminalAbandoned.test.ts",
+      "sha256": "3785620841f1028f016b771e2e715e26c390612b7abf8acc22b9699dbab20276"
+    },
+    {
+      "path": "studio-runner/test/retainedExecute.test.ts",
+      "sha256": "2aa49b583cd8c05a611d76d69537ca0abdba7657d962135a27ff935b4e5e7e0e"
+    },
+    {
+      "path": "studio-runner/test/run/appVideoOwnership.test.ts",
+      "sha256": "e95e4b3f8e83a37bdb02ddc6068fa695657087fe786a63894365091a0499e2c3"
+    },
+    {
+      "path": "studio-runner/test/run/browserProfilePreferences.test.ts",
+      "sha256": "f97266db07702485562cdd8d56671a83e97b10d1943ae9e65d9c2f9f1e92f739"
+    },
+    {
+      "path": "studio-runner/test/run/canary.test.ts",
+      "sha256": "3e5b08bf30445416d805d7fafae63acfbdbc969067c580c3f0e1b78c203a7e48"
+    },
+    {
+      "path": "studio-runner/test/run/childRuntimeTeardown.test.ts",
+      "sha256": "5d7aee97c6895450796d2392c21d5134a8c285e81205b872179415ecea4b6307"
+    },
+    {
+      "path": "studio-runner/test/run/confinement.test.ts",
+      "sha256": "c39785e685bc09ab608049d26803b5fd38c19bc3cdc8cff059a112d69b954a06"
+    },
+    {
+      "path": "studio-runner/test/run/deadline.test.ts",
+      "sha256": "8acb5f591c56f423e833eba7106ed581198fe302b53304f9fa2bcb09c1b56379"
+    },
+    {
+      "path": "studio-runner/test/run/errors.test.ts",
+      "sha256": "a4ae0ddee3bc0dec58e352d80badd59646680a7ee85cd42a836e651b6f32e09a"
+    },
+    {
+      "path": "studio-runner/test/run/evidenceStoreFaults.test.ts",
+      "sha256": "d426bba96659d5795d968083c2a78dd677a066e4ef14ee05f61d1c3e4de4703b"
+    },
+    {
+      "path": "studio-runner/test/run/forkKillTree.test.ts",
+      "sha256": "70adf1d00021e39d13638a0abcf6c8d3055dada98962669b126b213e539cf324"
+    },
+    {
+      "path": "studio-runner/test/run/guidedBrowserReap.test.ts",
+      "sha256": "8b1f8628ca378919625ed58e35e883c8f54a4d5ed924f457b65c87cc5ffa3d90"
+    },
+    {
+      "path": "studio-runner/test/run/launcher.test.ts",
+      "sha256": "4695ff1a7bd74f48a05103533a2546106f5ba534a9be82f5c6b0601696ded119"
+    },
+    {
+      "path": "studio-runner/test/run/manifest.test.ts",
+      "sha256": "10c9bedc918473b41b980adf6340b7ca831f5aee96b3c8fde48a0ea34c59c71a"
+    },
+    {
+      "path": "studio-runner/test/run/objectStore.test.ts",
+      "sha256": "a3ca26179f9d3680a0010249c0c0d8cff71dbe27be005b6eccc0448f5689ff38"
+    },
+    {
+      "path": "studio-runner/test/run/objectStoreFactory.test.ts",
+      "sha256": "6920f10a9a170d909293d48781f681ffd05ab0bed4a7d10cbe3f716a1280f861"
+    },
+    {
+      "path": "studio-runner/test/run/observation.test.ts",
+      "sha256": "926ed47f66dc918e3d49e6dac2bead0b2737953a7fd2bd2ae7aa2fe8de83c0d9"
+    },
+    {
+      "path": "studio-runner/test/run/observationCollectorInvoke.test.ts",
+      "sha256": "546fbaecad20dfa35de015459ba80c4d61ebd58087ae733aee25fd5e5dd2693f"
+    },
+    {
+      "path": "studio-runner/test/run/observationCollectorNaming.test.ts",
+      "sha256": "1c7f8e8634396716d2bba1064ba821feb1d70456985fc67b8b1c47e1bd983cb1"
+    },
+    {
+      "path": "studio-runner/test/run/observationInventory.test.ts",
+      "sha256": "e55d9737c463680e49e74ccfc024fbf6ce8e0609bbd7999d24c85488a6dfbf4b"
+    },
+    {
+      "path": "studio-runner/test/run/observedBootstrap.test.ts",
+      "sha256": "07d9a14d9752bb698cbdacdaeb18872f64450dfd5ce10fc00d95b39122273675"
+    },
+    {
+      "path": "studio-runner/test/run/observedChildRuntime.test.ts",
+      "sha256": "d9fa80ce843238f949fee1509dc339515e70b3b17887d378aacda47bf7a43916"
+    },
+    {
+      "path": "studio-runner/test/run/observedPreparedAdapter.test.ts",
+      "sha256": "3d5076e153008c06bc63418c4e2ddfdbf6cb6ff664863cd937b020a8861c5d88"
+    },
+    {
+      "path": "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "sha256": "6f8e1cd75babd867a8cb98bd7a9a6bfbe67507fda5257ed408b53869fda843d9"
+    },
+    {
+      "path": "studio-runner/test/run/observedWriterQuiescence.test.ts",
+      "sha256": "9cb02633263a54f5fd4257c0713c135f439c7fe94524fc40eeaa6dc523db71ac"
+    },
+    {
+      "path": "studio-runner/test/run/outputRelay.test.ts",
+      "sha256": "7ad24b3982498b933b411ae23843db48bcf9447d47d6e2b4bedf7f1071ebe6bc"
+    },
+    {
+      "path": "studio-runner/test/run/outputRelayContainment.test.ts",
+      "sha256": "ae0f48005b7c31e3d4627284fd7e93995e348f068c5e29aa654d323dc4d927af"
+    },
+    {
+      "path": "studio-runner/test/run/passwordControlResolution.test.ts",
+      "sha256": "86da1d8587590bd2aa57d90be09b9a1e21f640d24fd27bb86c2a68681edcb34b"
+    },
+    {
+      "path": "studio-runner/test/run/passwordControlTransport.test.ts",
+      "sha256": "09896cdcacdabc35df843ce315b30e923bc565413c49ebd38eb61fabcb14b8a0"
+    },
+    {
+      "path": "studio-runner/test/run/processTableUnavailable.test.ts",
+      "sha256": "63cc2bf8275fd0afe8c223f5f8a940a770b7f3541041bf191a89af49d03380f7"
+    },
+    {
+      "path": "studio-runner/test/run/production-seams.test.ts",
+      "sha256": "20cd582c846d1ab2d56222246a9af5b5a93cadc2400e2d8b133656831725194d"
+    },
+    {
+      "path": "studio-runner/test/run/recording.test.ts",
+      "sha256": "eea9d0a68a0b4c9d1c184acd151eeabfb1a66ee95edfac9eb9fb5eab9de07544"
+    },
+    {
+      "path": "studio-runner/test/run/recordingScratch.test.ts",
+      "sha256": "4ef07c3cc581ace86be3ec0906842316dea1dc4ba7745e22e0cd1bc95df70ee5"
+    },
+    {
+      "path": "studio-runner/test/run/s3ObjectStore.test.ts",
+      "sha256": "ca6863b5a3506761f783f3f7841415edb5c6b1b3ec4225fa2b9d8527cd5ac39c"
+    },
+    {
+      "path": "studio-runner/test/run/s3Sonic.test.ts",
+      "sha256": "c5372477ef086c32e2ad1f920d8ab3f8951309a14954b2964013903a3f933860"
+    },
+    {
+      "path": "studio-runner/test/run/s3Wire.test.ts",
+      "sha256": "31df9b33858c168bfe6419f8c51f06cd696135a3b0e7f24db19811ecff63d4d1"
+    },
+    {
+      "path": "studio-runner/test/run/sandbox.test.ts",
+      "sha256": "6a9bf6d5037ce971347df5991372d569e1162ecc9f1db69b36fdc6eb0b473305"
+    },
+    {
+      "path": "studio-runner/test/run/secretReplay.test.ts",
+      "sha256": "dc43402d1c3c2f2e5fe4d520e16c2f8b6a188a58c363dcb0e2a6b19470041226"
+    },
+    {
+      "path": "studio-runner/test/run/timeline.test.ts",
+      "sha256": "6ad9b3494c384b05d108b28ba47e786061658c9ad7bf6c788208217f1501e29b"
+    },
+    {
+      "path": "studio-runner/test/run/trackTreeSampling.test.ts",
+      "sha256": "0c1379432cebb1413a091405d87ce43a84007abace4985a031ec673fe98d4f6f"
+    },
+    {
+      "path": "studio-runner/test/run/tree.test.ts",
+      "sha256": "2583ec49d9e691a88a2c889ea933b9c743bbec468e5eb7d3fde06bbe902685ee"
+    },
+    {
+      "path": "studio-runner/test/run/treeAsyncReader.test.ts",
+      "sha256": "da99f3469288ca8d359de24c5df831fe080d714a52a4950a83be72b43c67f7a1"
+    },
+    {
+      "path": "studio-runner/test/run/treeAsyncReaderFaults.test.ts",
+      "sha256": "570f145db2314247e49ad0bd34fca2052f3cbb90471c7126e7e6acebe9ef43f2"
+    },
+    {
+      "path": "studio-runner/test/run/versionProbe.test.ts",
+      "sha256": "2ef2ecc6b11d5e2b0af31e02fa66e9f35917aa21a9c8ad8e2c90034a5c153512"
+    },
+    {
+      "path": "studio-runner/test/runtime-versions.test.ts",
+      "sha256": "c4ee96430ad00943b938f2e0d6e5ff3ed85533136d6d6a2b5a75d66b08b49f18"
+    },
+    {
+      "path": "studio-runner/test/schemaSemantics.test.ts",
+      "sha256": "229cceffefa0cd3dd107a22091dab48cbee922f3efd06661cca177f6bdd707fb"
+    },
+    {
+      "path": "studio-runner/test/server/admission.test.ts",
+      "sha256": "c869b277b8fc97fa4bd2290572a3a05a5e9fab0898cc48bfa1fe5856bc189d78"
+    },
+    {
+      "path": "studio-runner/test/server/cancel.test.ts",
+      "sha256": "6e6c73edf4043986797c2f7859c0af645e5a35e450c082b48856e20842013a33"
+    },
+    {
+      "path": "studio-runner/test/server/concurrency.test.ts",
+      "sha256": "498c9c604ad621268b95baacd432f06fea5ffe929cc9f14c9077458f2d5ec8da"
+    },
+    {
+      "path": "studio-runner/test/server/controlWindowLog.test.ts",
+      "sha256": "24f69e58d5606a0f0c59f0c96ec9de624884987773af730ee22bdcb1b157ed76"
+    },
+    {
+      "path": "studio-runner/test/server/deadline-outcome.test.ts",
+      "sha256": "232099909c944b77d28e312bd42a7b8981e35b0a98130a418c73d832845d9ca9"
+    },
+    {
+      "path": "studio-runner/test/server/drain.test.ts",
+      "sha256": "931059ab53fef49652d86bc93f11a82a25f634ffe5b33b3c46607db6775080e9"
+    },
+    {
+      "path": "studio-runner/test/server/evidence.test.ts",
+      "sha256": "3df3137fc52331a1972ebe8e2ddfe9654daf633b92d64512309f2962477d81a9"
+    },
+    {
+      "path": "studio-runner/test/server/evidenceConfig.test.ts",
+      "sha256": "f14cef29bb88f2b3031cf784b70ed8fb1678572818429bed6080961bccb6b612"
+    },
+    {
+      "path": "studio-runner/test/server/guidedMode.test.ts",
+      "sha256": "7da57d6389d0593bdd1d6c66ffe5f50d7fbcd3a62af46e87c9e98ab3bfc2dc40"
+    },
+    {
+      "path": "studio-runner/test/server/hung-child.test.ts",
+      "sha256": "e9a3b7638b9434abdeb5e3a5e962fd2fc09ca5cb4174b66c8d1908f7444d2039"
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayAdmission.test.ts",
+      "sha256": "2478379fbc47b54fa89c94f7383de9f4301105d4da8025c4c4e4ef92082dd4eb"
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayAuthorization.test.ts",
+      "sha256": "af79cffc7d66e57be89729e140ad9bed9960535529ec3fe8fd4e6d35853413fd"
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayRoutes.test.ts",
+      "sha256": "c3aecdf8af1c5d3c26afab75bc760d3794d02beecc72568c3a785f9d4f87bba4"
+    },
+    {
+      "path": "studio-runner/test/server/prelaunch.test.ts",
+      "sha256": "16ef03b92f6ee46cdd464012e3bcc4e0354ebf101658591fc9c8e966aa13bf4e"
+    },
+    {
+      "path": "studio-runner/test/server/probe.test.ts",
+      "sha256": "90983fc7ea4019bcd52055cd26aa15e56479d03af793da6ba1a10528723998f1"
+    },
+    {
+      "path": "studio-runner/test/server/resolved-value-guards.test.ts",
+      "sha256": "d33f4b2a7068674a9989ff59fecc219eb882706565d12f22bd4e31f2f0ee62e5"
+    },
+    {
+      "path": "studio-runner/test/server/routes.test.ts",
+      "sha256": "5123fec482ec2f8add9d222ccbb4e991b11019caa96e5d00704390a49850206d"
+    },
+    {
+      "path": "studio-runner/test/server/scratch.test.ts",
+      "sha256": "7a3850114a8ba11cd481f5a9b23ef0dd28cc7e09e5b604f079d670aac679b5bf"
+    },
+    {
+      "path": "studio-runner/test/server/stepTimeoutCeiling.test.ts",
+      "sha256": "ade0018d33d1adedb361e7de6494c1318cc3d3d85e1f8e2d6eb6c96c859ec0dc"
+    },
+    {
+      "path": "studio-runner/test/server/storage-lifecycle.test.ts",
+      "sha256": "3a3c608aff991c7ac4756ac43f9234844a0ce26bf2a2c5980b98fdadacb1afb1"
+    },
+    {
+      "path": "studio-runner/test/server/surface.test.ts",
+      "sha256": "742d220329ebb1349f1a19450248ffbb8bd87cdcbc29415dab4439981ebab791"
+    },
+    {
+      "path": "studio-runner/test/server/terminal-order.test.ts",
+      "sha256": "bcba2a659152cad712e27ead53c7d86fd7afbe34b43833a9ab87413855c3aea4"
+    },
+    {
+      "path": "studio-runner/test/server/timeline.test.ts",
+      "sha256": "27c59dde79eaf953f478e753d9c6e345a818a33ba37d6d0a5cdaf51b3c19ef37"
+    },
+    {
+      "path": "studio-runner/test/server/tlsListener.test.ts",
+      "sha256": "ca3a389537e70075eb91babc6458edb4dff8ca0dc5aa3ad618f62c622cbcd74a"
+    },
+    {
+      "path": "studio-runner/test/static/noRunnerSinks.test.ts",
+      "sha256": "645fedf9ee1ce8077b0cb6d88df4ef2e4916ecdc647b84310a558f7719ccd3de"
+    },
+    {
+      "path": "studio-runner/vitest.config.ts",
+      "sha256": "cb110d944a17da279eefbce363b75cb50c09f753b6705dfd67d40948e1ff3051"
+    },
+    {
+      "path": "studio-runner/vitest.deployment.config.ts",
+      "sha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b"
+    },
+    {
+      "path": "studio-runner/vitest.fixtures.config.ts",
+      "sha256": "2d51915fec9757e34ed1c0c2311fd1362abab917bfa1c5bf8b70ab47cb2c3f87"
+    },
+    {
+      "path": "tools/build-studio-observed-schemas.cjs",
+      "sha256": "6557931cf566b5346c4b3eb88ed27a5fef279749934c853288202ebf615ca68f"
+    },
+    {
+      "path": "tools/check-studio-observed-contracts.cjs",
+      "sha256": "ed641bdce8b10171b6b132c1375a4e4cb24bdfbbe710f5f8e3a3360ea279e3ce"
+    }
+  ],
+  "historical": {
+    "unit": {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-g9b-runner-unit01-vitest.json",
+      "sha256": "72e874e19afe45c0b24b98b971b25c86f0b672d5c637b84de5a03d4b7ea049d4",
+      "count": 29,
+      "skips": [
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-2b [ED-05, SPK-04, Platform/SRE] \u2014 the same pod spec APPLIED, with Chromium\u2019s sandbox observed active in-cluster: non-root under the cluster PodSecurity level, unprivileged user namespaces on the nodes, launch logs showing the sandbox active with no disabling flag, /dev/shm sized sufficiently, and a controlled-fixture run producing a readable webm from that pod. CARRIES story 10.12 AC-6b. There is NO fallback that disables the sandbox: if neither RuntimeDefault nor a Platform-approved Localhost profile works, this escalates to Platform/SRE and Security. Closes when docs/qa/spikes/SPK-04/ carries the evidence and ED-05 is updated.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-3b [SPK-04 question 3, Platform/SRE + @architect] \u2014 the seccomp profile the spike selects, with its approval reference: whether RuntimeDefault permits the namespace-creating clone/unshare calls the sandbox needs without CAP_SYS_ADMIN, and if not, the Platform-approved Localhost profile file, its owner and its approval reference, committed under docs/qa/spikes/SPK-04/. ADR-001 open item O-4. The chart renders RuntimeDefault as a deliberate starting value, never inherited from the backend and never Unconfined.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-4b [ED-05, SPK-04, Platform/SRE] \u2014 SEC-2 browser-path immutability on the INTERNAL image in-cluster, rather than on the public Playwright base ADR-001 \u00a78 permits for local development only. The attack itself is run and recorded against the local image in test/deployment/sec2.test.ts; what is deferred is running it against the image ED-05 delivers, inside a pod. CARRIES story 10.12 AC-6b with AC-2b.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-05 / SPK-04 \u2014 the internal image and the sandbox, in-cluster AC-5b [SPK-04 question 6, Platform/SRE] \u2014 in-cluster PID-1 reaping and slot recovery: under shareProcessNamespace, an orphaned grandchild is reaped by the pause container and a hung child is killed by the parent with the pod recovering its slot. CARRIES story 10.13 AC-11b. The mechanism is chosen and rendered (shareProcessNamespace: true) and the SIGNAL half is proven against the built image in 10.18a; the REAPING half cannot be proven outside a pod, because a pause container exists only in one. Stated rather than blurred, as AC-5a requires.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-04 / SPK-05 \u2014 egress enforcement and destination policy AC-8b [ED-04, SPK-05, Platform/SRE + an unnamed application owner] \u2014 enforcement proven FROM a runner pod with the policy applied: approved host reachable; unapproved host blocked; REDIRECT to an unapproved host blocked; subresources and authentication-provider hops to approved hosts allowed; cloud/cluster metadata and control endpoints, link-local ranges and local files unreachable; DNS behaviour for an unapproved name recorded; callback and object store reachable. If the spike finds only static L3/L4 policy exists, \u00a79.3 requires that per-run destination checks in the runner become the PRIMARY control and that Security accept that limitation EXPLICITLY \u2014 that acceptance, or its absence, is part of this criterion\u2019s evidence.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-04 / SPK-05 \u2014 egress enforcement and destination policy AC-9b [ED-04, ADR-002 O-6, @architect then the implementing story] \u2014 story 10.17\u2019s destination-misuse negative tests, un-skipped against the enforced mechanism. They are 10.17\u2019s tests, in 10.17\u2019s files, and this story does not rewrite them. CARRIES story 10.17 AC-16b with its gate note unchanged. The gate-shut tripwire over the production ACCEPTED_JOB_KEYS is re-run UNCHANGED and green in test/run/canary.test.ts; adding a policy field to the closed RunJob is ADR-002 Class B and no story may land it before an architect rules.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-03 / SPK-03 \u2014 the private object store AC-10b [ED-03, SPK-03, Platform/SRE] \u2014 the scopes DENIED IN FACT on the real store: the runner principal\u2019s GET and LIST denied, the API principal\u2019s PUT denied; plus path-style addressing, multipart upload, HEAD/GET with Range, server-side encryption defaults, and read-after-write consistency on a key the recovery path reads immediately after writing. CARRIES story 10.14 AC-18b. The DEPLOYMENT half \u2014 two distinct Secrets, no Get/List key name on the runner\u2019s side, the fixed \u00a76.2 prefix \u2014 is asserted over the rendered manifest in test/deployment/chart.test.ts. What is deferred is a denial observed on a real store.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-03 / SPK-03 \u2014 the private object store AC-11 [ED-03, SPK-03, Platform/SRE] \u2014 lifecycle, versioning and incomplete-upload behaviour with caveats recorded: whether bucket versioning is on and whether lifecycle rules expire noncurrent versions and delete markers; whether incomplete multipart uploads are aborted and after how long; the observed lag between lifecycle expiry and physical deletion; and whether a GET on an expired object fails or still serves. CARRIES story 10.14 AC-19b. A NEGATIVE result is a valid closure and is recorded as a caveat for Security, not worked around. Until then no artefact may claim exact-time physical deletion \u2014 asserted over this story\u2019s own rendered output in chart.test.ts.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed ED-02 \u2014 identity, and the halves inherited from stories 10.7 and 10.17 AC-19b [ED-02, owner UNASSIGNED IN SOURCES] \u2014 credentialed acceptance through the real ingress: a real trusted-gateway identity resolving to a real user; a FORGED identity header denied at the gateway rather than at the application; a wrong-CSI request denied; access revocation terminating an open SSE stream within the configured refresh interval; and the real vault replacing the SecretsService REDACTED/plaintext stub. CARRIES story 10.17 AC-5b and AC-7b, and story 10.7 AC-4b, AC-6b and AC-37b. The CODE half (three bypass paths made configuration-driven and default-closed) is story 10.18b\u2019s. @po could not name an owner and said so; @pm raises ED-02 to Checks-squad engineering management via BRD \u00a78, with Security & Compliance accepting. Story 10.19 MAY NOT BE DRAFTED while ED-02\u2019s owner reads TBD.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice AC-17 IS NOT THIS STORY\u2019S and is not a skip here. @po moved it to story 10.19 at wave-6 validation: it depends on sibling story 10.15, it is blocked on ED-06/SPK-02 either way, 10.19\u2019s depends_on already lists both 10.15 and 10.18, and it duplicated story 10.15\u2019s AC-19b (\"deployment owner 10.18, integrated proof 10.19\"). Recorded in the manifest under 10.19\u2019s inherited_deferrals. This entry exists so a reader looking for AC-17 finds the pointer rather than concluding it was dropped. Dependency assumption D-3 is CLOSED.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice Story 10.14\u2019s AC-26 is DISCHARGED, not re-opened. It was recorded \"skipped, never passed\" in a merged story for want of an architect\u2019s ruling on promoting RunnerEvidence.partial to required. ADR-002 \u00a720 is that ruling and story 10.18a landed the edit; 10.14\u2019s own checkbox is left exactly as it merged, on the standing rule that a merged, gated story is not re-opened to close a deferral a later ruling unblocked.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice AC-13a, AC-16a, AC-18, AC-19a, AC-20, AC-21a, AC-22 and AC-23a are STORY 10.18b\u2019s and are IMPLEMENTED, not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check, the three bypass closures with their permit companions, the runbook disclosures, the CSRF finding, the measured backend baseline and the kill switch. This entry was a forward pointer when 10.18a shipped; it is kept, corrected, so that a reader comparing the two halves\u2019 skip counts is not left thinking the edge half deferred its own scope.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-13b [ED-06, SPK-02 question 3, Platform/SRE (ingress)] \u2014 TWO TIMED execution.snapshot EVENTS REACH A REAL BROWSER SEPARATELY, before response closure, through every proxy layer, captured as a HAR from a real browser on the staging hosts. The DEPLOYMENT half is done and asserted over the rendered manifest: a separate Ingress carrying only the two streaming paths, proxy-buffering off, and an idle timeout derived from the stream lifetime and compared against the rendered heartbeat in the same manifest. What is deferred is whether any of that survives the wire. A PASSING BACKEND TEST IS NOT EVIDENCE FOR THIS CRITERION and must not be offered as one \u2014 the SSE assessment says so directly: \"a buffered mock-controller response does not prove SSE delivery\". Closes when docs/qa/spikes/SPK-02/ carries the HAR and ED-06 is updated.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-14 [ED-06, SPK-02 question 4, Platform/SRE (ingress)] \u2014 a 15 s HEARTBEAT KEEPS AN IDLE STREAM OPEN across the ingress and any platform proxy, and the EFFECTIVE MAXIMUM STREAM LIFETIME is measured against the intended 60 s. If the effective maximum is BELOW the configured lifetime, the configured value moves to match the measurement and the change is recorded \u2014 studioSse.lifetimeSeconds is a \u00a78.5 starting value, not a commitment, and the ingress timeout is derived from it so it moves too. That is the mechanism working, not a criterion failing. Nothing in this repository can measure a proxy it has never crossed.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-15 [ED-06, SPK-02 question 5, Platform/SRE (ingress) + backend dev] \u2014 RECONNECT WITH Last-Event-ID TO A DIFFERENT API REPLICA restores the current snapshot. The evidence must show the two connections were served by DIFFERENT PODS: a reconnect that happens to land on the same replica proves nothing and is the way this criterion gets reported passed without being tested. Production runs three replicas scaling to six. The design answers this by reading committed state rather than by affinity, and **NO STICKY-SESSION OR SESSION-AFFINITY SETTING MAY BE INTRODUCED TO MAKE IT PASS** \u2014 story 10.18b introduced none, and the streaming Ingress it added carries no affinity annotation of any kind. Trading a design property for a deployment workaround would close this criterion by defeating the thing it exists to check.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-16b [ED-06, SPK-02 questions 1-2, Platform/SRE (ingress) + frontend dev] \u2014 THE PLATFORM\u2019S ACTUAL BROWSER-AUTH ROUTE, IN WRITING, COVERING FEDERATED MODE: which route carries the session cookie to the events and video paths \u2014 same-origin gateway path, or cross-origin with withCredentials plus exact-origin credentialed CORS \u2014 and whether it holds in BOTH standalone and federated (shell-hosted) modes, where the browser\u2019s origin is the PUT platform shell\u2019s and no values file in this chart can know it; and whether a bearer-only requirement exists anywhere on the path, in which case SSE needs the header-capable client inside the centralized API service (STORY 10.11\u2019s, not this one\u2019s) and <video> needs an ambient session regardless. The DEPLOYMENT half is done: exact-origin credentialed CORS compared against the rendered frontend host in the same manifest, never a wildcard, and no credential in any URL. A DEMONSTRATED GATEWAY INCOMPATIBILITY IS A VALID OUTCOME \u2014 it selects the documented GET fallback and changes no execution contract.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18b \u2014 blocked criteria, recorded as skipped and never passed ED-06 / SPK-02 \u2014 the authenticated route through the real ingress AC-21b [ED-06 / SPK-02 question 7, and ED-02; Platform/SRE + Security] \u2014 THE CSRF CONTROL THE PLATFORM ROUTE ACTUALLY PROVIDES, stated in writing by its owner, and whether the application must add one. The DECIDABLE half is done (AC-21a): the gap is recorded with the two facts that bound it \u2014 the put_session cookie and SecurityConfig.setAllowCredentials(true) with the MFE and API on different hosts \u2014 in SecurityConfig itself and in the runbook \u00a710 as an open launch prerequisite. This story deliberately did NOT enable Spring\u2019s CSRF filter or drop CORS credentials: either changes the public request contract of every existing Checks route, which is not a Studio story\u2019s to land.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18b \u2014 blocked criteria, recorded as skipped and never passed Staging \u2014 the deployed stack under load AC-23b [staging; ED-06/ED-05 and the spikes; Platform/SRE] \u2014 KILL SWITCH, DRAIN, RECOVERY AND BOUNDED OVERLOAD OBSERVED AGAINST THE DEPLOYED STACK, with ordinary REST/check service preserved. Bounded Studio load must not degrade the ordinary check path \u2014 a BRD success metric, not a nicety \u2014 and pod sizing is validated under that load before production templating (BRD \u00a78: \"Prove one runner pod in staging before templating production\"). The kill switch\u2019s behaviour is driven on the production path in both directions in backend StudioKillSwitchWiringTest, and its deployed wiring is asserted over the rendered manifest; what is deferred is the stack.",
+          "status": "skipped"
+        },
+        {
+          "file": "deferred.test.ts",
+          "fullName": "10.18b \u2014 blocked criteria, recorded as skipped and never passed Not a skip \u2014 resolved configuration-delivery pointer AC-18 is resolved: test/deployment/envfrom-keys.test.ts is green across all value sets. The chart converts dotted configOverrides keys to Spring-compatible environment names and fails rendering on invalid or colliding names. This historical pointer remains to show that the earlier red escalation was closed rather than allowlisted.",
+          "status": "skipped"
+        },
+        {
+          "file": "canary.test.ts",
+          "fullName": "Blocked halves \u2014 recorded as live skips, never as passes AC-13b (ED-02, owner 10.19, the other half of 10.13 AC-7b) \u2014 the same canaries through the integrated path with real vault material: nothing the API persists carries them, across progress rows, the persisted snapshot, structured log storage and 10.14\u2019s terminal result manifest. The runner can only assert on what leaves it; the API half needs real material, which needs a real vault. ED-02 is status: open.",
+          "status": "skipped"
+        },
+        {
+          "file": "canary.test.ts",
+          "fullName": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a variable URL resolving to an unapproved origin is refused at dispatch",
+          "status": "skipped"
+        },
+        {
+          "file": "canary.test.ts",
+          "fullName": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 the same resolved URL is refused again during execution",
+          "status": "skipped"
+        },
+        {
+          "file": "canary.test.ts",
+          "fullName": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a redirect from an approved origin to an unapproved one is refused",
+          "status": "skipped"
+        },
+        {
+          "file": "canary.test.ts",
+          "fullName": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a subresource request to an unapproved origin is refused",
+          "status": "skipped"
+        },
+        {
+          "file": "canary.test.ts",
+          "fullName": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a secret submitted to an approved origin over an unapproved scheme is refused",
+          "status": "skipped"
+        },
+        {
+          "file": "canary.test.ts",
+          "fullName": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a local file URL is refused",
+          "status": "skipped"
+        },
+        {
+          "file": "canary.test.ts",
+          "fullName": "Blocked halves \u2014 recorded as live skips, never as passes AC-16b (ED-04 + ADR-002 O-6; mechanism owner 10.18 SPK-05, integrated proof 10.19) \u2014 a cloud metadata endpoint is refused",
+          "status": "skipped"
+        },
+        {
+          "file": "sandbox.test.ts",
+          "fullName": "AC-6b \u2014 the sandbox proven in-cluster starts sandboxed under the cluster PodSecurity level \u2014 deferred to ED-05/SPK-04/10.18",
+          "status": "skipped"
+        },
+        {
+          "file": "drain.test.ts",
+          "fullName": "AC-12 \u2014 SIGTERM drains without abandoning an admitted attempt an admitted attempt survives SIGKILL \u2014 rests on story 10.7 reapers, not on this suite",
+          "status": "skipped"
+        }
+      ]
+    },
+    "fixtures": {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/execution/obs009-g9b-runner-fixtures01-vitest.json",
+      "sha256": "af100ea3793d3f8f283cc5300f7d99a7003ab9003533bade71cb5e3ee02f29d6",
+      "count": 9,
+      "skips": [
+        {
+          "file": "deadline-cleanup.test.ts",
+          "fullName": "deferred criteria \u2014 skipped, not passed AC-5b \u2014 the runner total sits inside the API recovery deadline (story 10.19, gated with 10.18)",
+          "status": "skipped"
+        },
+        {
+          "file": "deadline-cleanup.test.ts",
+          "fullName": "deferred criteria \u2014 skipped, not passed AC-7b \u2014 nothing the API persists carries the canary (story 10.19, with 10.17)",
+          "status": "skipped"
+        },
+        {
+          "file": "deadline-cleanup.test.ts",
+          "fullName": "deferred criteria \u2014 skipped, not passed AC-11b \u2014 the six paths inside the pinned image under PID-1 reaping (ED-05 / story 10.18)",
+          "status": "skipped"
+        },
+        {
+          "file": "seek-measurement.test.ts",
+          "fullName": "AC-12b \u2014 seek accuracy through the pipeline, against the 500 ms target measures dispatch \u2192 runner \u2192 Sonic \u2192 API \u2192 MFE seek in staging \u2014 SPK-06 phase B",
+          "status": "skipped"
+        },
+        {
+          "file": "seek-measurement.test.ts",
+          "fullName": "AC-12c \u2014 the readiness-to-first-frame gap measures the gap on the controlled fixture in staging \u2014 evidenced by SPK-06 phase B",
+          "status": "skipped"
+        },
+        {
+          "file": "upload-evidence.test.ts",
+          "fullName": "deferred criteria \u2014 skipped, not passed AC-7b \u2014 the terminal manifest is declared as a closed schema in the frozen contract (@architect, ADR-002 \u00a712 Class B)",
+          "status": "skipped"
+        },
+        {
+          "file": "upload-evidence.test.ts",
+          "fullName": "deferred criteria \u2014 skipped, not passed AC-18b \u2014 real Sonic endpoint, write-only runner credentials scoped to studio/, read-only API credentials (ED-03, story 10.18; integrated 10.19)",
+          "status": "skipped"
+        },
+        {
+          "file": "upload-evidence.test.ts",
+          "fullName": "deferred criteria \u2014 skipped, not passed AC-19b \u2014 verified lifecycle configuration on real Sonic: physical deletion, versioning/noncurrent objects, incomplete-upload cleanup (ED-03, story 10.18)",
+          "status": "skipped"
+        },
+        {
+          "file": "upload-evidence.test.ts",
+          "fullName": "deferred criteria \u2014 skipped, not passed AC-26 (O-14) \u2014 promote RunnerEvidence.partial from optional to required in the frozen contract",
+          "status": "skipped"
+        }
+      ]
+    }
+  },
+  "sourceMutationAllowed": false
+}

@@ -1,0 +1,127 @@
+{
+  "label": "obs011-recovery-20261020-gsma-a01",
+  "verdict": "FOCUSED_IMPLEMENTATION_GREEN",
+  "resultSha256": "17c1d2d6c306aae7cf45145c0d889160effb22350289b6653e35ff145afc9b08",
+  "collectorExit": 0,
+  "counts": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "testcases": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.retention.GuidedObservationPrunerIT",
+      "name": "sessionsInsideTheWindowOrStillFinalizingAreNotPruned()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.retention.GuidedObservationPrunerIT",
+      "name": "aNeverPublishedFailedSessionIsPrunedAndItsResultIsUnchanged()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.retention.GuidedObservationPrunerIT",
+      "name": "aPublishedSessionKeepsItsPublicationRowsAndItsRevisionStillVerifies()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "terminalSucceededHttpResultRefusesPublicationInsteadOfSavingForever()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "deniedDirectResultsCheckAuthorityBeforeBaseLookupWithAndWithoutBase()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "enabledAndReceiptDefaultPathsDoNotAddBasePresenceLookup()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "disabledPublicationKeepsResultReadAuthorityChecks()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "manualEnabledFallbackRetainsTerminalSucceededPendingAndHttp200()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "disabledRetainedSucceededBaseKeepsDirectFallbackPendingAndHttp202()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "nonTerminalHttpResultIsAcceptedAndConformsToV3Result()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "disabledRetainedReceiptKeepsHttpReceiptAuthorityAndCurrentHeadReadiness()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "disabledSucceededBaseQueryFailurePropagatesInsteadOfClaimingAbsentBase()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedTeardownShedTest",
+      "name": "anIdAlreadyQueuedOrInFlightIsNeverSubmittedTwice()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedTeardownShedTest",
+      "name": "shedWarnsOncePerIntervalAndTheNextTickKeepsOneDurableAttempt()",
+      "status": "PASS"
+    }
+  ],
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true,
+  "taskCollectionComplete": true,
+  "exact14CaseIdentitySet": true,
+  "fiveFinalHashes": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "sha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "sha256": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "sha256": "255469af129ef55146c568d5a839d643c6469c54900bbd81c699b87b2f056c05"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "sha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a"
+    }
+  ],
+  "scope": "Focused implementation proof only; final style/full integrated/native Replay/QA gates remain owed; no lifecycle/release credit"
+}

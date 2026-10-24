@@ -1,0 +1,50 @@
+{
+  "artifact": "independent-fe-rt-draft-static-review",
+  "reviewer": "Quinn / independent QA",
+  "scope": "static draft content/preservation only",
+  "isStoryQaVerdict": false,
+  "isLaneExitApproval": false,
+  "isW1Approval": false,
+  "sourceApplicationAuthorized": false,
+  "assessment": "STATIC_SCOPE_SUPPORTED_WITH_NAMED_EXECUTION_CONDITIONS",
+  "mandatorySourceCorrections": [],
+  "executionConditions": [
+    "Root baseline cause/coverage/tree-open and quiet sandbox gate",
+    "FE semantic types/lint/named tests/strict unused gate/build bundle exclusion",
+    "RT checker self-test/semantic types/lint/full named suites",
+    "Independent seed dist verification: helper checks source capture.files, not capture.dist",
+    "Full before/after emit and explicit root acceptance of any exact dist move or carry AC4d",
+    "T0EP guarded deletions remain excluded; exact12/7 file MERGE/final11G only"
+  ],
+  "checks": {
+    "parseOnly": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/fe-rt-drafts/static-parse.json",
+      "sha256": "d867b1ca98b978f06dda6de9c1dcd281b685e28a94c257f000389141a88445c7",
+      "allPassed": true
+    },
+    "integrity": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/fe-rt-drafts/static-integrity.json",
+      "sha256": "00653f9d7b4c08e66e267e788be2f5c53d2b35c77e17c1a121e54f4868b7f00b",
+      "allPassed": true
+    }
+  },
+  "artifactHashes": {
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/frontend-draft/resume2/frontend-draft.patch": "f7a661e3148a7f715802493d64bd131a62533e38ef59e21b5f685fe5397797dd",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/frontend-draft/resume2/copy-back-manifest.json": "0b78b37194ac59549432b4ce2063adf308162d718f081a06d7c66779620effd1",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/runner-draft.patch": "75f086270d0318dc57255a6791c74295f3f86a10703fbb03bc110e3f1c6ee22d",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/copy-back-manifest.json": "04a00ad58a0e8b06fb18b1a41397313f56bbc0f7980b43131f0f46944ec19500",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/ast-equal.mjs": "2ac0f4b515664a4cd9f820da2b2417d6cdd19edd50d2bf85beaf1d7044fb95f0",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/ast-equal.self-test.mjs": "5d76ab3ee16dc2a9423e4f43822e57a223dfd65aadb5c1678b53f63c1e2dc68d",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/compare-emit.py": "dc9d7dff1230b21f9f533141407514307d3648cb3e20223f146224ffbe47ead1",
+    "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-frontend01-vitest.json": "27eb90dbb0f629b9a4b69fa45f2c26eeb14d51ff2ff1af4b06b08b866d6c3bdc"
+  },
+  "reviewMdSha256": "5a9249f6bb89a429c2097dc2904cb9abb21a15df12de35bdb15cc618135c609a",
+  "budgetCeilingUsd": 500,
+  "actualSpendAvailable": false,
+  "compilerProgramTypeCheckEmitRun": false,
+  "testsSelfTestsBuildsRun": false,
+  "sourceWrites": false,
+  "sandboxSeeded": false,
+  "gitWrites": false,
+  "externalContacts": false
+}

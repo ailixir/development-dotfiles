@@ -1,0 +1,1798 @@
+{
+  "kind": "TEST001_FINAL_SOURCE_APPLICABILITY03",
+  "createdUtc": "2026-10-21T03:06:25.204732+00:00",
+  "disposition": "SOURCE_APPLICABLE_FOR_EXISTING_FINAL_PAIR_CONDITIONAL_ON_FINAL_GUARDS_AND_QA_ROOT_ADMISSION",
+  "scope": "selected public Java text/hash comparisons and closed metadata; not fresh runtime or Java parser proof",
+  "selectedSourceSha256": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java": "072ce61b3c0f94d94076ef18c7acd170a4331e53d0968a132c08c85f15628c9c"
+  },
+  "declaredSourceByStage": {
+    "e10": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/stages/00-test001/repo/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616"
+    },
+    "repairedB4": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/incoming/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "abb4773016aa3499b76cf1aae3ac0da0f0b820ac4df19fb66887188c7dfe53f4"
+    },
+    "typedCf38": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "cf38d0c1314db3f4ae81c827846a97d144fdca5e9adb78de86e0723e8663a297"
+    },
+    "final5d8": {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8"
+    },
+    "reversedC441": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/variants/reversed-orders/repo/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "c441abc23e67760b892998f96d26edd093b60f641ec85618a68d147281ddcad7"
+    }
+  },
+  "methodSpanChecks": [
+    {
+      "name": "P7_wrappers",
+      "startLiteralAnchor": "  @Test\n  @org.junit.jupiter.api.Order(27)",
+      "endLiteralAnchorExcluded": "  private static final java.util.concurrent.atomic.AtomicReference<VaultScope> P7_OUTAGE_SCOPE",
+      "sha256ByStage": {
+        "e10": "daa5cc0d30789b9d5be88f4df0cd74034431500468c2b493118ee498ed5f6365",
+        "repairedB4": "daa5cc0d30789b9d5be88f4df0cd74034431500468c2b493118ee498ed5f6365",
+        "typedCf38": "daa5cc0d30789b9d5be88f4df0cd74034431500468c2b493118ee498ed5f6365",
+        "final5d8": "daa5cc0d30789b9d5be88f4df0cd74034431500468c2b493118ee498ed5f6365"
+      },
+      "bytesByStage": {
+        "e10": 357,
+        "repairedB4": 357,
+        "typedCf38": 357,
+        "final5d8": 357
+      },
+      "e10ToFinalByteIdentical": true,
+      "literalWaitMapRowsApplied": [],
+      "literalWaitBindings": [],
+      "mappedE10EqualsRepairedB4": true,
+      "repairedB4EqualsTypedCf38": true,
+      "finalStyleBridge": "accepted correction01/02/03 source-preservation and independent scope-alpha review; no fresh parser/token-prover executed"
+    },
+    {
+      "name": "P7_capture_cleanup",
+      "startLiteralAnchor": "  private void p7CapturedFaultAndRetry",
+      "endLiteralAnchorExcluded": "  private void p7FaultAndRetry",
+      "sha256ByStage": {
+        "e10": "ff618d9a8d480538c0afe19a49f1ff4b5172a8bfc3eddcf862a9fa29b2a3f2f8",
+        "repairedB4": "ff618d9a8d480538c0afe19a49f1ff4b5172a8bfc3eddcf862a9fa29b2a3f2f8",
+        "typedCf38": "ff618d9a8d480538c0afe19a49f1ff4b5172a8bfc3eddcf862a9fa29b2a3f2f8",
+        "final5d8": "ff618d9a8d480538c0afe19a49f1ff4b5172a8bfc3eddcf862a9fa29b2a3f2f8"
+      },
+      "bytesByStage": {
+        "e10": 1443,
+        "repairedB4": 1443,
+        "typedCf38": 1443,
+        "final5d8": 1443
+      },
+      "e10ToFinalByteIdentical": true,
+      "literalWaitMapRowsApplied": [],
+      "literalWaitBindings": [],
+      "mappedE10EqualsRepairedB4": true,
+      "repairedB4EqualsTypedCf38": true,
+      "finalStyleBridge": "accepted correction01/02/03 source-preservation and independent scope-alpha review; no fresh parser/token-prover executed"
+    },
+    {
+      "name": "edited_source",
+      "startLiteralAnchor": "  void editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+      "endLiteralAnchorExcluded": "  @Test\n  @org.junit.jupiter.api.Order(4)",
+      "sha256ByStage": {
+        "e10": "936563fe8b948bbe1f84c213d219f3c976434c54c7ba2a9d46e66486bba93252",
+        "repairedB4": "936563fe8b948bbe1f84c213d219f3c976434c54c7ba2a9d46e66486bba93252",
+        "typedCf38": "936563fe8b948bbe1f84c213d219f3c976434c54c7ba2a9d46e66486bba93252",
+        "final5d8": "936563fe8b948bbe1f84c213d219f3c976434c54c7ba2a9d46e66486bba93252"
+      },
+      "bytesByStage": {
+        "e10": 8674,
+        "repairedB4": 8674,
+        "typedCf38": 8674,
+        "final5d8": 8674
+      },
+      "e10ToFinalByteIdentical": true,
+      "literalWaitMapRowsApplied": [],
+      "literalWaitBindings": [],
+      "mappedE10EqualsRepairedB4": true,
+      "repairedB4EqualsTypedCf38": true,
+      "finalStyleBridge": "accepted correction01/02/03 source-preservation and independent scope-alpha review; no fresh parser/token-prover executed"
+    },
+    {
+      "name": "queued_refusals",
+      "startLiteralAnchor": "  @Test\n  @org.junit.jupiter.api.Order(2)",
+      "endLiteralAnchorExcluded": "  private ObjectNode failureReport",
+      "sha256ByStage": {
+        "e10": "a0d5ea6b85f62a8fb0a3ff012007b44a91af3ad6e1fccaa80141c81e0e1d2a82",
+        "repairedB4": "892134c23b743ed1b29ea4bc3859eb5d239480f5de761a3d24deebccadfdef59",
+        "typedCf38": "892134c23b743ed1b29ea4bc3859eb5d239480f5de761a3d24deebccadfdef59",
+        "final5d8": "d02098f26ef610db34d420b4869cb1634663ca951e29d83bcd785a0a752c305a"
+      },
+      "bytesByStage": {
+        "e10": 8767,
+        "repairedB4": 24675,
+        "typedCf38": 24675,
+        "final5d8": 27846
+      },
+      "e10ToFinalByteIdentical": false,
+      "literalWaitMapRowsApplied": [
+        47,
+        48,
+        49
+      ],
+      "literalWaitBindings": [
+        {
+          "ids": [
+            47
+          ],
+          "sourceSha256": "50a893ef57c303310866637c8816cf895c8cbd55bbbbb8c884e56c1024dfc76d",
+          "replacementSha256": "7d46d3cb0f8fc64dd3f0bae7928a99ddb01fa00fa436e84f737773745cfec6de"
+        },
+        {
+          "ids": [
+            48
+          ],
+          "sourceSha256": "e02ad74785126d1f7e837b15ca898c18fd0ca907968e24c3e04d79887ccdfe1d",
+          "replacementSha256": "29458e461e9da726b2d319f18c15a11c67a03dfa47f13f009a19f9f440874271"
+        },
+        {
+          "ids": [
+            49
+          ],
+          "sourceSha256": "1fd7a8be62020c21d65b8ca37f8af806d7bce1ddeedbb4bc03960387abb9958e",
+          "replacementSha256": "4c139b01ed11c8bf31d4d1d537958a44c840929c61a033edaf6ba4762b4ce8f5"
+        }
+      ],
+      "mappedE10EqualsRepairedB4": true,
+      "repairedB4EqualsTypedCf38": true,
+      "finalStyleBridge": "accepted correction01/02/03 source-preservation and independent scope-alpha review; no fresh parser/token-prover executed"
+    },
+    {
+      "name": "P7_workflow",
+      "startLiteralAnchor": "  private void p7FaultAndRetry",
+      "endLiteralAnchorExcluded": "  @Test\n  @org.junit.jupiter.api.Order(38)",
+      "sha256ByStage": {
+        "e10": "964fe2ada38cf4ef37bb31e99feb031e30096b7509d5364d394baba905ed1ff3",
+        "repairedB4": "4d7c534b2be28325fd742c1ad9c5165f3cbcaa02d0e6cbd50b4ba33b176138ee",
+        "typedCf38": "4d7c534b2be28325fd742c1ad9c5165f3cbcaa02d0e6cbd50b4ba33b176138ee",
+        "final5d8": "f81a4a0eb0c2bb4e57b54463e50090d56042b8a3178e64879b566721ddc9c07c"
+      },
+      "bytesByStage": {
+        "e10": 15375,
+        "repairedB4": 20597,
+        "typedCf38": 20597,
+        "final5d8": 22291
+      },
+      "e10ToFinalByteIdentical": false,
+      "literalWaitMapRowsApplied": [
+        67
+      ],
+      "literalWaitBindings": [
+        {
+          "ids": [
+            67
+          ],
+          "sourceSha256": "23309803fafc35a746f6a72de5892e894d9b8c651830625203f79a0b1f1b93ec",
+          "replacementSha256": "5372105a0e9f4f3390bcc72b8b0ad9dd0d322edf8c24c228e9984d41d41c24ff"
+        }
+      ],
+      "mappedE10EqualsRepairedB4": true,
+      "repairedB4EqualsTypedCf38": true,
+      "finalStyleBridge": "accepted correction01/02/03 source-preservation and independent scope-alpha review; no fresh parser/token-prover executed"
+    }
+  ],
+  "sharedHelperTextSpanChecks": [
+    {
+      "name": "itrEnsureClassFixtures",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 4786,
+            "startLiteralLine": "  private void itrEnsureClassFixtures(",
+            "nextOuterTextBoundaryLine": "  private ItrPublishedFixture itrFreshPublishedFixture() throws Exception {",
+            "sha256": "7e63068408a6c72bc02556238c9b6b441b0bc46a8af87c8f240809785fa310b7",
+            "bytes": 1293
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 5281,
+            "startLiteralLine": "  private void itrEnsureClassFixtures(",
+            "nextOuterTextBoundaryLine": "  private ItrPublishedFixture itrFreshPublishedFixture() throws Exception {",
+            "sha256": "7e63068408a6c72bc02556238c9b6b441b0bc46a8af87c8f240809785fa310b7",
+            "bytes": 1293
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 5282,
+            "startLiteralLine": "  private void itrEnsureClassFixtures(",
+            "nextOuterTextBoundaryLine": "  private ItrPublishedFixture itrFreshPublishedFixture() throws Exception {",
+            "sha256": "7e63068408a6c72bc02556238c9b6b441b0bc46a8af87c8f240809785fa310b7",
+            "bytes": 1293
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 5623,
+            "startLiteralLine": "  private void itrEnsureClassFixtures(",
+            "nextOuterTextBoundaryLine": "  private ItrPublishedFixture itrFreshPublishedFixture() throws Exception {",
+            "sha256": "7e63068408a6c72bc02556238c9b6b441b0bc46a8af87c8f240809785fa310b7",
+            "bytes": 1293
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "itrFreshPublishedFixture",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 4809,
+            "startLiteralLine": "  private ItrPublishedFixture itrFreshPublishedFixture(",
+            "nextOuterTextBoundaryLine": "  private void itrEstablishOwnAuditCorpus() throws Exception {",
+            "sha256": "f5835d574dba7d2a59033fe114cea7f4df312226c1438dc0df107fa805fe3562",
+            "bytes": 773
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 5304,
+            "startLiteralLine": "  private ItrPublishedFixture itrFreshPublishedFixture(",
+            "nextOuterTextBoundaryLine": "  private void itrEstablishOwnAuditCorpus() throws Exception {",
+            "sha256": "f5835d574dba7d2a59033fe114cea7f4df312226c1438dc0df107fa805fe3562",
+            "bytes": 773
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 5305,
+            "startLiteralLine": "  private ItrPublishedFixture itrFreshPublishedFixture(",
+            "nextOuterTextBoundaryLine": "  private void itrEstablishOwnAuditCorpus() throws Exception {",
+            "sha256": "f5835d574dba7d2a59033fe114cea7f4df312226c1438dc0df107fa805fe3562",
+            "bytes": 773
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 5646,
+            "startLiteralLine": "  private ItrPublishedFixture itrFreshPublishedFixture(",
+            "nextOuterTextBoundaryLine": "  private void itrEstablishOwnAuditCorpus() throws Exception {",
+            "sha256": "5d6e4f85eadfe4ce8027f97ed0c1c102374658991519c6fec458c874f8f2b873",
+            "bytes": 869
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": false,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "itrEstablishOwnAuditCorpus",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 4824,
+            "startLiteralLine": "  private void itrEstablishOwnAuditCorpus(",
+            "nextOuterTextBoundaryLine": "  private static final java.util.concurrent.atomic.AtomicInteger ITR_AUDIT_CONTENT_SCANS =",
+            "sha256": "22a3681d95ba8247659f46c37547813fe30cd3f01bbce6171fa6cff7d70df110",
+            "bytes": 621
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 5319,
+            "startLiteralLine": "  private void itrEstablishOwnAuditCorpus(",
+            "nextOuterTextBoundaryLine": "  private static final java.util.concurrent.atomic.AtomicInteger ITR_AUDIT_CONTENT_SCANS =",
+            "sha256": "22a3681d95ba8247659f46c37547813fe30cd3f01bbce6171fa6cff7d70df110",
+            "bytes": 621
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 5320,
+            "startLiteralLine": "  private void itrEstablishOwnAuditCorpus(",
+            "nextOuterTextBoundaryLine": "  private static final java.util.concurrent.atomic.AtomicInteger ITR_AUDIT_CONTENT_SCANS =",
+            "sha256": "22a3681d95ba8247659f46c37547813fe30cd3f01bbce6171fa6cff7d70df110",
+            "bytes": 621
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 5669,
+            "startLiteralLine": "  private void itrEstablishOwnAuditCorpus(",
+            "nextOuterTextBoundaryLine": "  private static final java.util.concurrent.atomic.AtomicInteger ITR_AUDIT_CONTENT_SCANS =",
+            "sha256": "049f436133dbb5198aa9fcae68472675e54572f1758c13a3f4caf75da89fb7ae",
+            "bytes": 740
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": false,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3Case",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 24118,
+            "startLiteralLine": "  private void p3Case(",
+            "nextOuterTextBoundaryLine": "  private static void p3CaptureOrdinaryReport(UUID execution, byte[] bytes) {",
+            "sha256": "fba2ce45dcc8aa868c2c8e620940f1809376ef2ac86f5261a11b315ba3c98ddc",
+            "bytes": 2638
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 29903,
+            "startLiteralLine": "  private void p3Case(",
+            "nextOuterTextBoundaryLine": "  private static void p3CaptureOrdinaryReport(UUID execution, byte[] bytes) {",
+            "sha256": "fba2ce45dcc8aa868c2c8e620940f1809376ef2ac86f5261a11b315ba3c98ddc",
+            "bytes": 2638
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 29906,
+            "startLiteralLine": "  private void p3Case(",
+            "nextOuterTextBoundaryLine": "  private static void p3CaptureOrdinaryReport(UUID execution, byte[] bytes) {",
+            "sha256": "fba2ce45dcc8aa868c2c8e620940f1809376ef2ac86f5261a11b315ba3c98ddc",
+            "bytes": 2638
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33602,
+            "startLiteralLine": "  private void p3Case(",
+            "nextOuterTextBoundaryLine": "  private static void p3CaptureOrdinaryReport(UUID execution, byte[] bytes) {",
+            "sha256": "fba2ce45dcc8aa868c2c8e620940f1809376ef2ac86f5261a11b315ba3c98ddc",
+            "bytes": 2638
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3CleanupOwnedResources",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 24349,
+            "startLiteralLine": "  private void p3CleanupOwnedResources(",
+            "nextOuterTextBoundaryLine": "  private void p3CleanupOrdinary(UUID execution, String cookie, long deadline) throws Exception {",
+            "sha256": "ac3c709e0b0ffd0e729f37eb169cea5a5f8acec01716f69114aaecf78ed3ef67",
+            "bytes": 2742
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 30134,
+            "startLiteralLine": "  private void p3CleanupOwnedResources(",
+            "nextOuterTextBoundaryLine": "  private void p3CleanupOrdinary(UUID execution, String cookie, long deadline) throws Exception {",
+            "sha256": "ac3c709e0b0ffd0e729f37eb169cea5a5f8acec01716f69114aaecf78ed3ef67",
+            "bytes": 2742
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 30137,
+            "startLiteralLine": "  private void p3CleanupOwnedResources(",
+            "nextOuterTextBoundaryLine": "  private void p3CleanupOrdinary(UUID execution, String cookie, long deadline) throws Exception {",
+            "sha256": "ac3c709e0b0ffd0e729f37eb169cea5a5f8acec01716f69114aaecf78ed3ef67",
+            "bytes": 2742
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33833,
+            "startLiteralLine": "  private void p3CleanupOwnedResources(",
+            "nextOuterTextBoundaryLine": "  private void p3CleanupOrdinary(UUID execution, String cookie, long deadline) throws Exception {",
+            "sha256": "ac3c709e0b0ffd0e729f37eb169cea5a5f8acec01716f69114aaecf78ed3ef67",
+            "bytes": 2742
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3CleanupOrdinary",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 24420,
+            "startLiteralLine": "  private void p3CleanupOrdinary(",
+            "nextOuterTextBoundaryLine": "  private void p4AssertRepositoryGraph() {",
+            "sha256": "7c3de0b6696305e78126fc4cc886fa32a5a491ede4487ece3b54a33d32477492",
+            "bytes": 3579
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 30205,
+            "startLiteralLine": "  private void p3CleanupOrdinary(",
+            "nextOuterTextBoundaryLine": "  private void p4AssertRepositoryGraph() {",
+            "sha256": "7c3de0b6696305e78126fc4cc886fa32a5a491ede4487ece3b54a33d32477492",
+            "bytes": 3579
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 30208,
+            "startLiteralLine": "  private void p3CleanupOrdinary(",
+            "nextOuterTextBoundaryLine": "  private void p4AssertRepositoryGraph() {",
+            "sha256": "7c3de0b6696305e78126fc4cc886fa32a5a491ede4487ece3b54a33d32477492",
+            "bytes": 3579
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33904,
+            "startLiteralLine": "  private void p3CleanupOrdinary(",
+            "nextOuterTextBoundaryLine": "  private void p4AssertRepositoryGraph() {",
+            "sha256": "7c3de0b6696305e78126fc4cc886fa32a5a491ede4487ece3b54a33d32477492",
+            "bytes": 3579
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3AttemptTeardown",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 34347,
+            "startLiteralLine": "  private static void p3AttemptTeardown(",
+            "nextOuterTextBoundaryLine": "  private static void throwTeardownFailures(java.util.List<Throwable> failures) throws Exception {",
+            "sha256": "80443cbd4557b2f05b74e571d17bf22fa2054014d28b0cbf117c4f8452481b97",
+            "bytes": 221
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 41521,
+            "startLiteralLine": "  private static void p3AttemptTeardown(",
+            "nextOuterTextBoundaryLine": "  private static void throwTeardownFailures(java.util.List<Throwable> failures) throws Exception {",
+            "sha256": "80443cbd4557b2f05b74e571d17bf22fa2054014d28b0cbf117c4f8452481b97",
+            "bytes": 221
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 41524,
+            "startLiteralLine": "  private static void p3AttemptTeardown(",
+            "nextOuterTextBoundaryLine": "  private static void throwTeardownFailures(java.util.List<Throwable> failures) throws Exception {",
+            "sha256": "80443cbd4557b2f05b74e571d17bf22fa2054014d28b0cbf117c4f8452481b97",
+            "bytes": 221
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 46127,
+            "startLiteralLine": "  private static void p3AttemptTeardown(",
+            "nextOuterTextBoundaryLine": "  private static void throwTeardownFailures(java.util.List<Throwable> failures) throws Exception {",
+            "sha256": "80443cbd4557b2f05b74e571d17bf22fa2054014d28b0cbf117c4f8452481b97",
+            "bytes": 221
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3Grant",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27111,
+            "startLiteralLine": "  private static void p3Grant(",
+            "nextOuterTextBoundaryLine": "  private static String p3CoreCookie(String principal, String email) {",
+            "sha256": "d235c968ecf989f6e1499b235a8fda12c1427bda177d9e1f188f9bcabbff6f68",
+            "bytes": 222
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33396,
+            "startLiteralLine": "  private static void p3Grant(",
+            "nextOuterTextBoundaryLine": "  private static String p3CoreCookie(String principal, String email) {",
+            "sha256": "d235c968ecf989f6e1499b235a8fda12c1427bda177d9e1f188f9bcabbff6f68",
+            "bytes": 222
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33399,
+            "startLiteralLine": "  private static void p3Grant(",
+            "nextOuterTextBoundaryLine": "  private static String p3CoreCookie(String principal, String email) {",
+            "sha256": "d235c968ecf989f6e1499b235a8fda12c1427bda177d9e1f188f9bcabbff6f68",
+            "bytes": 222
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 37411,
+            "startLiteralLine": "  private static void p3Grant(",
+            "nextOuterTextBoundaryLine": "  private static String p3CoreCookie(String principal, String email) {",
+            "sha256": "d235c968ecf989f6e1499b235a8fda12c1427bda177d9e1f188f9bcabbff6f68",
+            "bytes": 222
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3Seed",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27125,
+            "startLiteralLine": "  private static void p3Seed(",
+            "nextOuterTextBoundaryLine": "  private ObjectNode p3StartCommand(UUID test, String environment) throws Exception {",
+            "sha256": "98ab076388ceebf6b10cf91433ba4dd3fbf50c2f7b62444ea6c330bc3e0a11ed",
+            "bytes": 310
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33410,
+            "startLiteralLine": "  private static void p3Seed(",
+            "nextOuterTextBoundaryLine": "  private ObjectNode p3StartCommand(UUID test, String environment) throws Exception {",
+            "sha256": "98ab076388ceebf6b10cf91433ba4dd3fbf50c2f7b62444ea6c330bc3e0a11ed",
+            "bytes": 310
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33413,
+            "startLiteralLine": "  private static void p3Seed(",
+            "nextOuterTextBoundaryLine": "  private ObjectNode p3StartCommand(UUID test, String environment) throws Exception {",
+            "sha256": "98ab076388ceebf6b10cf91433ba4dd3fbf50c2f7b62444ea6c330bc3e0a11ed",
+            "bytes": 310
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 37425,
+            "startLiteralLine": "  private static void p3Seed(",
+            "nextOuterTextBoundaryLine": "  private ObjectNode p3StartCommand(UUID test, String environment) throws Exception {",
+            "sha256": "98ab076388ceebf6b10cf91433ba4dd3fbf50c2f7b62444ea6c330bc3e0a11ed",
+            "bytes": 310
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3Start",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27146,
+            "startLiteralLine": "  private String p3Start(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3Call(String cookie, String path, JsonNode body, int status) throws Exception {",
+            "sha256": "118685d44a8054e54d64ec22191de5808f0af7d9b99f375ed795a94e87c0abf4",
+            "bytes": 265
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33431,
+            "startLiteralLine": "  private String p3Start(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3Call(String cookie, String path, JsonNode body, int status) throws Exception {",
+            "sha256": "118685d44a8054e54d64ec22191de5808f0af7d9b99f375ed795a94e87c0abf4",
+            "bytes": 265
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33434,
+            "startLiteralLine": "  private String p3Start(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3Call(String cookie, String path, JsonNode body, int status) throws Exception {",
+            "sha256": "118685d44a8054e54d64ec22191de5808f0af7d9b99f375ed795a94e87c0abf4",
+            "bytes": 265
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 37446,
+            "startLiteralLine": "  private String p3Start(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3Call(String cookie, String path, JsonNode body, int status) throws Exception {",
+            "sha256": "118685d44a8054e54d64ec22191de5808f0af7d9b99f375ed795a94e87c0abf4",
+            "bytes": 265
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3Publish",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27198,
+            "startLiteralLine": "  private P3Publication p3Publish(",
+            "nextOuterTextBoundaryLine": "  private UUID p3Execute(UUID test) throws Exception {",
+            "sha256": "2cc1e67060143e1a5f07381892fa450d04783a5d15d13645d59a3195ac856013",
+            "bytes": 1099
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33483,
+            "startLiteralLine": "  private P3Publication p3Publish(",
+            "nextOuterTextBoundaryLine": "  private UUID p3Execute(UUID test) throws Exception {",
+            "sha256": "2cc1e67060143e1a5f07381892fa450d04783a5d15d13645d59a3195ac856013",
+            "bytes": 1099
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33486,
+            "startLiteralLine": "  private P3Publication p3Publish(",
+            "nextOuterTextBoundaryLine": "  private UUID p3Execute(UUID test) throws Exception {",
+            "sha256": "2cc1e67060143e1a5f07381892fa450d04783a5d15d13645d59a3195ac856013",
+            "bytes": 1099
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 37498,
+            "startLiteralLine": "  private P3Publication p3Publish(",
+            "nextOuterTextBoundaryLine": "  private UUID p3Execute(UUID test) throws Exception {",
+            "sha256": "2cc1e67060143e1a5f07381892fa450d04783a5d15d13645d59a3195ac856013",
+            "bytes": 1099
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3Execute",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27223,
+            "startLiteralLine": "  private UUID p3Execute(",
+            "nextOuterTextBoundaryLine": "  private void p3AssertBinding(UUID execution, VaultScope scope, P3Publication publication)",
+            "sha256": "48a052dc2f26d8f17570e4676076dbb0508533c3ee17a532c2836521a7a0b570",
+            "bytes": 317
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33508,
+            "startLiteralLine": "  private UUID p3Execute(",
+            "nextOuterTextBoundaryLine": "  private void p3AssertBinding(UUID execution, VaultScope scope, P3Publication publication)",
+            "sha256": "48a052dc2f26d8f17570e4676076dbb0508533c3ee17a532c2836521a7a0b570",
+            "bytes": 317
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33511,
+            "startLiteralLine": "  private UUID p3Execute(",
+            "nextOuterTextBoundaryLine": "  private void p3AssertBinding(UUID execution, VaultScope scope, P3Publication publication)",
+            "sha256": "48a052dc2f26d8f17570e4676076dbb0508533c3ee17a532c2836521a7a0b570",
+            "bytes": 317
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 37523,
+            "startLiteralLine": "  private UUID p3Execute(",
+            "nextOuterTextBoundaryLine": "  private void p3AssertBinding(UUID execution, VaultScope scope, P3Publication publication)",
+            "sha256": "48a052dc2f26d8f17570e4676076dbb0508533c3ee17a532c2836521a7a0b570",
+            "bytes": 317
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3AssertBinding",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27233,
+            "startLiteralLine": "  private void p3AssertBinding(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3AwaitExecution(UUID execution, String expected) throws Exception {",
+            "sha256": "06c68f2f5d0e397ad50bab83fac069bbf3ae761df800261a5b31ac9789fdd66e",
+            "bytes": 835
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33518,
+            "startLiteralLine": "  private void p3AssertBinding(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3AwaitExecution(UUID execution, String expected) throws Exception {",
+            "sha256": "06c68f2f5d0e397ad50bab83fac069bbf3ae761df800261a5b31ac9789fdd66e",
+            "bytes": 835
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33521,
+            "startLiteralLine": "  private void p3AssertBinding(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3AwaitExecution(UUID execution, String expected) throws Exception {",
+            "sha256": "06c68f2f5d0e397ad50bab83fac069bbf3ae761df800261a5b31ac9789fdd66e",
+            "bytes": 835
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 37533,
+            "startLiteralLine": "  private void p3AssertBinding(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3AwaitExecution(UUID execution, String expected) throws Exception {",
+            "sha256": "06c68f2f5d0e397ad50bab83fac069bbf3ae761df800261a5b31ac9789fdd66e",
+            "bytes": 835
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p7AttemptAudit",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 22598,
+            "startLiteralLine": "  private List<Map<String, Object>> p7AttemptAudit(",
+            "nextOuterTextBoundaryLine": "  @Test",
+            "sha256": "11c8cdb9d1cb117dcf4d2f89087f5cbd9a8ecf47a259051dbbf893ed24a46be0",
+            "bytes": 302
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 28086,
+            "startLiteralLine": "  private List<Map<String, Object>> p7AttemptAudit(",
+            "nextOuterTextBoundaryLine": "  @Test",
+            "sha256": "11c8cdb9d1cb117dcf4d2f89087f5cbd9a8ecf47a259051dbbf893ed24a46be0",
+            "bytes": 302
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 28089,
+            "startLiteralLine": "  private List<Map<String, Object>> p7AttemptAudit(",
+            "nextOuterTextBoundaryLine": "  @Test",
+            "sha256": "11c8cdb9d1cb117dcf4d2f89087f5cbd9a8ecf47a259051dbbf893ed24a46be0",
+            "bytes": 302
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 31591,
+            "startLiteralLine": "  private List<Map<String, Object>> p7AttemptAudit(",
+            "nextOuterTextBoundaryLine": "  @Test",
+            "sha256": "11c8cdb9d1cb117dcf4d2f89087f5cbd9a8ecf47a259051dbbf893ed24a46be0",
+            "bytes": 302
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3Scan",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27498,
+            "startLiteralLine": "  private void p3Scan(",
+            "nextOuterTextBoundaryLine": "  private static JsonNode p3LaunchCounter() throws Exception {",
+            "sha256": "8d3f01c29e99653ad88ec8328da9a8aa757522a00ded59283859537ad2f4d2b4",
+            "bytes": 684
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 34276,
+            "startLiteralLine": "  private void p3Scan(",
+            "nextOuterTextBoundaryLine": "  private static JsonNode p3LaunchCounter() throws Exception {",
+            "sha256": "8d3f01c29e99653ad88ec8328da9a8aa757522a00ded59283859537ad2f4d2b4",
+            "bytes": 684
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 34279,
+            "startLiteralLine": "  private void p3Scan(",
+            "nextOuterTextBoundaryLine": "  private static JsonNode p3LaunchCounter() throws Exception {",
+            "sha256": "8d3f01c29e99653ad88ec8328da9a8aa757522a00ded59283859537ad2f4d2b4",
+            "bytes": 684
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 38613,
+            "startLiteralLine": "  private void p3Scan(",
+            "nextOuterTextBoundaryLine": "  private static JsonNode p3LaunchCounter() throws Exception {",
+            "sha256": "8d3f01c29e99653ad88ec8328da9a8aa757522a00ded59283859537ad2f4d2b4",
+            "bytes": 684
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "scanCompleteAuditStream",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 34528,
+            "startLiteralLine": "  private static void scanCompleteAuditStream(",
+            "nextOuterTextBoundaryLine": "  private static void itrAssertAuditCorpus() {",
+            "sha256": "2ef7211daa2b2c3befdc87afb437ec4ab0fc05fc38ad36aac93befcd0756e3a8",
+            "bytes": 202
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 41900,
+            "startLiteralLine": "  private static void scanCompleteAuditStream(",
+            "nextOuterTextBoundaryLine": "  private static void itrAssertAuditCorpus() {",
+            "sha256": "2ef7211daa2b2c3befdc87afb437ec4ab0fc05fc38ad36aac93befcd0756e3a8",
+            "bytes": 202
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 41903,
+            "startLiteralLine": "  private static void scanCompleteAuditStream(",
+            "nextOuterTextBoundaryLine": "  private static void itrAssertAuditCorpus() {",
+            "sha256": "2ef7211daa2b2c3befdc87afb437ec4ab0fc05fc38ad36aac93befcd0756e3a8",
+            "bytes": 202
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 46630,
+            "startLiteralLine": "  private static void scanCompleteAuditStream(",
+            "nextOuterTextBoundaryLine": "  private static void itrAssertAuditCorpus() {",
+            "sha256": "2ef7211daa2b2c3befdc87afb437ec4ab0fc05fc38ad36aac93befcd0756e3a8",
+            "bytes": 202
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "itrAssertAuditCorpus",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 34536,
+            "startLiteralLine": "  private static void itrAssertAuditCorpus(",
+            "nextOuterTextBoundaryLine": "  private static void scanAuditContent() {",
+            "sha256": "9cca7f8af4ebaa3667051c09619ebc6742acebd0c7f82d5176fdd16a277bd44e",
+            "bytes": 517
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 41908,
+            "startLiteralLine": "  private static void itrAssertAuditCorpus(",
+            "nextOuterTextBoundaryLine": "  private static void scanAuditContent() {",
+            "sha256": "9cca7f8af4ebaa3667051c09619ebc6742acebd0c7f82d5176fdd16a277bd44e",
+            "bytes": 517
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 41911,
+            "startLiteralLine": "  private static void itrAssertAuditCorpus(",
+            "nextOuterTextBoundaryLine": "  private static void scanAuditContent() {",
+            "sha256": "9cca7f8af4ebaa3667051c09619ebc6742acebd0c7f82d5176fdd16a277bd44e",
+            "bytes": 517
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 46638,
+            "startLiteralLine": "  private static void itrAssertAuditCorpus(",
+            "nextOuterTextBoundaryLine": "  private static void scanAuditContent() {",
+            "sha256": "9cca7f8af4ebaa3667051c09619ebc6742acebd0c7f82d5176fdd16a277bd44e",
+            "bytes": 517
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "scanFinalOwnedSinks",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 3437,
+            "startLiteralLine": "  private void scanFinalOwnedSinks(",
+            "nextOuterTextBoundaryLine": "  private void scanFinalAuditBoundary() throws Exception {",
+            "sha256": "d3941147289ee652325a531c80ac62cb4339710b9b6c60658fe0f8a702016c40",
+            "bytes": 5930
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 3833,
+            "startLiteralLine": "  private void scanFinalOwnedSinks(",
+            "nextOuterTextBoundaryLine": "  private void scanFinalAuditBoundary() throws Exception {",
+            "sha256": "d3941147289ee652325a531c80ac62cb4339710b9b6c60658fe0f8a702016c40",
+            "bytes": 5930
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 3834,
+            "startLiteralLine": "  private void scanFinalOwnedSinks(",
+            "nextOuterTextBoundaryLine": "  private void scanFinalAuditBoundary() throws Exception {",
+            "sha256": "d3941147289ee652325a531c80ac62cb4339710b9b6c60658fe0f8a702016c40",
+            "bytes": 5930
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 4107,
+            "startLiteralLine": "  private void scanFinalOwnedSinks(",
+            "nextOuterTextBoundaryLine": "  private void scanFinalAuditBoundary() throws Exception {",
+            "sha256": "d3941147289ee652325a531c80ac62cb4339710b9b6c60658fe0f8a702016c40",
+            "bytes": 5930
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "startWorkers",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 32699,
+            "startLiteralLine": "  private void startWorkers(",
+            "nextOuterTextBoundaryLine": "  private void startOrdinaryWorker(boolean preserveExistingLog) throws Exception {",
+            "sha256": "f31c10df94c79a2d3ccd5478030cdd035458c9fd4ef024ac5b1fe478c8bc30e4",
+            "bytes": 14194
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 39774,
+            "startLiteralLine": "  private void startWorkers(",
+            "nextOuterTextBoundaryLine": "  private void startOrdinaryWorker(boolean preserveExistingLog) throws Exception {",
+            "sha256": "f31c10df94c79a2d3ccd5478030cdd035458c9fd4ef024ac5b1fe478c8bc30e4",
+            "bytes": 14194
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 39777,
+            "startLiteralLine": "  private void startWorkers(",
+            "nextOuterTextBoundaryLine": "  private void startOrdinaryWorker(boolean preserveExistingLog) throws Exception {",
+            "sha256": "f31c10df94c79a2d3ccd5478030cdd035458c9fd4ef024ac5b1fe478c8bc30e4",
+            "bytes": 14194
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 44316,
+            "startLiteralLine": "  private void startWorkers(",
+            "nextOuterTextBoundaryLine": "  private void startOrdinaryWorker(boolean preserveExistingLog) throws Exception {",
+            "sha256": "f31c10df94c79a2d3ccd5478030cdd035458c9fd4ef024ac5b1fe478c8bc30e4",
+            "bytes": 14194
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": true,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "awaitFinalizing",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 32409,
+            "startLiteralLine": "  private void awaitFinalizing(",
+            "nextOuterTextBoundaryLine": "  private UUID arrangeActivation(UUID schedule, UUID testId, UUID revision, long version) {",
+            "sha256": "42cfb81d04cc018ba6bb5cf4cecc4e3ba4e7a1ae1dbe92484749b8a0127c933a",
+            "bytes": 809
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 39385,
+            "startLiteralLine": "  private void awaitFinalizing(",
+            "nextOuterTextBoundaryLine": "  private UUID arrangeActivation(UUID schedule, UUID testId, UUID revision, long version) {",
+            "sha256": "ec118b75db591f6e7ea6713ecfdb66c41f303a903a21080e618e86e40b7fb34f",
+            "bytes": 6150
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 39388,
+            "startLiteralLine": "  private void awaitFinalizing(",
+            "nextOuterTextBoundaryLine": "  private UUID arrangeActivation(UUID schedule, UUID testId, UUID revision, long version) {",
+            "sha256": "ec118b75db591f6e7ea6713ecfdb66c41f303a903a21080e618e86e40b7fb34f",
+            "bytes": 6150
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 43856,
+            "startLiteralLine": "  private void awaitFinalizing(",
+            "nextOuterTextBoundaryLine": "  private UUID arrangeActivation(UUID schedule, UUID testId, UUID revision, long version) {",
+            "sha256": "20d43b3a8ce8ceacbdf7e527b4b4dc98cf8150930271f0ffa8b03267d27ef117",
+            "bytes": 7399
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": false,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3AwaitTeardown",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27464,
+            "startLiteralLine": "  private void p3AwaitTeardown(",
+            "nextOuterTextBoundaryLine": "  private long p3DecodeVideo(UUID execution, JsonNode current) throws Exception {",
+            "sha256": "1a59535b9c155ca30863dca47555412fd5c6da009235135c7e11cabfc7459f02",
+            "bytes": 466
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 34045,
+            "startLiteralLine": "  private void p3AwaitTeardown(",
+            "nextOuterTextBoundaryLine": "  private long p3DecodeVideo(UUID execution, JsonNode current) throws Exception {",
+            "sha256": "e49b244bccd659d9e9f8758d098159ebafd89f88b76176845d9ff371086f5e23",
+            "bytes": 5844
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 34048,
+            "startLiteralLine": "  private void p3AwaitTeardown(",
+            "nextOuterTextBoundaryLine": "  private long p3DecodeVideo(UUID execution, JsonNode current) throws Exception {",
+            "sha256": "e49b244bccd659d9e9f8758d098159ebafd89f88b76176845d9ff371086f5e23",
+            "bytes": 5844
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 38254,
+            "startLiteralLine": "  private void p3AwaitTeardown(",
+            "nextOuterTextBoundaryLine": "  private long p3DecodeVideo(UUID execution, JsonNode current) throws Exception {",
+            "sha256": "70ae5590ad09eb1617164b8765a2cba67a1c5903fae597ee832634f7ca6c12ce",
+            "bytes": 6952
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": false,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3DecodeVideo",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27477,
+            "startLiteralLine": "  private long p3DecodeVideo(",
+            "nextOuterTextBoundaryLine": "  private void p3Scan(List<String> values) throws Exception {",
+            "sha256": "5cb1be5500bef12610f0a4e5edbb42133255bd107952f9ae71a2c131e1491df4",
+            "bytes": 1152
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 34157,
+            "startLiteralLine": "  private long p3DecodeVideo(",
+            "nextOuterTextBoundaryLine": "  private void p3Scan(List<String> values) throws Exception {",
+            "sha256": "8c517d5367d9c20d6d29fd1bd90b3d5df8107e9b71c5fcf37066b845ee81fb0e",
+            "bytes": 6433
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 34160,
+            "startLiteralLine": "  private long p3DecodeVideo(",
+            "nextOuterTextBoundaryLine": "  private void p3Scan(List<String> values) throws Exception {",
+            "sha256": "8c517d5367d9c20d6d29fd1bd90b3d5df8107e9b71c5fcf37066b845ee81fb0e",
+            "bytes": 6433
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 38432,
+            "startLiteralLine": "  private long p3DecodeVideo(",
+            "nextOuterTextBoundaryLine": "  private void p3Scan(List<String> values) throws Exception {",
+            "sha256": "b26706617591cdbb5308948103e513d79439487760f4fcfa857e657b018d0f31",
+            "bytes": 7490
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": false,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3AwaitExecution",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27249,
+            "startLiteralLine": "  private JsonNode p3AwaitExecution(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3AwaitExecution(UUID execution, String expected, long deadline)",
+            "sha256": "410b1943aa1aa6075a1fab9f9626fc4f408174369b0f727d9d4b16c953c26b4b",
+            "bytes": 205
+          },
+          {
+            "ordinal": 2,
+            "declarationLine": 27254,
+            "startLiteralLine": "  private JsonNode p3AwaitExecution(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3RunnerReport(UUID execution) throws Exception {",
+            "sha256": "8223373ec765adcdebac1a95130ff2727d8392b106c8c6601daf76b62039ba52",
+            "bytes": 709
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33534,
+            "startLiteralLine": "  private JsonNode p3AwaitExecution(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3AwaitExecution(UUID execution, String expected, long deadline)",
+            "sha256": "410b1943aa1aa6075a1fab9f9626fc4f408174369b0f727d9d4b16c953c26b4b",
+            "bytes": 205
+          },
+          {
+            "ordinal": 2,
+            "declarationLine": 33539,
+            "startLiteralLine": "  private JsonNode p3AwaitExecution(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3RunnerReport(UUID execution) throws Exception {",
+            "sha256": "25bbc6fe5dae214c50827f9c856b3b9484a34c96aaf7bf347c211a6f0d3057e6",
+            "bytes": 6012
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33537,
+            "startLiteralLine": "  private JsonNode p3AwaitExecution(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3AwaitExecution(UUID execution, String expected, long deadline)",
+            "sha256": "410b1943aa1aa6075a1fab9f9626fc4f408174369b0f727d9d4b16c953c26b4b",
+            "bytes": 205
+          },
+          {
+            "ordinal": 2,
+            "declarationLine": 33542,
+            "startLiteralLine": "  private JsonNode p3AwaitExecution(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3RunnerReport(UUID execution) throws Exception {",
+            "sha256": "25bbc6fe5dae214c50827f9c856b3b9484a34c96aaf7bf347c211a6f0d3057e6",
+            "bytes": 6012
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 37549,
+            "startLiteralLine": "  private JsonNode p3AwaitExecution(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3AwaitExecution(UUID execution, String expected, long deadline)",
+            "sha256": "410b1943aa1aa6075a1fab9f9626fc4f408174369b0f727d9d4b16c953c26b4b",
+            "bytes": 205
+          },
+          {
+            "ordinal": 2,
+            "declarationLine": 37554,
+            "startLiteralLine": "  private JsonNode p3AwaitExecution(",
+            "nextOuterTextBoundaryLine": "  private JsonNode p3RunnerReport(UUID execution) throws Exception {",
+            "sha256": "2f6462be2701795a89ced260e2fe56229abb060f855314cf9a5258b9f2214d0b",
+            "bytes": 7102
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": false,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    },
+    {
+      "name": "p3RunnerReport",
+      "textSpanByStage": {
+        "e10": [
+          {
+            "ordinal": 1,
+            "declarationLine": 27271,
+            "startLiteralLine": "  private JsonNode p3RunnerReport(",
+            "nextOuterTextBoundaryLine": "  private void p3AssertUsed(String session, UUID execution) {",
+            "sha256": "3cea8d5582c99d30aecb4dd14030834fbd4fa88c83bfd29763ed69dbf5e6123a",
+            "bytes": 1432
+          }
+        ],
+        "repairedB4": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33655,
+            "startLiteralLine": "  private JsonNode p3RunnerReport(",
+            "nextOuterTextBoundaryLine": "  private void p3AssertUsed(String session, UUID execution) {",
+            "sha256": "aca446a67dd7f81f6b465b62fc07e40b25a36b01dabe001a7209be4cd73dd7e2",
+            "bytes": 6713
+          }
+        ],
+        "typedCf38": [
+          {
+            "ordinal": 1,
+            "declarationLine": 33658,
+            "startLiteralLine": "  private JsonNode p3RunnerReport(",
+            "nextOuterTextBoundaryLine": "  private void p3AssertUsed(String session, UUID execution) {",
+            "sha256": "aca446a67dd7f81f6b465b62fc07e40b25a36b01dabe001a7209be4cd73dd7e2",
+            "bytes": 6713
+          }
+        ],
+        "final5d8": [
+          {
+            "ordinal": 1,
+            "declarationLine": 37732,
+            "startLiteralLine": "  private JsonNode p3RunnerReport(",
+            "nextOuterTextBoundaryLine": "  private void p3AssertUsed(String session, UUID execution) {",
+            "sha256": "b5277ad855a2742dc6070eb73f71a2568ffbdb9bc6e8b17c95724d02cceabb24",
+            "bytes": 7754
+          }
+        ]
+      },
+      "allOverloadsE10ToFinalByteIdentical": false,
+      "allOverloadsB4ToTypedFoldByteIdentical": true
+    }
+  ],
+  "reverseCompleteSourceDelta": [
+    {
+      "line": 18064,
+      "before": "  @org.junit.jupiter.api.Order(2)",
+      "after": "  @org.junit.jupiter.api.Order(3)"
+    },
+    {
+      "line": 18477,
+      "before": "  @org.junit.jupiter.api.Order(3)",
+      "after": "  @org.junit.jupiter.api.Order(2)"
+    },
+    {
+      "line": 22004,
+      "before": "  @org.junit.jupiter.api.Order(27)",
+      "after": "  @org.junit.jupiter.api.Order(28)"
+    },
+    {
+      "line": 22010,
+      "before": "  @org.junit.jupiter.api.Order(28)",
+      "after": "  @org.junit.jupiter.api.Order(27)"
+    }
+  ],
+  "pollMetadataScope": "relevant direct/shared/conditional transitive waits, not a claim every branch executes in every P7",
+  "relevantPollRows": [
+    {
+      "id": "1",
+      "enclosing_method": "registerOwnedProcess",
+      "batch": "B4",
+      "reason": "retry of ProcessHandle.info() after a RuntimeException inside the 500 ms identity window (same loop as #2)",
+      "interval_ms": "5",
+      "original_deadline": "until",
+      "on_timeout": "FALL_THROUGH"
+    },
+    {
+      "id": "2",
+      "enclosing_method": "registerOwnedProcess",
+      "batch": "B4",
+      "reason": "poll until ProcessHandle.info() shows start instant and command line; 500 ms window, 5 ms (same loop as #1)",
+      "interval_ms": "5",
+      "original_deadline": "until",
+      "on_timeout": "FALL_THROUGH"
+    },
+    {
+      "id": "3",
+      "enclosing_method": "startOwnedWorker",
+      "batch": "B4",
+      "reason": "waits for the candidate-owned post-listen marker file; 20 s (10 s for role secret) from process start, 20 ms; verifyOwnedRoot each pass",
+      "interval_ms": "20",
+      "original_deadline": "until",
+      "on_timeout": "FAIL_AT_WAIT"
+    },
+    {
+      "id": "4",
+      "enclosing_method": "verifyPreviousWorkerGenerationClosed",
+      "batch": "B4",
+      "reason": "do-while until the prior worker generation shows all sessions/recordings settled and descendants gone; 30 ms; on timeout writeOpenGenerationDiagnostic() then throws",
+      "interval_ms": "30",
+      "original_deadline": "until",
+      "on_timeout": "MAP_EXCEPTION"
+    },
+    {
+      "id": "5",
+      "enclosing_method": "<static initializer> (secret fixture bootstrap)",
+      "batch": "B4",
+      "reason": "waits for the secret fixture to write its origin announcement; 10 s, 20 ms; fails fast if the fixture process died",
+      "interval_ms": "20",
+      "original_deadline": "fixtureDeadline",
+      "on_timeout": "MAP_EXCEPTION"
+    },
+    {
+      "id": "6",
+      "enclosing_method": "cancelFailedTestOwnedSessions (@AfterEach, failed-test path)",
+      "batch": "B4",
+      "reason": "waits for teardownStatus CONFIRMED of a failed test's owned session; 20 s, 30 ms; last value goes into the cleanup evidence",
+      "interval_ms": "30",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "47",
+      "enclosing_method": "queuedAndPreReadyRefusals (Order 2)",
+      "batch": "B3",
+      "reason": "polls for the file initial-context-check-entered; 15 s, 20 ms",
+      "interval_ms": "20",
+      "original_deadline": "enteredDeadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "48",
+      "enclosing_method": "queuedAndPreReadyRefusals (Order 2)",
+      "batch": "B1",
+      "reason": "polls the failed execution until streamComplete; 30 s, 50 ms",
+      "interval_ms": "50",
+      "original_deadline": "until",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "49",
+      "enclosing_method": "queuedAndPreReadyRefusals (Order 2)",
+      "batch": "B3",
+      "reason": "polls RECEIVED_FAILURE_REPORTS until it holds two reports; 2 s, 10 ms",
+      "interval_ms": "10",
+      "original_deadline": "captureDeadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "60",
+      "enclosing_method": "awaitState",
+      "batch": "B3",
+      "reason": "polls the session state until it equals <expected>; throws AssertionError at once on a terminal state or after 30 s; 20 ms",
+      "interval_ms": "20",
+      "original_deadline": "end",
+      "on_timeout": "MAP_EXCEPTION"
+    },
+    {
+      "id": "62",
+      "enclosing_method": "awaitGuidedVideoSettled",
+      "batch": "B1",
+      "reason": "polls GET /result until evidence.video.status is no longer PROCESSING; 45 s, 100 ms; validates the schema on the last result",
+      "interval_ms": "100",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "66",
+      "enclosing_method": "p6AwaitProcesses",
+      "batch": "B4",
+      "reason": "polls until owned processes are reaped (gone) or execution-terminated; caller-supplied deadline, 20 ms; throws IllegalStateException on timeout",
+      "interval_ms": "20",
+      "original_deadline": "deadline",
+      "on_timeout": "MAP_EXCEPTION"
+    },
+    {
+      "id": "67",
+      "enclosing_method": "p7FaultAndRetry (Order 27)",
+      "batch": "B3",
+      "reason": "polls for the file initial-context-check-entered; 15 s, 20 ms",
+      "interval_ms": "20",
+      "original_deadline": "until",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "77",
+      "enclosing_method": "p4AwaitRevocationObserverCompletion",
+      "batch": "B3",
+      "reason": "polls the revocation observer state until all witnesses settled; caller deadline, 20 ms; assertion follows",
+      "interval_ms": "20",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "78",
+      "enclosing_method": "p4SealPrivateProducersAfterOwnerCleanup",
+      "batch": "B3",
+      "reason": "polls producer sample files until the final ACK/failure sample matches; caller deadline, 20 ms; assertion follows",
+      "interval_ms": "20",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "82",
+      "enclosing_method": "p3AwaitExecution",
+      "batch": "B1",
+      "reason": "polls ui_test_executions.status until PASSED/FAILED/ERROR; caller deadline, 30 ms",
+      "interval_ms": "30",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "83",
+      "enclosing_method": "p3RunnerReport",
+      "batch": "B3",
+      "reason": "polls P3_FINAL_REPORTS for the execution id; 5 s, 20 ms",
+      "interval_ms": "20",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "85",
+      "enclosing_method": "p3AwaitTeardown",
+      "batch": "B3",
+      "reason": "polls teardownStatus until CONFIRMED; 20 s, 30 ms; throws AssertionError on timeout",
+      "interval_ms": "30",
+      "original_deadline": "deadline",
+      "on_timeout": "MAP_EXCEPTION"
+    },
+    {
+      "id": "86",
+      "enclosing_method": "p3DecodeVideo",
+      "batch": "B1",
+      "reason": "polls the execution until streamComplete; 45 s, 30 ms (sleeps before each fetch; the first fetch is the caller's snapshot)",
+      "interval_ms": "30",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "87",
+      "enclosing_method": "awaitJoinedVideo",
+      "batch": "B1",
+      "reason": "polls the execution until streamComplete; 45 s, 30 ms",
+      "interval_ms": "30",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "89",
+      "enclosing_method": "C5Capture.awaitS2Completion",
+      "batch": "B3",
+      "reason": "polls the S2 sample file until closed; caller deadline, 20 ms; shape assertions inside the loop",
+      "interval_ms": "20",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "90",
+      "enclosing_method": "awaitFinalizing",
+      "batch": "B3",
+      "reason": "polls the session state (JDBC when c5Capture is active, lock otherwise) until FINALIZING or terminal; 90 s, 50 ms; asserts FINALIZING; throws AssertionError on timeout",
+      "interval_ms": "50",
+      "original_deadline": "end",
+      "on_timeout": "MAP_EXCEPTION"
+    },
+    {
+      "id": "93",
+      "enclosing_method": "stopOwnedApplicationJobs",
+      "batch": "B4",
+      "reason": "polls a SimpleAsyncTaskScheduler's activeThreads until empty; shared deadline, 20 ms; assertion follows",
+      "interval_ms": "20",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    },
+    {
+      "id": "94",
+      "enclosing_method": "stopOwnedProcessTree",
+      "batch": "B4",
+      "reason": "polls until the root process and its recorded descendants exit after destroy(); guided grace (63 s class) or 30 s, 30 ms; the forced-kill branch follows on timeout",
+      "interval_ms": "30",
+      "original_deadline": "deadline",
+      "on_timeout": "FALL_THROUGH"
+    },
+    {
+      "id": "95",
+      "enclosing_method": "stopOwnedProcessTree",
+      "batch": "B4",
+      "reason": "polls up to 5 s, 20 ms after destroyForcibly() until the root and descendants are gone; assertions follow",
+      "interval_ms": "20",
+      "original_deadline": "deadline",
+      "on_timeout": "RETURN_LAST"
+    }
+  ],
+  "standaloneAlternativeOrderEvidenceCarried": "original e10/c441 observations and raw results unchanged; source independence and assertion structure preserved, not fresh final singleton result",
+  "affectedEvidenceLimits": {
+    "B1B4Focused": {
+      "passed": 13,
+      "freshP7OrReverse": false
+    },
+    "scratchPairs": {
+      "passed": 53,
+      "representativeSites": 10,
+      "direct47_48_49_67Covered": false,
+      "nativeCredit": false
+    },
+    "client98": {
+      "passed": 93,
+      "failed": 5,
+      "historicalFailurePreserved": true
+    },
+    "awake59": {
+      "passed": 59,
+      "failed": 0,
+      "Replay": "5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8",
+      "client": "072ce61b3c0f94d94076ef18c7acd170a4331e53d0968a132c08c85f15628c9c",
+      "historicalCauseProved": false,
+      "P7Credit": false
+    },
+    "slot3": "FAIL_PRESERVED"
+  },
+  "remainingMandatoryExits": [
+    "actual runner application and matching configured build/full product equivalence",
+    "final runner coverage/static/contracts/pins and conditional FE carry",
+    "fresh image/inimage/deployment/correctedD2/G9 singlecase/C10/finaldiagnostic/Live inputs",
+    "final source/helper/runtime/config/environment/dependency/image tuple guard; no pending mutations",
+    "Replay4 and5 consecutive identical108 with all original controls and no interposed runtime/source/build",
+    "whole6 all3partitions/freshmergedcoverage/unchangedfloors",
+    "independent AC5 TEST001/T5 review and authorized bookkeeping"
+  ],
+  "maximumReplayCalls": 6,
+  "consumedReplayCalls": 3,
+  "remainingReplayCalls": [
+    4,
+    5,
+    6
+  ],
+  "extraP7OrderInvocationAuthorized": false,
+  "cutoffUtc": "2026-10-22T04:35:27.361777Z",
+  "earlierFactsTighten": true,
+  "clockReset": false,
+  "sharedUsdCeiling": 500,
+  "aggregateSpend": "UNKNOWN",
+  "headroom": "UNKNOWN",
+  "newRuntimeSourceOrLifecycleApproval": false,
+  "sourceReferences": [
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/test001-final-source-applicability03-task.txt",
+      "sha256": "ea24a0c23ed105206a28125af52a4c4d6aa9c08e53ae0e2579b129b248095f13"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/test001-final-source-applicability03-context.txt",
+      "sha256": "7de5dbd1370790cd73ca8a84191474872b6fa723c323b1df3ab9f5ea4171e05e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/stages/00-test001/repo/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/incoming/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "abb4773016aa3499b76cf1aae3ac0da0f0b820ac4df19fb66887188c7dfe53f4"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "cf38d0c1314db3f4ae81c827846a97d144fdca5e9adb78de86e0723e8663a297"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/variants/reversed-orders/repo/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "c441abc23e67760b892998f96d26edd093b60f641ec85618a68d147281ddcad7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "sha256": "072ce61b3c0f94d94076ef18c7acd170a4331e53d0968a132c08c85f15628c9c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-readiness-traceability03/manifest.json",
+      "sha256": "cf13020e13f92166e05f414fc7ba117cefc316164c3d2e5c02e7c77cb286af67"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-readiness-traceability03/bindings.json",
+      "sha256": "6c18096931653bda4a01b7e8d4907195315f942767889032f94559428ac706fb"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-readiness-traceability03/readiness.md",
+      "sha256": "259ab2f9ed1fe016130066105683d39df54dd3893efeea5d77233485a24ab694"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-application.json",
+      "sha256": "294a2bd60c8385aaf08a48754320856dcd5889927c2ed5be462e4facb15edacc"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-controls-progress.json",
+      "sha256": "0ad0947da201ec1336231d27d175db424a167d5546464c3f7feb88651da1291e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-reverse-ordinals.json",
+      "sha256": "100e583aa8782366040829c0426a6cf39e008521ac95967d32b4daaae3c9e4a4"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-full-slot3/terminal-assessment.json",
+      "sha256": "52e714e459c87abb6357e97c163aee6c60a8def2a7bca9281312b4f159bc5da9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/terminal-assessment.json",
+      "sha256": "63c19786b56a2fff0c42ee3e5b882bb700be2a2e1f7696e00ce92a5f04f223ab"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/reader-input-baton.json",
+      "sha256": "5f110f67ce8f2f6d20ac1cfceee21bc9cd908202e7f1c477d32bf30d3e366f26"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/wait-pairs-execution.json",
+      "sha256": "20911e53f63c75616014e92da865d75fe0d5742e1681347c0f0dc9c45569bc75"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/c6-and-fold-integration-qa/review.md",
+      "sha256": "04b2cb5dbd0dde2d249be2f51e1c088ba3227d7ef86e4fa39ab79d5de7d18431"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/c6-and-fold-integration-qa/c6-evidence-checks.json",
+      "sha256": "b794bd4f8f3b2996c7d541eff97a95ed9874c1ef5d7c18d47cba8012a81fbcb5"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/source-text-checks.json",
+      "sha256": "25d5bfd09cae605b50d5fb6f86fde06e683c3b9c66d38d8fb96db169a60fc7bb"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/application-bindings.json",
+      "sha256": "2ea5b735f2726a86f7867f9d243b96a60a4e3f695e959e5e3580088fd1a97647"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-composed-qa-review.md",
+      "sha256": "7b9d0747918ab06d04aef107b4891dd1b4eeb662917065716027deaf822c8ac6"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/style-correction01/preservation.json",
+      "sha256": "4e8eca94f84af2ecf2b02d5108bf2144197d95b56961b0bb2d9ea5895dec416c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/style-correction02/preservation.json",
+      "sha256": "32280ad57af631aa9e990351a6d170402cec960df74a07e080ce32b8a2a40dd0"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/scope-alpha-independent-qa/review.md",
+      "sha256": "0906e61a145f5119f8691e81bf59a3a71b3385bd067857230032bf6a2cdd72f1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/style-correction03/preservation.json",
+      "sha256": "65a270954c6e0fc7101ba6a1de6f59e1b08cfeb763bc2058a26f5f629eefe946"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/style-correction03/binding.json",
+      "sha256": "daa772ad2d0fb336ee55bc839d47525fa469e0d44fbe6890459b5cca7d6fa4cf"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/style-correction03/constant-proof.json",
+      "sha256": "84959bdd1bf78a8f28f98a98f8ae8c2970d206b8c2cb4d18ad6324f8fc8964df"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/actual-final-source-bindings.json",
+      "sha256": "7dccc7e732ed9a4cdebd297abaab4eb15c040eafde7d85f3ebbb7ff18ad160d9"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-client-initialization-fix/design.md",
+      "sha256": "b0701261dac924deb7a0b947d9f9704f1581b7542cbf6e0ea91545b83287f434"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-client-initialization-fix/constructor-callsite-proof.json",
+      "sha256": "26d119e9f3b14cc9c0ff19cc65b28117f223df780b21857688534f284581b361"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-client-initialization-fix/forward.patch",
+      "sha256": "6d3183438bd206852be7335edacaedeb9d47fdba582828618a7cf317920cbe05"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-client-initialization-execution01/terminal-assessment.json",
+      "sha256": "e88ca3d4f090adad053362cc60da8e2fc0cf35fddd293abc1936e70d52d654ba"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/native-host-suspension/awake-control-execution01/receipt.json",
+      "sha256": "484b90eb81cc8249403720d9a51cb7e656c33950f002985102a4ccf2e355917f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/poll-edits.json",
+      "sha256": "3a357359abdbb2caf2d50c4afaef89c21ae7b070baff0703859421e7acf393ec"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/row-classification-proof-map.json",
+      "sha256": "ab487be7be7765e2f4ffd184d09f6c498fa09632cfe9df7c63c89f82aadbad8a"
+    }
+  ]
+}

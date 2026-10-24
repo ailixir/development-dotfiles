@@ -1,0 +1,32 @@
+{
+  "sourceVerdict": "CLEAN_EXACT_C6_FOLD_SUCCESSOR_AND_DISJOINT_LEFT_COMPOSITION",
+  "mandatoryFindings": [],
+  "manifestSha256": "d2ca2f6485721bb4f030ada707242f33e6f59770d14d739773c8000ee4dfeb68",
+  "applicationBindingsSha256": "2ea5b735f2726a86f7867f9d243b96a60a4e3f695e959e5e3580088fd1a97647",
+  "foldPatchSha256": "8dfa0ec0494c85415053fcf73fc710243e0a8ae5f9e75e3dfcd7b7599bfa148f",
+  "rollbackPatchSha256": "d17cbda9ff291f5c4b176c8ad9ce84e5f4edbf5f5584e601bccc41909152136a",
+  "beforeReplay": "abb4773016aa3499b76cf1aae3ac0da0f0b820ac4df19fb66887188c7dfe53f4",
+  "afterReplay": "cf38d0c1314db3f4ae81c827846a97d144fdca5e9adb78de86e0723e8663a297",
+  "operationCount": 38,
+  "hunkCount": 142,
+  "same37OtherOperationsAndOutputs": true,
+  "onlyTwoReplayHeadersChanged": [
+    {
+      "old": "@@ -36896,9 +36899,9 @@",
+      "new": "@@ -37043,9 +37046,9 @@"
+    },
+    {
+      "old": "@@ -38420,7 +38423,7 @@",
+      "new": "@@ -38567,7 +38570,7 @@"
+    }
+  ],
+  "c6ExactBoundedTransformationOnInheritedIncomingAndTypedBuffers": true,
+  "originalAssertionsAnd21DeliberateSleepsPreserved": true,
+  "left10PathsDisjoint": true,
+  "combined48ForwardInverseExact": true,
+  "historical82ArtifactsUnchanged": true,
+  "actualReplayEqualityRequired": false,
+  "sourceApplied": false,
+  "runtimeExecuted": false,
+  "finalPairCredit": false
+}

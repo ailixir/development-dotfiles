@@ -1,0 +1,202 @@
+{
+  "kind": "static current-source evidence only",
+  "sources": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "848e102c199e0497ce006528b25c71396c34ed7490f0b822569b000b9bf17d43"
+    },
+    {
+      "path": ".codex/skills/aiox-devops/SKILL.md",
+      "sha256": "aebb30f558db1e446e6dcfe5e64f87ec7b79eb3246b37cd60fcb828230fece06"
+    },
+    {
+      "path": ".aiox-core/development/agents/devops.md",
+      "sha256": "fb4555b484be4b93e11ed1e974b3e904ba7cddecb01ce44ac26828c7e8a8e382"
+    },
+    {
+      "path": ".aiox-core/constitution.md",
+      "sha256": "1a866487cbe49bf480e79d466a685981be1fda57ef91beda7d77963f23de5df1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/RESUME-HANDOFF-20261018-CODEX.md",
+      "sha256": "7965d55220905ada4ca1670c941f65360c596697f6970f39b096fcaa94c17212"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-decisions.md",
+      "sha256": "758a33bcd2db1b1f07ebed4ebbc6ce632657c7d8fa5b64a3136d2a98a538f09d"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "sha256": "395ed4f676fc3a97e1e4c17d085dcc45394365a20dc57fc0d595c5b98a3b4edf"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "976cc0e8cd9a97240fa18651481172d89354fbd59b8131bb47437973ad45962f"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/deployment.yaml",
+      "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977"
+    },
+    {
+      "path": "helm-chart/put-checks/templates/configmap.yaml",
+      "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260"
+    },
+    {
+      "path": "helm-chart/put-checks/values.yaml",
+      "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80"
+    },
+    {
+      "path": "helm-chart/put-checks/values-dev.yaml",
+      "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1"
+    },
+    {
+      "path": "helm-chart/put-checks/values-uat.yaml",
+      "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33"
+    },
+    {
+      "path": "helm-chart/put-checks/values-prod.yaml",
+      "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9"
+    },
+    {
+      "path": "studio-runner/test/deployment/integrations.test.ts",
+      "sha256": "6358d5d008ea3545df78719d5c2e66bc16f5cdf564e17af8056bd9d3e57d302b"
+    },
+    {
+      "path": "studio-runner/test/deployment/envfrom-keys.test.ts",
+      "sha256": "87b82dbb8186fbf08885e36794785e477419b9fbc7c28408d1a6a923a237c840"
+    },
+    {
+      "path": "studio-runner/test/deployment/helm.ts",
+      "sha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0"
+    },
+    {
+      "path": "backend/src/main/resources/application.yml",
+      "sha256": "271fac527d075f996173e6cf1ef52d409d4416d3d6a46114fc541097b3a25f75"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewayProperties.java",
+      "sha256": "44b1a118ce320d1e1a2e132409025e1070cd70846baf1e1fd142bb3a44daf0b4"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewaySelectionProperties.java",
+      "sha256": "7e2828989313dfaadd3eeb383e2935c5a41c2830d6f960158ce032a578752b3b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewayConfig.java",
+      "sha256": "dbbd1f7b5f5883ab0f831e1eb78bff2511757c97b9df04b2a081813e6e88c2dc"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/config/MountedSpringConfigurationTest.java",
+      "sha256": "b880c0c0d71e6450d1fdd3d5f2453e6289c8bdc5a459b2dafb45e12987737e38"
+    }
+  ],
+  "dedicatedCurrentFacts": [
+    {
+      "property": "studio.gateway.provider",
+      "normalized": "studiogatewayprovider",
+      "envPlaceholder": "STUDIO_GATEWAY_PROVIDER",
+      "placeholderNormalized": "studiogatewayprovider",
+      "chartOwner": "studioGateway.provider",
+      "apiDeploymentEnvLine": 174,
+      "currentlyProtected": false
+    },
+    {
+      "property": "studio.gateway.endpoint",
+      "normalized": "studiogatewayendpoint",
+      "envPlaceholder": "STUDIO_GATEWAY_ENDPOINT",
+      "placeholderNormalized": "studiogatewayendpoint",
+      "chartOwner": "studioGateway.endpoint or vertexConfigMap.name/endpointKey",
+      "apiDeploymentEnvLine": 176,
+      "currentlyProtected": false
+    },
+    {
+      "property": "studio.gateway.project",
+      "normalized": "studiogatewayproject",
+      "envPlaceholder": "STUDIO_GATEWAY_PROJECT",
+      "placeholderNormalized": "studiogatewayproject",
+      "chartOwner": "studioGateway.project or vertexConfigMap.name/projectKey",
+      "apiDeploymentEnvLine": 185,
+      "currentlyProtected": false
+    },
+    {
+      "property": "studio.gateway.location",
+      "normalized": "studiogatewaylocation",
+      "envPlaceholder": "STUDIO_GATEWAY_LOCATION",
+      "placeholderNormalized": "studiogatewaylocation",
+      "chartOwner": "studioGateway.location or vertexConfigMap.name/locationKey",
+      "apiDeploymentEnvLine": 194,
+      "currentlyProtected": false
+    },
+    {
+      "property": "studio.gateway.model",
+      "normalized": "studiogatewaymodel",
+      "envPlaceholder": "STUDIO_GATEWAY_MODEL",
+      "placeholderNormalized": "studiogatewaymodel",
+      "chartOwner": "studioGateway.model",
+      "apiDeploymentEnvLine": 203,
+      "currentlyProtected": false
+    },
+    {
+      "property": "studio.gateway.credentials.mode",
+      "normalized": "studiogatewaycredentialsmode",
+      "envPlaceholder": "STUDIO_GATEWAY_CREDENTIALS_MODE",
+      "placeholderNormalized": "studiogatewaycredentialsmode",
+      "chartOwner": "studioGateway.credentialsMode",
+      "apiDeploymentEnvLine": 205,
+      "currentlyProtected": false
+    },
+    {
+      "property": "studio.gateway.credentials.service-account-key-file",
+      "normalized": "studiogatewaycredentialsserviceaccountkeyfile",
+      "envPlaceholder": "STUDIO_GATEWAY_CREDENTIALS_KEY_FILE",
+      "placeholderNormalized": "studiogatewaycredentialskeyfile",
+      "chartOwner": "studioGateway.credentialsMountPath/credentialsKey; credentialsSecret mounts contents",
+      "apiDeploymentEnvLine": 207,
+      "currentlyProtected": false
+    }
+  ],
+  "apiDedicatedGatewayEnv": [
+    "STUDIO_GATEWAY_PROVIDER",
+    "STUDIO_GATEWAY_ENDPOINT",
+    "STUDIO_GATEWAY_PROJECT",
+    "STUDIO_GATEWAY_LOCATION",
+    "STUDIO_GATEWAY_MODEL",
+    "STUDIO_GATEWAY_CREDENTIALS_MODE",
+    "STUDIO_GATEWAY_CREDENTIALS_KEY_FILE"
+  ],
+  "workerDedicatedGatewayEnv": [],
+  "existingInvariant": {
+    "helper": "_helpers.tpl:691-693; values.yaml:160-162",
+    "owner": "STUDIO-OBS-009 T1/T2 @devops with @dev",
+    "propertyGuardCalledForBoth": "deployment.yaml:9 and :400"
+  },
+  "precedenceQualification": "Canonical env properties can override mounted values, explicitly covered by MountedSpringConfigurationTest. No actual gateway source precedence experiment or exploit was executed. The key-file placeholder differs from its canonical property; both name the same dedicated chart fact.",
+  "genericPolicyAudit": {
+    "validateEnvironmentKey": "reserves normalized springprofiles* and springapplicationjson/springconfigimport/springconfiglocation/springconfigadditionallocation only",
+    "env": "API and worker map arbitrary other env keys after dedicated env entries",
+    "envFromSecrets": "API and worker map listed keys to secretKeyRef after generic env; selectors checked by same validator",
+    "gatewayAliasCollisions": "No explicit gateway collision denial in existing validator; effective duplicate-env handling/runtime precedence unexecuted. Report to root as broader policy issue; this draft does not alter env/envFromSecrets validation.",
+    "otherExistingAllowedControls": "JAVA_OPTS with chart dump-disabling flags, datasource Secret references, gateway transport budgets/features, ordinary custom properties remain allowed",
+    "observedPolicy": "G-O4 independently scans observed catalog/policy aliases in configOverrides/env when observed is on. Left byte-identical; no statement here about all possible secret aliases."
+  },
+  "newNormalizedTokens": [
+    "studiogatewayprovider",
+    "studiogatewayendpoint",
+    "studiogatewayproject",
+    "studiogatewaylocation",
+    "studiogatewaymodel",
+    "studiogatewaycredentialsmode",
+    "studiogatewaycredentialsserviceaccountkeyfile",
+    "studiogatewaycredentialskeyfile"
+  ],
+  "legacyNormalizedTokens": [
+    "studiocompilegatewayprovider",
+    "studiocompilegatewayendpoint",
+    "studiocompilegatewayproject",
+    "studiocompilegatewaylocation",
+    "studiocompilegatewaymodel",
+    "studiocompilegatewaycredentialsmode",
+    "studiocompilegatewaycredentialsserviceaccountkeyfile"
+  ],
+  "runtimeClaims": []
+}

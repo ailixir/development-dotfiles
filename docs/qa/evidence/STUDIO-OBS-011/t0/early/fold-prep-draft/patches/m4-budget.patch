@@ -1,0 +1,11 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java
+@@ -179,7 +179,7 @@
+         try {
+           verdict =
+               validator.validate(
+-                  outgoing, new PublicationBudget(attempt.validationDeadline(), clock));
++                  outgoing, new PublicationBudget(attempt.validationDeadline(), Clock.systemUTC()));
+         } catch (GuidedSessionException failure) {
+           sessions.transaction(
+               () -> {

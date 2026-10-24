@@ -1,0 +1,224 @@
+{
+  "completedAt": "2026-10-20T14:33:31.225810+00:00",
+  "status": "FIVE_FILE_IMPLEMENTATION_APPLIED_FOCUSED_GREEN_FOUR_INTENDED_MUTANTS_KILLED",
+  "story": "STUDIO-OBS-011",
+  "implementation": "GS-M(a), C-OBS008-1 and C-OBS009-1",
+  "checks": [
+    {
+      "label": "obs011-recovery-20261020-gsma-red01",
+      "exit": 1,
+      "counts": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 14.88,
+      "verdict": "INTENDED_OLD_BEHAVIOR_ASSERTION_RED",
+      "resultSha256": "4a85a8544ed9fcc0a3000ef847980b217aac5f69c1cdfecd6abe9d046d25004f",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true
+    },
+    {
+      "label": "obs011-recovery-20261020-gsma-red02",
+      "exit": 1,
+      "counts": {
+        "total": 9,
+        "passed": 4,
+        "failed": 5,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 22.77,
+      "verdict": "STOP_MIXED_INTENDED_ASSERTION_RED_AND_FIXTURE_SETUP_FAILURES",
+      "resultSha256": "9c42945e778eaa90df18e85b381a434c598f8cf8360b3ca6cce4064564cc4a0c",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true
+    },
+    {
+      "label": "obs011-recovery-20261020-gsma-red03",
+      "exit": 1,
+      "counts": {
+        "total": 9,
+        "passed": 4,
+        "failed": 5,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 24.49,
+      "verdict": "STOP_INTENDED_ASSERTION_REDS_PLUS_TERMINAL_IMMUTABILITY_FIXTURE_FAILURE",
+      "resultSha256": "620fd85402a5341911fb96be8353f8570cdd8a194ea9078fbf5f804531a88104",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true
+    },
+    {
+      "label": "obs011-recovery-20261020-gsma-red04",
+      "exit": 1,
+      "counts": {
+        "total": 9,
+        "passed": 5,
+        "failed": 4,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 25.2,
+      "verdict": "INTENDED_OLD_BEHAVIOR_ASSERTION_RED_NO_FIXTURE_FAILURES",
+      "resultSha256": "f81653925da57bbfb8bde8dbd5092173cdcd7da6255534b252f7cf3325dc2d04",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true
+    },
+    {
+      "label": "obs011-recovery-20261020-gsma-a01",
+      "exit": 0,
+      "counts": {
+        "total": 14,
+        "passed": 14,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 34.71,
+      "verdict": "FOCUSED_IMPLEMENTATION_GREEN",
+      "resultSha256": "17c1d2d6c306aae7cf45145c0d889160effb22350289b6653e35ff145afc9b08",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true
+    },
+    {
+      "label": "obs011-recovery-20261020-gsma-mut01",
+      "exit": 1,
+      "counts": {
+        "total": 2,
+        "passed": 1,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 9.01,
+      "verdict": "INTENDED_ASSERTION_KILL",
+      "resultSha256": "3f4990f869f348d0b67a621b9e615f5491eedf2d03d73ee1548aa3a500146b24",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true
+    },
+    {
+      "label": "obs011-recovery-20261020-gsma-mut02",
+      "exit": 1,
+      "counts": {
+        "total": 2,
+        "passed": 1,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 8.32,
+      "verdict": "INTENDED_ASSERTION_KILL",
+      "resultSha256": "2d5e0f1d20fa484bc6407f544f617fca6d50e43b00485b877bf3b84c00424533",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true
+    },
+    {
+      "label": "obs011-recovery-20261020-gsma-mut03",
+      "exit": 1,
+      "counts": {
+        "total": 9,
+        "passed": 8,
+        "failed": 1,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 23.42,
+      "verdict": "INTENDED_ASSERTION_KILL",
+      "resultSha256": "2fc703391911f06bb65dbe5fb6a0cf4eb5d9965dedf71d1b9985dbf98d7fbc28",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true
+    },
+    {
+      "label": "obs011-recovery-20261020-gsma-mut04",
+      "exit": 1,
+      "counts": {
+        "total": 9,
+        "passed": 5,
+        "failed": 4,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 23.97,
+      "verdict": "INTENDED_ASSERTION_KILL_GSM_P5",
+      "resultSha256": "edfb96ee7f1ea50841d9136f00cfb46d5d996de3df120fc1e1be0874e436f911",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true
+    }
+  ],
+  "exactFiveFileDeltaFromFreshRunnerBaseline": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "beforeSha256": "72cdc69c1471eb37f388946619fb5770226ed5512e8a8f5caf5ec8606d560835",
+      "afterSha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "beforeSha256": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+      "afterSha256": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "beforeSha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5",
+      "afterSha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "beforeSha256": null,
+      "afterSha256": "255469af129ef55146c568d5a839d643c6469c54900bbd81c699b87b2f056c05"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "beforeSha256": null,
+      "afterSha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a"
+    }
+  ],
+  "allOtherCapturedSourceUnchanged": true,
+  "finalSourceDigest": "330399d14af7602b7cc113b77b310735337c8c6f94dbc9fe591f2e3006887a49",
+  "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "distChanged": false,
+  "readOnlyPrunerPin": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/retention/GuidedObservationPrunerIT.java",
+    "sha256": "85847c7059efe38039f75ac8c0d56c54a54b182dd0b495b548f9390f28929d6d",
+    "stillMatchesS011": true
+  },
+  "projectorBaton": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8",
+  "serviceRestoredAfterEachMutant": true,
+  "successorManifestSha256": "e0254290dd70dfc9ca504036c1c4f31a5625bf18205c2131500398032badd26a",
+  "successorArtifactListSha256": "5772c07511b8a1c8228a971821bba9a60d641cf1460f9b051c4f12e3b14fc830",
+  "helperCodeChanges": false,
+  "mainCandidateChanges": false,
+  "testFixtureCorrection": "All nine methods and65 original assert/verify chains preserved; real pre-effect eligible new sessions, no terminal revival, all owned starts cancelled by AfterEach assertAll; two root-reviewed fixture corrections retained as history.",
+  "notExecuted": [
+    "formatter/style gates on five new files",
+    "broad Replay/full-class/native integrated gate",
+    "final independent QA/lifecycle/release gates"
+  ],
+  "fullClassReplayInvocations": 0,
+  "lifecycleOrReleaseCredit": false,
+  "externalProviderOperations": false,
+  "budgetCeilingUSD": 500,
+  "aggregateSpend": "UNKNOWN",
+  "activeJobs": []
+}

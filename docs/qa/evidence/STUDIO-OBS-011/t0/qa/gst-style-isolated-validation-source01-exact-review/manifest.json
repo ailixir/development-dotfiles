@@ -1,0 +1,108 @@
+{
+  "kind": "QUINN_EXACT_GST_ISOLATED_SOURCE01_PROTOCOL_REVIEW",
+  "reviewer": "Quinn",
+  "subjectManifestSha256": "67ae068fc92006900082af0b1aca4cfc46c90737812d550392d9f5575f3aad26",
+  "ariaManifestSha256": "1b9a734119c87c43ec8282fa6146428bf94df0c0d9221b2545a9e3d5aa3a25e5",
+  "verdict": "HOLD_EXACT_INACTIVE_PROTOCOL_CORRECTION_REQUIRED",
+  "mandatoryFindings": [
+    "GSTISO01-QA-01",
+    "GSTISO01-QA-02",
+    "GSTISO01-QA-03"
+  ],
+  "mandatoryFindingCount": 3,
+  "payloadCount": 13,
+  "files": [
+    {
+      "path": "SHA256SUMS",
+      "sha256": "a20e68d3a537eeebcf0dc2f84a5949909704c43d0658c245f922f9d0ff2a7c29",
+      "bytes": 959,
+      "mode": 420
+    },
+    {
+      "path": "checks.json",
+      "sha256": "20f2f81a28b1959810d7030a8bc7bd073a2f62eea2c9fdc475f6eebcb82c7924",
+      "bytes": 94899,
+      "mode": 420
+    },
+    {
+      "path": "critical.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "critical.stdout",
+      "sha256": "6c62962c3e61089c7c0454939c7316082a96dbecb0f5b65fb86e58370b8cc8fa",
+      "bytes": 6238,
+      "mode": 420
+    },
+    {
+      "path": "critical_checks.py",
+      "sha256": "50d9571c9f5693f10b5b4b21b015014995b7e56f01c076735d9395e35e54eb70",
+      "bytes": 5202,
+      "mode": 420
+    },
+    {
+      "path": "findings.json",
+      "sha256": "d67d00ec017af749326cb08293f4768600f31bbca823a59080339d399b41a0e6",
+      "bytes": 9937,
+      "mode": 420
+    },
+    {
+      "path": "history.json",
+      "sha256": "bfac5f160e905788febb7c7675df06690953e52cfa0d3a27e2752e6dc539e32e",
+      "bytes": 1105,
+      "mode": 420
+    },
+    {
+      "path": "pins.json",
+      "sha256": "76b5ebaed5871b834d797b17c83409c9a9acb20624959a245d2f99b103470be4",
+      "bytes": 33889,
+      "mode": 420
+    },
+    {
+      "path": "review-record.json",
+      "sha256": "e5b2dfa35243e4ec58260abc2bf7354cecc927b62939bfa03b1f58e8854d685b",
+      "bytes": 6206,
+      "mode": 420
+    },
+    {
+      "path": "review.md",
+      "sha256": "0469b08ea04e7ec2ed298056e84a536cf765762514c195c53ef25d0095c5c92c",
+      "bytes": 10140,
+      "mode": 420
+    },
+    {
+      "path": "verify.py",
+      "sha256": "b3a0d902abb90d269409ac8c564cd502223f8bcbe5c513670aa43b86b60f1c79",
+      "bytes": 6132,
+      "mode": 420
+    },
+    {
+      "path": "verify.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "verify.stdout",
+      "sha256": "bfc02f9de8952f53e282850c1521dd0c80c40e3e9b45ed71b3b31185eff2bed5",
+      "bytes": 187,
+      "mode": 420
+    }
+  ],
+  "independentStaticChecks": 624,
+  "publicPins": 131,
+  "independentCriticalChecks": 14,
+  "independentCriticalCases": 7,
+  "reusedAriaFullFlow": 43,
+  "reusedAriaStatic": 4552,
+  "attributedAriaCritical": 8,
+  "actualTargetActions": 0,
+  "ordinaryRuntimeAdapterImplemented": false,
+  "sourceOnly": true,
+  "actualAuthority": false,
+  "credit": false,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

@@ -1,0 +1,252 @@
+"""Archive fresh Test-task outputs. Separate collector options from Gradle args with --."""
+from pathlib import Path
+from collections import Counter
+import argparse
+import datetime
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+
+ALLOWED_TASKS = {"test", "guidedIncrementalTest", "crossReplicaTest"}
+COUNT_KEYS = ("total", "passed", "failed", "errors", "skipped")
+
+
+def file_fact(path, root):
+    return {"path": str(path.relative_to(root)),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "bytes": path.stat().st_size, "mtimeNs": path.stat().st_mtime_ns,
+            "mode": oct(path.stat().st_mode & 0o777)}
+
+
+def safe_file(path, root):
+    if path.is_symlink() or not path.is_file():
+        raise ValueError("Expected a regular non-symlink output")
+    if not path.resolve().is_relative_to(root.resolve()):
+        raise ValueError("Output escaped the workspace")
+    current = path.parent
+    while current != root:
+        if current.is_symlink():
+            raise ValueError("Symlink output parent")
+        current = current.parent
+
+
+def archive_file(source, destination, root):
+    safe_file(source, root)
+    if destination.exists():
+        raise ValueError("Refusing to overwrite an evidence artifact")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, destination)
+    if hashlib.sha256(source.read_bytes()).digest() != hashlib.sha256(destination.read_bytes()).digest():
+        raise ValueError("Archive bytes do not match the original")
+    return file_fact(destination, root)
+
+
+def read_xml(path, task):
+    suite = ET.parse(path).getroot()
+    counts = {"total": int(suite.attrib.get("tests", 0)),
+              "failed": int(suite.attrib.get("failures", 0)),
+              "errors": int(suite.attrib.get("errors", 0)),
+              "skipped": int(suite.attrib.get("skipped", 0))}
+    cases = [{"task": task, "class": case.attrib.get("classname"),
+              "name": case.attrib["name"],
+              "status": "FAIL" if case.find("failure") is not None or case.find("error") is not None
+              else "SKIP" if case.find("skipped") is not None else "PASS"}
+             for case in suite.iter("testcase")]
+    counts["passed"] = counts["total"] - counts["failed"] - counts["errors"] - counts["skipped"]
+    if len(cases) != counts["total"] or counts["passed"] < 0:
+        raise ValueError("XML testcase count does not match its suite")
+    if sum(case["status"] == "FAIL" for case in cases) != counts["failed"] + counts["errors"]:
+        raise ValueError("XML failure counts do not match its testcases")
+    if sum(case["status"] == "SKIP" for case in cases) != counts["skipped"]:
+        raise ValueError("XML skip counts do not match its testcases")
+    return counts, cases
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("label")
+    parser.add_argument("--test-tasks", required=True)
+    parser.add_argument("--require-exec-tasks", default="")
+    parser.add_argument("--allowed-skips-file", help="Independently approved exact task/class/name multiset; default permits zero skips")
+    argv = sys.argv[1:]
+    if "--" not in argv:
+        parser.error("Separate collector options from Gradle arguments with --")
+    boundary = argv.index("--")
+    args = parser.parse_args(argv[:boundary])
+    gradle_args = argv[boundary + 1:]
+    tasks = args.test_tasks.split(",")
+    required_exec = set(filter(None, args.require_exec_tasks.split(",")))
+    if not tasks or len(tasks) != len(set(tasks)) or not set(tasks) <= ALLOWED_TASKS:
+        parser.error("Use unique explicitly allowed Test task names")
+    if not required_exec <= set(tasks):
+        parser.error("Required exec tasks must be selected Test tasks")
+    if not gradle_args or "--source-exclusions" in gradle_args:
+        parser.error("Task-qualified validation requires Gradle arguments and globally held source")
+    if not args.label or any(character not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_" for character in args.label):
+        parser.error("Invalid evidence label")
+    root = Path.cwd()
+    out = root / "docs/qa/evidence/STUDIO-OBS-011/execution"
+    result_path = out / f"{args.label}-results.json"
+    base_path = out / f"{args.label}-default-task-base-results.json"
+    archive = out / f"{args.label}-task-outputs"
+    if any(path.exists() for path in (result_path, base_path, archive)):
+        parser.error("Refusing to overwrite an existing execution")
+    allowed_skips = []
+    allowed_skip_source = None
+    if args.allowed_skips_file:
+        policy_path = Path(args.allowed_skips_file).resolve()
+        safe_file(policy_path, root)
+        allowed_skip_source = file_fact(policy_path, root)
+        allowed_skips = json.loads(policy_path.read_text())
+        if not isinstance(allowed_skips, list) or any(
+            not isinstance(case, dict) or set(case) != {"task", "class", "name"}
+            or not all(isinstance(value, str) and value for value in case.values())
+            or case["task"] not in tasks for case in allowed_skips
+        ):
+            parser.error("Approved skips must be an exact selected task/class/name list")
+    allowed_skip_multiset = Counter((case["task"], case["class"], case["name"]) for case in allowed_skips)
+    legacy = root / ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py"
+    process = subprocess.run([sys.executable, str(legacy), args.label, *gradle_args])
+    if not result_path.exists():
+        raise SystemExit(process.returncode or 2)
+    shutil.copy2(result_path, base_path)
+    receipt = json.loads(result_path.read_text())
+    started = datetime.datetime.fromisoformat(receipt["started"]).timestamp()
+    archive.mkdir()
+    counts = dict.fromkeys(COUNT_KEYS, 0)
+    cases, xml_files, reports, exec_files, guards, cohorts, errors, task_results = [], [], [], [], [], [], [], {}
+    try:
+        for task in tasks:
+            task_counts = dict.fromkeys(COUNT_KEYS, 0)
+            task_xml = []
+            source_dir = root / "backend/build/test-results" / task
+            for source in sorted(source_dir.glob("TEST-*.xml")):
+                if source.stat().st_mtime < started:
+                    continue
+                suite_counts, suite_cases = read_xml(source, task)
+                fact = archive_file(source, archive / task / "xml" / source.name, root)
+                fact["task"] = task
+                task_xml.append(fact)
+                cases.extend(suite_cases)
+                for key in COUNT_KEYS:
+                    task_counts[key] += suite_counts[key]
+            if not task_xml or not task_counts["total"]:
+                errors.append({"task": task, "reason": "MISSING_FRESH_NONEMPTY_XML"})
+            elif task_counts["total"] == task_counts["skipped"]:
+                errors.append({"task": task, "reason": "NO_EXECUTED_TESTCASES"})
+            for key in COUNT_KEYS:
+                counts[key] += task_counts[key]
+            xml_files.extend(task_xml)
+            report_dir = root / "backend/build/reports/tests" / task
+            index = report_dir / "index.html"
+            if index.is_file() and index.stat().st_mtime >= started:
+                for source in sorted(report_dir.rglob("*")):
+                    if source.is_file():
+                        fact = archive_file(source, archive / task / "html" / source.relative_to(report_dir), root)
+                        fact["task"] = task
+                        reports.append(fact)
+            else:
+                errors.append({"task": task, "reason": "MISSING_FRESH_HTML_INDEX"})
+            execution_data = root / "backend/build/jacoco" / f"{task}.exec"
+            current_exec = execution_data.is_file() and execution_data.stat().st_mtime >= started
+            fresh_exec = current_exec and execution_data.stat().st_size > 0
+            if current_exec:
+                fact = archive_file(execution_data, archive / task / "jacoco" / execution_data.name, root)
+                fact["task"] = task
+                fact["nonempty"] = fresh_exec
+                exec_files.append(fact)
+            if task in required_exec and not fresh_exec:
+                errors.append({"task": task, "reason": "MISSING_FRESH_NONEMPTY_REQUIRED_EXEC"})
+            task_results[task] = {"counts": task_counts, "freshXmlFiles": len(task_xml),
+                                  "freshHtmlIndex": index.is_file() and index.stat().st_mtime >= started,
+                                  "freshExec": fresh_exec, "execRequired": task in required_exec}
+            join_ran = any(case["task"] == task and case["class"] ==
+                           "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT"
+                           for case in cases)
+            cohort_root = root / "backend/build/guided-cohorts" / task
+            fresh_cohorts = [path for path in sorted(cohort_root.rglob("cohort.json"))
+                             if path.stat().st_mtime >= started]
+            if join_ran and len(fresh_cohorts) != 1:
+                errors.append({"task": task, "reason": "MISSING_OR_AMBIGUOUS_FRESH_JOIN_COHORT",
+                               "count": len(fresh_cohorts)})
+            for cohort in fresh_cohorts:
+                required_names = {"cohort.json", "guard-tally.json", "audit-final.json"}
+                candidates = {cohort.parent / name for name in required_names}
+                candidates.update(source for source in cohort.parent.glob("*.json")
+                                  if re.fullmatch(r"(?:model-budget-evidence|responses|privacy)-[A-Za-z0-9._-]+\.json", source.name))
+                for source in sorted(candidates):
+                    if not source.is_file() or source.stat().st_mtime < started:
+                        errors.append({"task": task, "reason": "MISSING_FRESH_COHORT_FILE", "file": source.name})
+                        continue
+                    fact = archive_file(source, archive / task / "cohorts" / source.relative_to(cohort_root), root)
+                    fact["task"] = task
+                    cohorts.append(fact)
+            task_results[task]["joinCasesPresent"] = join_ran
+            task_results[task]["freshJoinCohorts"] = len(fresh_cohorts)
+        guard_root = root / "backend/build/guard-tally"
+        for source in sorted(guard_root.rglob("*.json")):
+            if source.stat().st_mtime < started:
+                continue
+            guards.append(archive_file(source, archive / "guard-tally" / source.relative_to(guard_root), root))
+        identities = {}
+        for case in cases:
+            identity = (case["class"], case["name"])
+            identities.setdefault(identity, set()).add(case["task"])
+        duplicates = [{"class": identity[0], "name": identity[1], "tasks": sorted(owners)}
+                      for identity, owners in identities.items() if len(owners) > 1]
+        if duplicates:
+            errors.append({"reason": "DUPLICATE_ORIGINAL_CASE_ACROSS_TASKS", "identities": duplicates})
+        actual_skip_multiset = Counter((case["task"], case["class"], case["name"])
+                                       for case in cases if case["status"] == "SKIP")
+        if actual_skip_multiset != allowed_skip_multiset:
+            errors.append({"reason": "EXACT_SKIP_POLICY_MISMATCH",
+                           "expected": allowed_skips,
+                           "actual": [{"task": case["task"], "class": case["class"], "name": case["name"]}
+                                      for case in cases if case["status"] == "SKIP"]})
+        if allowed_skip_source:
+            policy_path = root / allowed_skip_source["path"]
+            if file_fact(policy_path, root)["sha256"] != allowed_skip_source["sha256"]:
+                errors.append({"reason": "APPROVED_SKIP_POLICY_CHANGED_DURING_RUN"})
+            else:
+                archive_file(policy_path, archive / "approved-historical-skips.json", root)
+    except Exception as error:
+        errors.append({"reason": "COLLECTION_EXCEPTION", "type": type(error).__name__})
+    receipt["defaultTaskBaseReceipt"] = file_fact(base_path, root)
+    receipt["legacyWrapper"] = file_fact(legacy, root)
+    receipt["taskedWrapper"] = file_fact(Path(__file__).resolve(), root)
+    receipt["explicitTestTasks"] = tasks
+    receipt["requiredFreshExecTasks"] = sorted(required_exec)
+    receipt["expectedHistoricalSkips"] = allowed_skips
+    receipt["historicalSkipSource"] = allowed_skip_source
+    receipt["skipPolicy"] = "Zero skipped cases unless they equal the independently approved exact task/class/name multiset"
+    receipt["counts"] = counts
+    receipt["testcases"] = cases
+    receipt["xmlFiles"] = xml_files
+    receipt["guardTallies"] = guards
+    receipt["taskResults"] = task_results
+    receipt["testHtmlFiles"] = reports
+    receipt["jacocoExecFiles"] = exec_files
+    receipt["guidedCohortFiles"] = cohorts
+    receipt["taskCollectionErrors"] = errors
+    receipt["taskCollectionComplete"] = not errors
+    receipt["scope"] = ("Explicit fresh Test-task outputs only; merged coverage, complete JOIN80 case union, "
+                        "per-invocation budget/audit/private media proof require separate assessment.")
+    stable = receipt.get("sourceStable") and receipt.get("distStable")
+    successful_cases = counts["passed"] > 0 and not counts["failed"] and not counts["errors"]
+    final_exit = process.returncode or (0 if stable and not errors and successful_cases else 2)
+    receipt["gradleExit"] = receipt["exit"]
+    receipt["exit"] = final_exit
+    receipt["validationSucceeded"] = final_exit == 0
+    result_path.write_text(json.dumps(receipt, indent=2) + "\n")
+    print(json.dumps({"exit": final_exit, "counts": counts, "testTasks": tasks,
+                      "taskCollectionComplete": not errors, "sourceStable": receipt.get("sourceStable"),
+                      "distStable": receipt.get("distStable")}))
+    raise SystemExit(final_exit)
+
+
+if __name__ == "__main__":
+    main()

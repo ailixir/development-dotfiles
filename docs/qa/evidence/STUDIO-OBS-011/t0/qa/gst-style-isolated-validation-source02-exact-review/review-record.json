@@ -1,0 +1,43 @@
+{
+  "reviewer": "Quinn",
+  "subjectManifestSha256": "0bac75fdd932a1858aef8dfb9e67d1769025966c707bfe9dd28122545b2534b2",
+  "protocol": "EXACT_INACTIVE_GST_ISOLATED_SOURCE02_REVIEW",
+  "verdict": "HOLD_EXACT_INACTIVE_PROTOCOL_CORRECTION_REQUIRED",
+  "mandatoryFindings": [
+    {
+      "id": "GSTISO02-QA-PERMIT-01",
+      "severity": "HIGH",
+      "mandatory": true,
+      "priorCategory": "GSTISO01-ARCH-01 / GSTISO01-QA-01",
+      "title": "Initial active gate admission clock is excluded from the original permit history",
+      "location": "pure_controller.py:122 and Controller._gate_inner:348-358",
+      "establishedBehavior": "guarded_gate sets gate_in_progress=True, but _gate_inner calls _gates before binding gate_permit. _gates calls _permit_time only if that permit is already present. Independent exact-controller fake pair returns161 at this initial admission, then100 for every later read against the unchanged permit issued100/expires160. The controller accepts phaseStatus0/GATE_OK/holdfalse, with original permit SHA and consumed gate cap1. The observed active clock sequence is[161,100,100,100,100,100,100].",
+      "requirement": "Every admitted clock fact consumed during an active gate must remain inside the same frozen original permit interval and nondecreasing; a transient expired/reversed value cannot be hidden by later recovery. Current Port contract explicitly claims this for _gates.",
+      "impact": "The prebinding admission can consume an expired clock and discard that history, allowing later recovered readings to qualify a successful gate. This is source/fake evidence only, not an actual permit or runtime bypass.",
+      "requiredCorrection": "Cover the initial active admission clock as well as all later ticks. Bind the original verified scalar permit before those facts are accepted, or retain and strictly validate all prebinding clock facts against that unchanged binding in order before success. Any expired/reversed/unknown active fact must latch HOLD with consumed cap and retained evidence. Do not refresh/reread a replacement permit, retry probes or extend expiry.",
+      "requiredPairs": [
+        "Timely initial admission and full completed gate remain accepted in the model.",
+        "Expired first active admission followed by a recovered clock must HOLD; later clean reads must not erase the initial fact."
+      ],
+      "evidence": [
+        "critical.py",
+        "critical.stdout: initial_gate_clock_expired_then_recovered",
+        "port-contract.json methods.monotonic_lease_time"
+      ]
+    }
+  ],
+  "advisoryFindings": [
+    {
+      "id": "GSTISO02-QA-DOC-01",
+      "severity": "LOW",
+      "mandatory": false,
+      "title": "Recipe retains an absent current design filename",
+      "location": "RECIPE.md opening required-read list",
+      "establishedBehavior": "The current recipe directs readers to IMPLEMENTATION-DESIGN.json, but that filename is absent from the exact65-member manifest. The packet instead contains SOURCE02-DESIGN.json and historical source01-IMPLEMENTATION-DESIGN.json.",
+      "recommendedCorrection": "Name the current SOURCE02-DESIGN.json and explicitly label any required source01 design as historical, using its retained exact filename.",
+      "impact": "Documentation navigation ambiguity only; no runtime action or extra source authority follows."
+    }
+  ],
+  "actualAuthority": false,
+  "ordinaryRuntimePortImplemented": false
+}

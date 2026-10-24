@@ -1,0 +1,68 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -3898,8 +3898,63 @@
+ 
+     static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+       long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-      while (!condition.getAsBoolean() && System.nanoTime() < end) {
+-        Thread.sleep(25);
++      {
++        class ItsPollGuidedPlanningIntegrationTestcondition {
++          Throwable failure;
++          boolean slept;
++          boolean initialAwaitTick = true;
++
++
++          boolean step() {
++            try {
++              if (slept && Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++
++              if (!(!condition.getAsBoolean() && System.nanoTime() < end)) {
++                return true;
++              }
++              if (Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              slept = true;
++              return false;
++
++            } catch (Throwable caught) {
++              failure = caught;
++              return true;
++            }
++          }
++        }
++        var itsPoll = new ItsPollGuidedPlanningIntegrationTestcondition();
++        if (!itsPoll.step()) {
++          try {
++            org.awaitility.Awaitility.await()
++                .alias("IT-S GuidedPlanningIntegrationTest-condition")
++                .pollInSameThread()
++                .dontCatchUncaughtExceptions()
++                .pollDelay(java.time.Duration.ZERO)
++                .pollInterval(java.time.Duration.ofMillis(25))
++                .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
++                .until(
++                    () -> {
++                      if (itsPoll.initialAwaitTick) {
++                        itsPoll.initialAwaitTick = false;
++                        return false;
++                      }
++                      return itsPoll.step();
++                    });
++          } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++            // Preserve the original last guard/observation and its assertion/error mapping.
++            itsPoll.step();
++          }
++        }
++        if (itsPoll.failure instanceof Exception exception) {
++          throw exception;
++        }
++        if (itsPoll.failure instanceof Error error) {
++          throw error;
++        }
+       }
+       assertThat(condition.getAsBoolean()).isTrue();
+     }

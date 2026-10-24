@@ -1,0 +1,214 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -186,6 +186,10 @@
+     require(translation == null, "RUNTIME_INCOMPATIBLE", 409);
+     translation = store;
+     questions = contexts;
++  }
++
++  private void requireTranslation(String id) {
++    require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
+   }
+ 
+   /** Fresh authorization/identity checks even when another command has a cached response. */
+@@ -202,7 +206,7 @@
+           owner(controller, "backend-controller", session, fence);
+           active(session);
+           access.checkSourceCurrent(session.document());
+-          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
++          requireTranslation(id);
+           return operation.apply(session);
+         });
+   }
+@@ -216,7 +220,7 @@
+           access.checkCurrent(session.document());
+           require(
+               session.document().path("owner").path("fence").asLong() == fence, "STALE_FENCE", 409);
+-          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
++          requireTranslation(id);
+           return reconcileLateModelUsageLocked(session);
+         });
+   }
+@@ -361,6 +365,7 @@
+         id,
+         fence,
+         session -> {
++          requireTranslation(id);
+           require(
+               (state(session).equals("PROPOSING") || state(session).equals("REPLAYING_PREFIX"))
+                   && !session.progress().has("sideEffectConfirmation")
+@@ -395,9 +400,7 @@
+             require(prefixRequestDigest == null, "INVALID_CONTRACT", 422);
+           }
+           session.document().put("state", "AWAITING_CLARIFICATION");
+-          if (translation != null && translation.exists(id)) {
+-            translation.continuation(id, prefix ? "REPLAYING_PREFIX" : "AWAITING_CLARIFICATION");
+-          }
++          translation.continuation(id, prefix ? "REPLAYING_PREFIX" : "AWAITING_CLARIFICATION");
+           repository.save(session);
+           return question.deepCopy();
+         });
+@@ -430,7 +433,7 @@
+           access.checkCurrent(session.document());
+           owner(controller, "backend-controller", session, fence);
+           active(session);
+-          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
++          requireTranslation(id);
+           session.progress().put("errorCode", code);
+           stop(session, "FAILED");
+           return null;
+@@ -822,6 +825,7 @@
+         key,
+         request,
+         session -> {
++          requireTranslation(id);
+           active(session);
+           JsonNode question = session.progress().path("clarification");
+           boolean sourceQuestion = question.path("phase").asText().equals("source");
+@@ -868,10 +872,8 @@
+             session
+                 .document()
+                 .put("state", incremental.pending(id) ? "REPLAYING_PREFIX" : "OBSERVING");
+-            if (translation != null && translation.exists(id)) {
+-              translation.continuation(
+-                  id, incremental.pending(id) ? "REPLAYING_PREFIX" : "REFRESH");
+-            }
++            translation.continuation(
++                id, incremental.pending(id) ? "REPLAYING_PREFIX" : "REFRESH");
+             repository.save(session);
+             return view(session);
+           }
+@@ -902,10 +904,8 @@
+               "configurationRevision",
+               session.document().path("scope").path("configurationRevision"));
+           answer.put("resolvedAt", clock.instant().toString());
+-          if (translation != null && translation.exists(id)) {
+-            questions.accept(session.document(), questionId, request.path("choiceId").asText());
+-            translation.continuation(id, sourceQuestion ? "SOURCE_PLAN" : "REFRESH");
+-          }
++          questions.accept(session.document(), questionId, request.path("choiceId").asText());
++          translation.continuation(id, sourceQuestion ? "SOURCE_PLAN" : "REFRESH");
+           answers.set(questionId, answer);
+           session.progress().remove("clarification");
+           session.document().put("state", sourceQuestion ? "PREPARING" : "OBSERVING");
+@@ -1311,6 +1311,7 @@
+         key,
+         proposal,
+         session -> {
++          requireTranslation(id);
+           require(
+               Set.of("PROPOSING", "REPLAYING_PREFIX").contains(state(session)),
+               "STALE_GENERATION",
+@@ -1464,9 +1465,7 @@
+           operation.set("operation", proposal.path("operation"));
+           action.put("operationHash", GuidedContracts.hash(operation));
+           repository.insertAction(action, proposal);
+-          if (translation != null && translation.exists(id)) {
+-            translation.attachAdmission(id, key, action);
+-          }
++          translation.attachAdmission(id, key, action);
+           preparations.attach(action);
+           bindings.attachConsumer(session.document(), proposal, action);
+           if (publication != null) {
+@@ -1722,40 +1721,6 @@
+         });
+   }
+ 
+-  /** Opaque evidence-store identifiers only; the authorized evidence service resolves them. */
+-  public JsonNode recordEvidence(
+-      Authentication worker,
+-      String id,
+-      long fence,
+-      String key,
+-      String evidenceId,
+-      String reference) {
+-    require(
+-        evidenceId != null
+-            && evidenceId.matches("[A-Za-z0-9_-]{1,256}")
+-            && reference != null
+-            && reference.matches("[A-Za-z0-9_-]{1,256}"),
+-        "INVALID_CONTRACT",
+-        422);
+-    ObjectNode request =
+-        contracts.object().put("evidenceId", evidenceId).put("reference", reference);
+-    return internal(
+-        worker,
+-        "owning-worker",
+-        id,
+-        fence,
+-        "evidence",
+-        key,
+-        request,
+-        session -> {
+-          repository.evidence(
+-              id, session.document().path("scopeHash").asText(), evidenceId, reference);
+-          session.progress().put("evidenceRef", reference);
+-          repository.save(session);
+-          return request;
+-        });
+-  }
+-
+   public JsonNode clarification(
+       Authentication controller, String id, long fence, String key, JsonNode question) {
+     contracts.validate("clarification", question);
+@@ -2020,6 +1985,7 @@
+         key,
+         request,
+         session -> {
++          requireTranslation(id);
+           materialization.verify(session.document(), request);
+           access.checkSourceCurrent(session.document());
+           require(
+@@ -2035,21 +2001,19 @@
+                   && GuidedContracts.hash(evidence).equals(request.path("evidenceHash").asText()),
+               "INVALID_CONTRACT",
+               422);
+-          if (translation != null && translation.exists(id)) {
+-            ObjectNode receipt = contracts.object();
+-            for (String field :
+-                List.of(
+-                    "contextId",
+-                    "contextRevision",
+-                    "sourceRevision",
+-                    "configurationRevision",
+-                    "scopeHash",
+-                    "workerId",
+-                    "ownerFence")) {
+-              receipt.set(field, request.path(field));
+-            }
+-            session.progress().set("translationBootstrapEvidence", receipt);
+-          }
++          ObjectNode receipt = contracts.object();
++          for (String field :
++              List.of(
++                  "contextId",
++                  "contextRevision",
++                  "sourceRevision",
++                  "configurationRevision",
++                  "scopeHash",
++                  "workerId",
++                  "ownerFence")) {
++            receipt.set(field, request.path(field));
++          }
++          session.progress().set("translationBootstrapEvidence", receipt);
+           session.progress().set("executionEvidence", evidence);
+           session.progress().set("evidenceHash", request.path("evidenceHash"));
+           session.progress().set("documentId", evidence.path("documentId"));
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -596,12 +596,9 @@
+   @Test
+   void evidenceReferencesAreScopedAndDoNotClaimReplay() {
+     String id = observing();
+-    service.recordEvidence(worker, id, 1, "evidence", "video-1", "evidence-store-1");
+-    assertThatThrownBy(
+-            () ->
+-                service.recordEvidence(
+-                    worker, id, 1, "raw", "video-2", "https://secret@example.test"))
+-        .hasMessage("INVALID_CONTRACT");
++    // R-21: the unused command is retired. Preserve this case's independent relational
++    // scope, opaque reference and public no-replay oracles at their surviving repository seam.
++    repository.evidence(id, scope(id), "video-1", "evidence-store-1");
+     assertThatThrownBy(() -> repository.evidence(id, "0".repeat(64), "foreign", "ref"))
+         .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+     service.cancel(user, id, "cancel", cancel());

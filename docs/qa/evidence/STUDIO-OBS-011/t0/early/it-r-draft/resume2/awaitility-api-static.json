@@ -1,0 +1,36 @@
+{
+  "version": "4.2.2",
+  "jarSha256": "e831fee30ed401e2208f1bd5a0ef9add538d9cb1103c0e43216691b647bde9c6",
+  "classSha256": "1c286a2a3824ff4dc373aae4c0a1849515485337ebd996ae72406923b4c1a413",
+  "methodDescriptors": {
+    "atMost": [
+      "(Ljava/time/Duration;)Lorg/awaitility/core/ConditionFactory;",
+      "(JLjava/util/concurrent/TimeUnit;)Lorg/awaitility/core/ConditionFactory;"
+    ],
+    "pollInterval": [
+      "(Ljava/time/Duration;)Lorg/awaitility/core/ConditionFactory;",
+      "(JLjava/util/concurrent/TimeUnit;)Lorg/awaitility/core/ConditionFactory;",
+      "(Lorg/awaitility/pollinterval/PollInterval;)Lorg/awaitility/core/ConditionFactory;"
+    ],
+    "pollDelay": [
+      "(JLjava/util/concurrent/TimeUnit;)Lorg/awaitility/core/ConditionFactory;",
+      "(Ljava/time/Duration;)Lorg/awaitility/core/ConditionFactory;"
+    ],
+    "pollInSameThread": [
+      "()Lorg/awaitility/core/ConditionFactory;"
+    ],
+    "dontCatchUncaughtExceptions": [
+      "()Lorg/awaitility/core/ConditionFactory;"
+    ],
+    "ignoreNoExceptions": [
+      "()Lorg/awaitility/core/ConditionFactory;"
+    ],
+    "until": [
+      "(Ljava/util/concurrent/Callable;Lorg/hamcrest/Matcher;)Ljava/lang/Object;",
+      "(Ljava/util/concurrent/Callable;Ljava/util/function/Predicate;)Ljava/lang/Object;",
+      "(Ljava/util/concurrent/Callable;)V",
+      "(Lorg/awaitility/core/Condition;)Ljava/lang/Object;"
+    ]
+  },
+  "inspection": "Python ZIP/classfile metadata read only; no JVM/javap/Gradle/tool execution"
+}

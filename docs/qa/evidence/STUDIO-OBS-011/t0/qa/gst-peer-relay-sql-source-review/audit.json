@@ -1,0 +1,76 @@
+{
+  "status": "SUPPORTED_SOURCE_ONLY_NO_EXECUTION_OR_ORDERING_RELEASE",
+  "finding": "GST-PEER-SQL-01",
+  "requiredCorrections": [],
+  "dispatchPinsVerified": 6,
+  "sealedArtifactsVerified": 19,
+  "pureSourceVerifierExit": 0,
+  "completeCandidates": 3,
+  "methods": 80,
+  "originalAssertions": 751,
+  "cases": 99,
+  "modeVariants": 9,
+  "sentinels": 11,
+  "SessionLifecycleBytesExactUnit04": true,
+  "TransportAddedAsciiQuestionMarks": 1,
+  "forwardAndReversePatchesExact": true,
+  "primaryCompleteResponsesIndependentlyFetchedAndHashVerified": [
+    {
+      "name": "pgjdbcParser",
+      "url": "https://raw.githubusercontent.com/pgjdbc/pgjdbc/REL42.7.4/pgjdbc/src/main/java/org/postgresql/core/Parser.java",
+      "sha256": "e3a309940b50aede9cc94fc59bc4eca2905fdce3ffa876f9d7995f8c187825f6",
+      "bytes": 56268,
+      "rawLineExcerptsVerified": 1
+    },
+    {
+      "name": "springJdbcTemplate",
+      "url": "https://raw.githubusercontent.com/spring-projects/spring-framework/v6.1.14/spring-jdbc/src/main/java/org/springframework/jdbc/core/JdbcTemplate.java",
+      "sha256": "326cb8cf8526844194e46701b6f4c8c4eea6a8fb2637098b1614c4b2b4d61292",
+      "bytes": 62049,
+      "rawLineExcerptsVerified": 4
+    },
+    {
+      "name": "pgjdbcSimpleParameterList",
+      "url": "https://raw.githubusercontent.com/pgjdbc/pgjdbc/REL42.7.4/pgjdbc/src/main/java/org/postgresql/core/v3/SimpleParameterList.java",
+      "sha256": "229fa7026744d5c63dc29a0ebdad8ad786e8577c667303a07d2a58cc06fba957",
+      "bytes": 18693,
+      "rawLineExcerptsVerified": 1
+    }
+  ],
+  "cachedJarsAndSelectedClassEntriesVerified": 2,
+  "cachedJarManifestVersionsVerified": 2,
+  "cachedBootBomVerified": true,
+  "oldBindCountLiteralBranchWitness": 2,
+  "newBindCountLiteralBranchWitness": 1,
+  "actualDriverParserExecuted": false,
+  "actualRuntimeSqlStateKnown": false,
+  "actualLoadedClassKnown": false,
+  "sameRequestOrFirstCauseJoinProven": false,
+  "actualSourceNativeRetryOrCreditReleased": false,
+  "inputs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/peer-relay-sql-source-audit/manifest.json",
+      "sha256": "8785ba01a5beedba8755f5a3118d5f9b2f56239b5a8972a7d6ca654094569912"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/interim-finite-diagnostic-projection.json",
+      "sha256": "4dcd5b8b71c584396dd5f804ad6ab15f2fef115ac5db24bee95e96c073349499"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/formatted-candidate-archive/index.json",
+      "sha256": "4c911b927423e491f0e3ca398af0bc2b1a9978a88b31a3a0d81a8fa92746176e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/owned-native/receipt.json",
+      "sha256": "c309f4421ba15a8d51cfa41fbe837b03fcb5035fc7c4278e05966f0e16396ff1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/owned-worker-recovery-result.json",
+      "sha256": "147be127b3bc823e42c6bd072a0cfc0ed12ea188ddd1af6ac089ed617598eec4"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gst-unit04-composed-start-review/review.md",
+      "sha256": "12c062e01a91a37b5f71e6be904c0da4a9e80c5f72976846f27aa20e3ceed311"
+    }
+  ]
+}

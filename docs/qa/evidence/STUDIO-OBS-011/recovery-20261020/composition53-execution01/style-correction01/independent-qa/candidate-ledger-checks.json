@@ -1,0 +1,135 @@
+{
+  "candidateSourceVerdict": "SOURCE_CLEAN",
+  "manifestSha256": "445a00da8a0990e11539f35a19229be189e9d314ff0e64beb447078f4eddedd2",
+  "preservationSha256": "4e8eca94f84af2ecf2b02d5108bf2144197d95b56961b0bb2d9ea5895dec416c",
+  "editorSourceSha256": "ce28310b697153c79c69a7b9ac4fa9301b0802851192e3579a2e6a3f1a0c22cc",
+  "stylePatchSha256": "e7fc15bdc5420cf09ad5ee3ef7af5cc7b0823b06535ab645be9da9025f4dd251",
+  "counts": {
+    "ADD_UNREFERENCED_WAIT_SCOPE_LABEL": 97,
+    "IF_THEN_CLOSE": 1325,
+    "IF_THEN_OPEN": 1325,
+    "ALIAS_REFERENCE": 210,
+    "ALIAS_DECLARATION": 113,
+    "EMPTY_FIXTURE_HOOK_COMMENT": 2
+  },
+  "files": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "beforeSha256": "693e95f0f9ace90451b2e83e63fa45716f8a0eabe45c2b3f6508a5a9d6f9d49a",
+      "candidateSha256": "91fed1c9240d506f402447f534adb1f86686dc8e797176cddafd32285988f35e",
+      "editCount": 7,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 61,
+      "junitMethodsIncludingParameterized": 10,
+      "sleepCalls": 0
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "beforeSha256": "eb596dbcfae26a1ac3aff3f3d0bdba36660c8f3b7fe8b4c4a1f1936a8dcbf37a",
+      "candidateSha256": "93f2afe66a2cd2c80092cbfbba283f74c819ba40eb3066677b60d62312d316cc",
+      "editCount": 8,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 136,
+      "junitMethodsIncludingParameterized": 16,
+      "sleepCalls": 2
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "beforeSha256": "453fbd004f9a2c3aaa2d24e196be717e7e8cff8d9f870d36cd726b7a806448fe",
+      "candidateSha256": "44e6b58c69fefaa02422535529b7a0c5158e25779923d13c5c309280a291eeda",
+      "editCount": 1,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 30,
+      "junitMethodsIncludingParameterized": 6,
+      "sleepCalls": 1
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "5a39eb2689b66dead773ea31c44f4ab6e62b9f17d65389158271908c0e1f522e",
+      "candidateSha256": "16985a03b5677d5410fc30d51b39f352fb64e1a096279834bd7818ccb6ccc5b0",
+      "editCount": 3039,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 2712,
+      "junitMethodsIncludingParameterized": 74,
+      "sleepCalls": 21
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "beforeSha256": "e354342aea22e68860085c714c5b9f780480f8922db168b83e9ee7c6d89ab74d",
+      "candidateSha256": "63c41d4fdc7c1bf5cc270bd5e055cd89aa9388a9fba0993c2965aabf1b737a6a",
+      "editCount": 4,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 14,
+      "junitMethodsIncludingParameterized": 3,
+      "sleepCalls": 0
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "beforeSha256": "74ed1658684b7ce272eb256600c13cda367afd20e186c4617eb68177d32f9f91",
+      "candidateSha256": "f53d7536c746d40a2b2f49dcb9c8849dd0f60da0343471b831df1df15fba0ffa",
+      "editCount": 1,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 225,
+      "junitMethodsIncludingParameterized": 36,
+      "sleepCalls": 0
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "beforeSha256": "7711053da6b4ae02945595d805fc617f20f5ed3d9e5a42bdcb9ee114d4c813da",
+      "candidateSha256": "a8cc959b9e3b909b5124d810523ffd76f34b47227806fafed658f14777adc479",
+      "editCount": 2,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 58,
+      "junitMethodsIncludingParameterized": 2,
+      "sleepCalls": 0
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "beforeSha256": "c3e92a3923d5d01f576dedac390d6abc2163eec48c116430e3481a4a9ce29733",
+      "candidateSha256": "db9b0a9d8548e510b4534a9ff094c372e875157026b683a952794f31290c6e50",
+      "editCount": 6,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 541,
+      "junitMethodsIncludingParameterized": 31,
+      "sleepCalls": 8
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "beforeSha256": "4d2329027617624f10b7376ec6f523c5d36aba2ac6808066a18f1a454daa5e4a",
+      "candidateSha256": "91ad59ecf6e2f3a1daf820bd5057351dfc5f29b8490ed2962fb340ce230f4e19",
+      "editCount": 2,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 30,
+      "junitMethodsIncludingParameterized": 2,
+      "sleepCalls": 0
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "beforeSha256": "fa09a47fdaa7073d64aeeadacf609c8738fdc4a4b01ba8102f462805cf892add",
+      "candidateSha256": "14e8ae52c523c5e52411503de8eefa31fedaa7261444513a0ecdaeda30f0b1e6",
+      "editCount": 1,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 22,
+      "junitMethodsIncludingParameterized": 2,
+      "sleepCalls": 1
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "beforeSha256": "cd32ec4e510b51344e5f3ec3e49227f34fb57d297418eca5e781607377950f4e",
+      "candidateSha256": "9f38719a92d30bde4a9a44b28b16d57248a561280b4ece75ed4574bc118f5ac0",
+      "editCount": 1,
+      "allUtf16PositionedEditsReconstructExactCandidate": true,
+      "assertionChains": 295,
+      "junitMethodsIncludingParameterized": 35,
+      "sleepCalls": 0
+    }
+  ],
+  "all113FreshAliasNamesUniquePerFile": true,
+  "all210ReferencesBoundToExactlyOneDeclaredAlias": true,
+  "all97LabelsGloballyNewAndOriginalScopesRetained": true,
+  "editReconstructionUsesJavaUtf16Positions": true,
+  "parseUtilityExecutedByReviewer": false,
+  "compilerTestsExecutedByReviewer": false,
+  "actualApplicationOrFormatterScopeNotYetAudited": true,
+  "privateEvidenceInspected": false
+}

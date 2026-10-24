@@ -1,0 +1,118 @@
+{
+  "reviewer": "Aria",
+  "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+  "subjectManifestSha256": "c0dc0bc2646537b4ae466a7d715ed31103cc27d1d72eaf5683ecf8222279523c",
+  "verdict": "HOLD_NEW_EXACT_SOURCE_SUCCESSOR_REQUIRED",
+  "mandatoryCount": 6,
+  "mandatoryFindings": [
+    {
+      "id": "G8-ARCH-AUTH-01",
+      "severity": "HIGH",
+      "title": "Validate complete root-author and proposal-factory facts before mutation",
+      "source": [
+        "runtime.py:1505-1534 author_control",
+        "runtime.py:1222-1297 capture",
+        "control-templates.json / operation.schema.json"
+      ],
+      "evidence": "Actual author writes claim-only release/red-decision/permit and returns0; complete supplied fixture release also writes. Missing directoryRoots/nodeCanonicalPath proposal rejects only after5/6 E mutations/H present; no native.",
+      "requiredCorrection": "Per-role exact required schemas/types/pins/canonical roles/tool inputs before author output or E mutation; distinguish required inputs from later derived facts; no fabricated authority.",
+      "evidenceArtifact": "targeted-checks.json",
+      "actualActions": 0
+    },
+    {
+      "id": "G8-ARCH-CUSTODY-02",
+      "severity": "HIGH",
+      "title": "Hash equality admits control owner/mode drift",
+      "source": [
+        "runtime.py:189-214 Files.read/verified",
+        "runtime.py:985-1008 bind_entry",
+        "entry.py:41-73 bootstrap_read"
+      ],
+      "evidence": "Same raw candidate baseline binds at0600/501,0644/501 and0600/777 in actual function fake pairs.",
+      "requiredCorrection": "Check expected runtime control mode/owner/type/cap on retained opened object before interpretation and recheck custody; keep public source metadata rules distinct.",
+      "evidenceArtifact": "targeted-checks.json",
+      "actualActions": 0
+    },
+    {
+      "id": "G8-ARCH-RELEVANCE-03",
+      "severity": "HIGH",
+      "title": "Previously related live child becomes unrelated after reparenting",
+      "source": [
+        "runtime.py:797-908 sample",
+        "runtime.py:928-945 boundaries"
+      ],
+      "evidence": "Child778 first CURRENT_ATTRIBUTED under runner777; runner disappears, same-start/argv/image child reparented1 remains alive; both actual boundaries accept UNRELATED.",
+      "requiredCorrection": "Persist encountered relevance/provenance at available precision across samples/operations; unexplained still-present parent/relevance transition HOLD; no numeric-PID strong identity/new provider/cleanup.",
+      "evidenceArtifact": "targeted-checks.json",
+      "actualActions": 0
+    },
+    {
+      "id": "G8-ARCH-INVENTORY-04",
+      "severity": "HIGH",
+      "title": "Inventory aggregate cap denies after over-budget byte acquisition",
+      "source": [
+        "runtime.py:628-653 inventory",
+        "runtime.py:189-208 Files.read",
+        "runtime.py:298-314 Budget"
+      ],
+      "evidence": "QA actual inventory stable4+4/cap10 acquires8 accepted; stale info size1 then8+8 acquires16 before ACTUAL_AGGREGATE_CAP. EventualHOLD, not falsely accepted archive.",
+      "requiredCorrection": "Constrain acquired-FD metadata and each read by per-file and remaining aggregate before acquiring bytes; reject inventory/open drift and preserve exact equality.",
+      "evidenceArtifact": "QA targeted.stdout",
+      "actualActions": 0
+    },
+    {
+      "id": "G8-ARCH-LINEAGE-05",
+      "severity": "HIGH",
+      "title": "Caught native failure drops durable PID/wait lineage after fallback wait",
+      "source": [
+        "runtime.py:1083-1155 run_native",
+        "runtime.py:1158-1207 phase_operation",
+        "runtime.py:1059-1062 publish_journal",
+        "entry.py dispatch/owner.finish return branch"
+      ],
+      "evidence": "QA actual phase ledger first-encounter write failure gets one successful direct fake wait; phase1/HOLD receipt and journal omit PID/directWait/runnerCompletion; ledger lacks encounter; owner.finish normal so no outer Context.failure output. Positive red retains native1 wait.",
+      "requiredCorrection": "Emit durable closed typed child/construction/PID/actualwait/output/unknown ownership lineage on every caught failure and bounded operator fallback if sink unavailable; no fabricated waits/raw bodies/signals/retry.",
+      "evidenceArtifact": "QA native-sink.stdout",
+      "actualActions": 0
+    },
+    {
+      "id": "G8-ARCH-SHELL-06",
+      "severity": "MEDIUM",
+      "title": "Guard top-level set +e changes parent global setting",
+      "source": [
+        "guard-exit.bash:177",
+        "SHELL-BINDING.md unchanged-settings rule"
+      ],
+      "evidence": "Literal top-level set +e executes when guard buffer is evaluated; no actual shell executed/setting observed.",
+      "requiredCorrection": "Remove global setting mutation; handle expected nonzero statuses locally while preserving readonly samebuffer/negative1/separate capture/gate builtin exit.",
+      "evidenceArtifact": "Literal sealed source",
+      "actualActions": 0
+    }
+  ],
+  "architectureSourceChecks": 774,
+  "distinctPublicPreparedPins": 112,
+  "architectureGuardedChecks": 40,
+  "wholeFlowChecks": 25,
+  "targetedExpectedOutcomeChecks": 15,
+  "targetedCases": 10,
+  "reusedIndependentQa159Controls": 159,
+  "prior333ControlsReplayed": 0,
+  "interpretationSites": 37,
+  "pythonInterpretationSites": 33,
+  "documentedShellEvalSites": 4,
+  "callbacks": 20,
+  "functionClassSpans": 97,
+  "runtimeClasses": 6,
+  "subjectAstSafetyStatementInstrumentation": false,
+  "actualRuntimeResourceOsNativePrivateBaselineActions": 0,
+  "sourceApproval": false,
+  "operationalAuthority": false,
+  "sourceWindowOrLease": false,
+  "readiness": false,
+  "permit": false,
+  "cleanup": false,
+  "IRLaneLifecycleCredit": false,
+  "independentQaManifestSha256": "13e9affb01d70194253eaeff2e91925defee39327979ecc84c5b050a40471970",
+  "independentQaVerifiedMembers": 20,
+  "independentQaMandatoryCount": 6
+}

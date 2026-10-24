@@ -1,0 +1,90 @@
+{
+  "status": "EXACT_TERMINAL_PUBLIC_DATA_ANALYSIS",
+  "recordsHashVerified": 27,
+  "sourceBeforeAfterCurrentEqual": true,
+  "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+  "recordedOriginalCount": 2438,
+  "recordedExecutableStates": {
+    "NON_JAVA": 2255,
+    "JAVA": 38,
+    "UNKNOWN": 145
+  },
+  "recordedWithOperationalKeeperCount": 2439,
+  "currentRecordedProofCounts": {
+    "PID_ABSENT": 2439
+  },
+  "operationalFullFingerprintRepaired": false,
+  "unrecordedForkAbsenceProved": false,
+  "globalQuietClaimed": false,
+  "caseIdentities": 2774,
+  "statusCounts": {
+    "PASS": 2762,
+    "SKIP": 11,
+    "FAIL": 1
+  },
+  "taskCollectionComplete": false,
+  "completeIdentityCollectionDifferentFromSkipPolicySuccess": true,
+  "soleRawCollectionError": "EXACT_SKIP_POLICY_MISMATCH",
+  "assessmentErrorsKnownButNotPassing": {
+    "evidence": 22,
+    "validation": 5,
+    "unknown": 0
+  },
+  "publicJoinProofErrors": [],
+  "cohortSummaries": [
+    {
+      "task": "test",
+      "invocations": 46,
+      "passed": 45,
+      "failed": 1,
+      "afterEachComplete": 46,
+      "flags": {
+        "auditComplete": true,
+        "privacyComplete": true,
+        "producersDrained": true,
+        "modelEvidenceComplete": true,
+        "budgetEvidenceComplete": true,
+        "responseEvidenceComplete": true
+      },
+      "auditContextClosed": true,
+      "retentionFailures": 0,
+      "xmlStatusMultisetEquals": true,
+      "completeAllPassed": false,
+      "privatePayloadRescanned": false
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "invocations": 62,
+      "passed": 62,
+      "failed": 0,
+      "afterEachComplete": 62,
+      "flags": {
+        "auditComplete": true,
+        "privacyComplete": true,
+        "producersDrained": true,
+        "modelEvidenceComplete": true,
+        "budgetEvidenceComplete": true,
+        "responseEvidenceComplete": true
+      },
+      "auditContextClosed": true,
+      "retentionFailures": 0,
+      "xmlStatusMultisetEquals": true,
+      "completeAllPassed": true,
+      "privatePayloadRescanned": false
+    }
+  ],
+  "reportOriginalFacts": 0,
+  "reportUncreditedStaleMetadata": 987,
+  "freshThreeExecs": true,
+  "reportDisposition": "NO_CURRENT_REPORT_ESTABLISHED",
+  "lineRatios": {},
+  "nativeBuild": {
+    "exit": 1,
+    "compileTaskStatus": "EXECUTED",
+    "compileTaskEventState": "HEADER_ONLY",
+    "buildSuccessful": false,
+    "buildFailedMarker": true
+  },
+  "currentRecordedResourceClosureSupportedInPrincipleNotYetAuthorized": true,
+  "ordinaryRouteStillHardHold": true
+}

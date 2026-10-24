@@ -1,0 +1,43 @@
+{
+  "kind": "INSPECTED_SYNTHETIC_REASONING_ONLY_NOT_PRODUCTION_EXECUTION",
+  "waitTruthTable": [
+    {
+      "syntheticState": "FINALIZING",
+      "staticWaitBranch": "RETURN_AFTER_ASSERT",
+      "actualValueObserved": false
+    },
+    {
+      "syntheticState": "FAILED",
+      "staticWaitBranch": "ASSERT_REJECT",
+      "actualValueObserved": false
+    },
+    {
+      "syntheticState": "EXPIRED",
+      "staticWaitBranch": "ASSERT_REJECT",
+      "actualValueObserved": false
+    },
+    {
+      "syntheticState": "UNKNOWN_OUTCOME",
+      "staticWaitBranch": "ASSERT_REJECT",
+      "actualValueObserved": false
+    },
+    {
+      "syntheticState": "CANCELLED",
+      "staticWaitBranch": "ASSERT_REJECT",
+      "actualValueObserved": false
+    },
+    {
+      "syntheticState": "OBSERVING",
+      "staticWaitBranch": "KEEP_POLLING_UNTIL_ORIGINAL_DEADLINE",
+      "actualValueObserved": false
+    },
+    {
+      "syntheticState": "PREPARING",
+      "staticWaitBranch": "KEEP_POLLING_UNTIL_ORIGINAL_DEADLINE",
+      "actualValueObserved": false
+    }
+  ],
+  "entitlementDefaultBranch": "principal in the two fixture actors AND csi==primaryCsi AND environment==fixture AND name==PASS; otherwise explicit P3 entitlement branch",
+  "secretPhaseReasoning": "Same exact scoped reference is seeded with the site expected symbol before learning; later only Vault is reseeded with distinct wrong symbol after publication+teardown. This is program order, not evidence of current runtime reachability.",
+  "nativeOrProviderActions": false
+}

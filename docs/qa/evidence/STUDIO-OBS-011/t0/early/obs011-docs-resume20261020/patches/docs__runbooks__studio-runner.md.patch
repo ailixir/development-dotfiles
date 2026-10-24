@@ -1,0 +1,71 @@
+--- a/docs/runbooks/studio-runner.md
++++ b/docs/runbooks/studio-runner.md
+@@ -13,6 +13,12 @@
+ | **Sections from STUDIO-OBS-009** | **§14 One entrypoint, TLS everywhere, the one-pod guard and the new Secrets** (written 2026-10-18 by @devops); the `CMD` paragraph of §4 is amended in the same change. §§1-3 and §5-13 were **not** re-audited by this change: §2 in particular still describes the `callback-api` class without the guided connector port (see §14.6) |
+ | **Written by** | @dev (Dex), story 10.18a · 2026-09-15; assembled by @dev (Dex), story 10.18b · 2026-09-16; audited and extended by @dev (Dex), story 10.19 · 2026-09-17 |
+ | **Last audited against the merged system** | **2026-09-17**, story 10.19 AC-8, at integration head `d3700f23d` (10.30, 10.31 and 10.32 merged). Drift found and corrected in this pass: `ED-02`'s owner (three places), the lifted 10.19 drafting gate (two places), story 10.30's write authorization (§9.1 new), story 10.31's video-route refusal surface (§7 new). Checked and found **not** drifted: §1–§6, §8, §10, §11 — including §11's "no key 10.18b added is affected" claim, which still holds for story 10.32's `STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS` because it matches the `STUDIO_RUNNER_*` shape §11 already names. Every disclosed limitation below is cross-checked against [`docs/qa/staging-acceptance-register.md`](../qa/staging-acceptance-register.md) (AC-8c) |
++
++> **Documentation correction — 2026-10-20 (STUDIO-OBS-011, C-OBS009-3).** Current chart
++> source confirms the writable mounts in §1 and the API/worker ingress plus guided callback
++> connector in §2 below. This is a bounded source recheck, not deployed validation or a new
++> full-system audit. The dated audit rows above and superseded §12(e) remain historical;
++> §14's external prerequisites and unmeasured limits remain open.
+ 
+ > ## Read this before anything else: what is still open
+ >
+@@ -76,8 +82,9 @@
+ 
+ **What the deployment guarantees.** The runner pod runs as a non-root user with
+ `allowPrivilegeEscalation: false`, all capabilities dropped, `readOnlyRootFilesystem: true`, a
+-single-keyed `seccompProfile`, and exactly two writable mounts: an `emptyDir` covering the per-run
+-scratch directory and an in-memory `/dev/shm`. There is **no chart path that renders a
++single-keyed `seccompProfile`, and writable scratch plus in-memory `/dev/shm` mounts. The
++`local` evidence provider adds its shared object-store mount; guided mode adds `/tmp` and
++the guided journal mount. TLS, trust and guided credential mounts are read-only. There is **no chart path that renders a
+ sandbox-disabling flag** and **no values key that can set `PLAYWRIGHT_BROWSERS_PATH` or `HOME`** —
+ the runner's environment is enumerated, and a values file naming a key outside the list fails the
+ render rather than being silently dropped.
+@@ -128,8 +135,8 @@
+ 
+ | Direction | Peer | Why |
+ |---|---|---|
+-| Ingress | the **worker** pods only, on the runner's Service port | §8.4: the internal routes are not public and the MFE never talks to the runner. Dispatch runs on the worker profile, not the API's |
+-| Egress | the **API** pods, on the API Service port | `callback-api`: admission and progress. Without this the terminal report never arrives |
++| Ingress | the **API and worker** pods, on the runner's Service port | Internal validation, replay and guided calls; the MFE never talks to the runner |
++| Egress | the **API** pods, on `backend.service.port`, plus `studioRunner.guided.tlsConnector.port` while guided mode is on | `callback-api`: replay admission/progress use the ordinary API port; guided claim/callbacks use the separate TLS connector (§14.2) |
+ | Egress | the object store, port from a values key, with metadata/link-local/private ranges excepted | `object-store` |
+ | Egress | the approved targets, **currently empty** | `target-page` — see below |
+ | Egress | `kube-dns` | Not a destination class. Without it every destination becomes a **silent hang** instead of a refusal |
+@@ -153,12 +160,12 @@
+ **per-run destination checks in the runner become the primary control** and that limitation needs
+ an explicit acceptance from Security. It is not accepted today.
+ 
+-**Audit trail, ADR-002 O-6.** The **dispatch policy identity** story 10.7 records on the execution
+-is what joins *a run* to *the policy it ran under*. Whichever way SPK-05 rules, that is the field to
+-read when asked "what was this run allowed to reach?". **No approved-target or secret-use policy
+-field exists on the job envelope**, and adding one is ADR-002 **Class B** — @architect's ruling
+-first, a story implements after. A story that adds it without the ruling is the thing the runner's
+-gate-shut tripwire exists to catch.
++**Current observed authorization.** The job's `binding` carries `scope`, `scopeHash`,
++`currentPolicyHash` and `replayGrant`; `secretOrigins` accompanies the resolved secrets.
++`validateObservedJob` checks these bindings against the artifact and trusted policy before
++admission. The dispatch policy identity remains audit context; it does not replace these checks.
++See `studio-runner/src/validator/observedReplay.ts` and `src/executor/observedOperations.ts`
++under the same runner directory.
+ 
+ ---
+ 
+@@ -1089,10 +1096,9 @@
+ 
+ ### 14.6 Known gaps in this runbook
+ 
+-- §2 (egress) describes the `callback-api` destination class as the API's HTTP port. With guided
+-  mode on, the same class also covers the connector port (a second port on the same rule; the
+-  replay callback stays on the first). The runner NetworkPolicy and its test already say so; §2's
+-  prose was not rewritten.
++- **2026-10-20 documentation correction:** §2 now includes the guided connector port in
++  `callback-api`, with API and worker ingress matching the chart. This source recheck supplies
++  no cluster/CNI enforcement evidence; the G-4/SPK-05 obligations remain.
+ - The pod's resource sizing for two browsers, the `/tmp` and journal volume sizes, the liveness
+   threshold and the guided drain bound (about 63 s of the 215 s grace) are starting values with a
+   recorded basis (`d2/resource-basis.md`), **unmeasured** (G-4).

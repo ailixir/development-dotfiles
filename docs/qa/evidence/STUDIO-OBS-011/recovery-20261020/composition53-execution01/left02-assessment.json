@@ -1,0 +1,299 @@
+{
+  "id": "left02",
+  "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-final-compose-left02-results.json",
+  "resultSha256": "7904147359dfd3970c547a0810851a3f16a8c7acfc546c1bb0cd0fc89b92b865",
+  "counts": {
+    "total": 42,
+    "passed": 42,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "exactExpectedIdentityCounter": true,
+  "actualIdentities": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "the locked copy is flushed then refreshed after the lock, and nothing is detached",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(e) readAuthoringDraft: visible read, lock, then flush and refresh of the locked copy",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(d) findAuthoringV2ById refuses a caller who may not read it, and locks nothing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(e) readAuthoringDraft refuses a caller who may not read it, and locks nothing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(b) authorized, then the locked read comes back empty: 403, never 400",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "AC-8 step 3: the CSI authorized is the stored draft's, never the request body's",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(c) internal delete, absent draft: still 'UI Test not found'",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(e) a draft gone or moved to an unreadable CSI by the time the lock is taken is 403",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(a) softDeleteTest(id, auth) never reads findCsiIdIncludingWithheld",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(a) updateTest never reads findCsiIdIncludingWithheld: owner, stranger, absent",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "switch ON: accept() proceeds past the switch and does the lookup \u2014 INVERTED",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "switch OFF: dispatchOnce() closes queued work instead of dispatching it",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "the default is ON \u2014 the switch is a kill switch, not an enable switch",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "switch OFF: accept() refuses with DISPATCH_DISABLED and never looks the test up",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "FINDING: the dispatcher's code default and its yaml default DISAGREE",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "switch ON: dispatchOnce() claims queued work instead \u2014 INVERTED",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "semanticTimingRefusalsWriteNoRow()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "aCsiOutsideTheKeyAlphabetFailsClosed()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "aTerminalSessionWithinTheWindowIsAcceptedAndNotRevived()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "anIdenticalDuplicateAfterTheWindowEchoesWithoutChangingAnyFact()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "everySessionStateIsAcceptedIncludingNonTerminal()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "theWindowIsJudgedOnTheDatabaseClockAgainstExpiresAtPlusGrace()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "projectionExpiredIsJudgedOnTheDatabaseClock()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "aDuplicateNeverBypassesCallerFenceScopeOrMaterializationIdentity()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "projectionAbsentRowFlipsFromProcessingToUnavailableAtTheDeadline()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "contractRefusalsBeforeAnyRead()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "noPublicProjectionCarriesAKeyBucketOrEndpoint()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "writeOnceAndSameKeyIdempotency()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "identityRefusals()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "requireRoleIsTheSharedCheck()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "projectionStoredRows()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "anOwnerCreatesUnderTheRowsCsiEnvironmentAndTestIdAndGetsNoValueBack()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "anOversizedBodyIsARequestErrorAfterAuthorization()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "theDefaultOffProviderIsNotConfiguredOnBothOperations()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "theBodyAndTheValueAreErasedAfterSuccessValidationFailureAndProviderFailure()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "aBodyNamingACsiEnvironmentOrAnOldFieldIsRefusedAndNothingIsWritten()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "theRequestRecordNeverRendersOrComparesTheValue()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "anUnauthorizedMalformedBodyIsRefusedAsForbiddenWithoutBeingParsed()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "eachRuleHasItsOwnCodeAndNoMessageCarriesTheValueOrAParserFragment()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "aDuplicateIsAlreadyExistsAndTheStoredEntryIsUnchanged()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "aStrangerAndAnAbsentTestGetTheSameRefusalOnBothOperations()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "aReaderMayListButNotCreate()",
+      "status": "PASS"
+    }
+  ],
+  "taskResults": {
+    "test": {
+      "counts": {
+        "total": 42,
+        "passed": 42,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "freshXmlFiles": 4,
+      "freshHtmlIndex": true,
+      "freshExec": true,
+      "execRequired": true,
+      "joinCasesPresent": false,
+      "freshJoinCohorts": 0
+    }
+  },
+  "jacocoExecFiles": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-final-compose-left02-task-outputs/test/jacoco/test.exec",
+      "sha256": "0a5a6b61bbf3566781448cd472d340cefe5767f24f8101012b7531ae15bbcadd",
+      "bytes": 299283,
+      "mtimeNs": 1792522545789643809,
+      "mode": "0o644",
+      "task": "test",
+      "nonempty": true
+    }
+  ],
+  "guidedCohortFiles": [],
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true
+}

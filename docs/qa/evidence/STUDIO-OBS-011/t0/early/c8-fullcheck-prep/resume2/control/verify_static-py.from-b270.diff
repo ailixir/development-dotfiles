@@ -1,0 +1,43 @@
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/verify_static.py
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/verify_static.py
+@@ -14,7 +14,7 @@
+  i=read(O/'inputs.json')
+  for p in i['pins']:assert sha(R/p['path'])==p['sha256'],p['path']
+  assert i['executionDependencyStatus'].startswith('PENDING_') and i['privateInputs']==[]
+- files=['unlock_gate.py','final_verifier.py','postclose.py','pure_controls.py','verify_static.py']
++ files=['unlock_gate.py','final_verifier.py','postclose.py','pure_controls.py','verify_static.py','integration_controls.py']
+  for n in files:ast.parse((O/n).read_text())
+  oldpath=R/'docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/unlock_gate.py';old=oldpath.read_text();new=(O/'unlock_gate.py').read_text()
+  assert sha(oldpath)=='55e5d935a0a38bd2b7477cde55f11b39df7c842ce5efc01494dbc7a1c32513a6'
+@@ -45,5 +45,30 @@
+  assert result['actualGateOrProducerOrObserverOrHelperMainExecuted'] is False and result['readinessOrPermitWritten'] is False
+  if (O/'manifest.json').exists():
+   for p in read(O/'manifest.json')['files']:assert sha(O/p['path'])==p['sha256']
+- print(json.dumps({'status':'STATIC_CONTROL_PREPARATION_PASS_EXECUTION_DEPENDENCY_PENDING','pureControls':61,'oldGateChecksMapped':len(a),'exactOldFunctionAsts':3,'BashExact':True,'actualGateProducerObserverOrExecutionMainRun':False,'readinessOrPermitOrSourceNativeAction':False,'executionSuccessorAcceptanceRequired':True}))
++ # New integration boundaries are code used by the actual loader, not alternate test grammar.
++ baseline=O.parent.parent/'resume1/control';execution=O.parent.parent/'resume3/execution'
++ assert sha(baseline/'manifest.json')=='b270b96cd4bd62c0331d83e9d683300d349210626c8710532de3c852e23f14cd'
++ for row in read(baseline/'manifest.json')['files']:assert sha(baseline/row['path'])==row['sha256']
++ assert sha(execution/'manifest.json')=='f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692'
++ for row in read(execution/'manifest.json')['files']:assert sha(execution/row['path'])==row['sha256']
++ assert set(check_calls((baseline/'unlock_gate.py').read_text()))<=set(b) and len(check_calls((baseline/'unlock_gate.py').read_text()))==128
++ for n in ('final_verifier.py','postclose.py','policy.json','guard-exit.bash','root-bindings.template.json'):assert (O/n).read_bytes()==(baseline/n).read_bytes()
++ assert read(O/'pure-control-results.json')==read(baseline/'pure-control-results.json')
++ assert 'lines.count(' not in new and 'terminal_statuses=' not in new
++ for helper in ('task_reducer','selected_build_task_requirements','native_task_log_requirements','load_pure_execution','blocked_report_rule','report_manifest_requirements','loaded_metadata_unchanged'):node(new,helper)
++ packet=ast.get_source_segment(new,node(new,'load_packet'))
++ assert "('reportManifestBeforeArchive','full-check/report-manifest-before-archive.json')" in packet
++ assert 'report_manifest_requirements(' in packet and 'task_reducer(' in packet and 'selected_build_task_requirements(' in packet and 'native_task_log_requirements(' in packet and 'load_pure_execution(' in packet
++ assert 'loaded_metadata_unchanged(b[\'loadedHashes\'],safe_bytes)' in new
++ loader=ast.get_source_segment(new,node(new,'load_pure_execution'))
++ assert 'sys.modules' not in loader and 'sys.path' in loader.split('\n')[1] # docstring only
++ assert "if level==0 and name=='report_inventory':" in loader and 'return dependency' in loader
++ api=read(execution/'pure-api.json');consts={n.targets[0].id:ast.literal_eval(n.value) for n in ast.parse(new).body if isinstance(n,ast.Assign) and len(n.targets)==1 and isinstance(n.targets[0],ast.Name) and n.targets[0].id in {'REDUCER_ASSESSOR_SHA','REPORT_INVENTORY_SHA','EXECUTION_CHECKS_SHA','CLASSIFICATION_SHA'}}
++ for const,filename in [('REDUCER_ASSESSOR_SHA','assessor.py'),('REPORT_INVENTORY_SHA','report_inventory.py'),('EXECUTION_CHECKS_SHA','execution_checks.py'),('CLASSIFICATION_SHA','evidence_classification.py')]:assert consts[const]==sha(execution/filename)==api['sources'][filename]['sha256']
++ integration=read(O/'integration-control-results.json');assert integration['status']=='PURE_ACTUAL_INTEGRATION_BOUNDARIES_PASS' and integration['count']==len(integration['controls'])==46
++ assert all(x['expected']==x['observed'] for x in integration['controls']) and integration['actualPurePairLoaderAndCoverageAPIExercised'] is True and integration['actualGatePacketProducerObserverOrOSMainExecuted'] is False
++ assert 'C8-EXEC-04' in i['parentReportedMandatoryFinding'] and contract['executionActualAdmissionAccepted'] is False
++ preservation=read(O/'preservation.json');assert preservation['runtimeChangedOnly']==['unlock_gate.py']
++ for row in preservation['baselineMemberComparisons']:assert sha(baseline/row['path'])==row['priorSha256'] and sha(O/row['path'])==row['successorSha256']
++ print(json.dumps({'status':'STATIC_RESUME2_INTEGRATION_COMPONENT_PASS_EXECUTION04_BINDING_PENDING','priorPureControls':61,'newActualPureBoundaryControls':46,'distinctPureControls':107,'oldGateChecksMapped':len(a),'exactOldFunctionAsts':3,'BashExact':True,'actualGateProducerObserverOrExecutionMainRun':False,'readinessOrPermitOrSourceNativeAction':False,'executionSuccessorAcceptanceRequired':True}))
+ if __name__=='__main__':main()

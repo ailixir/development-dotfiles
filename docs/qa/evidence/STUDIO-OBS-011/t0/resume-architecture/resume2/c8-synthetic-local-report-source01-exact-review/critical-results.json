@@ -1,0 +1,152 @@
+{
+  "kind": "INDEPENDENT_BOUNDED_ACTUAL_FUNCTION_FAKE_COUNTEREXAMPLES",
+  "cases": 12,
+  "passed": 12,
+  "failed": 0,
+  "independentObservations": 12,
+  "fakeModelBookkeeping": 10286,
+  "deniedHostEvents": [],
+  "checks": [
+    {
+      "name": "utility-acquisition",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "utility rejects only AFTER full acquisition and loses known exit",
+        "exception": "Hold",
+        "allocatedFakeBytes": 16777217,
+        "waitReturned": true,
+        "knownExitOmitted": true
+      }
+    },
+    {
+      "name": "storage-write-primary",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "write finally replaces original primary",
+        "raisedClass": "OSError",
+        "originalPrimaryPreserved": false
+      }
+    },
+    {
+      "name": "storage-read-primary",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "read preserves original and separate cleanup/UNKNOWN",
+        "primaryClass": "ValueError",
+        "cleanupCount": 2
+      }
+    },
+    {
+      "name": "self-text-byte-bound",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "multibyte overflow returned UNKNOWN after encode",
+        "characters": 2049,
+        "utf8Bytes": 4098,
+        "encodeBeforeBound": "verified independently by AST"
+      }
+    },
+    {
+      "name": "stale-original-readiness",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "fresh permit admits stale original readiness",
+        "readinessAgeNs": 1000000002999
+      }
+    },
+    {
+      "name": "reversed-permit-clock",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "PRE to POST reversal accepted",
+        "pre": 1000000009000,
+        "post": 1000000003000
+      }
+    },
+    {
+      "name": "expired-outer-publication",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "outer allow publication completes after expiry with code0",
+        "status": 0,
+        "expiredBeforeReturn": true
+      }
+    },
+    {
+      "name": "expired-lease-launch",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "native launches after lease expired during setup",
+        "launchAfterExpiry": true
+      }
+    },
+    {
+      "name": "persistent-prior-relevance",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "archive forgets held relevant PID when current argv changes",
+        "knownPid": 9292,
+        "knownPriorRelevanceIgnored": true
+      }
+    },
+    {
+      "name": "bootstrap-private-channel",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "bootstrap failure writes unchecked inherited stderr2",
+        "writes": [
+          {
+            "fd": 2,
+            "bytes": 73
+          }
+        ],
+        "privateSinkValidationReached": false
+      }
+    },
+    {
+      "name": "postclose-real-caller-parent",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "new postclose caller rejected by original-holder equality",
+        "newParent": 999,
+        "oldHeldParent": 800,
+        "reason": "BOOT_HOLDER"
+      }
+    },
+    {
+      "name": "positive-serialized-peer",
+      "passed": true,
+      "assertions": 0,
+      "details": {
+        "observation": "same direct child credentials between two serialized live polls",
+        "livePolls": 2,
+        "threadCreated": false
+      }
+    }
+  ],
+  "sourcePins": {
+    "profile.py": "e9c5db06fd9cca5a80e13e4d1ec94906456dd882a159bfb9a949e06df5121b25",
+    "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+    "storage.py": "515655dea6115dc69d24b4666b79204370846bd4257fde44a7a3975dbef6101b",
+    "mode_predicates.py": "d882e49e61db40a6083295193b2e2014567c17afd656f572357b6511284f121c",
+    "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+    "runtime.py": "9c8c8a0d6209c9b9d80f3adeb6e01d4ec29cc3c14b1a9b18d88c13e07c3c0dc8",
+    "entry.py": "a1355be9cb40575ea0a4be6fe7de171356b7dd42d104285c7044e8197ad155dd",
+    "controls.py": "db12611b6ba64746dd5d934e904e7b3a0a6d6ab17a049405bd503330d8442397"
+  },
+  "authorFixtureDefinitionsOnly": true,
+  "author24NotReplayed": true,
+  "old498NotReplayed": true,
+  "actualTargetActions": 0
+}

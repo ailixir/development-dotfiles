@@ -1,0 +1,398 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -27641,9 +27641,324 @@
+             producer == 2 ? "revCheckRootLater();" : "revCheckRoot();");
+   }
+ 
++
++  private static String p4StartupDiagnosticSupport(String root) throws Exception {
++    return """
++// Off-tree source for the embedded ReplayIT fixture. Never imported by this draft.
++import {createHash as diagCreateHash} from 'node:crypto';
++const diagRoot=%s,diagSites=[{"site":1,"file":"guided/runtime.js","line":99,"origin":"RUNTIME_TIMER","lineSha256":"05273f46b834e7381cd0ba99e8d9dc5b888ba6535f7f5aae9ce4aeff61688001"},{"site":2,"file":"guided/ownership.js","line":55,"origin":"OWNERSHIP_EXPIRY_TIMER","lineSha256":"9ce1b16f336793e7a4b851e88d9528cf2a819a2687866ac3e53690de018f9a6c"},{"site":3,"file":"guided/ownership.js","line":180,"origin":"OWNERSHIP_RENEW_FAILURE","lineSha256":"81f4c5fcb989a096b2cf834bbc9272db14f78dde6f705861f9f8350813029993"},{"site":4,"file":"guided/ownership.js","line":219,"origin":"OWNERSHIP_CONTEXT_START_FAILURE","lineSha256":"b933a6da9e7db16e2cf9b7bd0227dfa3bc007262fef65a6b59080f2841b7eef7"},{"site":5,"file":"guided/ownership.js","line":258,"origin":"OWNERSHIP_STOP_REQUEST","lineSha256":"7fabf678d68121c68e94ce350e918de4b9c1b49966e21736b9fe2dfcc095052b"},{"site":6,"file":"guided/ownership.js","line":263,"origin":"OWNERSHIP_STOP_REQUEST","lineSha256":"3ceda8469aba3f81bf695374469ce9c52c7f361504ecf645303805124b63ffbc"},{"site":7,"file":"guided/ownership.js","line":267,"origin":"OWNERSHIP_CLOSE","lineSha256":"f18b45e73c42f58e02a8ffc54819d2813fe7bea958c44967c803f1b2b8bacd4e"},{"site":8,"file":"guided/runtime.js","line":201,"origin":"BROWSER_LOSS","lineSha256":"89f3071a3384e45a5674ba6955d02493961b74db2583b9b79f51a93c2932084c"},{"site":9,"file":"guided/runtime.js","line":122,"origin":"START_CATCH","lineSha256":"ecdaf8c69e13c2cf7d8f3f1dcc316ea135e8e478f85a999dcbfaa5558fc38dc4"},{"site":10,"file":"guided/runtime.js","line":215,"origin":"START_CATCH","lineSha256":"ece6b7cdadf5d202c76983376bb57906c7c28f0f0173f861c5074142ef35d9fa"},{"site":12,"file":"guided/ownership.js","line":230,"origin":"OTHER","lineSha256":"6621a6647e37b8c36255d05a35b092a590abd33d4dcda1ccec9856e2f9ab10ac"},{"site":13,"file":"guided/runtime.js","line":807,"origin":"OTHER","lineSha256":"af491620d249e07cc28de29ffb4f9eedb0a116bf80c6214b50c4b46b04a1f9af"}],diagDistHashes={"guided/runtime.js":"fa61032216bebfa2f2f1dcdc6c92145957bbd2c24d6ec035d4d243e091c55c80","guided/ownership.js":"7107f182632abd4ac20bf8210d3929719da8c5857c6d2d39e0ae4b303f6c4952","run/browser.js":"b009d0fe463628b726c618b79eba9f741236f5d477ee66ae3c5282ece1b51a59","run/guidedBrowser.js":"1116e59672e72f5c25dbd11e047f63fe0b18d11c7e5fe7c299a156aecea2631b","guided/contracts.js":"d25d26030cf6f33a5b2a702c274ff9ee0dec5a4afe9b5d25ba9cd2a326ea32c5"};
++const diagStates=new Map(),diagRuntimes=new WeakMap(),diagOwners=new WeakMap();
++const diagPrototypeMethods=[];
++let diagHashesValid=null,diagInstallationFailed=false;
++const diagCodes=['NONE','OTHER','LEASE_LOST','CONTEXT_LOST','IDENTITY_MISMATCH',
++  'INVALID_CONTRACT','POLICY_DENIED','BUDGET_EXCEEDED','REVISION_CONFLICT','REVOKED',
++  'CLAIM_DENIED','CALLBACK_DENIED','BUSY','TIMEOUT','CANCELLED','EXPIRED','UNKNOWN_OUTCOME'];
++const diagPhases=['NONE','OTHER','VALIDATE','JOURNAL','RECORDER','LAUNCH','WITHHOLD',
++  'BLANK_MATCH','BOOTSTRAP_CALLBACK','STARTED','PROFILE','PROCESS','PROBE','STARTUP_PAGE',
++  'APP_PAGE','ROUTING','BLANK_DOCUMENT'];
++const diagLosses=['NONE','OTHER','EXTRA_PAGE','PAGE_CRASH','BROWSER_DISCONNECTED','ROUTE_FAILURE'];
++const diagEnum=(values,value)=>value==null?'NONE':values.includes(value)?value:'OTHER';
++const diagHash=value=>diagCreateHash('sha256').update(JSON.stringify(value)).digest('hex');
++const diagNumber=value=>Number.isFinite(value)?Math.max(-2147483647,Math.min(2147483647,
++  Math.trunc(value))):0;
++const diagSelect=()=>{try{const mode=revMode();return mode?.active===true&&mode.path===1
++  &&mode.c6===4&&Number.isSafeInteger(mode.case)&&mode.case>0&&mode.case<=2147483647
++  &&mode.epoch===mode.case?mode:null;}catch{return null;}};
++const diagCheckHashes=()=>{
++  if(diagHashesValid!==null)return diagHashesValid;
++  try{diagHashesValid=Object.entries(diagDistHashes).every(([file,expected])=>
++    diagCreateHash('sha256').update(revFs.readFileSync(new URL(diagRoot+file))).digest('hex')
++      ===expected);}catch{diagHashesValid=false;}
++  return diagHashesValid;
++};
++const diagPosition=()=>{
++  try{if(!diagCheckHashes())return {origin:'OTHER',site:0};
++    const frames=new Error().stack?.split('\\n')??[];
++    for(const frame of frames){const matching=diagSites.filter(site=>
++      frame.includes(diagRoot+site.file+':'+site.line+':'));
++      if(matching.length===1)return {origin:matching[0].origin,site:matching[0].site};
++      if(matching.length>1)return {origin:'OTHER',site:matching[0].site};}
++  }catch{}return {origin:'OTHER',site:0};
++};
++const diagState=(sessionId,contextId=null)=>{
++  try{const mode=diagSelect();if(!mode||typeof sessionId!=='string')return null;
++    const sessionHash=diagHash(sessionId),key=mode.case+'-'+sessionHash;
++    let state=diagStates.get(key);
++    // One selected session per numeric case. A second identity fails closed diagnostically.
++    if(!state&&[...diagStates.values()].some(item=>item.case===mode.case)){
++      for(const item of diagStates.values())if(item.case===mode.case){
++        item.instrumentationFailed=true;diagPublish(item);}return null;}
++    if(!state){state={case:mode.case,epoch:mode.epoch,producer:revProducer,sessionHash,
++      contextHash:diagHash(null),began:performance.now(),seq:0,events:[],truncated:false,
++      instrumentationFailed:!diagCheckHashes()||diagInstallationFailed,stopCount:0,abortCount:0,methods:[],
++      writeAttempts:0,writesCompleted:0,writesFailed:0,writersPending:0,
++      markerAttempts:0,markerCompleted:0,markerFailed:0,
++      observersPending:0,closed:false,restored:false,currentStop:null,pendingStop:null};
++      diagStates.set(key,state);}
++    if(typeof contextId==='string')state.contextHash=diagHash(contextId);
++    return state;
++  }catch{return null;}
++};
++const diagFailed=state=>{if(state)state.instrumentationFailed=true;};
++const diagPublish=state=>{
++  if(!state)return;
++  let fd=null,temporary=null,ownedTemporary=null;
++  state.writeAttempts++;state.writersPending++;
++  try{revCheckRoot();
++    const target=revLedgerRoot+'/diag-start1-'+state.case+'-1.json';temporary=target+'.tmp';
++    if(revFs.existsSync(target)){const info=revFs.lstatSync(target);
++      if(info.isSymbolicLink()||!info.isFile()||(info.mode&0o777)!==0o600
++        ||info.uid!==process.getuid())throw new Error('FILE');}
++    // This snapshot is published only after its fd closes. Counts include this successful write.
++    const body=JSON.stringify({schemaVersion:1,case:state.case,epoch:state.epoch,producer:1,
++      sessionHash:state.sessionHash,contextHash:state.contextHash,truncated:state.truncated,
++      instrumentationFailed:state.instrumentationFailed,closed:state.closed,
++      restored:state.restored,writeAttempts:state.writeAttempts,
++      writesCompleted:state.writesCompleted+1,writesFailed:state.writesFailed,
++      markerAttempts:state.markerAttempts,markerCompleted:state.markerCompleted,markerFailed:state.markerFailed,
++      writersPending:state.writersPending-1,observersPending:state.observersPending,
++      events:state.events});
++    // Reserve two bytes for the sticky failure marker within the 16KiB total cap.
++    if(Buffer.byteLength(body)>16382)throw new Error('BOUND');
++    revCheckRoot();fd=revFs.openSync(temporary,revFs.constants.O_WRONLY|revFs.constants.O_CREAT
++      |revFs.constants.O_EXCL|revFs.constants.O_NOFOLLOW,0o600);
++    const info=revFs.fstatSync(fd);ownedTemporary={dev:info.dev,ino:info.ino};
++    if(!info.isFile()||(info.mode&0o777)!==0o600||info.uid!==process.getuid())
++      throw new Error('FILE');
++    revFs.writeFileSync(fd,body);revFs.closeSync(fd);fd=null;
++    revCheckRoot();revFs.renameSync(temporary,target);temporary=null;state.writesCompleted++;
++  }catch{state.writesFailed++;state.instrumentationFailed=true;
++    // Sticky value-free marker; no original operation is failed by the diagnostic.
++    state.markerAttempts++;
++    try{revCheckRoot();const markerPath=revLedgerRoot+'/diag-start1-failed';
++      if(revFs.existsSync(markerPath)){const old=revFs.lstatSync(markerPath);
++        if(old.isSymbolicLink()||!old.isFile()||old.size>2||(old.mode&0o777)!==0o600
++          ||old.uid!==process.getuid())throw new Error('MARKER');}
++      const marker=revFs.openSync(markerPath,
++      revFs.constants.O_WRONLY|revFs.constants.O_CREAT
++      |revFs.constants.O_NOFOLLOW|revFs.constants.O_NONBLOCK,0o600);
++      try{const info=revFs.fstatSync(marker);
++        if(!info.isFile()||info.size>2||(info.mode&0o777)!==0o600||info.uid!==process.getuid())
++          throw new Error('MARKER');revFs.writeSync(marker,'1\\n');}
++      finally{revFs.closeSync(marker);}state.markerCompleted++;}catch{state.markerFailed++;}}
++  finally{if(fd!==null)try{revFs.closeSync(fd);}catch{state.instrumentationFailed=true;}
++    if(temporary!==null&&ownedTemporary)try{revCheckRoot();const actual=revFs.lstatSync(temporary);
++      if(!actual.isSymbolicLink()&&actual.isFile()&&actual.dev===ownedTemporary.dev
++        &&actual.ino===ownedTemporary.ino&&actual.uid===process.getuid())revFs.unlinkSync(temporary);
++      else state.instrumentationFailed=true;}catch{state.instrumentationFailed=true;}
++    state.writersPending--;}
++};
++const diagRecord=(state,event,fields={})=>{
++  if(!state)return;
++  try{const runtime=state.runtime;
++    const row={schemaVersion:1,event,seq:++state.seq,sessionHash:state.sessionHash,
++      contextHash:state.contextHash,case:state.case,epoch:state.epoch,producer:1,
++      elapsedMs:diagNumber(performance.now()-state.began),
++      phase:diagEnum(diagPhases,runtime?.startPhase),loss:diagEnum(diagLosses,runtime?.lossReason),
++      ...fields};
++    // Reserve 2KiB for the envelope and sticky failure/truncation metadata.
++    const size=Buffer.byteLength(JSON.stringify([...state.events,row]));
++    const critical=['ABORT_ENTRY','STOP_ENTRY','START_SETTLE','OWNER_CLOSE'].includes(event);
++    if(state.events.length>=32||size>14336
++      ||(!critical&&(state.events.length>=24||size>12288)))state.truncated=true;
++    else state.events.push(row);
++  }catch{state.instrumentationFailed=true;}
++  diagPublish(state);
++};
++const diagEntry=entry=>diagState(entry?.assignment?.sessionId,entry?.runtime?.context?.contextId);
++const diagTiming=entry=>{try{const now=Date.now();return {
++  leaseRemainingMs:diagNumber(Date.parse(entry.grant?.owner?.leaseExpiresAt
++    ??entry.assignment.expiresAt)-now),
++  assignmentRemainingMs:diagNumber(Date.parse(entry.assignment.expiresAt)-now),
++  entryEpoch:diagNumber(entry.epoch),stopped:entry.stopped===true};}catch{return {};}};
++const diagError=error=>{const fields={};
++  try{let current=error;for(let index=0;index<6;index++){
++    fields['chain'+index]=diagEnum(diagCodes,current?.message);
++    if(current?.phase!=null)fields.launchPhase=diagEnum(diagPhases,current.phase);
++    if(current?.loss!=null)fields.launchLoss=diagEnum(diagLosses,current.loss);
++    current=current?.cause;}
++    fields.code=diagEnum(diagCodes,error?.message);
++  }catch{fields.code='OTHER';}return fields;};
++const diagObserve=(state,result,settled)=>{
++  if(!state)return;
++  state.observersPending++;
++  const done=(fulfilled,error)=>{state.observersPending--;
++    try{settled(fulfilled,error);}catch{diagFailed(state);diagPublish(state);}};
++  try{result.then(()=>done(true,null),error=>done(false,error)).catch(()=>{
++    diagFailed(state);diagPublish(state);});}
++  catch{state.observersPending--;diagFailed(state);diagPublish(state);}
++};
++const diagOwn=(state,object,name,make)=>{
++  try{const descriptor=Object.getOwnPropertyDescriptor(object,name),original=object[name];
++    if(typeof original!=='function'||descriptor?.configurable===false)throw new Error('METHOD');
++    const wrapped=make(original);
++    if(!Reflect.defineProperty(object,name,{...(descriptor??{
++      configurable:true,writable:true,enumerable:false}),value:wrapped}))throw new Error('METHOD');
++    state.methods.push([object,name,descriptor,wrapped]);return true;
++  }catch{diagFailed(state);return false;}
++};
++const diagRestore=methods=>{
++  let restored=true;
++  for(const [object,name,descriptor,wrapped] of [...methods].reverse()){
++    try{if(Object.getOwnPropertyDescriptor(object,name)?.value!==wrapped
++      ||!(descriptor?Reflect.defineProperty(object,name,descriptor):Reflect.deleteProperty(object,name)))
++      restored=false;}catch{restored=false;}}
++  return restored;
++};
++const diagBeforeStart=runtime=>{
++  let state=null;
++  try{state=diagState(runtime.context?.sessionId,runtime.context?.contextId);if(!state)return null;
++    if(diagRuntimes.has(runtime)){diagFailed(state);return state;}
++    diagRuntimes.set(runtime,state);state.runtime=runtime;state.startBegan=performance.now();
++    diagOwn(state,runtime.startAbort,'abort',original=>function(...args){
++      try{const aborted=this.signal.aborted,first=state.abortCount++===0;
++        const position=state.currentStop??diagPosition();
++        diagRecord(state,'ABORT_ENTRY',{...position,aborted,first,
++          reason:diagEnum(diagCodes,args[0]?.message),stopCount:state.stopCount});
++      }catch{diagFailed(state);}
++      return Reflect.apply(original,this,args);
++    });
++    diagOwn(state,runtime,'applyAcknowledgedLease',original=>function(...args){
++      const before=Date.parse(this.liveLease??this.context.leaseExpiresAt),began=performance.now();
++      let result;try{result=Reflect.apply(original,this,args);}catch(error){
++        diagRecord(state,'LEASE_APPLY',{fulfilled:false,...diagError(error),
++          durationMs:diagNumber(performance.now()-began)});throw error;}
++      diagRecord(state,'LEASE_APPLY',{fulfilled:true,leaseAdvanceMs:diagNumber(
++        Date.parse(this.liveLease??this.context.leaseExpiresAt)-before),
++        leaseRemainingMs:diagNumber(Date.parse(this.liveLease??this.context.leaseExpiresAt)-Date.now()),
++        durationMs:diagNumber(performance.now()-began)});return result;
++    });
++    diagRecord(state,'START_BEGIN',{aborted:runtime.startAbort.signal.aborted});
++  }catch{diagFailed(state);}return state;
++};
++const diagStartSettled=(state,result)=>diagObserve(state,result,(fulfilled,error)=>
++  diagRecord(state,'START_SETTLE',{fulfilled,...diagError(error),
++    durationMs:diagNumber(performance.now()-state.startBegan)}));
++const diagStopBegin=(runtime,reason)=>{
++  try{const state=diagRuntimes.get(runtime);if(!state)return null;
++    const position=diagPosition();
++    const origin=position.site===12&&state.pendingStop?state.pendingStop:position;
++    const previous=state.currentStop;state.currentStop=origin;state.stopCount++;
++    diagRecord(state,'STOP_ENTRY',{...origin,reason:diagEnum(diagCodes,reason),
++      aborted:runtime.startAbort.signal.aborted,first:state.stopCount===1,stopCount:state.stopCount});
++    return {state,previous};
++  }catch{return null;}
++};
++const diagStopForwarded=(token,result)=>{
++  if(!token)return;token.state.currentStop=token.previous;
++  diagObserve(token.state,result,(fulfilled,error)=>diagRecord(token.state,'STOP_SETTLE',
++    {fulfilled,...diagError(error),stopCount:token.state.stopCount}));
++};
++const diagGrant=(args,fulfilled,error)=>{
++  try{const state=diagEntry(args[0]);if(!state)return;
++    const previous=Date.parse(args[0]?.grant?.owner?.leaseExpiresAt),
++      next=Date.parse(args[1]?.owner?.leaseExpiresAt);
++    diagRecord(state,'CHECK_GRANT',{...diagTiming(args[0]),initial:args[2]===true,fulfilled,
++      leaseAdvanceMs:diagNumber(next-previous),...diagError(error)});
++  }catch{}
++};
++const diagInvalidated=entry=>{
++  try{diagRecord(diagEntry(entry),'INVALIDATE',diagTiming(entry));}catch{}
++};
++const diagOwner=(owner,state)=>{
++  let meta=diagOwners.get(owner);if(meta)return meta;
++  meta={methods:[],claims:new Map(),activeClaims:new Set(),states:new Set()};
++  diagOwners.set(owner,meta);return meta;
++};
++const diagWrapClaim=(owner,meta,state)=>{
++  if(meta.methods.length)return;
++  diagOwn(meta,owner.options,'claim',original=>function(...args){
++    try{const current=meta.claims.get(diagHash(args[0]?.sessionId));
++    if(current){const signal=args[3],state=current.state;
++      const abort=()=>diagRecord(state,'CLAIM_ABORT',{...diagTiming(current.entry),
++        initial:current.initial,aborted:signal.aborted,budgetMs:diagNumber(args[2]),
++        durationMs:diagNumber(performance.now()-current.began)});
++      try{signal.addEventListener('abort',abort,{once:true});
++        current.listeners.push([signal,abort]);
++        current.budgetMs=diagNumber(args[2]);current.budgetObserved=true;
++      }catch{diagFailed(state);}}}catch{for(const state of meta.states)diagFailed(state);}
++    return Reflect.apply(original,this,args);
++  });
++  if(meta.instrumentationFailed)diagFailed(state);
++};
++const diagReleaseClaim=(meta,current)=>{
++  meta.activeClaims.delete(current);
++  if(meta.claims.get(current.key)===current)meta.claims.delete(current.key);
++  for(const [signal,listener] of current.listeners){
++    try{signal.removeEventListener('abort',listener);}catch{diagFailed(current.state);}}
++  if(meta.activeClaims.size===0&&meta.methods.length){
++    const restored=diagRestore(meta.methods);
++    if(restored)meta.methods=[];else diagFailed(current.state);
++  }
++};
++const diagInstallOwnership=()=>{
++  for(const name of ['requestClaim','stopEntry','close']){
++    const descriptor=Object.getOwnPropertyDescriptor(RevOwnership.prototype,name),
++      original=descriptor?.value;
++    if(typeof original!=='function'||descriptor.configurable!==true){diagInstallationFailed=true;continue;}
++    const wrapped=function(...args){
++      if(name==='close'){
++        const meta=diagOwners.get(this),result=Reflect.apply(original,this,args);
++        if(meta){const states=[...meta.states];
++          // One observer per original close; return the exact original promise immediately.
++          try{result.then(()=>{
++            const methodsRestored=diagRestore(meta.methods),
++              prototypesRestored=diagRestore(diagPrototypeMethods),
++              restored=methodsRestored&&prototypesRestored;
++            for(const state of states){state.closed=true;
++              state.restored=diagRestore(state.methods)&&restored;
++              if(!state.restored||state.observersPending!==0)diagFailed(state);
++              diagRecord(state,'OWNER_CLOSE',{fulfilled:true});}
++          },error=>{for(const state of states){state.restored=diagRestore(state.methods);
++              diagFailed(state);diagRecord(state,'OWNER_CLOSE',{fulfilled:false,...diagError(error)});}
++            diagRestore(meta.methods);diagRestore(diagPrototypeMethods);
++          }).catch(()=>{for(const state of states){diagFailed(state);diagPublish(state);}});
++          }catch{for(const state of states){diagFailed(state);diagPublish(state);}}}
++        return result;
++      }
++      const entry=args[0],state=diagEntry(entry);
++      if(!state)return Reflect.apply(original,this,args);
++      let meta;try{meta=diagOwner(this,state);meta.states.add(state);}
++      catch{diagFailed(state);return Reflect.apply(original,this,args);}
++      if(name==='stopEntry'){
++        const position=diagPosition();
++        if(!entry.stopping&&entry.runtime){state.pendingStop=position;
++          const runtimeState=diagRuntimes.get(entry.runtime);if(runtimeState)runtimeState.pendingStop=position;}
++        diagRecord(state,'STOP_ENTRY_OWNERSHIP',{...position,...diagTiming(entry),
++          reason:diagEnum(diagCodes,args[1])});
++        return Reflect.apply(original,this,args);
++      }
++      const initial=args[1]===true,began=performance.now(),timing=diagTiming(entry);
++      const cap=entry.runtime?.hasSecretInputs?1000:10000;
++      const key=diagHash(entry.assignment.sessionId),
++        current={key,state,entry,initial,began,listeners:[],budgetMs:0,budgetObserved:false};
++      meta.claims.set(key,current);meta.activeClaims.add(current);diagWrapClaim(this,meta,state);
++      diagRecord(state,'CLAIM_BEGIN',{...timing,initial,
++        requestBudgetMs:diagNumber(Math.min(cap,timing.leaseRemainingMs-100))});
++      let result;try{result=Reflect.apply(original,this,args);}catch(error){
++        diagReleaseClaim(meta,current);diagRecord(state,'CLAIM_SETTLE',{...diagTiming(entry),
++          initial,fulfilled:false,...diagError(error),durationMs:diagNumber(performance.now()-began)});
++        throw error;}
++      diagObserve(state,result,(fulfilled,error)=>{
++        diagReleaseClaim(meta,current);
++        diagRecord(state,'CLAIM_SETTLE',{...diagTiming(entry),initial,fulfilled,
++          budgetMs:current.budgetMs,budgetObserved:current.budgetObserved,
++          ...diagError(error),durationMs:diagNumber(performance.now()-began)});
++      });return result;
++    };
++    if(Reflect.defineProperty(RevOwnership.prototype,name,{...descriptor,value:wrapped}))
++      diagPrototypeMethods.push([RevOwnership.prototype,name,descriptor,wrapped]);
++    else diagInstallationFailed=true;
++  }
++};
++"""
++        .formatted(JSON.writeValueAsString(root));
++  }
++
+   private static String p4GuidedRevocationObservers() throws Exception {
+     String root = Path.of("../studio-runner/dist").toAbsolutePath().normalize().toUri().toString();
+     return p4RevocationScalarSupport(1)
++        + p4StartupDiagnosticSupport(root)
+         + """
+ import {GuidedRuntime as RevRuntime} from %s;
+ import {GuidedOwnership as RevOwnership} from %s;
+@@ -27676,8 +27991,9 @@
+   }catch{c5GrantFail();}
+ };
+ const revStart=RevRuntime.prototype.start;
+-RevRuntime.prototype.start=function(...args){const \
++RevRuntime.prototype.start=function(...args){const diag=diagBeforeStart(this), \
+ result=Reflect.apply(revStart,this,args),mode=revMode();
++  diagStartSettled(diag,result);
+   if(mode?.active&&mode.path===1){const runtime=this;
+     result.then(()=>{try{
+       if(mode.c6){revInit(mode);if(!revGroups.size&&!revC6RetryRestore)revStarted=false;}
+@@ -27749,8 +28065,10 @@
+ RevOwnership.prototype.checkGrant=function(...args){
+   const selected=revFs.existsSync(c5ValuesFile),started=selected?performance.now():0;
+   let result;try{result=Reflect.apply(revCheck,this,args);}catch(error){
+-    if(selected)c5GrantRecord(args,false,error,performance.now()-started);throw error;}
++    if(selected)c5GrantRecord(args,false,error,performance.now()-started);
++    diagGrant(args,false,error);throw error;}
+   if(selected)c5GrantRecord(args,true,null,performance.now()-started);
++  diagGrant(args,true,null);
+   const mode=revMode();
+   if(mode?.active&&mode.path===1){try{const entry=args[0];
+     if(entry.stopped!==false)throw new Error('OWNER');
+@@ -27760,12 +28078,15 @@
+ const revInvalidate=RevOwnership.prototype.invalidate;
+ RevOwnership.prototype.invalidate=function(...args){const \
+ result=Reflect.apply(revInvalidate,this,args),mode=revMode();
++  diagInvalidated(args[0]);
+   if(mode?.active&&mode.path===1&&revOwners.get(args[0])===mode.case){
+     if(args[0].stopped===true){if(!mode.c6)revEmit(mode,5,1);}else revFail();}return result;};
+ const revStop=RevRuntime.prototype.stop;
+ RevRuntime.prototype.stop=function(...args){const mode=revRuntimes.get(this);
+   if(mode&&!mode.c6){const restored=revRestore();revEmit(mode,6,1,0,0,restored);}
++  const diag=diagStopBegin(this,args[0]);
+   const result=Reflect.apply(revStop,this,args);
++  diagStopForwarded(diag,result);
+   if(mode){const reason=['REVOKED','LEASE_LOST','EXPIRED','CANCELLED','CONTEXT_LOST',...(mod\
+ e.c6?['UNKNOWN_OUTCOME']:[])].indexOf(args[0])+1;
+     if(this.accepting===false&&reason>0)revEmit(mode,5,1,0,reason);else revFail();
+@@ -27814,6 +28135,8 @@
+       revRuntimes.delete(this);
+     }}
+   return result;};
++
++try{diagInstallOwnership();}catch{diagInstallationFailed=true;}
+ 
+ // S2 observes original operation completion only; no native/provider/model/callback call added.
+ const s2States=new Map(),s2Methods=[];
+@@ -31916,6 +32239,22 @@
+         assertThat(Files.getPosixFilePermissions(file))
+             .isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
+         sinks.put("prefix-sync/" + file.getFileName(), Files.readAllBytes(file));
++      }
++    }
++    Path startupDiagnostics = TEMP.resolve("p4-revocation-producers");
++    if (Files.isDirectory(startupDiagnostics, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
++      p4RequirePrivateProducerRoot(startupDiagnostics);
++      try (var files = Files.list(startupDiagnostics)) {
++        for (Path file : files.filter(path -> path.getFileName().toString()
++            .startsWith("diag-start1-")).toList()) {
++          assertThat(Files.isSymbolicLink(file)).isFalse();
++          assertThat(Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)).isTrue();
++          assertThat(file.toRealPath().getParent()).isEqualTo(startupDiagnostics.toRealPath());
++          assertThat(Files.size(file)).isLessThanOrEqualTo(16384);
++          assertThat(Files.getPosixFilePermissions(file)).isEqualTo(
++              java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
++          sinks.put("startup-diagnostic/" + file.getFileName(), Files.readAllBytes(file));
++        }
+       }
+     }
+     C5Capture capture = c5Capture;

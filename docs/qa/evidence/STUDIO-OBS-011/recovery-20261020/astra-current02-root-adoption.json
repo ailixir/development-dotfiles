@@ -1,0 +1,22 @@
+{
+  "atUtc": "2026-10-21T01:38:21.994595+00:00",
+  "reviewSha256": "62e61b6dd4c76147c40b4e432277a611481f0ad06e7895ce710cec9313eeef35",
+  "verdict": "CONCERNS",
+  "rootDisposition": "ADOPT_TARGETED_PLAN_CORRECTIONS",
+  "model": "gpt-6-astra",
+  "reasoningEffort": "high",
+  "userExplicitlyRequested": true,
+  "actions": [
+    "TwoFileScopedSuccessorAndAllSixFreshPassesRequired",
+    "ExplicitProspectiveResourceLimitationNoHistoricalCleanupClaim",
+    "FreshBenchmarkCopyBeforeItsFrozenSourceMutates",
+    "011PrioritySingleHeavyLane",
+    "Broader009ReportNot011Gate",
+    "NoReplayClockResetOrExtraAttempt",
+    "OneCoordinatorOwnedExternalReferenceHandback"
+  ],
+  "sourceApproval": false,
+  "resourceAdmission": false,
+  "nativeGo": false,
+  "allStoriesInProgress": true
+}

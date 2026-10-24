@@ -1,0 +1,4152 @@
+{"passed": 222, "cases": 15, "failed": 0, "actualNativeActions": 0}
+{
+  "reviewSuite": "flow_checks.py",
+  "suiteSha256": "cdfd518dd65c80d4e4eb74f49e814e54cc8d4cfeb55280acd518113393c14682",
+  "omittedOnlyTopLevelResultWriter": true,
+  "result": {
+    "kind": "EXACT_CONTROLLER_SYNTHETIC_COOPERATIVE_FLOW",
+    "passed": 222,
+    "failed": 0,
+    "checks": [
+      {
+        "name": "REMOVE_ONLY_YIELD_RESTORES_SERVE_AST",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_PUBLIC_OUTPUT_NAME",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_good",
+        "passed": true
+      },
+      {
+        "name": "FLOW_ACCEPT_good",
+        "passed": true
+      },
+      {
+        "name": "STARTUP_ORDER",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_good",
+        "passed": true
+      },
+      {
+        "name": "FLOW_ACCEPT_parser",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_parser",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_invalid_release",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_invalid_release",
+        "passed": true
+      },
+      {
+        "name": "NO_MUTATION_BEFORE_FULL_SCHEMA",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_invalid_release",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_early",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_early",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_early",
+        "passed": true
+      },
+      {
+        "name": "EARLY_ENROLLMENT_CONSUMED_HOLD",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_early",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_foreign",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_foreign",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_foreign",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_foreign",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_abi",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_abi",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_abi",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_abi",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_nonce",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_nonce",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_nonce",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_nonce",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_PUBLIC_OUTPUT_NAME",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_late_commit",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_late_commit",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_late_commit",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_late_commit",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_PUBLIC_OUTPUT_NAME",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_missing_commit",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_missing_commit",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_missing_commit",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_missing_commit",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_PUBLIC_OUTPUT_NAME",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_extra",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_extra",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_extra",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_extra",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_PUBLIC_OUTPUT_NAME",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_write_failed",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_write_failed",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_write_failed",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_write_failed",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_PUBLIC_OUTPUT_NAME",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_native_failed",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_native_failed",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_native_failed",
+        "passed": true
+      },
+      {
+        "name": "NATIVE_FAILED_NOT_CONVERTED",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_native_failed",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_partial_create",
+        "passed": true
+      },
+      {
+        "name": "FLOW_CLEAN_FAILED_DRAIN_partial_create",
+        "passed": true
+      },
+      {
+        "name": "PARTIAL_CREATE_RETAINED",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_partial_create",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_PUBLIC_OUTPUT_NAME",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_close_unknown",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_close_unknown",
+        "passed": true
+      },
+      {
+        "name": "FLOW_RETAINS_close_unknown",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_close_unknown",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_SHORT_MODE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "LISTENER_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "EXACT_ENDPOINT",
+        "passed": true
+      },
+      {
+        "name": "ONE_BACKLOG",
+        "passed": true
+      },
+      {
+        "name": "READY_BEFORE_LAUNCH",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NOT_INHERITABLE",
+        "passed": true
+      },
+      {
+        "name": "CONNECTION_NONBLOCKING",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "EXCLUSIVE_PUBLIC_OUTPUT_NAME",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "SELECTOR_BOUND",
+        "passed": true
+      },
+      {
+        "name": "JOIN_BOUND_join_unknown",
+        "passed": true
+      },
+      {
+        "name": "FLOW_HOLD_join_unknown",
+        "passed": true
+      },
+      {
+        "name": "FLOW_RETAINS_join_unknown",
+        "passed": true
+      },
+      {
+        "name": "NO_SECOND_ATTEMPT_join_unknown",
+        "passed": true
+      },
+      {
+        "name": "ZERO_FORBIDDEN_REAL_CALLS",
+        "passed": true
+      }
+    ],
+    "cases": [
+      {
+        "name": "good",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "QUALIFICATION_EVIDENCE_COMPLETE_PENDING_QA_ROOT",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "NONE",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": true,
+            "enrollmentCount": 1,
+            "dataCount": 1,
+            "ackCount": 1,
+            "commitCount": 1,
+            "callerAckConfirmed": true,
+            "callerElapsedNs": 10,
+            "conservativeElapsedNs": 1710,
+            "peerEofObserved": true,
+            "qualified": true,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": false,
+            "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+            "peerIdentity": {
+              "pid": 123,
+              "ppid": 77,
+              "uid": 501,
+              "start": "SYNTHETIC",
+              "processImage": "/synthetic/bin/java",
+              "executableFileHash": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+              "identityComplete": true,
+              "kernelIdentityComplete": true,
+              "kernelStartSeconds": 1,
+              "kernelStartMicroseconds": 2,
+              "argvHash": "7777777777777777777777777777777777777777777777777777777777777777"
+            },
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true,
+              "short": true,
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "NONE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "parser",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "QUALIFICATION_EVIDENCE_COMPLETE_PENDING_QA_ROOT",
+          "mode": "parser",
+          "attemptConsumed": true,
+          "primaryReason": "NONE",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "53dfefdec211d83d9b36e232454b404a812f66ca8e7ded7c6d26608e5a6c69b9",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "26f778c5ffc7d8e348a57cea97afba46d3b5b3a4b945aa3ee28d4db226d606b2",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": null,
+          "relayReceipt": null,
+          "relayPrimaryReason": "NONE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": false,
+          "shortNamespace": null,
+          "socketNode": null,
+          "namespaceMetadataState": "NOT_CREATED",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "invalid_release",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": null,
+          "attemptConsumed": true,
+          "primaryReason": "MODE",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": null,
+          "nativeWaited": false,
+          "requestSha256": null,
+          "inputPostcheckCompleted": false,
+          "releaseSha256": "d724aecff991d3f39d171d61438ba70f8a0786f2a2f6da2fd32b908869bfdabf",
+          "codePins": {},
+          "controlSha256": null,
+          "nativeArchiveSha256": null,
+          "projectionSha256": null,
+          "relayReceipt": null,
+          "relayPrimaryReason": "NONE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": false,
+          "shortNamespace": null,
+          "socketNode": null,
+          "namespaceMetadataState": "NOT_CREATED",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "early",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "EARLY_ENROLLMENT",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": false,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": null,
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": false,
+            "enrollmentCount": 1,
+            "dataCount": 0,
+            "ackCount": 0,
+            "commitCount": 0,
+            "callerAckConfirmed": false,
+            "callerElapsedNs": null,
+            "conservativeElapsedNs": null,
+            "peerEofObserved": false,
+            "qualified": false,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": true,
+            "projectionSha256": null,
+            "peerIdentity": null,
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true,
+              "short": true,
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "UNMAPPED_RELAY_FAILURE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "foreign",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "STANDALONE_IDENTITY",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": null,
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": false,
+            "enrollmentCount": 1,
+            "dataCount": 0,
+            "ackCount": 0,
+            "commitCount": 0,
+            "callerAckConfirmed": false,
+            "callerElapsedNs": null,
+            "conservativeElapsedNs": null,
+            "peerEofObserved": false,
+            "qualified": false,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": true,
+            "projectionSha256": null,
+            "peerIdentity": null,
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true,
+              "short": true,
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "UNMAPPED_RELAY_FAILURE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "abi",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "RELAY_PROTOCOL",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": null,
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": false,
+            "enrollmentCount": 1,
+            "dataCount": 0,
+            "ackCount": 0,
+            "commitCount": 0,
+            "callerAckConfirmed": false,
+            "callerElapsedNs": null,
+            "conservativeElapsedNs": null,
+            "peerEofObserved": false,
+            "qualified": false,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": true,
+            "projectionSha256": null,
+            "peerIdentity": null,
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true,
+              "short": true,
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "PEER_ABI_SIZE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "nonce",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "RELAY_PROTOCOL",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": null,
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": false,
+            "enrollmentCount": 1,
+            "dataCount": 0,
+            "ackCount": 0,
+            "commitCount": 0,
+            "callerAckConfirmed": false,
+            "callerElapsedNs": null,
+            "conservativeElapsedNs": null,
+            "peerEofObserved": false,
+            "qualified": false,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": true,
+            "projectionSha256": null,
+            "peerIdentity": {
+              "pid": 123,
+              "ppid": 77,
+              "uid": 501,
+              "start": "SYNTHETIC",
+              "processImage": "/synthetic/bin/java",
+              "executableFileHash": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+              "identityComplete": true,
+              "kernelIdentityComplete": true,
+              "kernelStartSeconds": 1,
+              "kernelStartMicroseconds": 2,
+              "argvHash": "7777777777777777777777777777777777777777777777777777777777777777"
+            },
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true,
+              "short": true,
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "DATA_BINDING",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "late_commit",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "RELAY_PROTOCOL",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": true,
+            "enrollmentCount": 1,
+            "dataCount": 1,
+            "ackCount": 1,
+            "commitCount": 0,
+            "callerAckConfirmed": false,
+            "callerElapsedNs": null,
+            "conservativeElapsedNs": null,
+            "peerEofObserved": false,
+            "qualified": false,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": true,
+            "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+            "peerIdentity": {
+              "pid": 123,
+              "ppid": 77,
+              "uid": 501,
+              "start": "SYNTHETIC",
+              "processImage": "/synthetic/bin/java",
+              "executableFileHash": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+              "identityComplete": true,
+              "kernelIdentityComplete": true,
+              "kernelStartSeconds": 1,
+              "kernelStartMicroseconds": 2,
+              "argvHash": "7777777777777777777777777777777777777777777777777777777777777777"
+            },
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true,
+              "short": true,
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "CONSERVATIVE_COMMIT_DEADLINE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "missing_commit",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "RELAY_PROTOCOL",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": true,
+            "enrollmentCount": 1,
+            "dataCount": 1,
+            "ackCount": 1,
+            "commitCount": 0,
+            "callerAckConfirmed": false,
+            "callerElapsedNs": null,
+            "conservativeElapsedNs": null,
+            "peerEofObserved": false,
+            "qualified": false,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": true,
+            "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+            "peerIdentity": {
+              "pid": 123,
+              "ppid": 77,
+              "uid": 501,
+              "start": "SYNTHETIC",
+              "processImage": "/synthetic/bin/java",
+              "executableFileHash": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+              "identityComplete": true,
+              "kernelIdentityComplete": true,
+              "kernelStartSeconds": 1,
+              "kernelStartMicroseconds": 2,
+              "argvHash": "7777777777777777777777777777777777777777777777777777777777777777"
+            },
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true,
+              "short": true,
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "FRAME_EOF",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "extra",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "RELAY_PROTOCOL",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": true,
+            "enrollmentCount": 1,
+            "dataCount": 1,
+            "ackCount": 1,
+            "commitCount": 1,
+            "callerAckConfirmed": true,
+            "callerElapsedNs": 10,
+            "conservativeElapsedNs": 1710,
+            "peerEofObserved": false,
+            "qualified": false,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": true,
+            "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+            "peerIdentity": {
+              "pid": 123,
+              "ppid": 77,
+              "uid": 501,
+              "start": "SYNTHETIC",
+              "processImage": "/synthetic/bin/java",
+              "executableFileHash": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+              "identityComplete": true,
+              "kernelIdentityComplete": true,
+              "kernelStartSeconds": 1,
+              "kernelStartMicroseconds": 2,
+              "argvHash": "7777777777777777777777777777777777777777777777777777777777777777"
+            },
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true,
+              "short": true,
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "EXTRA_FRAME_OR_BYTES",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "write_failed",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "RELAY_PROTOCOL",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": null,
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": false,
+            "enrollmentCount": 1,
+            "dataCount": 1,
+            "ackCount": 0,
+            "commitCount": 0,
+            "callerAckConfirmed": false,
+            "callerElapsedNs": null,
+            "conservativeElapsedNs": null,
+            "peerEofObserved": false,
+            "qualified": false,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": true,
+            "projectionSha256": null,
+            "peerIdentity": {
+              "pid": 123,
+              "ppid": 77,
+              "uid": 501,
+              "start": "SYNTHETIC",
+              "processImage": "/synthetic/bin/java",
+              "executableFileHash": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+              "identityComplete": true,
+              "kernelIdentityComplete": true,
+              "kernelStartSeconds": 1,
+              "kernelStartMicroseconds": 2,
+              "argvHash": "7777777777777777777777777777777777777777777777777777777777777777"
+            },
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true,
+              "short": true,
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "UNMAPPED_RELAY_FAILURE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "native_failed",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "NATIVE_FAILED",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": 1,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": true,
+            "enrollmentCount": 1,
+            "dataCount": 1,
+            "ackCount": 1,
+            "commitCount": 1,
+            "callerAckConfirmed": true,
+            "callerElapsedNs": 10,
+            "conservativeElapsedNs": 1710,
+            "peerEofObserved": true,
+            "qualified": true,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": false,
+            "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+            "peerIdentity": {
+              "pid": 123,
+              "ppid": 77,
+              "uid": 501,
+              "start": "SYNTHETIC",
+              "processImage": "/synthetic/bin/java",
+              "executableFileHash": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+              "identityComplete": true,
+              "kernelIdentityComplete": true,
+              "kernelStartSeconds": 1,
+              "kernelStartMicroseconds": 2,
+              "argvHash": "7777777777777777777777777777777777777777777777777777777777777777"
+            },
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true,
+              "short": true,
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "NONE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "partial_create",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "UNMAPPED_CONTROLLER_FAILURE",
+          "cleanupReason": "NONE",
+          "canonicalClosed": true,
+          "nativeStatus": null,
+          "nativeWaited": false,
+          "requestSha256": null,
+          "inputPostcheckCompleted": false,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": null,
+          "projectionSha256": null,
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": false,
+            "custodyConfirmed": false,
+            "enrollmentCount": 0,
+            "dataCount": 0,
+            "ackCount": 0,
+            "commitCount": 0,
+            "callerAckConfirmed": false,
+            "callerElapsedNs": null,
+            "conservativeElapsedNs": null,
+            "peerEofObserved": false,
+            "qualified": false,
+            "threadTerminated": true,
+            "descriptorsClosed": true,
+            "stopRequested": true,
+            "failure": false,
+            "projectionSha256": null,
+            "peerIdentity": null,
+            "shortNamespace": null,
+            "socketNode": null,
+            "fdIdentities": {},
+            "closeOutcomes": {
+              "parent": true
+            }
+          },
+          "relayPrimaryReason": "NONE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": null,
+          "socketNode": null,
+          "namespaceMetadataState": "CREATED_METADATA_UNQUALIFIED",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "close_unknown",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "RELAY_DRAIN",
+          "cleanupReason": "CLEANUP_UNCONFIRMED",
+          "canonicalClosed": false,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": true,
+            "enrollmentCount": 1,
+            "dataCount": 1,
+            "ackCount": 1,
+            "commitCount": 1,
+            "callerAckConfirmed": true,
+            "callerElapsedNs": 10,
+            "conservativeElapsedNs": 1710,
+            "peerEofObserved": true,
+            "qualified": false,
+            "threadTerminated": true,
+            "descriptorsClosed": false,
+            "stopRequested": true,
+            "failure": true,
+            "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+            "peerIdentity": {
+              "pid": 123,
+              "ppid": 77,
+              "uid": 501,
+              "start": "SYNTHETIC",
+              "processImage": "/synthetic/bin/java",
+              "executableFileHash": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+              "identityComplete": true,
+              "kernelIdentityComplete": true,
+              "kernelStartSeconds": 1,
+              "kernelStartMicroseconds": 2,
+              "argvHash": "7777777777777777777777777777777777777777777777777777777777777777"
+            },
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": false,
+              "listener": true,
+              "selector": true
+            }
+          },
+          "relayPrimaryReason": "NONE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "OPEN"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "OPEN"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "OPEN"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "OPEN"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "UNKNOWN"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      },
+      {
+        "name": "join_unknown",
+        "result": {
+          "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+          "status": "HOLD",
+          "mode": "relay",
+          "attemptConsumed": true,
+          "primaryReason": "RELAY_DRAIN",
+          "cleanupReason": "CLEANUP_UNCONFIRMED",
+          "canonicalClosed": false,
+          "nativeStatus": 0,
+          "nativeWaited": true,
+          "requestSha256": "64979cf9b5f824db981892a8ab10e7f40eadd48788525670587c8d998b075514",
+          "inputPostcheckCompleted": true,
+          "releaseSha256": "84c93a9c7e494d21e7c07045ccffceff5e30c5db520fa19686ab646707264439",
+          "codePins": {
+            "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+            "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+            "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+            "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+          },
+          "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+          "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+          "relayReceipt": {
+            "protocolVersion": 2,
+            "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+            "codePins": {
+              "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+              "qualification_controller.py": "0a916b29bb399529adab8004331031682374b21655eac9c09b6973ec84a27fd7",
+              "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+              "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+            },
+            "ready": true,
+            "custodyConfirmed": true,
+            "enrollmentCount": 1,
+            "dataCount": 1,
+            "ackCount": 1,
+            "commitCount": 1,
+            "callerAckConfirmed": true,
+            "callerElapsedNs": 10,
+            "conservativeElapsedNs": 1710,
+            "peerEofObserved": true,
+            "qualified": false,
+            "threadTerminated": false,
+            "descriptorsClosed": false,
+            "stopRequested": true,
+            "failure": true,
+            "projectionSha256": "b29710ac70cc07dc250f8d5e5d7e360e876be83f4365aef3a2658abf88598fe9",
+            "peerIdentity": {
+              "pid": 123,
+              "ppid": 77,
+              "uid": 501,
+              "start": "SYNTHETIC",
+              "processImage": "/synthetic/bin/java",
+              "executableFileHash": "6da43b944e494e885e69af021f93c6d9331c78aa228084711429160a5bbd15b5",
+              "identityComplete": true,
+              "kernelIdentityComplete": true,
+              "kernelStartSeconds": 1,
+              "kernelStartMicroseconds": 2,
+              "argvHash": "7777777777777777777777777777777777777777777777777777777777777777"
+            },
+            "shortNamespace": {
+              "dev": 1,
+              "inode": 2,
+              "mode": 16832,
+              "uid": 501
+            },
+            "socketNode": {
+              "dev": 1,
+              "inode": 3,
+              "mode": 49536,
+              "uid": 501
+            },
+            "fdIdentities": {
+              "listener": {
+                "dev": 1,
+                "inode": 300,
+                "mode": 49536,
+                "uid": 501
+              },
+              "connection": {
+                "dev": 1,
+                "inode": 301,
+                "mode": 49536,
+                "uid": 501
+              }
+            },
+            "closeOutcomes": {
+              "connection": true,
+              "listener": true,
+              "selector": true
+            }
+          },
+          "relayPrimaryReason": "NONE",
+          "ownership": [
+            {
+              "number": 1,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 2,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 3,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 4,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 5,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 6,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 7,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 8,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 9,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 10,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 11,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 12,
+              "kind": "DIRECTORY",
+              "state": "OPEN"
+            },
+            {
+              "number": 13,
+              "kind": "DIRECTORY",
+              "state": "OPEN"
+            },
+            {
+              "number": 14,
+              "kind": "DIRECTORY",
+              "state": "OPEN"
+            },
+            {
+              "number": 15,
+              "kind": "DIRECTORY",
+              "state": "OPEN"
+            },
+            {
+              "number": 16,
+              "kind": "SELECTOR",
+              "state": "CLOSED"
+            },
+            {
+              "number": 17,
+              "kind": "LISTENER",
+              "state": "CLOSED"
+            },
+            {
+              "number": 18,
+              "kind": "NATIVE_PROCESS",
+              "state": "CLOSED"
+            },
+            {
+              "number": 19,
+              "kind": "CONNECTION",
+              "state": "CLOSED"
+            },
+            {
+              "number": 20,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 21,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 22,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 23,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 24,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 25,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 26,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            },
+            {
+              "number": 27,
+              "kind": "DIRECTORY",
+              "state": "CLOSED"
+            }
+          ],
+          "partialShortCreated": true,
+          "shortNamespace": {
+            "dev": 1,
+            "inode": 2,
+            "mode": 16832,
+            "uid": 501
+          },
+          "socketNode": {
+            "dev": 1,
+            "inode": 3,
+            "mode": 49536,
+            "uid": 501
+          },
+          "namespaceMetadataState": "QUALIFIED_READY_METADATA",
+          "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+        }
+      }
+    ],
+    "singleTestOnlyReadyYield": true,
+    "removeYieldRestoresServeAst": true,
+    "realConcurrency": false,
+    "forbiddenBoundaryCalls": [],
+    "actualNativeJavaTlsUnixPeerPlatformActions": 0
+  }
+}

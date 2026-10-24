@@ -1,0 +1,229 @@
+{
+  "actualRuntimeAuthority": false,
+  "completeBatch": true,
+  "mandatoryFindingCount": 12,
+  "mandatoryFindings": [
+    {
+      "correspondingArchitectureFinding": "C8S01-ARCH-01",
+      "evidence": "Own QA nonzero utility case: communicate returns status7 and both byte buffers, waitReturned true, but actualExit remains null and completion UNKNOWN. Finite source also confirms unbounded communicate before either16MiB check. Aria oversized-buffer counterexample is separately pinned/reused evidence, not replayed.",
+      "id": "C8S01-QA-01",
+      "impact": "The advertised16MiB cap does not bound communicate internal allocation. A later owner opinion or unexecuted-platform disclaimer cannot implement that limit. Independent actual returned/wait/type facts must not disappear merely because another acceptance predicate fails.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "runtime.py:Inspector.utility:80-110",
+        "runtime.py:Unit.drain_step:452-479"
+      ],
+      "mandatory": true,
+      "peerEvidence": "Independent utility-acquisition case supplies16777217 bytes. communicate returns the full buffer before len(out) is checked; waitReturned is True but known returncode0 is omitted from actualExit and completion remains UNKNOWN. The source documentation expressly acknowledges this pre-acquisition gap.",
+      "requiredCorrection": "Implement a concrete approved bounded acquisition/drain path before allocation, with retained returned process/pipe/partial output ownership and independently projected strict status/wait/drain facts. If approved mechanisms cannot supply it, retain precise implementation HOLD; do not run or approve the existing path on an owner Boolean.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Bound utility output acquisition before communicate and preserve independent completion facts"
+    },
+    {
+      "correspondingArchitectureFinding": "C8S01-ARCH-02",
+      "evidence": "Independent source trace: first-read helper has no enclosing per-entry sink creator; root-caller inherits FD1/FD2; launch verifies stdout only after read/compile/release/decision; main writes unchecked FD2 on earlier failure. C8_S0_BIN is not bound into the release declared BIN by concrete parent attestation. Aria bootstrap-private-channel case is reused, not replayed.",
+      "id": "C8S01-QA-02",
+      "impact": "A pre-E/bootstrap/constructor failure has no implemented fully owned private failure channel. A single inherited output file cannot satisfy successive empty-sink checks without reviewed rebinding. Actual wrapper custody/closing/status is a missing implementation surface, alongside later actual evidence; future owner records cannot fill it.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "root-caller.bash:c8_s0_invoke/exit",
+        "first-read.template.bash:1-14",
+        "entry.py:launch:116-147",
+        "entry.py:main:151-169"
+      ],
+      "mandatory": true,
+      "peerEvidence": "The shell invokes Python without creating/rebinding/retaining a per-entry exclusive sink. Entry validates inherited FD1 only after manifest/code/release/decision reads and module interpretation. Independent bootstrap-private-channel case proves an earlier error writes to unchecked inherited FD2. The next entry requires an empty FD1 although the previous entry writes it; the missing enclosing wrapper is prose only. C8_S0_BIN is a shell parameter while the release BIN role is separately declared; no concrete enclosing caller/attestation graph binds those actual requested-launch values.",
+      "requiredCorrection": "Include the concrete enclosing caller/wrapper and per-entry exclusive0600 named descriptor acquisition/retention/confirmed close/external status path. Protect failures before first helper/interpretation, including stderr or its explicitly private replacement. Bind the actual readonly requested BIN and source/release/unit controls to the independently declared role contract through an exact reviewed parent attestation. Preserve cap-before-acquisition, SAME buffers, old holder, no root scans/signals/cleanup and external completion distinct from snapshots.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Implement the enclosing per-entry private failure/output caller and bind requested launch"
+    },
+    {
+      "correspondingArchitectureFinding": "C8S01-ARCH-03",
+      "evidence": "Both Unit.retain_foreground and foreground_boot_hold are literal infinite loops. The packet explicitly calls the external disposition UNIMPLEMENTED. Retaining actual references is preserved, but no complete ordinary failure closure is implemented. Test-only StopForeground is not actual termination.",
+      "id": "C8S01-QA-03",
+      "impact": "This is a known protocol implementation dependency, not a missing Java/path/ABI input that existing guards can qualify. Normal cases do not establish the required failure closure.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "runtime.py:Unit.retain_foreground:480-490",
+        "entry.py:foreground_boot_hold:73-76",
+        "REVIEW-AND-ACTUAL-OBLIGATIONS.md:UNKNOWN disposition"
+      ],
+      "mandatory": true,
+      "peerEvidence": "Both actual loops intentionally never return. The source explicitly calls the external disposition UNIMPLEMENTED; the author StopForeground exception merely stops fake observation and is not actual exit/drain proof. References remain retained, which is safer than discarding them, but no completing external boundary exists in this source.",
+      "requiredCorrection": "Provide a separately reviewed concrete existing-mechanism disposition with honest actual ownership/outer completion, or keep the exact consumer source/actual use HOLD for that unresolved boundary. Do not replace the loop with normal return/raise, interpreter teardown, signal, close retry or fabricated status, and do not add new provider/API research as an automatic workaround.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Resolve the explicitly unimplemented UNKNOWN external disposition before claiming completeness"
+    },
+    {
+      "correspondingArchitectureFinding": "C8S01-ARCH-04",
+      "evidence": "Own QA write/close counterexample propagates close OSError while original write ValueError survives only as __context__; Storage.primary remains unset. Same bare-finally category exists in info/mkdir/inventory and selected custody paths. Read/create first-primary fixes are retained and must not regress.",
+      "id": "C8S01-QA-04",
+      "impact": "Entry/native latch can receive the cleanup as its first primary, contrary to the declared first-error and separate-cleanup contract. Partial ownership retention alone does not preserve the original failure reason.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "storage.py:Storage.write:139-146",
+        "storage.py:Storage.info:46-49",
+        "storage.py:Storage.mkdir:94-109",
+        "storage.py:Storage.inventory:147-164"
+      ],
+      "mandatory": true,
+      "peerEvidence": "Independent storage-write-primary case raises a write ValueError followed by a close OSError; Storage.write raises the latter and loses the original as the propagated primary. The positive storage-read-primary case confirms read retains the first error plus two cleanup records/UNKNOWN references. create saves its first exception, while several remaining bare finally closers have the same replacement pattern as write.",
+      "requiredCorrection": "Apply one consistent first-primary-before-fallible-cleanup/publication rule across all selected Storage/custody/partial caller paths, preserving separate closed cleanup outcomes and actual references. Recheck read/create retained fixes rather than regressing them. Fix the full category, not only the demonstrated write branch.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Preserve first primary throughout Storage write and remaining finally/partial paths"
+    },
+    {
+      "correspondingArchitectureFinding": "C8S01-ARCH-05",
+      "evidence": "Own QA injected hash failure records only one field call and no self_report; the other field is never collected. Finite source proves encode precedes byte bound. The4096char memory limit is not the adopted4096UTF8-byte-before-encoding requirement.",
+      "id": "C8S01-QA-05",
+      "impact": "The adopted4096-character AND4096-byte-before-encoding/hash requirement is not implemented. Declaring memory-only roles does not satisfy the acquisition bound or independent known metadata retention.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "runtime.py:self_text:16-21",
+        "runtime.py:Unit.self_roles:299-306"
+      ],
+      "mandatory": true,
+      "peerEvidence": "Finite AST proves value.encode executes before len(raw)>4096. The independent multibyte case has2049 characters/4098 UTF8 bytes and is rejected only after encoding. Hash failure is not caught by self_text, so it can also abort the sequential second-field collection.",
+      "requiredCorrection": "Count strict UTF8 byte width in bounded exact-str memory first, reject NUL/surrogate/nonstring/unavailable/overcap without encoding/hash, then hash only permitted bytes. Collect and preserve independently known reported/orig metadata even when the other field/hash fails. Never guess, follow, normalize or operationalize the unknown raw reported text.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Enforce the UTF8 byte bound before encoding and retain independent self metadata"
+    },
+    {
+      "correspondingArchitectureFinding": "C8S01-ARCH-06",
+      "evidence": "Own QA gate accepts readiness createdAtNs1 at roughly1e12ns, and PRE1000000009000 then POST1000000003000. Another own exact execute/gate fake returns0 after sink delivery advances time beyond permit expiry1060000000000. POST precedes finish/serialization/write/shell delivery.",
+      "id": "C8S01-QA-06",
+      "impact": "A fresh permit alone does not make the original readiness fresh. Clock reversal and expired final delivery can authorize builtin exit despite the mandatory original-readiness60s PRE/afterallow/POST contract.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "runtime.py:Unit.permit_check:595-603",
+        "runtime.py:Unit.gate:604-618",
+        "entry.py:execute:87-111",
+        "root-caller.bash:exit"
+      ],
+      "mandatory": true,
+      "peerEvidence": "Three independent actual-function fake counterexamples: readiness.createdAtNs=1 is admitted with a fresh permit at roughly1e12ns; PRE1000000009000 then POST1000000003000 is accepted; and the inherited operator write advances past permit expiry while entry still returns guard0/allowTrue. POST occurs before Unit.finish, serialization, sink writes and shell status delivery.",
+      "requiredCorrection": "Carry one exact frozen readiness/permit binding through the complete selected caller boundary; enforce strict types, original readiness age, issued/expiry ordering and nondecreasing observations. Put the last same-permit check after all fallible finalization/publication/allow preparation that precedes the actual accepted delivery. Preserve once caps, status inspection and no permit renewal/retry.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Bind freshness to original readiness and the whole final allow/publication suffix"
+    },
+    {
+      "correspondingArchitectureFinding": "C8S01-ARCH-07",
+      "evidence": "Independent source: owners checks lease once before current/source/setup. Native performs preadmit, phase, mkdir and attempt publication before starting its monotonic budget, and does not recheck lease before child.launch. Aria actual-function fake late-launch counterexample is reused/pinned, not rerun.",
+      "id": "C8S01-QA-07",
+      "impact": "Fallible setup can consume or outlast the selected scope before native starts. The supplied native budget is not an enforced deadline over the full required setup/launch interval.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "runtime.py:Unit.owners:338-342",
+        "runtime.py:Unit.native:491-510",
+        "runtime.py:Unit.current:346-352"
+      ],
+      "mandatory": true,
+      "peerEvidence": "Independent expired-lease-launch case advances wall time beyond the12h lease at attempt.json publication. Native still launches and finishes with primary NONE. owners checked the lease earlier, current does not recheck it, and the native clock begins only after preadmit/phase/initial namespace publication.",
+      "requiredCorrection": "Bind and check the same exact lease/deadline from the selected before-fallible-work point through every authorized setup/write/launch/phase boundary, without renewal or clock reversal. Expiry must consume the attempt and stay HOLD with partial resources retained; no late launch, retry or cleanup.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Keep the active lease and exact outer deadline valid through setup and launch"
+    },
+    {
+      "correspondingArchitectureFinding": "C8S01-ARCH-08",
+      "evidence": "Independent entry/caller trace: BOOT_PARENT binds getppid to descriptor.expectedShellPid, then BOOT_HOLDER binds that same value to release.holder.shell.pid. Postclose must run after this original shell is absent; no distinct outer observer caller is modeled. Direct Unit fake flows bypass launch.",
+      "id": "C8S01-QA-08",
+      "impact": "The actual sealed entry/caller cannot implement the intended outer postclose path under ordinary distinct caller identities. This is a code/DAG issue, not an unknown PID input or actual-platform qualification.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "entry.py:launch:124-145",
+        "controls.py:descriptor:38-43",
+        "runtime.py:Inspector.controller_lock:115-140",
+        "runtime.py:Unit.postclose:619-630"
+      ],
+      "mandatory": true,
+      "peerEvidence": "Independent postclose-real-caller-parent case uses a new actual fake parent999 after old shell800 is gone. BOOT_PARENT accepts the new descriptor, but BOOT_HOLDER rejects it because release.holder.shell is still800. Using800 instead would require the original held shell as parent, contradicting normal postclose absence. Direct Unit postclose fake flows bypass this full-entry mismatch.",
+      "requiredCorrection": "Model and verify a distinct postclose observer/caller/root scope while retaining the original immutable wrapper/shell/lock tuple as the subject whose absence/free inode must be proved. Review the full same-buffer CLI path and actual separate outer completion; do not overwrite the original holder or use PID reuse as a workaround.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Give postclose its own exact outer caller binding instead of the dead held parent"
+    },
+    {
+      "correspondingArchitectureFinding": "C8S01-ARCH-09",
+      "evidence": "Independent complete call map: only negative/preadmit call history, history restores only capture and only after an admitting sample. Archive calls current before reading held; final/gate/postclose never restore the full typed predecessors. Fresh Inspector starts relevance empty. Aria prior-relevance fake is reused/pinned.",
+      "id": "C8S01-QA-09",
+      "impact": "Per-entry reconstruction silently forgets previously relevant/ambiguous actors. A changed argv or apparent reuse becomes an implicit exemption, contrary to persistent relevance and honest known-history requirements.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "runtime.py:Inspector.restore:161-165",
+        "runtime.py:Unit.history:366-382",
+        "runtime.py:Unit.archive:558-578",
+        "runtime.py:Unit.final/gate/postclose:587-630"
+      ],
+      "mandatory": true,
+      "peerEvidence": "Independent persistent-prior-relevance case places known wasRelevant PID9292 in the held receipt, then returns that PID with an unrelated current argv. A new archive Unit has empty relevance, calls current before consuming held history and accepts FULL_W_E_ARCHIVE. Only capture history is restored for negative/held; later entries do not join predecessor relevance/client/utility history.",
+      "requiredCorrection": "Bind the complete typed predecessor history and actual completion facts before each current admitting sample, including archive/final/gate/postclose. Reconcile duplicates/conflicts, retain UNKNOWN/start gaps and all actual known IDs, and keep conservative numeric/relevance handling. Do not turn all prior PIDs into ownership/listener exemptions or invent interval/exhaustive guarantees.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Carry persistent relevance and typed predecessor history across all entries"
+    },
+    {
+      "correspondingArchitectureFinding": "C8S01-ARCH-10",
+      "evidence": "Own QA inventory of /inventory/empty yields zero rows and succeeds with entry budget0. Directory rows/reserve are absent, archive builds directories only for files, equality compares file rows only. Additionally Custody.members uses unbounded listdir before any entry count, so checking file count later cannot bound directory-name acquisition.",
+      "id": "C8S01-QA-10",
+      "impact": "The claimed complete bounded W/E archive can omit empty directories and directory metadata and cannot enforce its entry cap on directory-only trees. Postclose/source/archive equality therefore covers a narrower subject than the declared full tree.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "storage.py:Storage.inventory:147-164",
+        "storage.py:Storage.archive:165-177",
+        "runtime.py:Unit.archive_equal:579-586"
+      ],
+      "mandatory": true,
+      "peerEvidence": "Finite source proof: the directory branch recurses without appending a directory row or reserving an entry; Budget.reserve is reached only by file read. archive creates directories only as parents of recorded files, and archive_equal compares only those file rows. An empty directory, its owner/mode, or its later addition/change has no row and cannot affect equality. Directory entries do not consume the advertised8192 entry budget.",
+      "requiredCorrection": "Represent and validate every selected file and directory with bounded acquisition/entry accounting, strict type/owner/mode/relative membership and honest metadata before/after. Copy empty directories and compare the complete typed tree with explicit archive-mode policy. Keep remaining shared byte budgets and no symlink/unknown-entry fallback; missing approved enumeration/custody support stays implementation HOLD. Bound directory-name acquisition before materializing an unbounded list; a later len/list/file-only budget is insufficient. No new enumeration API is implicitly authorized.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Archive and bound the complete directory tree, not only regular-file rows"
+    },
+    {
+      "evidence": "Frozen Java reads CHECKS_PUBLIC_OBSERVER_CONTROL as Base64url-encoded raw control JSON, decodes it, caps decoded bytes4096 and hashes those bytes. Python phase(relay) requires the variable equal launchControlPin.path. These are distinct subjects; the actual literal absolute path contains characters outside the URL decoder alphabet and is not the serialized control. Author fake World manufactures DATA/COMMIT directly and never calls this Java parser. Finite review binds both exact literals; no Java or new fake case was run.",
+      "id": "C8S01-QA-11",
+      "impact": "The sealed full Python/Java relay cannot admit its own launch environment, regardless of correct Java/path/ABI inputs. The all-nine fake flows do not cover this consumer boundary. Native producer return/hash/printed ROOT_RECEIPT_REQUIRED cannot replace DATA/COMMIT.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "runtime.py:Unit.phase:445-450",
+        "observer-fragment.java.txt:p3ObserverControl:104-114",
+        "fake_check.py:World.make_release/World.popen"
+      ],
+      "mandatory": true,
+      "requiredCorrection": "Preserve frozen production0153/harness82a9/body/driver/wire. Construct and validate the exact existing Base64url environment representation from the same already pinned raw launch-control bytes, with original byte/character/hash limits, no reopening or operationalizing raw self text. Bind the requested launch environment hash/control raw SHA/nonce consistently in caller, release, source/phase maps and receiver. Add one bounded pure cross-language-literal/encoding contract check; no Java/native/platform action is authorized by this finding.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Match the unchanged Java control environment wire instead of supplying a path"
+    },
+    {
+      "evidence": "Entry reads and hashes manifest, six code buffers, release and decision, then executes all module top levels via modules(buffers). Release/decision structural validation comes after that execution; exact rootScope/codeReview/owner/input/environment/launch-control graph is read later through Unit.owners/phase. The author loaderOrder explicitly reflects that ordering. This satisfies code-buffer hashes but not the saved task requirement to bind the complete independently pinned root/current-input/review/owner control graph before parsing/compiling the consumed target code.",
+      "id": "C8S01-QA-12",
+      "impact": "The requested pre-interpretation control/custody boundary is incomplete. Later owner Booleans and pin reads cannot retroactively establish acquisition/metadata/hash binding before earlier target interpretation. This is a source ordering/coverage gap, distinct from unknown future pin values.",
+      "independentlyReviewedSource": true,
+      "locations": [
+        "entry.py:launch:124-146",
+        "entry.py:modules:78-85",
+        "runtime.py:Unit.owners:315-345",
+        "runtime.py:Unit.phase:397-451",
+        "finite-method-dependency-map.json:loaderOrder"
+      ],
+      "mandatory": true,
+      "requiredCorrection": "Implement a reviewed bootstrap graph reader/closed schema that consumes the exact externally supplied release/decision/review/owner/root/current-input maps under aggregate/per-item caps and retained FD/private failure ownership before target compile/exec. Verify external raw SHA/metadata first, parse only the consumed bounded buffers, and pass those same buffers/facts forward without reopening. Preserve no self/future cycles, no guessed future pins, all once caps and no runtime or new API research authority.",
+      "severity": "HIGH",
+      "status": "OPEN_SOURCE_IMPLEMENTATION_HOLD",
+      "title": "Acquire the complete externally pinned control graph before target module interpretation"
+    }
+  ],
+  "peerManifestSha256": "69f7fbd9835e5c8953b85b3362c4fa4c92c86fdcee77bb8008c60e435deca444",
+  "reviewer": "Quinn",
+  "subjectManifestSha256": "bf6ff7d9cd627c40c6df37c9edc841cb7242170a287d3d15c9f1681899d764b7",
+  "technicalOwnerRulingIssued": false,
+  "verdict": "HOLD"
+}

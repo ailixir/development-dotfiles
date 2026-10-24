@@ -1,0 +1,63 @@
+--- docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/fixture.mjs
++++ docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation02/fixture.mjs
+@@ -9,15 +9,25 @@
+ process.on('unhandledRejection',()=>{console.log('{"event":"D2_ADAPTER_ERROR"}');process.exit(1);});
+ const mode = process.argv[2];
+ if (mode === 'inspect' || mode === 'inspect-after') {
++  // Failure-only closed metadata; incomplete/unreached observations remain null.
++  let inspectionStage='recording-walk';
++  const inspectionFacts={activeRecordingDirectories:null,journals:null,nonemptyJournals:null,owners:null,liveOwnedBrowserLeaders:null,recordingDirectoryHandles:null,readonlyRefusals:null,coreSoftZero:null,coreHardZero:null,tlsMode0440:null,tlsGid1001:null,linux:null};
++  try {
+   const tmp = mode === 'inspect' ? '/tmp' : '/runner-tmp';
+   let activeRecordingDirectories=0, journals=0, nonemptyJournals=0, owners=0;
+   const walk=(path,depth=0)=>{if(depth>6)throw new Error('D2_INSPECTION_BOUND');for(const name of readdirSync(path)){const child=join(path,name),s=lstatSync(child);if(s.isSymbolicLink())continue;if(s.isDirectory()){if(name.startsWith('checks-recording-'))activeRecordingDirectories++;walk(child,depth+1);}else if(name.endsWith('.journal')){journals++;if(s.size>0)nonemptyJournals++;}else if(name.endsWith('.journal.owner'))owners++;}};
+   walk(`${tmp}/.checks-guided-recordings`);
++  inspectionFacts.activeRecordingDirectories=activeRecordingDirectories;
++  if(mode==='inspect-after')inspectionStage='after-recording-assert';
+   if(mode==='inspect-after') {if(activeRecordingDirectories!==0)throw new Error('D2_SCRATCH_NOT_REMOVED');console.log(JSON.stringify({event:'D2_AFTER',activeRecordingDirectories}));process.exit(0);}
++  inspectionStage='journal-walk';
+   walk('/journal/data');
++  inspectionFacts.activeRecordingDirectories=activeRecordingDirectories;inspectionFacts.journals=journals;inspectionFacts.nonemptyJournals=nonemptyJournals;inspectionFacts.owners=owners;
++  inspectionStage='node-pid';
+   const nodePid=process.argv[3];if(!/^[1-9][0-9]*$/.test(nodePid)||Number(nodePid)<=1)throw new Error('D2_NODE_PID');
+   // Fresh live leader selected by the same main-parent + checks-guided profile rule as existing helpers.
+   let liveOwnedBrowserLeaders=0;
++  inspectionStage='browser-enumeration';
+   for(const pid of readdirSync('/proc').filter(name=>/^[1-9][0-9]*$/.test(name))){
+     try {
+       const stat=readFileSync(`/proc/${pid}/stat`,'utf8'), fields=stat.slice(stat.lastIndexOf(')')+2).split(' ');
+@@ -26,17 +36,34 @@
+       if(argv.some(arg=>/^--user-data-dir=\S*\/checks-guided-[A-Za-z0-9]+\//u.test(arg)))liveOwnedBrowserLeaders++;
+     }catch{/* A process that vanished during inspection is not counted as live. */}
+   }
++  inspectionFacts.liveOwnedBrowserLeaders=liveOwnedBrowserLeaders;
++  inspectionStage='browser-assert';
+   if(liveOwnedBrowserLeaders!==1)throw new Error('D2_NO_ACTIVE_OWNED_BROWSER');
++  inspectionStage='core-limits';
+   const core=/^Max core file size\s+(\S+)\s+(\S+)\s+bytes$/m.exec(readFileSync(`/proc/${nodePid}/limits`,'utf8'));
++  inspectionFacts.coreSoftZero=core===null?null:core?.[1]==='0';inspectionFacts.coreHardZero=core===null?null:core?.[2]==='0';
+   if(core?.[1]!=='0'||core?.[2]!=='0')throw new Error('D2_CORE_LIMIT');
++  inspectionStage='recording-fds';
+   const fdDirectory=`/proc/${nodePid}/fd`;
+   let recordingDirectoryHandles=0;
+   for(const fd of readdirSync(fdDirectory)){try{if(readlinkSync(join(fdDirectory,fd)).includes('/.checks-guided-recordings/'))recordingDirectoryHandles++;}catch{/* fd may close between enumeration/readlink */}}
++  inspectionFacts.recordingDirectoryHandles=recordingDirectoryHandles;
++  inspectionStage='tls-key';
+   const keyStat=lstatSync('/tls/tls.key');
++  inspectionFacts.tlsMode0440=(keyStat.mode&0o777)===0o440;inspectionFacts.tlsGid1001=keyStat.gid===1001;
+   if((keyStat.mode&0o777)!==0o440||keyStat.gid!==1001||readFileSync('/tls/tls.key').length===0)throw new Error('D2_TLS_MODE');
++  inspectionStage='readonly-probes';
+   for(const path of ['/app/.d2-readonly-probe','/tls/.d2-readonly-probe']){try{writeFileSync(path,'D2',{flag:'wx'});unlinkSync(path);throw new Error('D2_ROOT_WRITABLE');}catch(error){if(error.code!=='EROFS')throw error;}}
++  inspectionFacts.readonlyRefusals=2;inspectionFacts.linux=process.platform==='linux';
++  inspectionStage='filesystem-assert';
+   if(process.platform!=='linux'||journals!==2||nonemptyJournals!==2||owners!==2||activeRecordingDirectories!==1||recordingDirectoryHandles<1)throw new Error('D2_FILESYSTEM_PROOF');
+   console.log(JSON.stringify({event:'D2_ACTIVE',observedAtMs:Date.now(),liveOwnedBrowserLeaders,linux:true,nodePid:Number(nodePid),journals,nonemptyJournals,owners,activeRecordingDirectories,recordingDirectoryHandles,tlsMode:'0440',tlsGid:keyStat.gid,readonlyRefusals:2,coreSoft:0,coreHard:0}));process.exit(0);
++  } catch(error) {
++    const predicates=new Set(["D2_INSPECTION_BOUND","D2_SCRATCH_NOT_REMOVED","D2_NODE_PID","D2_NO_ACTIVE_OWNED_BROWSER","D2_CORE_LIMIT","D2_TLS_MODE","D2_ROOT_WRITABLE","D2_FILESYSTEM_PROOF"]);
++    const ioCodes=new Set(["ENOENT","EACCES","EPERM","EIO","ENOTDIR","ELOOP","EROFS","EMFILE","ENFILE"]);
++    const reason=predicates.has(error?.message)?error.message:ioCodes.has(error?.code)?`IO_${error.code}`:'UNKNOWN';
++    console.log(JSON.stringify({event:'D2_INSPECTION_FAILED',mode,stage:inspectionStage,reason,facts:inspectionFacts}));process.exit(1);
++  }
+ }
+ const root = mode === 'prepare' ? process.argv[3] : '/tls';
+ const fixtureRoot = process.argv[4];

@@ -1,0 +1,693 @@
+{
+  "kind": "DESIGN02_INDEPENDENT_KNOWN_ID_RETENTION_FAKE_CASES",
+  "checks": 85,
+  "results": [
+    {
+      "id": "KNOWN_SELF_RETAINED_body-valid-both",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_body-valid-both",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_body-valid-both",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_body-valid-both",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_body-valid-both",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_body-valid-both",
+      "passed": true
+    },
+    {
+      "id": "OTHER_KNOWN_ROLE_RETAINED_body-valid-both",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_bootstrap-verified-body",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_bootstrap-verified-body",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_bootstrap-verified-body",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_bootstrap-verified-body",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_bootstrap-verified-body",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_bootstrap-verified-body",
+      "passed": true
+    },
+    {
+      "id": "OTHER_KNOWN_ROLE_RETAINED_bootstrap-verified-body",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_body-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_body-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_body-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_body-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_body-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_body-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "OTHER_KNOWN_ROLE_RETAINED_body-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_body-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_body-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_body-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_body-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_body-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_body-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "OTHER_KNOWN_ROLE_RETAINED_body-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_body-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_body-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_body-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_body-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_body-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_body-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "OTHER_KNOWN_ROLE_RETAINED_body-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_body-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_body-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_body-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_body-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_body-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_body-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "OTHER_KNOWN_ROLE_RETAINED_body-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_bootstrap-integrity-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_bootstrap-integrity-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_bootstrap-integrity-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_bootstrap-integrity-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_bootstrap-integrity-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_bootstrap-integrity-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "NO_BODY_FALLTHROUGH_bootstrap-integrity-invalid-parent",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_bootstrap-integrity-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_bootstrap-integrity-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_bootstrap-integrity-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_bootstrap-integrity-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_bootstrap-integrity-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_bootstrap-integrity-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "NO_BODY_FALLTHROUGH_bootstrap-integrity-throwing-parent",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_bootstrap-integrity-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_bootstrap-integrity-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_bootstrap-integrity-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_bootstrap-integrity-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_bootstrap-integrity-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_bootstrap-integrity-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "NO_BODY_FALLTHROUGH_bootstrap-integrity-invalid-self",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_bootstrap-integrity-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_bootstrap-integrity-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_bootstrap-integrity-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_bootstrap-integrity-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_bootstrap-integrity-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_bootstrap-integrity-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "NO_BODY_FALLTHROUGH_bootstrap-integrity-throwing-self",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_body-wrong-valid-parent",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_body-wrong-valid-parent",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_body-wrong-valid-parent",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_body-wrong-valid-parent",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_body-wrong-valid-parent",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_body-wrong-valid-parent",
+      "passed": true
+    },
+    {
+      "id": "OTHER_KNOWN_ROLE_RETAINED_body-wrong-valid-parent",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_SELF_RETAINED_body-unavailable-role",
+      "passed": true
+    },
+    {
+      "id": "KNOWN_PARENT_RETAINED_body-unavailable-role",
+      "passed": true
+    },
+    {
+      "id": "INDEPENDENT_READS_ONCE_body-unavailable-role",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_OUTCOME_body-unavailable-role",
+      "passed": true
+    },
+    {
+      "id": "NO_UNSUPPORTED_PROOF_body-unavailable-role",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_NO_RAW_OUTPUT_body-unavailable-role",
+      "passed": true
+    },
+    {
+      "id": "OTHER_KNOWN_ROLE_RETAINED_body-unavailable-role",
+      "passed": true
+    },
+    {
+      "id": "PERSISTENT_DENY_AUDIT_ZERO_REAL",
+      "passed": true
+    }
+  ],
+  "cases": [
+    {
+      "case": "body-valid-both",
+      "fakeExit": 0,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "METADATA_ONLY",
+        "reason": "NONE",
+        "pid": 9000,
+        "ppid": 3749,
+        "reportedRole": "BIN",
+        "origArgv0Role": "APP",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "bootstrap-verified-body",
+      "fakeExit": 0,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "METADATA_ONLY",
+        "reason": "NONE",
+        "pid": 9000,
+        "ppid": 3749,
+        "reportedRole": "BIN",
+        "origArgv0Role": "APP",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "body-invalid-parent",
+      "fakeExit": 1,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "HOLD",
+        "reason": "SELF_METADATA_UNAVAILABLE",
+        "pid": 9000,
+        "ppid": null,
+        "reportedRole": "BIN",
+        "origArgv0Role": "APP",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "body-throwing-parent",
+      "fakeExit": 1,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "HOLD",
+        "reason": "SELF_METADATA_UNAVAILABLE",
+        "pid": 9000,
+        "ppid": null,
+        "reportedRole": "BIN",
+        "origArgv0Role": "APP",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "body-invalid-self",
+      "fakeExit": 1,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "HOLD",
+        "reason": "SELF_METADATA_UNAVAILABLE",
+        "pid": null,
+        "ppid": 3749,
+        "reportedRole": "BIN",
+        "origArgv0Role": "APP",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "body-throwing-self",
+      "fakeExit": 1,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "HOLD",
+        "reason": "SELF_METADATA_UNAVAILABLE",
+        "pid": null,
+        "ppid": 3749,
+        "reportedRole": "BIN",
+        "origArgv0Role": "APP",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "bootstrap-integrity-invalid-parent",
+      "fakeExit": 1,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "HOLD",
+        "reason": "LITERAL_INTEGRITY_OR_EXECUTION_FAILURE",
+        "pid": 9000,
+        "ppid": null,
+        "reportedRole": "UNAVAILABLE",
+        "origArgv0Role": "UNAVAILABLE",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "bootstrap-integrity-throwing-parent",
+      "fakeExit": 1,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "HOLD",
+        "reason": "LITERAL_INTEGRITY_OR_EXECUTION_FAILURE",
+        "pid": 9000,
+        "ppid": null,
+        "reportedRole": "UNAVAILABLE",
+        "origArgv0Role": "UNAVAILABLE",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "bootstrap-integrity-invalid-self",
+      "fakeExit": 1,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "HOLD",
+        "reason": "LITERAL_INTEGRITY_OR_EXECUTION_FAILURE",
+        "pid": null,
+        "ppid": 3749,
+        "reportedRole": "UNAVAILABLE",
+        "origArgv0Role": "UNAVAILABLE",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "bootstrap-integrity-throwing-self",
+      "fakeExit": 1,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "HOLD",
+        "reason": "LITERAL_INTEGRITY_OR_EXECUTION_FAILURE",
+        "pid": null,
+        "ppid": 3749,
+        "reportedRole": "UNAVAILABLE",
+        "origArgv0Role": "UNAVAILABLE",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "body-wrong-valid-parent",
+      "fakeExit": 1,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "HOLD",
+        "reason": "EXPECTED_HELD_PARENT_MISMATCH",
+        "pid": 9000,
+        "ppid": 3748,
+        "reportedRole": "BIN",
+        "origArgv0Role": "APP",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    },
+    {
+      "case": "body-unavailable-role",
+      "fakeExit": 1,
+      "record": {
+        "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+        "status": "HOLD",
+        "reason": "SELF_ROLE_UNAVAILABLE",
+        "pid": 9000,
+        "ppid": 3749,
+        "reportedRole": "UNAVAILABLE",
+        "origArgv0Role": "APP",
+        "start": null,
+        "argvHash": null,
+        "fullFingerprint": null,
+        "observedProcessImage": null,
+        "timestamp": null,
+        "qualified": false,
+        "NFact": false,
+        "descriptorCompletion": "NOT_OBSERVED",
+        "postExitLeakProof": false,
+        "outerObserverCompletionOwed": true
+      },
+      "fakeCalls": [
+        "getpid",
+        "getppid"
+      ],
+      "realSelfMetadataRead": false
+    }
+  ],
+  "literalFakeExecutions": {
+    "body": 8,
+    "bootstrap": 5
+  },
+  "boundaryAttempts": [],
+  "actualDiagnosticOrProcessActions": 0,
+  "nestedExecUsesSameFakeImports": true,
+  "subjectSafetyEdits": false,
+  "unchanged756And1020Replayed": false
+}

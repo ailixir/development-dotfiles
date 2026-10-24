@@ -1,0 +1,29 @@
+{"passed": 6, "cases": 2, "failed": 0, "actualNativeActions": 0}
+{
+  "kind": "INDEPENDENT_ACTUAL_INVOCATION_NATIVE_RESULT_PAIR",
+  "checks": 6,
+  "cases": [
+    {
+      "case": "positive-native-fields",
+      "status": "QUALIFICATION_EVIDENCE_COMPLETE_PENDING_QA_ROOT",
+      "primaryReason": "NONE",
+      "canonicalClosed": true,
+      "nativeStatus": 0,
+      "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "ordinaryAdapterIsSynthetic": true
+    },
+    {
+      "case": "malformed-native-fields",
+      "status": "HOLD",
+      "primaryReason": "NATIVE_UNKNOWN",
+      "canonicalClosed": true,
+      "nativeStatus": "SYNTHETIC_PRIVATE_STATUS_SENTINEL",
+      "nativeArchiveSha256": "SYNTHETIC_PRIVATE_ARCHIVE_SENTINEL",
+      "ordinaryAdapterIsSynthetic": true
+    }
+  ],
+  "boundaryAttempts": [],
+  "actualActions": 0,
+  "subjectControllerOrReceiverSafetyEdits": false,
+  "harnessAdaptation": "Only15case invocation loop replaced by2targeted cases; oneREADYyield/reverseproof and unchanged persistent audit/effect guards retained. Result writer omitted."
+}

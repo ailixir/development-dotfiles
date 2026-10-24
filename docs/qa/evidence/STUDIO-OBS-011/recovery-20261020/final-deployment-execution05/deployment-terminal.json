@@ -1,0 +1,38 @@
+{
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-final-runner-deployment01",
+    "pnpm",
+    "--dir=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.deployment.config.ts",
+    "--minWorkers=1",
+    "--maxWorkers=1"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T04:03:01.456514+00:00",
+  "driverPid": 47000,
+  "rawCollectorExit": 0,
+  "accepted": true,
+  "continuousAwakeClaim": false,
+  "caffeinatePid": 47135,
+  "caffeinateArgv": [
+    "/usr/bin/caffeinate",
+    "-i"
+  ],
+  "collectorPid": 47136,
+  "collectorEndedAtUtc": "2026-10-21T04:04:28.562571+00:00",
+  "rawChildExit": 0,
+  "collectorResultSha256": "3ba83d0f0af820cbe836714a2142fba380cd6d8b3c3f71bb32a4aa181e9c9329",
+  "postguardsAndReconciliationCompletedAtUtc": "2026-10-21T04:04:30.772115+00:00",
+  "sourceTestInputDistA1E19Cache191Protected21Chart22Quotes6ImageStable": true,
+  "caffeinateHeldThroughAllPostguards": true,
+  "caffeinateExit": -15,
+  "caffeinateReleased": true,
+  "caffeinateReleasedAtUtc": "2026-10-21T04:04:30.775031+00:00"
+}

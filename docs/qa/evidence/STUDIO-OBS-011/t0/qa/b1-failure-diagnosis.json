@@ -1,0 +1,121 @@
+{
+  "artifact": "STUDIO-OBS-011 B1 first-failure diagnosis",
+  "preparedBy": "Quinn (@qa)",
+  "observedAtUtc": "2026-10-19T00:52:13.171535+00:00",
+  "isVerdict": false,
+  "label": "obs011-t0-baseline-check01",
+  "process": {
+    "exit": 0,
+    "observation": "  PID  PPID STARTED                      ELAPSED STAT COMMAND\n88167 88145 Sun Oct 18 19:53:58 2026       58:15 S    /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home/bin/java -Dfile.encoding=UTF-8 -Xmx64m -Xms64m -Dorg.gradle.appname=gradlew -classpath /Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain --continue check --rerun-tasks --no-daemon\n88182 88167 Sun Oct 18 19:53:59 2026       58:14 Ss   /Users/brunobuger/.jdks/jdk-21.0.10+7/Contents/Home/bin/java --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED -XX:MaxMetaspaceSize=384m -XX:+HeapDumpOnOutOfMemoryError -Xms256m -Xmx512m -Dfile.encoding=UTF-8 -Duser.country=US -Duser.language=en -Duser.variant -cp /Users/brunobuger/.gradle/wrapper/dists/gradle-8.10.2-bin/a04bxjujx95o3nb99gddekhwo/gradle-8.10.2/lib/gradle-daemon-main-8.10.2.jar -javaagent:/Users/brunobuger/.gradle/wrapper/dists/gradle-8.10.2-bin/a04bxjujx95o3nb99gddekhwo/gradle-8.10.2/lib/agents/gradle-instrumentation-agent-8.10.2.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 8.10.2\n",
+    "terminal": false
+  },
+  "log": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01.log",
+    "mtimeUtc": "2026-10-19T00:52:06.435452+00:00",
+    "progressLineCountsOnly": {
+      "PASSED": 1932,
+      "SKIPPED": 2,
+      "FAILED": 15
+    },
+    "failedProgressLines": [
+      "GuidedPublicationReplayIT > actualGuidedReleasedValueInjectedFailureRedactsProducedSinks() FAILED",
+      "GuidedPublicationReplayIT > actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead() FAILED",
+      "GuidedPublicationReplayIT > actualCorePublishedControlValuePasswordRequestRefusesBeforeRead() FAILED",
+      "GuidedPublicationReplayIT > actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead() FAILED",
+      "GuidedPublicationReplayIT > actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion() FAILED",
+      "GuidedPublicationReplayIT > actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending() FAILED",
+      "GuidedPublicationReplayIT > actualSecretControlWindowLossBeforeReadyReachesTerminalError() FAILED",
+      "GuidedPublicationReplayIT > auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass() FAILED",
+      "GuidedPublicationReplayIT > historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof() FAILED",
+      "GuidedPublicationReplayIT > actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay() FAILED",
+      "GuidedPublicationReplayIT > incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck() FAILED",
+      "GuidedPublicationReplayIT > actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache() FAILED",
+      "GuidedPublicationReplayIT > incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent() FAILED",
+      "GuidedPublicationReplayIT > incrementalSecretPrefixPreservesEveryVaultFaultOracle() FAILED",
+      "GuidedPublicationReplayIT > executionError FAILED"
+    ],
+    "skippedProgressLines": [
+      "ExecutionVideoExternallyGatedCriteriaTest > AC-18b — ranged reads against real Sonic (ED-03 / SPK-03 / 10.18 / 10.19) SKIPPED",
+      "ExecutionVideoExternallyGatedCriteriaTest > AC-19b — the media route through the real ingress (ED-06 / SPK-02 / 10.18 / 10.19) SKIPPED"
+    ]
+  },
+  "terminalCollectorReceiptPresent": false,
+  "freshReplayXmlPresent": false,
+  "firstFailure": {
+    "task": "test",
+    "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+    "name": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks()",
+    "order": 32,
+    "path": "p8C6Case(4) -> p8C6Run -> awaitState",
+    "exceptionClass": "java.lang.AssertionError",
+    "line": 19249,
+    "expectedSessionState": "UNKNOWN_OUTCOME",
+    "observedSessionStateFromCleanupReceipt": "FAILED",
+    "causeClassification": "UNPROVEN: test fixture / main / runner not distinguished by available evidence",
+    "testFileLaneOwner": "11-IT-R",
+    "mainOrRunnerCauseOwner": "root routes after cause proof; no authority for 11-IT-R to patch main/runner"
+  },
+  "cascade": {
+    "laterBeforeEachFailures": 13,
+    "line": 3767,
+    "guard": "cleanupUnconfirmed must be false",
+    "meaning": "deliberate native-cleanup fail-stop; retain guard",
+    "classTeardownExecutionErrorLine": 31923,
+    "classTeardownOperation": "capture.collect(sinks)"
+  },
+  "safeFacts": {
+    "tempDirectory": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/obs007-joined-12026084583951601838",
+    "firstCleanup": {
+      "testMethod": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks",
+      "sessions": [
+        {
+          "beforeState": "FAILED",
+          "teardownStatus": "CONFIRMED"
+        }
+      ],
+      "allActualTeardownsConfirmed": false
+    },
+    "c5Numeric": {
+      "encodedPatternHits": 0,
+      "encodedInvalidWrites": 0,
+      "encodedObserverFailed": false,
+      "streamedLogsCollected": true,
+      "streamedLogsFinalChecked": true,
+      "captureTargetClosed": true,
+      "patternCount": 15,
+      "traceArmed": true
+    },
+    "revocationStateNumericOnly": {
+      "active": true,
+      "case": 6,
+      "epoch": 6,
+      "path": 1,
+      "c6": 4
+    },
+    "revocationObserverFailedMarkerExists": true,
+    "ownedWorkerCleanupNumericOnly": {
+      "cleanupFailureCount": 0,
+      "metadataBytes": 1393191,
+      "metadataEvents": 2077,
+      "observerSkippedTerminated": 0,
+      "registeredRoots": 113
+    },
+    "limitations": "Marker/state/numeric facts do not establish when or why observer failure occurred and are not a complete native closure/canary proof."
+  },
+  "coverageTaskLogMarkersObserved": [],
+  "coverageStatus": "NOT YET PROVEN; no terminal task execution or fresh merged JaCoCo assessment",
+  "skipPolicy": {
+    "entries": 9,
+    "sha256": "6bd2a808a40a707397757b3ff4f1a78e5eff8ee37666c7b26271582b14457cac",
+    "finalB1ExactMultisetReconciliation": "OWED: final collector receipt absent",
+    "placeholderUnchanged": true
+  },
+  "nextActions": [
+    "Keep original B1 live; preserve source/dist freeze; no retry or signal",
+    "At terminal receipt inspect collector-archived fresh ReplayIT XML first exception and suppressed cleanup exceptions, exporting only safe codes/classes/numeric facts",
+    "Reconcile all three task-qualified case and skip multisets; require exact nine expected skips and actual coverage-task execution",
+    "Root rules before W1 unless a lane-owned test-only cause is proved; main/runner or coverage failure remains root-owned",
+    "Preserve native producer closure, canary scans, cleanupUnconfirmed guard and final audit boundaries; D5 is not a remedy for the primary terminal-state failure"
+  ],
+  "actionsTaken": "Read-only process/log/source and safe numeric/JSON inspections. Wrote only these diagnosis artifacts under t0/qa; no tests/builds/Docker/process signals/retries/source edits/delegation."
+}

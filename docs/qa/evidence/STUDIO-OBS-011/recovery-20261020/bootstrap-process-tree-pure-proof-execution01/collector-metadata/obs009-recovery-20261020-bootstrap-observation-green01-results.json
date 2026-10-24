@@ -1,0 +1,39 @@
+{
+  "command": [
+    "pnpm",
+    "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "test/run/bootstrapProcessTreeObservation.test.ts",
+    "--coverage.enabled=false",
+    "--minWorkers=1",
+    "--maxWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-20261020-bootstrap-observation-green01-vitest.json"
+  ],
+  "cwd": "studio-runner",
+  "started": "2026-10-21T00:50:19.562729+00:00",
+  "elapsedSeconds": 0.74,
+  "exit": 0,
+  "sourceStable": true,
+  "distStable": true,
+  "logSha256": "f016e8370f4da75ac280a48dea22115e4eb7a97458364638e30f930c91c04232",
+  "testInputStable": true,
+  "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+  "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+  "vitest": {
+    "success": true,
+    "numPassedTests": 37,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTests": 37,
+    "numPassedTestSuites": 2,
+    "numFailedTestSuites": 0
+  },
+  "vitestReportSha256": "7befe5242f6bdb66f06b902be560a07a55953026c9af8e9e6b0c3159d82058fc"
+}

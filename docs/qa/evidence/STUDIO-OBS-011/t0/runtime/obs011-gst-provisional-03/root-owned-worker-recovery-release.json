@@ -1,0 +1,28 @@
+{
+  "atUtc": "2026-10-19T08:40:30.838034+00:00",
+  "signedBy": "root / Orion",
+  "decision": "ABANDON_ACTUAL_FAILED_INCOMPLETE03_EXACT_WORKER_ONLY_RECOVERY",
+  "rootUnitReleaseSha256": "2e705692283c0e4fbc6bd8661c2eee19416c22d6baac4cf7ccde5505163acfd0",
+  "qualityPolicySha256": "f376bdc3ec80e174ff89695fc2edb3f5877be143ed84c1f636df3f62638b0d9c",
+  "architecturePolicySha256": "e47ab473561c81c0047eadf2ed3702082955753e595a667755847f79d6c00085",
+  "target": {
+    "pid": 76623,
+    "ppid": 76004,
+    "start": "Mon Oct 19 04:31:53 2026",
+    "argvHash": "4a297c92ac66cc7f95ab10e7c7a2eafeb9d25d2ae856fc7e54870bbd34c6b314",
+    "projectMarkerCandidate": true,
+    "identityComplete": true,
+    "commHash": "17c41513aa70a3adec9bfe02602b2b410fecd663fc3089da7d4c71a18dbf9ed9",
+    "executableHash": "17c41513aa70a3adec9bfe02602b2b410fecd663fc3089da7d4c71a18dbf9ed9",
+    "executableFileHash": "19f2cd660267f4fb79a83debff11e8c3d509cd06beb499297e6558b030b8789a"
+  },
+  "preSignalIdentitySha256": "20d92ae7f0e3aee25cbc7de10e008e675c506ae37cead96196341ac03af72b57",
+  "diagnosticResultSha256": "a6c08151cebd90bbba967ce8b644a1cb078ca1a83b3e237ab57f0cb60f578995",
+  "fixedProjectionSha256": "6a154ba8137d95ccc7417322f032d1947d6d72e298380f130e4a51d060eb712c",
+  "scope": "ONEfullymatchedworkerSIGTERM,15s; onlysamefullymatchedpersistentworkerONESIGKILL,10s;stoponabsence/reuse/uncertainty. NootherPID/group/controller/daemon/inheritedsignal.",
+  "reason": "Alreadyfailedactualfull99 attempt; sampled STOP_OWNER_DRAIN3436/CUT_CLEANUP2999/CUT_RUN2952, stillforeground. UnderlyingclientExecution/Timeout/Cancellation causeUNKNOWN, no deadlock or semanticcompletionclaim.",
+  "classification": "ABORTED_FAILED_INCOMPLETE",
+  "preserveControllersAndLock": true,
+  "restoreOnlyAfterActualForegroundAndKnownOwnedWritersTerminal": true,
+  "retryOrCredit": false
+}

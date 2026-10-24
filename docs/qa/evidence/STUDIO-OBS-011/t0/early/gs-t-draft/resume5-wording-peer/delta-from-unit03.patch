@@ -1,0 +1,92 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -1898,7 +1898,7 @@
+               List.of(
+                   new com.citi.put.checks.studio.dto.AuthoringStep(
+                       UUID.fromString("00000000-0000-4000-8000-0000000000a1"),
+-                      "Click Order reference.",
++                      "Click Order number.",
+                       null),
+                   new com.citi.put.checks.studio.dto.AuthoringStep(
+                       UUID.fromString("00000000-0000-4000-8000-0000000000a2"),
+@@ -1919,7 +1919,7 @@
+               + "'chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,?)",
+           SOURCE_TEST,
+           mapper.writeValueAsString(
+-              List.of("Click Order reference.", "Assert Order reference is visible.")),
++              List.of("Click Order number.", "Assert Order reference is visible.")),
+           mapper.writeValueAsString(authoring),
+           mapper.writeValueAsString(
+               com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity.create(
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java
+@@ -529,7 +529,7 @@
+               List.of(
+                   new com.citi.put.checks.studio.dto.AuthoringStep(
+                       UUID.fromString("00000000-0000-4000-8000-0000000000a1"),
+-                      "Click Order reference.",
++                      "Click Order number.",
+                       null),
+                   new com.citi.put.checks.studio.dto.AuthoringStep(
+                       UUID.fromString("00000000-0000-4000-8000-0000000000a2"),
+@@ -550,7 +550,7 @@
+               + "'chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,?)",
+           SOURCE_TEST,
+           mapper.writeValueAsString(
+-              List.of("Click Order reference.", "Assert Order reference is visible.")),
++              List.of("Click Order number.", "Assert Order reference is visible.")),
+           mapper.writeValueAsString(authoring),
+           mapper.writeValueAsString(
+               com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity.create(
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -2875,7 +2875,7 @@
+           .isFalse();
+       reconciled = true;
+     } catch (Exception | Error failure) {
+-      observeGstCutPrimary(failure);
++      observeGstCutPrimary(failure, created[0]);
+       primary = failure;
+       throw failure;
+     } finally {
+@@ -5290,7 +5290,21 @@
+     }
+   }
+ 
+-  private static void observeGstCutPrimary(Throwable primary) {
++  private static void observeGstCutPrimary(Throwable primary, Scenario scenario) {
++    observeGstFailure("CUT_PRIMARY", primary);
++    try {
++      Throwable peer = scenario == null ? null : scenario.peerFailure.get();
++      if (peer == null) {
++        gstDiagnosticLine("CUT_PEER", "NONE", "NONE", "OTHER", "UNPROVEN", "NONE", 0);
++      } else {
++        observeGstFailure("CUT_PEER", peer);
++      }
++    } catch (Throwable observationFailure) {
++      gstDiagnosticUnproven();
++    }
++  }
++
++  private static void observeGstFailure(String site, Throwable primary) {
+     try {
+       String family =
+           primary instanceof GuidedSessionException
+@@ -5329,7 +5343,7 @@
+           break;
+         }
+       }
+-      gstDiagnosticLine("CUT_PRIMARY", "NONE", status, family, code, frame, line);
++      gstDiagnosticLine(site, "NONE", status, family, code, frame, line);
+     } catch (Throwable observationFailure) {
+       gstDiagnosticUnproven();
+     }
+@@ -5419,6 +5433,8 @@
+       return switch (method) {
+         case "prepareGuidedControllerCut" -> "CUT_SETUP";
+         case "runGuidedControllerCut" -> "CUT_RUN";
++        case "callback" -> "PEER_CALLBACK";
++        case "relay" -> "PEER_RELAY";
+         default -> "NONE";
+       };
+     }

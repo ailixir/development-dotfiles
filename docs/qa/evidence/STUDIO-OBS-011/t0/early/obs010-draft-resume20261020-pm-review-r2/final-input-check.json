@@ -1,0 +1,19 @@
+{
+  "checkedAtUtc": "2026-10-20T03:01:15.940814+00:00",
+  "initialInspection": "All47 input pins matched at initial review inspection; integrity.json is that captured observation.",
+  "finalInputDrift": [
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/resume-20261020/coordinator-plan.json",
+      "capturedSha256": "bf4059ed78e2e7d8f629551b16f7b95d08101a30bc8beb9385df3e3a8ba20ebb",
+      "capturedBytes": 3836,
+      "observedSha256": "8beed302c7f28116935df37430ef5f3162710fced66a15161d3de86ba081d13b",
+      "observedBytes": 4901
+    }
+  ],
+  "unaffectedInputPinsMatched": 46,
+  "subjectManifestUnchanged": true,
+  "subjectChecksumListUnchanged": true,
+  "previousPartialUnchanged": true,
+  "exactTargetBasesUnchanged": true,
+  "interpretation": "Root-owned mutable coordination progress changed during independent review. Current plan was read: statuses/source freeze/runtimeAuthorityGranted:false remain; it supplies no actual runtime authority. Not a second product defect. Corrected packet must bind its actual current documentary inputs and preserve this captured subject. No all-inputs-unchanged-at-end claim."
+}

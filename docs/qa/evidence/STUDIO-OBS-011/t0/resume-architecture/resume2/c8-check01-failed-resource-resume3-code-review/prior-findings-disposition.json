@@ -1,0 +1,32 @@
+{
+  "rootAdoptionSha256": "81cd935d7e83989d5ae2dd326c1533880081b1963ad0435485f4b1d94e63a136",
+  "dispositions": [
+    {
+      "prior": "Aria02 C8-FR2-01 / QA02 FR02-BUFFER-01",
+      "disposition": "PARTIALLY_FIXED_REUSED_BASELINE_REMAINS_OPEN",
+      "evidence": "Policy and CORE compile the exact verified buffers. Root/index/plan/input/retained/local-control consumers reject changed returned buffers. Remaining inherited baseline consumer is C8-FR3-01."
+    },
+    {
+      "prior": "Aria02 C8-FR2-02",
+      "disposition": "FIX_PRESENT_SYNTHETICALLY_VERIFIED",
+      "evidence": "Captured component-only validators protect all Custody operations; policy bootstrap no longer exports canonical. Negative header/schema/derived member and held proof derived member are validated before journal body access."
+    },
+    {
+      "prior": "QA02 FR02-OBSERVE-02",
+      "disposition": "FIX_PRESENT_SYNTHETICALLY_VERIFIED",
+      "evidence": "Nonempty/incomplete stderr, incomplete stdout, unexpected and Boolean statuses HOLD. Closed completeness fields are journaled without raw stderr. Allowed no-result1 requires empty streams and ps/lsof role; required census/maps/identity/FD proof still rejects missing data."
+    },
+    {
+      "prior": "QA02 FR02-COMPILE-03",
+      "disposition": "FIX_PRESENT_SYNTHETICALLY_VERIFIED",
+      "evidence": "All three forbidden paths/links are rechecked after final census and final client accounting, before current proof returns."
+    },
+    {
+      "prior": "root81cd exact cached Python role requirement",
+      "disposition": "COHERENT_SOURCE_ONLY_EXACT_TUPLE",
+      "evidence": "Explicit launch/reported BIN866e723f and process APP2e86b5cd roles. Exact process comm and before/after mapping/file/PID-start/argv stability bind current client; unrelated same-basename mapping is accepted without alias exemption. Actual unit compatibility is unobserved."
+    }
+  ],
+  "earlierControlMembershipCustodyClientAccountingAndTypedStatusFixesRetained": true,
+  "noActualFingerprintCauseOrRepair": true
+}

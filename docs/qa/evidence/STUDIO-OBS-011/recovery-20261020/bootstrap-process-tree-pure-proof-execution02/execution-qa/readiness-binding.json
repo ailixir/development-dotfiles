@@ -1,0 +1,52 @@
+{
+  "verdict": "READY_FOR_SEPARATELY_DISPATCHED_SIX_CASE_PROOF",
+  "producerManifestSha256": "4680636b4e1fc17209f7a30af2c63f4070c625dff359159d5fd82f57c1b03966",
+  "receiptSha256": "ee2c7ef358451ebb8b6292ffa875ad8f1c904659e70c4c0b78d5c37d56c011bd",
+  "assessmentSha256": "7e5eca5fe5157021eaf069ef56adbbcf7d33562c4ba2141727ecd4cde85e8c0d",
+  "reviewSha256": "26792e8de17f4d438be521cc248fe45718f32ee0081ce597a1b151542eb29431",
+  "sourceV2ManifestSha256": "0cc11d42cc7431145c288d0dd32e6064193aba3176a0a99d459e1cb91a9467d4",
+  "paths": [
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "v1Sha256": "187a2460cd61f38dbbaeab6b4d571f6a2fa9b1a644f6e6e2c5836397566285b8",
+      "v2GreenSha256": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba",
+      "v2RedSha256": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba",
+      "actualBeforeExists": true,
+      "requiredActualBeforeSha256": "7b928dc51eef99343cdeefdb1cbf8055c70b7d46c2ed086073ec380f92c17fb1",
+      "actualApplication": "UNEXECUTED_NOT_RELEASED"
+    },
+    {
+      "path": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "v1Sha256": "8cb01289c3b77a501facf1f1763b8ec436cdd07add3ce6b1c461fd47d318d626",
+      "v2GreenSha256": "b15b569f43c40f2461d8f5c1604a3243f4ea837a40e04fc0e2e576abecc8a5a1",
+      "v2RedSha256": "7058cc1a9640eac6d10cab3989159fd905394a72645c583bb99a05b819679faa",
+      "actualBeforeExists": false,
+      "requiredActualBeforeSha256": null,
+      "actualApplication": "UNEXECUTED_NOT_RELEASED"
+    },
+    {
+      "path": "studio-runner/test/run/bootstrapProcessTreeObservation.test.ts",
+      "v1Sha256": "dbcaac71e28b282c0cd4d1cea213fb9994832cd5be3108dc3f30f62cb43968d8",
+      "v2GreenSha256": "775ee841b73fa4a3a78fc0bd27a419d1ec97b7cec6b8e7bf38863c4eb24fc181",
+      "v2RedSha256": "775ee841b73fa4a3a78fc0bd27a419d1ec97b7cec6b8e7bf38863c4eb24fc181",
+      "actualBeforeExists": false,
+      "requiredActualBeforeSha256": null,
+      "actualApplication": "UNEXECUTED_NOT_RELEASED"
+    }
+  ],
+  "acceptedNewRedFrame": "test/run/bootstrapProcessTreeObservation.test.ts:54:82",
+  "all37GreenActualPass": true,
+  "bothTypesAndBothThreeFileLintsActual0": true,
+  "all23OriginalLintSitesResolvedAtV2Source": true,
+  "completePrivateProduct238": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "resourceLimitationAcceptanceSha256": "7be649260809ad21c2431657dad3304e1a5d344f07f6151164e86ca2bd8b2d23",
+  "rootSeparateNativeDispatchAndCurrentBindingsRequired": true,
+  "currentNativeExecutionGo": false,
+  "actualSourceApplicationGo": false,
+  "nativeCasesAlreadyPassed": false,
+  "conditional301PlusSixFulfilled": false,
+  "historicalRaw307Gate": "FAIL",
+  "historicalAllDescendantsGone": "NOT_ESTABLISHED",
+  "lifecycleApproval": false,
+  "findings": []
+}

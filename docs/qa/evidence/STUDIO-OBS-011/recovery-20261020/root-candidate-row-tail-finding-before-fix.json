@@ -1,0 +1,11 @@
+{
+  "atUtc": "2026-10-21T01:49:48.401099+00:00",
+  "source": "renewal_phase_independent_qa candidate-source-review message",
+  "inputCandidateManifestSha256": "e9df98a0d5a6e92552cc1357587fa5450a6b5041e61e51f46d5276525f38582b",
+  "inputHelperSha256": "1dd3fccbcbb0e9146d549c319c6c3b3c5efd43744b901f594dd6a5fcd5745479",
+  "finding": "Numeric-row regex uses dot-star suffix without dotAll, so valid numeric PID/PPID plus embedded CR or JavaScript line separator metadata fails ROW_IDENTITY. Complete numeric graph must instead retain row; unchanged metadata classifier may mark it UNKNOWN.",
+  "preCodeControls": "Add explicit embedded U+000D and U+2028 metadata variants within existing four-control loops; no new case identities. Unrelated capture/confirmation succeeds, required population fails closed.",
+  "actualHistoricalNativeCause": "UNKNOWN_UNRETAINED",
+  "sourceOnlyCorrectionAllowed": true,
+  "runtimeGo": false
+}

@@ -1,0 +1,569 @@
+{
+  "kind": "CODE02_CURRENT_EXACT_SIGNATURES_AND_CALLERS",
+  "signatures": {
+    "entry.py": [
+      {
+        "function": "root_read",
+        "signature": "path, cap=16777216, failure_sink=None",
+        "line": 12,
+        "endLine": 42
+      },
+      {
+        "function": "pairs",
+        "signature": "values",
+        "line": 44,
+        "endLine": 49
+      },
+      {
+        "function": "execute",
+        "signature": "mode, auth_sha, control_sha=None, failure_sink=None",
+        "line": 51,
+        "endLine": 68
+      },
+      {
+        "function": "own",
+        "signature": "fd",
+        "line": 16,
+        "endLine": 16
+      }
+    ],
+    "failed_gateway.py": [
+      {
+        "function": "run",
+        "signature": "mode, auth_sha, control_sha=None, system=None, root_raw=None, code_buffers=None, failure_sink=None",
+        "line": 477,
+        "endLine": 493
+      },
+      {
+        "function": "__init__",
+        "signature": "self",
+        "line": 39,
+        "endLine": 39
+      },
+      {
+        "function": "operator_emit",
+        "signature": "self, value",
+        "line": 40,
+        "endLine": 40
+      },
+      {
+        "function": "custody",
+        "signature": "self, path, mode=None",
+        "line": 41,
+        "endLine": 42
+      },
+      {
+        "function": "read",
+        "signature": "self, path, mode=None, cap=16777216",
+        "line": 43,
+        "endLine": 46
+      },
+      {
+        "function": "umask",
+        "signature": "self",
+        "line": 47,
+        "endLine": 50
+      },
+      {
+        "function": "now",
+        "signature": "self",
+        "line": 51,
+        "endLine": 51
+      },
+      {
+        "function": "monotonic",
+        "signature": "self",
+        "line": 52,
+        "endLine": 52
+      },
+      {
+        "function": "pid",
+        "signature": "self",
+        "line": 53,
+        "endLine": 53
+      },
+      {
+        "function": "ppid",
+        "signature": "self",
+        "line": 54,
+        "endLine": 54
+      },
+      {
+        "function": "uid",
+        "signature": "self",
+        "line": 55,
+        "endLine": 55
+      },
+      {
+        "function": "python",
+        "signature": "self",
+        "line": 56,
+        "endLine": 56
+      },
+      {
+        "function": "popen",
+        "signature": "self, argv",
+        "line": 57,
+        "endLine": 57
+      },
+      {
+        "function": "lock_free",
+        "signature": "self, path, expected",
+        "line": 58,
+        "endLine": 70
+      },
+      {
+        "function": "__init__",
+        "signature": "self, system, authority, authority_sha, contract, control, control_sha, code_buffers, failure_sink=None",
+        "line": 73,
+        "endLine": 99
+      },
+      {
+        "function": "merge_pins",
+        "signature": "self, pins",
+        "line": 101,
+        "endLine": 105
+      },
+      {
+        "function": "bound",
+        "signature": "self, path, expected=None, mode=None, cap=16777216",
+        "line": 107,
+        "endLine": 122
+      },
+      {
+        "function": "document",
+        "signature": "self, path, expected=None",
+        "line": 123,
+        "endLine": 123
+      },
+      {
+        "function": "local",
+        "signature": "self, name",
+        "line": 124,
+        "endLine": 126
+      },
+      {
+        "function": "write",
+        "signature": "self, name, value",
+        "line": 127,
+        "endLine": 131
+      },
+      {
+        "function": "validate_root",
+        "signature": "self, value, role",
+        "line": 132,
+        "endLine": 135
+      },
+      {
+        "function": "check_members",
+        "signature": "self",
+        "line": 136,
+        "endLine": 149
+      },
+      {
+        "function": "load_libraries",
+        "signature": "self",
+        "line": 151,
+        "endLine": 190
+      },
+      {
+        "function": "capture",
+        "signature": "self, command, allowed=(0,)",
+        "line": 192,
+        "endLine": 220
+      },
+      {
+        "function": "table",
+        "signature": "self",
+        "line": 222,
+        "endLine": 239
+      },
+      {
+        "function": "client_identity",
+        "signature": "self, row",
+        "line": 241,
+        "endLine": 254
+      },
+      {
+        "function": "register",
+        "signature": "self",
+        "line": 256,
+        "endLine": 266
+      },
+      {
+        "function": "publish",
+        "signature": "self",
+        "line": 267,
+        "endLine": 275
+      },
+      {
+        "function": "clients",
+        "signature": "self, rows",
+        "line": 276,
+        "endLine": 296
+      },
+      {
+        "function": "postclose_lock",
+        "signature": "self, rows",
+        "line": 297,
+        "endLine": 300
+      },
+      {
+        "function": "observe",
+        "signature": "self, archive=False",
+        "line": 301,
+        "endLine": 325
+      },
+      {
+        "function": "bounded_inventory",
+        "signature": "self, path",
+        "line": 327,
+        "endLine": 352
+      },
+      {
+        "function": "copy_budget",
+        "signature": "self",
+        "line": 353,
+        "endLine": 353
+      },
+      {
+        "function": "copy_entry",
+        "signature": "self, budget",
+        "line": 354,
+        "endLine": 355
+      },
+      {
+        "function": "copy_tree",
+        "signature": "self, source, destination, rows, budget=None",
+        "line": 356,
+        "endLine": 379
+      },
+      {
+        "function": "require_admission",
+        "signature": "self",
+        "line": 380,
+        "endLine": 387
+      },
+      {
+        "function": "make_archive",
+        "signature": "self",
+        "line": 388,
+        "endLine": 405
+      },
+      {
+        "function": "check_archives",
+        "signature": "self",
+        "line": 406,
+        "endLine": 417
+      },
+      {
+        "function": "require_actual_archive_review",
+        "signature": "self",
+        "line": 419,
+        "endLine": 426
+      },
+      {
+        "function": "operate",
+        "signature": "self",
+        "line": 428,
+        "endLine": 465
+      },
+      {
+        "function": "close",
+        "signature": "self",
+        "line": 467,
+        "endLine": 475
+      },
+      {
+        "function": "visit",
+        "signature": "root, prefix=''",
+        "line": 329,
+        "endLine": 351
+      }
+    ],
+    "custody.py": [
+      {
+        "function": "need",
+        "signature": "value, reason",
+        "line": 7,
+        "endLine": 8
+      },
+      {
+        "function": "member",
+        "signature": "name",
+        "line": 9,
+        "endLine": 9
+      },
+      {
+        "function": "key",
+        "signature": "st",
+        "line": 10,
+        "endLine": 10
+      },
+      {
+        "function": "filekey",
+        "signature": "st",
+        "line": 11,
+        "endLine": 11
+      },
+      {
+        "function": "rowkey",
+        "signature": "row",
+        "line": 12,
+        "endLine": 12
+      },
+      {
+        "function": "__init__",
+        "signature": "self, path, mode=None, api=os",
+        "line": 17,
+        "endLine": 29
+      },
+      {
+        "function": "check",
+        "signature": "self",
+        "line": 30,
+        "endLine": 34
+      },
+      {
+        "function": "acquire",
+        "signature": "self, name, flags, mode=384",
+        "line": 35,
+        "endLine": 39
+      },
+      {
+        "function": "release",
+        "signature": "self, fd",
+        "line": 40,
+        "endLine": 43
+      },
+      {
+        "function": "info",
+        "signature": "self, name",
+        "line": 44,
+        "endLine": 45
+      },
+      {
+        "function": "absent",
+        "signature": "self, name",
+        "line": 46,
+        "endLine": 49
+      },
+      {
+        "function": "members",
+        "signature": "self",
+        "line": 50,
+        "endLine": 52
+      },
+      {
+        "function": "read",
+        "signature": "self, name, mode=None, cap=16777216, expected=None",
+        "line": 53,
+        "endLine": 69
+      },
+      {
+        "function": "output",
+        "signature": "self, name, mode",
+        "line": 70,
+        "endLine": 76
+      },
+      {
+        "function": "write",
+        "signature": "self, name, raw, mode=384",
+        "line": 77,
+        "endLine": 85
+      },
+      {
+        "function": "copy_from",
+        "signature": "self, source, name, row, budget",
+        "line": 86,
+        "endLine": 123
+      },
+      {
+        "function": "mkdir",
+        "signature": "self, name, mode",
+        "line": 124,
+        "endLine": 129
+      },
+      {
+        "function": "symlink",
+        "signature": "self, name, target",
+        "line": 130,
+        "endLine": 131
+      },
+      {
+        "function": "readlink",
+        "signature": "self, name",
+        "line": 132,
+        "endLine": 133
+      },
+      {
+        "function": "close",
+        "signature": "self",
+        "line": 134,
+        "endLine": 149
+      }
+    ],
+    "protocol.py": [
+      {
+        "function": "need",
+        "signature": "value, reason",
+        "line": 8,
+        "endLine": 9
+      },
+      {
+        "function": "sha",
+        "signature": "raw",
+        "line": 10,
+        "endLine": 10
+      },
+      {
+        "function": "packed",
+        "signature": "value",
+        "line": 11,
+        "endLine": 11
+      },
+      {
+        "function": "pin",
+        "signature": "value",
+        "line": 12,
+        "endLine": 12
+      },
+      {
+        "function": "pairs",
+        "signature": "items",
+        "line": 13,
+        "endLine": 16
+      },
+      {
+        "function": "decode",
+        "signature": "raw",
+        "line": 17,
+        "endLine": 19
+      },
+      {
+        "function": "authority",
+        "signature": "a, contract",
+        "line": 20,
+        "endLine": 29
+      },
+      {
+        "function": "finite_join",
+        "signature": "rows, contract, clients, current, controllers, probe",
+        "line": 31,
+        "endLine": 49
+      },
+      {
+        "function": "equivalent",
+        "signature": "rows",
+        "line": 51,
+        "endLine": 52
+      },
+      {
+        "function": "freshness",
+        "signature": "now, readiness, permit",
+        "line": 53,
+        "endLine": 55
+      },
+      {
+        "function": "__init__",
+        "signature": "self, emit, pid=None, ppid=None",
+        "line": 60,
+        "endLine": 61
+      },
+      {
+        "function": "text",
+        "signature": "self, value, maximum",
+        "line": 62,
+        "endLine": 65
+      },
+      {
+        "function": "number",
+        "signature": "self, value, minimum, maximum",
+        "line": 66,
+        "endLine": 69
+      },
+      {
+        "function": "forward",
+        "signature": "self, error",
+        "line": 70,
+        "endLine": 105
+      }
+    ]
+  },
+  "changedEdges": [
+    {
+      "callee": "entry.execute/root_read",
+      "callers": [
+        "verified guard"
+      ],
+      "change": "same outer FailureSink required; immediate bootstrap FD ledger; all close attempts retain unknown references"
+    },
+    {
+      "callee": "run -> Unit.__init__",
+      "callers": [
+        "verified entry.execute",
+        "direct explicitly fake dispatcher checks"
+      ],
+      "change": "same single sink owner registered before validation; external controls still pinned before parse"
+    },
+    {
+      "callee": "System.custody -> Custody.__init__",
+      "callers": [
+        "every runtime custody reader/copier"
+      ],
+      "change": "System.resources strong reference before constructor; Custody.OWNED before first open, FD before first fstat"
+    },
+    {
+      "callee": "Custody.read(expected=)",
+      "callers": [
+        "Unit.bounded_inventory"
+      ],
+      "change": "expected actual FD metadata and remaining/per-file cap; count consumed FD bytes, never enumerated size only"
+    },
+    {
+      "callee": "Custody.copy_from",
+      "callers": [
+        "Unit.copy_tree",
+        "Unit.make_archive four raw artifacts"
+      ],
+      "change": "N-only destination roots, expected source FD key/size/hash/mode and shared entries/actual bytes; no inherited unbounded copier"
+    },
+    {
+      "callee": "Custody.output",
+      "callers": [
+        "write",
+        "copy_from"
+      ],
+      "change": "exclusive opened FD owner/inode before fchmod, then exact original mode/identity before writing under inherited077"
+    },
+    {
+      "callee": "Unit.capture",
+      "callers": [
+        "table",
+        "current identity",
+        "reviewed06 read-only observation hooks"
+      ],
+      "change": "child strong ref immediately after Popen, bounded requested argv; communicate completeness before wait; UNKNOWN retained"
+    },
+    {
+      "callee": "FailureSink.forward",
+      "callers": [
+        "run exception",
+        "same guard final exception path for CLI/postclose"
+      ],
+      "change": "closed typed bounded UNQUALIFIED ROOT_OPERATOR_TOOL_TRACE, same exact embedded definition, deduplicated, no N writes"
+    }
+  ],
+  "exactCurrentInstalledPins": {
+    "failed_gateway.py": "cbc8a9e34b70697227afbde28312ef9e6233f5d147b700e73a2af834fc9311a9",
+    "custody.py": "28734fb5f9c8a53736027b1887fdf5585b3a31cae64d1cae9ac9930bbcb10000",
+    "protocol.py": "7420eefc62e4a5a652a4b35a09b783fd7c7ea378af16a211686ebd6fd78e36b2",
+    "guard-failed-red.bash": "87cad704023ec86ce1bccfaa8680fbf255f04ec06c93e38d2d155de8dc101c84",
+    "contract.json": "f45d5b644d4863158cc6f8d560fd5b4ef55592e6b07baa9d526799dce5abfcee",
+    "entry.py": "da015600c5b620e145f71af45ab4a915260c62369c10f62b1cb4ab16bd757a1e"
+  },
+  "activeSourceDirectory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume2",
+  "futureInstalledDirectory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree03-20261019/failed-red-resource-disposition01",
+  "code01InputsHistoricalOnly": true,
+  "actualOsCompatibilityAndDeliveryUnproved": true
+}

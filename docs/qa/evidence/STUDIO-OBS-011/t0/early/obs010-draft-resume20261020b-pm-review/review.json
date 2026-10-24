@@ -1,0 +1,97 @@
+{
+  "kind": "INDEPENDENT_PM_BOUNDED_CORRECTION_REVIEW",
+  "reviewer": "Morgan / aiox-pm / obs010_pm_review",
+  "reviewedAtUtc": "2026-10-20T03:09:10.215748+00:00",
+  "subject": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020b",
+  "manifestSha256": "834450ec1f7da042d0629cf1d649351c9f8a1006357a75af12cb312a53adfbe5",
+  "SHA256SUMSSha256": "f6b741a8d12503310bb6bd8052d01c73682a5f32f9992a8dbf47fd552bb7ccbb",
+  "decision": "BOUNDED_SOURCE_ONLY_CORRECTION_ACCEPTED_WITH_ALL_RETAINED_CONDITIONS",
+  "mandatoryFindings": [],
+  "correctionRequests": [],
+  "resolvedFinding": {
+    "id": "PM010-R1-LANE-LOCATORS",
+    "state": "RESOLVED_FOR_THIS_DOCUMENTARY_SUCCESSOR_ONLY",
+    "basis": "Three required R1 lane/rule locators now present in KL015R1 row and map, exact sections/pins verified; pending independent009QA/G9 R1a-d and receipts-alone-no-closure text unchanged.",
+    "sourceLocators": [
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/b/receipt.md",
+        "section": "6. ACs covered (local half) and owed",
+        "line": 112,
+        "coverage": "R1 a\u2013c",
+        "run": "obs009-b-04",
+        "sha256": "efc1d9b44d91e12abb362edd30f4a485358b294fe0a9c8321235a2d12b416c51",
+        "bytes": 22031
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/b/w3/receipt.md",
+        "section": "6. ACs covered and owed",
+        "line": 61,
+        "coverage": "R1 d",
+        "run": "obs009-b-w3-04",
+        "sha256": "95526656447359aa1271c459cb9e4fcd3331657d8fbd08b7d157f76b33544525",
+        "bytes": 16571
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w1.5/ruling-part2.md",
+        "section": "1.4 Tests for lane B (`GuidedEvidencePendingAppendIT`, the PR-BE baton)",
+        "line": 68,
+        "coverage": "R1 rule \u00a71.4",
+        "sha256": "f2529751ddc5448ce27bd58fbae389e91b906e4366b0cae5d2e3e6e54c0a623f",
+        "bytes": 18736
+      }
+    ]
+  },
+  "inheritedConditionsExactFullReferences": [
+    {
+      "kind": "PM",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-pm-review-r2/review.md",
+      "sha256": "6514aaa296d8b3e22b7894b143a4b8bb5b22764db594543dace4d1c17b02b9f0",
+      "section": "Complete retained conditions",
+      "conditionIds": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10",
+        "C11",
+        "C12",
+        "C13",
+        "C14"
+      ],
+      "manifestPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-pm-review-r2/manifest.json",
+      "manifestSha256": "eaee5ca0e9968e7b116b223ce18147226680e148d3ab95f076ae8d810e17be75",
+      "allRetained": true,
+      "historicalOutcomeNotTransferred": true
+    },
+    {
+      "kind": "QA",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-qa-review/review.md",
+      "sha256": "3b0c2b0fd99f0317d62af439026f69335a94abcb4c65ee4aaef62c4fe1113fd2",
+      "section": "Complete retained conditions",
+      "conditionItems": "1\u201310, all ten in full",
+      "manifestPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-qa-review/manifest.json",
+      "manifestSha256": "ca4df79a360902a11db42d0d251d268bd71ad4fd700e4864f04ce1faff2ed3bd",
+      "allRetained": true,
+      "historicalOutcomeNotTransferred": true
+    }
+  ],
+  "scope": "Only affected citation, own-packet path/hash/patch bindings and historical-context classification newly reviewed; exact unaffected old conclusions reused as historical source/document assessment after comparison and pin verification.",
+  "reuseLimits": "No broad repeat implementation/source audit or project tests. Prior PM HOLD and QA scoped acceptance remain immutable records for predecessor; new changed-byte acceptance is supplied here only. No actual R1 proof credited.",
+  "contextClassification": "Immutable captured coordinator snapshot is HISTORICAL_CONTEXT_ONLY_NON_NORMATIVE with raw origin/time/hash/bytes. Original bf4059 plan hash is historical provenance only; old unavailable bytes not reconstructed; no live-origin read or future live-plan-byte-stability approval condition.",
+  "isStoryQaGate": false,
+  "isFormalProductAcceptance": false,
+  "isReleaseApproval": false,
+  "authorizesApplication": false,
+  "authorizesSourceWindow": false,
+  "authorizesRuntimeOrResourceAction": false,
+  "lifecycleChanged": false,
+  "projectTestsOrBuildsRun": false,
+  "targetWrites": false,
+  "onlyNewReviewDirectoryWritten": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020b-pm-review",
+  "remainingState": "009/010/011 gates remain owed; actual29815 restoration/closure separately blocked; no new runtime/resource grant. Fresh backend check+JaCoCo before011 credit and final affected suites owed; C8/GST parked; all external/pilot/release gates and user deferrals retained."
+}

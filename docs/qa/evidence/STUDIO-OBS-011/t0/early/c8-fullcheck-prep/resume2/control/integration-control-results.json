@@ -1,0 +1,241 @@
+{
+  "status": "PURE_ACTUAL_INTEGRATION_BOUNDARIES_PASS",
+  "count": 46,
+  "controls": [
+    {
+      "control": "repeated-context-green-native-boundary",
+      "expected": "ACCEPT",
+      "observed": "ACCEPT"
+    },
+    {
+      "control": "repeated-context-successful-compile-boundary",
+      "expected": "ACCEPT",
+      "observed": "ACCEPT"
+    },
+    {
+      "control": "41-context-then-one-FAILED-native-pair",
+      "expected": "ACCEPT",
+      "observed": "ACCEPT"
+    },
+    {
+      "control": "41-context-FAILED-cannot-be-green",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "failed-native-then-distinct-real-compile0-pair",
+      "expected": "ACCEPT",
+      "observed": "ACCEPT"
+    },
+    {
+      "control": "header-alone-is-not-build-completion",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "success-marker-with-nonzero-native",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "missing-required-task",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "explicit-FAILED-compile-not-success",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "explicit-SKIPPED-compile-not-success",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "explicit-UP-TO-DATE-compile-not-success",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "explicit-FROM-CACHE-compile-not-success",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "explicit-NO-SOURCE-compile-not-success",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "header-after-terminal",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "repeated-terminal",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "conflicting-terminal",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "unknown-status",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "wrong-assessor-source-pin",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "wrong-task-event-proof",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "clean-module-real-loader-and-coverage-API",
+      "expected": "ACCEPT",
+      "observed": "ACCEPT"
+    },
+    {
+      "control": "poisoned-cache-and-global-import-trap-ignored",
+      "expected": "ACCEPT",
+      "observed": "ACCEPT"
+    },
+    {
+      "control": "missing-inventory",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "tampered-inventory",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "unbound-inventory",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "wrong-inventory-pin",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "tampered-checker",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "swapped-sibling",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "current-before-archive-real-schema-crosslinks",
+      "expected": "ACCEPT",
+      "observed": "ACCEPT"
+    },
+    {
+      "control": "physical-manifest-drift",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "coherent-current-incomplete-inventory-hard-HOLD",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "manifest-inventory-mismatch",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "precopy-original-vs-archive-original-drift",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "current-xml-fact-hash-drift",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "dynamic-original-facts-drift",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "static-report-path-drift",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "preserved-proof-coverage-link-drift",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "missing-physical-manifest",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "same-loaded-manifest-current-recheck-detects-drift",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "known-failed-no-current-report-zero-body-zero-ratio",
+      "expected": "ACCEPT",
+      "observed": "ACCEPT"
+    },
+    {
+      "control": "blocked-current-old-metadata",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "blocked-unstable-metadata",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "blocked-copied-body",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "blocked-ratios-forbidden",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "blocked-not-actual-Test-failure",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "assessment-evidence-hard-not-qualifiable",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    },
+    {
+      "control": "prior-owned-gap-hard-not-qualifiable",
+      "expected": "HOLD",
+      "observed": "HOLD"
+    }
+  ],
+  "pinnedReducerAstExact": true,
+  "actualPurePairLoaderAndCoverageAPIExercised": true,
+  "actualGatePacketProducerObserverOrOSMainExecuted": false,
+  "actualRuntimePrivateNativeSourceAction": false,
+  "readinessOrRelease": false
+}

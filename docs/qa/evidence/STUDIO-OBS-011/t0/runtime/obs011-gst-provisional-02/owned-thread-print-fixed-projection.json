@@ -1,0 +1,24 @@
+{
+  "rawSha256": "1a6a5084cfd1b1aecc2373a6cc58dab402a7be7407dfcd1963607c939eddf93e",
+  "candidateSourceSha256": "9e9aef4355a151d6a6d9959af129ef2e8267b4b0d6596fecd296e4669da01878",
+  "fixedCandidateFramesOnly": [
+    {
+      "fixedCandidateFrame": "SourceStopOwner.drainUninterruptibly",
+      "sourceLine": 3435
+    },
+    {
+      "fixedCandidateFrame": "attemptGuidedCutCleanup",
+      "sourceLine": 2998
+    },
+    {
+      "fixedCandidateFrame": "runGuidedControllerCut",
+      "sourceLine": 2951
+    },
+    {
+      "fixedCandidateFrame": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost",
+      "sourceLine": 2607
+    }
+  ],
+  "stackSnapshotDoesNotProveFullHistoryOrCause": true,
+  "otherRawBodyReleased": false
+}

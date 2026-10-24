@@ -1,0 +1,23 @@
+{
+  "actualExit": 1,
+  "vitest": {
+    "success": false,
+    "numPassedTests": 295,
+    "numFailedTests": 1,
+    "numPendingTests": 9,
+    "numTotalTests": 305,
+    "numPassedTestSuites": 49,
+    "numFailedTestSuites": 1
+  },
+  "publicFailedCases": [
+    {
+      "file": "test/fixtures-tier/native-blank-surface-controls.test.ts",
+      "fullName": "exact native blank classifier rejects actual 'chrome://version/' at 800 x 600 separately",
+      "status": "failed",
+      "publicFailureFirstLine": "Error: CONTROL_READINESS"
+    }
+  ],
+  "acceptedSandboxDistPreserved": true,
+  "actualRootInputDistStable": true,
+  "runningJobs": false
+}

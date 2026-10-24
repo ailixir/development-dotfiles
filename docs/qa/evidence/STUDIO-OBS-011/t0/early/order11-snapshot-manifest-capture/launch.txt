@@ -1,0 +1,5 @@
+UNEXECUTED. After independent exact package and actual-scope approval only, from repository root:
+
+PYTHONDONTWRITEBYTECODE=1 python3 docs/qa/evidence/STUDIO-OBS-011/t0/early/order11-snapshot-manifest-capture/capture_snapshot.py --expected-authorization-sha APPROVED_AUTHORIZATION_FILE_SHA256 --expected-root-approval-sha APPROVED_ROOT_FILE_SHA256 --expected-quinn-approval-sha APPROVED_QUINN_FILE_SHA256
+
+FIRST operation should use optionalCorrelation=false/journalAuthority=NONE in the independently approved scope. No current release or private read is authorized. Packet construction: PACKET-CONSTRUCTION.md. No retry/output override argument exists. Synthetic-only validation (not release): PYTHONDONTWRITEBYTECODE=1 python3 docs/qa/evidence/STUDIO-OBS-011/t0/early/order11-snapshot-manifest-capture/contracts.py

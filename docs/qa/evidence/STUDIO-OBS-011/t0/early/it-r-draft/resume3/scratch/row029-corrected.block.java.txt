@@ -1,0 +1,105 @@
+{
+      // IT-R POLL 29: exact original transitions; one old interval owed at most.
+      final var itrRead029_until = until;
+      class ItrState029 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
+      final var itr029 = new ItrState029();
+      
+      java.util.concurrent.Callable<Boolean> itrPoll029 = () -> {
+        if (itr029.firstException != null) throw itr029.firstException;
+        if (itr029.firstError != null) throw itr029.firstError;
+        if (itr029.terminal) return true;
+        try {
+        if (itr029.intervalOwed) {
+          if (Thread.interrupted()) throw new InterruptedException();
+          if (Clock.nanoTime() < itr029.owedUntil) return false;
+          itr029.intervalOwed = false;
+        }
+        if (!(!INCREMENTAL_DRIFT_CAPTURE.containsKey(id))) { itr029.terminal = true; return true; }
+        itr029.firstIteration = false;
+        assertThat(Clock.nanoTime()).isLessThan(itrRead029_until);
+      itr029.intervalOwed = true; Clock.startElapsed(); itr029.owedUntil = Clock.nanoTime() + Duration.ofMillis(10).toNanos();
+        return false;
+        } catch (Exception itrFailure029) {
+          if (itr029.firstException == null && itr029.firstError == null) {
+            itr029.firstException = itrFailure029; itr029.terminal = true;
+          }
+          throw itr029.firstException;
+        } catch (Error itrFailure029) {
+          if (itr029.firstException == null && itr029.firstError == null) {
+            itr029.firstError = itrFailure029; itr029.terminal = true;
+          }
+          throw itr029.firstError;
+        }
+      };
+      try {
+        while (!itr029.terminal) {
+          // First invocation is manual. Reentry serves only the original pending transition.
+          boolean itrDone029 = itrPoll029.call();
+          if (itrDone029) break;
+          if (Thread.interrupted()) throw new InterruptedException();
+          if (noAwaitGap) { Clock.advance(1_000_000_000L); noAwaitGap = false; }
+long itrNow029 = Clock.nanoTime();
+          long itrRemaining029 = itrRead029_until - itrNow029;
+          long itrOwed029 = itr029.intervalOwed ? itr029.owedUntil - itrNow029 : 0;
+          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
+          long itrBound029 = Math.max(itrRemaining029, itrOwed029); if (itrBound029 <= 0) noAwaitPathObserved = true;
+          if (itrBound029 > 0) {
+            final boolean[] itrFirstTick029 = {true};
+            try {
+              final long probeChainStarted029 = System.nanoTime();
+org.awaitility.Awaitility.await("ReplayIT POLL 29")
+                  .atMost(Duration.ofNanos(itrBound029))
+                  .pollInterval(Duration.ofMillis(10)).pollDelay(Duration.ZERO)
+                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
+                  .until(() -> {
+                    try {
+                    if (itr029.firstException != null) throw itr029.firstException;
+                    if (itr029.firstError != null) throw itr029.firstError;
+                    if (itr029.terminal) return true;
+                    if (Thread.interrupted()) throw new InterruptedException();
+                    if (itrFirstTick029[0]) {
+                      itrFirstTick029[0] = false;
+                      probeIntervalEntered.countDown(); return false; // Cached tick: no second immediate condition/read/effect.
+                    }
+                    boolean itrObserved029; try { itrObserved029 = itrPoll029.call(); } finally { if (scenario.startsWith("LATE_")) { lateCallbackEntered = true; lateCompletionBeyondBound = System.nanoTime() - probeChainStarted029 > itrBound029; } }
+                    if (!itrObserved029 && Thread.interrupted()) throw new InterruptedException();
+                    return itrObserved029;
+                    } catch (Exception itrFailure029) {
+                      if (itr029.firstException == null && itr029.firstError == null) {
+            itr029.firstException = itrFailure029; itr029.terminal = true;
+          }
+                      if (itr029.firstError != null) throw itr029.firstError;
+                      throw itr029.firstException;
+                    } catch (Error itrFailure029) {
+                      if (itr029.firstException == null && itr029.firstError == null) {
+            itr029.firstError = itrFailure029; itr029.terminal = true;
+          }
+                      if (itr029.firstException != null) throw itr029.firstException;
+                      throw itr029.firstError;
+                    }
+                  });
+            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout029) {
+              if (itr029.firstException != null) throw itr029.firstException;
+              if (itr029.firstError != null) throw itr029.firstError;
+              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
+            }
+          }
+          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
+        }
+      } catch (Exception itrFailure029) {
+        if (itr029.firstException == null && itr029.firstError == null) {
+            itr029.firstException = itrFailure029; itr029.terminal = true;
+          }
+        if (itr029.firstError != null) throw itr029.firstError;
+        throw itr029.firstException;
+      } catch (Error itrFailure029) {
+        if (itr029.firstException == null && itr029.firstError == null) {
+            itr029.firstError = itrFailure029; itr029.terminal = true;
+          }
+        if (itr029.firstException != null) throw itr029.firstException;
+        throw itr029.firstError;
+      } finally {
+        
+      }
+      
+    }

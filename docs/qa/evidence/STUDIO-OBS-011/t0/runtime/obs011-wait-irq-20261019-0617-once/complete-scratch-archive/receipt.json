@@ -1,0 +1,43 @@
+{
+  "scope": "CONFORMANCE-I1 scratch only; native gates and original234 comparisons remain separate",
+  "status": "OBSERVABLE_PROBE_PASS",
+  "sourceSha256": "8a3f05da3a3b5565758705ae70ba0f42f82d1c3ff0a9977fa92eeac1c3b21048",
+  "bindingsSha256": "c12176d573e311776bf4e6f112871b4d1e5d13053a63845b5b52a38d812b6174",
+  "java21Home": "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home",
+  "java21ReleaseSha256": "c0396ee69271e1a2c323e62c7d38dfd94206acab6def9b3ab6a99f7d75ce509a",
+  "phases": [
+    {
+      "command": [
+        "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home/bin/javac",
+        "-g:lines,source",
+        "-encoding",
+        "UTF-8",
+        "-cp",
+        "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.awaitility/awaitility/4.2.2/7336242073ebf83fe034e42b46a403c5501b63c9/awaitility-4.2.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.assertj/assertj-core/3.25.3/792b270e73aa1cfc28fa135be0b95e69ea451432/assertj-core-3.25.3.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest/2.2/1820c0968dba3a11a1b30669bb1f01978a91dedc/hamcrest-2.2.jar",
+        "-d",
+        "/private/tmp/obs011-wait-irq-20261019-0617-once",
+        "/private/tmp/obs011-wait-irq-20261019-0617-once/WaitIrqConformance.java"
+      ],
+      "maximumSeconds": 30,
+      "exit": 0
+    },
+    {
+      "command": [
+        "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home/bin/java",
+        "-cp",
+        "/private/tmp/obs011-wait-irq-20261019-0617-once:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.awaitility/awaitility/4.2.2/7336242073ebf83fe034e42b46a403c5501b63c9/awaitility-4.2.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.assertj/assertj-core/3.25.3/792b270e73aa1cfc28fa135be0b95e69ea451432/assertj-core-3.25.3.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest/2.2/1820c0968dba3a11a1b30669bb1f01978a91dedc/hamcrest-2.2.jar",
+        "WaitIrqConformance",
+        "/private/tmp/obs011-wait-irq-20261019-0617-once/owned-interval-proof.log"
+      ],
+      "maximumSeconds": 60,
+      "exit": 0
+    }
+  ],
+  "elapsedSeconds": 1.7932386661414057,
+  "proofSha256": "6f26a344d9118e3a2e758fc2d3d99486ee8134220784482c2316480232f4b84e",
+  "proofChecksPassed": true,
+  "sourceApplied": false,
+  "automaticRetry": false,
+  "nativeGateCredit": false,
+  "timingIdentityClaim": false
+}

@@ -1,0 +1,121 @@
+# Source06 operator recipe; inert source preparation only
+
+RUNTIME-RECIPE.md and SOURCE03-DECISIONS.md are the complete current source06 contract.
+All actual source/native/platform/auxiliary authority remains unbound. The following separate
+operator phases retain the original one-case and restoration protocol; source06 adds the
+root relay and its mandatory qualification/ownership/receipt checks described there.
+
+1. Independent exact Aria and Quinn code/privacy review must bind this sealed Replay pre/postimage, patch, producer, schema, collector, controller, guard, tests and recipe. Java and Bash have not been compiled or run here. Review the one rawSocket/TLS exchange,12/14/15s envelope and root-owned bounded DATA/ACK/COMMIT relay explicitly. Ordinary fixture private retention/hooks remain unchanged and sealed; this is not a zero-artifact claim.
+2. The real effects/CLI adapter must be implemented and independently reviewed with faithful blocked tests. Bind exact fresh source-plan/catalog/mode facts, reviewed code/data bytes, runtime whitelist/custody, utility binaries, canonical Python launch/reported/process/argument roles, Java21, Node24 and immutable wrapper. Do not import or run an old helper main. The accepted ownership core may be reused only through a verified same-buffer AST extraction and the existing DEVNULL-only child-stdin adaptation; preserve conservative census-before-identity, sticky Java and every BaseException-finally drain branch. Old core fingerprint/readers need the current reviewed strict MAC Python-role/anchored-census/client-accounting adapters, never an old unchecked loader.
+3. Proper Gateway closure/postclose and its root disposition must precede this unit. Aria/Quinn/root must issue the exact limited temporary Replay lease and non-IR classification, explicitly qualifying qa/b1-terminal finalstep6, withheld T0/W1 signature/root731a, current zero-writer C8 scope and pre-F1 Replay immutability solely for this new observation/restore/compile unit. Pax concurrence remains necessary wherever an adopted condition applies. No actual certification is supplied here. If literal work is IT-R scoped, stop for its existing clock/cap prerequisites; the label does not exclude IR by itself.
+4. Root separately verifies a fresh exclusive source lease, fixed source1808/main506/dist238/modes, auxiliary/tools/cache facts, no competing native/source job and genuinely unused unit/output paths. Root then binds a NEW immutable one-unit release and starts a NEW immutable-wrapper interactive Bash hold. Current source remains f9c; the virtual candidate digest 3a6fddda4946106f143783640746464cf2c775256f2340b9d24d1a4701adadbd is derived solely from the accepted plan's one Replay-row substitution, not an actual capture. Use no consumed C8 hold or historical controller PID.
+
+## Actual sequence, if separately released later
+
+Every numbered action below is a distinct operator/root decision, never a queued command batch. Each foreground command inherits `/dev/null`, reaches its actual prompt, and has its actual `$?` captured in a **separate** PTY call before any next phase. Root inspects typed receipts, current source/resource facts and sticky flags after every action. No background launch, automatic next phase, retry, signal, timeout-to-success conversion, lock bypass or private fallback is authorized.
+
+1. Root creates only the newly bound0700 runtime directory and explicitly enumerated0600 implementation/data/input records. Preserve exact Replay preimage/mode in the new source backup. All runtime paths/ancestor handles/name/mode/uid/code buffers are checked with no-follow custody. The public output must be absent. Install the new immutable release and active-lock pin; do not fabricate starts/inodes/PIDs. The Java observer has one fixed public output path, so changing the label/path requires a separately reviewed new candidate.
+2. In the SAME newly held shell, source `guard-public-observe.bash` with actual release SHA, exact canonical Python launch path, actual new CLI adapter absolute path and its SHA. Capture setup status separately; inspect readonly guard/body/bindings plus exact loader/adapter hash. The guard's loader reads the concrete adapter through no-follow ancestor descriptors and executes only the same hash-verified buffer. A failed setup still leaves the installed HOLD-capable readonly exit function. No product/native phase follows uncertain setup.
+3. With readiness and permit absent, invoke `exit 1 entry-NNNN-pins.json ENTRY_RAW_SHA` alone. Require actual denial/nonzero, a returned prompt, separate actual status1, immutable negative client/utility record, and a separate successful held proof of the SAME wrapper/shell PID+start/argv, same descriptor/device/inode and held kernel lock. That proof must include unchanged preimage/source and all current verification clients/utilities. Root separately admits source/native only after inspecting the entire chain.
+4. Separately authorize `stage` through the future adapter/controller. Prove exact Replay b8b10df4/mode0644, accepted wholef9c/modes/main/dist/aux and source lease before writing. Install only Replay.postimage.java at mode0644, then prove full one-path virtual-candidate/source/mode equality. No formatter or other source mutation is part of this stage. A write failure is HOLD; restore only proven owned pre/post bytes under a separately inspected root decision.
+5. Root separately authorizes **one** `selected` phase. It claims an exclusive consumed marker before setup/admission/native. Its sole underlying argv, from backend, is:
+
+   `./gradlew test --tests com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedWrongPasswordAnnotatesEarlierSecretFill --rerun-tasks --no-daemon`
+
+   Launch only via the freshly bound owned-native adapter. Preserve original4000 task configuration, all normal dependencies, verifyRunnerDist and retainOriginalGuidedCohort finalizer. Source inspection shows test's finalizer checks one cohort/run and guard-tally consistency, not the full46 count; this is source evidence, not an observed task graph. The actual selected graph/invocations still must be independently accounted. Java Testcontainers setup may fail independently of CLI cached-image availability. No build/profile/fixture seed/credential/budget alteration, Docker pull/retag, offline flag, full-class replacement or retry is allowed. Setup, compile, no-tests, interruption, observation or native failure consumes the attempt.
+6. After true foreground termination and owned conservative drain, capture actual native/collector/outer phase statuses separately. Collect only the one fixed new public observation file through the new adapter's exact public-file reader, using its sealed producer schema and root-bound postimage/schema/collector/release pins. No directory discovery or other payload is accepted. The collector requires one exact closed record; zero is UNAVAILABLE, multiple records AMBIGUOUS, malformed/unmodeled inputs INVALID/UNKNOWN. Separately collect exactly one selected JUnit task/class/name invocation/zero skip and normal AfterEach/class teardown/retention/six public lifecycle flags. No failure text/system streams/private artifacts are read to obtain a cause. Missing metadata stays HOLD; the tuple cannot alter native status.
+7. Root separately authorizes exact source restoration after proving no live native writer and ownership of the current pre/post bytes. Restore Replay.preimage.java b8b10df4 byte-for-byte and mode0644, all other1807 source records/modes exact, full f9c, main506/dist238/aux exact under the same lease. No observer source is retained, even if the case passed. Preserve archived candidate bytes and failed native evidence; no private body reads or cleanup are involved.
+8. Only after separately inspecting successful restoration, root may authorize **one** compile-restored phase, from backend:
+
+   `./gradlew compileTestJava --rerun-tasks --no-daemon`
+
+   Its exact task graph invokes no tests. The new owned adapter again accounts every native child/client/utility, true terminal status and sticky flags, and proves same original source before/after. Require actual compileTestJava executed SUCCESS, BUILD SUCCESSFUL and actual compile0 for normal closure. Any compile failure/setup/no-task/observation failure consumes this sole compile and keeps custody HOLD. Do not reuse check01's no-compile failed-resource exception. A necessary failed-resource disposition would require its own exact independent architecture/QA/root authority.
+9. Independently review actual selected/observer/restore/compile receipts and limits; root chooses the explicit expected wrapper exit. Selected native1 remains failed and wrapper1. Missing/unqualified public evidence, failed accounting or other failed phase requires nonzero disposition; no tuple produces C8/source/lane credit. No gap can be silently cleared. A normal close requires complete current source/compile/resource proof; a gap requires a separately reviewed new disposition.
+10. Run standalone final verification through the new adapter/controller, with no permit. Require actual0, two fresh complete anchored source/resource/client observations and immutable readiness. Capture actual status0 separately and inspect all facts/hashes. Only then, in a **separate root decision**, create the exact readiness-hash-bound one-exit permit, actual expected0/1, release/lock/evidence pins, no credit and issued time. The template is UNRELEASED; no such permit exists from this packet.
+11. Invoke only the explicit guarded `exit 0 entry-NNNN-pins.json ENTRY_RAW_SHA` or `exit 1 entry-NNNN-pins.json ENTRY_RAW_SHA` selected above. The gate freshly checks both observations, source originalf9/modes, successful restored compile/evidence/review, all recorded/prior client identities/utility waits, same holder and kernel lock and readiness age0..60 seconds **before and after** current checks. Only gate0 reaches the readonly function's builtin exit. On HOLD remain in the same shell. No direct builtin/exec/EOF/signal, automatic freshness refresh or retry is part of this recipe.
+12. Capture the outer wrapper's actual exit from the tool result separately; an exited shell cannot supply another `$?`. Root binds that result to the exact guard-allow. Then run a separate outer postclose proof, require actual0, same inode/free kernel, absent or start-qualified-reused controllers, inherited six unchanged, scoped owned/prior clients resolved and sourcef9/restored compile evidence. Its current checker is discharged by the actual outer waited tool0, not recursive invented checkers. Independent actual closure QA/root adoption follow before any next unit.
+
+## Interpretation and stop
+
+FINALIZING produces NOT_REPRODUCED with no public request, then the original case continues. For a captured same-owned FAILED result, an allowlisted code is a public boundary reported in this new invocation; it does not prove the original check01 cause, assertion-time atomicity, failed guard data, bootstrap/action phase, fixture/product defect or remedy. A state mismatch preserves only the closed two states with UNKNOWN/unqualified code. EXPIRED/CANCELLED/UNKNOWN_OUTCOME are different new outcomes. Any absent/null/OTHER/unmodeled code stays UNKNOWN. Never infer a private stage from progress.activeStep.
+
+End after this single bounded tuple or honest UNKNOWN and exact restoration/compile/proper closure. Do not automatically ask another endpoint question, inspect private metadata, rerun, implement a remedy, amend F1/TEST001/stages/mutations/baton, release general W1/main, grant IR/lane/lifecycle credit or mark C8 green. The original full-check failure, Checkstyle failure, skip mismatch, absent coverage/ratios and historical ownership/observation limits remain unchanged. All21 external inputs remain external. Aggregate USD500 spending is unknown; no new budget is fabricated.
+
+## Source06 mandatory independent entry pins
+
+Each CLI entry takes `MODE RELEASE_SHA entry-NNNN-pins.json ENTRY_RAW_SHA [STATUS]`.
+The operator first creates a new immutable root-authored entry pin record and independently
+inspects its exact raw SHA. It binds the exact release, CLI mode, and every existing control
+JSON/client/utility/observation/native/drain/phase/result/admission/collection/disposition/
+readiness/permit/wrapper journal. It includes active-lock and prior entry pin documents,
+excludes itself, root-release (already explicit RELEASE_SHA), and installed artifact JSON
+(already release-pinned). No wildcard, directory-derived grant, first-read self-pin, stale
+control hash, next-entry alias, or reciprocal release/active hash is valid. Root must account
+all actual results/clients/utilities before binding the next entry; an unexpected JSON member
+or missing independent pin denies before any existing control JSON interpretation.
+
+For the negative gate use `exit 1 entry-NNNN-pins.json ENTRY_RAW_SHA`; for the final gate use
+`exit EXPECTED_STATUS entry-NNNN-pins.json ENTRY_RAW_SHA`. The readonly loader forwards these
+explicit arguments. Guard setup arguments remain the four exact release/Python/adapter/hash
+bindings. Held proof additionally has literal final argument1; all other modes have no status.
+Never invoke an unpinned CLI entry.
+
+The selected cap is claimed before all setup. Only the exact newly claimed, externally
+authorized selected client can have AUTHORIZED_PENDING_SETUP: same claim identity/hash,
+root-selected decision external pin, no relay/native/terminal records, no relay or receipt.
+Actual current/source/inherited/resource checks remain fresh. Setup immediately ends this
+state; partial, live, terminal, later-client and unresolved cases require their real receipts.
+No future selected-drain is fabricated. No retry or allowance reset exists.
+
+Main discharges output/control custody only when no relay exists or actual thread termination
+and descriptor closes are confirmed. Unresolved READY/serve/fsync/stop/BaseException paths
+retain Effects, thread, output, control, authority and descriptor references plus a closed
+partial receipt. No cross-thread force-close, cleanup, fake drain or generic recovery follows.
+Actual joined closure or a separately reviewed exact disposition is required to discharge.
+
+All nine ordinary entries (including outer postclose) must execute the exact reviewed common
+`entry-loader.py.txt` literal using canonical Python `-B -c`, followed by the exact adapter
+absolute path, independently inspected adapter SHA, MODE, RELEASE_SHA, entry pin basename,
+independently inspected entry SHA and optional literal STATUS. This loader is byte-identical
+to the readonly guard loader. Copy the reviewed loader literal through the independently
+pinned root/operator action; never evaluate an unverified file read, shell substitution,
+ordinary adapter-path import or old main. It verifies no-follow adapter custody and hashes
+the exact buffer before compile; only then may the concrete adapter read independently
+pinned release/entry controls. The source text is not a thirteenth installed member.
+
+## Retained bootstrap and assigned-resource corrections
+
+The common guard/ordinary/postclose loader uses explicit non-removable if/raise checks for
+arguments, mode, path, owner/mode/size/read stability and raw SHA before adapter compilation.
+It makes the same decisions when compiled normally or optimized. No runtime environment,
+Python optimization configuration or operator mode is changed by this source preparation.
+
+The relay owns canonical close outcomes for every actually acquired connection, listener,
+selector, short custody and parent custody. Complete descriptorsClosed remains false until
+all those closes and the actual bounded thread join are confirmed. A custody-check or stop
+exception updates the actual owned state before publishing the drain; copying a failure
+cannot leave stale true flags eligible for main discharge. Partial/unknown resources retain
+Effects/control/output/relay/thread/authority references. A fully closed failed native or
+protocol result still permits clean custody teardown while preserving its failed disposition.
+Only these two source finding categories change; all prior scopes and gates remain binding.
+
+## Source06 acquisition ownership is required before validation or factory transfer
+
+The invocation Ownership ledger exists before load's first custody factory. Every custody
+object is registered before opening, and every successful directory/file open is immediately
+registered by a distinct token before fstat/validation/next acquisition. Failed/unreturned
+constructors, temporary files, transferred sink handles and early bootstrap owners remain
+reachable. OPEN/TRANSFERRED permit one explicit close, CLOSED is confirmed and never reclosed,
+UNKNOWN is unconfirmed and cannot be retried by bare descriptor number. Reused descriptor
+numbers get distinct acquisition tokens; the old UNKNOWN token cannot be cleared by reuse.
+
+Relay complete closure additionally requires the explicit invocation ledger view to be clear.
+Only the two validated caller control/output directory owners are borrowed; their temporary
+files, unknown closes and failed owners are never exempt. Main wraps load itself, and load
+wraps both factories. Partial bootstrap or transient-close failure retains the actual ledger,
+Effects when present, caller custody, authority, relay and failed-acquisition references.
+A directory chain alone is not complete closure. Clean fully closed failed operations still
+may discharge caller custody while their failure and all later actual gates remain intact.
+The common loader has its own immediate bootstrap acquisition/close records before adapter
+interpretation. Any UNKNOWN bootstrap close denies compile in both normal and optimized mode.
+No current output permission, source window, automatic retry, actual-close claim or cleanup.

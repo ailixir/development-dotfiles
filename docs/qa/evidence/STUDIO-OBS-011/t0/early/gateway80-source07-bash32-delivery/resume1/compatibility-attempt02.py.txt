@@ -1,0 +1,57 @@
+"""One fixed Bash3.2 builtin-only transport batch. No target code is evaluated."""
+from pathlib import Path
+import hashlib,json,re,shlex,subprocess
+HERE=Path(__file__).absolute().parent
+PINS=json.loads((HERE/'input-pins.json').read_bytes())
+ROWS=PINS['deliveries']
+def sha(raw):return hashlib.sha256(raw).hexdigest()
+def prefix(row):
+ old=Path(row['oldHelperPath']).read_bytes();new=(HERE/row['newHelper']).read_bytes()
+ assert sha(old)==row['oldHelperSha256'] and sha(new)==row['newHelperSha256']
+ assert old.replace(b'LC_ALL=C builtin read -r -N ',b"IFS= LC_ALL=C builtin read -r -d '' -n ")==new
+ source=new.decode('ascii').splitlines(True)
+ stop=next(i for i,line in enumerate(source) if line.startswith("if '/opt/homebrew/") or line.startswith("'/opt/homebrew/"))
+ value=''.join(source[:stop]);assert 'builtin eval' not in value and '-B -c' not in value
+ line=next(x for x in source[:stop] if 'IFS= LC_ALL=C builtin read' in x)
+ match=re.search(r"-n ([0-9]+) ([A-Z0-9_]+) < ",line);assert match
+ cap=int(match[1]);buffer=match[2];status=re.search(r'else ([A-Z0-9_]+)=\$\?; fi',line)[1]
+ assert cap==row['payloadBytes']+1 and 'readonly '+buffer in value
+ return value,cap,buffer,status
+def program(value,buffer,status):
+ return 'set -- '+shlex.quote('0'*64)+' INERT_UNISSUED_REQUEST\ntransport() {\n'+value+'\nreturn 0\n}\ntransport "$@"\ntransport_status=$?\n'+(
+  "builtin printf 'FR07_READER_VERSION=%s\\nFR07_PID=%s\\nFR07_PPID=%s\\nFR07_READ_STORED_STATUS=%s\\nFR07_BYTE_COUNT=%s\\nFR07_TRANSPORT_STATUS=%s\\nFR07_TARGET_ENTRY_CALLS=0\\nFR07_STOP_BEFORE_TARGET=YES\\nFR07_DATA_BEGIN\\n' \"$BASH_VERSION\" \"$$\" \"$PPID\" \"${STATUS-READ_SUCCESS_BRANCH}\" \"${#BUFFER}\" \"$transport_status\"\n"
+  "builtin printf '%s' \"$BUFFER\"\nexit \"$transport_status\"\n").replace('STATUS',status).replace('BUFFER',buffer)
+def main():
+ cases=[]
+ for index,row in enumerate(ROWS):
+  raw=Path(row['payloadPath']).read_bytes();assert sha(raw)==row['payloadSha256'] and len(raw)==row['payloadBytes']
+  value,cap,buffer,status=prefix(row);cases.append(dict(id='payload_'+str(index+1),program=program(value,buffer,status),expected=raw,expectedStatus=0,kind='EXACT_UNCHANGED_PUBLIC_PAYLOAD',readerBinding=row['newHelper']))
+ base=b' \t leading\\literal\nsecond line\ntrailing \t\n'
+ for name,raw,want in [('whitespace_eof',base,0),('truncated',base[:-1],1),('extra_byte',base+b'X',1),('nul',base[:7]+b'\0'+base[8:],1)]:
+  fixture=HERE/('fixture-'+name+'.bin');fixture.write_bytes(raw)
+  row=ROWS[0];value,cap,buffer,status=prefix(row)
+  value=value.replace(shlex.quote(row['payloadPath']),shlex.quote(str(fixture)))
+  value=value.replace('-n '+str(cap)+' ','-n '+str(len(base)+1)+' ').replace('== '+str(row['payloadBytes'])+' ]]','== '+str(len(base))+' ]]')
+  assert str(fixture) in value and '-n '+str(len(base)+1)+' ' in value
+  cases.append(dict(id=name,program=program(value,buffer,status),expected=raw,expectedStatus=want,kind='FINITE_INERT_SCRATCH_READER_CONTROL',readerBinding='metadata reader with only fixture path/cap/expected length substituted'))
+ assert len(cases)==8
+ results=[]
+ for case in cases:
+  path=HERE/(case['id']+'.attempt02.actual-bash32.bash');path.write_text(case['program'])
+  # Absolute approved Bash only. Empty startup/path environment; program contains
+  # builtins, public/scratch file redirection and a stop before ALL target calls.
+  child=subprocess.run(['/bin/bash','--noprofile','--norc','-c',case['program']],env={'PATH':'','BASH_ENV':'','ENV':'','LC_ALL':'C'},stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False)
+  (HERE/(case['id']+'.attempt02.stdout')).write_bytes(child.stdout);(HERE/(case['id']+'.attempt02.stderr')).write_bytes(child.stderr)
+  assert len(child.stdout)<=131072 and len(child.stderr)<=4096
+  head,buffer=child.stdout.split(b'FR07_DATA_BEGIN\n',1);meta=dict(line.decode('ascii').split('=',1) for line in head.splitlines())
+  ok=child.returncode==case['expectedStatus'] and meta['FR07_TRANSPORT_STATUS']==str(case['expectedStatus']) and meta['FR07_READER_VERSION'].startswith('3.2.') and meta['FR07_TARGET_ENTRY_CALLS']=='0' and meta['FR07_STOP_BEFORE_TARGET']=='YES' and not child.stderr
+  if case['expectedStatus']==0:ok=ok and buffer==case['expected'] and meta['FR07_READ_STORED_STATUS']=='1'
+  else:ok=ok and case['id'] in ('truncated','extra_byte','nul')
+  results.append(dict(id=case['id'],kind=case['kind'],readerBinding=case['readerBinding'],actualChildExit=child.returncode,expectedExit=case['expectedStatus'],metadata=meta,actualBufferBytes=len(buffer),actualBufferSha256=sha(buffer),expectedInputSha256=sha(case['expected']),positiveCompleteBytesExact=buffer==case['expected'] if case['expectedStatus']==0 else None,scriptSha256=sha(case['program'].encode()),stdoutSha256=sha(child.stdout),stderrSha256=sha(child.stderr),passed=ok))
+  # Preserve every completed actual child immediately; stop rather than replacing
+  # or broadening the fixed batch if a concrete invariant fails.
+  receipt=dict(kind='ACTUAL_BASH32_BUILTIN_ONLY_PUBLIC_SOURCE_TRANSPORT',results=results,currentActualBashChildren=len(results),allPassed=all(r['passed'] for r in results),allTargetEntriesUnavailable=True,actualTargetEvalCompileLauncherAuthorResourceCalls=0,actualMetadataScopeReused=False,actualBashVersion=meta['FR07_READER_VERSION'],oldFake27or31or39or13Replayed=False)
+  (HERE/'compatibility-attempt02.json').write_text(json.dumps(receipt,indent=2)+'\n')
+  if not ok:raise AssertionError('FIXED_READER_CASE_FAILED:'+case['id'])
+ print(json.dumps(dict(actualBashChildren=8,positivePayloads=4,inertControls=4,passed=8,targetEntryCalls=0,actualBashVersion=results[0]['metadata']['FR07_READER_VERSION'])),flush=True)
+if __name__=='__main__':main()

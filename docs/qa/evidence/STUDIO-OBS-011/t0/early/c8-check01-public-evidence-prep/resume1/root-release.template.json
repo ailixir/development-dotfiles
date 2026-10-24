@@ -1,0 +1,61 @@
+{
+  "kind": "INERT_PROSPECTIVE_ONE_SELECTED_PUBLIC_OBSERVATION_ROOT_BINDING_TEMPLATE",
+  "rootAuthorized": false,
+  "actualReleased": false,
+  "label": "obs011-t0-c8-public-error-observe01",
+  "baseSourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+  "candidateSourceDigest": "ecb74d5f9ab42e3888d8e05f419f107213030873ca84d2b0dfc0ce4964da0b35",
+  "preimageSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "postimageSha256": "60c971936b17a008b20d37637db1c5cf242697386adfcd4df6671d0a57f2f560",
+  "selectedAttemptCap": 1,
+  "restoreCompileCap": 1,
+  "selectedArgv": [
+    "./gradlew",
+    "test",
+    "--tests",
+    "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+    "--rerun-tasks",
+    "--no-daemon"
+  ],
+  "compileArgv": [
+    "./gradlew",
+    "compileTestJava",
+    "--rerun-tasks",
+    "--no-daemon"
+  ],
+  "fixtureProfile": "original4000",
+  "sourceWriters": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+  ],
+  "privateObserverReadOrCapture": false,
+  "C8Credit": false,
+  "IRCredit": false,
+  "generalSourceRelease": false,
+  "rootAdoptionSha256": null,
+  "releaseSha256": null,
+  "activeLockSha256": null,
+  "exactAriaCodeReviewed": false,
+  "exactQaCodePrivacyReviewed": false,
+  "limitedSourceWindowQualified": false,
+  "literalScopeCertifiedNonIr": false,
+  "freshExclusiveSourceLease": false,
+  "gatewayProperlyClosed": false,
+  "newImmutableWrapperAndGuardBound": false,
+  "ordinaryPrivateHooksUnchangedSealed": true,
+  "adapterSha256": null,
+  "adapterAbsolutePath": null,
+  "guardSha256": "bd4e946060dbd3f66332b87c84482f4b5818292ff313dbc8010f60145974c7b4",
+  "canonicalPythonLaunch": null,
+  "pythonReportedExecutable": null,
+  "pythonProcessExecutable": null,
+  "pythonObservedArgumentExecutable": null,
+  "toolSourceCurrentFacts": null,
+  "allLiveNativeSourcePrivateCallsAuthorized": false,
+  "requiredBeforeAnyBinding": "Complete runtime-effects-boundary.json and independent exact source/recipe/adapter/privacy/root review; do not turn these booleans true by inference.",
+  "collectorProvenance": {
+    "rootReleaseSha256": null,
+    "observerPostimageSha256": "60c971936b17a008b20d37637db1c5cf242697386adfcd4df6671d0a57f2f560",
+    "schemaSha256": "ac8bf8d46702482efd17a12fefff98955d3e9c34c05b67342b2c52afdcab4837",
+    "collectorSha256": "6af2c224de9da69cf6ceee0436fd3784114dd4275d8842cbec1ce7f9ccbbaa5b"
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "unitLabel": "obs011-gst-provisional-06",
+  "rootReleaseSha256": "fdb83d69f9296ed21a18ba380f8ac642bfd5caeba43138e867774621049d3ef6",
+  "activeLockSha256": "e88d550c1af45203cdc09c6eff202f3896e02a297394503c43dc25e53a32f865",
+  "status": "VERIFIED",
+  "verificationExit": 0,
+  "verifiedAtEpoch": 1792408578.0012212,
+  "expectedWrapperExit": 0,
+  "retroactiveRepairClaim": false,
+  "historicalGapCodes": [
+    "GST03_FORMAT_IDENTITY_GAP",
+    "GST03_PREMATURE_UNLOCK_INTERVAL"
+  ],
+  "phaseState": {
+    "format": "TERMINAL",
+    "native": "TERMINAL",
+    "restore-compile": "NOT_STARTED"
+  },
+  "evidencePins": {
+    "original-modes.json": "86584b3f710109522709cf0195fdc8f20d30f10988e3ba71f80922e00de96036",
+    "owned-format/receipt.json": "6a10aaf4e11fb1d1518749b01846b9eba2faeea8340acef2c9b307c64f270150",
+    "owned-native/receipt.json": "5f82304f10c6cfcf459968bc00a7de6c4118aaf4209391ec120c83d8110f45e4"
+  },
+  "source": {
+    "disposition": "RETAIN_AUTHORIZED_THREE",
+    "overrides": {
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": "0a9cd30bf501089b5cbc17922e1f9809efd5f176c83f42359ad4ba0105a8ac59",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java": "353bc8ebcf75d373203c58b016ead65648661cfdf47fa950d6230ac238ac7aa5",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "5317d3805950e562da4530433fcfdf660b1744e3b17cf58c5fa3f047b2176b15"
+    },
+    "digest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277"
+  },
+  "build": {
+    "phase": "native",
+    "exit": 0,
+    "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+    "provenanceSha256": "9edfca62fdf9320a64f4ff6e8dab3cbcabeb1754768748ced1670e78547cb2f9",
+    "preCompileCheckpointSha256": "06b663d8142982c0c7dcb405a3d63e20a42748a3dee194393f53af51c4ce4034",
+    "postCompileCheckpointSha256": "9a94c4b7a0dbc7e4047b4ffcf129dde7a42ca63bb47b24c6b644ba9c22bca148",
+    "compileTestJavaActuallyExecuted": true,
+    "resultSha256": "55b22af567a893541578ebb1805a2576c2bf29028ac2af21cda57b8f404e34b0",
+    "caseProofSha256": "84cb734ded8d1159376d93c5cc4666798354e86b25d4e857833d47e182f0d5dc",
+    "phaseAfterNativeSha256": "2d6b7cd874cc8b28907632aa114f1159675f929fac3368bd25ebfc549fe46a44",
+    "archiveIndexSha256": "37b34ea917e21addfc4df8850f40f9f4306153ed7441a8a0214918ccaa4b9116"
+  },
+  "resources": {
+    "foregroundTerminal": true,
+    "recordedSetComplete": true,
+    "extraOwned": [],
+    "recordedOwned": [
+      {
+        "pid": 41326,
+        "start": "Mon Oct 19 07:07:04 2026"
+      },
+      {
+        "pid": 41364,
+        "start": "Mon Oct 19 07:07:04 2026"
+      },
+      {
+        "pid": 41446,
+        "start": "Mon Oct 19 07:07:07 2026"
+      },
+      {
+        "pid": 43142,
+        "start": "Mon Oct 19 07:08:05 2026"
+      },
+      {
+        "pid": 43145,
+        "start": "Mon Oct 19 07:08:06 2026"
+      },
+      {
+        "pid": 43164,
+        "start": "Mon Oct 19 07:08:06 2026"
+      },
+      {
+        "pid": 43165,
+        "start": "Mon Oct 19 07:08:06 2026"
+      },
+      {
+        "pid": 43186,
+        "start": "Mon Oct 19 07:08:07 2026"
+      },
+      {
+        "pid": 43274,
+        "start": "Mon Oct 19 07:08:10 2026"
+      },
+      {
+        "pid": 43801,
+        "start": "Mon Oct 19 07:08:28 2026"
+      }
+    ],
+    "ownedPorts": []
+  },
+  "manualGaps": [],
+  "gaps": [],
+  "producerSha256": "ca3b078da598dcd7a387013fa1840704b6f53131b03234b0d561540d9ab87b0e",
+  "resourceBoundarySha256": "de1259680a2af7e29d09bba78b051b60ee783b9cc93c5f0b8fdb6ab0dc1042d5"
+}

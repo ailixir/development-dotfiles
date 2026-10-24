@@ -1,0 +1,53 @@
+--- g9-stage-file-source-preparation02/seed-and-bind.py
++++ g9-stage-file-source-preparation03/seed-and-bind.py
+@@ -2,11 +2,13 @@
+ from pathlib import Path
+ 
+ ROOT = Path('/Users/brunobuger/orca/workspaces/put-checks/ui-studio')
+-OUT = ROOT / 'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-source-preparation02'
++OUT = ROOT / 'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-source-preparation03'
+ PREP = ROOT / 'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation'
+ PARENT = Path('/private/tmp/obs009-g9-f2-current-20261020-root01')
+ BUILD = ROOT / 'docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-bootstrap-actual-build01-results.json'
+ CAPTURE = BUILD.with_name(BUILD.name.replace('-results.json', '-after.json'))
++BIN_BASELINE = ROOT / 'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application02/after-build-21-bin-links.json'
++BIN_BASELINE_SHA256 = '284ae82a7b4f2c0b0b002d16fdef8cac63ff83d9c9588432772e975df5544ca1'
+ SKIP = {'backend/build', 'backend/.gradle', 'backend/buildSrc/build', 'backend/buildSrc/.gradle', 'studio-runner/coverage', 'studio-runner/short.webm'}
+ ROOTS = ['backend', 'studio-runner', 'docs/specs', 'tools', '.github', 'package.json', 'package-lock.json', 'AGENTS.md']
+ H = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+@@ -51,7 +53,26 @@
+             q = Path(base) / name
+             assert q.is_file()
+             names.append(str(q.relative_to(ROOT)))
+-    assert len(links) == 21
++    # Preserve the complete selected dependency inventory; 21 applies only to SDK .bin.
++    assert H(BIN_BASELINE) == BIN_BASELINE_SHA256
++    baseline = json.loads(BIN_BASELINE.read_text())
++    assert type(baseline) is list and len(baseline) == 21
++    expected_bin = []
++    for row in baseline:
++        assert type(row) is dict and set(row) == {'path', 'target', 'mode', 'device', 'inode'}
++        assert type(row['path']) is str and Path(row['path']).parent == Path('studio-runner/node_modules/.bin')
++        assert type(row['target']) is str and row['target']
++        assert type(row['device']) is int and row['device'] >= 0
++        assert type(row['inode']) is int and row['inode'] > 0
++        mode = row['mode']
++        assert type(mode) is str and mode.startswith('0o') and len(mode) in {5, 6}
++        assert all(c in '01234567' for c in mode[2:])
++        # Application metadata serializes lstat mode as octal text; our live inventory uses int.
++        expected_bin.append({**row, 'mode': int(mode, 8)})
++    assert len({row['path'] for row in expected_bin}) == 21
++    actual_bin = sorted((row for row in links if Path(row['path']).parent == Path('studio-runner/node_modules/.bin')), key=lambda row: row['path'])
++    assert len(actual_bin) == 21
++    assert actual_bin == sorted(expected_bin, key=lambda row: row['path'])
+     assert len(names) == len(set(names))
+     return sorted(names), sorted(links, key=lambda x: x['path'])
+ 
+@@ -116,6 +137,6 @@
+ original_capture_guard(capture)
+ write('copy-command-results.json', runs)
+ write('copy-selected-actual-after.json', {'files': after, 'symlinks': after_links, 'actualSourceDigest': capture['digest'], 'distDigest': capture['dist']['digest']})
+-release = {'kind': 'G9_COPY_CUSTODY_COMPLETE_ACTUAL_INPUT_READ_WINDOW_RELEASED', 'atUtc': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'rawExit': 0, 'sourceDigest': capture['digest'], 'sourceMembers': 1814, 'distDigest': capture['dist']['digest'], 'distMembers': 238, 'selectedCopyMembersEach': len(names), 'actualInputsStableThroughoutCopy': True, 'actual21SymlinksExact': True, 'eachCopyRegularNoSourceHardlinks': True, 'copies': [v['patchCwd'] for v in commands['variants']], 'futureActualSourceReads': False, 'futureScope': 'own copies/captured immutable metadata only; private patching and seal may continue while actual unit mutates generated cache', 'noTestsCompilerGradleOrNativeExecuted': True}
++release = {'kind': 'G9_COPY_CUSTODY_COMPLETE_ACTUAL_INPUT_READ_WINDOW_RELEASED', 'atUtc': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'rawExit': 0, 'sourceDigest': capture['digest'], 'sourceMembers': 1814, 'distDigest': capture['dist']['digest'], 'distMembers': 238, 'selectedCopyMembersEach': len(names), 'actualInputsStableThroughoutCopy': True, 'actualBin21SymlinksMatchAcceptedAfterBuild': True, 'selectedDependencySymlinkInventoryCount': len(links), 'selectedBinSymlinkCount': 21, 'eachCopyRegularNoSourceHardlinks': True, 'copies': [v['patchCwd'] for v in commands['variants']], 'futureActualSourceReads': False, 'futureScope': 'own copies/captured immutable metadata only; private patching and seal may continue while actual unit mutates generated cache', 'noTestsCompilerGradleOrNativeExecuted': True}
+ write('copy-read-window-release.json', release)
+ print(json.dumps(release), flush=True)

@@ -1,0 +1,89 @@
+{
+  "kind": "INDEPENDENT_BOUNDED_FULL_DOCUMENTARY_AUDIT_CORRECTION_ACCEPTANCE",
+  "decision": "BOUNDED_FULL_DOCUMENTARY_AUDIT_CORRECTION_ACCEPTANCE",
+  "subject": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs011-runbook-audit-resume20261020b",
+  "subjectManifestSha256": "d16d242e523bdc08c779fdd49688c42b2380ac03d34868a5bb5a4188af974ac3",
+  "predecessorSubjectManifestSha256": "8b445844b7e1a9f089d622e65f5e58a7e449365671b567118702d72ed1e4189f",
+  "priorAllFindingsQaManifestSha256": "665dbfd07ea99b83e789c1957548b4b3995d87931bcbd829d1454c7e42a47f9a",
+  "mandatoryFindings": [],
+  "resolutions": [
+    {
+      "finding": "DOC-RB-01",
+      "disposition": "RESOLVED_DOCS_ONLY",
+      "assessment": "Sections5/6/12(a) now describe the effective studio.execution.dispatcher.enabled property, distinguish the rendered STUDIO_DISPATCHER_ENABLED alias from the literal-true worker-profile override, require effective-property verification, and qualify scheduled closure/recovery on that effective property. The affected operative prose has no remaining alias-based guarantee. Audit rows5/6/12 agree. This remains a source-configuration inference, not a process measurement or source fix."
+    },
+    {
+      "finding": "DOC-RB-02",
+      "disposition": "RESOLVED_DOCS_ONLY",
+      "assessment": "Sections6/12(a) explicitly retain the instruction to leave the effective dispatcher property enabled while engaging the execution kill switch. They state that queued work waits for a scheduler to resume and perform closure/reaping, and that deadlines alone do not close rows. The old until-its-deadline assertion is absent from affected operative prose."
+    },
+    {
+      "finding": "DOC-RB-03",
+      "disposition": "RESOLVED_DOCS_ONLY",
+      "assessment": "Section9.1 limits caller-supplied X-User-* trust to identity-headers, distinguishes the fixed core-service administrative identity and CSI-GET-only augmentation of a resolved identity, and retains the ED-02 real-identity proof gap. The related audit row agrees."
+    }
+  ],
+  "reportSha256": "d438271d4cc08077bc39141b232762c78f9040b1e7a4b086fd6b7dc7a153e05d",
+  "checksSha256": "ee084b89505f54b0fe517bea4fedb643fad6b41ee78316860a12d8afd9ddb206",
+  "allEightPriorConditions": [
+    "Documentation review only. No patch application, integration/source-window/lease authority, storycredit, lifecycle transition, fresh-baseline credit or runtime approval.",
+    "All three mandatory factual corrections must be prepared in a new sealed docs-only revision and independently re-reviewed; preserve this subject and earlier packets.",
+    "Full requested section coverage was reviewed, but C-OBS009-3/F2 documentary acceptance remains pending these corrections. This does not invalidate the earlier bounded approval of the five unaffected documentation patches.",
+    "The current studio.gateway.* protection gap is explicitly disclosed and remains unresolved. Separate architecture triage owns product/source placement; this review requests no product fix and treats neither old studio.compile.gateway.* guards nor environment entries as effective gateway-integrity proof.",
+    "Keep all external gates open: ED-02 identity/Vault/secret-use policy and linked tickets; ED-03/SPK-03 storage/IAM/lifecycle/consistency; ED-04/SPK-05 CNI/destinations; ED-05/SPK-04 current image/sandbox/PID; ED-06/SPK-02 proxy/cookie/media/reconnect/CSRF; section14 provisioning/sizing/PKCS12/JDK/cert-manager and release proof.",
+    "The model string and global/us/eu location advice are inherited platform-approval inputs, not verified provider availability/compatibility or an actual approval. Real endpoint, model/location, identity, allowlists, quota and release scenarios remain environment-owner proof.",
+    "Fresh backend check --rerun-tasks plus JaCoCo before011 credit and full affected final suites remain owed. Retain original tests/assertions/skips/timeouts and010 Live surface. C8/GST infrastructure stays parked and lean-deferred work stays deferred.",
+    "Root retains integration/lifecycle ownership. No staging, commit, push, deployment, signal, held-resource cleanup or external contact. No accessibility/skill/governance scope expansion. USD500 shared ceiling retained; actual aggregate spend unavailable."
+  ],
+  "priorConditionReferences": [
+    {
+      "number": 1,
+      "jsonPointer": "/conditions/0",
+      "manifestSha256": "665dbfd07ea99b83e789c1957548b4b3995d87931bcbd829d1454c7e42a47f9a"
+    },
+    {
+      "number": 2,
+      "jsonPointer": "/conditions/1",
+      "manifestSha256": "665dbfd07ea99b83e789c1957548b4b3995d87931bcbd829d1454c7e42a47f9a"
+    },
+    {
+      "number": 3,
+      "jsonPointer": "/conditions/2",
+      "manifestSha256": "665dbfd07ea99b83e789c1957548b4b3995d87931bcbd829d1454c7e42a47f9a"
+    },
+    {
+      "number": 4,
+      "jsonPointer": "/conditions/3",
+      "manifestSha256": "665dbfd07ea99b83e789c1957548b4b3995d87931bcbd829d1454c7e42a47f9a"
+    },
+    {
+      "number": 5,
+      "jsonPointer": "/conditions/4",
+      "manifestSha256": "665dbfd07ea99b83e789c1957548b4b3995d87931bcbd829d1454c7e42a47f9a"
+    },
+    {
+      "number": 6,
+      "jsonPointer": "/conditions/5",
+      "manifestSha256": "665dbfd07ea99b83e789c1957548b4b3995d87931bcbd829d1454c7e42a47f9a"
+    },
+    {
+      "number": 7,
+      "jsonPointer": "/conditions/6",
+      "manifestSha256": "665dbfd07ea99b83e789c1957548b4b3995d87931bcbd829d1454c7e42a47f9a"
+    },
+    {
+      "number": 8,
+      "jsonPointer": "/conditions/7",
+      "manifestSha256": "665dbfd07ea99b83e789c1957548b4b3995d87931bcbd829d1454c7e42a47f9a"
+    }
+  ],
+  "documentaryScopeAccepted": true,
+  "fullSourceAuditReusedFromExactPredecessor": true,
+  "storyCredit": false,
+  "freshBaselineCredit": false,
+  "runtimeExternalReleaseGatesSatisfied": false,
+  "all21ExternalInputsRemainOwed": true,
+  "integrationAuthority": false,
+  "rootOwnsIntegrationAndLifecycle": true,
+  "onlyWriteDirectory": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs011-runbook-audit-resume20261020b-qa-review"
+}

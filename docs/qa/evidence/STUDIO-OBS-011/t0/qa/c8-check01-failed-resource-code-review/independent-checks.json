@@ -1,0 +1,159 @@
+{
+  "scope": "SOURCE_AND_SYNTHETIC_ONLY",
+  "actualAdapterOrHelperImports": false,
+  "actualRuntimeOsPrivateActions": 0,
+  "results": [
+    {
+      "check": "sealed pure suite",
+      "passed": 97,
+      "expected": 97,
+      "outputWriteRemoved": true
+    },
+    {
+      "check": "package membership execution",
+      "accepts": true,
+      "expected": 24,
+      "actual": 24,
+      "missing": [],
+      "extra": []
+    },
+    {
+      "check": "package membership control",
+      "accepts": false,
+      "expected": 5,
+      "actual": 4,
+      "missing": [
+        "control/guard-exit.bash"
+      ],
+      "extra": []
+    },
+    {
+      "check": "write unchanged parent",
+      "accepted": true,
+      "calls": [
+        {
+          "requested": "/repo/unit/failed-resource-disposition01/readiness.json",
+          "resolved": "/repo/unit/failed-resource-disposition01/readiness.json",
+          "dir_fd_retained": false
+        }
+      ],
+      "bytesWritten": 19
+    },
+    {
+      "check": "write parent substitution",
+      "accepted": true,
+      "calls": [
+        {
+          "requested": "/repo/unit/failed-resource-disposition01/readiness.json",
+          "resolved": "/other-owned-target/readiness.json",
+          "dir_fd_retained": false
+        }
+      ],
+      "bytesWritten": 19
+    },
+    {
+      "check": "actual observe clean",
+      "accepted": true,
+      "currentUnknown": [],
+      "unexpectedDescendants": [],
+      "ownedListeners": [],
+      "recordedCount": 2439
+    },
+    {
+      "check": "actual observe unbound child",
+      "accepted": true,
+      "currentUnknown": [],
+      "unexpectedDescendants": [],
+      "ownedListeners": [],
+      "recordedCount": 2439
+    },
+    {
+      "check": "actual observe unbound child listener",
+      "accepted": true,
+      "currentUnknown": [],
+      "unexpectedDescendants": [],
+      "ownedListeners": [],
+      "recordedCount": 2439
+    },
+    {
+      "check": "actual observe empty second census",
+      "accepted": true,
+      "currentUnknown": [],
+      "unexpectedDescendants": [],
+      "ownedListeners": [],
+      "recordedCount": 2439
+    },
+    {
+      "check": "future readiness",
+      "held": true,
+      "reason": "STALE_OR_FUTURE"
+    },
+    {
+      "check": "expires after observation",
+      "held": true,
+      "reason": "STALE_OR_FUTURE"
+    },
+    {
+      "check": "future permit",
+      "held": true,
+      "reason": "STALE_OR_FUTURE"
+    },
+    {
+      "check": "prior client survivor",
+      "held": true,
+      "reason": "CLIENT_ACCOUNTING"
+    },
+    {
+      "check": "retained contract",
+      "equalsInputCopy": true,
+      "all22EvidencePreserved": true,
+      "all5ValidationPreserved": true
+    },
+    {
+      "check": "predicate bootstrap import",
+      "importLine": 13,
+      "safeReaderDefinitionLine": 26,
+      "events": [
+        {
+          "module": "predicates",
+          "importedBeforeCodePin": true
+        }
+      ]
+    },
+    {
+      "check": "four sequential independent client journals",
+      "entries": 4,
+      "priorSurvivors": 0,
+      "allCurrentClientRecorded": true
+    },
+    {
+      "check": "same PID/start journal collision",
+      "failsClosed": true,
+      "overwrites": false
+    },
+    {
+      "check": "synthetic Python mapping Python",
+      "identityComplete": true,
+      "actualConfiguredInterpreterObserved": false
+    },
+    {
+      "check": "synthetic Python mapping python3.13",
+      "identityComplete": false,
+      "actualConfiguredInterpreterObserved": false
+    },
+    {
+      "check": "stable candidate role observed",
+      "inheritedMatched": 6,
+      "otherProjectFacts": 1,
+      "incompleteStableIdentities": 0,
+      "currentCandidateUnknownExplicitlyReported": false
+    },
+    {
+      "check": "stable candidate role unknown",
+      "inheritedMatched": 6,
+      "otherProjectFacts": 0,
+      "incompleteStableIdentities": 0,
+      "currentCandidateUnknownExplicitlyReported": false
+    }
+  ]
+}

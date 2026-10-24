@@ -1,0 +1,30 @@
+{
+  "label": "obs011-recovery-20261020-gsma-mut03",
+  "mutant": "refused-to-pending",
+  "verdict": "INTENDED_ASSERTION_KILL",
+  "counts": {
+    "total": 9,
+    "passed": 8,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "collectorExit": 1,
+  "failures": [
+    {
+      "name": "terminalSucceededHttpResultRefusesPublicationInsteadOfSavingForever()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "message": "org.opentest4j.AssertionFailedError: \nexpected: \"REFUSED\"\n but was: \"PENDING\"",
+      "sites": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT.terminalSucceededHttpResultRefusesPublicationInsteadOfSavingForever(GuidedResultPublicationDisabledIT.java:151)"
+      ]
+    }
+  ],
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true,
+  "restoreMatches": true,
+  "restoredServiceSha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e",
+  "resultSha256": "2fc703391911f06bb65dbe5fb6a0cf4eb5d9965dedf71d1b9985dbf98d7fbc28",
+  "lifecycleCredit": false
+}

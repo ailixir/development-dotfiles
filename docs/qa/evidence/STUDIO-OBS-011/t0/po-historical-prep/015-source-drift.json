@@ -1,0 +1,1229 @@
+{
+  "changed": [
+    {
+      "path": "AGENTS.md",
+      "reviewedSha256": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198",
+      "currentSha256": "848e102c199e0497ce006528b25c71396c34ed7490f0b822569b000b9bf17d43"
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "reviewedSha256": "205cc6b91b01a0b9e28461f9902400b0b63ab024c58f575337997f6316865c2e",
+      "currentSha256": "fee7af874cc0875d8dd299f8f9e1a0739ae79347ba0b0de665c81931045cbe74"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+      "reviewedSha256": "db602b57767ff00908b782fabdce1e5e5eb6cb7cc61fc7b200f159ce85ac10df",
+      "currentSha256": "ee92952b18f87ac113bb42867d1bbe43fd4062276f1afdf125caa2fa48a427e1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+      "reviewedSha256": "27b972be0d98e0f792acd9ad18c13dddbc2ab8c95e3a97dfa60a7a97950c381c",
+      "currentSha256": "c9b8019dfc341633b8647fdce492814b31682a9ed2d5fd61a8516384ffafbfab"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "reviewedSha256": "3109936e2729573d631013563e0fdb47959335cc3509d66860637bc81f05a196",
+      "currentSha256": "7eeaa3b49107bc1436adf7d0107dedede12f6ad364a756bc41c716ad828c99ae"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+      "reviewedSha256": "f3e52690a3df583c1a39ec1f76ca1883d03613f11a978b6b11bbda171a417d95",
+      "currentSha256": "d8cfb9fc4dcf4fb30119867a358c138f302be862b71f4d7b26fa5229b5a6e1a7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+      "reviewedSha256": "8861f33186f1219b119535fa1a496d33c3be649d9ec323984ab837333cc5a813",
+      "currentSha256": "ebb679fc8ccf3e2e5df0252c1e27b54471e22388541bd3e35b82f90f007ed86f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerProperties.java",
+      "reviewedSha256": "bc2dc656bac918189c66adf906eb7a79edcea9206a4447c7514ae970959597b6",
+      "currentSha256": "47ac8e9f5ddb383cfe26575261cd71581d3cca98db5512c5756016bf6afc4004"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionSnapshotDto.java",
+      "reviewedSha256": "13a0bdfaa3712bcabbab3a9d100ac525540f63861c2066d83947369a5adab016",
+      "currentSha256": "03518ffd48efeac2f92ef6f754a617ca3f5a1eb80a854519e2a1aea0d2f5f34d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java",
+      "reviewedSha256": "2196349ba653195b6cfedb7ba6eb1bbd77e19cd64c3175e436264a37be2c8eb7",
+      "currentSha256": "bdce2a9c4e4fa3f668349b79b016ebc7879b901dd11b9ed461696b42a0506d16"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+      "reviewedSha256": "c17c52985de22d762a4afd96b68d6e42b661af89a963f44273c74ccbf27e259d",
+      "currentSha256": "0be7b180d7ea483a0b99abca38a03a63f6518d6e3f23f5d833c5e12b67b26cc2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedEvidenceConfiguration.java",
+      "reviewedSha256": "a44f726528edf8c60956717603299c6a480ceb3fa4b7021b3adced7d3660bdc7",
+      "currentSha256": "27f9415d7a763f45f8297e1dec841953e41f3922ee8ffa1126110fe16ba9f639"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceService.java",
+      "reviewedSha256": "0f3be7586414f80debcc704d1ef65374bf5f108487a590cbf7018398bf867c12",
+      "currentSha256": "19578626f97f05314dd3b7ec9bd91f79e1011d70838df425653b0d2f2f9cb5a2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java",
+      "reviewedSha256": "bedf413de95924e0b69b7f59927b17210d4a2c78daca54cdfd2bee6b51e2315f",
+      "currentSha256": "e4d2c994c9e60bd779f6112c872c2853ded236fbf063735d33b11b9f484c40d9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "reviewedSha256": "7a729e54fd62b88b4132c37a38a74b263ae07f2ac569f91973f8cc75839e5cf7",
+      "currentSha256": "c06279a35213c8b1eea5aca1e84b3b968cba20392e7cb06d6bae21a4d66b967b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "reviewedSha256": "65b15440ac5408ac037f5b904144bb235f776b6ea9af1c51c85621b51ac624f8",
+      "currentSha256": "72cdc69c1471eb37f388946619fb5770226ed5512e8a8f5caf5ec8606d560835"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "reviewedSha256": "7530c317e8553b537e8d63a14a3f5c3c98644e897150e758404d7946e38b0feb",
+      "currentSha256": "8ac947325e24a16590710eb77ba949c02328f97f0227dac0355f796a0798b90a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "reviewedSha256": "a40f444255ec8ccc1b7fbf8e8dbe942d9fb26392a7dd7eaffdcc50d832fd8c1d",
+      "currentSha256": "350a3f22f4cd9a5baa3b2907e9ad9aa3865ca60d08c960b1a6f77fcbb68dfd5a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "reviewedSha256": "495ec47c1d751c22054d7451690325a0656ba0b41571e386312b7b1bff30d22e",
+      "currentSha256": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java",
+      "reviewedSha256": "3732d860c1388108b435004182e3d260b2c1a1cf30507b8e5f21d5b78e8010c0",
+      "currentSha256": "cc792aefee5fe3afa6477ec91570069a922ac968bee8258a06ee1f7681098704"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+      "reviewedSha256": "74264a5c4eec19075688565a759813990e00879f3654ce6e20484b5a323b09eb",
+      "currentSha256": "886889ee7634bf67500f9511ac8647f294721fb6cd8a581bb50fcd7a5bcec7eb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "reviewedSha256": "cfb55a54e2068a48365af6b45ec3fc59141e83d7e48ca28826acace38125e603",
+      "currentSha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java",
+      "reviewedSha256": "0f99e12b18a6f59ea2d1d519f5925534967ac18384166def0bde683038e8249f",
+      "currentSha256": "b14e638d3dc0074c8ed44ad5023b702026ad1d3b62bcd5b5a73240c38e07df8d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+      "reviewedSha256": "54748de0a795e37814c7c0b3cef9a5203f7a3eba377889d5fbd3da6d810885fc",
+      "currentSha256": "d0e365d51ab5b612300a0a39f9a707c27329a2ae3b8bf22c01c9706f524aed6e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+      "reviewedSha256": "be081cdaa83192c668f89ccabb94bd449fc02f518c3bcdf9c46665fa58efa36a",
+      "currentSha256": "fc17ee639dee403a461bc454a794569b01c44f9c880dbb9d74b2e46c091bb78a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java",
+      "reviewedSha256": "23d60febec8460d48a769e5d3202431577bde9236132b9dc74d319ae6a34675e",
+      "currentSha256": "66a3dd75faabd8a4645e8df6d7767e1ed274d8a698ab3e750c945fde7d12bd66"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+      "reviewedSha256": "86b36ee2e157be9d34161d5c2ff754b40a572f7862ba6e6b03e67fc7fedda4c6",
+      "currentSha256": "2a93cf9456d3f9dff981cf4f3becc486e3cd0ec4acbc6629b34b62c7a562d166"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java",
+      "reviewedSha256": "b95edd3d9cb94d6a668fc13644a86d1114eeda4f6d32eb490c4306ebd43cc957",
+      "currentSha256": "8b6ac8699306d4edd6dc8c87c3a49c4852f576662de128ae44ed45bc349d93f4"
+    },
+    {
+      "path": "backend/src/main/resources/application-api.yml",
+      "reviewedSha256": "13016a85f3676bfb86d7ca86a79ace9b447aec6c2eb9bff50deeaafd50544db7",
+      "currentSha256": "dc64f398da2c84d75c7f2a470ee47c50ebef5103ebba4fa138a38ae3aa1d210a"
+    },
+    {
+      "path": "backend/src/main/resources/application-dev.yml",
+      "reviewedSha256": "b8aee7b549f99473e02adb5eacac093a2b253703b6b30e59b24430a11b58ff13",
+      "currentSha256": "096248359497109d1f0f5afbc1e64e8f468aa3a480425595daa8167e3d6af251"
+    },
+    {
+      "path": "backend/src/main/resources/application-local.yml",
+      "reviewedSha256": "99fad72e13f1fd9664367ce064cc7650a71e755ba1b0b8033c22a9ab5715338a",
+      "currentSha256": "e89396c3c714c441b051a062fa04ad994a1e9041e02eecae3e4c4f8b3190f281"
+    },
+    {
+      "path": "backend/src/main/resources/application-prod.yml",
+      "reviewedSha256": "c6da46639087462703b0385c300ff02a842ac9fb833a959b50c1faeb51158176",
+      "currentSha256": "7e4f389822263caac8258c7f6447c5ece995123b8c1ce85ae2443ed72d148d00"
+    },
+    {
+      "path": "backend/src/main/resources/application-staging.yml",
+      "reviewedSha256": "4f6319ec4f2236d724c7593148040a9f8cc4d749257b81f6e9e6f9b1e3248711",
+      "currentSha256": "533d530c57e47a9898b758a11c8b15647d9238bdcf6c24141068dc6dcd5d7b0a"
+    },
+    {
+      "path": "backend/src/main/resources/application-test.yml",
+      "reviewedSha256": "eec357d5cec8d7b8fdc88f7f57b1a6f878e581c54af875b8450027e987045594",
+      "currentSha256": "c99ac391f0a29211cb254bc0c95d298f8c3ab4de647d7ce1b02b431f295683a2"
+    },
+    {
+      "path": "backend/src/main/resources/application-worker.yml",
+      "reviewedSha256": "5195d5d6e7734370aacd46520ff56ec4858d4bafff89413d957a971f142bae41",
+      "currentSha256": "bf0c42d16bfdfbb1f7d5f7a5d9206f6ce98fe58e4c3bddd0f5bfff64160c3a65"
+    },
+    {
+      "path": "backend/src/main/resources/application.yml",
+      "reviewedSha256": "272736619835ac434ff9d4c69e2e4a42009e57cd4091ee4fb9bf6769ca728494",
+      "currentSha256": "271fac527d075f996173e6cf1ef52d409d4416d3d6a46114fc541097b3a25f75"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+      "reviewedSha256": "1252f11d1c9d23993244b90c110e8612f0f9c72aa529c393c679e0edd668345f",
+      "currentSha256": "e45d33c2168883689633f147daeaeddc221340961d3879f7e63e7e9f46dec3c1"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/ErrorCodeConstraintMigrationIT.java",
+      "reviewedSha256": "003ce9a0807d8e062ca0e97bf8daf2f5025b4ad3ed624be99c40c2ab4c3913d6",
+      "currentSha256": "b5cd9de77ce742e0dc114ac9045040fb72fa464066552e2634763d35943d511d"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/ExecutionSnapshotMapperTest.java",
+      "reviewedSha256": "e0778aefb738bb1d5dd608c5ff72460ad21c8bde63499b635915ae07b176cbed",
+      "currentSha256": "cf95616531807c49afeb3047c07bbde0c6480b00eeffb381ef0cfb45bdcce1d6"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "reviewedSha256": "59d501b33c96e4050549ed0ad628bee6e73e7054bb2b1eb185096fdcb4df50c6",
+      "currentSha256": "14f748837bfd3f16c8c01c86574f80b0b72d5a3f1840c62e6f20623a847b4c42"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/StudioAuthoringApiIT.java",
+      "reviewedSha256": "41a12c5f57f6cb8d05ee2310754e3dd2d22d3984fa6fdcfbeea9932ffa094a85",
+      "currentSha256": "6c6aaa36b4c58a7e87c8b2d530afbe5a93276b3f8cfc7e2f9a2c41e0b8d01b9b"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java",
+      "reviewedSha256": "00feb38cddf89c352143c59465cdd215be121cc80eba541747771b7d75f672a7",
+      "currentSha256": "a3479bffc9cb2a1cc1d96901ff7a9f12b91ae78d72ab686239432c14455f3e33"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/StudioServiceWriteAuthorizationTest.java",
+      "reviewedSha256": "6139389c230e19c69909610c774f132cec267c9f9992d8cd99973471d44cbcd8",
+      "currentSha256": "b7d546e86b9a15971d2bcef99625a46dbb3058b08ae31f1367759af1e3f98aae"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/contract/StudioContextContractTest.java",
+      "reviewedSha256": "9805c33f24412bc9a6e57945857dcacdd25499fbddf33c3dc81cf09c04eb849c",
+      "currentSha256": "84fb333c3c478ed4bfe33a03a0902dede3bfbed39b1ce9428038c30c9835875a"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/evidence/ExecutionVideoContractTest.java",
+      "reviewedSha256": "0c85617cbd39475bbbe4be17e3757de58e8ed4fbd9f409d215de0d21c18c25e5",
+      "currentSha256": "1e867b1a87a7e0af3e92d1da55b212c653f813c65bd2d03877ea44b18c34d34c"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedGovernanceMigrationIT.java",
+      "reviewedSha256": "f5842d165e12afcc0684c47469076b123e7bbbb487a95e792456c5b6a0a5ce56",
+      "currentSha256": "61b7be0f8f823cb27f6dd691252150177d2ea743575419a860cf75a350362977"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedRecordingMigrationIT.java",
+      "reviewedSha256": "26f607b782fe90c45079e66b0d1fcc3c83ab055df87b6dab6fc73411bb1695b5",
+      "currentSha256": "de700c477b570b0ba0b95fbd500610016b34a855f77e53423c08a50c2fe22678"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+      "reviewedSha256": "e4f19fcf54556517447815af750a75e786cac0a376803347606d06b58fa3ea64",
+      "currentSha256": "dfbb264f4a061a1afcf5be59a940905ebde558d2da79783979d458a744049637"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "reviewedSha256": "a0ab8e7e0196a51bab73f8ab4d91ea4ffff9b7ab7c7f3bdc46523dd851aad8c1",
+      "currentSha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "reviewedSha256": "f21c9266afc92ff95072e4d7c7a0047e5c4db6bc9037ff398bd34cd037e37158",
+      "currentSha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingSeed.java",
+      "reviewedSha256": "01d39c6dff8d461ae338ff3cb4efdac63e0d59eb57aa10986e03621032eec56d",
+      "currentSha256": "0d6019631e83c9ed62c7fe2f1b988a1fde2b67ad8b255135e43102ef187b16d0"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceTest.java",
+      "reviewedSha256": "7204b45fa9249060c80a55db91adb76a29d13e367ced25e85aa58cb1ec44af98",
+      "currentSha256": "cd8eb34ad78c6ea20a2b14734dee5440461e1484610768de14ad505010789c8f"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionVideoIT.java",
+      "reviewedSha256": "61b43626881e6a29030f426a9ada7b88a25d01aef4f65ad24b751e1bd6b3bc07",
+      "currentSha256": "ee59cc124f3b3be25ac5122ba23908ecf8c55448239ee542c21ce81f52ba3c6e"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "reviewedSha256": "592948cea23e5940fac9db44d7f16b03ea6def9aa162c89892f4962e724f4a2f",
+      "currentSha256": "9b8b38e4bd7bb2c04d8a222e3baa228bd0a4b622028bc8250227a01d05fc0abd"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "reviewedSha256": "533fbee213a2adf3dbff16ed22d6bb9482372e159003246f4cbf7d569a91783f",
+      "currentSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+      "reviewedSha256": "659853de0ec6be586f002a9c20231738dede4abc861f667d09b9d13b685693cc",
+      "currentSha256": "46e7d47b002c54f40853ff57fd99eb3524addaed125e2b81415709d8eb53b923"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "reviewedSha256": "47c18e4f652379d31e100cd84bada6fa1ca0e1be19e46fabde6a24e21e508676",
+      "currentSha256": "97162010003856cdc7f55f411e286a70f381a664c78c2e5b5cde7d5415784db9"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "reviewedSha256": "4c5236fd7056c292e9b9225340321282beed6589c5165ef02e8e97080613fa6a",
+      "currentSha256": "4d47ad6f8d67bfd3278b0d3f3930085e90f190d0ea500875272082eb97a7754e"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedDefaultModelReservationIT.java",
+      "reviewedSha256": "1a402fb857d93ce17c7335eea2af4524a3d73f2d6161c9e65c1bae3e991cc52d",
+      "currentSha256": "be70c59ce219191c8a78685dde55e98409554bb06cc764acaa0d97b7dc3dd27b"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "reviewedSha256": "1b58702407586e41f5196d2ec734905b59ff72b4b69aebdb2a28ad97b0e1fa46",
+      "currentSha256": "9c68ac5bcdc79fba476177cf6bbbab12ee5583e9bfd3fe2c9449fb3a92d41aa9"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java",
+      "reviewedSha256": "150d2b7d964a0e1710d9996a7a28370cea796c1a40d85d4c06c020b4982d9f66",
+      "currentSha256": "5227d729e4a6b325dd4c0ea79cf3e5bc90c4020bafc6127a018c88b31402de03"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/internal/RunnerReportProjectionTest.java",
+      "reviewedSha256": "d8d1d8a95b5909190fa1f42a985e266d1499e5e790b510c7bc4f4c770e89f4f0",
+      "currentSha256": "8dc5e41c2d8592fa791c7fbf3c0cf006c9aae6ae4e847d501967a8697e4ae622"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java",
+      "reviewedSha256": "66f193c5ecf4be86c1245fe1d32e666d075373fb4e0f69929a8c7d74e8ea6ff5",
+      "currentSha256": "67c26122f9d60f63f23229736ca36620428c29f2b7e5f9f28a2158ef693bc319"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/sse/SseStreamingIT.java",
+      "reviewedSha256": "17bd450cebacbc7d5c5ad50b2be26a41b7ae16ceb25ffc46a8898ec2927a6db1",
+      "currentSha256": "2845b8736b137267da85353efdc36c669a32e9192bf1566af11012ac44ef877c"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+      "reviewedSha256": "03d5e84aacd91b1bbab5c04006ceb72d63215a5c3671c99f0b024efab4cf3d54",
+      "currentSha256": "0f60fabce9dab238203682de49a031a8ec103e4ac18b1694375059f20ab312df"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/ObservedPublicationFixture.java",
+      "reviewedSha256": "b11b75c5fd221a3930c77ceb4b5a0f9cad121b64130df74afc6cce0b640a8d4a",
+      "currentSha256": "9264ae0ec8f23d2d3544c2e09341d695a8035e77744b28cd116fdee985de1b1a"
+    },
+    {
+      "path": "backend/src/test/resources/studio/guided/session-it-documents.json",
+      "reviewedSha256": "82029d3aa98eda90194134b00831505fc3c7a67ddb835291495d20824879163e",
+      "currentSha256": "37b71432258ccf942918d02ad9e78ca4f43a3579b75cf977d760076aeabb3e0e"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/consensus-plan.md",
+      "reviewedSha256": "8533a334271403ac307e7ca7e8b780a16e02abb0d1283d0fe9c14f0f3b118ff2",
+      "currentSha256": "50d3ec86728f97ef3f9489411de5c988fdc9f9c909dbeb40c266a3205e133943"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/fixtures.json",
+      "reviewedSha256": "b5942f63eaa520fe80ed7cde10018586a29c5e314283c79051009626bc1716f8",
+      "currentSha256": "fb1f9856353fef07825bf28ce72b4ed69e54f1cd5b78dc1d9fbb097c06ef2fc6"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/limits.schema.json",
+      "reviewedSha256": "f6e4bba01ee38ee2aa56b759120ec2e86c97f47cec15609e4ce0c60ccef97995",
+      "currentSha256": "736791305cf68723c01cb2b144cfb14f45b817c95e5954609d2517e680e6ba3e"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "reviewedSha256": "a7c9f5956bb153694ea08730adde1ac0d3c47042f14a87819ed4089458c0885f",
+      "currentSha256": "c573e50bb3fb6cbf2ea39e269888dbb07f8da2b193de769da167cc7998d072b6"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+      "reviewedSha256": "7accd138c4b8385142e9c2b20f308912e2d0cc7b9afccf2d4aac4155ea0197ca",
+      "currentSha256": "22ce88aeeac00de3f5e1202bdfa58e62c756e9cb39e72e00deb7b2e216c41b55"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json",
+      "reviewedSha256": "378ab88d0abedb156990f414c0b44ac8a8bdebfcbb791efb12fe0e6723401b26",
+      "currentSha256": "38dd5dddc4e48003b93a674a90f03ee70c4c89094aafe97dca4bd55f044069e8"
+    },
+    {
+      "path": "docs/specs/studio/examples/context-authoring-invalid.json",
+      "reviewedSha256": "d301a48606e64f84322a926029dbb2652ef8d1c6a71b2618f9d26d3e170045e3",
+      "currentSha256": "bec852d2d94372ceac736f378814379f14d85a175bcd6a54eb14065eb0f9f932"
+    },
+    {
+      "path": "docs/specs/studio/examples/context-authoring-valid.json",
+      "reviewedSha256": "2ae890db47b89a384bd62bc1d9c3c6c76b3e3cdf6623bd4cc536bf8044bfc4b1",
+      "currentSha256": "9892317ceef4830b4cb0d5a291678b6ec94020f40e74086dea46e4a5ad99f36f"
+    },
+    {
+      "path": "docs/specs/studio/openapi.yaml",
+      "reviewedSha256": "c053a7f75656628a1b3e031e02f40f4982aa3a85fc241a4c87c7229460f5d70f",
+      "currentSha256": "bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4"
+    },
+    {
+      "path": "frontend/README.md",
+      "reviewedSha256": "a89f7a00874b3945a7d991f12961c598c613d0dacaddb051c2d4b61a594ad423",
+      "currentSha256": "8fe7c5df748f855189d5feb065bd6f96e3c400f7595fe51eb3e15f7911faccb4"
+    },
+    {
+      "path": "frontend/package.json",
+      "reviewedSha256": "c8485306473e0b494c3f73f0f8817592410d4a5f5912b4ade6b0b3dc7eddd07d",
+      "currentSha256": "a80cd3e7b28811be0926e88d884d42fd180fd80a29743958ec6db85c72b51e0d"
+    },
+    {
+      "path": "frontend/src/components/checks/wizard/configs/UiTestConfig.test.tsx",
+      "reviewedSha256": "b1c1394452b7787f36529ce67d5037426ddb632d5f70c23cd7ec44741cba49ee",
+      "currentSha256": "8596b3b854a7e91799fb5256ff30979cc921e2dc66b3a9e7a956cf7da8d83054"
+    },
+    {
+      "path": "frontend/src/components/checks/wizard/configs/UiTestConfig.tsx",
+      "reviewedSha256": "6a12d66f0b21c680584590b0b4b7e7888274c79ca7bba8751a98258ec8048968",
+      "currentSha256": "33d5b9fe01855a63207e55b8ec267ff6945998601959fa502fe496d357c858b2"
+    },
+    {
+      "path": "frontend/src/components/studio/OnboardingCoach.tsx",
+      "reviewedSha256": "9584ebc6c699e03329d2f5ffd7c2530c56c9f13db7cbdddafdd12b1081f25295",
+      "currentSha256": "11a9e284d8c0ecb453f782cdfdd0b453945b845721e95d1e8bddb0f5c250b1a9"
+    },
+    {
+      "path": "frontend/src/components/studio/SecretInput.test.tsx",
+      "reviewedSha256": "8b2c11478e18c600a666d3369fd419fef15c5054ffa29d03e1806cc35cc02722",
+      "currentSha256": "f1e14bba9f0f1b6dfdbf46a754c7d1d2eb5dead4c564e7e99015e2763c242506"
+    },
+    {
+      "path": "frontend/src/components/studio/SecretInput.tsx",
+      "reviewedSha256": "ce76295c02c95cf222d66e486d7a97411672919baf543c2717e562cf4c75908f",
+      "currentSha256": "53a6c1aa4b1131e75c43c67a126bcc503f31f9fcd0aaded749c686ae49027c1d"
+    },
+    {
+      "path": "frontend/src/components/studio/evidence/VideoEvidencePanel.tsx",
+      "reviewedSha256": "d591d740b88cbbddbacf9e10489a8199f0e750c214a1798f00325cb01882bbe3",
+      "currentSha256": "2ccd0fd4e3ffa032a028ad87feefde163001e5091c3a33eb2ba88915e25a1a86"
+    },
+    {
+      "path": "frontend/src/components/studio/evidence/index.ts",
+      "reviewedSha256": "86b0926f9a41a2f6e2e55b265f19af7f28fd8d1f7987aecae21fce8f38356f1b",
+      "currentSha256": "6b77b840800042fe9a1b15a9cd12855b3fd40ebc8bb31474ece87f6acfd73533"
+    },
+    {
+      "path": "frontend/src/components/studio/evidence/stepSeek.test.tsx",
+      "reviewedSha256": "a5e2fb746e8cf796207dd203458cdafb037eae2a174ae401abf71bb249e91ca2",
+      "currentSha256": "3d54d715ef560b1b15c29946777c6efdc97855dfa1e5882c404323f95cc93e2f"
+    },
+    {
+      "path": "frontend/src/components/studio/run/ExecutionProgressView.tsx",
+      "reviewedSha256": "1490093812eb6f64496d7abae2e1353e1ac5781527cf034d30c8427257e315db",
+      "currentSha256": "6a1d0d60f68dfa3959ca89886ee193b42c610fb232aafc1ac76408fbc7bba8c9"
+    },
+    {
+      "path": "frontend/src/components/studio/run/RunControl.tsx",
+      "reviewedSha256": "5d97d9431e22ea0acc790a34f51a46a4c051240e8ca8a6fb755ecae260002e67",
+      "currentSha256": "b4f28ce2a0efffb469a304e19d2869c7c8410805e5658a071887b857e5abc176"
+    },
+    {
+      "path": "frontend/src/components/studio/run/executeRefusals.ts",
+      "reviewedSha256": "6e93b7a259af9d56bfccd7ea6d54a5acc69dd6bd99eb59c829f98f0f815a6a77",
+      "currentSha256": "63cca1269edde3d20b6a60961afa8d778926b0db62bf1dadb7d801d5f64f5563"
+    },
+    {
+      "path": "frontend/src/components/studio/run/executionErrorNarratives.ts",
+      "reviewedSha256": "81d92287185d382f44a3c2ab9ac01d09bca84dd592d9550a13181634ac35fa8f",
+      "currentSha256": "a20824bd602397f4eb7dd8aa5aecc80348ec5bdbd4ac1984310d17c0bce044ea"
+    },
+    {
+      "path": "frontend/src/components/studio/run/index.ts",
+      "reviewedSha256": "6d27660304bf533c0d46bdcdb9771d56c4fb635b34a2d2841e40af2ebffbd56e",
+      "currentSha256": "40470157c7d56535431f9651ebf6fd8c198c8d5228d0d08180658de87fd86aa6"
+    },
+    {
+      "path": "frontend/src/components/studio/run/runEnablement.ts",
+      "reviewedSha256": "1f3d8eb643fe6c47f9a46da7d37710e130634fc844b1fc1c7974edb339526f94",
+      "currentSha256": "8ec371eddef182e8fca558e9d7cdbd17a27da54e38f276c78746cd57f8c085cd"
+    },
+    {
+      "path": "frontend/src/components/studio/run/runGate.test.tsx",
+      "reviewedSha256": "ae0a484c359e9dc3edb4e770b3b5c9fbe8c5dd0ab8ba2a39551b06329ba34dee",
+      "currentSha256": "419d6ede4bc9d3a3a7f340b0750a2fe13532baee82a4f9e56a65d1b6a1908523"
+    },
+    {
+      "path": "frontend/src/components/studio/run/useRunGate.ts",
+      "reviewedSha256": "94686bc85680c166fbca10f077f9f3f72d220ba0e4a9ee5f40bf22c0b60f83ee",
+      "currentSha256": "2a2f0809894a32ff429ec3c3cec6c11ecf918267a136e95bc27c77325fb1b602"
+    },
+    {
+      "path": "frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx",
+      "reviewedSha256": "e871cf3f3cecd5e2c698a03960a7d703e5a78f5ed3df9c3a3cf54e3212a63e79",
+      "currentSha256": "570efec763011168ae45cdde858b05e6d0317f57eeed6486db9e86eaaf707384"
+    },
+    {
+      "path": "frontend/src/components/studio/scheduling/StudioScheduleDialog.tsx",
+      "reviewedSha256": "74908b5f2fd1308a3ff382bcf30d8d5ed003122176fc36143802975c35c79199",
+      "currentSha256": "1791c296479f93f593083be2b8f00717d53c20d193cf14af2a891a9e3c49bda9"
+    },
+    {
+      "path": "frontend/src/components/studio/templates/index.ts",
+      "reviewedSha256": "2adf0980da8cfc563aa8888e35ba73770db038d7f2673a5de2e59814e48b4172",
+      "currentSha256": "bfeffc4332a118904e7f49892bf53a42e50183d372e4b712da05cd79f30e6ae0"
+    },
+    {
+      "path": "frontend/src/components/studio/templates/quickStartTemplates.test.ts",
+      "reviewedSha256": "beea940247750266d314fec90686188ace6c24471738cea23ec09963a2a0d7a8",
+      "currentSha256": "54c67742c4b622b6e47263232d4f29b1a03138ee7aedb14f963faf6e358af431"
+    },
+    {
+      "path": "frontend/src/components/studio/templates/quickStartTemplates.ts",
+      "reviewedSha256": "5eae648ebfde584f7e760ea59215df47aca75f97e859bc4ad0ae4530b0286ef6",
+      "currentSha256": "ed4b3a91cb895e3be9bfabf981718d17d2de63b0f14257162df2854c8ad0fc8b"
+    },
+    {
+      "path": "frontend/src/components/studio/tests/CreateTestDialog.tsx",
+      "reviewedSha256": "7d7681d57b9299d98233c67d7475796cf75ccf53a1702f90f0a81aaab5888af3",
+      "currentSha256": "2dd650505be451c7452c63df4b2a7ec9ce4f9102f1c18115c05376aec885aa22"
+    },
+    {
+      "path": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+      "reviewedSha256": "0e51f09e439aaff95dc559c3fdd8a9b331c4b8559eab2882d3a10f63f08a6a48",
+      "currentSha256": "96168908d344db0ea6694e27e23a2b46700254ca5d44c0e46b2b6128eda15981"
+    },
+    {
+      "path": "frontend/src/pages/ChecksStudioPage/pageAuthoringUx.test.tsx",
+      "reviewedSha256": "27e171c5e9c9e00662e7def79cb667aeb2683bbe4957d0ad3d2b75b1a63a98bc",
+      "currentSha256": "16b51603c2e39bf5773d1d2a3dec48a68df3b3ad7beaf54b9edbd4b413933bbe"
+    },
+    {
+      "path": "frontend/src/pages/ChecksStudioPage/pageEvidence.test.tsx",
+      "reviewedSha256": "063cafd1a012eae5f44414b4ffc0291806fd7ecc5a921c6ea557cd00f8b172a0",
+      "currentSha256": "8b6608a016b218d3807dc3c9f3f0d0f6e81da7e0b91d81cba0368017603e0f6b"
+    },
+    {
+      "path": "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+      "reviewedSha256": "46e00287bceca9e2a5a82ec1bf463a01627dd88c7292862a30a54aee9b401ab5",
+      "currentSha256": "7b5bcac2df9c5a66f5e01b49fdb9b6b715d57543bfec5d0e979d55f5fe823cbc"
+    },
+    {
+      "path": "frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx",
+      "reviewedSha256": "18bcf2d2d765dcd96604d7d44cb59aaaa08226d0214470f89fb64e9db7b14d34",
+      "currentSha256": "6f82ef342a30d6e5c6a38bd3fa30186bf9ab5cfdb13b8e53f7374a352f86f9ea"
+    },
+    {
+      "path": "frontend/src/pages/ChecksStudioPage/pageStepTimeout.test.tsx",
+      "reviewedSha256": "ca36dd05766b0e5710011b46d31ff26423356d763a60955ce800e296502ebfe3",
+      "currentSha256": "7a2eb144c2d7607c66853b4d3157ec74b454447502d7cbdfb0941fef6f1faf8e"
+    },
+    {
+      "path": "frontend/src/pages/CreateCheckPage/CreateCheckPage.tsx",
+      "reviewedSha256": "9398f9324f59687332f3994fec38868a85a039e4b3a3019a8463bf006de5da3e",
+      "currentSha256": "7626effb26bd0ca756d86f102902306fe4ccea076266366a40d4f73946c32dde"
+    },
+    {
+      "path": "frontend/src/services/api/studioApi.ts",
+      "reviewedSha256": "150d6c92ff72a03b62c904b032da4d3b52b5acb48be34aeaaace4125dbb1f0bf",
+      "currentSha256": "582e04ca7091f7d30c5eec25e6729a4c0da37b8b7592b621d843ce7f2160d1eb"
+    },
+    {
+      "path": "frontend/src/services/api/studioAuthoringTransport.test.ts",
+      "reviewedSha256": "975fbf4b03d1e49127aa2e33ab5889a28abca4fd61faaec83797b2d56f6dcb00",
+      "currentSha256": "8b25f924a9a1188259eb53e41afb2045bc9bf757d49e15ac96bca32fc5c922e6"
+    },
+    {
+      "path": "frontend/src/services/api/studioAuthoringTransport.ts",
+      "reviewedSha256": "1b72681a10af99e8abffabdc6df5664a67d19eb369ce881fca61b9eefb90e9d0",
+      "currentSha256": "63bb2e045f25bb44ff7d636956697dfc311c3ce8d236af4f4ad9d65144fa97b5"
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/authoringHandlers.test.ts",
+      "reviewedSha256": "beb5d21519b6eb44f5325fb72d5f6ccafb638711ae8728f4f5fea0e82506b727",
+      "currentSha256": "85808e7a628765f436de9d1fa68b65f53e088009efbd1298f3880f9ab8f78215"
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/authoringHandlers.ts",
+      "reviewedSha256": "381867fbc6746daeef7d88259d26c4b26ba2da24d57cb14cecafb24cb48c3f83",
+      "currentSha256": "30bcb60bd25c7f8ad707b7b3fefd5406514549defe0cd91dcb9093482c36f8cb"
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/authoringState.ts",
+      "reviewedSha256": "d90a529119d0baaa04f584a3b70a3426c1af3856306f309ed4e769c4200dacf6",
+      "currentSha256": "ff72967d57802a90a76756b4d3268dbcec9b18e45453a28336b86fc5bec2a7d4"
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/confirmedRevisionEscalation.test.ts",
+      "reviewedSha256": "8effbf2909682ff80ccd149f349682f405884ebf81de08cc27b898462bf88524",
+      "currentSha256": "02afae95abfb1166e5a23aa226fe4f24296753d33566de668936d3081821a3b4"
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/executionFixtures.ts",
+      "reviewedSha256": "7c4c2dd9ee51953b8f9f1514b4de9f08172278c3b365b119caaff52f4359e22c",
+      "currentSha256": "16ea5df01d89d9ddd2a2592253d7a734bbe7838f49b0926d27e70200b57521ff"
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/executionScenarios.ts",
+      "reviewedSha256": "7c2a992620c1c06be73f30859f4e971a25c192c77f6b1a40135b0b16700ebc38",
+      "currentSha256": "24892cde107817f7785b7154e8d32ba10147ae520141f473d79e0deab40e197e"
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/handlers.ts",
+      "reviewedSha256": "c548df0c8a580186569cd5b949bdcd15a1128c5f3deb92dd31573a290edfc4c9",
+      "currentSha256": "61df7a979249b91424e6841715b4d9832c91a8833ebe87b7aad6d70eea6415ed"
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/studioContract.test.ts",
+      "reviewedSha256": "62a653b6fa73735fd06e10dd76614155cc8e836e58ce12f3b37b53a204933dc5",
+      "currentSha256": "300838a92ec19ac05cd6ba940ea22cb2a7982b7182ba02fc1c29e34e0f0da47b"
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/studioEscalation.test.ts",
+      "reviewedSha256": "a2f4017492c154652a45b2a7e1f50880fc3ad2dc2d81f0ab3dd173b628dedead",
+      "currentSha256": "d9765401e47519a0549020a30fa8654b83478b432b904deeede9bd0e342fefa8"
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/studioHandlers.test.ts",
+      "reviewedSha256": "02146f563aa7f5ab1ea3aa57c05ef4d2b48fc97a4d33cf4cfb9e885810b04d20",
+      "currentSha256": "f5db5c7b27199f1217e00b70cf9900407bf70c2788d6a2eca613844c983f8d5c"
+    },
+    {
+      "path": "frontend/src/store/slices/studioSlice.ts",
+      "reviewedSha256": "9124567a8bf9e1baa0b2aac0680dad5b4042bb902a80f391d5eda67811ccc50d",
+      "currentSha256": "5c5faab50262f404a52369a98d027d983cf6fe758555d8fbcf136a80eaaf1936"
+    },
+    {
+      "path": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+      "reviewedSha256": "64f347784be9490c636487adab899f1f65f97fa38d6aafaae162de0e52551050",
+      "currentSha256": "cf00ca4d9f6b75484d73e3f3e081f27fd9da63fd97d0ae8ed51f3a376cf79cc6"
+    },
+    {
+      "path": "frontend/src/types/studio/studioContextContract.test.ts",
+      "reviewedSha256": "e7cb5503d591ce860c0985690417cfcad56f9b0c40c6957ba8ec701f3094ade8",
+      "currentSha256": "fc3b7dc81564deec54c1594215f51770425cda687e452b3cfcc87dc7e5948ef1"
+    },
+    {
+      "path": "frontend/src/types/studio/studioTypes.ts",
+      "reviewedSha256": "e634a1b04ec49035987655cd5310add58c63db991298ec61b9e25841a343f760",
+      "currentSha256": "8f877ce4ad097566042211faada30e1c726319745edb45c30b33c7c31cf327d2"
+    },
+    {
+      "path": "frontend/src/utils/config/studioCapabilities.ts",
+      "reviewedSha256": "9e299300575105b1f1182aec0788f9b049c25b3e48822bc0363c4b23ceb51456",
+      "currentSha256": "69779679a733f7ecfb8b4cb8796742bbfecf36caf8327cf87c1492d1f3a0d727"
+    },
+    {
+      "path": "frontend/vitest.config.ts",
+      "reviewedSha256": "85aa86a7c2a13f6d1c9b4bfa7f15fb5420ca74691a3112a3da167b22e93f1404",
+      "currentSha256": "a069bc64049c73e52583ef778d3a3637d1dc631e7cfa8c82aeaf2c7342fbc0e8"
+    },
+    {
+      "path": "studio-runner/Dockerfile",
+      "reviewedSha256": "5246d243ff1706ac8b3f818d71d56bce2a3494be154426736829bbcb25a084cb",
+      "currentSha256": "70881264ddda3a7f71da1f1da74794cfea7c19287fa05ddd1bff9bb8ef4489eb"
+    },
+    {
+      "path": "studio-runner/README.md",
+      "reviewedSha256": "37d11f456a6bd00a451d44e9eb52f56f57149aa494495dbca5fcd97f8bccbd00",
+      "currentSha256": "1b8891f988234b4f8e875df644332e69ac2f57efe720a86af63878ef5ada92d2"
+    },
+    {
+      "path": "studio-runner/ci/stages.md",
+      "reviewedSha256": "15082994d07d5bdd864281c0658443afe8110628bd506dd47130208ac7c7ca95",
+      "currentSha256": "4ca78b97f007eed935ef9d6fb43ddf621beb05296dc3346369ccd380df9489d2"
+    },
+    {
+      "path": "studio-runner/evaluation/README.md",
+      "reviewedSha256": "f42e5154b568af7b8dceb19bb9f62ebf6aeeab7b3a0c533554333ba046d9973e",
+      "currentSha256": "fcf738f8899d59255a13fea0b55e1919c0d7337d06321a4020d47137e9d9c207"
+    },
+    {
+      "path": "studio-runner/evaluation/cli.mjs",
+      "reviewedSha256": "29d70ccf4a1b0b31d6a7e6e66759227a5a78910fe4ca084c4000969abf090942",
+      "currentSha256": "ec074937ae648792143b44b9013d8b17f13b105bb206caa9250ca2843d65f524"
+    },
+    {
+      "path": "studio-runner/package.json",
+      "reviewedSha256": "b8b9bc81b1bacf37005bfc14100cf1b2e9247155e3f0763a2b85355b79b3561d",
+      "currentSha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e"
+    },
+    {
+      "path": "studio-runner/scripts/check-pins.d.mts",
+      "reviewedSha256": "2ec5548fc7d6e882a0d3bccaa95cd28d6e6ef7e064c393cb1535037ba6212d27",
+      "currentSha256": "290a5510d412f78fde0956c1fd7db1525389fc9f1b3523f5674723c1510de1ef"
+    },
+    {
+      "path": "studio-runner/scripts/check-pins.mjs",
+      "reviewedSha256": "00d76f062f0edf3d829a5c65af652bb5a68f088790bbf9bf2ef5903d271f4d2b",
+      "currentSha256": "4d1da390e9266789e30e2e2a12f8a9b4293c9acb78484b780900be6f9b9a4815"
+    },
+    {
+      "path": "studio-runner/scripts/write-runtime-versions.d.mts",
+      "reviewedSha256": "19d54753e67eb8667f725c8014315e11f0d46f5d796d4d3ef6253d8409b047c1",
+      "currentSha256": "d0bf46e4f1a584a9ab3c33efe21f586d2e7bcd3c6c6e8163c088177b1cb3ed3d"
+    },
+    {
+      "path": "studio-runner/scripts/write-runtime-versions.mjs",
+      "reviewedSha256": "44043491492139560b6e5c7ac4f95a04a25ccd3e007d8ef0b04de692e2b23ad9",
+      "currentSha256": "6c3e64064184a494092c5de56f69dba818913f293b3b8a3c2d2ba86a54d94f26"
+    },
+    {
+      "path": "studio-runner/src/compat/runtime-versions.ts",
+      "reviewedSha256": "bf362d88e1ec3ebbe0fc2c28231dfb16f0298d29ea439838ca45aab7c32b38e1",
+      "currentSha256": "6520fcf0df5baa4914e46f2e1b495eb7be593b5e3286a76c3d9d8ef9a77670a2"
+    },
+    {
+      "path": "studio-runner/src/guided/runtime.ts",
+      "reviewedSha256": "a95ae57ac285e98118c182bdac3092bfc9fc1be003c9072e8f8488811a754776",
+      "currentSha256": "8ce999d78ff0fe7500e9c7aece20beaf31c4e6ce2c74c0c256de7d71713da3f8"
+    },
+    {
+      "path": "studio-runner/src/guided/schemas.json",
+      "reviewedSha256": "8d21a51550084780d3a4da7a1a482beb717886de57bae4de72a5274db18cdd95",
+      "currentSha256": "11aa8b5001f3aa606d72f659179cefae7670eb75a3fbdb7af518512817dbd4b8"
+    },
+    {
+      "path": "studio-runner/src/guided/transport.ts",
+      "reviewedSha256": "1c6638387cea86e519be065975e04d4ecdd7b28918709d02c08c0dd4da6a69ad",
+      "currentSha256": "527471dfbe446c3fc2396c71158bd339d9bb33f73f5139994d7e58e7d84190ed"
+    },
+    {
+      "path": "studio-runner/src/main.ts",
+      "reviewedSha256": "e0bac30c0469aead61a07054daf7b76f3570a49eb658a17db1628d121fe68842",
+      "currentSha256": "2a3e92f7401c19e1117903a01bac58f9e3bb0c2e37dc817dfd6b309e2490f322"
+    },
+    {
+      "path": "studio-runner/src/probe.ts",
+      "reviewedSha256": "ca763aae70acc4369233fb4f7b03d42b7e578413c6474934117a98a7658e989a",
+      "currentSha256": "c243ba6e2d5446fabca6790d311ee10ef5acfb14016b0779f272acce1674468f"
+    },
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "reviewedSha256": "c9d74add7549cfbc6c065e663d75d5c844340503413203ddf0d28af785d4b171",
+      "currentSha256": "0a1b85fcb121d21f2d4c4c0b262cce3216d4a86097c459a6d82ffa8755f2e1c0"
+    },
+    {
+      "path": "studio-runner/src/run/guidedBrowser.ts",
+      "reviewedSha256": "f5019a6235961dace45714c950e4bb2d5851e61efe6839b1ae3fbbb8c6e6d844",
+      "currentSha256": "63f899ef688df31f3608c4a0b10f86ea5e63b710410bb32eb7f4d374cd2d63ae"
+    },
+    {
+      "path": "studio-runner/src/run/launcher.ts",
+      "reviewedSha256": "0dfeb39a76c046dd1df4b1b9df0cec238aa57c0c7b067b8824368ffc075e9fd7",
+      "currentSha256": "15725739bc77ffb82cd4851a78bf7777df644a902dde0217c272b48243fc7bc3"
+    },
+    {
+      "path": "studio-runner/src/run/observationCollector.ts",
+      "reviewedSha256": "5af51bbf179b7ce77cb873767a90a3288dd495c0837dc4ad053387330c16db99",
+      "currentSha256": "78470dc28cc3eb8b894de1ebe44d0e8a8eb6bfb9e09cee3ffa7530167ec20ca0"
+    },
+    {
+      "path": "studio-runner/src/server/application.ts",
+      "reviewedSha256": "e4157791ebd2c252ab1c4a62ca906ee9cf38ece8fe6c4feb77867323ebf16c27",
+      "currentSha256": "275524a2080225132a8a091d2417fd62f4cae9641305a4eb32286ab3f369d725"
+    },
+    {
+      "path": "studio-runner/src/server/config.ts",
+      "reviewedSha256": "613f9bc237469295cef8d956aa398cd094e5385cba0d0f4b6b22e5e8751f9745",
+      "currentSha256": "95299924714c357c63874e75f610bea0250cddb598ff4e22e0596b05137c05ad"
+    },
+    {
+      "path": "studio-runner/src/server/identity.ts",
+      "reviewedSha256": "728d91aa271afc65ef3ccbb9546dd55910c3789647045563e5f16875afe6c9f2",
+      "currentSha256": "472c00d4a2923d73713a6fe5d6cae241f5488efeba4ec57e4eb0a5046b49b53b"
+    },
+    {
+      "path": "studio-runner/src/server/routes.ts",
+      "reviewedSha256": "760e7afa15a10d27497deecb577351df4d1124a982ebe6560a20bf6681d442ba",
+      "currentSha256": "c0c432d43f08b4560fbef879b1ffcadc83e78bbbb4b637982493e5257fe1e9fc"
+    },
+    {
+      "path": "studio-runner/src/server/runCoordinator.ts",
+      "reviewedSha256": "004e52deb3e0b1965a8dec43db08e17170515cbcd5fc5f2980269a46433ed52f",
+      "currentSha256": "c299db916e6bfe7d58ef6057ada76b77dbc5eb12f545e0471aa3462767377482"
+    },
+    {
+      "path": "studio-runner/src/server/server.ts",
+      "reviewedSha256": "996a7d126c95212d56ca7508c02e5442b263960736ccc4e2b5265fe0faf55bdd",
+      "currentSha256": "0ba8ebe27c81e2921532c5e20cca81674089c379dd29ef2432126758364540a6"
+    },
+    {
+      "path": "studio-runner/src/validator/observedSchemas.json",
+      "reviewedSha256": "357f6c428f6b85c4bcc3894d6b4c564b291e9642cded402d2c1d0811750e9d29",
+      "currentSha256": "42a804fc6216aaaa9643f0455db5b7a420c7070219289fdfe512b260f1b21f02"
+    },
+    {
+      "path": "studio-runner/src/versions.ts",
+      "reviewedSha256": "797c9ca2a1918d3677997cdd858742937edede5ffc9a2c14ee092935ba966e79",
+      "currentSha256": "fe714b50724bf2d9b53bfcd1a15f023944771af639afa45471de8b1fed69a6fe"
+    },
+    {
+      "path": "studio-runner/test/compat.test.ts",
+      "reviewedSha256": "56d0a32468563fc02619204aa2359b4a172482da6324c42535fd87ceb9c583de",
+      "currentSha256": "14c6e7dedf9a74d9d311abdf477c685ae9b88bed110e24364bb396a4aa1292c6"
+    },
+    {
+      "path": "studio-runner/test/deployment/backend-env.test.ts",
+      "reviewedSha256": "d2844ebc68b780ab67e6f9f370158c93d9e871d80c3ea770454312245167961c",
+      "currentSha256": "925e0bfd589ada54feb4d72074e5596e0b1379a00a84278d471edfacb4d0cd02"
+    },
+    {
+      "path": "studio-runner/test/deployment/chart.test.ts",
+      "reviewedSha256": "7667053c9a550e663e609360407a8ec128d4e528db4af3f8a7a334cb12106bc1",
+      "currentSha256": "df34bc91f2e4b86335c5fbec5f58e7a40eeaa03d037561729a2bf46c5a5efd2c"
+    },
+    {
+      "path": "studio-runner/test/deployment/envfrom-keys.test.ts",
+      "reviewedSha256": "347a975176f4a2423a38890960c541a3da1dce9a473a1b4e4e43065aa14510e2",
+      "currentSha256": "87b82dbb8186fbf08885e36794785e477419b9fbc7c28408d1a6a923a237c840"
+    },
+    {
+      "path": "studio-runner/test/deployment/helm.ts",
+      "reviewedSha256": "a03043b76bb5f6ee13951733936f82554f3bb4c05bd8587a9c176543f27f8528",
+      "currentSha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0"
+    },
+    {
+      "path": "studio-runner/test/deployment/image.ts",
+      "reviewedSha256": "89ab5ad652296f370897bd3314c2e4d15c52e1fbd4bb2f86e61a3b74f10255d8",
+      "currentSha256": "de2af79ab1a72016d51a510ede5b71d6d949df9902b944a42158159ba86bcf53"
+    },
+    {
+      "path": "studio-runner/test/deployment/scaling.test.ts",
+      "reviewedSha256": "dd4d7c237262f669f57f7ad13f92844e5fa2676b540f213418021a8179110c38",
+      "currentSha256": "d831f6f1e4308052e20ba0b4ee04e52512f796d326e551adcb3ee180309a37cf"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/browser-profile-safety.test.ts",
+      "reviewedSha256": "b86a4e480549ad5fa7be8ced7b6e699ff0c4318e536b01f8064144e60dbe7a06",
+      "currentSha256": "5f0930fb516f0c04e23769165148bb2ce4c726fee3e69c2288c670f4d8e3e3ea"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "reviewedSha256": "e184e5fa2ab76727b9a4080041e9d496472d9bc5fe8aa88aefbb58212ebbd164",
+      "currentSha256": "7b928dc51eef99343cdeefdb1cbf8055c70b7d46c2ed086073ec380f92c17fb1"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-video.test.ts",
+      "reviewedSha256": "d8c90763a8779eb5a7466a2912781396cf48397d5283f5695c1647fb612edf14",
+      "currentSha256": "cf94fb1aa1383eaf44a8f276325bb5bcc6a41bc613806eecf58091b4099691a7"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "reviewedSha256": "22789612e66b57d1b9f9608816cae91606f950b36ef9b3e91701e0af71e22cb7",
+      "currentSha256": "f2b53e1dcfb195d9f2c72996a67e2ce7d0043617c83fb986b94c0daf558399f9"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-secret-control.test.ts",
+      "reviewedSha256": "c2da1736a8a136c308682ea2b2c7f643e057c070972fe5e26cf42cdc516173d6",
+      "currentSha256": "15f81d2591c5226db6144ea716be60c76a1cc4b431c12dae81e583927feccb8b"
+    },
+    {
+      "path": "studio-runner/test/guided/browser.test.ts",
+      "reviewedSha256": "2e516344ced18a49855a70b8c7e71dee09386984f5a08c8a4f112884cf83d3c7",
+      "currentSha256": "73d359901693ab2fd355932d9344d48c7dfd0b800e5e8f54e23c2cdc73ba86ea"
+    },
+    {
+      "path": "studio-runner/test/guided/incrementalRuntime.test.ts",
+      "reviewedSha256": "112def39b6fff4b2b6d4a45d180f5bb15d100f7b5e5d1494e1b84eca057cc519",
+      "currentSha256": "fafbe9d6a79c4b17a1cb2f94fcdeb9455c7d40133144c1b82f8cc371daa12f83"
+    },
+    {
+      "path": "studio-runner/test/guided/ownership.test.ts",
+      "reviewedSha256": "65f171bd1c51b83436fedd26223d54017e802f3c4a3dad1f1071dd3b95a53b51",
+      "currentSha256": "436b45e61faab72efd9ec5d801f7e720ae8801872702c80286c31af37f5d8e19"
+    },
+    {
+      "path": "studio-runner/test/guided/runtime.test.ts",
+      "reviewedSha256": "002a7af44e7b77d18a7a0e5425f2fc2118eb5ee78a9b011351fab62b6b0af073",
+      "currentSha256": "ad6ad7e20730e1dd775d15301450738ed227964057ab6edfeca36fd1307bc629"
+    },
+    {
+      "path": "studio-runner/test/guided/stopReason.test.ts",
+      "reviewedSha256": "34497e1959c646a00331bfcc45d6c998eae7f1e805e1a997cf0defb513476fce",
+      "currentSha256": "f2d703d0d5d7b01b77c779c63ecd45cbe32fe97eeeb437837d982eb377ab9bcf"
+    },
+    {
+      "path": "studio-runner/test/guided/transport.test.ts",
+      "reviewedSha256": "74e235e9abd245eae0f8a8ffa80a8099f040e087e0ff05ab30a03dfaf23e9473",
+      "currentSha256": "7f3c6d5f7317f31ac9be5ba282b99301f6702b1ad0abd4b7b7280a1391809ed0"
+    },
+    {
+      "path": "studio-runner/test/helpers/guidedTls.ts",
+      "reviewedSha256": "bb06b80734a892d526890eb0efaaea61e061c2f8442e7f807ea1d62b4b0e07fb",
+      "currentSha256": "413a40b168a979af6d857cf62448800d286211b9dd71bfa29e1c9b69421bf9cf"
+    },
+    {
+      "path": "studio-runner/test/helpers/harness.ts",
+      "reviewedSha256": "abfab3e3fb3efd7d5b59ac53e7b56d3360eadf5b8ace560722ff491267e485ae",
+      "currentSha256": "0d0f940c9cc10c46c1418337ec9bc3277cb1ec70abe1730835340bb2ee0b113f"
+    },
+    {
+      "path": "studio-runner/test/helpers/profileSafetyFixture.ts",
+      "reviewedSha256": "8147b47e798c68291255f13c106f6c052c38b7d3e5651c54367b1fb59cde1617",
+      "currentSha256": "7f9ee53a0c52a01263cde59f2dc18ddb02ad08832ddbf362122229124dc00ffe"
+    },
+    {
+      "path": "studio-runner/test/helpers/recordingScratchWorker.mjs",
+      "reviewedSha256": "e6ad5a92455a5cf2f23432d86b041b8b18b4ade62692aa6339be34ba271ffa7f",
+      "currentSha256": "653d3687cf9e699908ca2684b2980a0f35331bff4e1394b285576d8644314d00"
+    },
+    {
+      "path": "studio-runner/test/helpers/runner.ts",
+      "reviewedSha256": "4458ed1a65bca9016d2b1f9e396b09eb1a09bf5167a06ac74e8f383ffd65055e",
+      "currentSha256": "789560114d90348b60886f222e026460dd9cc947dce7014878dac85f2c29a783"
+    },
+    {
+      "path": "studio-runner/test/isolation.test.ts",
+      "reviewedSha256": "42ccc41865277f54df2b70b6a45f66253c07ad7c0804f9bfe8e3c7f96f6dbf7b",
+      "currentSha256": "2ed21df415d2b3e4e37479a9f470df708dc1d9319ee733c5ecb109eb4d3db3d5"
+    },
+    {
+      "path": "studio-runner/test/pins.test.ts",
+      "reviewedSha256": "9ad3d06289fe538303fdb83593254b0448e3c38d05ff1e0de888cfd69790e834",
+      "currentSha256": "a846c1e5e32a81c20051fbf4892cfc7790187da34f134990a0dd3d3f2b42b3ca"
+    },
+    {
+      "path": "studio-runner/test/profileSafetyFixture.test.ts",
+      "reviewedSha256": "f88f26bb41e94517a9e8da90f145bcb9f30fd44d9152a6e20ba9dafb61310e81",
+      "currentSha256": "ca9e020334ef1c6db194660f55a85f2c59bbd89b35419105c6007778125dd6ee"
+    },
+    {
+      "path": "studio-runner/test/run/confinement.test.ts",
+      "reviewedSha256": "126fdbc8e0fb4585f83e139ff0f31210ad32dcc1d075f9a6bd2e019be08381a0",
+      "currentSha256": "c39785e685bc09ab608049d26803b5fd38c19bc3cdc8cff059a112d69b954a06"
+    },
+    {
+      "path": "studio-runner/test/run/forkKillTree.test.ts",
+      "reviewedSha256": "e96aa2b2d5555a6ec0af3710b9390c43ae121e7ea036038e74ab7640824a5897",
+      "currentSha256": "70adf1d00021e39d13638a0abcf6c8d3055dada98962669b126b213e539cf324"
+    },
+    {
+      "path": "studio-runner/test/run/observationCollectorInvoke.test.ts",
+      "reviewedSha256": "5cfaf908afc8a7f40dc4c5167ee6371e78362fbf13f87ea913ef036b02da5cee",
+      "currentSha256": "546fbaecad20dfa35de015459ba80c4d61ebd58087ae733aee25fd5e5dd2693f"
+    },
+    {
+      "path": "studio-runner/test/runtime-versions.test.ts",
+      "reviewedSha256": "73a46aacf24aa4ee8fddf042e761f199c52c406dfab57e386f71732b8cafbfdc",
+      "currentSha256": "c4ee96430ad00943b938f2e0d6e5ff3ed85533136d6d6a2b5a75d66b08b49f18"
+    },
+    {
+      "path": "studio-runner/test/server/cancel.test.ts",
+      "reviewedSha256": "7badf2f06a0c4cc95834d4755ab992bd2ce4533a8163d2ff8539fba9922537e9",
+      "currentSha256": "6e6c73edf4043986797c2f7859c0af645e5a35e450c082b48856e20842013a33"
+    },
+    {
+      "path": "studio-runner/test/server/drain.test.ts",
+      "reviewedSha256": "b8697861067692327d0facbf684f17960e037e3d073a4b1083fe6a00e66ecc8f",
+      "currentSha256": "931059ab53fef49652d86bc93f11a82a25f634ffe5b33b3c46607db6775080e9"
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayAdmission.test.ts",
+      "reviewedSha256": "e13e70f9d546412c37c83cb82fb2f28c228f59519db9fdf374d59d1c6b0a9a55",
+      "currentSha256": "2478379fbc47b54fa89c94f7383de9f4301105d4da8025c4c4e4ef92082dd4eb"
+    },
+    {
+      "path": "studio-runner/test/server/observedReplayRoutes.test.ts",
+      "reviewedSha256": "bf1d723f6ba4b53f6578646b0db8214e619f3c747ae06a1f60623560398b4a91",
+      "currentSha256": "c3aecdf8af1c5d3c26afab75bc760d3794d02beecc72568c3a785f9d4f87bba4"
+    },
+    {
+      "path": "studio-runner/test/server/probe.test.ts",
+      "reviewedSha256": "1e03e9e26b17a1b153d9468108bc70ab5ba545231b96f3f7d35e1f61f34206ad",
+      "currentSha256": "90983fc7ea4019bcd52055cd26aa15e56479d03af793da6ba1a10528723998f1"
+    },
+    {
+      "path": "studio-runner/test/server/routes.test.ts",
+      "reviewedSha256": "ad98d3a5c66cda6de20269be561bb3a0a0c3c37eccbda9e4dbee4f60c4aa3cd5",
+      "currentSha256": "5123fec482ec2f8add9d222ccbb4e991b11019caa96e5d00704390a49850206d"
+    },
+    {
+      "path": "studio-runner/test/server/storage-lifecycle.test.ts",
+      "reviewedSha256": "052b41beee886ab8dea4b3a81c543ad77a9b13b37a75a1f89e0d5af14d21b671",
+      "currentSha256": "3a3c608aff991c7ac4756ac43f9234844a0ce26bf2a2c5980b98fdadacb1afb1"
+    },
+    {
+      "path": "studio-runner/test/server/surface.test.ts",
+      "reviewedSha256": "54ae776b1844b1f792c2cc623f081c344f343e84be325dd8b153a1b08be52e1e",
+      "currentSha256": "742d220329ebb1349f1a19450248ffbb8bd87cdcbc29415dab4439981ebab791"
+    },
+    {
+      "path": "studio-runner/vitest.config.ts",
+      "reviewedSha256": "c833caed66dc39aed1677db7cab921e97a5eb5b36291429c5f5e90f1a28c08f8",
+      "currentSha256": "cb110d944a17da279eefbce363b75cb50c09f753b6705dfd67d40948e1ff3051"
+    },
+    {
+      "path": "tools/check-studio-observed-contracts.cjs",
+      "reviewedSha256": "685d92275f7057df877d95f644aab0f7f04b1d7446881eecb6e2f42e0fe0acc9",
+      "currentSha256": "ed641bdce8b10171b6b132c1375a4e4cb24bdfbbe710f5f8e3a3360ea279e3ce"
+    },
+    {
+      "path": "tools/corun-report.mjs",
+      "reviewedSha256": "c4035b8eca23a9a6e21af4d6a59d96b1034049e09679f752ffef74cf3a67114e",
+      "currentSha256": "2b911dbbc37dd14b952ae2135a6920bf425f651fa4229c74715ba8d7a732b94b"
+    },
+    {
+      "path": "tools/corun.sh",
+      "reviewedSha256": "a6c8f2e9f18359d46020b89777b2ef9ec998495fff69bdd8a55977f5683e55c5",
+      "currentSha256": "1775b396b92ebfcb55253e36db9b817bcfc4a106dbde61adf3c870779644cbd7"
+    }
+  ],
+  "missing": [
+    "frontend/package-lock.json",
+    "frontend/src/types/studio/legacyStudioAuthoringAdapter.test.ts",
+    "frontend/src/types/studio/legacyStudioAuthoringAdapter.ts",
+    "studio-runner/evaluation/lifecycle.d.mts",
+    "studio-runner/evaluation/lifecycle.mjs",
+    "studio-runner/evaluation/lifecycle.test.mjs",
+    "studio-runner/src/run/guidedConfig.ts",
+    "studio-runner/src/run/guidedMain.ts",
+    "studio-runner/src/run/guidedShutdown.ts",
+    "studio-runner/test/evaluation/fixture-run.test.ts",
+    "studio-runner/test/evaluation/scripted-backend.ts",
+    "studio-runner/test/run/guidedMain.test.ts"
+  ],
+  "added": [
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/ReplayFailure.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationProjector.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioCapabilitiesService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsCapabilityController.java",
+    "backend/src/main/resources/db/migration/V22__execution_replay_failure.sql",
+    "backend/src/test/java/com/citi/put/checks/corun/ObservedCoRunIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/ExecutionReplayFailureMigrationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/StudioReadLockOrderIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/PreReadyRevocationJoinedIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/PreReadyRevocationProbeIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerTlsTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedScheduledBeansProfileTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/secret/GuidedRuntimeRolePrivilegeIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedConnectorScopeTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSchemaProbeIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/scheduling/ObservedScheduleAuthorityIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/secrets/DatabaseCanaryScanIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/secrets/StudioCapabilitiesIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/secrets/VaultPolicyIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+    "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarnessTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/support/RunnerTestTls.java",
+    "docs/specs/studio-observed-authoring/contracts/v3/public-ui-projections.schema.json",
+    "frontend/.npmrc",
+    "frontend/e2e/fixtures/studio-run.webm",
+    "frontend/e2e/harness.spec.ts",
+    "frontend/e2e/mswProxy.ts",
+    "frontend/e2e/start-servers.mjs",
+    "frontend/e2e/studio-authoring-real-backend.spec.ts",
+    "frontend/e2e/studio-guided.spec.ts",
+    "frontend/e2e/tsconfig.json",
+    "frontend/playwright.config.ts",
+    "frontend/pnpm-lock.yaml",
+    "frontend/src/components/studio/evidence/GuidedSeekControls.tsx",
+    "frontend/src/components/studio/evidence/guidedEvidence.test.tsx",
+    "frontend/src/components/studio/evidence/guidedSeekTargets.ts",
+    "frontend/src/components/studio/guided/GuidedClarification.tsx",
+    "frontend/src/components/studio/guided/GuidedCompletion.tsx",
+    "frontend/src/components/studio/guided/GuidedRunStatus.tsx",
+    "frontend/src/components/studio/guided/LoginRequiredNotice.tsx",
+    "frontend/src/components/studio/guided/PlanExplanation.tsx",
+    "frontend/src/components/studio/guided/ReadinessChip.tsx",
+    "frontend/src/components/studio/guided/clarification.test.tsx",
+    "frontend/src/components/studio/guided/guided.test.tsx",
+    "frontend/src/components/studio/guided/guidedNarratives.ts",
+    "frontend/src/components/studio/guided/index.ts",
+    "frontend/src/components/studio/guided/loginRequired.test.tsx",
+    "frontend/src/components/studio/guided/planExplanation.test.tsx",
+    "frontend/src/components/studio/guided/useGuidedSession.test.ts",
+    "frontend/src/components/studio/guided/useGuidedSession.ts",
+    "frontend/src/components/studio/references/ReferencePicker.tsx",
+    "frontend/src/components/studio/references/index.ts",
+    "frontend/src/components/studio/references/referencePicker.test.tsx",
+    "frontend/src/components/studio/references/referenceTokens.test.ts",
+    "frontend/src/components/studio/references/referenceTokens.ts",
+    "frontend/src/components/studio/run/replayFailure.test.tsx",
+    "frontend/src/pages/ChecksStudioPage/authoredLiteralHint.test.ts",
+    "frontend/src/pages/ChecksStudioPage/authoredLiteralHint.ts",
+    "frontend/src/pages/ChecksStudioPage/pageGuidedRun.test.tsx",
+    "frontend/src/pages/ChecksStudioPage/pageReplayAndReferences.test.tsx",
+    "frontend/src/pages/ChecksStudioPage/secretDeclaration.test.ts",
+    "frontend/src/pages/ChecksStudioPage/secretDeclaration.ts",
+    "frontend/src/services/api/studioGuidedApi.test.ts",
+    "frontend/src/services/api/studioGuidedApi.ts",
+    "frontend/src/services/mocks/studio/capabilityHandlers.ts",
+    "frontend/src/services/mocks/studio/guidedFixtures.ts",
+    "frontend/src/services/mocks/studio/guidedHandlers.test.ts",
+    "frontend/src/services/mocks/studio/guidedHandlers.ts",
+    "frontend/src/services/mocks/studio/secretsHandlers.ts",
+    "frontend/src/types/studio/studioAuthoringValidation.ts",
+    "frontend/src/types/studio/studioGuidedTypes.ts",
+    "studio-runner/evaluation/observed-authoring/evaluate.d.mts",
+    "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+    "studio-runner/evaluation/observed-authoring/manifest.json",
+    "studio-runner/evaluation/observed-authoring/pages/c01/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c01/home.html",
+    "studio-runner/evaluation/observed-authoring/pages/c01/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c02/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c02/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c02/wiki.html",
+    "studio-runner/evaluation/observed-authoring/pages/c03/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c03/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c03/wiki.html",
+    "studio-runner/evaluation/observed-authoring/pages/c04/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c04/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c04/trial.html",
+    "studio-runner/evaluation/observed-authoring/pages/c05/dashboard.html",
+    "studio-runner/evaluation/observed-authoring/pages/c05/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c05/login.html",
+    "studio-runner/evaluation/observed-authoring/pages/c05/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c06/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c06/forms.html",
+    "studio-runner/evaluation/observed-authoring/pages/c06/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c07/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c07/search.html",
+    "studio-runner/evaluation/observed-authoring/pages/c07/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c08/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c08/orders.html",
+    "studio-runner/evaluation/observed-authoring/pages/c08/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c09/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c09/forms.html",
+    "studio-runner/evaluation/observed-authoring/pages/c09/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c10/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c10/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c11/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c11/home.html",
+    "studio-runner/evaluation/observed-authoring/pages/c11/other.html",
+    "studio-runner/evaluation/observed-authoring/pages/c11/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c12/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c12/forms.html",
+    "studio-runner/evaluation/observed-authoring/pages/c12/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c13/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/c13/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/c13/wikimain.html",
+    "studio-runner/evaluation/observed-authoring/pages/d1/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/d1/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/d3/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/d3/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/e2/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/e2/shadow.html",
+    "studio-runner/evaluation/observed-authoring/pages/e2/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/e3/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/e3/frame.html",
+    "studio-runner/evaluation/observed-authoring/pages/e3/inner.html",
+    "studio-runner/evaluation/observed-authoring/pages/e3/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/e4/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/e4/list.html",
+    "studio-runner/evaluation/observed-authoring/pages/e4/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/inc-edit4/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/inc-insert/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/q1/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/q1/form.html",
+    "studio-runner/evaluation/observed-authoring/pages/q1/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/q2/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/q2/home.html",
+    "studio-runner/evaluation/observed-authoring/pages/q2/reports.html",
+    "studio-runner/evaluation/observed-authoring/pages/q2/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/q3/city.html",
+    "studio-runner/evaluation/observed-authoring/pages/q3/expected-outcome.json",
+    "studio-runner/evaluation/observed-authoring/pages/q3/step-text.json",
+    "studio-runner/evaluation/observed-authoring/pages/server.mjs",
+    "studio-runner/scripts/print-observed-catalog.d.mts",
+    "studio-runner/scripts/print-observed-catalog.mjs",
+    "studio-runner/test/deployment/dump-settings.test.ts",
+    "studio-runner/test/deployment/tls-client-cert.test.ts",
+    "studio-runner/test/evaluation/benchmarkScoring.test.ts",
+    "studio-runner/test/evaluation/budgetAdmission.test.ts",
+    "studio-runner/test/evaluation/corpusManifest.test.ts",
+    "studio-runner/test/evaluation/corpusPages.test.ts",
+    "studio-runner/test/evaluation/harnessSelfTest.test.ts",
+    "studio-runner/test/evaluation/observedCorpus.ts",
+    "studio-runner/test/evaluation/observedOracle.test.ts",
+    "studio-runner/test/fixtures-tier/focusMutation.test.ts",
+    "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+    "studio-runner/test/fixtures-tier/helpers/guidedLaunch.ts",
+    "studio-runner/test/print-observed-catalog.test.ts",
+    "studio-runner/test/reporting/terminalAbandoned.test.ts",
+    "studio-runner/test/run/guidedBrowserReap.test.ts",
+    "studio-runner/test/server/controlWindowLog.test.ts",
+    "studio-runner/test/server/guidedMode.test.ts",
+    "studio-runner/test/server/tlsListener.test.ts"
+  ],
+  "distChanged": [
+    "compat/runtime-versions.d.ts",
+    "compat/runtime-versions.js",
+    "compat/runtime-versions.js.map",
+    "guided/runtime.js",
+    "guided/runtime.js.map",
+    "guided/schemas.json",
+    "guided/transport.d.ts",
+    "guided/transport.js",
+    "guided/transport.js.map",
+    "main.d.ts",
+    "main.js",
+    "main.js.map",
+    "probe.d.ts",
+    "probe.js",
+    "probe.js.map",
+    "run/browser.js",
+    "run/browser.js.map",
+    "run/guidedBrowser.d.ts",
+    "run/guidedBrowser.js",
+    "run/guidedBrowser.js.map",
+    "run/guidedConfig.d.ts",
+    "run/guidedConfig.js",
+    "run/guidedConfig.js.map",
+    "run/guidedMain.d.ts",
+    "run/guidedMain.js",
+    "run/guidedMain.js.map",
+    "run/guidedShutdown.d.ts",
+    "run/guidedShutdown.js",
+    "run/guidedShutdown.js.map",
+    "run/launcher.js",
+    "run/launcher.js.map",
+    "run/observationCollector.d.ts",
+    "run/observationCollector.js",
+    "run/observationCollector.js.map",
+    "runtime-versions.json",
+    "server/application.d.ts",
+    "server/application.js",
+    "server/application.js.map",
+    "server/config.d.ts",
+    "server/config.js",
+    "server/config.js.map",
+    "server/identity.d.ts",
+    "server/identity.js",
+    "server/identity.js.map",
+    "server/routes.d.ts",
+    "server/routes.js",
+    "server/routes.js.map",
+    "server/runCoordinator.d.ts",
+    "server/runCoordinator.js",
+    "server/runCoordinator.js.map",
+    "server/server.d.ts",
+    "server/server.js",
+    "server/server.js.map",
+    "validator/observedSchemas.json",
+    "versions.d.ts",
+    "versions.js",
+    "versions.js.map"
+  ],
+  "distAdded": []
+}

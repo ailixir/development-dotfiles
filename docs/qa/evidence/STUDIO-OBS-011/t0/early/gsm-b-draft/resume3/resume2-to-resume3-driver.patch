@@ -1,0 +1,372 @@
+--- a/run-unit.py
++++ b/run-unit.py
+@@ -13,6 +13,7 @@
+ from driver_support import (Journal, OwnedNative, ParentLock, Recorder, capture, file_state,
+                             finalized_keep_allowed, safe_path, sha, utc)
+ from validate_collector import validate
++from report_resources import load_policy, POLICY_SHA256
+ 
+ PHASES = ['red03', 'green', 'freeze', 'delete-side-effect', 'delete-clarify', 'delete-admit',
+           'delete-bootstrap', 'admit-after-authorize']
+@@ -36,6 +37,9 @@
+ 
+ 
+ def immutable_inputs(root, plan):
++    adoption = plan['wrapperAdoptionReceipt']
++    if file_state(safe_path(root, adoption['path']))['sha256'] != adoption['sha256']:
++        raise ValueError('EXACT_WRAPPER_STATIC_ADOPTION_CHANGED')
+     for name, digest in plan['immutableHelpers'].items():
+         state = file_state(safe_path(root, name))
+         if state is None or state['sha256'] != digest:
+@@ -48,6 +52,9 @@
+     root = next(p for p in here.parents if (p / 'backend/gradlew').is_file())
+     plan = json.loads(file_state(here / 'driver-plan.json')['bytes'])
+     manifest = json.loads(file_state(here / 'manifest.json')['bytes'])
++    if plan['reportResourcePolicySha256'] != POLICY_SHA256:
++        raise ValueError('EXACT_RESOURCE_POLICY_REQUIRED')
++    resource_policy = load_policy(root, here / 'report-resource-policy.json')
+     if sha(file_state(here / 'manifest.json')['bytes']) != plan['sourceManifestSha256']:
+         raise ValueError('BOUND_MANIFEST_CHANGED')
+     for line in file_state(here / 'artifact-hashes.sha256')['bytes'].decode().splitlines():
+@@ -66,6 +73,7 @@
+                 'driverSha256': file_state(here / 'run-unit.py')['sha256'],
+                 'supportSha256': file_state(here / 'driver_support.py')['sha256'],
+                 'validatorSha256': file_state(here / 'validate_collector.py')['sha256'],
++                'resourceClassifierSha256': file_state(here / 'report_resources.py')['sha256'],
+                 'planSha256': file_state(here / 'driver-plan.json')['sha256'],
+                 'artifactLedgerSha256': file_state(here / 'artifact-hashes.sha256')['sha256']}
+     if any(authorization.get(key) != value for key, value in required.items()):
+@@ -114,7 +122,7 @@
+                'sourceRestored': False, 'originalCompileSucceeded': False,
+                'authorizationSha256': authorization_state['sha256'], 'initialParentLock': initial_lock,
+                'proofBeforeMainChange': proof_facts(), 'notQaOrLaneVerdict': True,
+-               'wrapperRuling': 'GSMB-WRAPPER-1 still requires explicit Quinn/root adoption for criterion credit'}
++               'wrapperRuling': 'GSMB-WRAPPER-1 bounded static criterion adopted by exact bound root receipt; no runtime or driver approval'}
+     rec = Recorder(folder, receipt)
+     native = OwnedNative(lock, rec)
+     saved_handlers = {}
+@@ -151,7 +159,7 @@
+             stream.write(capture(['/usr/sbin/lsof', '-nP', '-iTCP', '-sTCP:LISTEN'], (0, 1)))
+         tasks = ['test', 'guidedIncrementalTest'] if suffix == 'b03' else ['test']
+         command = [sys.executable, '.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py',
+-                   label, '--test-tasks', ','.join(tasks), '--']
++                   label, '--test-tasks', ','.join(tasks), '--require-exec-tasks', ','.join(tasks), '--']
+         for task in tasks:
+             command += [task]
+             for name in selected:
+@@ -159,7 +167,7 @@
+         command += ['--continue', '--rerun-tasks', '--no-daemon']
+         exit_code = native.run(command, root, env, folder / (label + '-collector.private.log'), label)
+         # Native drain already settled BEFORE receipt reads or any following source operation.
+-        result = validate(root, execution, label, selected, tasks, expected, exit_code, time.time())
++        result = validate(root, execution, label, selected, tasks, expected, exit_code, time.time(), resource_policy)
+         result.update({'suffix': suffix, 'label': label, 'proofAfterCollector': proof_facts()})
+         result['validatedComplete'] = result['validatedComplete'] and result['proofAfterCollector'] == expected_proof
+         receipt['runs'].append(result)
+@@ -242,8 +250,20 @@
+                     rec.error('RESTORATION_COMPILE_EXCEPTION_' + type(error).__name__)
+                 native.drain()
+                 boundary()
+-                if not journal.originals_match():
+-                    rec.hold('RESTORED_BYTES_MODE_CHANGED_DURING_ORIGINAL_COMPILE', lock)
++                integrity_failure = None
++                try:
++                    original_integrity = journal.originals_match()
++                except BaseException as error:
++                    original_integrity = False
++                    integrity_failure = 'ORIGINAL_INTEGRITY_OBSERVATION_' + type(error).__name__
++                    rec.error(integrity_failure)
++                if not original_integrity:
++                    receipt['finalizedSuccess'] = False
++                    receipt['keptSuccessfulFreezeUnit'] = False
++                    receipt['sourceRestored'] = False
++                    receipt['originalCompileSucceeded'] = False
++                    native.drain(); boundary()
++                    rec.hold(integrity_failure or 'RESTORED_BYTES_MODE_CHANGED_DURING_ORIGINAL_COMPILE', lock)
+                 if not receipt['originalCompileSucceeded']:
+                     rec.hold('ORIGINAL_COMPILE_FAILED_HOLD_NO_RETRY_OR_RELEASE', lock)
+         receipt['keptSuccessfulFreezeUnit'] = bool(keep)
+@@ -254,15 +274,31 @@
+             receipt['finalizedSuccess'] = False
+             receipt['keptSuccessfulFreezeUnit'] = False
+             receipt['status'] = 'RESTORING_AFTER_TERMINAL_PERSISTENCE_FAILURE'
+-            if not journal.restore():
+-                rec.hold('POST_DECISION_RESTORE_INCOMPLETE_HOLD', lock)
+-            receipt['sourceRestored'] = True
+-            receipt['originalCompileSucceeded'] = compile_unit('post-decision-original-compile') == 0
++            post_failure = None
++            try:
++                receipt['sourceRestored'] = journal.restore()
++                if not receipt['sourceRestored']:
++                    post_failure = 'POST_DECISION_RESTORE_INCOMPLETE_HOLD'
++                else:
++                    receipt['originalCompileExit'] = compile_unit('post-decision-original-compile')
++                    receipt['originalCompileSucceeded'] = receipt['originalCompileExit'] == 0
++                    if not receipt['originalCompileSucceeded']:
++                        post_failure = 'POST_DECISION_ORIGINAL_COMPILE_FAILED_HOLD'
++                    elif not journal.originals_match():
++                        post_failure = 'POST_DECISION_RESTORED_BYTES_MODE_CHANGED'
++            except BaseException as error:
++                post_failure = 'POST_DECISION_COMPILE_OR_INTEGRITY_EXCEPTION_' + type(error).__name__
++                rec.error(post_failure)
++                receipt['sourceRestored'] = False
++                receipt['originalCompileSucceeded'] = False
++            # No post-compile IO/assessment exception escapes to the unlocking parent.
+             native.drain(); boundary()
+-            if not journal.originals_match():
+-                rec.hold('POST_DECISION_RESTORED_BYTES_MODE_CHANGED', lock)
+-            if not receipt['originalCompileSucceeded']:
+-                rec.hold('POST_DECISION_ORIGINAL_COMPILE_FAILED_HOLD', lock)
++            if post_failure is not None:
++                receipt['finalizedSuccess'] = False
++                receipt['keptSuccessfulFreezeUnit'] = False
++                receipt['sourceRestored'] = False
++                receipt['originalCompileSucceeded'] = False
++                rec.hold(post_failure, lock)
+             receipt['keptSuccessfulFreezeUnit'] = False
+             receipt['status'] = 'TERMINAL_SAFE_SOURCE_EVIDENCE_INCOMPLETE'
+             rec.emit('TERMINAL_PERSISTENCE_FAILED_RESTORED')
+--- a/validate_collector.py
++++ b/validate_collector.py
+@@ -6,15 +6,18 @@
+ import re
+ import xml.etree.ElementTree as ET
+ from driver_support import file_state, safe_path
++from report_resources import load_policy, classify, dynamic_paths, verify_producers
+ 
+ 
+-def validate(root, execution, label, classes, tasks, expected_cases, child_exit, ended_epoch):
++def validate(root, execution, label, classes, tasks, expected_cases, child_exit, ended_epoch, resource_policy=None):
+     path = safe_path(root, execution / (label + '-results.json'))
+     snapshot = file_state(path)
+     if snapshot is None:
+         raise ValueError('COLLECTOR_RECEIPT_MISSING')
+     result = json.loads(snapshot['bytes'])
+     started = datetime.datetime.fromisoformat(result['started']).timestamp()
++    policy = resource_policy if resource_policy is not None else load_policy(root)
++    producers, resources, active_html = {}, [], {task: set() for task in tasks}
+     failures = []
+     if child_exit != 0 or result.get('exit') != 0 or result.get('gradleExit') != 0:
+         failures.append('NONZERO_COLLECTOR_OR_NATIVE')
+@@ -40,15 +43,28 @@
+             if (current is None or current['sha256'] != entry['sha256']
+                     or len(current['bytes']) != entry['bytes']
+                     or current['mtimeNs'] != entry['mtimeNs']
+-                    or entry.get('mode') is not None and oct(current['mode']) != entry['mode']
+-                    or not started <= entry['mtimeNs'] / 1e9 <= ended_epoch + 2):
++                    or oct(current['mode']) != entry['mode']):
+                 raise ValueError('ARCHIVE_HASH_SIZE_OR_ORIGINAL_FRESHNESS_INVALID')
++            inherited = False
++            if group == 'testHtmlFiles':
++                classification = classify(root, execution, label, entry, current, tasks, cases, policy, producers)
++                inherited = classification['kind'] != 'DYNAMIC_ACTIVE_HTML'
++                if inherited:
++                    resources.append(classification)
++                else:
++                    active_html[entry['task']].add(classification['relativePath'])
++            if not inherited and not started <= entry['mtimeNs'] / 1e9 <= ended_epoch + 2:
++                raise ValueError('DYNAMIC_ARCHIVE_ORIGINAL_NOT_FRESH')
+             if group == 'xmlFiles':
+                 suite = ET.fromstring(current['bytes'])
+                 for case in suite.iter('testcase'):
+                     status = ('FAIL' if case.find('failure') is not None or case.find('error') is not None
+                               else 'SKIP' if case.find('skipped') is not None else 'PASS')
+                     xml_cases.append((entry['task'], case.get('classname'), case.get('name'), status))
++    for task in tasks:
++        if active_html[task] != dynamic_paths(cases, task):
++            failures.append('ACTIVE_REPORT_HTML_SCOPE_INCOMPLETE:' + task)
++    verify_producers(producers)
+     actual = Counter((c['task'], c['class'], c['name'], c['status']) for c in cases)
+     if Counter(xml_cases) != actual:
+         failures.append('FRESH_XML_MULTISET_MISMATCH')
+@@ -86,5 +102,7 @@
+     return {'validatedComplete': not failures, 'failures': failures,
+             'collectorReceiptSha256': snapshot['sha256'], 'expectedCases': sum(wanted.values()),
+             'actualCases': len(cases), 'nativeTasks': {task: statuses.get(task) for task in tasks},
++            'inheritedStaticResources': resources,
++            'resourcePolicyNoFreshnessCredit': True,
+             'redVerdict': 'UNASSESSED_REQUIRES_EXACT_NEW_ASSERTION_LINES',
+             'notQaOrLaneVerdict': True}
+--- /dev/null
++++ b/report_resources.py
+@@ -0,0 +1,102 @@
++"""Only three exact pinned Gradle8.10.2 test-report resources; no result freshness credit."""
++import io
++import json
++from pathlib import Path
++import zipfile
++from driver_support import file_state, safe_path
++
++POLICY_SHA256 = '8b36d0b7306eaca8f31300b2a3cadd615024a13414a82b9968f8235d06f7cb1f'
++CATALOG_SHA256 = '3be436be6ec4784ee393c16aee0aaf65d7620b4aed9fabfb73c68b4be09e359e'
++
++
++def load_policy(root, policy_path=None):
++    path = policy_path or Path(__file__).resolve().with_name('report-resource-policy.json')
++    current = file_state(safe_path(root, path))
++    if current is None or current['sha256'] != POLICY_SHA256:
++        raise ValueError('PINNED_RESOURCE_POLICY_CHANGED')
++    policy = json.loads(current['bytes'])
++    for reference in policy['reviewedInputs'].values():
++        if file_state(safe_path(root, reference['path']))['sha256'] != reference['sha256']:
++            raise ValueError('RESOURCE_POLICY_REVIEW_OR_ADOPTION_CHANGED')
++    binding = policy['reviewedInputs']['catalog']
++    if binding['sha256'] != CATALOG_SHA256:
++        raise ValueError('PINNED_23_RESOURCE_CATALOG_REQUIRED')
++    catalog = json.loads(file_state(safe_path(root, binding['path']))['bytes'])
++    expected = [item for item in catalog['resources'] if item['generator'] == 'Gradle8.10.2-test-report']
++    if len(catalog['resources']) != 23 or len(expected) != 3 or policy['resources'] != expected:
++        raise ValueError('EXACT_THREE_GRADLE_RESOURCES_REQUIRED')
++    declaration = policy['producerDeclaration']
++    if file_state(safe_path(root, declaration['path']))['sha256'] != declaration['sha256']:
++        raise ValueError('PINNED_GRADLE_PRODUCER_DECLARATION_CHANGED')
++    return policy
++
++
++def dependency(path):
++    path = Path(path)
++    if not path.is_absolute() or '..' in path.parts:
++        raise ValueError('PINNED_ABSOLUTE_JAR_PATH_REQUIRED')
++    for item in (path, *path.parents):
++        if item.is_symlink():
++            raise ValueError('PRODUCER_JAR_SYMLINK')
++    return file_state(path)
++
++
++def dynamic_paths(cases, task):
++    classes = {item['class'] for item in cases if item['task'] == task}
++    return {'index.html'} | {'classes/' + name + '.html' for name in classes} | {
++        'packages/' + name.rsplit('.', 1)[0] + '.html' for name in classes}
++
++
++def classify(root, execution, label, entry, current, tasks, cases, policy, producers):
++    task = entry.get('task')
++    if task not in tasks:
++        raise ValueError('REPORT_TASK_NOT_SELECTED')
++    artifact = safe_path(root, entry['path'])
++    archive_root = safe_path(root, execution / (label + '-task-outputs') / task / 'html')
++    try:
++        relative = artifact.relative_to(archive_root).as_posix()
++    except ValueError:
++        raise ValueError('REPORT_OUTSIDE_EXACT_TASK_HTML_ROOT') from None
++    matches = [item for item in policy['resources'] if item['reportRelativePath'] == relative]
++    if not matches:
++        if relative not in dynamic_paths(cases, task):
++            raise ValueError('UNKNOWN_OR_MISPLACED_REPORT_RESOURCE')
++        return {'kind': 'DYNAMIC_ACTIVE_HTML', 'task': task, 'relativePath': relative}
++    if len(matches) != 1:
++        raise ValueError('AMBIGUOUS_STATIC_RESOURCE')
++    item = matches[0]
++    jar_path = item['dependencyJarPath']
++    if jar_path not in producers:
++        fact = dependency(jar_path)
++        if (fact is None or fact['sha256'] != item['dependencyJarSha256']
++                or len(fact['bytes']) != policy['producerJarBytes'][jar_path]):
++            raise ValueError('PINNED_PRODUCER_JAR_HASH_OR_SIZE_CHANGED')
++        producers[jar_path] = fact
++    producer = producers[jar_path]
++    if producer['sha256'] != item['dependencyJarSha256']:
++        raise ValueError('PRODUCER_CATALOG_BINDING_CHANGED')
++    with zipfile.ZipFile(io.BytesIO(producer['bytes'])) as archive:
++        entries = [info for info in archive.infolist() if info.filename == item['dependencyEntry']]
++        if len(entries) != 1 or entries[0].is_dir():
++            raise ValueError('PRODUCER_ENTRY_MISSING_OR_AMBIGUOUS')
++        data = archive.read(entries[0])
++    from driver_support import sha
++    if (sha(data) != item['resourceSha256'] or len(data) != item['resourceBytes']
++            or current['sha256'] != item['resourceSha256']
++            or len(current['bytes']) != item['resourceBytes']):
++        raise ValueError('EXACT_STATIC_RESOURCE_CONTENT_CHANGED')
++    return {'kind': policy['classification'], 'task': task, 'relativePath': relative,
++            'originalReportRoot': policy['originalReportRoot'].format(task=task),
++            'producerJarPath': jar_path, 'producerJarSha256': producer['sha256'],
++            'producerJarBytes': len(producer['bytes']), 'entry': item['dependencyEntry'],
++            'sha256': current['sha256'], 'bytes': len(current['bytes']),
++            'mode': oct(current['mode']), 'originalMtimeNs': current['mtimeNs'],
++            'freshnessCredit': False, 'caseCoverageRuntimeCredit': False}
++
++
++def verify_producers(producers):
++    for path, original in producers.items():
++        current = dependency(path)
++        if current is None or any(current[key] != original[key]
++                for key in ['sha256', 'mode', 'dev', 'ino', 'mtimeNs']):
++            raise ValueError('PRODUCER_CHANGED_DURING_ASSESSMENT')
+--- /dev/null
++++ b/report-resource-policy.json
+@@ -0,0 +1,75 @@
++{
++  "schemaVersion": 1,
++  "scope": "GSMb selected test task report archives only; three exact pinned Gradle8.10.2 resources; no JaCoCo/whole-run/coverage exception",
++  "noRuntimeAuthority": "Reviewed same03 protocol/content distinction is an input, not an authorization to run GSMb or relabel any harness. Fresh phase authorization and independent corrected-driver review remain owed.",
++  "reviewedInputs": {
++    "catalog": {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/report-static-assets-review/proposed-static-resource-catalog.json",
++      "sha256": "3be436be6ec4784ee393c16aee0aaf65d7620b4aed9fabfb73c68b4be09e359e"
++    },
++    "architecture": {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/report-static-assets-review/review.md",
++      "sha256": "0416ce0fce705608a0860fed32de71718a30973ac938846d9e326c96f036c4de"
++    },
++    "protocol": {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/report-static-assets-review/post-terminal-protocol.md",
++      "sha256": "b15f9aa304e75709032fc756769cabfffee85c3ce22102869146c2fba5544f0d"
++    },
++    "independentQuinn": {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/report-static-protocol-review/review.md",
++      "sha256": "ec0e67b21cbf8192b17f8bf73baf8ada3cd49fd42ec5755d58fc59c1fa67ad26"
++    },
++    "rootSame03ConditionalAdoption": {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-report-static-protocol-root-adoption.json",
++      "sha256": "0a96a75830856906e4912cb50e0c8419c838003eab48390925723755fa5ad1f0"
++    }
++  },
++  "producerDeclaration": {
++    "path": "backend/gradle/wrapper/gradle-wrapper.properties",
++    "sha256": "23b7b98fa7f086c7310fb49d39084bdb472003a03f3b8508b43098f381d53114"
++  },
++  "archiveReportRoot": "execution/{label}-task-outputs/{task}/html",
++  "originalReportRoot": "backend/build/reports/tests/{task}",
++  "resources": [
++    {
++      "generator": "Gradle8.10.2-test-report",
++      "reportRelativePath": "css/base-style.css",
++      "dependencyJarPath": "/Users/brunobuger/.gradle/wrapper/dists/gradle-8.10.2-bin/a04bxjujx95o3nb99gddekhwo/gradle-8.10.2/lib/gradle-core-8.10.2.jar",
++      "dependencyJarSha256": "7324a13de64df67259cb95de18c0a79a5b51acec020f5ee1f3a3474446522637",
++      "dependencyEntry": "org/gradle/reporting/base-style.css",
++      "resourceSha256": "a10a4ef75ca2601b44bfdaf3112a5854f6376f68d7cbaf6958286f04488d293b",
++      "resourceBytes": 2645,
++      "classification": "INHERITED_STATIC_RENDER_RESOURCE_NO_CASE_CREDIT",
++      "mtimeRule": "original timestamp preserved; no minimum current-run time if exact path+dependency+entry+resource hash all proven"
++    },
++    {
++      "generator": "Gradle8.10.2-test-report",
++      "reportRelativePath": "js/report.js",
++      "dependencyJarPath": "/Users/brunobuger/.gradle/wrapper/dists/gradle-8.10.2-bin/a04bxjujx95o3nb99gddekhwo/gradle-8.10.2/lib/gradle-core-8.10.2.jar",
++      "dependencyJarSha256": "7324a13de64df67259cb95de18c0a79a5b51acec020f5ee1f3a3474446522637",
++      "dependencyEntry": "org/gradle/reporting/report.js",
++      "resourceSha256": "fc89c6d002d18f4662065c9887b2cda8f8486f2737d4ad0f2fdeac0ad58a44dc",
++      "resourceBytes": 5252,
++      "classification": "INHERITED_STATIC_RENDER_RESOURCE_NO_CASE_CREDIT",
++      "mtimeRule": "original timestamp preserved; no minimum current-run time if exact path+dependency+entry+resource hash all proven"
++    },
++    {
++      "generator": "Gradle8.10.2-test-report",
++      "reportRelativePath": "css/style.css",
++      "dependencyJarPath": "/Users/brunobuger/.gradle/wrapper/dists/gradle-8.10.2-bin/a04bxjujx95o3nb99gddekhwo/gradle-8.10.2/lib/plugins/gradle-testing-base-8.10.2.jar",
++      "dependencyJarSha256": "0cf59ddbd7503ca6979ee871d7eeef7553535b3ad3f8897f90f3a8e73f0fb6ad",
++      "dependencyEntry": "org/gradle/api/internal/tasks/testing/report/style.css",
++      "resourceSha256": "61866908fd7eb09c79e96239f69db2e8cc5c6526cdb308eba0535ed2a0f6a263",
++      "resourceBytes": 1135,
++      "classification": "INHERITED_STATIC_RENDER_RESOURCE_NO_CASE_CREDIT",
++      "mtimeRule": "original timestamp preserved; no minimum current-run time if exact path+dependency+entry+resource hash all proven"
++    }
++  ],
++  "producerJarBytes": {
++    "/Users/brunobuger/.gradle/wrapper/dists/gradle-8.10.2-bin/a04bxjujx95o3nb99gddekhwo/gradle-8.10.2/lib/gradle-core-8.10.2.jar": 3193323,
++    "/Users/brunobuger/.gradle/wrapper/dists/gradle-8.10.2-bin/a04bxjujx95o3nb99gddekhwo/gradle-8.10.2/lib/plugins/gradle-testing-base-8.10.2.jar": 207507
++  },
++  "classification": "INHERITED_STATIC_RENDER_RESOURCE_NO_CASE_COVERAGE_OR_RUNTIME_FRESHNESS_CREDIT",
++  "unknownResource": "REJECT; never suffix/directory blanket",
++  "dynamicFreshness": "Strict original within-run mtime for active HTML/XML/exec/cohort/guard outputs, plus exact archive mtime/hash/size/mode/containment for all files"
++}

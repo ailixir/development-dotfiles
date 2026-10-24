@@ -1,0 +1,539 @@
+{
+ "artifact": "STUDIO-OBS-011 11-IT-R read-only prep (t0/early/11-IT-R)",
+ "preparedBy": "Dex (@dev), 2026-10-18, during B1; read-only (grep, sed, cat, python3 -I, zipfile listing of the awaitility jar). No gradle, node, test, javap or git write. Nothing under backend/ was touched; scratch analysis files live in the session scratchpad.",
+ "companions": [
+  "sleep-table.tsv (95 rows, this folder)"
+ ],
+ "target": {
+  "file": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "sha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "lines": 34454,
+  "startDigest": "HEAD b39359f78; source 061fc41f...; read at S_011 [V]",
+  "bindsOnlyWhileShaUnchanged": true,
+  "applyPreflight": "shasum -a 256 the file; it must equal the value above (ReplayIT is read-only through 11-GS-M part b). If not, re-anchor every line number below by symbol grep before the first edit."
+ },
+ "census": {
+  "grep -c '\\\\.sleep('": 95,
+  "grep -c 'Thread.sleep'": 94,
+  "TimeUnit.NANOSECONDS.sleep": 1,
+  "positiveControlForTheGrep": "grep -c 'p3AwaitExecution' = 19 and grep -c 'AUDIT_CANARIES' = 30 at S_011 [V]; run them in the same command so a 0 cannot mean a broken grep",
+  "POLL": 74,
+  "DELIBERATE": 21,
+  "deliberateIds": [
+   12,
+   13,
+   24,
+   25,
+   26,
+   27,
+   28,
+   39,
+   40,
+   46,
+   53,
+   56,
+   57,
+   59,
+   65,
+   68,
+   71,
+   76,
+   88,
+   91,
+   92
+  ],
+  "pollBatches": {
+   "B1": {
+    "count": 15,
+    "ids": [
+     7,
+     16,
+     22,
+     34,
+     35,
+     36,
+     45,
+     48,
+     51,
+     58,
+     61,
+     62,
+     82,
+     86,
+     87
+    ]
+   },
+   "B2": {
+    "count": 23,
+    "ids": [
+     8,
+     9,
+     10,
+     11,
+     14,
+     15,
+     17,
+     18,
+     19,
+     20,
+     21,
+     23,
+     29,
+     30,
+     31,
+     32,
+     33,
+     37,
+     38,
+     41,
+     42,
+     43,
+     84
+    ]
+   },
+   "B3": {
+    "count": 24,
+    "ids": [
+     44,
+     47,
+     49,
+     50,
+     52,
+     54,
+     55,
+     60,
+     63,
+     67,
+     69,
+     72,
+     73,
+     74,
+     75,
+     77,
+     78,
+     79,
+     80,
+     81,
+     83,
+     85,
+     89,
+     90
+    ]
+   },
+   "B4": {
+    "count": 12,
+    "ids": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     64,
+     66,
+     70,
+     93,
+     94,
+     95
+    ]
+   }
+  },
+  "grepAfterApply": {
+   "allPollConverted": 21,
+   "B4Carried(12)": 33,
+   "onlyThe6UnprovableCarried(ids 1,2,4,6,93,95)": 27
+  },
+  "onTimeoutMix": {
+   "RETURN_LAST": 52,
+   "MAP_EXCEPTION": 10,
+   "FALL_THROUGH": 7,
+   "FAIL_AT_WAIT": 5
+  },
+  "note": "Every row of sleep-table.tsv carries line, enclosing method, class, reason, replacement, batch, on_timeout and whether a green run reaches it. Lines are S_011 lines."
+ },
+ "wallTimeExpectation": "[I] Converting the 74 POLL sleeps will not move ReplayIT's wall time (about 1066 s, i.e. 18 min). Every POLL interval is 5-100 ms with deadlines of 2-120 s, so a converted loop saves at most one interval per wait. The elapsed time is browser, runner and DELIBERATE real-time waits (natural lease/grant/preparation expiry, the original run deadline in Order 26, 5 s Retry-After in Order 27, 1.1-3 s negative windows). AC-5 asks for before/after, not a reduction; report a flat time as expected (Dex RC-5, brief).",
+ "awaitilityFacts": {
+  "version": "4.2.2 [V jar in ~/.gradle cache]",
+  "apiNamesPresentInConditionFactory": "pollInSameThread, alias, pollDelay, pollInterval, atMost, until(Callable,Predicate), untilAsserted, ignoreExceptions, failFast, conditionEvaluationListener [V constant-pool scan]",
+  "pollDelayDefault": "equals the poll interval; every converted loop that checked first must set pollDelay(Duration.ZERO) [I from Awaitility documentation, not run]",
+  "exceptions": "an exception thrown by an until(Callable) condition propagates at once unless ignoreExceptions() is set; untilAsserted retries AssertionError [I, not run; the first green run of batch B1 proves it]",
+  "ConditionTimeoutException": "unchecked, so existing catch (Exception | Error) blocks and p3AttemptTeardown still work"
+ },
+ "conversionRules": [
+  "Only POLL rows are converted; DELIBERATE rows keep their sleep and their reason stays in sleep-table.tsv and the receipt (no code comment unless the site has none and the receipt needs one).",
+  "atMost = the deadline the loop already had; pollInterval = its interval; pollDelay(Duration.ZERO) where the loop checked before sleeping; pollInSameThread() always (sessions.transaction, ThreadLocal B1 state, p3 helpers are thread-affine or cheap); alias names the condition.",
+  "Behaviour-identical by default: where the original fell through to an assertion or returned the last value on timeout, use the private helper awaitLast (below), which swallows ConditionTimeoutException and returns the last observed value, so the caller's existing assertion stays the contract and no timeout turns a former pass into a new red. Rows marked MAP_EXCEPTION keep their exact AssertionError/IllegalStateException text; FAIL_AT_WAIT rows already asserted inside the loop.",
+  "No new @Test method, no rename (SINGLETON_METHODS, INCREMENTAL_METHODS and build.gradle.kts joinedDefaultMethods select by name; grep -c '^  @Test$' stays 73 and ParameterizedTest stays 1).",
+  "No weaker assertion; no change to the R10-rev2-2 wrapper-only diagnostic (STUDIO-OBS-009 AC-12), the 012A canary scan content, or any DELIBERATE window length.",
+  "Hand-format and anchor edits by exact-once text anchors (build.py), not line numbers: ReplayIT is not google-java-format clean (925 lines over 100 columns) so never run the spotless IDE hook on it; produce the patch with git diff --no-index --histogram; compare checkstyle only on added lines (memory: tooling_replayit_patch_and_lint, tooling_gradle_focused_runs)."
+ ],
+ "helperProposal": {
+  "where": "private static method inside GuidedPublicationReplayIT (not a shared file; the T0 ruling bars Await.java and a shared wrapper, which this is not). IDS: ADAPT of the existing awaitJoinedVideo/awaitState loop shapes in the same file.",
+  "deviationToFlag": "R-5w v3 says 'use Awaitility directly'. The helper still calls Awaitility directly; it only centralises the try/catch that keeps the old fall-through. If @qa prefers inline calls, ~52 sites grow by 5-8 lines each; the plan and counts do not change.",
+  "code": [
+   "private static <T> T awaitLast(String alias, java.time.Duration atMost, java.time.Duration interval,",
+   "    java.util.concurrent.Callable<T> read, java.util.function.Predicate<? super T> done) {",
+   "  var last = new java.util.concurrent.atomic.AtomicReference<T>();",
+   "  try {",
+   "    org.awaitility.Awaitility.await(alias).atMost(atMost).pollDelay(java.time.Duration.ZERO)",
+   "        .pollInterval(interval).pollInSameThread()",
+   "        .until(() -> { T value = read.call(); last.set(value); return done.test(value); });",
+   "  } catch (org.awaitility.core.ConditionTimeoutException expired) {",
+   "    // The old loops fell through; the caller's own assertion decides, with its own message.",
+   "  }",
+   "  return last.get();",
+   "}"
+  ]
+ },
+ "test001": {
+  "story": "AC-5 cleanup item TEST-001 a-d (R-TEST-001); goes first.",
+  "rootCause": [
+   "Order(3) reads publishedTestId, currentPublishedSession and currentPublishedReceipt (instance fields, PER_CLASS lifecycle, :4778-4780) that Order(1) writes (publishedTestId :17974; currentPublished* :18515-18516 inside schedulerAndNewHead, called from Order 1). C10 attempt01 proved this at :18379 on an older tree [V qa-local-validation-record.md section 6].",
+   "Order(2) reads publishedTestId at :17980 and asserts it is non-null (:17981).",
+   "The two P7 tests do not read another test's fields. They fail alone in the teardown: C5Capture.close() runs scanCompleteAuditStream (:31804), which asserts AUDIT_CANARIES is non-empty (:34431) and that the audit stream holds GUIDED_ACTION_ADMITTED and REPLAY_DISPATCHED (:34432-34435). In the test lane the only registrar before Orders 27/28 is Order 9 (:19456) [V grep of the 17 AUDIT_CANARIES add sites]. Observed alone: w8-flake-p7-01/02 failed with the teardown assertion and no body failure (STUDIO-OBS-015 backend/w8-flake-fix01/review.md section 4); that the bodies pass is inferred there, not proven.",
+   "The same scan runs in AfterAll (scanFinalOwnedSinks :3447, scanFinalAuditBoundary :3570), so ANY subset run that lacks a canary registrar or a replay fails at class level, not only P7."
+  ],
+  "sharedStateInventory": [
+   {
+    "id": "S1",
+    "state": "publishedTestId, currentPublishedSession, currentPublishedReceipt (instance, :4778-4780)",
+    "writers": "Order 1 (:17974, :18515-18516)",
+    "readers": "Order 2 (:17980), Order 3 (:18392-18463)",
+    "consequence": "Orders 2 and 3 cannot run alone. Order 3 also mutates the shared test (PUT makes sourceRevision 2, :18421-18435), so a single shared fixture would break Order 2 if Order 3 ran first.",
+    "fix": "D2"
+   },
+   {
+    "id": "S2",
+    "state": "class fixtures made by Order 1: startWorkers() (:17623: guided and ordinary workers, worker.jwt, worker.json, governed policies for CSI-123 and CSI-456, initial-context-state.json) and the users/csi_systems('CSI-123') rows (:17659-17667)",
+    "writers": "Order 1; later tests that call startWorkers/p3Case",
+    "readers": "without a start of their own: Orders 2, 3 (via S1), 4, 5, 6, 7, 8 (createSource inserts ui_tests with csi 'CSI-123' and startLearning needs the guided worker) and the two Order 9 methods",
+    "notNeeded": "Orders >= 10 (p3Case starts workers when null, :24053), the incremental family (own startWorkers and own CSI), Order 19, Order 39",
+    "fix": "D3"
+   },
+   {
+    "id": "S3",
+    "state": "global counters read as ABSOLUTE values: RECEIPTS, NAVIGATIONS, VALUES",
+    "readers": "Order 1 only: :17757 (containsExactly VALUES.get(0)), :17758, :17772, :17773, :17928, :17929, :17930, :17957, :17958 [V grep of literal comparisons across the file; all other tests use before-snapshots]",
+    "consequence": "Order 1 passes only if it is the first test to touch /flow. Runs in another order fail even though no test reads another test's state.",
+    "fix": "D4"
+   },
+   {
+    "id": "S4",
+    "state": "AUDIT_CANARIES (:540) and AUDIT_EVENTS (:536) vacuity controls in scanCompleteAuditStream (:34429-34452)",
+    "callSites": "C5Capture.close :31804 (O9a, Order 37, P7 x2, Orders 33-36, Orders 29-32), scanFinalOwnedSinks :3447, scanFinalAuditBoundary :3570, Order 39 :34426",
+    "consequence": "Every C5Capture-based case, and any subset run, fails alone or at AfterAll unless a registrar and both event kinds were produced earlier in the JVM.",
+    "fix": "D1 + D5"
+   },
+   {
+    "id": "S5",
+    "state": "cleanupUnconfirmed (instance, sticky) asserted in @BeforeEach :3765-3767",
+    "consequence": "one failed worker teardown fails every later test, so one failure reads as many. This is the fail-stop and is kept.",
+    "fix": "D6 (message only) or leave"
+   },
+   {
+    "id": "S6",
+    "state": "static per-case switches: coreRole (reset @BeforeEach), primaryCsi (restored by p3Case finally; asserted == CSI-123 at :3774), secretLoginScenario/s2TraceBinding (:19468-19469, reset :19785-19786), P7_OUTAGE_SCOPE (reset in both finally blocks), asynchronousPage (finally), incrementalCsiRestorePending (reset in @AfterEach :3964), c5Capture (cleared in finally when cleanupUnconfirmed is false)",
+    "consequence": "none found [I from reading the try/finally structure]; preReadyId (:18042, reset :18148 outside a finally) can leak after an Order 2 failure but is read only by hooks that compare ids, so it is harmless [I]"
+   },
+   {
+    "id": "S7",
+    "state": "two methods share @Order(9) (:19407 actualSecretLogin..., :20142 guidedRecorderFault...)",
+    "consequence": "their relative order is unspecified; no dependence between them found [I]. Not changed."
+   },
+   {
+    "id": "S8",
+    "state": "worker-side S2 observer is single-use per guided-worker lifetime (memory: project_replayit_s2_single_use)",
+    "consequence": "only O9a calls beginS2 [V grep]; alone it is the first S2 case, so no change"
+   }
+  ],
+  "fixes": [
+   {
+    "id": "D1",
+    "what": "C5Capture constructor registers its canary values: AUDIT_CANARIES.addAll(values).",
+    "why": "The five C5Capture users (O9a, Order 37, P7 x2, Orders 29-32, Orders 33-36) plant secret values that must never reach the audit stream; today only O9a also registers them. This makes their own in-test scan non-vacuous when they run alone. It adds coverage (the audit scan now also covers C4/C5 values), it removes none.",
+    "lines": "~2 (constructor near :30768)",
+    "risk": "low: values are random UUID-suffixed strings; audit events carry ids and codes only"
+   },
+   {
+    "id": "D5",
+    "what": "Split scanCompleteAuditStream into scanAuditContent() (closed shape, 1 KiB, no canary; what C5Capture.close keeps calling) and assertAuditControls() (canaries non-empty, admitted and dispatched events present). The three class-wide call sites (scanFinalOwnedSinks :3447, scanFinalAuditBoundary :3570, Order 39 :34426) call assertAuditControls() only when wholeLaneRan() is true.",
+    "wholeLaneRan": "the set of FIXTURE_INVOCATIONS methods contains every method of the lane: for ORIGINAL_4000 that is SINGLETON_METHODS minus INCREMENTAL_METHODS (equals the 46 names of build.gradle.kts joinedDefaultMethods [V python3 -I set comparison, difference empty]); for INCREMENTAL_2048 it is INCREMENTAL_METHODS.",
+    "why": "The controls are positive controls for a whole-class run. A subset invocation cannot satisfy them, so every single-test run died in AfterAll or in a C5 close. In the full class both lanes enforce exactly what they enforce today (Order 39 and AfterAll); only the earlier mid-class vacuity check at C5 closes is dropped, while the content scan there is unchanged.",
+    "lines": "~25",
+    "risk": "medium: it is the only change to an assertion helper; @qa should confirm 'not weaker' on the full-lane equivalence. Mutant M-gate proves the controls still bite."
+   },
+   {
+    "id": "D2",
+    "what": "Replace the three loose fields by explicit lazy state: ensurePublished() builds a published test only when absent (createSource(TEXT), startLearning, awaitFinalizing, finalize 200; sets the three fields) and forgetPublished() clears it. Order 1 keeps setting the fields exactly as today (zero extra cost in class order). Order 2 and Order 3 start with ensurePublished(). Order 3 calls forgetPublished() in a finally, because it edits the source.",
+    "why": "Order 2 and Order 3 become self-sufficient and order independent at no cost in the in-order class: the memo from Order 1 is used, and Order 3 invalidates it so a later Order 2 would rebuild. Alone or reversed they each pay one learning (about 30 s [I]) on the CSI-123 daily budget.",
+    "lines": "~45",
+    "risk": "low-medium: needs ensureClassFixtures() (D3); Order 3 asserts readiness SOURCE_CHANGED on a head session, which a single fresh session also gives [I from reading :18444-18455]"
+   },
+   {
+    "id": "D3",
+    "what": "ensureClassFixtures(): insert users('user-1') and csi_systems('CSI-123') with ON CONFLICT DO NOTHING (the same SQL as :17659-17667 and p3Case :24041-24049) and, when guidedWorker or ordinaryWorker is null or not alive, startWorkers(). Call it as the first statement of Orders 2-8 and both Order 9 methods. Order 1 keeps its own startWorkers() (unchanged). No @BeforeEach hook, so incremental and p3Case tests do not pay for a second start.",
+    "why": "Orders 2-9 read class fixtures that only Order 1 creates.",
+    "lines": "~15 + 10 call sites",
+    "risk": "low: ADAPT of the p3Case prelude (:24053-24055). In class order the guard is a no-op after Order 1; the isAlive test can only add a restart where the old run would have failed on a dead worker."
+   },
+   {
+    "id": "D4",
+    "what": "Order 1: take int nav0 = NAVIGATIONS.get(), rec0 = RECEIPTS.size(), val0 = VALUES.size() before the first learning and compare against subList(rec0..)/subList(val0..) and nav0 + n at :17757, :17758, :17772, :17773, :17928-17930, :17957, :17958.",
+    "why": "Removes the 'first test in the JVM' assumption without changing a single expected value in class order (all baselines are 0 there).",
+    "lines": "~12",
+    "risk": "low, mechanical; equality with the old asserts when baselines are 0"
+   },
+   {
+    "id": "D6",
+    "what": "Optional: record the first failing test name when cleanupUnconfirmed is set and put it in the @BeforeEach assertion message.",
+    "why": "The cascade is a deliberate fail-stop (no restart over unreaped workers). Naming the first failure makes the cascade read as one failure without weakening it.",
+    "lines": "~6",
+    "risk": "low; skip if @qa wants zero change to the fail-stop"
+   }
+  ],
+  "testsClaimedIndependent": {
+   "provenByRun": [
+    "P7 actualPoolDefiniteRefusal... alone",
+    "P7 actualScopedVaultOutage... alone",
+    "P7 pair reversed (28 then 27)",
+    "Order 2 alone",
+    "Order 3 alone",
+    "Order 3 then Order 2 (reversed)"
+   ],
+   "provenBySpotCheck(optional)": [
+    "Order 4 alone (D3 path)",
+    "Order 33 alone (C5 user other than P7; D1+D5)",
+    "Order 4 before Order 1 (D3+D4)"
+   ],
+   "byConstructionOnly": "Orders 5-9, 10-26, 29-38 and the default-lane unordered tests: they start their own workers (p3Case/startWorkers) or use ensureClassFixtures(); no run alone is planned for them [I]. Reading found no other cross-test field.",
+   "namedCarriedUnlessQaRules": [
+    {
+     "test": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass (Order 39)",
+     "reason": "It asserts a property of every other test's output, so alone it can only pass vacuously after D5. It is class-scoped by definition (name, javadoc :34416-34421).",
+     "owner": "@dev, @qa confirms"
+    },
+    {
+     "test": "the 28 guidedIncrementalTest methods and the 35 joined variants",
+     "reason": "Out of the TEST-001 evidence set (c); they run in forkEvery=1 with their own per-parent CSI and worker start. Single runs are not planned.",
+     "owner": "@dev"
+    }
+   ]
+  },
+  "openUnknowns": [
+   "Whether the P7 bodies and the other AfterAll gates (assertProviderFactsComplete, refreshActualResponseDispositions, retainFinalCohort, GuardDecisionTally.write) pass for a one-test invocation. w8-flake-p7 saw only the audit assertion, but a first red can hide the next. Budget two extra single-test iterations; the red-first runs R1/R2 tell us which gate is next.",
+   "Whether REPLAY_DISPATCHED is emitted for a refused first dispatch in P7b (the outage case never sends) [I: the second dispatch sends, so yes].",
+   "Whether a single @Test selection on the test task starts the DirtiesContext/PER_CLASS lifecycle cleanly (w8-flake-p7 and C10 ran such selections, so yes) [V by their logs]."
+  ]
+ },
+ "applyPlan": {
+  "gate": "start only after root records the 11-GS-M part b hand-over and the ReplayIT sha256; verify the sha before the first edit; record sha256 before and after every batch.",
+  "order": "TEST-001 first (S0), then B1, B2, B3, B4. A batch is kept only if the next full class run is green. Stop at the end of apply day 2 or the 6th full-class run, whichever comes first.",
+  "batches": [
+   {
+    "id": "S0",
+    "content": "TEST-001: D1, D2, D3, D4, D5 (+ D6 if accepted). Zero sleep edits.",
+    "size": "~110 lines, 1 file"
+   },
+   {
+    "id": "B1",
+    "content": "stream/status polls with identical shape: 15 sites (ids [7, 16, 22, 34, 35, 36, 45, 48, 51, 58, 61, 62, 82, 86, 87])",
+    "size": "15 sites + awaitLast helper"
+   },
+   {
+    "id": "B2",
+    "content": "incremental-lane helper polls: 23 sites (ids [8, 9, 10, 11, 14, 15, 17, 18, 19, 20, 21, 23, 29, 30, 31, 32, 33, 37, 38, 41, 42, 43, 84])",
+    "size": "23 sites; ids 20, 21, 84 are restructures"
+   },
+   {
+    "id": "B3",
+    "content": "default-lane test bodies and p3/p4/p8/p14 helpers: 24 sites (ids [44, 47, 49, 50, 52, 54, 55, 60, 63, 67, 69, 72, 73, 74, 75, 77, 78, 79, 80, 81, 83, 85, 89, 90])",
+    "size": "24 sites"
+   },
+   {
+    "id": "B4",
+    "content": "process and teardown infrastructure: 12 sites (ids [1, 2, 3, 4, 5, 6, 64, 66, 70, 93, 94, 95]); stretch. ids 1, 2, 4, 6, 93, 95 cannot be proven by a green run (rare or failure-only paths) and sit in fail-closed teardown, so they are carried by name unless @qa rules otherwise; ids 3, 5, 64, 66, 70, 94 are provable.",
+    "size": "6 provable + 6 conditional carry"
+   }
+  ],
+  "fullClassRuns": [
+   {
+    "run": "R1",
+    "label": "obs011-itr-01",
+    "state": "S0",
+    "note": "closes TEST-001 evidence (c): full class"
+   },
+   {
+    "run": "R2",
+    "label": "obs011-itr-02",
+    "state": "S0+B1+B2 (38 sites)"
+   },
+   {
+    "run": "R3",
+    "label": "obs011-itr-03",
+    "state": "S0+B1+B2+B3 (62 sites)"
+   },
+   {
+    "run": "R4",
+    "label": "obs011-itr-04",
+    "state": "+B4 provable 6 (68 sites); if B4 is not attempted R4 is the confirm run"
+   },
+   {
+    "run": "R5",
+    "label": "obs011-itr-05",
+    "state": "confirm: same bytes as R4, second consecutive green"
+   },
+   {
+    "run": "R6",
+    "label": "obs011-itr-06",
+    "state": "spare: one red = revert that batch to the last green sha256, rerun"
+   }
+  ],
+  "estimate": {
+   "plannedFullClassRuns": 5,
+   "cap": 6,
+   "bestCase": 4,
+   "gradleTime": "5 x ~18 min = ~90 min planned (108 min at the cap), plus ~10 non-credited single or subset runs of ~4-6 min = ~45 min [I]; the lock is shared with IT-S and GS-T2, so queue time is extra",
+   "editTime": "[I] S0 about half a day with javac and gjf pre-checks outside the lock; B1-B3 about one day together; fits the 2-day cap if no run goes red"
+  },
+  "contingency": "One red batch costs R6. A second red means the last state green once is the baton and the rest is carried by name (ids per sleep-table.tsv), as the lane timebox says. If S0 is not green by R2, stop and escalate to root the same day (TEST-001 not closed): FOLD-final waits for that ruling, not for more conversion.",
+  "preChecksOutsideLock": [
+   "javac compile of the edited file against build/classes plus the cache jars (memory tooling_javac_precheck_outside_lock); fix before taking the lock",
+   "gjf 1.22 CLI check of the NEW members only, in a scratch wrapper class (the file is not gjf clean; never run the spotless IDE hook on it)",
+   "checkstyle CLI on added lines only (compare base vs patched; spring-jcl needed)",
+   "grep -c '\\\\.sleep(' equals 95 minus converted ids, with its positive controls; grep -c '^  @Test$' = 73; grep -c ParameterizedTest = 1; no new @Test, no renamed method",
+   "git apply --check -p0 of the histogram patch, and sha256 of the scratch-applied file equals the edited file"
+  ],
+  "commands": {
+   "singleTestPattern": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-itr-<k> --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.<method>' --no-daemon",
+   "fullClass": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-itr-<n> --test-tasks test,guidedIncrementalTest -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' guidedIncrementalTest --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' --no-daemon",
+   "reversedOrderPattern": "MUTANT_FORM with the two @Order values swapped by the mutation step (cp f f.pre; swap; run; restore; shasum equals pre) inside one lock hold",
+   "lsofBeforeEveryRun": "lsof -nP -iTCP -sTCP:LISTEN",
+   "noteVerifyRunnerDist": "a method-level --tests on a runner-spawning class still triggers verifyRunnerDist: nothing under studio-runner/src may be newer than dist/main.js"
+  },
+  "redFirst": {
+   "applies": "The brief's C3 list names C-OBS009-1, C-OBS008-1, F-1 and R9-OBS-3, not TEST-001. For TEST-001 the 'new test' is the single-test selection itself; red must be an assertion failure of an EXISTING assertion against the S_011 file (not a compile error, not 'no tests found'). [proposal for @qa to accept or trim]",
+   "runs": [
+    {
+     "label": "obs011-itr-red1",
+     "cmd": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-itr-red1 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue' --no-daemon",
+     "expected": "red: 'the OBS-007 case registered its canaries' (:34431) from C5Capture.close or AfterAll; no body failure"
+    },
+    {
+     "label": "obs011-itr-red2",
+     "cmd": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-itr-red2 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness' --no-daemon",
+     "expected": "red at assertThat(publishedTestId).isNotNull() (:18392), then the AfterAll canaries assertion"
+    },
+    {
+     "label": "(inferred, not run)",
+     "cmd": "Order 2 alone",
+     "expected": "red at :17981 'Requires the genuinely published revision' [I by reading; same cause as red2]"
+    }
+   ],
+   "ifGreen": "If red1 or red2 is green, the premise changed since C10/w8: stop and report, do not edit."
+  },
+  "greenEvidence(core)": [
+   {
+    "id": "E1",
+    "cmd": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-itr-e1 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue' --no-daemon"
+   },
+   {
+    "id": "E2",
+    "cmd": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-itr-e2 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue' --no-daemon"
+   },
+   {
+    "id": "E3",
+    "cmd": "reversed: swap @Order(27)/(28) under MUTANT_FORM; --tests for both P7 methods",
+    "note": "28 runs before 27"
+   },
+   {
+    "id": "E4",
+    "cmd": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-itr-e4 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.queuedAndPreReadyRefusals' --no-daemon"
+   },
+   {
+    "id": "E5",
+    "cmd": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-itr-e5 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness' --no-daemon"
+   },
+   {
+    "id": "E6",
+    "cmd": "reversed: swap @Order(2)/(3) under MUTANT_FORM; --tests for both",
+    "note": "Order 3 then Order 2 (D2 invalidation)"
+   }
+  ],
+  "greenEvidence(optional)": [
+   {
+    "id": "E7",
+    "cmd": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-itr-e7 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays' --no-daemon",
+    "note": "D3 path"
+   },
+   {
+    "id": "E8",
+    "cmd": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-itr-e8 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead' --no-daemon",
+    "note": "a C5 user other than P7 (D1+D5 generalise)"
+   },
+   {
+    "id": "E9",
+    "cmd": "swap @Order(1)/(4) under MUTANT_FORM; --tests O1 and O4",
+    "note": "D3+D4: Order 4 runs before Order 1"
+   }
+  ],
+  "mutants": [
+   {
+    "id": "M-gate",
+    "edit": "wholeLaneRan() returns true",
+    "expect": "E1 command goes red (assertAuditControls bites on a subset)",
+    "proves": "D5 gating is what lets a subset pass, and the controls are real"
+   },
+   {
+    "id": "M-forget",
+    "edit": "remove forgetPublished() from Order 3",
+    "expect": "E6 reversed run goes red (Order 2 meets the edited source: execute refused LEARN_REQUIRED)",
+    "proves": "the invalidation is needed"
+   },
+   {
+    "id": "M-fixtures (optional)",
+    "edit": "ensureClassFixtures() becomes a no-op",
+    "expect": "E7 goes red (no worker / no CSI row)",
+    "proves": "D3 is what makes Order 4 self-sufficient"
+   },
+   {
+    "id": "M-baseline (optional)",
+    "edit": "restore the absolute asserts in Order 1 (revert D4)",
+    "expect": "E9 goes red",
+    "proves": "D4 is needed for a different order"
+   },
+   {
+    "id": "M-helper (one per batch, @qa to size)",
+    "edit": "in awaitLast invert the predicate",
+    "expect": "a single run of an Order that uses the batch's helper (Order 1 for B1/B3, Order 4 for B1) fails within its bound, not after a hang",
+    "proves": "the converted waits are wired and bounded"
+   }
+  ],
+  "mutationRules": "MUTANT_FORM only: edit, run and restore inside one lock hold; record the restored sha256 and require it to equal the pre-mutation sha256; every mutant must go red (a survivor is a finding).",
+  "evidenceRules": "Single and subset runs are never credited (D-14); lane collector runs are non-evidentiary (R-T0-4). Record command, exit code, counts, ReplayIT sha256 before and after for each. Counts to reconcile from the archived XML (same test list before and after, no @Test added or removed): test lane 46 methods (= SINGLETON_METHODS minus INCREMENTAL_METHODS), guidedIncrementalTest lane 28 methods (27 singletons plus one parameterised method with 35 variants); 46 + 28 = the 74 @Test/@ParameterizedTest methods [V from build.gradle.kts and the source]."
+ },
+ "batonAndCarry": {
+  "batonOut": "GuidedPublicationReplayIT.java -> 11-FOLD-final, at the last sha256 that was green twice in a row",
+  "carryCandidatesByName": {
+   "unprovableByGreenRun(6)": [
+    1,
+    2,
+    4,
+    6,
+    93,
+    95
+   ],
+   "ifTimeboxFires": "any POLL id not yet converted, owner @dev, reason timebox"
+  }
+ },
+ "decisionsForRoot": [
+  "Accept the private awaitLast helper (deviation from 'directly') or require inline calls?",
+  "Accept D5 (assertion helper split with wholeLaneRan gating) as 'not weaker', or limit TEST-001 to D1+D2+D3+D4 and carry the AfterAll subset failure for everything except the P7 pair? (D1 alone is not enough for Order 2/3 alone: AfterAll would still fail without a registrar.)",
+  "Keep Order 39 as a named class-scoped carry, or seed a corpus when alone?",
+  "Confirm that 'green twice in a row' means two consecutive full-class runs on the same sha256.",
+  "Confirm the 6 unprovable POLL ids (1, 2, 4, 6, 93, 95) may be carried by name from the start."
+ ],
+ "notDone": [
+  "No draft patch was cut: the real file may not be edited, and the early folder is the only write area. The edits are small and text-anchored, so the patch is generated at apply time (build.py + histogram diff) against the sha256 above.",
+  "No Gradle, JVM or Awaitility behaviour was exercised; every behavioural statement about Awaitility and about single-test outcomes is [I] until the red1/red2 and E-runs are taken."
+ ]
+}

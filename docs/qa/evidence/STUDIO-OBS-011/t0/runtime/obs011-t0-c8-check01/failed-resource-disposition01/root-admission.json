@@ -1,0 +1,35 @@
+{
+  "kind": "ROOT_NEW_GUARD_ADMISSION",
+  "authorizedBy": "root",
+  "releaseSha256": "b45b165ae1ca6b08774146534e7a6bdb7321b6f2f6ee47673dc94a6bc9cfc5ef",
+  "activeLockSha256": "a938fadcc56ddb8b8e86b80cb2a50589c558cb8a135e934c7443d2508b827b24",
+  "negativeActualStatus": 1,
+  "separateStatusCaptured": true,
+  "sameOriginalHolderAfterDenial": true,
+  "readinessAbsentAtDenial": true,
+  "permitAbsentAtDenial": true,
+  "originalExitAndBindingsUnchanged": true,
+  "newReadonlyFunctionInspected": true,
+  "negativeDenialSha256": "487ebb8eb1dd7d176fdf3c2e9d40314c32ef7fb90ea0803d9afaa223842592f6",
+  "setupAndSeparateStatusAndSameHolderEvidence": [
+    "install a57b1e actual0; audit a580e8b6f88527144d866ea533a9de8f6d4252548b7c7112ff878a6026f1d3cb",
+    "source d62e53 prompt; separate setup bd55de status0",
+    "readonly inspection62b3c5: new function and all four new bindings readonly; original exit body and original three GST bindings retained. Requested GST_UNLOCK_PYTHON did not exist; original guard uses command python3, so no prior Python binding existed or changed.",
+    "negative33d1ef MISSING_READINESS prompt; separate acb37b actual1; raw denial/journal inspection530bde actual0",
+    "held-proof command378c6c; completion ae74b8 prompt; separate99cd01 actual0; inspection95620a actual0, two source/holder/resource snapshots, finite2439 absent, inherited6 exact, prior clients absent,264 waited complete utility receipts all0"
+  ],
+  "heldProofSha256": "7518e2fef7f8db43641b61e3a70f101673313a3c3f299a2cd27591e9887b6fdb",
+  "heldProofActualStatus": 0,
+  "heldProofSeparateStatusCaptured": true,
+  "heldProofSeparateStatusEvidence": "PTY19501 chunk99cd01 actual HELD_PROOF_STATUS=0 at original bash prompt",
+  "configuredLaunch": {
+    "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+    "sha256": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095"
+  },
+  "configuredLaunchInspected": true,
+  "exactOperatorCommandEvidence": [
+    "PTY19501 d62e53: source absolute installed guard b45b165ae1ca6b08774146534e7a6bdb7321b6f2f6ee47673dc94a6bc9cfc5ef /opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+    "PTY19501 62b3c5: declare -r C8_FAILED_PYTHON exact configured BIN; declare -r C8_FAILED_SHELL_PID=45227; readonly -fp retained both exact function bodies",
+    "PTY19501 378c6c: exact configured BIN -B absolute failed_resource.py held-proof b45b165ae1ca6b08774146534e7a6bdb7321b6f2f6ee47673dc94a6bc9cfc5ef 1 < /dev/null"
+  ]
+}

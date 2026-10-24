@@ -1,0 +1,215 @@
+{
+  "kind": "ACTUAL_RUNNER_FIVE_GATES_PRODUCER_RECEIPT",
+  "atUtc": "2026-10-21T03:23:05.705896+00:00",
+  "outcome": "ALL_FIVE_LOCAL_GATES_PASS_PENDING_INDEPENDENT_QA",
+  "commands": [
+    {
+      "phase": "types",
+      "originalToolSession": 10681,
+      "collectorPid": 72696,
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-actual-final-types01",
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "type-check"
+      ],
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "startedAtUtc": "2026-10-21T03:19:49.270770+00:00",
+      "endedAtUtc": "2026-10-21T03:19:57.291426+00:00",
+      "outerExit": 0,
+      "childExit": 0,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "resultSha256": "26a993f26b3f8c7a0399ed2e5bf4e97bb5af3aa9adc62cc244b47c2ee4210841",
+      "postGuardComplete": true
+    },
+    {
+      "phase": "lint",
+      "originalToolSession": 15619,
+      "collectorPid": 74829,
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-actual-final-lint01",
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "run",
+        "lint"
+      ],
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "startedAtUtc": "2026-10-21T03:20:52.112169+00:00",
+      "endedAtUtc": "2026-10-21T03:21:05.231381+00:00",
+      "outerExit": 0,
+      "childExit": 0,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "resultSha256": "bb26fd509b4c4a519ec29ced099a2fe052e50dfd30f6cb1e107c0506b4951a88",
+      "postGuardComplete": true
+    },
+    {
+      "phase": "unit",
+      "originalToolSession": 53458,
+      "collectorPid": 75590,
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-actual-final-unit01",
+        "pnpm",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--minWorkers=1",
+        "--maxWorkers=2"
+      ],
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "startedAtUtc": "2026-10-21T03:21:13.802660+00:00",
+      "endedAtUtc": "2026-10-21T03:21:55.408058+00:00",
+      "outerExit": 0,
+      "childExit": 0,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "resultSha256": "4277acc58e37d4e3ed0a3e362ee5e3fd13b894daaaa1993bc5f5f9b8cf5e0088",
+      "postGuardComplete": true
+    },
+    {
+      "phase": "contracts",
+      "originalToolSession": 37512,
+      "collectorPid": 78976,
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-actual-final-contracts01",
+        "node",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/tools/check-studio-observed-contracts.cjs"
+      ],
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "startedAtUtc": "2026-10-21T03:22:01.804110+00:00",
+      "endedAtUtc": "2026-10-21T03:22:04.056843+00:00",
+      "outerExit": 0,
+      "childExit": 0,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "resultSha256": "6ba86915e2a49ae6a34d06eb060e43c714f3bf7930dabfeb422a3f3af74fbe23",
+      "postGuardComplete": true
+    },
+    {
+      "phase": "host-pins",
+      "originalToolSession": 79710,
+      "collectorPid": 79547,
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-actual-final-host-pins01",
+        "node",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/scripts/check-pins.mjs",
+        "--root",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+        "--json"
+      ],
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "startedAtUtc": "2026-10-21T03:22:17.842632+00:00",
+      "endedAtUtc": "2026-10-21T03:22:18.269904+00:00",
+      "outerExit": 0,
+      "childExit": 0,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "resultSha256": "e6ccdcea7af04a2dc9ee6fe5a025bb4a8d15033a2bc7e049b66575315081296a",
+      "postGuardComplete": true
+    }
+  ],
+  "unit": {
+    "total": 2717,
+    "counts": {
+      "passed": 2692,
+      "skipped": 25
+    },
+    "physicalTestFiles": 118,
+    "reportedSuiteCounts": {
+      "numTotalTestSuites": 419,
+      "numPassedTestSuites": 419,
+      "numFailedTestSuites": 0,
+      "numPendingTestSuites": 0
+    },
+    "distinctFullIdentityStatusKeys": 2713,
+    "duplicateExcessMultiplicity": 4,
+    "exactCounterIncludingStatusesAndMultiplicity": true,
+    "perFileCaseOrderExact": true,
+    "genuineDeferredCount": 15,
+    "helperCount": 41,
+    "optionalRuntimeErrorSummary": "NOT_EMITTED"
+  },
+  "coverage": {
+    "global": {
+      "lines": {
+        "total": 8671,
+        "covered": 8476,
+        "skipped": 0,
+        "pct": 97.75
+      },
+      "statements": {
+        "total": 8671,
+        "covered": 8476,
+        "skipped": 0,
+        "pct": 97.75
+      },
+      "functions": {
+        "total": 734,
+        "covered": 717,
+        "skipped": 0,
+        "pct": 97.68
+      },
+      "branches": {
+        "total": 6098,
+        "covered": 5497,
+        "skipped": 0,
+        "pct": 90.14
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "globalAndSixOriginalScopesPass": true,
+    "summarySha256": "a9ad4d58a26248739269e6ad3f23f9f39a8cedce684288dd578e025e5d29f4b5",
+    "configSha256": "cb110d944a17da279eefbce363b75cb50c09f753b6705dfd67d40948e1ff3051"
+  },
+  "contractsCodegen": "Seven public categories PASS; four byte-identical generated outputs; no generation writes",
+  "hostPins": {
+    "assertedHostPinsPassed": true,
+    "failures": [],
+    "notAsserted": [
+      "dist/runtime-versions.json chromiumBuild is not asserted (it is null): this build did not run inside the pinned Playwright image, or ran there without being told which image it was, so the browser build was not asserted (ED-05).",
+      "dist/runtime-versions.json image is not asserted (it is null): this build did not run inside the pinned Playwright image, or ran there without being told which image it was, so the browser build was not asserted (ED-05)."
+    ],
+    "imageGate": "OWED"
+  },
+  "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+  "sourceFiles": 1814,
+  "distDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "distFiles": 238,
+  "soleGeneratedDependencyDelta": "Exact known Vitest result cache190\u2192191; no broad node_modules exemption",
+  "ownedRuntime": "All five original collector commands reaped terminal0; no native/browser job launched by this task",
+  "sourceWriter": false,
+  "heavyAndCurrentRReadReleased": true,
+  "sealUsesCapturedMetadataOnly": true,
+  "historicalFailuresPreserved": true,
+  "unrun": [
+    "fresh final image build/in-image require-image pins/deployment/Linux smoke",
+    "G9 successor checks",
+    "final backend/Replay slots4/5 and wholecheck6",
+    "independent final evidence acceptance",
+    "009/010 external/provider/security/human facts"
+  ],
+  "lifecycle": "InProgress; no storyDone/productrelease/external acceptance"
+}

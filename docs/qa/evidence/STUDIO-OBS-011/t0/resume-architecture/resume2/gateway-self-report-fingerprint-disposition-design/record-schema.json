@@ -1,0 +1,95 @@
+{
+  "kind": "CLOSED_SELF_REPORTED_TEXT_FINGERPRINT_SCHEMA_V1",
+  "fields": [
+    "kind",
+    "status",
+    "reason",
+    "pid",
+    "ppid",
+    "reportedRole",
+    "reportedTextStatus",
+    "reportedTextUtf8Bytes",
+    "reportedTextSha256",
+    "origArgv0Role",
+    "origArgv0TextStatus",
+    "origArgv0TextUtf8Bytes",
+    "origArgv0TextSha256",
+    "digestKind",
+    "start",
+    "argvHash",
+    "fullFingerprint",
+    "observedProcessImage",
+    "timestamp",
+    "qualified",
+    "NFact",
+    "descriptorCompletion",
+    "postExitLeakProof",
+    "outerObserverCompletionOwed"
+  ],
+  "extraFields": "REJECT",
+  "duplicateJsonMembers": "REJECT",
+  "status": [
+    "METADATA_ONLY",
+    "HOLD"
+  ],
+  "reason": [
+    "NONE",
+    "SELF_METADATA_UNAVAILABLE",
+    "EXPECTED_HELD_PARENT_MISMATCH",
+    "SELF_TEXT_UNAVAILABLE",
+    "LITERAL_INTEGRITY_OR_EXECUTION_FAILURE"
+  ],
+  "role": [
+    "BIN",
+    "APP",
+    "OTHER",
+    "UNAVAILABLE"
+  ],
+  "textStatus": [
+    "COMPLETE",
+    "UNAVAILABLE",
+    "TYPE",
+    "EMPTY",
+    "NUL",
+    "SURROGATE",
+    "CHAR_CAP",
+    "BYTE_CAP",
+    "ENCODING_FAILURE",
+    "HASH_FAILURE"
+  ],
+  "digestKind": "SELF_REPORTED_TEXT_DIGEST",
+  "bounds": {
+    "maxCharactersBeforeEncoding": 4096,
+    "maxStrictUtf8BytesBeforeEncodingOrHashing": 4096,
+    "maxOutputAsciiBytes": 1024,
+    "positiveIdExclusiveUpper": 2147483648,
+    "bodyCodeAsciiBytes": 4096
+  },
+  "fieldRules": {
+    "COMPLETE": "exact int byteCount1..4096 plus lowercase SHA256hex64 of exact strictUTF8 bytes; no normalization",
+    "HASH_FAILURE": "known exact int byteCount1..4096 retained; SHA null; HOLD",
+    "other": "count/SHA null; HOLD; independently known other field retained"
+  },
+  "explicitNull": [
+    "start",
+    "argvHash",
+    "fullFingerprint",
+    "observedProcessImage",
+    "timestamp"
+  ],
+  "explicitFalse": [
+    "qualified",
+    "NFact",
+    "postExitLeakProof"
+  ],
+  "descriptorCompletion": "NOT_OBSERVED",
+  "outerObserverCompletionOwed": true,
+  "forbidden": [
+    "raw text/path/environment/arguments",
+    "path normalization/resolve/file read/stat/search",
+    "file/binary/processimage identity inference",
+    "OTHER as identity acceptance",
+    "historical repair"
+  ],
+  "actualAuthority": false
+}

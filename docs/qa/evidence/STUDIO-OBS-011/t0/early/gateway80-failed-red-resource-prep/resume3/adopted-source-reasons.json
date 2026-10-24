@@ -1,0 +1,451 @@
+{
+  "kind": "FINITE_SOURCE_CANDIDATES_NOT_EXECUTED_STAGE",
+  "candidates": [
+    {
+      "source": "custody.py",
+      "function": "Custody.__init__",
+      "line": 19,
+      "reason": "CUSTODY_PATH",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.__init__",
+      "line": 28,
+      "reason": "CUSTODY_OWNER_MODE",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.check",
+      "line": 34,
+      "reason": "CUSTODY_DIRECTORY_CHANGED",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.acquire",
+      "line": 36,
+      "reason": "MEMBER",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.info",
+      "line": 45,
+      "reason": "MEMBER",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.members",
+      "line": 52,
+      "reason": "CUSTODY_MEMBERS",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.read",
+      "line": 54,
+      "reason": "READ_CAP",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.read",
+      "line": 57,
+      "reason": "FILE_OWNER_MODE_CAP",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.read",
+      "line": 58,
+      "reason": "READ_EXPECTED_METADATA",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.read",
+      "line": 61,
+      "reason": "FILE_IDENTITY_CHANGED",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.read",
+      "line": 62,
+      "reason": "READ_CAP",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.read",
+      "line": 64,
+      "reason": "READ_PARTIAL",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.read",
+      "line": 65,
+      "reason": "FILE_IDENTITY_CHANGED",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.read",
+      "line": 67,
+      "reason": "FILE_IDENTITY_CHANGED",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "custody.py",
+      "function": "Custody.close",
+      "line": 149,
+      "reason": "CUSTODY_CLOSE_UNCONFIRMED",
+      "namespace": "CUSTODY_HOLD"
+    },
+    {
+      "source": "protocol.py",
+      "function": "pairs",
+      "line": 15,
+      "reason": "DUPLICATE_JSON",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "protocol.py",
+      "function": "decode",
+      "line": 18,
+      "reason": "BOUNDED_JSON",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "protocol.py",
+      "function": "authority",
+      "line": 21,
+      "reason": "ROOT_AUTHORITY",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "protocol.py",
+      "function": "authority",
+      "line": 22,
+      "reason": "FAILED_ONLY",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "protocol.py",
+      "function": "authority",
+      "line": 23,
+      "reason": "NO_SOURCE_NATIVE_CREDIT",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "protocol.py",
+      "function": "authority",
+      "line": 24,
+      "reason": "EXACT_FAILED_SUBJECT",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "protocol.py",
+      "function": "authority",
+      "line": 25,
+      "reason": "NEW_ROOT_EXCEPTION",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "protocol.py",
+      "function": "authority",
+      "line": 26,
+      "reason": "SOURCE_LIMITS",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "protocol.py",
+      "function": "authority",
+      "line": 27,
+      "reason": "ROOT_INPUT_PINS",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "protocol.py",
+      "function": "authority",
+      "line": 28,
+      "reason": "CODE_PINS",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.__init__",
+      "line": 83,
+      "reason": "EXTERNAL_CONTROL_PIN_MAP",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.__init__",
+      "line": 85,
+      "reason": "EXACT_EXTERNAL_SOURCE_PIN_MAP",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.__init__",
+      "line": 86,
+      "reason": "N_CONTROL_PIN_SCOPE",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.__init__",
+      "line": 87,
+      "reason": "N_ONLY_NEW_DIRECTORY_PIN_SCOPE",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.__init__",
+      "line": 92,
+      "reason": "OLD_EXACT_COUNT",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.__init__",
+      "line": 97,
+      "reason": "ROOT_N_OPENED_IDENTITY",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.merge_pins",
+      "line": 103,
+      "reason": "CANONICAL_EXTERNAL_PIN",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.merge_pins",
+      "line": 104,
+      "reason": "CONFLICTING_EXTERNAL_PIN",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.bound",
+      "line": 109,
+      "reason": "EXTERNAL_PIN_REQUIRED",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.bound",
+      "line": 110,
+      "reason": "CONFLICTING_EXPLICIT_INPUT_PIN",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.bound",
+      "line": 112,
+      "reason": "IMMUTABLE_MODE_CONFLICT",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.bound",
+      "line": 116,
+      "reason": "VERIFIED_CONSUMED_BUFFER_CHANGED",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.bound",
+      "line": 118,
+      "reason": "IMMUTABLE_FILE_IDENTITY_CHANGED",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.bound",
+      "line": 120,
+      "reason": "IMMUTABLE_BUFFER_SUBSTITUTED",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.local",
+      "line": 125,
+      "reason": "LOCAL_NAME",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.validate_root",
+      "line": 133,
+      "reason": "ROOT_ROLE_OR_SCOPE",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.validate_root",
+      "line": 134,
+      "reason": "ROOT_SUBJECT_PINS",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.validate_root",
+      "line": 135,
+      "reason": "ROOT_NO_HISTORICAL_REPAIR",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.check_members",
+      "line": 137,
+      "reason": "OLD_E_MEMBERSHIP_PLUS_N_ONLY",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.check_members",
+      "line": 140,
+      "reason": "OLD_E_BYTES_CHANGED",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.check_members",
+      "line": 143,
+      "reason": "ARCHIVE_ROOT_TYPE_OWNER",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.check_members",
+      "line": 144,
+      "reason": "N_MEMBER_MODE_OWNER",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.check_members",
+      "line": 145,
+      "reason": "N_STRICT_MEMBER_NAME",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.check_members",
+      "line": 147,
+      "reason": "UNPINNED_PREEXISTING_N_MEMBER",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.load_libraries",
+      "line": 152,
+      "reason": "EXACT_NEW_CODE_REVIEWS_OWED",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.load_libraries",
+      "line": 154,
+      "reason": "EXACT_THREE_NEW_CODE_RECORDS",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.load_libraries",
+      "line": 156,
+      "reason": "NEW_CODE_RECORD_SCOPE",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.load_libraries",
+      "line": 167,
+      "reason": "ORIGINAL_E_W_NOT_N",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.load_libraries",
+      "line": 180,
+      "reason": "N_ONLY_LIBRARY_WRITE",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.load_libraries",
+      "line": 187,
+      "reason": "EXACT_BINARY_MODES_HASHES",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.capture",
+      "line": 193,
+      "reason": "UTILITY_ARGV",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.capture",
+      "line": 194,
+      "reason": "PROVISIONAL_CHILD_CAP_OR_PENDING",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.capture",
+      "line": 195,
+      "reason": "UTILITY_CANONICAL_BINDING",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.capture",
+      "line": 196,
+      "reason": "NO_NATIVE_TOOL",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.capture",
+      "line": 197,
+      "reason": "UTILITY_CANONICAL_NO_ALIAS",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.capture",
+      "line": 198,
+      "reason": "UTILITY_BINDING_LENGTH",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.register",
+      "line": 257,
+      "reason": "OBSERVER_UMASK_077",
+      "namespace": "PROTOCOL_HOLD"
+    },
+    {
+      "source": "failed_gateway.py",
+      "function": "Unit.close",
+      "line": 475,
+      "reason": "UNIT_CLOSE_UNCONFIRMED",
+      "namespace": "PROTOCOL_HOLD"
+    }
+  ],
+  "count": 63,
+  "bothHoldClassesExist": true,
+  "actualFirstReason": "UNKNOWN_NOT_RETROACTIVELY_ESTABLISHED",
+  "includesCleanupSites": true,
+  "noCauseClaim": true
+}

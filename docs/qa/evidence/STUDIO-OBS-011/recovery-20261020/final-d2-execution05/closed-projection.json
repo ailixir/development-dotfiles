@@ -1,0 +1,34 @@
+{
+  "closedFacts": {
+    "cleanup.json": {
+      "commandExit": 0,
+      "ownedResourcesRemaining": 0
+    },
+    "image-before.txt": {
+      "Id": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+      "Os": "linux",
+      "Cmd": [
+        "sh",
+        "-c",
+        "ulimit -c 0 && exec node dist/main.js"
+      ],
+      "Entrypoint": null,
+      "User": "pwuser"
+    },
+    "pwuserUidGid1001": true
+  },
+  "missingSourceDeclaredFacts": [
+    "noinit.json",
+    "debug.json",
+    "active.json",
+    "drain.json",
+    "after.json",
+    "result.json",
+    "pre-stop-fixture-events.jsonl",
+    "fixture-events.jsonl",
+    "image-after.txt"
+  ],
+  "projectionComplete": false,
+  "opaqueIdsOnlyHashed": true,
+  "privateNativeAuthPayloadsLogsMediaDecoded": false
+}

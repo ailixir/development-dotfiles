@@ -1,0 +1,56 @@
+{
+  "scope": "ONE_ORIGINAL_AUTHORIZED_READ_ONLY_SDC_REVIEW_VERIFICATION_AFTER_FORMAT",
+  "argv": [
+    "node",
+    "tools/aiox-local.cjs",
+    "sdc",
+    "verify",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+    "review",
+    "--json"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedUtc": "2026-10-21T10:29:48.304612+00:00",
+  "endedUtc": "2026-10-21T10:29:48.361061+00:00",
+  "originalChildPid": 6041,
+  "originalWaitReturned": true,
+  "rawExit": 0,
+  "stdout": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-qa-metadata-format17/sdc-verify-review.stdout.json",
+    "sha256": "3f127fd9655192d49ce15e45e68610a0334be0bcb9d3a182cd031d1934dbbe31",
+    "bytes": 1799
+  },
+  "stderr": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-qa-metadata-format17/sdc-verify-review.stderr.bin",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "thisCommandInvocations": 1,
+  "markFlagAbsent": true,
+  "noDirectLedgerOrPhaseMutationByQa": true,
+  "parsedTopLevelOk": null,
+  "noAutomaticRetry": true,
+  "notNewAcceptanceReviewOrLifecycleTransition": true,
+  "actualResultPath": "result",
+  "parsedResultOk": true,
+  "recognizedActualMetadata": {
+    "storyId": "STUDIO-OBS-011",
+    "status": "Done",
+    "qaVerdict": "PASS",
+    "qaReviewer": "Quinn (@qa; independent SDC reviewer)",
+    "qaReviewedRevision": "story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee",
+    "qaEvidenceError": null,
+    "tasks": {
+      "total": 18,
+      "done": 18
+    }
+  },
+  "originalResultChecks": [
+    "PASS: QA evidence contains an explicit verdict",
+    "PASS: QA verdict present (PASS)",
+    "PASS: QA evidence identifies reviewer",
+    "PASS: QA evidence binds reviewed_revision",
+    "PASS: QA evidence provenance matches the current story/verdict",
+    "PASS: approved QA verdict set status Done (got Done)"
+  ]
+}

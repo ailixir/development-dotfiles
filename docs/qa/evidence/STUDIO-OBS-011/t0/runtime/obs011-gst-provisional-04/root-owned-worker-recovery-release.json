@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-19T09:47:47.379932+00:00",
+  "signedBy": "root",
+  "decision": "AUTHORIZE_ONE_SIGTERM_TO_EXACT_FAILED_OWNED_WORKER_ONLY",
+  "rootUnitReleaseSha256": "c903e2fcb6441c33f5d86e00cee8e248e9e86e443761f637911101c216e6dbef",
+  "activeLockSha256": "8292a3239f8842993e41fc2db177dcbbb8319da179d7c26dcc4c6dd8b72eb272",
+  "actualCandidateSha256": "cdced4fcc1967d1a9e83c15f99a3ab19824d0e514b66ee38b4763e04b58adf91",
+  "diagnosticResultSha256": "2b44a3b5c9f2f9c9de9270c24088d74f7b7679b966e4345ec37e46b7b5ddd320",
+  "fixedProjectionSha256": "61d064c242b86dc492124f89f990e512441e2b5f25efd01b5d13970ef756ac1a",
+  "target": {
+    "identity": {
+      "pid": 92785,
+      "ppid": 92137,
+      "start": "Mon Oct 19 05:40:57 2026",
+      "argvHash": "d95cdc35be7158f946c4df56a18e557629529bc8ea5b6df9d5ffed744c9f673f",
+      "projectMarkerCandidate": true,
+      "identityComplete": true,
+      "commHash": "17c41513aa70a3adec9bfe02602b2b410fecd663fc3089da7d4c71a18dbf9ed9",
+      "executableHash": "17c41513aa70a3adec9bfe02602b2b410fecd663fc3089da7d4c71a18dbf9ed9",
+      "executableFileHash": "19f2cd660267f4fb79a83debff11e8c3d509cd06beb499297e6558b030b8789a"
+    },
+    "ancestorChain": [
+      {
+        "pid": 92785,
+        "ppid": 92137,
+        "start": "Mon Oct 19 05:40:57 2026",
+        "argvHash": "d95cdc35be7158f946c4df56a18e557629529bc8ea5b6df9d5ffed744c9f673f"
+      },
+      {
+        "pid": 92137,
+        "ppid": 92124,
+        "start": "Mon Oct 19 05:40:36 2026",
+        "argvHash": "76b51467dd45ca073c5717216588277759004a793004125508f4b902e4a7dbc2"
+      },
+      {
+        "pid": 92124,
+        "ppid": 92097,
+        "start": "Mon Oct 19 05:40:36 2026",
+        "argvHash": "7a0de22ef25338f6370adb7748662978bc8496cfc1db4f5fb25f9be6db73a1df"
+      },
+      {
+        "pid": 92097,
+        "ppid": 92093,
+        "start": "Mon Oct 19 05:40:35 2026",
+        "argvHash": "0fb6c42a3c06d6a487188d282643b1e73bf821ecf48c9b7d20edff14238b34de"
+      },
+      {
+        "pid": 92093,
+        "ppid": 92089,
+        "start": "Mon Oct 19 05:40:35 2026",
+        "argvHash": "04b65f06a69152bb8bb0571c76939d86d5e82ce47d8d60f5033b3bce0b175ace"
+      },
+      {
+        "pid": 92089,
+        "ppid": 86484,
+        "start": "Mon Oct 19 05:40:35 2026",
+        "argvHash": "c7cf6894991b8cadf9b1629e2ff0c9f4974058fd9c21c1ecc72d700e419cc3de"
+      },
+      {
+        "pid": 86484,
+        "ppid": 86481,
+        "start": "Mon Oct 19 05:37:04 2026",
+        "argvHash": "e693ea77d4dc14554715c43d1be0d346a18945c4ef836b403ed7c46fe14271a8"
+      },
+      {
+        "pid": 86481,
+        "ppid": 17932,
+        "start": "Mon Oct 19 05:37:04 2026",
+        "argvHash": "1d1638cae329a35e35525dbea90f90afea0724722d4b3ae17d673fa8a10670f6"
+      }
+    ],
+    "actualExecutable": "/Users/brunobuger/.jdks/jdk-21.0.10+7/Contents/Home/bin/java",
+    "configuredJava21ExecutableByteIdentical": true,
+    "releaseSha256": "c0396ee69271e1a2c323e62c7d38dfd94206acab6def9b3ab6a99f7d75ce509a",
+    "actualNativeCollectorDescendant": true,
+    "gradleTestExecutorMainVerified": true
+  },
+  "basis": "Known interim native failures and finite CUT_PRIMARY/peer DATA_INTEGRITY; one bounded current Thread.print0 samples Test worker WAITING at real settled.await3436 via controller-cut cleanup2952. Current failed foreground blocks safe owned-source rollback. Not proof of deadlock or genuine completion.",
+  "mustFreshlyMatchFullIdentityAncestorsAndSameKernelLockBeforeSignal": true,
+  "signal": "SIGTERM",
+  "maxTargetSignals": 1,
+  "observeSeconds": 15,
+  "SIGKILLAuthorized": false,
+  "otherProcessOrControllerOrGroupSignalAuthorized": false,
+  "onReuseAbsenceOrUncertainty": "STOP_TARGET_SIGNALS",
+  "onSameTargetSurvivor": "KEEP_HOLD_REQUIRE_DISTINCT_EXACT_DISPOSITION",
+  "outcomeClassification": "ABORTED_FAILED_INCOMPLETE_RESOURCE_RECOVERY; no operationsComplete/ownership confirmation/full99/cause credit"
+}

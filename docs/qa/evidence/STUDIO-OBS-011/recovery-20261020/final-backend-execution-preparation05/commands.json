@@ -1,0 +1,150 @@
+{
+  "kind": "UNEXECUTED_MINIMAL_ORIGINAL_PAIR_ENVELOPE05",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-execution-preparation05/run-pair.py",
+    "<ROOT_FINAL_PAIR_ADMISSION_JSON>",
+    "<EXACT_ADMISSION_SHA256>"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "executed": false,
+  "originalPairCollectorsAndReadersCopiedForReview": [
+    {
+      "slot": 4,
+      "label": "obs011-lean-ir-final01",
+      "status": "UNEXECUTED_REQUIRES_SEPARATE_ROOT_RELEASE",
+      "freshLabelAbsentAtPreparation": true,
+      "collectorArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-lean-ir-final01",
+        "--test-tasks",
+        "test,guidedIncrementalTest",
+        "--require-exec-tasks",
+        "test,guidedIncrementalTest",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "guidedIncrementalTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "readerArgvAfterActualTerminal": [
+        "python3",
+        "-B",
+        "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-replay-reader-preparation/bound-reader/verify_future_run.py",
+        "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final01-results.json",
+        "--stage",
+        "04-b4"
+      ],
+      "readerScope": "Exact raw two-task full-Replay receipt only",
+      "expected": {
+        "test": 46,
+        "guidedIncrementalTest": 62,
+        "total": 108,
+        "PASS": 108,
+        "SKIP": 0,
+        "variants": 35
+      },
+      "bindingReady": false,
+      "freshLabelAbsentAtThisPreparation": true
+    },
+    {
+      "slot": 5,
+      "label": "obs011-lean-ir-final02",
+      "status": "UNEXECUTED_REQUIRES_SEPARATE_ROOT_RELEASE",
+      "freshLabelAbsentAtPreparation": true,
+      "collectorArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-lean-ir-final02",
+        "--test-tasks",
+        "test,guidedIncrementalTest",
+        "--require-exec-tasks",
+        "test,guidedIncrementalTest",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "guidedIncrementalTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "readerArgvAfterActualTerminal": [
+        "python3",
+        "-B",
+        "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-replay-reader-preparation/bound-reader/verify_future_run.py",
+        "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final02-results.json",
+        "--stage",
+        "04-b4"
+      ],
+      "readerScope": "Exact raw two-task full-Replay receipt only",
+      "expected": {
+        "test": 46,
+        "guidedIncrementalTest": 62,
+        "total": 108,
+        "PASS": 108,
+        "SKIP": 0,
+        "variants": 35
+      },
+      "bindingReady": false,
+      "freshLabelAbsentAtThisPreparation": true
+    }
+  ],
+  "whole6DataOnlySeparateRelease": {
+    "slot": 6,
+    "label": "obs011-lean-ir-integrated01",
+    "status": "UNEXECUTED_REQUIRES_SEPARATE_ROOT_RELEASE",
+    "freshLabelAbsentAtPreparation": true,
+    "collectorArgv": [
+      "python3",
+      ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+      "python3",
+      ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+      "obs011-lean-ir-integrated01",
+      "--test-tasks",
+      "test,guidedIncrementalTest,crossReplicaTest",
+      "--require-exec-tasks",
+      "test,guidedIncrementalTest,crossReplicaTest",
+      "--allowed-skips-file",
+      "docs/qa/evidence/STUDIO-OBS-011/t0/qa/approved-skips.json",
+      "--",
+      "--continue",
+      "check",
+      "--rerun-tasks",
+      "--no-daemon"
+    ],
+    "readerArgvAfterActualTerminal": null,
+    "readerScope": "Pair reader is inapplicable to the raw three-task/2792-case receipt. Preserve actual receipt and perform separate acceptance analysis from existing outputs.",
+    "expected": {
+      "test": 2728,
+      "guidedIncrementalTest": 62,
+      "crossReplicaTest": 2,
+      "total": 2792,
+      "PASS": 2783,
+      "SKIP": 9,
+      "uniqueTaskClassDisplayStatusKeys": 2768
+    },
+    "bindingReady": false,
+    "freshLabelAbsentAtThisPreparation": true
+  },
+  "whole6AutomaticBranchInDriver": false,
+  "futureOriginalToolHandle": "assigned by original exec launch; root retains/polls that same handle, no new observer",
+  "driverPrintedOriginalPids": [
+    "driverPid",
+    "collectorPid",
+    "inhibitorPid"
+  ],
+  "noGlobalPidObserverOrNumericAbsenceClaim": true
+}

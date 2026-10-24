@@ -1,0 +1,47 @@
+{
+  "kind": "INDEPENDENT_PM_DOCUMENT_REVIEW_RECEIPT",
+  "createdAtUtc": "2026-10-20T03:01:15.945200+00:00",
+  "exclusiveWriteRoot": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-pm-review-r2",
+  "subject": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020",
+  "subjectManifestSha256": "a8c83522c8f22c4e5d5cde27278d0084459d22030075f1270b25bad4f224a3b1",
+  "subjectSHA256SUMSSha256": "9c3f1a6609e1edb6afabe1839352b055258ae73cbfaaedcf831e37ac2b9e4ae3",
+  "decision": "HOLD_FOR_ONE_DOCUMENTATION_CORRECTION",
+  "mandatoryFindingIds": [
+    "PM010-R1-LANE-LOCATORS"
+  ],
+  "retainedConditions": 14,
+  "isStoryQaGate": false,
+  "isReleaseApproval": false,
+  "sourceWindowAuthorized": false,
+  "targetApplicationPerformed": false,
+  "inputFreshness": "47pins initial;1mutable coordinator-plan drift observed end;46other input pins unchanged; see final-input-check.json",
+  "priorPartialUnchangedAtEnd": true,
+  "payloads": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-pm-review-r2/document-checks.json",
+      "sha256": "d8cefe08f18cc0a215b06deced6a7a80e6dcc1fd6d4d72b792840bb372057259",
+      "bytes": 6539
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-pm-review-r2/final-input-check.json",
+      "sha256": "f010bce2d59514c622257985462c0bd437463f9879b860e7ffa4960db456759f",
+      "bytes": 1139
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-pm-review-r2/integrity.json",
+      "sha256": "7eeb81b1bc30bcabf92b511dc51fad04d9b136fd38c0719c27687a9429733461",
+      "bytes": 18452
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-pm-review-r2/review.json",
+      "sha256": "2f4928e8133f1ef58459aeab098c5e7a479a5e69dbb5188a9e3c98f8f04a5244",
+      "bytes": 11664
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-pm-review-r2/review.md",
+      "sha256": "6514aaa296d8b3e22b7894b143a4b8bb5b22764db594543dace4d1c17b02b9f0",
+      "bytes": 13298
+    }
+  ],
+  "selfExclusion": "manifest excludes itself; SHA256SUMS includes manifest and payloads and excludes itself"
+}

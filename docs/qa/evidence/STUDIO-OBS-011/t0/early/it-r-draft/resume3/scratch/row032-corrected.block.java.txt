@@ -1,0 +1,111 @@
+{
+      // IT-R POLL 32: exact original transitions; one old interval owed at most.
+      final var itrRead032_end = end;
+      class ItrState032 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
+      final var itr032 = new ItrState032();
+      
+      java.util.concurrent.Callable<Boolean> itrPoll032 = () -> {
+        if (itr032.firstException != null) throw itr032.firstException;
+        if (itr032.firstError != null) throw itr032.firstError;
+        if (itr032.terminal) return true;
+        try {
+        if (itr032.intervalOwed) {
+          if (Thread.interrupted()) throw new InterruptedException();
+          if (Clock.nanoTime() < itr032.owedUntil) return false;
+          itr032.intervalOwed = false;
+        }
+        if (!(jdbc.queryForObject(
+            "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+                + " AND ordinal=0 AND document->>'state'='SUCCEEDED'",
+            Integer.class,
+            id,
+            b1Step(stepIndex))
+        == 0)) { itr032.terminal = true; return true; }
+        itr032.firstIteration = false;
+        assertThat(Clock.nanoTime()).as("S(%s)#0 SUCCEEDED", stepIndex).isLessThan(itrRead032_end);
+      itr032.intervalOwed = true; Clock.startElapsed(); itr032.owedUntil = Clock.nanoTime() + Duration.ofMillis(20).toNanos();
+        return false;
+        } catch (Exception itrFailure032) {
+          if (itr032.firstException == null && itr032.firstError == null) {
+            itr032.firstException = itrFailure032; itr032.terminal = true;
+          }
+          throw itr032.firstException;
+        } catch (Error itrFailure032) {
+          if (itr032.firstException == null && itr032.firstError == null) {
+            itr032.firstError = itrFailure032; itr032.terminal = true;
+          }
+          throw itr032.firstError;
+        }
+      };
+      try {
+        while (!itr032.terminal) {
+          // First invocation is manual. Reentry serves only the original pending transition.
+          boolean itrDone032 = itrPoll032.call();
+          if (itrDone032) break;
+          if (Thread.interrupted()) throw new InterruptedException();
+          if (noAwaitGap) { Clock.advance(1_000_000_000L); noAwaitGap = false; }
+long itrNow032 = Clock.nanoTime();
+          long itrRemaining032 = itrRead032_end - itrNow032;
+          long itrOwed032 = itr032.intervalOwed ? itr032.owedUntil - itrNow032 : 0;
+          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
+          long itrBound032 = Math.max(itrRemaining032, itrOwed032); if (itrBound032 <= 0) noAwaitPathObserved = true;
+          if (itrBound032 > 0) {
+            final boolean[] itrFirstTick032 = {true};
+            try {
+              final long probeChainStarted032 = System.nanoTime();
+org.awaitility.Awaitility.await("ReplayIT POLL 32")
+                  .atMost(Duration.ofNanos(itrBound032))
+                  .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
+                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
+                  .until(() -> {
+                    try {
+                    if (itr032.firstException != null) throw itr032.firstException;
+                    if (itr032.firstError != null) throw itr032.firstError;
+                    if (itr032.terminal) return true;
+                    if (Thread.interrupted()) throw new InterruptedException();
+                    if (itrFirstTick032[0]) {
+                      itrFirstTick032[0] = false;
+                      probeIntervalEntered.countDown(); return false; // Cached tick: no second immediate condition/read/effect.
+                    }
+                    boolean itrObserved032; try { itrObserved032 = itrPoll032.call(); } finally { if (scenario.startsWith("LATE_")) { lateCallbackEntered = true; lateCompletionBeyondBound = System.nanoTime() - probeChainStarted032 > itrBound032; } }
+                    if (!itrObserved032 && Thread.interrupted()) throw new InterruptedException();
+                    return itrObserved032;
+                    } catch (Exception itrFailure032) {
+                      if (itr032.firstException == null && itr032.firstError == null) {
+            itr032.firstException = itrFailure032; itr032.terminal = true;
+          }
+                      if (itr032.firstError != null) throw itr032.firstError;
+                      throw itr032.firstException;
+                    } catch (Error itrFailure032) {
+                      if (itr032.firstException == null && itr032.firstError == null) {
+            itr032.firstError = itrFailure032; itr032.terminal = true;
+          }
+                      if (itr032.firstException != null) throw itr032.firstException;
+                      throw itr032.firstError;
+                    }
+                  });
+            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout032) {
+              if (itr032.firstException != null) throw itr032.firstException;
+              if (itr032.firstError != null) throw itr032.firstError;
+              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
+            }
+          }
+          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
+        }
+      } catch (Exception itrFailure032) {
+        if (itr032.firstException == null && itr032.firstError == null) {
+            itr032.firstException = itrFailure032; itr032.terminal = true;
+          }
+        if (itr032.firstError != null) throw itr032.firstError;
+        throw itr032.firstException;
+      } catch (Error itrFailure032) {
+        if (itr032.firstException == null && itr032.firstError == null) {
+            itr032.firstError = itrFailure032; itr032.terminal = true;
+          }
+        if (itr032.firstException != null) throw itr032.firstException;
+        throw itr032.firstError;
+      } finally {
+        
+      }
+      
+    }

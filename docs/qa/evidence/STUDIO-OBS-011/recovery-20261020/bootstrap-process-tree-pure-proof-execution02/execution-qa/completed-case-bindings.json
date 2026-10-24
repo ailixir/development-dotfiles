@@ -1,0 +1,59 @@
+{
+  "status": "ACCEPTED_SEALED_V2_ORIGINAL_RED_GREEN_CASE_AND_CACHE_PROOF",
+  "sourceV2QaPinsExact": true,
+  "cases": {
+    "red01": {
+      "reportSha256": "6b199ccb85b3efa5dddc01aa4ec2bcd9bffe300739cd8c61e44f06d2a77f65bb",
+      "logSha256": "cabc27968f300479381b6ece106f88a056b9d18719033f9987f45088037275ad",
+      "rawExit": 1,
+      "caseCount": 37,
+      "physicalFiles": 1,
+      "exactOrderedIdentityCounter": true,
+      "statuses": {
+        "failed": 1,
+        "skipped": 36
+      },
+      "optionalRuntimeErrorSummary": "NOT_EMITTED"
+    },
+    "green01": {
+      "reportSha256": "a96ab72d19b51f4dc9cb95b1cdb6d1a18dc60d2cd5038cf30eeab4005ead5d0e",
+      "logSha256": "f597c688220afbf22ddf487ec623160b15777900e4aa3e1fcae38c3e4bd72a0f",
+      "rawExit": 0,
+      "caseCount": 37,
+      "physicalFiles": 1,
+      "exactOrderedIdentityCounter": true,
+      "statuses": {
+        "passed": 37
+      },
+      "optionalRuntimeErrorSummary": "NOT_EMITTED"
+    }
+  },
+  "definingNewRed": {
+    "type": "AssertionError",
+    "marker": "COHERENT_CAPTURE_INVENTORY_POSTCONDITION",
+    "frame": "test/run/bootstrapProcessTreeObservation.test.ts:54:82",
+    "actualCaptureUndefined": true,
+    "actualFailureCodeESRCH": true,
+    "expectedThreeMemberInventory": true,
+    "expectedKnownMockLabels": true,
+    "sameOriginalLogOnly": true,
+    "rawBodyOrIdsExported": false,
+    "oldExecutedFrame52NotRelabeled": true,
+    "noAlternateCaseSuiteOrControlledUnhandledFailure": true
+  },
+  "cache": {
+    "version": "3.2.7",
+    "same191KeyCounter": true,
+    "allOld190ValuesExact": true,
+    "knownUnitFailedSequence": [
+      false,
+      true,
+      false
+    ],
+    "finiteDurationFailedOnly": true
+  },
+  "finalAllSixStaticTerminalsAndProducerSealStillRequired": false,
+  "nativeGo": false,
+  "newExecutionInReview": false,
+  "producerManifestSha256": "4680636b4e1fc17209f7a30af2c63f4070c625dff359159d5fd82f57c1b03966"
+}

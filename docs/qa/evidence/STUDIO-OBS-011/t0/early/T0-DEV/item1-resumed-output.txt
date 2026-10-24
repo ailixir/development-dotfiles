@@ -1,0 +1,68 @@
+unique ids: {'count': 14, 'distinct': 14, 'duplicates': [], 'pass': True}
+non-empty: {'11-T0': 2, '11-GS-T': 4, '11-GS-M': 8, '11-LEFT': 17, '11-FOLD-prep': 21, '11-RT': 11, '11-IT-R': 3, '11-IT-S': 7, '11-GS-T2': 4, '11-FE': 12, '11-DOC': 6, '11-FOLD-final': 44, '11-MERGE': 28, '11-G': 1}
+deps pass: True problems: [] edgeBad: [] cycles: []
+external prerequisites: {'execute-011 collectors exist': True, '010 dated Live surface list exists': True, 'runbook s14 UAT note present (Gage X-6)': True, 'print-observed-catalog.mjs present (X-7)': True, 'execute-011 output folder exists': True}
+loose bad: [] [] []
+per-group hits: {'W1': 0, 'W2': 0, 'W3': 0, 'W3+waves-array': 0, 'W4': 0, 'W5': 0, 'W6': 0}
+strict pairs: 52 concurrent w/o declared order: 0 no declared order at all: 0
+   DispatchAuthorization.java       11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   HttpRunnerDispatchClient.java    11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   ProvisionalDispatchAuthorization.java 11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   StudioRunnerConfiguration.java   11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   StudioRunnerTls.java             11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedDispatchService.java       11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedPreparationStore.java      11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedPlanPublisher.java         11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedPublicationConfiguration.java 11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedPublicationResultProjector.java 11-GS-M        a+b  | 11-FOLD-final  None | concurrent=False declared=True
+   ObservedReplayAuthorization.java 11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   ObservedReplayAuthorizer.java    11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   ObservedReplayBindingBuilder.java 11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   ObservedReplayConfiguration.java 11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   PublicationGrantAuthority.java   11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedSessionConfiguration.java  11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   README.md                        11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedTranslationService.java    11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedBridgeIntegrationTest.java 11-GS-T2       None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedBridgePlannedIT.java       11-GS-T2       None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedPublicationReplayIT.java   11-IT-R        apply | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedEvidencePendingAppendJoinedIT.java 11-IT-S        None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedServiceTransportFaultIT.java 11-GS-T        None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedServiceTransportFaultIT.java 11-GS-T        None | 11-IT-S        None | concurrent=False declared=True
+   GuidedServiceTransportFaultIT.java 11-IT-S        None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedSessionIT.java             11-GS-M        b    | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedSessionIT.java             11-GS-T        None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedSessionIT.java             11-GS-T        None | 11-GS-M        b    | concurrent=False declared=True
+   GuidedFocusMutationJoinedIT.java 11-IT-S        None | 11-FOLD-final  None | concurrent=False declared=True
+   GuidedPlanningIntegrationTest.java 11-IT-S        None | 11-FOLD-final  None | concurrent=False declared=True
+   axe-results.json                 11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   fold                             11-FOLD-prep   None | 11-FOLD-final  None | concurrent=False declared=True
+   README.md                        11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   pinnedVideoEvidenceFacts.ts      11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   <NEW-copy-source-registry>       11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   guided.test.tsx                  11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   guidedNarratives.ts              11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   RunDetailsDrawer.tsx             11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   authoringHandlers.ts             11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   handlers.ts                      11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   studioHandlers.test.ts           11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   studioWcagAudit.test.tsx         11-FE          None | 11-MERGE       None | concurrent=False declared=True
+   README.md                        11-RT          None | 11-MERGE       None | concurrent=False declared=True
+   browser-oracle.test.mjs          11-RT          None | 11-MERGE       None | concurrent=False declared=True
+   example-manifest.json            11-RT          None | 11-MERGE       None | concurrent=False declared=True
+   contracts.ts                     11-RT          None | 11-MERGE       None | concurrent=False declared=True
+   diagnostics.ts                   11-RT          None | 11-MERGE       None | concurrent=False declared=True
+   evidence.ts                      11-RT          None | 11-MERGE       None | concurrent=False declared=True
+   json.ts                          11-RT          None | 11-MERGE       None | concurrent=False declared=True
+   transport.ts                     11-RT          None | 11-MERGE       None | concurrent=False declared=True
+   guidedBrowser.ts                 11-RT          None | 11-MERGE       None | concurrent=False declared=True
+   deferred.test.ts                 11-RT          None | 11-MERGE       None | concurrent=False declared=True
+sharedFilesSingleOwner: missing from table: ['backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java', 'backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java', 'backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java', 'backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java', 'backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md', 'backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java']
+sharedFilesSingleOwner: in table but not shared: ['backend/build.gradle.kts', 'backend/src/main/java/com/citi/put/checks/studio/StudioService.java', 'backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java', 'backend/src/main/resources/application.yml', 'backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java', 'backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java']
+lanes missing from waves: []
+FOLD_TESTS: 21 FOLD_PREP_MAIN: 17
+OBS: 11-IT-R prep: K-17 (record 5.2) and the lane startsWhen say prep writes docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r/ until 'tree open'; that path is not in the 11-IT-R write list (only execution/it-r/prep/**). It falls under the 11-T0 write set (t0/**), so there is no conflict, but the two are not stated together.
+OBS: schedule.lanes still puts 11-RT at [0.5,1.5] and 11-IT-R prep at [1.5,3.0] (the v2 order). Record 5.2 K-17 and 14.2 put 11-IT-R prep first (from B1) and 11-RT 'as slots free'. Both orders keep write sets disjoint, but with IT-R prep running from 0.5 the agent count at 0.5-1.5 would be 6 (GS-T, GS-M a, LEFT, FOLD-prep, IT-R prep, RT) against maxParallelism 5. The schedule block was not re-cut for K-17. Doc fix only; no write-set effect.
+OBS: waves[W3] lists '11-MERGE frontend half (root)' but concurrencyGroups puts it in W4 (and schedule.lanes has it at 4.5-5.0, i.e. W3 timing). Checked both variants above (group 'W3+waves-array'): no write-set hit either way.
+OBS: 11-FOLD-final writes reference 'FOLD_PREP_MAIN' and 'the 21 FOLD_TESTS listed in lanes.json v1': neither is defined inside lanes.v3.json. FOLD_PREP_MAIN is derivable (the 11-FOLD-prep writes under backend/src/main = 17 paths); the 21 are in v1. A reader of v3 alone cannot resolve them.
+OBS: 11-IT-S batonOut says 'all six files -> 11-FOLD-final', but only 4 of the 6 are FOLD_TESTS (SecretUseAuditIT and GuidedPublicationRaceTest are not). Wording only; the baton for those two is simply released.

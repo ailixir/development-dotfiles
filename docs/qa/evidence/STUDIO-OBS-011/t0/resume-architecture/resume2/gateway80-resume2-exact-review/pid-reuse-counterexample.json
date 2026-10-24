@@ -1,0 +1,29 @@
+{
+  "id": "G80-RESOURCE-07",
+  "function": "actual extracted run_native + actual worker_candidates with fake IO/OS/process/time",
+  "schedule": [
+    "sample1 original spawned child PID10/startA",
+    "poll0 reaps original; previous sample still containsA so another iteration occurs",
+    "sample2 same PID10/startB/ppid1 unrelated ordinary Node, unrelated cwd; child poll remains0"
+  ],
+  "ownedIdentityKeys": [
+    [
+      10,
+      "ORIGINAL_CHILD_A"
+    ],
+    [
+      10,
+      "REUSED_UNRELATED_B"
+    ]
+  ],
+  "reusedPidClassifiedNative": true,
+  "nativeExit": 0,
+  "timedOut": true,
+  "status": "HOLD",
+  "stickyFlags": [
+    "PHASE_TIMEOUT_NOT_TERMINALITY"
+  ],
+  "realPopenOrOsOrCensusCalls": false,
+  "noActualSignalOrCleanup": true,
+  "meaning": "PID reuse transfers ownership to an unrelated new start; true child exit does not authorize that transfer."
+}

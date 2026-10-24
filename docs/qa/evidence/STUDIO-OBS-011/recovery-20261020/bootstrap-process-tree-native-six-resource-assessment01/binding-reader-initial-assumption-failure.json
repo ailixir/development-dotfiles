@@ -1,0 +1,10 @@
+{
+  "toolExit": 1,
+  "errorType": "FileNotFoundError",
+  "cause": "Binding-only reader assumed private runner-copy profile contained backend Replay. It intentionally does not.",
+  "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "productOrSourceChanged": false,
+  "processProbesRun": false,
+  "preclearBodyRead": false,
+  "correction": "Bind Replay only at actual-root against sealed actual capture; leave the reviewed private copy profile unchanged."
+}

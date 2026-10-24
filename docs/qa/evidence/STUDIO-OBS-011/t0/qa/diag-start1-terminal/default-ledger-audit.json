@@ -1,0 +1,1362 @@
+{
+  "atUtc": "2026-10-19T03:50:11.298132+00:00",
+  "scope": "independent sealed default partition/ledger only; overall native/restoration outcome is assessed separately in terminal-audit.json",
+  "schemaSha256": "1e53dd36eed0083f93d8164163e5361652d678e2c5034900e631cac7ec14128e",
+  "ledgerSha256": "3c2ec09202bfbc2e432574b72d18993866c9ec33475402dc40daa206efb7e947",
+  "ledgerBytes": 8232,
+  "case": 6,
+  "epoch": 6,
+  "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+  "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+  "eventCount": 18,
+  "entireActualSchemaValidated": true,
+  "duplicateKeysAndNonJsonConstantsRejected": true,
+  "closedAndDescriptorsRestored": true,
+  "allWriteDrainMarkerCountersValid": true,
+  "privateOriginalEqualsPublicCopy": true,
+  "privateRootAndProducer0700Ledger0600": true,
+  "noMarkerOrTemporaryFile": true,
+  "all12DistSitesAnd5FullFilesEqual": true,
+  "cohortSha256": "0afb2c37751e803ac8a6b6646f17ee32ae58b90ef4ee2401e934fe24b321ac6c",
+  "cohortSixFlagsVerified": true,
+  "all46CasesPassedClosedAndMatchActualGradleSetXml": true,
+  "perInvocationPrivacyModelResponseFilesVerified": 230,
+  "allDefaultCohortFileFacts": {
+    "responses-test-22-actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead-singleton-after-each.json": {
+      "bytes": 8249,
+      "sha256": "a3b1602721e593efe29d79202600b9a78fe4f36a499aa7c18548adec1187b19d"
+    },
+    "responses-test-13-actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope-singleton-after-each.json": {
+      "bytes": 22103,
+      "sha256": "15d19b665bb6327df910d728fef0303b99b6222d936ac2e4fc4ba5a0fe43438e"
+    },
+    "responses-test-42-actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay-singleton-final.json": {
+      "bytes": 9620,
+      "sha256": "dc8e2f34cb8f1ab7621ce345537e4d7af9074061015198c547b5ed72dca787dc"
+    },
+    "privacy-test-21-actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead-singleton.json": {
+      "bytes": 90192,
+      "sha256": "85aeabb231ec0737ceb75fd4dec8c6fb9e0022cef558245303a7bb2502bf358f"
+    },
+    "privacy-test-16-actualGuidedRegistrationPassingAssertRemainsPassed-singleton.json": {
+      "bytes": 90151,
+      "sha256": "9110767e34525935df726de3e612369f87f8c7713a8e7fc1d03a931cf5f0d915"
+    },
+    "privacy-test-30-actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect-singleton.json": {
+      "bytes": 90177,
+      "sha256": "52cd94a39573e14365fd0112bf68f88215b490e0aaa267e7003c18a59f846639"
+    },
+    "model-budget-evidence-test-35-actualCorePublishedControlValuePasswordRequestRefusesBeforeRead-singleton-final.json": {
+      "bytes": 3897,
+      "sha256": "6205af9c3d84892a79e5d130ae5bb14e9f4f05d865961f29574aab73a5a9dc60"
+    },
+    "responses-test-9-guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes-singleton-final.json": {
+      "bytes": 5457,
+      "sha256": "66fb7fb9b6cfc6ae5846ecc8fce860474b97665b3e04422434cf0b0b7bca9d23"
+    },
+    "model-budget-evidence-test-31-actualPublishedPublicCancelWhileNativePasswordWorldPending-singleton-after-each.json": {
+      "bytes": 4458,
+      "sha256": "498250f5c23ca3e43583a04aeda32c9d08cec3594a50fad92a69f32b6825d829"
+    },
+    "privacy-test-39-actualSecretControlWindowLossBeforeReadyReachesTerminalError-singleton.json": {
+      "bytes": 90171,
+      "sha256": "324fd1178cd205495a03fddeef04764d4bcdf83e921a4829649573793654bdd9"
+    },
+    "responses-test-6-absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork-singleton-after-each.json": {
+      "bytes": 8232,
+      "sha256": "9c7ecaa7dca1b08657e2f747e7708c29ac3290ef95ec5aae69b94950408b1b26"
+    },
+    "model-budget-evidence-test-14-actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure-singleton-after-each.json": {
+      "bytes": 2223,
+      "sha256": "1189a0784f83f46747ca001d0694fb37717c1d93d7645e3b1904b07823a47ff3"
+    },
+    "model-budget-evidence-test-21-actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead-singleton-final.json": {
+      "bytes": 6549,
+      "sha256": "1462056609b479cd0c23a7184c7b6f0509539f96011c50da3e9c2eb81b0fe1de"
+    },
+    "responses-test-22-actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead-singleton-final.json": {
+      "bytes": 8770,
+      "sha256": "50bc03f7b396f50b48776218712dca5ea26b82d90cd76d5b428714cc9f1c43d8"
+    },
+    "responses-test-44-actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache-singleton-after-each.json": {
+      "bytes": 2059,
+      "sha256": "57805b2837b4a4b4ed894c98f16b21b436cfc85dfcbe065bb92fd6347bd392ed"
+    },
+    "model-budget-evidence-test-10-actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel-singleton-final.json": {
+      "bytes": 5017,
+      "sha256": "7dd64b70082aaa5975188089045fc8bed36b4aa7a3e57503fd9b640b474f90fe"
+    },
+    "model-budget-evidence-test-28-actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue-singleton-final.json": {
+      "bytes": 7106,
+      "sha256": "2328843e9f9541985ee51b7b7cfb9015e92fbc6096128317b0f5e804a66a76a1"
+    },
+    "model-budget-evidence-test-41-historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof-singleton-after-each.json": {
+      "bytes": 2223,
+      "sha256": "d5f5b07fa4cb9d793c92e69246c9b03f01b84602443514a345271177bb4bdf8c"
+    },
+    "privacy-test-11-actualCoreMayUseDenialStartsNoSessionAndNoBrowser-singleton.json": {
+      "bytes": 90149,
+      "sha256": "0207cd4e7b89899a2fa52c8e1416e7c2530fd5bf384905d6663f8aaba52496be"
+    },
+    "model-budget-evidence-test-46-incrementalSecretPrefixPreservesEveryVaultFaultOracle-singleton-after-each.json": {
+      "bytes": 9152,
+      "sha256": "abf9e108d906f18af8b15024ac53536c4dd00f154c1974061fd246c899dbc1da"
+    },
+    "responses-test-21-actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead-singleton-final.json": {
+      "bytes": 8772,
+      "sha256": "c741def401f59bdbd3b3cf67c1b9a30d680e56c989ee961d3120b7826ec54696"
+    },
+    "responses-test-46-incrementalSecretPrefixPreservesEveryVaultFaultOracle-singleton-after-each.json": {
+      "bytes": 8988,
+      "sha256": "0864ca7a307ec445280faff01ac82bd9ae584bb1069475d66e6401cb6d5f364e"
+    },
+    "privacy-test-14-actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure-singleton.json": {
+      "bytes": 90171,
+      "sha256": "ce009e804b893e11a8f2f970406c8ab20b7d29bc52681beb5aa77a3e321b9239"
+    },
+    "model-budget-evidence-test-40-auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass-singleton-after-each.json": {
+      "bytes": 134,
+      "sha256": "31d55c84e7c9d4ac9943ad1616825c9611c7c027b0a60e4f5e8226068fb32d67"
+    },
+    "privacy-test-7-observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays-singleton.json": {
+      "bytes": 90199,
+      "sha256": "614a84411d80b58ef8f8fabf68090f77354ed30c3abd58a48f82f858a5c3066d"
+    },
+    "responses-test-40-auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass-singleton-after-each.json": {
+      "bytes": 504,
+      "sha256": "c69f6df1815018f691e7a46e524a6778edadf5ad50fbb6317f96671bd3f7bc0d"
+    },
+    "responses-test-39-actualSecretControlWindowLossBeforeReadyReachesTerminalError-singleton-after-each.json": {
+      "bytes": 5918,
+      "sha256": "6dae5dd8c976a3c87df46babeab9dfebcb4747f6fa207184cc2927e15fd0755c"
+    },
+    "responses-test-5-modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance-singleton-after-each.json": {
+      "bytes": 5906,
+      "sha256": "a6b1abb945bc2935b64dcdfca3bd640d3d5d1736c3662534e97ae64ee5b79148"
+    },
+    "responses-test-25-actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds-singleton-after-each.json": {
+      "bytes": 4390,
+      "sha256": "9ec3bcb7549ce278d89ca5e8dc6d2561fff8a6b6c33be3759e70fae1b3a53333"
+    },
+    "privacy-test-35-actualCorePublishedControlValuePasswordRequestRefusesBeforeRead-singleton.json": {
+      "bytes": 90177,
+      "sha256": "8f420112a70dac4e0f6c6cc5a2e874d939cefb56f1de763919af291d30ef14ff"
+    },
+    "model-budget-evidence-test-8-originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall-singleton-after-each.json": {
+      "bytes": 5428,
+      "sha256": "68a962aaa4192bbc963b2f3548a70ed84ed6f6d89cb944946cd1ac220fecdceb"
+    },
+    "model-budget-evidence-test-39-actualSecretControlWindowLossBeforeReadyReachesTerminalError-singleton-after-each.json": {
+      "bytes": 4458,
+      "sha256": "a66aad660da09a7a83e699fdc9a7a418a84e65065ec6e4735be160fd162fb132"
+    },
+    "model-budget-evidence-test-32-actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending-singleton-final.json": {
+      "bytes": 2782,
+      "sha256": "c85a5e0b3e197701ad1af98cd03fae1416c90e935d078402be9cb072f90d6191"
+    },
+    "guard-tally.json": {
+      "bytes": 10928,
+      "sha256": "ff06c7c4b5ad72cf862204627763ca44e370fe7089eb158fbf8dd45d7f3659e6"
+    },
+    "responses-test-43-incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck-singleton-after-each.json": {
+      "bytes": 9773,
+      "sha256": "64008c1086e8e82b90682d647d89c0acd2279c59bc77836623e19d20cde7b917"
+    },
+    "privacy-test-38-actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending-singleton.json": {
+      "bytes": 90189,
+      "sha256": "4473c1446bab72c8a55356300f7394bd435a5ecedea81699686693de69b45e3e"
+    },
+    "responses-test-3-editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness-singleton-final.json": {
+      "bytes": 524,
+      "sha256": "f143543fc9418168acea4dbb99e20390c482b6abd5ed14db530bd0bba9b02ff6"
+    },
+    "responses-test-28-actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue-singleton-final.json": {
+      "bytes": 9588,
+      "sha256": "5a8acedf32a15b522676e2b28598c45519e18460d277ff99e939a9c671833f1f"
+    },
+    "model-budget-evidence-test-8-originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall-singleton-final.json": {
+      "bytes": 5428,
+      "sha256": "68a962aaa4192bbc963b2f3548a70ed84ed6f6d89cb944946cd1ac220fecdceb"
+    },
+    "model-budget-evidence-test-5-modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance-singleton-after-each.json": {
+      "bytes": 4448,
+      "sha256": "a1b197bf7dfc9bd3c06b8df1c8487384cee4259601e7e2e203039bc5349031ba"
+    },
+    "model-budget-evidence-test-38-actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending-singleton-after-each.json": {
+      "bytes": 4458,
+      "sha256": "900663e42a231612e9fc17d0f005904035c7ddca83556fc08b4ae2f5b8f91c97"
+    },
+    "responses-test-45-incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent-singleton-after-each.json": {
+      "bytes": 9018,
+      "sha256": "1a69c7d27a3fda67e636a14b9ca5639a75a12dfa712929421f4447c7cd3aaee7"
+    },
+    "privacy-test-9-guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes-singleton.json": {
+      "bytes": 90176,
+      "sha256": "72e2d70f9b076d55ddec45d9a80546a8c514702a73cb4f1d866d7ce9f76d27e3"
+    },
+    "model-budget-evidence-test-45-incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent-singleton-final.json": {
+      "bytes": 7516,
+      "sha256": "4650059a590689f53bb216ca9e5464f290a4881a9c6473842157d55df7e859a5"
+    },
+    "privacy-test-8-originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall-singleton.json": {
+      "bytes": 90215,
+      "sha256": "1e31659f7b746ba5463959786b5539c61cfeaffa5262eb8507607af55220107a"
+    },
+    "model-budget-evidence-test-7-observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays-singleton-after-each.json": {
+      "bytes": 4448,
+      "sha256": "d7d7d2c2c9a76668fc1a5d6f61677e473f4f9594aaed92fc2a51eba329f466f9"
+    },
+    "responses-test-30-actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect-singleton-after-each.json": {
+      "bytes": 5924,
+      "sha256": "f2cd7f8ac0e207458bc2f9cad7ae6e8e41ce16ceb7af9199b0a6c58f7f469eff"
+    },
+    "responses-test-35-actualCorePublishedControlValuePasswordRequestRefusesBeforeRead-singleton-final.json": {
+      "bytes": 5464,
+      "sha256": "add822d8be29da923b66d786a2b7655783fe97c7edf6758f84f1bc0bfc4ca00d"
+    },
+    "model-budget-evidence-test-23-actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution-singleton-final.json": {
+      "bytes": 4458,
+      "sha256": "f8314d64a2b38e618c2bc00e46ce7f3bd130bdcef9fbcb93ec6b1284495076b1"
+    },
+    "model-budget-evidence-test-46-incrementalSecretPrefixPreservesEveryVaultFaultOracle-singleton-final.json": {
+      "bytes": 9152,
+      "sha256": "abf9e108d906f18af8b15024ac53536c4dd00f154c1974061fd246c899dbc1da"
+    },
+    "responses-test-14-actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure-singleton-after-each.json": {
+      "bytes": 2832,
+      "sha256": "1882bead5a26ecc521553b68361188cc8ae9111850dd66b03b64245c1f5ca15d"
+    },
+    "responses-test-19-actualPublishedRegistrationPassingAssertRemainsPassed-singleton-after-each.json": {
+      "bytes": 3589,
+      "sha256": "9da5721c6ca0e12fc9c1042c2d8ee000002d82481615c184452d406b2c7948e6"
+    },
+    "model-budget-evidence-test-19-actualPublishedRegistrationPassingAssertRemainsPassed-singleton-after-each.json": {
+      "bytes": 2781,
+      "sha256": "f5500a106795f708d30ad66e9553d246893bdcae1079b0e3fd98b59702c9d00c"
+    },
+    "model-budget-evidence-test-44-actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache-singleton-final.json": {
+      "bytes": 1664,
+      "sha256": "bd05c4c82772dea12ae7610191585461d69a0779ea92179f56a5fdbc06a5775b"
+    },
+    "model-budget-evidence-test-43-incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck-singleton-final.json": {
+      "bytes": 7665,
+      "sha256": "f3fc5751549e7c13e84f5fbd6c4432aef16a45172920718f1dbe98b9ebba8ac6"
+    },
+    "model-budget-evidence-test-27-actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper-singleton-final.json": {
+      "bytes": 4458,
+      "sha256": "e9148c10139018e74ab5f40280c5debf1777100357635cf0484d83fc9d67b459"
+    },
+    "responses-test-42-actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay-singleton-after-each.json": {
+      "bytes": 9048,
+      "sha256": "d35e416d5c8450b29761e1f9031dcc77ed457b935b576176b531b64bdcb9d7cb"
+    },
+    "responses-test-36-actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead-singleton-final.json": {
+      "bytes": 2159,
+      "sha256": "1dd6ae4d8fe1c1429a66f5f283f5de61c5035b83ed421ee09249456a8b406fba"
+    },
+    "privacy-test-5-modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance-singleton.json": {
+      "bytes": 90171,
+      "sha256": "cc0a42bf4e3d04d3bf7ac39461126591216a8857023a1ce24d545c9e571294b9"
+    },
+    "privacy-test-6-absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork-singleton.json": {
+      "bytes": 90193,
+      "sha256": "0d2998e3f2c1450c84c08df67b48a8de8f0be8363e8d2a38c698ad0cb39d1826"
+    },
+    "model-budget-evidence-test-7-observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays-singleton-final.json": {
+      "bytes": 4448,
+      "sha256": "d7d7d2c2c9a76668fc1a5d6f61677e473f4f9594aaed92fc2a51eba329f466f9"
+    },
+    "privacy-test-15-actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch-singleton.json": {
+      "bytes": 90161,
+      "sha256": "a34b1834a0a451a0f920d6f5c89e3432c4dfc2313e7eeee7073b1193f70d0bc3"
+    },
+    "responses-test-31-actualPublishedPublicCancelWhileNativePasswordWorldPending-singleton-after-each.json": {
+      "bytes": 5914,
+      "sha256": "abe519eb4d081873d6f28c2f80e24fc9b8e5cdcb667810bcd4a1079385d322b1"
+    },
+    "model-budget-evidence-test-1-actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues-singleton-final.json": {
+      "bytes": 7647,
+      "sha256": "69c399996c676799c2d87d13eb5f59db6e2f5a750f6f74973c6e8482b81c5567"
+    },
+    "model-budget-evidence-test-41-historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof-singleton-final.json": {
+      "bytes": 2223,
+      "sha256": "d5f5b07fa4cb9d793c92e69246c9b03f01b84602443514a345271177bb4bdf8c"
+    },
+    "model-budget-evidence-test-9-guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes-singleton-final.json": {
+      "bytes": 3896,
+      "sha256": "53ade9123632f0389d40156fcbb0216003843c588b0f2996ada210cbec575ee6"
+    },
+    "responses-test-32-actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending-singleton-final.json": {
+      "bytes": 3825,
+      "sha256": "3b332fb969442dc869c1041d3ecfe59effcf2fa100673d3f3bde662dfb8d26f8"
+    },
+    "model-budget-evidence-test-42-actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay-singleton-final.json": {
+      "bytes": 7107,
+      "sha256": "97246d024626e977239c7deed4cb4b6cd3afc16eba3cf7c442aa69e90c9bb75a"
+    },
+    "responses-test-38-actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending-singleton-after-each.json": {
+      "bytes": 5936,
+      "sha256": "eb13068001facb60487d41801f300987dac67474d8f443c6af03b2d2852267b3"
+    },
+    "responses-test-7-observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays-singleton-after-each.json": {
+      "bytes": 5933,
+      "sha256": "b681e7aadbdc1b84665822e3314f1465e5dbf4b43b88888e71b677cda5240b29"
+    },
+    "cohort.json": {
+      "bytes": 102314,
+      "sha256": "0afb2c37751e803ac8a6b6646f17ee32ae58b90ef4ee2401e934fe24b321ac6c"
+    },
+    "responses-test-1-actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues-singleton-final.json": {
+      "bytes": 10406,
+      "sha256": "979e98ad0d1ff350faa3d915851813e76aeddd3be9fbe2a40941326a2b8e33ac"
+    },
+    "model-budget-evidence-test-40-auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass-singleton-final.json": {
+      "bytes": 134,
+      "sha256": "31d55c84e7c9d4ac9943ad1616825c9611c7c027b0a60e4f5e8226068fb32d67"
+    },
+    "privacy-test-23-actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution-singleton.json": {
+      "bytes": 90195,
+      "sha256": "f5655da17db7443f345a78610296e6abfedd82267e45ca9a3f42b965cf434197"
+    },
+    "responses-test-11-actualCoreMayUseDenialStartsNoSessionAndNoBrowser-singleton-after-each.json": {
+      "bytes": 3581,
+      "sha256": "ef7ff11c2ce5f104c1130aa218f87ee229aa7d309c52c32bcfa9d73d89d2e22f"
+    },
+    "responses-test-25-actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds-singleton-final.json": {
+      "bytes": 4650,
+      "sha256": "84674800c42e14edf218c4ef9f655ee0be2c29ad0a9faebbd453298e0b960a68"
+    },
+    "responses-test-4-asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays-singleton-after-each.json": {
+      "bytes": 5149,
+      "sha256": "3967825e36440a217a8a8a1c648bcbe55abcaa4eb294c6884bfc0c73280ca16c"
+    },
+    "model-budget-evidence-test-14-actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure-singleton-final.json": {
+      "bytes": 2223,
+      "sha256": "1189a0784f83f46747ca001d0694fb37717c1d93d7645e3b1904b07823a47ff3"
+    },
+    "model-budget-evidence-test-12-actualCoreGuidedSameSecretIdStaysWithinPersistedScope-singleton-final.json": {
+      "bytes": 17433,
+      "sha256": "698adde0972cf57764ed1c057a53958f4b1be0860be4fe741140ecab0ad44cd9"
+    },
+    "responses-test-29-actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue-singleton-final.json": {
+      "bytes": 6292,
+      "sha256": "7bac8d6db6d5f6b92fb5fff6f24474681db5a6988ff7903b57bedf15a7ad6041"
+    },
+    "model-budget-evidence-test-45-incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent-singleton-after-each.json": {
+      "bytes": 7516,
+      "sha256": "4650059a590689f53bb216ca9e5464f290a4881a9c6473842157d55df7e859a5"
+    },
+    "privacy-test-32-actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending-singleton.json": {
+      "bytes": 90183,
+      "sha256": "22f4f7a1cdf40b3d5140cfe0676e16b514b8e6fc0330b4ba79a5ea8d215f7972"
+    },
+    "privacy-test-18-actualPublishedWrongPasswordAnnotatesEarlierSecretFill-singleton.json": {
+      "bytes": 90159,
+      "sha256": "378abe973da22bfe01cde3b2fa78e40f2b3e8d44d27e85996389c876617d0a99"
+    },
+    "model-budget-evidence-test-32-actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending-singleton-after-each.json": {
+      "bytes": 2782,
+      "sha256": "c85a5e0b3e197701ad1af98cd03fae1416c90e935d078402be9cb072f90d6191"
+    },
+    "model-budget-evidence-test-22-actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead-singleton-final.json": {
+      "bytes": 6549,
+      "sha256": "3c4238ef64ccfd86dfdd61c6ade82905fedc0757be5cf5d54a344dec27a0ae63"
+    },
+    "responses-test-32-actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending-singleton-after-each.json": {
+      "bytes": 3617,
+      "sha256": "b4d61b459a1a86739c829d4b1efd240c6b802772ce93b6a778fd0d05d1b37be0"
+    },
+    "responses-test-18-actualPublishedWrongPasswordAnnotatesEarlierSecretFill-singleton-final.json": {
+      "bytes": 6270,
+      "sha256": "403ccedc2872a97eb5229566b4cca63c929f5702715373892cc44b288ad7b1ec"
+    },
+    "responses-test-7-observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays-singleton-final.json": {
+      "bytes": 6297,
+      "sha256": "5876e70a5767ce425ddb6eb08a5d650940305abd0a0a20c3859c289877edb2ee"
+    },
+    "responses-test-36-actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead-singleton-after-each.json": {
+      "bytes": 2055,
+      "sha256": "54099112aea8fade21d12c9aa6ba106ff421e676c4c30515b37d813f673290cc"
+    },
+    "model-budget-evidence-test-9-guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes-singleton-after-each.json": {
+      "bytes": 3896,
+      "sha256": "53ade9123632f0389d40156fcbb0216003843c588b0f2996ada210cbec575ee6"
+    },
+    "model-budget-evidence-test-20-syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls-singleton-final.json": {
+      "bytes": 134,
+      "sha256": "02db2ca840a7449c29e58e3ffc86849a8fd925d21e00b659d4710f9cb32b8787"
+    },
+    "model-budget-evidence-test-1-actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues-singleton-after-each.json": {
+      "bytes": 7647,
+      "sha256": "69c399996c676799c2d87d13eb5f59db6e2f5a750f6f74973c6e8482b81c5567"
+    },
+    "model-budget-evidence-test-33-actualGuidedReleasedValueInjectedFailureRedactsProducedSinks-singleton-final.json": {
+      "bytes": 2782,
+      "sha256": "5f9bf9c6573c9522e45ed5c2192dd6856e1fc64dcced9d5a75b84d989cf0b2f0"
+    },
+    "responses-test-44-actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache-singleton-final.json": {
+      "bytes": 2162,
+      "sha256": "fa2355271266cf3e25a76a7ae03da424c572be6d2fdbd0bae63c735b610b1a8a"
+    },
+    "responses-test-43-incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck-singleton-final.json": {
+      "bytes": 10398,
+      "sha256": "71af2f39bb702ec6f4a064b22422a6443e4e08dadadf0e26b88d39fc2652ac92"
+    },
+    "responses-test-17-actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection-singleton-final.json": {
+      "bytes": 3820,
+      "sha256": "5684f6ac6521f3c9bce5d479bee548afa13699e5baf53aefcf2a18fc70371edb"
+    },
+    "responses-test-2-queuedAndPreReadyRefusals-singleton-after-each.json": {
+      "bytes": 449,
+      "sha256": "770af7c04514b264c89f97426bec1fb0ef49b95f3d64955434c80a9a47ea3ee6"
+    },
+    "privacy-test-1-actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues-singleton.json": {
+      "bytes": 90203,
+      "sha256": "a60904b79e3e709910627fa3304e2cca534e4dd53b079f69b2834dffe25f953f"
+    },
+    "privacy-test-27-actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper-singleton.json": {
+      "bytes": 90207,
+      "sha256": "6602655b345a4e594bf2e3f265245d6166f7965d8376192709140257312092e8"
+    },
+    "privacy-test-24-actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution-singleton.json": {
+      "bytes": 90193,
+      "sha256": "c4acaa94b941df226b2ba9321486e9a9c655a4efccd838ee9facb3099221979c"
+    },
+    "privacy-test-45-incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent-singleton.json": {
+      "bytes": 90193,
+      "sha256": "35bdf0c5eae7b47bc782113ad2947669befaaedd7b2495627943356da53c9f18"
+    },
+    "responses-test-23-actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution-singleton-after-each.json": {
+      "bytes": 5942,
+      "sha256": "746fe7b23bb9260f6d0c8e131e4f8767fa173d83ed00a440fc0e7bd815838c36"
+    },
+    "responses-test-31-actualPublishedPublicCancelWhileNativePasswordWorldPending-singleton-final.json": {
+      "bytes": 6278,
+      "sha256": "f62b215cde5c5438ab6cd6b4a854d37e7c1c70a3daf9ad679dd7d67fb7a7e1c2"
+    },
+    "model-budget-evidence-test-18-actualPublishedWrongPasswordAnnotatesEarlierSecretFill-singleton-final.json": {
+      "bytes": 4458,
+      "sha256": "d1ffb6f24ed9789b3fcafb2d25f32cf141da360e97f018428581280dddadfc2d"
+    },
+    "model-budget-evidence-test-17-actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection-singleton-after-each.json": {
+      "bytes": 2781,
+      "sha256": "2e88410ef9f958a0cd3faac9c451abd9b039cd4bf4f59f7b31f6d31beb8f8b6d"
+    },
+    "audit-final.json": {
+      "bytes": 218,
+      "sha256": "8f61f42e11e063c35f2572915ab9f662e88e2adf96a53915b7d6b338f2fa032b"
+    },
+    "responses-test-33-actualGuidedReleasedValueInjectedFailureRedactsProducedSinks-singleton-final.json": {
+      "bytes": 3813,
+      "sha256": "01dc619d371ce0a0b44a9ee4dabcd19877151a3838e351cba4922ff1f47bb8da"
+    },
+    "model-budget-evidence-test-31-actualPublishedPublicCancelWhileNativePasswordWorldPending-singleton-final.json": {
+      "bytes": 4458,
+      "sha256": "498250f5c23ca3e43583a04aeda32c9d08cec3594a50fad92a69f32b6825d829"
+    },
+    "responses-test-29-actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue-singleton-after-each.json": {
+      "bytes": 5928,
+      "sha256": "d79b69dfd1628310de5f5708d024a5def3ff22422ba7deeabaed84f2e548be15"
+    },
+    "model-budget-evidence-test-17-actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection-singleton-final.json": {
+      "bytes": 2781,
+      "sha256": "2e88410ef9f958a0cd3faac9c451abd9b039cd4bf4f59f7b31f6d31beb8f8b6d"
+    },
+    "model-budget-evidence-test-22-actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead-singleton-after-each.json": {
+      "bytes": 6549,
+      "sha256": "3c4238ef64ccfd86dfdd61c6ade82905fedc0757be5cf5d54a344dec27a0ae63"
+    },
+    "responses-test-28-actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue-singleton-after-each.json": {
+      "bytes": 9016,
+      "sha256": "334e4729b52a6b9ab8d5bfa7e358e8a19350c14996b567c85228b4bc90f79cbf"
+    },
+    "privacy-test-13-actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope-singleton.json": {
+      "bytes": 90168,
+      "sha256": "8ba6d73c39d58e39ca960a6b562e5a6c023ba17b8d7325e7c431fb8b4ecb12de"
+    },
+    "model-budget-evidence-test-13-actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope-singleton-after-each.json": {
+      "bytes": 17433,
+      "sha256": "e244ecb85ee0b81d27b90eecf7099646d3e67cf97f7391a59282b3e1393bff28"
+    },
+    "responses-test-3-editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness-singleton-after-each.json": {
+      "bytes": 529,
+      "sha256": "206be4adfbf9813aafa3bf8b7553703abf88c0315b55eb2b0396f42b3374fddf"
+    },
+    "model-budget-evidence-test-29-actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue-singleton-after-each.json": {
+      "bytes": 4458,
+      "sha256": "040c737a20e196667c621b802fc2807368525fed472d3b3d063a520e01c281d0"
+    },
+    "responses-test-8-originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall-singleton-after-each.json": {
+      "bytes": 6724,
+      "sha256": "670efeba982eb019f6f8966224eee863b3ba97751f0d859c2f780adc946b6e85"
+    },
+    "model-budget-evidence-test-30-actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect-singleton-after-each.json": {
+      "bytes": 4458,
+      "sha256": "22b55cf8cf6e9a58dd4fe89466389e29dcf13195f22b6ef436eb10540bed457c"
+    },
+    "responses-test-9-guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes-singleton-after-each.json": {
+      "bytes": 5145,
+      "sha256": "e7687813a5ff0dd4d2f90ae9be385aa39857be9dbdeb80aa9dd61a48ff7b175b"
+    },
+    "responses-test-17-actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection-singleton-after-each.json": {
+      "bytes": 3613,
+      "sha256": "25b80df02b5aa9d927f75df97d90ff919c3d88c9ea4ab6b8d2bfb24f58c361e2"
+    },
+    "responses-test-14-actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure-singleton-final.json": {
+      "bytes": 2987,
+      "sha256": "356ee64598752153fbb095ef244f9b9ee9c7414f6d825a50e463d265362fbb3a"
+    },
+    "privacy-test-4-asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays-singleton.json": {
+      "bytes": 90185,
+      "sha256": "a912c3e2f9f2c9f56c0b7d710760747357d506f7acd5f65d152473ce7052e049"
+    },
+    "responses-test-41-historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof-singleton-final.json": {
+      "bytes": 3037,
+      "sha256": "c883acd9f5dab4ee81f9523d64e40ad1655a87da939a7645df49a844bcf3990c"
+    },
+    "privacy-test-40-auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass-singleton.json": {
+      "bytes": 90153,
+      "sha256": "3b113a186d94e872c694e34566b95204c2e59834b9a2ebc8acdcd2df9621eaae"
+    },
+    "model-budget-evidence-test-19-actualPublishedRegistrationPassingAssertRemainsPassed-singleton-final.json": {
+      "bytes": 2781,
+      "sha256": "f5500a106795f708d30ad66e9553d246893bdcae1079b0e3fd98b59702c9d00c"
+    },
+    "model-budget-evidence-test-3-editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness-singleton-after-each.json": {
+      "bytes": 133,
+      "sha256": "52feef313c22c340bea39822d377c2d4001489db7e6e8a4d850aa9e272ada3f0"
+    },
+    "model-budget-evidence-test-29-actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue-singleton-final.json": {
+      "bytes": 4458,
+      "sha256": "040c737a20e196667c621b802fc2807368525fed472d3b3d063a520e01c281d0"
+    },
+    "privacy-test-20-syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls-singleton.json": {
+      "bytes": 90171,
+      "sha256": "7d8a4d18ab6c2c7a7d3effe45edfdf74b91a4092d215508f44048c0eac31f041"
+    },
+    "responses-test-45-incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent-singleton-final.json": {
+      "bytes": 9590,
+      "sha256": "9b39065e3c3dead55fb42fb638ac79f6c10c7b2a2247bd126221b8118d55c24c"
+    },
+    "privacy-test-17-actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection-singleton.json": {
+      "bytes": 90181,
+      "sha256": "eee7f4ea7a96d8784a83bf29156225b34c2665a947326926228fdf52102fb425"
+    },
+    "model-budget-evidence-test-11-actualCoreMayUseDenialStartsNoSessionAndNoBrowser-singleton-after-each.json": {
+      "bytes": 2781,
+      "sha256": "c5beb26b133a057e241b75c56d825cfc51de295a7275166a178af8304cbda5ed"
+    },
+    "model-budget-evidence-test-6-absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork-singleton-after-each.json": {
+      "bytes": 6532,
+      "sha256": "f0ba5a588c27ffdac14db2bc695e435eeeec6b070dc30fce245bd2e0af48ee86"
+    },
+    "model-budget-evidence-test-25-actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds-singleton-final.json": {
+      "bytes": 3340,
+      "sha256": "f46a7555a40be612557621b5320ef0dff94517d52d23e7e07607d760b5366d7d"
+    },
+    "privacy-test-44-actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache-singleton.json": {
+      "bytes": 90169,
+      "sha256": "301e0f87c7a6377cf01dca98bfafb9e080ab98a2d18066c0fb4f5d6fd8906ad3"
+    },
+    "model-budget-evidence-test-2-queuedAndPreReadyRefusals-singleton-final.json": {
+      "bytes": 133,
+      "sha256": "95f83619295ed4cfbb7a87bff6f2f39af5005a10d5abacab5c0320ebc77e8672"
+    },
+    "privacy-test-12-actualCoreGuidedSameSecretIdStaysWithinPersistedScope-singleton.json": {
+      "bytes": 90166,
+      "sha256": "0660842cdf7b05f64c207e2dedacdf972923a81725be4b840859f7ced5f20541"
+    },
+    "model-budget-evidence-test-42-actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay-singleton-after-each.json": {
+      "bytes": 7107,
+      "sha256": "97246d024626e977239c7deed4cb4b6cd3afc16eba3cf7c442aa69e90c9bb75a"
+    },
+    "privacy-test-22-actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead-singleton.json": {
+      "bytes": 90190,
+      "sha256": "ffdd9c6a0fe661e89f7c38f0787ce8987699775a9f86cde6d6223664acb6ac87"
+    },
+    "responses-test-21-actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead-singleton-after-each.json": {
+      "bytes": 8251,
+      "sha256": "7ff5d66c5b74c3a08e289f5ee3eb23c0afc2c5378d4203072032120d86d4ade5"
+    },
+    "model-budget-evidence-test-15-actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch-singleton-final.json": {
+      "bytes": 3898,
+      "sha256": "6cb7f0ec9ee78f2fc6e4d035f8778fb3e64c8ad3e6b54fb52b6a801376ed7347"
+    },
+    "responses-test-34-actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead-singleton-final.json": {
+      "bytes": 2166,
+      "sha256": "bec81cee6af77569cb91e4980533373ab8ad448b1dc343c1a6f7502fb3cc6cf8"
+    },
+    "responses-test-39-actualSecretControlWindowLossBeforeReadyReachesTerminalError-singleton-final.json": {
+      "bytes": 6282,
+      "sha256": "db2a9e724adb48f9bfbbf73bff1de66517bee97886b8be8ec9345edbf1842861"
+    },
+    "responses-test-13-actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope-singleton-final.json": {
+      "bytes": 23560,
+      "sha256": "9a4c2621131d854f4d12c2dffd74115bfd4f3d3dfd5d403b1bbae8a360659115"
+    },
+    "privacy-test-46-incrementalSecretPrefixPreservesEveryVaultFaultOracle-singleton.json": {
+      "bytes": 90175,
+      "sha256": "180517cb13381f14a9ef9dea0fa00acf355e2074a5f2068e0e1a0ce7a18d7112"
+    },
+    "model-budget-evidence-test-44-actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache-singleton-after-each.json": {
+      "bytes": 1664,
+      "sha256": "bd05c4c82772dea12ae7610191585461d69a0779ea92179f56a5fdbc06a5775b"
+    },
+    "responses-test-2-queuedAndPreReadyRefusals-singleton-final.json": {
+      "bytes": 444,
+      "sha256": "1dc2c0758068cabf38450d01ce7b969924217bad8f8048ce96efe94b15093656"
+    },
+    "model-budget-evidence-test-10-actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel-singleton-after-each.json": {
+      "bytes": 5017,
+      "sha256": "7dd64b70082aaa5975188089045fc8bed36b4aa7a3e57503fd9b640b474f90fe"
+    },
+    "privacy-test-26-actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds-singleton.json": {
+      "bytes": 90189,
+      "sha256": "6a6d21bb134b53817981108fac397dbd36bde8e83e1310183d84fa0e4e01edd0"
+    },
+    "model-budget-evidence-test-5-modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance-singleton-final.json": {
+      "bytes": 4448,
+      "sha256": "a1b197bf7dfc9bd3c06b8df1c8487384cee4259601e7e2e203039bc5349031ba"
+    },
+    "model-budget-evidence-test-4-asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays-singleton-after-each.json": {
+      "bytes": 3889,
+      "sha256": "ba38802af08eecae113d3260194a05ecda11284d6c4de0db34ce07495562998b"
+    },
+    "responses-test-8-originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall-singleton-final.json": {
+      "bytes": 7142,
+      "sha256": "f06060aff543a850ff62a4d5ccfd73a9833b96e81c59852d826f4753f30c4717"
+    },
+    "responses-test-41-historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof-singleton-after-each.json": {
+      "bytes": 2882,
+      "sha256": "14854957caf518cfbb497e3156d3349dc957b47a43e28265533fb4fafc9eadbb"
+    },
+    "responses-test-34-actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead-singleton-after-each.json": {
+      "bytes": 2062,
+      "sha256": "689c4bd1d9017f9c86f630d7f5801cfb6eb13837d4cca22fe3f88234f04b5259"
+    },
+    "privacy-test-36-actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead-singleton.json": {
+      "bytes": 90163,
+      "sha256": "abf6044f28cabd875865d88e84630873559a93db7b96f2f9140f03f3cd1dec60"
+    },
+    "model-budget-evidence-test-20-syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls-singleton-after-each.json": {
+      "bytes": 134,
+      "sha256": "02db2ca840a7449c29e58e3ffc86849a8fd925d21e00b659d4710f9cb32b8787"
+    },
+    "privacy-test-2-queuedAndPreReadyRefusals-singleton.json": {
+      "bytes": 90098,
+      "sha256": "952eb38464378a4e02c2a4689461c61d604c4a984a88a889cff598d6f059af50"
+    },
+    "responses-test-4-asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays-singleton-final.json": {
+      "bytes": 5461,
+      "sha256": "6b2456f747155588e2a6735003084da557da145378962eba629c6b634ef31a3d"
+    },
+    "privacy-test-29-actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue-singleton.json": {
+      "bytes": 90181,
+      "sha256": "21fc40ee6709e2aa56b5c4b68e313d0c4b321dc709d68d3aefb9a47e0a71a196"
+    },
+    "model-budget-evidence-test-35-actualCorePublishedControlValuePasswordRequestRefusesBeforeRead-singleton-after-each.json": {
+      "bytes": 3897,
+      "sha256": "6205af9c3d84892a79e5d130ae5bb14e9f4f05d865961f29574aab73a5a9dc60"
+    },
+    "responses-test-46-incrementalSecretPrefixPreservesEveryVaultFaultOracle-singleton-final.json": {
+      "bytes": 9560,
+      "sha256": "bf1d4d3bbddb4b7dec506502d597c4828005b40d582e37bc391226bf61780305"
+    },
+    "responses-test-26-actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds-singleton-final.json": {
+      "bytes": 6300,
+      "sha256": "f8ecf0a368b7d3dd19719302955412f91873df9baa67095483cb59ddafd53527"
+    },
+    "model-budget-evidence-test-27-actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper-singleton-after-each.json": {
+      "bytes": 4458,
+      "sha256": "e9148c10139018e74ab5f40280c5debf1777100357635cf0484d83fc9d67b459"
+    },
+    "model-budget-evidence-test-43-incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck-singleton-after-each.json": {
+      "bytes": 7665,
+      "sha256": "f3fc5751549e7c13e84f5fbd6c4432aef16a45172920718f1dbe98b9ebba8ac6"
+    },
+    "model-budget-evidence-test-3-editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness-singleton-final.json": {
+      "bytes": 133,
+      "sha256": "52feef313c22c340bea39822d377c2d4001489db7e6e8a4d850aa9e272ada3f0"
+    },
+    "responses-test-12-actualCoreGuidedSameSecretIdStaysWithinPersistedScope-singleton-after-each.json": {
+      "bytes": 22101,
+      "sha256": "3705cc8255edf4ebd9094a5bbe18c69600422b2cbaff1e27e43083c6992ca9a2"
+    },
+    "responses-test-18-actualPublishedWrongPasswordAnnotatesEarlierSecretFill-singleton-after-each.json": {
+      "bytes": 5906,
+      "sha256": "dbf9cc1e4be044fde956f4f4da8ac020b39e80dedf64f042cc0b5e4531559500"
+    },
+    "model-budget-evidence-test-12-actualCoreGuidedSameSecretIdStaysWithinPersistedScope-singleton-after-each.json": {
+      "bytes": 17433,
+      "sha256": "698adde0972cf57764ed1c057a53958f4b1be0860be4fe741140ecab0ad44cd9"
+    },
+    "responses-test-5-modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance-singleton-final.json": {
+      "bytes": 6270,
+      "sha256": "603da27a86fd784f14b8a616d6e4d909521a187e38f52f7a7be54c2e72145a96"
+    },
+    "model-budget-evidence-test-23-actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution-singleton-after-each.json": {
+      "bytes": 4458,
+      "sha256": "f8314d64a2b38e618c2bc00e46ce7f3bd130bdcef9fbcb93ec6b1284495076b1"
+    },
+    "model-budget-evidence-test-38-actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending-singleton-final.json": {
+      "bytes": 4458,
+      "sha256": "900663e42a231612e9fc17d0f005904035c7ddca83556fc08b4ae2f5b8f91c97"
+    },
+    "responses-test-24-actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution-singleton-final.json": {
+      "bytes": 6304,
+      "sha256": "143eae09787dada3e7ba2bfbb8d951fb1f99a45969412ae70b723eb4c1f65493"
+    },
+    "model-budget-evidence-test-24-actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution-singleton-final.json": {
+      "bytes": 4458,
+      "sha256": "ebcdb84108a61aacb4bb03a1e95ac0a76f918893d58236b8175cd15c15ba8f75"
+    },
+    "model-budget-evidence-test-34-actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead-singleton-after-each.json": {
+      "bytes": 1663,
+      "sha256": "d844888361420e7f7b18a924c0a0112bb11953eaaf1bcdf97574d7bc3ee6f7f4"
+    },
+    "model-budget-evidence-test-4-asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays-singleton-final.json": {
+      "bytes": 3889,
+      "sha256": "ba38802af08eecae113d3260194a05ecda11284d6c4de0db34ce07495562998b"
+    },
+    "privacy-test-33-actualGuidedReleasedValueInjectedFailureRedactsProducedSinks-singleton.json": {
+      "bytes": 90171,
+      "sha256": "6809bc4a7b2f753a8c828f4967be6f935ba5dbebaea8dcfe1c472afedd0e12d0"
+    },
+    "model-budget-evidence-test-28-actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue-singleton-after-each.json": {
+      "bytes": 7106,
+      "sha256": "2328843e9f9541985ee51b7b7cfb9015e92fbc6096128317b0f5e804a66a76a1"
+    },
+    "responses-test-40-auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass-singleton-final.json": {
+      "bytes": 499,
+      "sha256": "c54c334e906dfb4ddeef67f415ab13453599384fa5258a064f618061989e14e3"
+    },
+    "model-budget-evidence-test-34-actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead-singleton-final.json": {
+      "bytes": 1663,
+      "sha256": "d844888361420e7f7b18a924c0a0112bb11953eaaf1bcdf97574d7bc3ee6f7f4"
+    },
+    "responses-test-38-actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending-singleton-final.json": {
+      "bytes": 6300,
+      "sha256": "6b0d974d2ec84cfcb4d81cff08b596ffa8c70150e83be12f7fd47587909f9219"
+    },
+    "model-budget-evidence-test-39-actualSecretControlWindowLossBeforeReadyReachesTerminalError-singleton-final.json": {
+      "bytes": 4458,
+      "sha256": "a66aad660da09a7a83e699fdc9a7a418a84e65065ec6e4735be160fd162fb132"
+    },
+    "privacy-test-25-actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds-singleton.json": {
+      "bytes": 90185,
+      "sha256": "02c537658a1234aff76c007a1ea5185c36f07f9d04ebf0ba343efec5f26afa67"
+    },
+    "responses-test-24-actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution-singleton-after-each.json": {
+      "bytes": 5940,
+      "sha256": "a5eec0b0235fae1a31eed7568628f4f1c5decd41e73bf20fd3e9f496f96b6527"
+    },
+    "responses-test-11-actualCoreMayUseDenialStartsNoSessionAndNoBrowser-singleton-final.json": {
+      "bytes": 3788,
+      "sha256": "5d6207db74f67aa4331589d3dea2a01b72b2f7c67c50e445801ff6097633fc4e"
+    },
+    "model-budget-evidence-test-37-actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion-singleton-after-each.json": {
+      "bytes": 2782,
+      "sha256": "8d5c3645e9801123c663580aa18d0335684c6c892afa47ef00e3e203ad0fd027"
+    },
+    "model-budget-evidence-test-26-actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds-singleton-final.json": {
+      "bytes": 4458,
+      "sha256": "f8da56b348ff6ea93c03a3967fbde5e03be37be919999ac941cb510582e77228"
+    },
+    "model-budget-evidence-test-36-actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead-singleton-final.json": {
+      "bytes": 1664,
+      "sha256": "9c3ace5815c4a6af66add3dd793b035e3d226e9d73370d017a36904453312fbb"
+    },
+    "responses-test-26-actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds-singleton-after-each.json": {
+      "bytes": 5936,
+      "sha256": "a7bdc2d9ef81ae7589ec76dbb241df698d80c8f5754c9afea9dd2f1df313a1c3"
+    },
+    "responses-test-16-actualGuidedRegistrationPassingAssertRemainsPassed-singleton-after-each.json": {
+      "bytes": 3583,
+      "sha256": "6e9a4da5f01b622db603820e63e4328d0f0b6fc5d1474ec8f09ffde0744dcefe"
+    },
+    "model-budget-evidence-test-13-actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope-singleton-final.json": {
+      "bytes": 17433,
+      "sha256": "e244ecb85ee0b81d27b90eecf7099646d3e67cf97f7391a59282b3e1393bff28"
+    },
+    "responses-test-27-actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper-singleton-final.json": {
+      "bytes": 6318,
+      "sha256": "36d9c0c049e500ea07a03997ad4db520b6b3dd07d5184003ed64e6cd0994c160"
+    },
+    "model-budget-evidence-test-11-actualCoreMayUseDenialStartsNoSessionAndNoBrowser-singleton-final.json": {
+      "bytes": 2781,
+      "sha256": "c5beb26b133a057e241b75c56d825cfc51de295a7275166a178af8304cbda5ed"
+    },
+    "responses-test-35-actualCorePublishedControlValuePasswordRequestRefusesBeforeRead-singleton-after-each.json": {
+      "bytes": 5152,
+      "sha256": "f053e83cec9f399c2b61acadd84a8f3c7c49071d83658db7ed01197c822909b3"
+    },
+    "responses-test-15-actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch-singleton-final.json": {
+      "bytes": 5449,
+      "sha256": "7ee7955bfca27592a49c6fcccf47122c8b8f17855376626b929187acabed6463"
+    },
+    "responses-test-6-absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork-singleton-final.json": {
+      "bytes": 8752,
+      "sha256": "ed2d7f21090ead9dc88765af77fddccc60a89785c648ebfcef6927b9057bf18a"
+    },
+    "privacy-test-19-actualPublishedRegistrationPassingAssertRemainsPassed-singleton.json": {
+      "bytes": 90157,
+      "sha256": "fb7ca97d12459146da22783db316933ebe2fe2240625b3f798cae8608de04ceb"
+    },
+    "privacy-test-34-actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead-singleton.json": {
+      "bytes": 90171,
+      "sha256": "2a90363db00c85484df55ddf6de1c881b5c8f4a0c62ba22779b0536dff41bfee"
+    },
+    "model-budget-evidence-test-25-actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds-singleton-after-each.json": {
+      "bytes": 3340,
+      "sha256": "f46a7555a40be612557621b5320ef0dff94517d52d23e7e07607d760b5366d7d"
+    },
+    "model-budget-evidence-test-6-absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork-singleton-final.json": {
+      "bytes": 6532,
+      "sha256": "f0ba5a588c27ffdac14db2bc695e435eeeec6b070dc30fce245bd2e0af48ee86"
+    },
+    "responses-test-33-actualGuidedReleasedValueInjectedFailureRedactsProducedSinks-singleton-after-each.json": {
+      "bytes": 3605,
+      "sha256": "a029258935279e2bc8fbb76cc29a984fa6ccdfa13a77ee3879c3d28d9613d3c0"
+    },
+    "model-budget-evidence-test-18-actualPublishedWrongPasswordAnnotatesEarlierSecretFill-singleton-after-each.json": {
+      "bytes": 4458,
+      "sha256": "d1ffb6f24ed9789b3fcafb2d25f32cf141da360e97f018428581280dddadfc2d"
+    },
+    "responses-test-37-actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion-singleton-after-each.json": {
+      "bytes": 3625,
+      "sha256": "cea8c7caa8d2009f3dc43602f8626c2eacaabb107a5e232de5e5bf8ba9f9a6af"
+    },
+    "privacy-test-3-editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness-singleton.json": {
+      "bytes": 90178,
+      "sha256": "5257aeb4a1f5fa7af62833e1ab9c5ef4a525d0f6ef10b9b98bef3d27ca8df48f"
+    },
+    "privacy-test-28-actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue-singleton.json": {
+      "bytes": 90188,
+      "sha256": "3629ccd9a3c482058652dd438047b1f353766df68b67ef8a39be1e2ad72fdf05"
+    },
+    "privacy-test-41-historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof-singleton.json": {
+      "bytes": 90221,
+      "sha256": "901a1a9ddf46774bf78cd3af38144af3ee8ea49b37d31aebf69982694eea4e7e"
+    },
+    "model-budget-evidence-test-26-actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds-singleton-after-each.json": {
+      "bytes": 4458,
+      "sha256": "f8da56b348ff6ea93c03a3967fbde5e03be37be919999ac941cb510582e77228"
+    },
+    "responses-test-19-actualPublishedRegistrationPassingAssertRemainsPassed-singleton-final.json": {
+      "bytes": 3796,
+      "sha256": "a417279f4bd3dc5648bc431eb736a17f1b5016ec46f81c6fd1c78de94d77eba7"
+    },
+    "responses-test-10-actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel-singleton-final.json": {
+      "bytes": 7139,
+      "sha256": "a46599c61a6c94525bae0a618b5dc93b6bd363571c545d54075b1ae9c94df7a9"
+    },
+    "privacy-test-31-actualPublishedPublicCancelWhileNativePasswordWorldPending-singleton.json": {
+      "bytes": 90167,
+      "sha256": "4c4481d81a7d939aeff576c5253ae93a05c1b28118e4ad573e32fa18f0c1a53f"
+    },
+    "responses-test-15-actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch-singleton-after-each.json": {
+      "bytes": 5137,
+      "sha256": "6ef38b6c199a5a06d216ed93aef492d2ef2a6cd188ffe6a8a25e6dd5bdb55856"
+    },
+    "responses-test-10-actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel-singleton-after-each.json": {
+      "bytes": 6723,
+      "sha256": "2d8451b0bee75132da7d66dd10e0476092915f7ba900f1944e30cad0b4b876dd"
+    },
+    "model-budget-evidence-test-30-actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect-singleton-final.json": {
+      "bytes": 4458,
+      "sha256": "22b55cf8cf6e9a58dd4fe89466389e29dcf13195f22b6ef436eb10540bed457c"
+    },
+    "privacy-test-42-actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay-singleton.json": {
+      "bytes": 90220,
+      "sha256": "d08590fd0e7bcea3b3c97db479950a2a667e7378c0e2545dd976f0cc3d451add"
+    },
+    "privacy-test-10-actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel-singleton.json": {
+      "bytes": 90205,
+      "sha256": "87a451282d8092c34b3159b8591a4d9aeb7415feb31e7c12e8474affcba7f166"
+    },
+    "model-budget-evidence-test-24-actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution-singleton-after-each.json": {
+      "bytes": 4458,
+      "sha256": "ebcdb84108a61aacb4bb03a1e95ac0a76f918893d58236b8175cd15c15ba8f75"
+    },
+    "responses-test-12-actualCoreGuidedSameSecretIdStaysWithinPersistedScope-singleton-final.json": {
+      "bytes": 23558,
+      "sha256": "7a3a4e2a7bdddbbdebef30fe44635c1fa3c22709967478e2d72d81e3e3c30970"
+    },
+    "responses-test-27-actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper-singleton-after-each.json": {
+      "bytes": 5954,
+      "sha256": "a6f369dec7c23b5b50cbff762b72a46e72087cd02c8a31ffbdc50f046d7747fe"
+    },
+    "responses-test-37-actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion-singleton-final.json": {
+      "bytes": 3833,
+      "sha256": "c703ee75ea10f73f723630acc73cc44b7ee88739c942900fd183ed761f0f8b7d"
+    },
+    "model-budget-evidence-test-21-actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead-singleton-after-each.json": {
+      "bytes": 6549,
+      "sha256": "1462056609b479cd0c23a7184c7b6f0509539f96011c50da3e9c2eb81b0fe1de"
+    },
+    "model-budget-evidence-test-15-actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch-singleton-after-each.json": {
+      "bytes": 3898,
+      "sha256": "6cb7f0ec9ee78f2fc6e4d035f8778fb3e64c8ad3e6b54fb52b6a801376ed7347"
+    },
+    "responses-test-23-actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution-singleton-final.json": {
+      "bytes": 6306,
+      "sha256": "a005ce31b1124c1f150b38ef9b30e3cd17d0cf67653b31088c1e5ddece9b53db"
+    },
+    "model-budget-evidence-test-37-actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion-singleton-final.json": {
+      "bytes": 2782,
+      "sha256": "8d5c3645e9801123c663580aa18d0335684c6c892afa47ef00e3e203ad0fd027"
+    },
+    "privacy-test-43-incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck-singleton.json": {
+      "bytes": 90172,
+      "sha256": "47e5ed5258c35cae0e751f38eafb55cc8d8b9127476f83219b49a49005437653"
+    },
+    "model-budget-evidence-test-16-actualGuidedRegistrationPassingAssertRemainsPassed-singleton-final.json": {
+      "bytes": 2781,
+      "sha256": "c65a4113fdcce6a6271bfdb19b91052aeee70538dabb380b8f3f71c9aa0aba89"
+    },
+    "privacy-test-37-actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion-singleton.json": {
+      "bytes": 90191,
+      "sha256": "5405c4d4794f62f2d92ec3fc18f81b668a406bd537e2bac5e080afe94399ea44"
+    },
+    "responses-test-30-actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect-singleton-final.json": {
+      "bytes": 6288,
+      "sha256": "fcd9c850f0c88a439d0f32b16b56096e32e7054b6aa7a1f4567a2179d5ea7eb4"
+    },
+    "responses-test-1-actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues-singleton-after-each.json": {
+      "bytes": 9781,
+      "sha256": "a6fdbef1e6c32b4183d9ada37ff3589189f4bd065d08593dc6e9bfaf6e238574"
+    },
+    "responses-test-20-syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls-singleton-final.json": {
+      "bytes": 517,
+      "sha256": "734e5e46a7ef4d926a14b0c6ecb9bcf3c84bd7017471fb43d4cfed71b97165b8"
+    },
+    "model-budget-evidence-test-33-actualGuidedReleasedValueInjectedFailureRedactsProducedSinks-singleton-after-each.json": {
+      "bytes": 2782,
+      "sha256": "5f9bf9c6573c9522e45ed5c2192dd6856e1fc64dcced9d5a75b84d989cf0b2f0"
+    },
+    "model-budget-evidence-test-16-actualGuidedRegistrationPassingAssertRemainsPassed-singleton-after-each.json": {
+      "bytes": 2781,
+      "sha256": "c65a4113fdcce6a6271bfdb19b91052aeee70538dabb380b8f3f71c9aa0aba89"
+    },
+    "responses-test-20-syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls-singleton-after-each.json": {
+      "bytes": 522,
+      "sha256": "98baaec6cbd8edbcb265eb6659296e4bb4702d2b69f863216d25269cd6498654"
+    },
+    "responses-test-16-actualGuidedRegistrationPassingAssertRemainsPassed-singleton-final.json": {
+      "bytes": 3790,
+      "sha256": "8b6be61db356fcd3d62d1143854cf4d830f6d7bdf62ad269da42f0d09849955c"
+    },
+    "model-budget-evidence-test-2-queuedAndPreReadyRefusals-singleton-after-each.json": {
+      "bytes": 133,
+      "sha256": "95f83619295ed4cfbb7a87bff6f2f39af5005a10d5abacab5c0320ebc77e8672"
+    },
+    "model-budget-evidence-test-36-actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead-singleton-after-each.json": {
+      "bytes": 1664,
+      "sha256": "9c3ace5815c4a6af66add3dd793b035e3d226e9d73370d017a36904453312fbb"
+    }
+  },
+  "ledgerInFinalPrivacySinkInventory": true,
+  "privateCorrelationHashOnly": [
+    {
+      "privatePathSha256": "1f3d4d073b3adc1aad4f30dbb899b2bd4860f154eb2c24e28fe8d08b71f0dc55",
+      "contentSha256": "6c5e681a0d2e9f979b0035104ae9bc9d42208b536241a4378b557238f279e7dc",
+      "matches": [
+        "context",
+        "session"
+      ]
+    },
+    {
+      "privatePathSha256": "9ff65901e43ab71a3200659e5ff5a2d8623fdc5fba1b977f812f79a53e1a5c1d",
+      "contentSha256": "118cbba19af95e5932581361e06804c682c8a0c1b240f181980cf65a43635d67",
+      "matches": [
+        "context",
+        "session"
+      ]
+    },
+    {
+      "privatePathSha256": "c83114ef8021ae7c73c4f01af2fa198b09da4f26fe746af7b542e3bd5a1ae9ee",
+      "contentSha256": "0cc294206dbfff3455349bed8f5ea356af0f36fdc40edc576d3c32b5c654a25e",
+      "matches": [
+        "session"
+      ]
+    }
+  ],
+  "selectedOriginalMethod": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks",
+  "selectedInvocationOrdinal": 33,
+  "events": [
+    {
+      "schemaVersion": 1,
+      "event": "CLAIM_BEGIN",
+      "seq": 1,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 1,
+      "phase": "NONE",
+      "loss": "NONE",
+      "leaseRemainingMs": 599886,
+      "assignmentRemainingMs": 599886,
+      "entryEpoch": 0,
+      "stopped": false,
+      "initial": true,
+      "requestBudgetMs": 10000
+    },
+    {
+      "schemaVersion": 1,
+      "event": "CHECK_GRANT",
+      "seq": 2,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 18,
+      "phase": "NONE",
+      "loss": "NONE",
+      "leaseRemainingMs": 599869,
+      "assignmentRemainingMs": 599869,
+      "entryEpoch": 0,
+      "stopped": false,
+      "initial": true,
+      "fulfilled": true,
+      "leaseAdvanceMs": 0,
+      "chain0": "NONE",
+      "chain1": "NONE",
+      "chain2": "NONE",
+      "chain3": "NONE",
+      "chain4": "NONE",
+      "chain5": "NONE",
+      "code": "NONE"
+    },
+    {
+      "schemaVersion": 1,
+      "event": "CLAIM_SETTLE",
+      "seq": 3,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 18,
+      "phase": "NONE",
+      "loss": "NONE",
+      "leaseRemainingMs": 599868,
+      "assignmentRemainingMs": 599868,
+      "entryEpoch": 0,
+      "stopped": false,
+      "initial": true,
+      "fulfilled": true,
+      "budgetMs": 10000,
+      "budgetObserved": true,
+      "chain0": "NONE",
+      "chain1": "NONE",
+      "chain2": "NONE",
+      "chain3": "NONE",
+      "chain4": "NONE",
+      "chain5": "NONE",
+      "code": "NONE",
+      "durationMs": 17
+    },
+    {
+      "schemaVersion": 1,
+      "event": "START_BEGIN",
+      "seq": 4,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 129,
+      "phase": "NONE",
+      "loss": "NONE",
+      "aborted": false
+    },
+    {
+      "schemaVersion": 1,
+      "event": "START_SETTLE",
+      "seq": 5,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 930,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "fulfilled": true,
+      "chain0": "NONE",
+      "chain1": "NONE",
+      "chain2": "NONE",
+      "chain3": "NONE",
+      "chain4": "NONE",
+      "chain5": "NONE",
+      "code": "NONE",
+      "durationMs": 801
+    },
+    {
+      "schemaVersion": 1,
+      "event": "CLAIM_BEGIN",
+      "seq": 6,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 1130,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "leaseRemainingMs": 28884,
+      "assignmentRemainingMs": 598757,
+      "entryEpoch": 0,
+      "stopped": false,
+      "initial": false,
+      "requestBudgetMs": 1000
+    },
+    {
+      "schemaVersion": 1,
+      "event": "CHECK_GRANT",
+      "seq": 7,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 1148,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "leaseRemainingMs": 28866,
+      "assignmentRemainingMs": 598739,
+      "entryEpoch": 0,
+      "stopped": false,
+      "initial": false,
+      "fulfilled": true,
+      "leaseAdvanceMs": 1131,
+      "chain0": "NONE",
+      "chain1": "NONE",
+      "chain2": "NONE",
+      "chain3": "NONE",
+      "chain4": "NONE",
+      "chain5": "NONE",
+      "code": "NONE"
+    },
+    {
+      "schemaVersion": 1,
+      "event": "CLAIM_SETTLE",
+      "seq": 8,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 1148,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "leaseRemainingMs": 28865,
+      "assignmentRemainingMs": 598738,
+      "entryEpoch": 0,
+      "stopped": false,
+      "initial": false,
+      "fulfilled": true,
+      "budgetMs": 1000,
+      "budgetObserved": true,
+      "chain0": "NONE",
+      "chain1": "NONE",
+      "chain2": "NONE",
+      "chain3": "NONE",
+      "chain4": "NONE",
+      "chain5": "NONE",
+      "code": "NONE",
+      "durationMs": 18
+    },
+    {
+      "schemaVersion": 1,
+      "event": "LEASE_APPLY",
+      "seq": 9,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 1149,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "fulfilled": true,
+      "leaseAdvanceMs": 1131,
+      "leaseRemainingMs": 29996,
+      "durationMs": 0
+    },
+    {
+      "schemaVersion": 1,
+      "event": "STOP_ENTRY_OWNERSHIP",
+      "seq": 10,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 2123,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "origin": "OWNERSHIP_STOP_REQUEST",
+      "site": 6,
+      "leaseRemainingMs": 29022,
+      "assignmentRemainingMs": 597764,
+      "entryEpoch": 0,
+      "stopped": false,
+      "reason": "UNKNOWN_OUTCOME"
+    },
+    {
+      "schemaVersion": 1,
+      "event": "INVALIDATE",
+      "seq": 11,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 2123,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "leaseRemainingMs": 29021,
+      "assignmentRemainingMs": 597763,
+      "entryEpoch": 1,
+      "stopped": true
+    },
+    {
+      "schemaVersion": 1,
+      "event": "STOP_ENTRY",
+      "seq": 12,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 2124,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "origin": "OWNERSHIP_STOP_REQUEST",
+      "site": 6,
+      "reason": "UNKNOWN_OUTCOME",
+      "aborted": false,
+      "first": true,
+      "stopCount": 1
+    },
+    {
+      "schemaVersion": 1,
+      "event": "ABORT_ENTRY",
+      "seq": 13,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 2124,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "origin": "OWNERSHIP_STOP_REQUEST",
+      "site": 6,
+      "aborted": false,
+      "first": true,
+      "reason": "CANCELLED",
+      "stopCount": 1
+    },
+    {
+      "schemaVersion": 1,
+      "event": "INVALIDATE",
+      "seq": 14,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 2124,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "leaseRemainingMs": 29020,
+      "assignmentRemainingMs": 597762,
+      "entryEpoch": 2,
+      "stopped": true
+    },
+    {
+      "schemaVersion": 1,
+      "event": "STOP_ENTRY",
+      "seq": 15,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 2137,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "origin": "OTHER",
+      "site": 0,
+      "reason": "UNKNOWN_OUTCOME",
+      "aborted": true,
+      "first": false,
+      "stopCount": 2
+    },
+    {
+      "schemaVersion": 1,
+      "event": "STOP_SETTLE",
+      "seq": 16,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 2418,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "fulfilled": true,
+      "chain0": "NONE",
+      "chain1": "NONE",
+      "chain2": "NONE",
+      "chain3": "NONE",
+      "chain4": "NONE",
+      "chain5": "NONE",
+      "code": "NONE",
+      "stopCount": 2
+    },
+    {
+      "schemaVersion": 1,
+      "event": "STOP_SETTLE",
+      "seq": 17,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 2418,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "fulfilled": true,
+      "chain0": "NONE",
+      "chain1": "NONE",
+      "chain2": "NONE",
+      "chain3": "NONE",
+      "chain4": "NONE",
+      "chain5": "NONE",
+      "code": "NONE",
+      "stopCount": 2
+    },
+    {
+      "schemaVersion": 1,
+      "event": "OWNER_CLOSE",
+      "seq": 18,
+      "sessionHash": "8c04ab7bb7a673f8246027d5c719f1447844f9f563b7541df98505689e7423cc",
+      "contextHash": "cc54f6a985361903ee3e7760c37a5426c1f00bb4d444299c0ac03a6e9aa0d4af",
+      "case": 6,
+      "epoch": 6,
+      "producer": 1,
+      "elapsedMs": 80346,
+      "phase": "STARTED",
+      "loss": "NONE",
+      "fulfilled": true
+    }
+  ],
+  "originalB1CauseProved": false,
+  "newNativeRunOrRestorationClaimed": false
+}

@@ -1,0 +1,85 @@
+{
+  "kind": "SOURCE_ONLY_C6_QA_01_SUCCESSOR",
+  "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "beforeSha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+  "redSha256": "cd1c81f9c5ace7b107a314c0f4baf9c6cb5dadacf9576a1213ee8e9455eb95e3",
+  "greenSha256": "ab429398f750bb493982be321bea550f16823d5b5a58111a1a3d180bff2ece1c",
+  "neutralBodySemantics": {
+    "oldBodyWithOnlyLazyProviderSubstitutionEqualsNeutralOverloadBody": true,
+    "tryCatchUnchanged": true,
+    "lazyNullHandleFailureStillInsideOriginalCatch": true,
+    "greenOnlyDelta": " || !isAlive.getAsBoolean() after successful nonterminal status",
+    "terminalShortCircuitUnchanged": true,
+    "unknownCatchFalseUnchanged": true
+  },
+  "existingSupportMethod": {
+    "name": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+    "order": 19,
+    "originalSpanSha256": "010c3a725bbf6ab82dbb62aa62ec87f891643f327dc53c465e68ff83cacbf1b3",
+    "originalPrefixPreservedExact": false,
+    "beforeLine": 20710,
+    "appendedControlCount": 9,
+    "newJUnitCaseCount": 0,
+    "originalContentAfterOpeningBracePreservedExact": true,
+    "note": "Signature gains throws Exception and entry gains exactly one existing initializer call; every original body byte and all nine prior control blocks remain exact."
+  },
+  "redOracle": {
+    "assertionDescription": "C6 successful nonterminal snapshot followed by death needs no signal",
+    "redAssertionDescriptionLine": 20887,
+    "redIsTrueLine": 20888,
+    "expected": true,
+    "oldActualPredicted": false,
+    "executed": false
+  },
+  "preservation": {
+    "originalAssertionsAndCasesPreserved": true,
+    "importsUnchanged": true,
+    "beforeTestAnnotationCount": 73,
+    "redTestAnnotationCount": 73,
+    "greenTestAnnotationCount": 73,
+    "beforeThreadSleepCount": 94,
+    "redThreadSleepCount": 94,
+    "greenThreadSleepCount": 94,
+    "allOriginalSleepExpressionsBytePreservedByWholeSourceRestoration": true,
+    "pinned21DeliberateSleepClassificationPreserved": "Prospective B4/FOLD retains20 Thread.sleep calls plus1 TimeUnit.NANOSECONDS.sleep(delay), total21 original deliberate sleeps, all byte-preserved. Current e10 retains all94 Thread.sleep calls plus the same1 nanos sleep.",
+    "beforeNanosSleepCount": 1,
+    "greenNanosSleepCount": 1,
+    "removeHelperAppendSignatureAndInitializerRestoresEntireBeforeExactly": true,
+    "explicitInverseEdits": [
+      "Restore original helper from neutral or green overload+adapter",
+      "Remove byte-identical appended nine-control block",
+      "Restore original support signature without throws Exception",
+      "Remove only entry itrEnsureClassFixtures(); call"
+    ]
+  },
+  "runtimeCompilerParserSandboxProductSourceWrites": false,
+  "oldAssertionInventory": {
+    "assertThat(": 2659,
+    "assertThatThrownBy(": 35
+  },
+  "newAssertionInventory": {
+    "assertThat(": 2677,
+    "assertThatThrownBy(": 35
+  },
+  "originalPacketManifestSha256": "f38a2d3b8c48d0b183191f547958e1e76baea003c76a313d89ba9b1d1c2b3878",
+  "originalNotReadyReviewSha256": "a69472c20e9fbde3f69ac443fb59935b51144739f63f6772568c52c6cc7fb4c3",
+  "correctionEdits": {
+    "signatureBefore": "  void syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls() {",
+    "signatureAfter": "  void syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls() throws Exception {",
+    "onlyAddedInitializerLine": "    itrEnsureClassFixtures();",
+    "entryCallCountInSelectedMethod": 1,
+    "sameEditBothStages": true,
+    "removingOnlySignatureAndInitializerRecreatesOriginalRedAndGreenExactly": true
+  },
+  "initializer": {
+    "startLineBefore": 4786,
+    "completeSpanSha256": "7e63068408a6c72bc02556238c9b6b441b0bc46a8af87c8f240809785fa310b7",
+    "completeSpanByteIdenticalExactlyOnceEachStage": true,
+    "startOnlyWhenBothWorkersNull": true,
+    "existingOwnersMustBeNonnullAndAlive": true,
+    "stickyCleanupGuardPreserved": true,
+    "noLearningOrAuditCanaryRegistrationAdded": true
+  },
+  "sameNineControlsSha256": "5c9bec78fdab86c13823b787e1a7d01789aa5e65e53b41b75aea090ce8474a45",
+  "sameNineControlsByteIdenticalBothStages": true
+}

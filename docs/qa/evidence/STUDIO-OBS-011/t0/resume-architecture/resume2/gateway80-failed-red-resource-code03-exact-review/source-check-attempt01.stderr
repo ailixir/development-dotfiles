@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code03-exact-review/verify_source.py", line 49, in <module>
+    check('no_global_shell_settings',not any(l.strip().startswith(('set -','set +','shopt ')) for l in guard.splitlines()))
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code03-exact-review/verify_source.py", line 8, in check
+    if value is not True:raise ValueError(name)
+                         ^^^^^^^^^^^^^^^^^^^^^^
+ValueError: no_global_shell_settings

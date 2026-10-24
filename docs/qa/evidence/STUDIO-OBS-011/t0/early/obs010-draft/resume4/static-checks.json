@@ -1,0 +1,221 @@
+{
+  "artifact": "author-resume4-static-package-checks-not-independent-QA",
+  "createdAt": "2026-10-19T01:42:36.261811+00:00",
+  "isStoryQaVerdict": false,
+  "checks": {
+    "all167CurrentInputBindingsMatch": true,
+    "packageSHA256SUMSMatch": true,
+    "targetBasesPreviewPatchHashesMatch": true,
+    "fiveExactConfinedTargets": true,
+    "combinedLiteralConcatenation": true,
+    "combinedHashMatches": true,
+    "exactInMemoryReconstruction": true,
+    "readOnlyGitApplyCheck": true,
+    "all67HistoricalPackageFilesPreserved": true,
+    "historicalFileSetsPreserved": true,
+    "rootRefreshExactlyPrepended525Bytes": true,
+    "refreshedHandoffOutsideB1CaptureAnd20QuotedInputs": true,
+    "68Architecture21Story010Verbatim": true,
+    "21GlobalExternalSeparateVerbatim": true,
+    "010Rows3Local9Dependent9External": true,
+    "19RBR21StoryMappings": true,
+    "strictLoggingCurrentRowVerbatim": true,
+    "fiveStoryCarriesUseCurrentStrictDispositions": true,
+    "allReleaseEvidenceSourcePathsExist": true,
+    "all70ReleaseRowsMatchMappedGateNames": true,
+    "19RBROnceInOrder": true,
+    "allGroupsAtoNand33ACIDs": true,
+    "noOldACPass": true,
+    "1034OriginalPrefixExact": true,
+    "sheetsUnchangedFromReviewedResume2": true,
+    "attemptFocusHeaderOnly": true,
+    "fiveUnassignedZeroParticipantFacts": true,
+    "12BlankNOTRUNDenominators": true,
+    "70ReleaseRowsFixedShapeAndMapped": true,
+    "section14ExactUnchanged12392Bytes": true,
+    "11EventualLinksAndAnchorsResolve": true,
+    "exactNineReferenceLineDeltas": true,
+    "actualProposedTargetDeltaContainsOnlyAuthorizedReferenceChanges": true,
+    "noStaleCurrentPackagePointersInAnyActualProposedTarget": true,
+    "operatorRunbookUsesCurrentTraceabilityMatrix": true,
+    "currentMatrixHasAcceptedRBR12SourcesAndFiveCarries": true,
+    "operatorHandoffDesignatesCurrentPackageAndSheets": true,
+    "pilotAnd1034PreviewsByteExactToReviewedResume3": true,
+    "acceptedPMDecisionUnchangedByteExact": true,
+    "allCurrentContentMappingsOnlyRebindOwnedOutputPaths": true,
+    "historicalReviewProvenanceRetained": true,
+    "DOC01003AcceptedForNarrowRereview": true
+  },
+  "allMechanicalChecksPassed": true,
+  "details": {
+    "inputDrift": [],
+    "targets": [
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "baseSha256": "9727657a78268acda3e95d634da1eeeeaff36680b4691ab3f0f3d5fcb6d00855",
+        "patchSha256": "2b3709a44d3deaa86fcacbc0d781222d426497f73094168d8c7e3b915a9a5f75",
+        "outputSha256": "bc476ef1f9bf568d1aceedac8ce9aaa4954f4180f681a2bd6cfb46ca0740a458",
+        "exactReconstruction": true
+      },
+      {
+        "target": "docs/qa/evidence/studio-observed-authoring/usability-pilot.md",
+        "baseSha256": null,
+        "patchSha256": "dd88bc18166d00d8407c6b80882fb80397365867e991451ae8843e92892372f0",
+        "outputSha256": "1c505793b209940c3fc5a0fe5629a56cddd01b2b3356239a81bcbb68f77479ce",
+        "exactReconstruction": true
+      },
+      {
+        "target": "docs/qa/evidence/studio-observed-authoring/release-readiness.md",
+        "baseSha256": null,
+        "patchSha256": "539aeb532d27eae50105f973de2f5bfc39d5be8efeb0a0fef6d33725b5e33356",
+        "outputSha256": "8a72c073c25f13c61744ffd51a9ebe06a0e18ac3fbe9737febb939f0c4946ee3",
+        "exactReconstruction": true
+      },
+      {
+        "target": "docs/qa/evidence/studio-observed-authoring/devops-handoff.md",
+        "baseSha256": null,
+        "patchSha256": "7952316ac118993678dd2e589a8610bb0fa7993fdcda75193fde7171e9be7258",
+        "outputSha256": "d1951c078076efb044f64c53bdc15226426158fe938c5b3735475fda36c152a0",
+        "exactReconstruction": true
+      },
+      {
+        "target": "docs/stories/10.34.story.md",
+        "baseSha256": "14c69d86bf81ebac22411d93961aa61164577110b13772fd3c30759921c9af33",
+        "patchSha256": "51e01a42dbc59d1cced41849b9c9dd2ea32f91e8587a896536b5a83ccdd1ee56",
+        "outputSha256": "38b0405fd41bdf27a8bef42d9049764bf1a3a1940e097aa7523be75660d7730b",
+        "exactReconstruction": true
+      }
+    ],
+    "gitApplyCheck": {
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "rootRefresh": {
+      "createdAt": "2026-10-19T01:35:03.267238+00:00",
+      "mutator": "root coordinator, not this worker",
+      "path": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/RESUME-HANDOFF-20261018-CODEX.md",
+      "beforeSha256": "604260c53e752257f3ea53d61b2a15d5b536ff61924be53c340cd595e39729a7",
+      "afterSha256": "7965d55220905ada4ca1670c941f65360c596697f6970f39b096fcaa94c17212",
+      "prependedBytes": 525,
+      "prependedSha256": "93b449b910cc1cdd99920b33f4c2c0265b5ebd80b0073322f65e19854801c78b",
+      "originalContentSha256": "604260c53e752257f3ea53d61b2a15d5b536ff61924be53c340cd595e39729a7",
+      "originalPausedContentBytePreserved": true,
+      "reason": "Root explicitly notified this worker that a current-resume pointer banner was prepended; root checked outside B1 source capture and 20 quoted inputs. Current resume3 binding is refreshed for this root-owned provenance change only.",
+      "resume2HistoricalManifestAndArtifacts": "Preserved byte-for-byte; historical handoff input hash intentionally remains the old captured hash.",
+      "patchAndPreviewChanges": false,
+      "affectedChecksRerun": [
+        "Current manifest input hashes",
+        "Pure prepend / original content hash",
+        "Reviewed resume2 artifact preservation"
+      ],
+      "unaffectedStaticChecks": "Prior exact patch reconstruction/applicability, previews, links/anchors, section14 and content/package checks remain bound to unchanged artifacts; no runtime test/build rerun."
+    },
+    "rootRefreshScopeProof": {
+      "B1Capture": "docs/qa/evidence/STUDIO-OBS-011/t0/start-capture.json",
+      "B1CaptureSha256": "e73152e4294a28da6dd435fb4b0b31fb9d35e0b47f04c91816e34642930bb1b6",
+      "quotedInputs": "docs/qa/evidence/STUDIO-OBS-011/t0/quoted-docs-s011.sha256",
+      "quotedInputsSha256": "c8c4025c87c8d02302a857553a3f9daf223220b0d1479692fc2fd5a13f034c15",
+      "quotedInputCount": 20
+    },
+    "links": [
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "url": "studio-runner.md#14-one-entrypoint-tls-everywhere-the-one-pod-guard-and-the-new-secrets-studio-obs-009",
+        "exists": true,
+        "anchorResolves": true
+      },
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "url": "../qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/traceability.md",
+        "exists": true,
+        "anchorResolves": true
+      },
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "url": "../qa/evidence/STUDIO-OBS-009/execution-20261018/d2/rotation-and-cert-inputs.md",
+        "exists": true,
+        "anchorResolves": true
+      },
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "url": "../qa/evidence/STUDIO-OBS-009/execution-20261018/d2/r82-alert-spec.md",
+        "exists": true,
+        "anchorResolves": true
+      },
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "url": "../qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json",
+        "exists": true,
+        "anchorResolves": true
+      },
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "url": "../qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/backend-remediation/implementation-receipt.json",
+        "exists": true,
+        "anchorResolves": true
+      },
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "url": "../qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/qa013/final-story-review.json",
+        "exists": true,
+        "anchorResolves": true
+      },
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "url": "../qa/evidence/STUDIO-OBS-010/live-surface-20261018/live-surface-list.json",
+        "exists": true,
+        "anchorResolves": true
+      },
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "url": "../qa/evidence/STUDIO-OBS-010/live-surface-20261018/live-surface-list.md",
+        "exists": true,
+        "anchorResolves": true
+      },
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "url": "../qa/evidence/STUDIO-OBS-010/live-surface-20261018/finalize-record.md",
+        "exists": true,
+        "anchorResolves": true
+      },
+      {
+        "target": "docs/stories/10.34.story.md",
+        "url": "../epics/EPIC-10-EXECUTION.yaml",
+        "exists": true,
+        "anchorResolves": true
+      }
+    ],
+    "semanticStaleLinks": [],
+    "manifestSha256": "8bc9a396d37f511ce2c8b0999da9b9e62a0129e7cf10521c72d0ec167f0b3d20",
+    "combinedPatchSha256": "7d94f14b96e1198c703011f70b385a2f1c765f99941d55d107e426756943dce0",
+    "narrowTargetDeltas": [
+      {
+        "target": "docs/runbooks/studio-guided-authoring.md",
+        "exactAuthorizedReferenceSubstitutionsOnly": true
+      },
+      {
+        "target": "docs/qa/evidence/studio-observed-authoring/usability-pilot.md",
+        "exactAuthorizedReferenceSubstitutionsOnly": true
+      },
+      {
+        "target": "docs/qa/evidence/studio-observed-authoring/release-readiness.md",
+        "exactAuthorizedReferenceSubstitutionsOnly": true
+      },
+      {
+        "target": "docs/qa/evidence/studio-observed-authoring/devops-handoff.md",
+        "exactAuthorizedReferenceSubstitutionsOnly": true
+      },
+      {
+        "target": "docs/stories/10.34.story.md",
+        "exactAuthorizedReferenceSubstitutionsOnly": true
+      }
+    ],
+    "staleCurrentPointers": []
+  },
+  "runtimeTestsRun": false,
+  "buildsRun": false,
+  "patchesApplied": false,
+  "gitWrites": false,
+  "externalCalls": false
+}

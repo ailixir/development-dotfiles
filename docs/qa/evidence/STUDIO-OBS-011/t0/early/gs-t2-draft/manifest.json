@@ -1,0 +1,123 @@
+{
+  "status": "complete off-tree preparation; ALL runtime/build/gates unexecuted",
+  "sourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+  "patchSha256": "81119d6a9ff6e2d0d2479f3cb453eaf4e696ab295c8d37cc9269059327158dd5",
+  "owned": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "operation": "edit",
+      "preimageSha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+      "candidateSha256": "19865c95c75381241cd4bc5d6ec8b2814892171374297ff8b439528e14891ac5",
+      "actualPreimageMatchesS011": true,
+      "candidateLines": 1130
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "operation": "edit",
+      "preimageSha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+      "candidateSha256": "3e13a1ef5e76040eb7353789bae04eb979c8d869438968f1ab7b6ff13ce96128",
+      "actualPreimageMatchesS011": true,
+      "candidateLines": 1878
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java",
+      "operation": "new",
+      "preimageSha256": null,
+      "candidateSha256": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463",
+      "actualPreimageMatchesS011": true,
+      "candidateLines": 515
+    }
+  ],
+  "patchReconstruction": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java"
+  ],
+  "artifacts": [
+    {
+      "path": "audit_draft.py",
+      "sha256": "5851130181ec5f5c85c7ca0233c0f2aa21e775a02f75797510e0b933e9548e0b",
+      "bytes": 14434
+    },
+    {
+      "path": "build_draft.py",
+      "sha256": "21b501ab9571e494b8b6c8016ed214b750975b752bf007699ff1eb24823e53d7",
+      "bytes": 16566
+    },
+    {
+      "path": "candidate.patch",
+      "sha256": "81119d6a9ff6e2d0d2479f3cb453eaf4e696ab295c8d37cc9269059327158dd5",
+      "bytes": 145843
+    },
+    {
+      "path": "candidates/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "sha256": "19865c95c75381241cd4bc5d6ec8b2814892171374297ff8b439528e14891ac5",
+      "bytes": 46129
+    },
+    {
+      "path": "candidates/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "sha256": "3e13a1ef5e76040eb7353789bae04eb979c8d869438968f1ab7b6ff13ce96128",
+      "bytes": 80423
+    },
+    {
+      "path": "candidates/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java",
+      "sha256": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463",
+      "bytes": 21519
+    },
+    {
+      "path": "commands.md",
+      "sha256": "e7a5e272edbc39f0f6701fc8210e7d4eb1a601d251d6291932ade22ad65702e5",
+      "bytes": 3451
+    },
+    {
+      "path": "main-s011-hashes.json",
+      "sha256": "077207432f85690946f49c5ca073b0a1590c747a3aec38faf3e46481766b48f9",
+      "bytes": 94487
+    },
+    {
+      "path": "orphan-helpers.json",
+      "sha256": "bb407f5bfa55a2b25bdd5cdde29957f97f1865d899fce9c792776f061f61b210",
+      "bytes": 5911
+    },
+    {
+      "path": "package_draft.py",
+      "sha256": "fa1a10cce8f2bd436ec1e155f174ced29fb35466df10e264dc2f7e055016b7b2",
+      "bytes": 14034
+    },
+    {
+      "path": "planned-gates.json",
+      "sha256": "1d3f7b4f057cdaba5019acc4cf5fb33453a70959eea7fe6a6c089d65b4e6eeea",
+      "bytes": 9148
+    },
+    {
+      "path": "preimages/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "sha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+      "bytes": 68877
+    },
+    {
+      "path": "preimages/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "sha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+      "bytes": 97612
+    },
+    {
+      "path": "receipt.md",
+      "sha256": "a4509fae7659cf6a5342adadc65512322b6f6045684fd1d6fecc10c672652cc3",
+      "bytes": 7889
+    },
+    {
+      "path": "state-reader-map.json",
+      "sha256": "86a15a158a786f10f1af20e451f35d4d4725722afc3422c1b2002059c723a87e",
+      "bytes": 59358
+    },
+    {
+      "path": "static-audit.json",
+      "sha256": "6f673954a659a9253b6832e408b001514c3117f8d1925855eb36abd167d2dcad",
+      "bytes": 105065
+    },
+    {
+      "path": "wait-call-sites.json",
+      "sha256": "11ff529c1072a773c8673b844dcd9af60dc7b7c8d41a487ad6ac63edbc3cb787",
+      "bytes": 3730
+    }
+  ]
+}

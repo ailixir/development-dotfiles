@@ -1,0 +1,196 @@
+{
+  "USD500SharedAggregate": "UNKNOWN",
+  "actualBashBuiltinsExecuted": false,
+  "actualResourceOutcomesExecuted": 0,
+  "actualTargetEffects": 0,
+  "attempt12": "Observed terminal exit1 via existing operator ok:false;14 assertions/2 exchanges; PTY request marker joined prior echo, driver missed line-start; harness transport interruption, not source failure; no signals",
+  "attempts": [
+    {
+      "attempt": 1,
+      "failure": {
+        "args": [
+          "FACTORY_NO_PRECREATE_N_FACT"
+        ],
+        "type": "Hold"
+      },
+      "operatorExchanges": 0,
+      "passed": 0,
+      "result": "critical-attempt01.json"
+    },
+    {
+      "attempt": 2,
+      "failure": {
+        "args": [
+          "CONTROL_AUTHOR_SOURCE_BINDING"
+        ],
+        "type": "Hold"
+      },
+      "operatorExchanges": 0,
+      "passed": 0,
+      "result": "critical-attempt02.json"
+    },
+    {
+      "attempt": 3,
+      "failure": {
+        "args": [
+          "OPERATOR_RESPONSE_REQUIRED"
+        ],
+        "type": "AssertionError"
+      },
+      "operatorExchanges": 0,
+      "passed": 4,
+      "result": "critical-attempt03.json"
+    },
+    {
+      "attempt": 4,
+      "failure": {
+        "args": [
+          "name 'sys' is not defined"
+        ],
+        "type": "NameError"
+      },
+      "operatorExchanges": 1,
+      "passed": 6,
+      "result": "critical-attempt04.json"
+    },
+    {
+      "attempt": 5,
+      "failure": {
+        "args": [
+          "OPERATOR_REJECTED:FAKE_OPERATOR_TRANSPORT_TRUNCATED_SOURCE_STATE_PROJECTION_CORRECTION"
+        ],
+        "type": "AssertionError"
+      },
+      "operatorExchanges": 2,
+      "passed": 14,
+      "result": "critical-attempt05.json"
+    },
+    {
+      "attempt": 6,
+      "failure": {
+        "args": [
+          "DERIVED_STATE_RAW_MISMATCH_PREWRITE_DENIES"
+        ],
+        "type": "AssertionError"
+      },
+      "operatorExchanges": 1,
+      "passed": 4,
+      "result": "critical-attempt06.json"
+    },
+    {
+      "attempt": 7,
+      "failure": {
+        "args": [
+          "REAL_GUARD_held-proof_EXPECTED_STATUS"
+        ],
+        "type": "AssertionError"
+      },
+      "operatorExchanges": 4,
+      "passed": 16,
+      "result": "critical-attempt07.json"
+    },
+    {
+      "attempt": 8,
+      "failure": {
+        "args": [
+          "OPERATOR_REJECTED:STATIC_ORIGINAL_CLOCK_LAST_SAMPLE_CORRECTION_BEFORE_FINAL_RUN"
+        ],
+        "type": "AssertionError"
+      },
+      "operatorExchanges": 0,
+      "passed": 4,
+      "result": "critical-attempt08.json"
+    },
+    {
+      "attempt": 9,
+      "failure": {
+        "args": [
+          "AUTHOR_ACTUAL_WRAPPER_RESULT_ACTUAL_CORRECTED_CALLER_ZERO"
+        ],
+        "type": "AssertionError"
+      },
+      "operatorExchanges": 20,
+      "passed": 53,
+      "result": "critical-attempt09.json"
+    },
+    {
+      "attempt": 10,
+      "failure": {
+        "args": [
+          "AUTHOR_ACTUAL_WRAPPER_RESULT:{\"namespace\": \"PROTOCOL_HOLD\", \"reason\": \"TYPED_ACTOR_ROSTER_SCHEMA\", \"stage\": \"CONTROL_AUTHOR\"}"
+        ],
+        "type": "AssertionError"
+      },
+      "operatorExchanges": 20,
+      "passed": 53,
+      "result": "critical-attempt10.json"
+    },
+    {
+      "attempt": 11,
+      "failure": {
+        "args": [
+          "REAL_GUARD_postclose_EXPECTED_STATUS"
+        ],
+        "type": "AssertionError"
+      },
+      "operatorExchanges": 13,
+      "passed": 35,
+      "result": "critical-attempt11.json"
+    },
+    {
+      "attempt": 12,
+      "failure": {
+        "args": [
+          "OPERATOR_REJECTED:OPERATOR_ORCHESTRATION_INTERRUPTED_PENDING_EXCHANGE_NOT_CUSTODIED"
+        ],
+        "type": "AssertionError"
+      },
+      "operatorExchanges": 2,
+      "passed": 14,
+      "result": "critical-attempt12.json"
+    },
+    {
+      "attempt": 13,
+      "failure": null,
+      "operatorExchanges": 13,
+      "passed": 39,
+      "result": "critical-attempt13.json"
+    }
+  ],
+  "authority": "NONE; all runtime/install/source/lifecycle/cleanup gates held",
+  "componentReuse": {
+    "binding": "final-binding-receipt.json",
+    "currentExecution": false,
+    "faults": [
+      "allow_io",
+      "unit_close",
+      "outer_close",
+      "delivery"
+    ],
+    "lateDenials": 4,
+    "source": "critical-attempt10.json",
+    "wholeRuntimeUnchanged": false
+  },
+  "currentFakeExecution": {
+    "assertions": 39,
+    "attempt": 13,
+    "observedOuterExit": 0,
+    "operatorExchanges": 13,
+    "postcloseStatus": 0,
+    "result": "critical-attempt13.json",
+    "toolStatus": "critical-attempt13-tool-status.json"
+  },
+  "inheritedConditions": "complete-root-all-findings-adoption.json and input-read-receipt.json; all existing literal copies retained",
+  "kind": "SOURCE06_PREPARATION_ONLY_SEALED_FOR_INDEPENDENT_REVIEW",
+  "postRunCorrection": "3 shell Python literal quoting lines in each applicable shell; exact intended Python AST and actual singlequoted argument verified; no new target execution; active harness updated for this semantic binding but not executed",
+  "precode": "PRECODE-DESIGN.md",
+  "pureJS": {
+    "binding": "final-binding-receipt.json",
+    "currentReusedChecks": 10,
+    "currentStateTransportExercised": true,
+    "diagnosticVectorReturnCallsNotExtraChecks": 3,
+    "historicalExecutedChecks": 10
+  },
+  "recipe": "SOURCE06-RECIPE.md",
+  "sourceBindings": "source-bindings.json"
+}

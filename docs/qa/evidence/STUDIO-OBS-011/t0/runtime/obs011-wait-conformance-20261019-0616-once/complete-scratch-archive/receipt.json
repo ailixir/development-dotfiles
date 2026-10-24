@@ -1,0 +1,30 @@
+{
+  "sourceSha256": "fa7c5acfdc3ed0373f87e3ce58619f576eb0d2f20a5965f29f269f470880faa2",
+  "bindingSha256": "90bc4385fe2a5b7477cecf1c9df32f761a2905bff2a96636e411f731ef74a10c",
+  "phases": [
+    {
+      "command": [
+        "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home/bin/javac",
+        "-cp",
+        "/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.awaitility/awaitility/4.2.2/7336242073ebf83fe034e42b46a403c5501b63c9/awaitility-4.2.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.assertj/assertj-core/3.25.3/792b270e73aa1cfc28fa135be0b95e69ea451432/assertj-core-3.25.3.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest/2.2/1820c0968dba3a11a1b30669bb1f01978a91dedc/hamcrest-2.2.jar",
+        "-d",
+        "/private/tmp/obs011-wait-conformance-20261019-0616-once",
+        "/private/tmp/obs011-wait-conformance-20261019-0616-once/WaitConformance.java"
+      ],
+      "exit": 0,
+      "maximumSeconds": 30
+    },
+    {
+      "command": [
+        "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home/bin/java",
+        "-cp",
+        "/private/tmp/obs011-wait-conformance-20261019-0616-once:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.awaitility/awaitility/4.2.2/7336242073ebf83fe034e42b46a403c5501b63c9/awaitility-4.2.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.assertj/assertj-core/3.25.3/792b270e73aa1cfc28fa135be0b95e69ea451432/assertj-core-3.25.3.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest/2.2/1820c0968dba3a11a1b30669bb1f01978a91dedc/hamcrest-2.2.jar",
+        "WaitConformance"
+      ],
+      "exit": 0,
+      "maximumSeconds": 60
+    }
+  ],
+  "nativeGatesStillRequired": true,
+  "sourceApplied": false
+}

@@ -1,0 +1,25 @@
+{
+  "atUtc": "2026-10-20T14:44:06.744314+00:00",
+  "decision": "APPROVE_EXACT_TWO_CURRENT_SEED_BINDINGS",
+  "pins": {
+    "prepare-sandbox-current.py": "ea698725a437e7b8453e72c0f0d52f0217893aa3f2b3d57adf73252546528f29",
+    "seed-helper.diff": "07c8658279e232507192521802abe626534ef597e4eb83bc6bbe41da69b3a17d",
+    "current-seed-inputs.json": "5edc3d42fa01fc6ae2b7663bbbb76697afdef9cb4c4bec73d20f3137b38506ff"
+  },
+  "selectedHistoricalFileCount": 493,
+  "currentSourceBindingsVerified": [
+    {
+      "path": "studio-runner/README.md",
+      "historicalSha256": "1b8891f988234b4f8e875df644332e69ac2f57efe720a86af63878ef5ada92d2",
+      "currentSha256": "4184d77764d72842d9bc4f5de5f39bafb491ea5f0987bead437b59e51f0bc9cd"
+    },
+    {
+      "path": "studio-runner/test/deployment/integrations.test.ts",
+      "historicalSha256": "6358d5d008ea3545df78719d5c2e66bc16f5cdf564e17af8056bd9d3e57d302b",
+      "currentSha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907"
+    }
+  ],
+  "review": "All original seven target/eighteen protected checks retained. Two exact current source hashes replace historical expected values only after historical hash match. Remaining491selectedinputs retain literal historical identity; historical helper/manifest/start/copylist pins retained. No union/exemption or product edit.",
+  "actualSeedExecuted": false,
+  "seedCondition": "Root seeds fresh outside-repository sandbox after FOLD heavy lane returns idle; B1/B7/tree release already satisfied."
+}

@@ -1,0 +1,53 @@
+{
+  "sourceSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "expectedCasesSha256": "fda33efa440799c23af34fd7ee34715782a1e50fec8602f2686ee4486b1e4c8d",
+  "profiles": {
+    "test": {
+      "caseCount": 46,
+      "singletons": 46,
+      "variants": 0,
+      "expectedOrder39BodyCalls": 1,
+      "healthyFinalControls": 2,
+      "healthyTotalCorpusChecks": 3,
+      "vacuityFaultBeforeBoundaryCounters": {
+        "OWNED_SINKS": {
+          "body": 1,
+          "final": 0
+        },
+        "CONTEXT_CLOSED": {
+          "body": 1,
+          "final": 0
+        }
+      },
+      "actualDefaultOrder39Provenance": "Exact task-qualified PASS XML and cohort passed/afterEachComplete singleton required only where source registry selects Order39."
+    },
+    "guidedIncrementalTest": {
+      "caseCount": 62,
+      "singletons": 27,
+      "variants": 35,
+      "expectedOrder39BodyCalls": 0,
+      "healthyFinalControls": 2,
+      "healthyTotalCorpusChecks": 2,
+      "vacuityFaultBeforeBoundaryCounters": {
+        "OWNED_SINKS": {
+          "body": 0,
+          "final": 0
+        },
+        "CONTEXT_CLOSED": {
+          "body": 0,
+          "final": 0
+        }
+      },
+      "actualDefaultOrder39Provenance": "Exact task-qualified PASS XML and cohort passed/afterEachComplete singleton required only where source registry selects Order39."
+    }
+  },
+  "sourceInvariant": "Original SINGLETON_METHODS contains Order39; INCREMENTAL_METHODS excludes it. No Java/source selection edit. Faults occur before final/total corpus counter increments.",
+  "forcedTrueSubset": {
+    "task": "test",
+    "actualCases": 1,
+    "expectedFullCases": 46,
+    "bodyCalls": 0,
+    "finalCounter": 0,
+    "genuineMultiplicityComplete": false
+  }
+}

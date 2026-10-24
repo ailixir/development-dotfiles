@@ -1,0 +1,16 @@
+// Executed in tools' pure V8 isolate, no Node/process/API/target effects.
+// exactHelperSource is the independently read/pinned Source07 operator-completion.js.
+// envelope is original-initial-envelope.json; no runtime facts are represented.
+const api = new Function(exactHelperSource + '\nreturn FR07Operator;')();
+const v = api.initialFacts(envelope);
+if (!api.initialBinder(v).includes(v.buffer) || !api.initialBinder(v).includes(v.sha256)) throw Error('SAME_BUFFER');
+const bad = JSON.parse(JSON.stringify(envelope));
+bad.actors[0].originalTrace.actualStatus = 1;
+let denied = 0;
+try { api.initialFacts(bad); } catch (e) { denied++; }
+if (denied !== 1) throw Error('TRACE_DENIAL');
+try { api.initialBinder({...v, buffer:v.buffer+' '}); } catch (e) { denied++; }
+if (denied !== 2) throw Error('RAW_PIN_DENIAL');
+// The same exact helper served the 3 actual fake Python operator exchanges:
+// initialFacts/initialBinder; adoptState/request; completion. Each handoff's raw
+// helper SHA and SAME buffer were checked by the live target; no test replay.

@@ -1,0 +1,80 @@
+{
+  "taskFiles": {
+    "gst-unit06-exact-qa-task.txt": "71ff467f24bc347ca5c1c272b8acace66ec55a365bcc2977071bff92e7314cab",
+    "gst-unit06-exact-qa-context.json": "91694ea0d8f7fac0f9d15e97af142498618aaf18a3aee7525b821ddfeb0dcf8b",
+    "gst-unit06-exact-qa-preflight.json": "489c67d94306a03e343cde54b73d6930579fe363deeaafc90c6f36e312418bc4"
+  },
+  "originalPreflightProvenance": "Root supplied SAFE original tool chunks c66553/6c8d01 before dispatch; repeated read-only SAFE result later persisted and inspected at the path above.",
+  "manifests": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/resume6-semantic-question/manifest.json",
+      "sha256": "c18a6bb5c943a7d756eb184988ef11ae4d4287406dbf014acd66b2c60e1bf192"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-restricted-unit-prep/resume6/manifest.json",
+      "sha256": "f999867a5406db62d55bf15852b5276dd0c716ce702e81e2140ebcb97534eedc"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/gst-limited-start-proposal06/manifest.json",
+      "sha256": "1a924c8725bcb44b554634471c3a7d64897110b28db8a53d74819972004ecc8d"
+    }
+  ],
+  "rootDesignAdoption": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gst-question-preparation-design-root-adoption.json",
+    "sha256": "732fa204f5d925faeeffd0848c44d62dd0aa090563a81579c1cdbe5843d506b7"
+  },
+  "selectedPrimaryApiSchemaSources": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "32968d0b2e214a9710e92069a8139ef2bd28776665688327ff9dbd55e0837c3f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+      "sha256": "4bba4ee7fba97452cbaa6aa7b1e30c7752ad0f4e8e5f66ead884930782e347fb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+      "sha256": "0be7b180d7ea483a0b99abca38a03a63f6518d6e3f23f5d833c5e12b67b26cc2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "sha256": "350a3f22f4cd9a5baa3b2907e9ad9aa3865ca60d08c960b1a6f77fcbb68dfd5a"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/observation.schema.json",
+      "sha256": "31afe5aa601b10ea1c81434797ff401ceef16ef5df90d49ffb700dfe7ff58963"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v3/replay-validation.schema.json",
+      "sha256": "40d547d9891561541947b591ffa6ba1d07ae2caff7349fd780db4acc8d5313d7"
+    }
+  ],
+  "preparedRuntimeMetadata": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/prepared-inputs-and-backups.json",
+      "sha256": "fa74b9ebd83fbc635238070535af5009bb0e3e3dd20248b9fcc5b9cd82eadd56"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/owned_native_phase.py",
+      "sha256": "e4a64776e712409867990ce7b848a2db7fbfe84f42ddafe26c499512a30cc3a1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/unlock_gate.py",
+      "sha256": "55e5d935a0a38bd2b7477cde55f11b39df7c842ce5efc01494dbc7a1c32513a6"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/guard-exit.bash",
+      "sha256": "bf5782294e00ac1509e6145233fa7c97a5085a14663ec475df8e0698d7135f0c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/policy.json",
+      "sha256": "727776bd3dccf400f1012c6994a36c5e180e92c7a50ba217fe10bffeb83fcd73"
+    }
+  ],
+  "additionalInputs": "Only explicit source/recipe input pins and safe added bindings; inherited protected/cache paths compared as literal hashes without opening bodies. Frozen source/mode/dist/aux hash comparison, no capture/census.",
+  "excluded": "No raw XML/log/thread/binary/TEMP/journal/business body or private locator; no verifier or other main, native/process/lock/signal/Git/provider action."
+}

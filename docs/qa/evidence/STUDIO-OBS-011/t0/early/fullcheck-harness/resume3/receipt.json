@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-19T03:57:51.176429+00:00",
+  "role": "Gage",
+  "state": "JAVA21_LAUNCHER_CORRECTION_PREPARED_UNAPPLIED_UNLAUNCHED",
+  "harnessSha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+  "planSha256": "576ebf9f01c0025cacc3bc6c7d6f4c747f8f84bb1f118a547cf11e21f7c94673",
+  "manifestSha256": "e57c7b4b992b83d7eb4fbc3eb1021e9090e99cd2ec610b828cf2ee961404d6ae",
+  "javaCorrectionManifestSha256": "095b6432c993a73d68493cfc6fb83a9702eeddb9d4f8ac9bbc55a91c5ba5ed0a",
+  "candidateCollectorSha256": "fa90d844d6443285ada1ae1856fdef4bd23ddf607ab97ec21ccd52f2fc30cc3a",
+  "originalActualCollectorSha256": "1bba89cc35982f8990af4f7112fb740f3fdc95397334a4d3787da08c73009cda",
+  "patchSha256": "4521a79501201dff3374f0e274a418e7b85cc7f8d35ffc9e9a96a80b43965bb0",
+  "helperModeOriginalAndCandidate": "0o644",
+  "staticReviewSha256": "c54d3993040bc539072721a55a2e79100e3688b6883189e0196c01320501becf",
+  "staticChecksPass": true,
+  "harnessByteIdenticalAcceptedResume2": true,
+  "sevenArtifactDeltaMap": [
+    {
+      "artifact": "EXACT-LAUNCH.md",
+      "previousSha256": "23d56c9adb9cf4c2f33ea0cf8ff612206cb9d72efaf37727b36dc314a07eea38",
+      "newSha256": "06eb135d5a57711eb45e1b669b833be3fd1c7d7669447e804344188b07bf28a6",
+      "byteIdentical": false
+    },
+    {
+      "artifact": "authorization.example.json",
+      "previousSha256": "43d6fce94cd83b25e4d16a5c1d7a3d90c2e8214fb917953307ffa537ad462d46",
+      "newSha256": "13567b8fe134bd8ecf832087b9bf939dd765ab7dc81523eb459203520c5e192f",
+      "byteIdentical": false
+    },
+    {
+      "artifact": "design.md",
+      "previousSha256": "8786f8ba902fa530bac523f16cff0dc1b6e085853351f93d121c265a895735bd",
+      "newSha256": "5685d20003e668d85b021bbc52203be13963b41d1ffe30f891ec08b3ffd7f125",
+      "byteIdentical": false
+    },
+    {
+      "artifact": "harness.py",
+      "previousSha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+      "newSha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+      "byteIdentical": true
+    },
+    {
+      "artifact": "plan.json",
+      "previousSha256": "9f05e9417bb63abf21fb1c5740cec280b194556b8c6d403d9c1e405432686d2f",
+      "newSha256": "576ebf9f01c0025cacc3bc6c7d6f4c747f8f84bb1f118a547cf11e21f7c94673",
+      "byteIdentical": false
+    },
+    {
+      "artifact": "static-review.json",
+      "previousSha256": "bf44a5f3ab23468cd61b08182ba4f973042ade3a3ae708d5fb3551f4a75d583a",
+      "newSha256": "c54d3993040bc539072721a55a2e79100e3688b6883189e0196c01320501becf",
+      "byteIdentical": false
+    },
+    {
+      "artifact": "static-review.py",
+      "previousSha256": "e71b2223c9bc1a918789eb4a6bb0cb9891484fc7c0c41dc9935a3e564c1da70f",
+      "newSha256": "5da9a4bbc279fd06441141725b0b251f98b3540b6ad3bc18018097d4724bf502",
+      "byteIdentical": false
+    }
+  ],
+  "exactPlanLeafChanges": [
+    {
+      "path": "javaHome",
+      "before": "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home",
+      "after": "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home"
+    },
+    {
+      "path": "immutableHelpers..aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py",
+      "before": "1bba89cc35982f8990af4f7112fb740f3fdc95397334a4d3787da08c73009cda",
+      "after": "fa90d844d6443285ada1ae1856fdef4bd23ddf607ab97ec21ccd52f2fc30cc3a"
+    }
+  ],
+  "actualCollectorChanged": false,
+  "harnessImportedOrExecuted": false,
+  "actualLaunch": false,
+  "runtimeOrMockTestsCompilerNodeBuildGradleHelmDockerProviderCalls": false,
+  "readOnlyJavaVersionQueries": 2,
+  "machineLinksChanged": false,
+  "installedOrDownloaded": false,
+  "sourceStoryOtherEvidenceChanged": false,
+  "processSignalsOrGitMutations": false,
+  "sourceBaselineRecapturedOrExpanded": false,
+  "current1808BoundSourceBytesMatch": true,
+  "sourceCurrentMembershipClaim": "Future unchanged stable_inputs gate; no replacement baseline created",
+  "current238DistMembership20Quoted22HelmOtherFiveHelpersMatch": true,
+  "oldFullcheck02ReceiptAndAuthorizationPreserved": true,
+  "independentCorrectionReview": "OWED",
+  "rootHelperApplyAndPostApplyRevalidation": "OWED",
+  "futureAuthorization03": "NOT_CREATED; example authorized:false",
+  "runtimeW1LaneQALifecycleCredit": false
+}

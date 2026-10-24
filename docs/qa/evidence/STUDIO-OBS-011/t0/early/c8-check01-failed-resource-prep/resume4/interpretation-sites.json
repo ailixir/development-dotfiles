@@ -1,0 +1,123 @@
+{
+  "runtimeSourceSha256": "b8868e78d9ac1b7de6aa200a2a3497e9b3705bbbc05018e41b09349fcf305e50",
+  "allRuntimeConsumerSites": [
+    {
+      "function": "bootstrap",
+      "consumer": "json.loads",
+      "line": 125,
+      "barrier": "c.read root release -> exact supplied release SHA before json.loads; code buffers read once, mode/custody/digest verified, same retained predicates buffer compiled/executed."
+    },
+    {
+      "function": "bootstrap",
+      "consumer": "exec",
+      "line": 133,
+      "barrier": "c.read root release -> exact supplied release SHA before json.loads; code buffers read once, mode/custody/digest verified, same retained predicates buffer compiled/executed."
+    },
+    {
+      "function": "bootstrap",
+      "consumer": "compile",
+      "line": 133,
+      "barrier": "c.read root release -> exact supplied release SHA before json.loads; code buffers read once, mode/custody/digest verified, same retained predicates buffer compiled/executed."
+    },
+    {
+      "function": "verified_read",
+      "consumer": "json.loads",
+      "line": 147,
+      "barrier": "Require path hash in b.loaded BEFORE read; fresh safe_bytes returned buffer checked against that hash, then exact returned bytes json.loads."
+    },
+    {
+      "function": "local",
+      "consumer": "json.loads",
+      "line": 207,
+      "barrier": "local_bytes enforces component/custody/mode, explicit expected pin when supplied and per-operation anchored digest; consumes same returned bytes. First new root/control/journal bytes are anchored then typed schema/hash relationships checked before indirection; no claim of a preexisting external hash for first root-authored controls."
+    },
+    {
+      "function": "load_fixed_module",
+      "consumer": "exec",
+      "line": 214,
+      "barrier": "Read old gate code once through safe_bytes; compare fixed old-gate SHA56020; compile/exec that exact buffer under non-main name. Only source observer closure reached."
+    },
+    {
+      "function": "load_fixed_module",
+      "consumer": "compile",
+      "line": 214,
+      "barrier": "Read old gate code once through safe_bytes; compare fixed old-gate SHA56020; compile/exec that exact buffer under non-main name. Only source observer closure reached."
+    },
+    {
+      "function": "load_authority/verified_json",
+      "consumer": "json.loads",
+      "line": 228,
+      "barrier": "Nested pin returns the actual digest-checked raw buffer; json.loads consumes it. Fixed INDEX/OLD_RELEASE/PIN constants and verified original package plan pin select indirections."
+    },
+    {
+      "function": "load_authority",
+      "consumer": "json.loads",
+      "line": 233,
+      "barrier": "input-pins and retained JSON parsed from exact raw buffers whose digest matched the new root authorization pins. No second read supplies interpreted bytes."
+    },
+    {
+      "function": "load_authority",
+      "consumer": "json.loads",
+      "line": 244,
+      "barrier": "input-pins and retained JSON parsed from exact raw buffers whose digest matched the new root authorization pins. No second read supplies interpreted bytes."
+    },
+    {
+      "function": "helpers",
+      "consumer": "ast.parse",
+      "line": 322,
+      "barrier": "CORE buffer read once, exact a1e7 SHA checked; AST parse and selected imports/read-only function compilation derive solely from that buffer. regular/capture/table are rebound before any boundary call."
+    },
+    {
+      "function": "helpers",
+      "consumer": "exec",
+      "line": 324,
+      "barrier": "CORE buffer read once, exact a1e7 SHA checked; AST parse and selected imports/read-only function compilation derive solely from that buffer. regular/capture/table are rebound before any boundary call."
+    },
+    {
+      "function": "helpers",
+      "consumer": "compile",
+      "line": 324,
+      "barrier": "CORE buffer read once, exact a1e7 SHA checked; AST parse and selected imports/read-only function compilation derive solely from that buffer. regular/capture/table are rebound before any boundary call."
+    }
+  ],
+  "reusedConsumers": [
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fullcheck-harness/resume3/harness.py",
+      "sourceSha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+      "function": "boundary_inventory",
+      "consumer": "json.loads(regular(ROOT/plan.baselinePath))",
+      "binding": {
+        "sourcePlanSha256": "9391e76dd403d45a1c8ab09c428ed6884a762c326959cefa63c781633c687313",
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/diag-start1-harness/resume2/preexisting-baseline.json",
+        "sha256": "fd39b45fd27689034742d5a3205461e9aa4a316baa810f8488216f8f49b7101a",
+        "bodyReadByRootNow": false,
+        "authority": "verified successor-plan immutableHelpers entry; rootreadplanmetadataonly"
+      },
+      "reader": "scope.regular -> core_regular: require exact path+verified plan immutableHelpers FD39 binding before read; fresh safe_bytes returned bytes digest checked FD39, then SAME bytes reach CORE json.loads. No fallback regular reader.",
+      "test": "actual helpers+CORE boundary valid/changed-after-earlier-hash/missing-pin/wrong-path/unexpected-target pairs; actual baseline untouched."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/unlock_gate.py",
+      "sourceSha256": "56020d0d3123339587bcf9e0a7f6968efe125a07a4331d9710b2a3be678d021e",
+      "function": "observe_source",
+      "consumer": "json.loads(safe_bytes(PLAN))",
+      "reader": "old.safe_bytes -> verified_bytes with explicit old.PLAN/old.PLAN_SHA576e binding; EVERY returned plan buffer is independently checked before consumption, including the second read. Source contents remain fresh safe reads checked against accepted source hash/mode; no stale source cache.",
+      "test": "Exact observe_source first hash/second JSON-parse prefix with verified returned-buffer wrapper: valid, wrong-first and changed-second synthetic plans; no original plan or baseline body read for the pairs."
+    }
+  ],
+  "sourceIndirections": [
+    "Root release SHA -> exact code/data/review pins before compile or JSON indirection",
+    "Verified input-pins -> explicit record paths/hashes; verified terminal index -> its27 preserved paths/hashes",
+    "Verified original release -> package code/hash inventory -> exact plan9391 -> source/modes/baseline metadata",
+    "Root/control/journal files -> retained namespace single-component read -> per-operation digest anchor -> typed schemas and explicit raw/canonical hash links before dereferencing names"
+  ],
+  "excludedUnreached": [
+    "Original CORE regular body remains byte-identical but global regular is rebound before boundary calls",
+    "Original CORE table/capture bodies replaced by strict anchored census and synchronous utility wrapper",
+    "All old gate main/closing/report/private/ordinary qualification routines remain uncalled",
+    "Generic unverified read JSON API removed; no XML/report/body parser introduced"
+  ],
+  "currentObservationsNotCached": true,
+  "actualBaselineBodyReadStatOrHash": false,
+  "codeAndMetadataAuditOnly": true
+}

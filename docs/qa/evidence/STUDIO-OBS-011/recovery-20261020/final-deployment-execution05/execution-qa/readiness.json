@@ -1,0 +1,39 @@
+{
+  "createdUtc": "2026-10-21T04:09:29.116361+00:00",
+  "verdict": "PASS_FINAL_DEPLOYMENT722_FOR_D2",
+  "componentGateOnly": true,
+  "producerManifestSha256": "1dff326d220c3aadebb1d43e7bec7c8159cebb576c1a484c78bd4912d4b065fd",
+  "actual722ReceiptSha256": "3ba83d0f0af820cbe836714a2142fba380cd6d8b3c3f71bb32a4aa181e9c9329",
+  "independentDependencyReviewReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/execution-qa/review.md",
+    "sha256": "5cd644836defbf640b5ffc7c9eb9a42f2f4aac3b5dadf132d093b6d779e77f92",
+    "bytes": 5775
+  },
+  "independentBindingsReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/execution-qa/bindings.json",
+    "sha256": "3aee6ee1bda24354c20852d62883e61f8dfc62fdcfd553a3c48e2c414e338d7e"
+  },
+  "allNineMeasuredFieldsVerified": true,
+  "rootFinalDependencyReviewRequiredSeparately": true,
+  "acceptedFinalDependencyReviewReference": null,
+  "D2BinderExecuted": false,
+  "D2RuntimeExecuted": false,
+  "newRuntimeReleaseGranted": false,
+  "overallStoryDone": false,
+  "storiesRemain": "InProgress",
+  "remaining": [
+    "root final dependency review/adoption and explicit next release",
+    "D2",
+    "final backend pair calls4/5 and whole-check call6",
+    "timing/T5 reconciliation",
+    "external approved-reference and acceptance obligations"
+  ],
+  "prior04RawGuardFailurePreserved": true,
+  "incidentalSupplementalLookupOrderingPreserved": true,
+  "sharedUsdCeiling": 500,
+  "headroom": "UNKNOWN",
+  "replayCap": 6,
+  "previouslyChargedReplayCalls": 3,
+  "newReplayCalls": 0,
+  "originalCutoffUtc": "2026-10-22T04:35:27.361777Z"
+}

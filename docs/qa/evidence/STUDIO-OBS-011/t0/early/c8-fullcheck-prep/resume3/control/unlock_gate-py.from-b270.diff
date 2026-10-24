@@ -1,0 +1,201 @@
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/unlock_gate.py
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/unlock_gate.py
+@@ -1,6 +1,6 @@
+ """Prepared C8-only gate. Pure checks are injectable; actual main/observe require new release."""
+ from pathlib import Path
+-import ast,errno,fcntl,hashlib,importlib.util,json,math,os,re,stat,subprocess,sys,time
++import ast,builtins,datetime,errno,fcntl,hashlib,importlib.util,json,math,os,re,stat,subprocess,sys,time,types
+ ROOT=Path('/Users/brunobuger/orca/workspaces/put-checks/ui-studio')
+ HERE=Path(__file__).resolve().parent
+ UNIT=HERE.parent
+@@ -17,6 +17,10 @@
+ SUCCESSOR_CATALOG_SHA='d96334bc0559bad126a82d6f84bd91a0ca1442288c713c764588173cec2e04ba'
+ ACCEPTED_MODES_SHA='86584b3f710109522709cf0195fdc8f20d30f10988e3ba71f80922e00de96036'
+ SKIPS_SHA='6bd2a808a40a707397757b3ff4f1a78e5eff8ee37666c7b26271582b14457cac'
++REDUCER_ASSESSOR_SHA='db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef'
++REPORT_INVENTORY_SHA='2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d'
++EXECUTION_CHECKS_SHA='c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194'
++CLASSIFICATION_SHA='f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5'
+ PHASES=('full-check','compile-reconcile')
+ OVERLAY={
+  'GuidedSessionIT.java':('4d47ad6f8d67bfd3278b0d3f3930085e90f190d0ea500875272082eb97a7754e','0a9cd30bf501089b5cbc17922e1f9809efd5f176c83f42359ad4ba0105a8ac59'),
+@@ -55,7 +59,7 @@
+             'validationErrors':a['validationErrors'],'evidenceErrors':a['evidenceErrors'],
+             'rawFullCheckPhaseExit':b['receipts']['full-check']['phaseExit'],'phaseOutcomes':{k:{f:x[f] for f in ('collectorExit','phaseExit','rawNativePhaseExit')} for k,x in b['receipts'].items()},'phaseValidationErrors':{k:x['validationErrors'] for k,x in b['receipts'].items()},'executionClosureErrors':b['executionErrors'],'phaseEvidenceErrors':{k:x['evidenceErrors'] for k,x in b['receipts'].items()},'phaseObservationFlags':{k:{f:x.get(f,False) for f in ('interrupted','sourceObservationGap')} for k,x in b['receipts'].items()},'assessmentSha256':b['evidenceHashes']['full-check/assessment.json'],
+             'catalogProofSha256':b['evidenceHashes']['full-check/catalog-proof.json'],
+-            'coverageProofSha256':b['evidenceHashes']['full-check/coverage-proof.json'],'C8Credit':False}
++            'coverageProofSha256':b['evidenceHashes']['full-check/coverage-proof.json'],'reportManifestBeforeArchiveSha256':b['evidenceHashes']['full-check/report-manifest-before-archive.json'],'C8Credit':False}
+ 
+ def qualification_basis(v):
+     keys=('unitLabel','rootReleaseSha256','activeLockSha256','expectedWrapperExit','evidencePins','phaseState','source','build','validation','resources','gaps','historicalGapCodes')
+@@ -276,8 +280,114 @@
+             'unexpectedHolderDescendants':sorted(unexpected),'liveOwnedPorts':live_ports,
+             'sourceDigest':source_digest,
+             'modesMatch':True,'auxiliaryInputsMatch':True,
+-            'metadataUnchanged':all(digest(safe_bytes(p))==h for p,h in b['loadedHashes'].items()),
++            'metadataUnchanged':loaded_metadata_unchanged(b['loadedHashes'],safe_bytes),
+             'inheritedMatched':len(boundary['inheritedMatched']),'boundaryDefects':defects,'boundary':boundary}
++
++def selected_build_task_requirements(reducer,log,provenance,phase_receipt):
++    events=reducer['task_event_proof'](log)
++    need(provenance['taskEventProof']==events,'BUILD_TASK_EVENT_PROOF_LINK')
++    need(type(phase_receipt['collectorExit']) is int and phase_receipt['collectorExit']==0
++         and type(provenance['exit']) is int and provenance['exit']==0,'ACTUAL_BUILD_NATIVE_ZERO')
++    need(events['unadornedHeadersAreCompletionProof'] is False and events['statuses'].get('compileTestJava')=='EXECUTED'
++         and provenance['taskStatus']=='EXECUTED' and provenance['buildSuccessful'] is True
++         and events['buildSuccessfulMarker'] is True and events['buildFailedMarker'] is False,'ACTUAL_EXECUTED_COMPILE_REQUIRED')
++    return events
++
++def native_task_log_requirements(reducer,log,assessment,coverage,native_exit):
++    events=reducer['task_event_proof'](log)
++    need(assessment['taskEventProof']==coverage['taskEventProof']==events,'NATIVE_TASK_EVENT_PROOF_LINK')
++    required={t:events['statuses'].get(t,'ABSENT') for t in ['test','guidedIncrementalTest','crossReplicaTest','requireFreshGuidedPartitions','jacocoTestReport','jacocoTestCoverageVerification','check']}
++    need(assessment['requiredTaskStatuses']==coverage['requiredTaskStatuses']==required,'NATIVE_TASK_STATUS_PROOF_LINK')
++    if assessment['validationOutcome']=='PASS':
++        need(type(native_exit) is int and native_exit==0 and events['buildSuccessfulMarker'] is True and events['buildFailedMarker'] is False,'ACTUAL_EXECUTED_C8_TASK_REQUIRED')
++        for task in required:need(required[task]=='EXECUTED','ACTUAL_EXECUTED_C8_TASK_REQUIRED')
++    return events
++
++def loaded_metadata_unchanged(loaded_hashes,read_bytes):
++    return all(digest(read_bytes(path))==expected for path,expected in loaded_hashes.items())
++
++def task_reducer(assessor_source,expected_sha):
++    need(isinstance(assessor_source,bytes) and digest(assessor_source)==expected_sha==REDUCER_ASSESSOR_SHA,'TASK_REDUCER_CODE_HASH')
++    tree=ast.parse(assessor_source.decode('utf-8'))
++    names={'task_event_proof','task_statuses'}
++    nodes=[n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in names]
++    need(len(nodes)==2 and {n.name for n in nodes}==names,'TASK_REDUCER_EXPORTS')
++    namespace={'re':re}
++    exec(compile(ast.Module(body=nodes,type_ignores=[]),'<pinned-task-reducer-only>','exec'),namespace)
++    return namespace
++
++def load_pure_execution(checks_source,inventory_source,expected_checks_sha,expected_inventory_sha):
++    """Fixed pair only: no sys.path, PYTHONPATH or global report_inventory cache lookup."""
++    need(isinstance(checks_source,bytes) and digest(checks_source)==expected_checks_sha==EXECUTION_CHECKS_SHA,'EXECUTION_CHECKS_CODE_HASH')
++    need(isinstance(inventory_source,bytes) and digest(inventory_source)==expected_inventory_sha==REPORT_INVENTORY_SHA,'REPORT_INVENTORY_CODE_HASH')
++    standard_import=builtins.__import__
++    stdlib={'collections','hashlib','json','math','html.parser','posixpath','re','urllib.parse','xml.etree.ElementTree'}
++    dependency=types.ModuleType('_c8_pinned_report_inventory')
++    def fixed_import(name,globals=None,locals=None,fromlist=(),level=0):
++        if level==0 and name=='report_inventory':
++            need(all(n in ('ROOT_PAGES','canonical_path') for n in fromlist),'REPORT_INVENTORY_IMPORT_EXPORT')
++            return dependency
++        need(level==0 and name in stdlib,'PURE_MODULE_IMPORT_SCOPE')
++        return standard_import(name,globals,locals,fromlist,level)
++    private_builtins=dict(vars(builtins));private_builtins['__import__']=fixed_import
++    inventory_namespace=dependency.__dict__
++    inventory_namespace['__builtins__']=private_builtins
++    exec(compile(inventory_source,'<pinned-report-inventory>','exec'),inventory_namespace)
++    need(callable(inventory_namespace.get('canonical_path')) and isinstance(inventory_namespace.get('ROOT_PAGES'),tuple),'REPORT_INVENTORY_EXPORTS')
++    namespace={'__name__':'_c8_pinned_execution_checks','__builtins__':private_builtins}
++    exec(compile(checks_source,'<pinned-execution-checks>','exec'),namespace)
++    need(callable(namespace.get('validate_close_evidence')) and callable(namespace.get('coverage_errors')),'EXECUTION_CHECKS_EXPORTS')
++    namespace['_pinned_report_inventory']=inventory_namespace
++    return namespace
++
++def blocked_report_rule(classification_source,expected_sha):
++    need(isinstance(classification_source,bytes) and digest(classification_source)==expected_sha==CLASSIFICATION_SHA,'REPORT_CLASSIFICATION_CODE_HASH')
++    tree=ast.parse(classification_source.decode('utf-8'))
++    nodes=[n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='evidenced_failed_test_report_block']
++    need(len(nodes)==1,'REPORT_BLOCK_EXPORT')
++    namespace={}
++    exec(compile(ast.Module(body=nodes,type_ignores=[]),'<pinned-blocked-report-rule>','exec'),namespace)
++    return namespace['evidenced_failed_test_report_block']
++
++def report_manifest_requirements(manifest,coverage,preserved,manifest_sha,coverage_sha,native_start,inventory_exports,blocked_rule):
++    need(set(manifest)=={'currentXmlDynamicInventory','originalFacts','staticReportPaths','originalFactsCapturedBeforeArchive','historicalInventoryUsed','uncreditedExistingReportMetadata'},'REPORT_MANIFEST_SCHEMA')
++    need(coverage['reportManifestBeforeArchiveSha256']==manifest_sha and preserved['coverageProofSha256']==coverage_sha,'BEFORE_ARCHIVE_MANIFEST_LINK')
++    inventory=manifest['currentXmlDynamicInventory']
++    need(inventory==coverage['currentXmlDynamicInventory'] and manifest['originalFactsCapturedBeforeArchive'] is True and manifest['historicalInventoryUsed'] is False,'BEFORE_ARCHIVE_INVENTORY_LINK')
++    metadata=manifest['uncreditedExistingReportMetadata']
++    need(coverage['reportObservation']['metadata']==metadata,'REPORT_OBSERVATION_METADATA_LINK')
++    disposition=coverage['reportDisposition']
++    if disposition=='BLOCKED_AFTER_EXPLICIT_FAILED_TEST':
++        need(blocked_rule(coverage) is True,'PINNED_BLOCKED_REPORT_RULE')
++        need(manifest['originalFacts']==[] and manifest['staticReportPaths']==[] and coverage['reportArtifacts']==[],'BLOCKED_REPORT_NO_BODY_COPY')
++        need(coverage['lineRatios']=={} and coverage['freshReport'] is False and not inventory.get('currentXmlSha256')
++             and inventory['complete'] is False and inventory['linksValid'] is False and inventory['allExpectedFresh'] is False
++             and inventory['expectedPaths']==inventory['actualPaths']==[],'BLOCKED_REPORT_UNCREDITED')
++        need(coverage['reportObservation']['complete'] is True and coverage['reportObservation']['noCurrentFiles'] is True,'BLOCKED_REPORT_OBSERVATION')
++        for row in metadata:
++            need(inventory_exports['canonical_path'](row['path']) and row['regular'] is True and row['stable'] is True and row['uncredited'] is True
++                 and type(row['mtimeNs']) is int and row['mtimeNs']/1e9<native_start,'BLOCKED_REPORT_OLD_METADATA_ONLY')
++        return
++    need(disposition=='CURRENT_REPORT_CLAIM','REPORT_DISPOSITION_UNPROVEN')
++    need(inventory['complete'] is True and inventory['linksValid'] is True and inventory['allExpectedFresh'] is True and inventory['errors']==[],'CURRENT_REPORT_INVENTORY_INCOMPLETE')
++    need(inventory['expectedPaths']==inventory['actualPaths'] and set(inventory_exports['ROOT_PAGES'])<=set(inventory['expectedPaths']),'CURRENT_REPORT_PATHS')
++    static=manifest['staticReportPaths'];expected_static=[x['catalog']['reportRelativePath'] for x in coverage['staticResources'] if x['catalog']['generator']=='JaCoCo0.8.12-html-report']
++    need(static==expected_static and len(static)==len(set(static))==20,'CURRENT_REPORT_STATIC_PATHS')
++    originals=[]
++    prefix='backend/build/reports/jacoco/test/'
++    for row in coverage['reportArtifacts']:
++        original=row['original'];need(original['path'].startswith(prefix),'CURRENT_REPORT_ORIGINAL_ROOT')
++        relative=original['path'][len(prefix):]
++        need(inventory_exports['canonical_path'](relative),'CURRENT_REPORT_ORIGINAL_PATH')
++        originals.append({'reportRelativePath':relative,**original})
++    need(manifest['originalFacts']==originals and len({x['reportRelativePath'] for x in originals})==len(originals),'BEFORE_ARCHIVE_ORIGINAL_FACTS')
++    dynamic=[]
++    for row in originals:
++        if row['reportRelativePath'] not in static:
++            dynamic.append({'path':row['reportRelativePath'],**{k:row[k] for k in ('sha256','bytes','mtimeNs','mode')},'stable':True,'symlink':False})
++    need(dynamic==inventory['originalFacts'],'BEFORE_ARCHIVE_DYNAMIC_FACTS')
++    xml=[x for x in originals if x['reportRelativePath']=='jacocoTestReport.xml']
++    need(len(xml)==1 and xml[0]['sha256']==inventory['currentXmlSha256'],'CURRENT_XML_FACT_HASH')
+ 
+ def load_packet(expected_release,load_ready=True):
+     need(re.fullmatch('[0-9a-f]{64}',expected_release) is not None,'EXACT_ROOT_BINDING_REQUIRED')
+@@ -304,8 +414,12 @@
+             path=UNIT/rel;need(digest(safe_bytes(path))==h,'PACKAGE_HASH');loaded[path]=h
+     for rel in ['control/unlock_gate.py','control/guard-exit.bash','control/policy.json','control/final_verifier.py','control/postclose.py']:
+         need(rel in release['controlPackagePins'],'CONTROL_PACKAGE_MEMBERSHIP')
+-    for rel in ['execution/execution_checks.py','execution/successor-plan.json','execution/successor-catalog.json']:
++    for rel in ['execution/execution_checks.py','execution/successor-plan.json','execution/successor-catalog.json','execution/report_inventory.py','execution/assessor.py','execution/evidence_classification.py']:
+         need(rel in release['executionPackagePins'],'EXECUTION_PACKAGE_MEMBERSHIP')
++    need(release['executionPackagePins']['execution/assessor.py']==REDUCER_ASSESSOR_SHA
++         and release['executionPackagePins']['execution/execution_checks.py']==EXECUTION_CHECKS_SHA
++         and release['executionPackagePins']['execution/report_inventory.py']==REPORT_INVENTORY_SHA
++         and release['executionPackagePins']['execution/evidence_classification.py']==CLASSIFICATION_SHA,'EXACT_EXECUTION03_API_BINDING')
+     need(release['phaseKeeperSha256']==release['executionPackagePins']['execution/phase_keeper.py'],'KEEPER_CODE_LINK')
+     admission=read(UNIT/'guard-admission-negative-result.json',True);held=read(UNIT/'held-preflight.json',True)
+     need(admission['rootUnitAuthorizationSha256']==expected_release and admission['activeLockSha256']==loaded[UNIT/'active-lock.json']
+@@ -324,7 +438,7 @@
+         path=UNIT/f'owned-{phase}/receipt.json'
+         if path.exists():receipts[phase]=read(path,True)
+     proofs={}
+-    for key,rel in [('outerReceipt','full-check/outer-receipt.json'),('assessment','full-check/assessment.json'),('catalogProof','full-check/catalog-proof.json'),('coverageProof','full-check/coverage-proof.json'),('publicJoinProof','full-check/public-join-proof.json'),('preservedPublicEvidence','full-check/preserved-public-evidence.json'),('sourceBefore','full-check/source-before.json'),('sourceAfter','full-check/source-after.json')]:
++    for key,rel in [('outerReceipt','full-check/outer-receipt.json'),('assessment','full-check/assessment.json'),('catalogProof','full-check/catalog-proof.json'),('coverageProof','full-check/coverage-proof.json'),('reportManifestBeforeArchive','full-check/report-manifest-before-archive.json'),('publicJoinProof','full-check/public-join-proof.json'),('preservedPublicEvidence','full-check/preserved-public-evidence.json'),('sourceBefore','full-check/source-before.json'),('sourceAfter','full-check/source-after.json')]:
+         proofs[key]=read(UNIT/rel,True)
+     raw_path=ROOT/'docs/qa/evidence/STUDIO-OBS-011/execution'/f'{UNIT.name}-results.json'
+     raw=read(raw_path,True,'native-results.json');proofs['rawCollector']=raw
+@@ -361,16 +475,22 @@
+     # This future read projects only exact task/status facts and exports no raw log content.
+     log=UNIT/'owned-compile-reconcile/collector.private.log' if failed else ROOT/'docs/qa/evidence/STUDIO-OBS-011/execution'/f'{UNIT.name}.log'
+     data=safe_bytes(log);need(digest(data)==proofs['buildProvenance']['taskLogSha256'],'ACTUAL_BUILD_LOG_HASH')
+-    lines=data.decode('utf-8').splitlines()
+-    need(lines.count('> Task :compileTestJava')==1 and any(x.startswith('BUILD SUCCESSFUL in ') for x in lines),'ACTUAL_EXECUTED_COMPILE_REQUIRED')
+-    if not failed:
+-        for task in ['test','guidedIncrementalTest','crossReplicaTest','requireFreshGuidedPartitions','jacocoTestReport','jacocoTestCoverageVerification','check']:
+-            need(lines.count('> Task :'+task)==1,'ACTUAL_EXECUTED_C8_TASK_REQUIRED')
++    reducer_path=UNIT/'execution/assessor.py';reducer_bytes=safe_bytes(reducer_path)
++    reducer=task_reducer(reducer_bytes,release['executionPackagePins']['execution/assessor.py'])
++    selected_events=selected_build_task_requirements(reducer,data.decode('utf-8'),proofs['buildProvenance'],receipts[build_phase])
+     loaded[log]=digest(data)
+-    module_path=UNIT/'execution/execution_checks.py'
+-    code=safe_bytes(module_path);need(digest(code)==release['executionPackagePins']['execution/execution_checks.py'],'EXECUTION_CHECKS_CODE_HASH')
+-    namespace={'__name__':'c8_exact_execution_checks','__file__':str(module_path)}
+-    exec(compile(code,str(module_path),'exec'),namespace)
++    native_log=ROOT/'docs/qa/evidence/STUDIO-OBS-011/execution'/f'{UNIT.name}.log'
++    native_bytes=safe_bytes(native_log);need(digest(native_bytes)==raw['logSha256'],'RAW_NATIVE_LOG_HASH')
++    native_events=native_task_log_requirements(reducer,native_bytes.decode('utf-8'),a,proofs['coverageProof'],raw['gradleExit'])
++    loaded[native_log]=digest(native_bytes)
++    module_path=UNIT/'execution/execution_checks.py';inventory_path=UNIT/'execution/report_inventory.py'
++    namespace=load_pure_execution(safe_bytes(module_path),safe_bytes(inventory_path),
++        release['executionPackagePins']['execution/execution_checks.py'],release['executionPackagePins']['execution/report_inventory.py'])
++    classification_path=UNIT/'execution/evidence_classification.py'
++    blocked_rule=blocked_report_rule(safe_bytes(classification_path),release['executionPackagePins']['execution/evidence_classification.py'])
++    report_manifest_requirements(proofs['reportManifestBeforeArchive'],proofs['coverageProof'],proofs['preservedPublicEvidence'],
++        evidence['full-check/report-manifest-before-archive.json'],evidence['full-check/coverage-proof.json'],
++        datetime.datetime.fromisoformat(raw['started']).timestamp(),namespace['_pinned_report_inventory'],blocked_rule)
+     validation_input={'fullCheckReceipt':receipts.get('full-check'),'assessment':proofs['assessment'],'catalogProof':proofs['catalogProof'],'coverageProof':proofs['coverageProof'],
+         'buildProvenance':proofs['buildProvenance'],'reconcileReceipt':receipts.get('compile-reconcile'),'reconcileAuthorization':proofs['reconcileAuthorization'],
+         'sourceBefore':proofs['sourceBefore'],'sourceAfter':proofs['sourceAfter'],'evidencePins':evidence,'expectedWrapperExit':1 if failed else 0}

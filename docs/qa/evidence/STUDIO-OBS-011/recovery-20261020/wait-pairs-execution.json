@@ -1,0 +1,367 @@
+{
+  "atUtc": "2026-10-20T14:24:37.114487+00:00",
+  "elapsedSeconds": 9.062,
+  "commands": [
+    "python3 -c 'from pathlib import Path; p=Path(\"docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/scratch/runs/obs011-itr-r4-wait-proof01\"); assert not p.exists(), \"fresh private scratch path required\"; (p/\"classes\").mkdir(parents=True, mode=0o700)'",
+    "'/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home/bin/javac' --release 21 -cp '/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.awaitility/awaitility/4.2.2/7336242073ebf83fe034e42b46a403c5501b63c9/awaitility-4.2.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest/2.2/1820c0968dba3a11a1b30669bb1f01978a91dedc/hamcrest-2.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.assertj/assertj-core/3.25.3/792b270e73aa1cfc28fa135be0b95e69ea451432/assertj-core-3.25.3.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.17.2/e6deb029e5901e027c129341fac39e515066b68c/jackson-databind-2.17.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.17.2/969a35cb35c86512acbadcdbbbfb044c877db814/jackson-core-2.17.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.17.2/147b7b9412ffff24339f8aba080b292448e08698/jackson-annotations-2.17.2.jar' -d '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/scratch/runs/obs011-itr-r4-wait-proof01/classes' '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/scratch/ItrWaitDifferentialScratch.java' > '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/scratch/runs/obs011-itr-r4-wait-proof01/private-compile.log' 2>&1",
+    "'/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home/bin/java' -cp '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/scratch/runs/obs011-itr-r4-wait-proof01/classes:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.awaitility/awaitility/4.2.2/7336242073ebf83fe034e42b46a403c5501b63c9/awaitility-4.2.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.hamcrest/hamcrest/2.2/1820c0968dba3a11a1b30669bb1f01978a91dedc/hamcrest-2.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/org.assertj/assertj-core/3.25.3/792b270e73aa1cfc28fa135be0b95e69ea451432/assertj-core-3.25.3.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.17.2/e6deb029e5901e027c129341fac39e515066b68c/jackson-databind-2.17.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.17.2/969a35cb35c86512acbadcdbbbfb044c877db814/jackson-core-2.17.2.jar:/Users/brunobuger/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.17.2/147b7b9412ffff24339f8aba080b292448e08698/jackson-annotations-2.17.2.jar' ItrWaitDifferentialScratch > '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/scratch/runs/obs011-itr-r4-wait-proof01/closed-pairs.log' 2> '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume4/scratch/runs/obs011-itr-r4-wait-proof01/private-stderr.log'"
+  ],
+  "exitCodes": [
+    0,
+    0,
+    0
+  ],
+  "allCommandsExecuted": true,
+  "javaBinaries": {
+    "javac": {
+      "path": "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home/bin/javac",
+      "sha256": "b064bbb7574c97d9e1efaa0200dafcca651bdddb7715f003bca83ef884b29c38"
+    },
+    "java": {
+      "path": "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home/bin/java",
+      "sha256": "19f2cd660267f4fb79a83debff11e8c3d509cd06beb499297e6558b030b8789a"
+    }
+  },
+  "sourceSha256": "5bfbde725744f735c5c60932882bbd6e72ac3c2fe63600df9a57d1620bf80aaf",
+  "classpathManifestSha256": "659649890d570904ea757e18a5decfb07e656bbbc3af028e6aef44edaab2db46",
+  "productSourceWritten": false,
+  "fullClassApplySlotCost": 0,
+  "verdict": "PASS_53_EXACT_SOURCE_PAIRED_COMPARISONS",
+  "logs": {
+    "private-stderr.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "closed-pairs.log": {
+      "sha256": "da6a9fa8d604112be05baf69f7ca095bcd6adf4ba833f10bcf93dd6c457b77ea",
+      "bytes": 3414
+    },
+    "private-compile.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  },
+  "pairs": [
+    {
+      "row": 29,
+      "scenario": "FINAL_CONDITION_SUCCESS",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 29,
+      "scenario": "NO_AWAIT_SUCCESS",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 29,
+      "scenario": "LATE_SUCCESS_FLAG",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 29,
+      "scenario": "LATE_THROW",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 29,
+      "scenario": "LATE_ERROR",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 29,
+      "scenario": "INITIAL_SUCCESS_PREINTERRUPTED",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 29,
+      "scenario": "DURING_INTERVAL_INTERRUPT",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 31,
+      "scenario": "FINAL_CONDITION_SUCCESS",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 31,
+      "scenario": "NO_AWAIT_SUCCESS",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 31,
+      "scenario": "LATE_SUCCESS_FLAG",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 31,
+      "scenario": "LATE_THROW",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 31,
+      "scenario": "LATE_ERROR",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 31,
+      "scenario": "INITIAL_SUCCESS_PREINTERRUPTED",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 31,
+      "scenario": "DURING_INTERVAL_INTERRUPT",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 32,
+      "scenario": "FINAL_CONDITION_SUCCESS",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 32,
+      "scenario": "NO_AWAIT_SUCCESS",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 32,
+      "scenario": "LATE_SUCCESS_FLAG",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 32,
+      "scenario": "LATE_THROW",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 32,
+      "scenario": "LATE_ERROR",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 32,
+      "scenario": "INITIAL_SUCCESS_PREINTERRUPTED",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 32,
+      "scenario": "DURING_INTERVAL_INTERRUPT",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 33,
+      "scenario": "FINAL_CONDITION_SUCCESS",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 33,
+      "scenario": "NO_AWAIT_SUCCESS",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 33,
+      "scenario": "LATE_SUCCESS_FLAG",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 33,
+      "scenario": "LATE_THROW",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 33,
+      "scenario": "LATE_ERROR",
+      "reads": 2,
+      "writes": 0
+    },
+    {
+      "row": 33,
+      "scenario": "INITIAL_SUCCESS_PREINTERRUPTED",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 33,
+      "scenario": "DURING_INTERVAL_INTERRUPT",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 83,
+      "scenario": "ENTERED_DEADLINE",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 83,
+      "scenario": "NO_AWAIT_SUCCESS",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 83,
+      "scenario": "LATE_SUCCESS_FLAG",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 83,
+      "scenario": "LATE_THROW",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 83,
+      "scenario": "LATE_ERROR",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 83,
+      "scenario": "DURING_INTERVAL_INTERRUPT",
+      "reads": 0,
+      "writes": 0
+    },
+    {
+      "row": 86,
+      "scenario": "ENTERED_DEADLINE",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 86,
+      "scenario": "NO_AWAIT_SUCCESS",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 86,
+      "scenario": "LATE_SUCCESS_FLAG",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 86,
+      "scenario": "LATE_THROW",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 86,
+      "scenario": "LATE_ERROR",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 86,
+      "scenario": "DURING_INTERVAL_INTERRUPT",
+      "reads": 0,
+      "writes": 0
+    },
+    {
+      "row": 5,
+      "scenario": "BLANK_CROSSED_INTERRUPT",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 5,
+      "scenario": "BLANK_CROSSED_CLEAR",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 5,
+      "scenario": "INITIAL_SUCCESS_PREINTERRUPTED",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 5,
+      "scenario": "LIVENESS_ERROR",
+      "reads": 0,
+      "writes": 0
+    },
+    {
+      "row": 5,
+      "scenario": "DURING_INTERVAL_INTERRUPT",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 6,
+      "scenario": "DEADLINE_FIRST_NO_BODY",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 38,
+      "scenario": "DEADLINE_FIRST_NO_BODY",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 84,
+      "scenario": "H8_NO_AWAIT_CONFIRMED",
+      "reads": 2,
+      "writes": 1
+    },
+    {
+      "row": 84,
+      "scenario": "H8_NO_AWAIT_TIMEOUT",
+      "reads": 2,
+      "writes": 1
+    },
+    {
+      "row": 84,
+      "scenario": "H8_WRITE_ERROR",
+      "reads": 2,
+      "writes": 1
+    },
+    {
+      "row": 84,
+      "scenario": "DURING_INTERVAL_INTERRUPT",
+      "reads": 1,
+      "writes": 0
+    },
+    {
+      "row": 84,
+      "scenario": "LATE_H8_CONFIRMED",
+      "reads": 2,
+      "writes": 1
+    },
+    {
+      "row": 84,
+      "scenario": "LATE_H8_WRITE_ERROR",
+      "reads": 2,
+      "writes": 1
+    }
+  ],
+  "comparisonCount": 53,
+  "privateCompileAndStderrEmpty": true,
+  "limitation": "Scratch compares ten extracted wait sites and controlled rare paths;no native/fullclass/timing-equivalence or product-gate credit. Native/final-wait checks remain owed."
+}

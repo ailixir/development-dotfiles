@@ -1,0 +1,36 @@
+def initial_actor_facts(raw,expected_sha,a,k,scope_sha,installer_pid):
+    need(type(raw)is bytes and len(raw)<=65536 and pin(expected_sha) and sha(raw)==expected_sha,'INITIAL_FACTS_RAW_PIN')
+    value=decode(raw)
+    fields={'kind','unit','sourceManifestSha256','installScopeSha256','authorizedBy','authorized','completeActualFacts','actors'}
+    need(type(value)is dict and set(value)==fields and value['kind']=='SOURCE07_INITIAL_ACTUAL_FACTS'
+        and value['unit']==k['subject']['label'] and value['sourceManifestSha256']==source_subject(a)
+        and pin(scope_sha) and value['installScopeSha256']==scope_sha and value['authorizedBy']=='root'
+        and value['authorized'] is True and value['completeActualFacts'] is True,'INITIAL_FACTS_SCOPE')
+    need(packed(value)==raw,'INITIAL_FACTS_CANONICAL_BUFFER')
+    facts=value['actors'];need(type(facts)is list and 1<=len(facts)<=64,'INITIAL_FACTS_BOUND')
+    roles={'EXTERNAL_ROOT_CONTROL_AUTHOR','EXTERNAL_ROOT_APPROVED_SOURCE_READER','EXTERNAL_ROOT_APPROVED_HELPER','EXTERNAL_ROOT_OWNER_RECORD_AUTHOR','EXTERNAL_ROOT_INSTALL_SCOPE_AUTHOR','EXTERNAL_ROOT_INPUT_AUTHOR'}
+    rows=[]
+    for item in facts:
+        need(type(item)is dict and set(item)=={'role','pid','ppid','actualStatus','toolCallId','separateStatusCaptured','originalTrace'},'INITIAL_FACT_SCHEMA')
+        need(item['role'] in roles and type(item['pid'])is int and 0<item['pid']<=2147483647
+            and type(item['ppid'])is int and 0<item['ppid']<=2147483647 and type(item['actualStatus'])is int
+            and -2147483648<=item['actualStatus']<=2147483647 and item['separateStatusCaptured'] is True
+            and type(item['toolCallId'])is str and re.fullmatch('[A-Za-z0-9_-]{1,128}',item['toolCallId'])is not None,'INITIAL_FACT_SCHEMA')
+        need(item['pid']!=installer_pid,'INITIAL_FACT_SELF_PRECOMPLETION')
+        trace=item['originalTrace']
+        expected=dict(kind='ORIGINAL_SEPARATELY_CAPTURED_TOOL_TRACE',toolCallId=item['toolCallId'],pid=item['pid'],ppid=item['ppid'],actualStatus=item['actualStatus'],separateStatusCaptured=True,statusMeaning='ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT',unit=value['unit'],sourceManifestSha256=value['sourceManifestSha256'],installScopeSha256=scope_sha)
+        need(type(trace)is dict and set(trace)==set(expected) and all(type(trace[name])is type(want) for name,want in expected.items()) and trace==expected,'INITIAL_FACT_TRACE_BINDING')
+        row=dict(pid=item['pid'],ppid=item['ppid'],kind=item['role'],start=None,argvHash=None,fullFingerprint=None,completionKind='ACTUAL_EXTERNAL_TOOL_EXIT',actualStatus=item['actualStatus'],directWaitClaimed=False,qualified=False,requiredDisposition='NUMERIC_ABSENCE_EVERY_APPLICABLE_COMPLETE_TABLE_AND_BOTH_FINITE_JOINS',evidence=k['initialActorCarrierPath']+'#SOURCE07_INITIAL_ACTUAL_FACTS:'+item['toolCallId'])
+        rows=actor_union(k,[*rows,row],allow_pending=False)
+    return value,rows
+
+def validate_initial_actor_facts(a,k):
+    buffer=a.get('initialActualFactsBuffer');expected=a.get('initialActualFactsSha256');scope=a.get('initialInstallScopeSha256')
+    need(type(buffer)is str and len(buffer)<=65536,'INITIAL_FACTS_RAW_PIN')
+    need(all(32<=ord(ch)<=126 for ch in buffer),'INITIAL_FACTS_CANONICAL_BUFFER')
+    designation=a.get('designatedControlAuthor');need(type(designation)is dict and type(designation.get('pid'))is int,'CONTROL_AUTHOR_REQUIRED')
+    value,derived=initial_actor_facts(buffer.encode('ascii','strict'),expected,a,k,scope,designation['pid'])
+    need(a.get('typedActorRosterComplete') is True and type(a.get('typedPriorActors'))is list,'TYPED_ACTOR_ROSTER_COMPLETE')
+    actual=actor_union(k,a['typedPriorActors'],allow_pending=True);by_pid={row['pid']:row for row in actual}
+    need(all(by_pid.get(row['pid'])==row for row in derived),'INITIAL_FACT_DERIVED_ROSTER')
+    return derived

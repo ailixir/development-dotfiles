@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-public-evidence-prep/resume3/pure_checks.py", line 536, in <module>
+    tests()
+    ~~~~~^^
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-public-evidence-prep/resume3/pure_checks.py", line 318, in tests
+    check('CLOSED_RECORD_' + code, CONTRACT['validate_record'](out) == out)
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "<prepared-public-contract>", line 138, in validate_record
+  File "<prepared-public-contract>", line 230, in validate_network
+ValueError: QUALIFIED_NETWORK_REQUIRED

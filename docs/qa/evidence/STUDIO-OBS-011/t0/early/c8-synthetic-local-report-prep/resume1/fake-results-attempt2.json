@@ -1,0 +1,226 @@
+{
+  "actualJavaExecuted": 0,
+  "actualModesExecuted": 0,
+  "authorProof": "FAKE_ONLY_NOT_ACTUAL_QUALIFICATION",
+  "checks": 26849,
+  "declaredCases": 24,
+  "deniedHostEvents": [],
+  "executedCases": 24,
+  "failures": 0,
+  "guardInstalledPermanently": true,
+  "kind": "S0_BOUNDED_FAKE_BATCH",
+  "parserVectorsDeclared": 24,
+  "parserVectorsJavaExecuted": 0,
+  "results": [
+    {
+      "checks": 2742,
+      "details": {
+        "actualJavaExecuted": false,
+        "nativeWaits": 1,
+        "operations": 7,
+        "postclose": true,
+        "utilityWaits": 106
+      },
+      "id": "FLOW-parser",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2847,
+      "details": {
+        "actualJavaExecuted": false,
+        "nativeWaits": 1,
+        "operations": 7,
+        "postclose": true,
+        "utilityWaits": 106
+      },
+      "id": "FLOW-tls-good",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2847,
+      "details": {
+        "actualJavaExecuted": false,
+        "nativeWaits": 1,
+        "operations": 7,
+        "postclose": true,
+        "utilityWaits": 106
+      },
+      "id": "FLOW-tls-oversize",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2847,
+      "details": {
+        "actualJavaExecuted": false,
+        "nativeWaits": 1,
+        "operations": 7,
+        "postclose": true,
+        "utilityWaits": 106
+      },
+      "id": "FLOW-tls-stall-handshake",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2847,
+      "details": {
+        "actualJavaExecuted": false,
+        "nativeWaits": 1,
+        "operations": 7,
+        "postclose": true,
+        "utilityWaits": 106
+      },
+      "id": "FLOW-tls-stall-write",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2847,
+      "details": {
+        "actualJavaExecuted": false,
+        "nativeWaits": 1,
+        "operations": 7,
+        "postclose": true,
+        "utilityWaits": 106
+      },
+      "id": "FLOW-tls-stall-body",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2847,
+      "details": {
+        "actualJavaExecuted": false,
+        "nativeWaits": 1,
+        "operations": 7,
+        "postclose": true,
+        "utilityWaits": 106
+      },
+      "id": "FLOW-tls-stall-trailers",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2847,
+      "details": {
+        "actualJavaExecuted": false,
+        "nativeWaits": 1,
+        "operations": 7,
+        "postclose": true,
+        "utilityWaits": 106
+      },
+      "id": "FLOW-tls-dribble",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 3021,
+      "details": {
+        "actualJavaExecuted": false,
+        "nativeWaits": 1,
+        "operations": 7,
+        "postclose": true,
+        "utilityWaits": 106
+      },
+      "id": "FLOW-relay",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 5,
+      "details": null,
+      "id": "FAIL-total-native-projection",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2,
+      "details": null,
+      "id": "FAIL-cross-profile-and-strong-claims",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2,
+      "details": null,
+      "id": "FAIL-poll-wait-owner-serialization",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 1,
+      "details": null,
+      "id": "FAIL-bool-poll",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 3,
+      "details": null,
+      "id": "FAIL-returned-invalid-wait-no-retry",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 1045,
+      "details": null,
+      "id": "FAIL-constructor-retained-foreground",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 36,
+      "details": null,
+      "id": "FAIL-peer-mismatch-consumed",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 35,
+      "details": null,
+      "id": "FAIL-early-enrollment",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 15,
+      "details": null,
+      "id": "FAIL-source-drift",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 1,
+      "details": null,
+      "id": "FAIL-permit-POST-expiry",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 4,
+      "details": null,
+      "id": "FAIL-remaining-budget-before-read",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 4,
+      "details": null,
+      "id": "FAIL-unknown-close-retains-no-retry",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 1,
+      "details": null,
+      "id": "FAIL-write-stall-completed-request",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2,
+      "details": null,
+      "id": "FAIL-entry-once-before-parse",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 1,
+      "details": null,
+      "id": "FAIL-exact-guard-status-delivery",
+      "outcome": "PASS"
+    }
+  ],
+  "sourceHashes": {
+    "controls.py": "db12611b6ba64746dd5d934e904e7b3a0a6d6ab17a049405bd503330d8442397",
+    "entry.py": "a1355be9cb40575ea0a4be6fe7de171356b7dd42d104285c7044e8197ad155dd",
+    "mode_predicates.py": "d882e49e61db40a6083295193b2e2014567c17afd656f572357b6511284f121c",
+    "profile.py": "e9c5db06fd9cca5a80e13e4d1ec94906456dd882a159bfb9a949e06df5121b25",
+    "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+    "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+    "runtime.py": "9c8c8a0d6209c9b9d80f3adeb6e01d4ec29cc3c14b1a9b18d88c13e07c3c0dc8",
+    "storage.py": "515655dea6115dc69d24b4666b79204370846bd4257fde44a7a3975dbef6101b"
+  },
+  "suiteExpansion": false,
+  "targetBoundaryGlobalsFaked": true
+}

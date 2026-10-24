@@ -1,0 +1,2974 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
+@@ -523,9 +523,8 @@
+           id,
+           "cancel",
+           ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-      styleWaitScope001:
+-      {
+-        long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(60000);
++      
++        long styleScope001BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(60000);
+         class BridgePoll1 {
+           Throwable failure;
+           boolean terminal;
+@@ -541,7 +540,7 @@
+                 throw new InterruptedException();
+               }
+               if (!(!(lost.get() == 3 && !sessions.teardownInFlight(id))
+-                  && System.nanoTime() < bridgeDeadline)) {
++                  && System.nanoTime() < styleScope001BridgeDeadline)) {
+                 terminal = true;
+                 return true;
+               }
+@@ -557,8 +556,8 @@
+             }
+           }
+         }
+-        var bridgePoll = new BridgePoll1();
+-        if (!bridgePoll.step()) {
++        var styleScope001BridgePoll = new BridgePoll1();
++        if (!styleScope001BridgePoll.step()) {
+           try {
+             org.awaitility.Awaitility.await()
+                 .alias("GuidedBridgeIntegrationTest: three refused stops finish")
+@@ -566,29 +565,29 @@
+                 .dontCatchUncaughtExceptions()
+                 .pollDelay(Duration.ZERO)
+                 .pollInterval(Duration.ofMillis(25))
+-                .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++                .atMost(Duration.ofNanos(Math.max(1L, styleScope001BridgeDeadline - System.nanoTime())))
+                 .until(
+                     () -> {
+-                      if (bridgePoll.initialAwaitTick) {
+-                        bridgePoll.initialAwaitTick = false;
++                      if (styleScope001BridgePoll.initialAwaitTick) {
++                        styleScope001BridgePoll.initialAwaitTick = false;
+                         return false;
+                       }
+-                      return bridgePoll.step();
++                      return styleScope001BridgePoll.step();
+                     });
+           } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-            if (!bridgePoll.terminal) {
+-              bridgePoll.step();
+-            }
+-          }
+-        }
+-        if (bridgePoll.failure instanceof Exception exception) {
++            if (!styleScope001BridgePoll.terminal) {
++              styleScope001BridgePoll.step();
++            }
++          }
++        }
++        if (styleScope001BridgePoll.failure instanceof Exception exception) {
+           throw exception;
+         }
+-        if (bridgePoll.failure instanceof Error error) {
++        if (styleScope001BridgePoll.failure instanceof Error error) {
+           throw error;
+         }
+         assertThat(lost.get() == 3 && !sessions.teardownInFlight(id)).isTrue();
+-      }
++      
+       assertThat(progress(id).path("teardownStatus").asText()).isEqualTo("PENDING");
+       assertThat(progress(id).path("teardownRequest").path("reason").asText())
+           .isEqualTo("CANCELLED");
+@@ -597,9 +596,8 @@
+ 
+       sessions.redriveTeardowns(Duration.ofMinutes(15), 32);
+ 
+-      styleWaitScope002:
+-      {
+-        long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(30000);
++      
++        long styleScope002BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(30000);
+         class BridgePoll2 {
+           Throwable failure;
+           boolean terminal;
+@@ -615,7 +613,7 @@
+                 throw new InterruptedException();
+               }
+               if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
+-                  && System.nanoTime() < bridgeDeadline)) {
++                  && System.nanoTime() < styleScope002BridgeDeadline)) {
+                 terminal = true;
+                 return true;
+               }
+@@ -631,8 +629,8 @@
+             }
+           }
+         }
+-        var bridgePoll = new BridgePoll2();
+-        if (!bridgePoll.step()) {
++        var styleScope002BridgePoll = new BridgePoll2();
++        if (!styleScope002BridgePoll.step()) {
+           try {
+             org.awaitility.Awaitility.await()
+                 .alias("GuidedBridgeIntegrationTest: teardown confirmed")
+@@ -640,29 +638,29 @@
+                 .dontCatchUncaughtExceptions()
+                 .pollDelay(Duration.ZERO)
+                 .pollInterval(Duration.ofMillis(25))
+-                .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++                .atMost(Duration.ofNanos(Math.max(1L, styleScope002BridgeDeadline - System.nanoTime())))
+                 .until(
+                     () -> {
+-                      if (bridgePoll.initialAwaitTick) {
+-                        bridgePoll.initialAwaitTick = false;
++                      if (styleScope002BridgePoll.initialAwaitTick) {
++                        styleScope002BridgePoll.initialAwaitTick = false;
+                         return false;
+                       }
+-                      return bridgePoll.step();
++                      return styleScope002BridgePoll.step();
+                     });
+           } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-            if (!bridgePoll.terminal) {
+-              bridgePoll.step();
+-            }
+-          }
+-        }
+-        if (bridgePoll.failure instanceof Exception exception) {
++            if (!styleScope002BridgePoll.terminal) {
++              styleScope002BridgePoll.step();
++            }
++          }
++        }
++        if (styleScope002BridgePoll.failure instanceof Exception exception) {
+           throw exception;
+         }
+-        if (bridgePoll.failure instanceof Error error) {
++        if (styleScope002BridgePoll.failure instanceof Error error) {
+           throw error;
+         }
+         assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
+-      }
++      
+       assertThat(lost.get()).isEqualTo(4);
+       assertThat(progress(id).has("teardownRequest")).isFalse();
+       assertThat(digests).hasSize(4).containsOnly(digests.getFirst());
+@@ -709,9 +707,8 @@
+           id,
+           "cancel",
+           ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-      styleWaitScope003:
+-      {
+-        long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(60000);
++      
++        long styleScope003BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(60000);
+         class BridgePoll3 {
+           Throwable failure;
+           boolean terminal;
+@@ -727,7 +724,7 @@
+                 throw new InterruptedException();
+               }
+               if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
+-                  && System.nanoTime() < bridgeDeadline)) {
++                  && System.nanoTime() < styleScope003BridgeDeadline)) {
+                 terminal = true;
+                 return true;
+               }
+@@ -743,8 +740,8 @@
+             }
+           }
+         }
+-        var bridgePoll = new BridgePoll3();
+-        if (!bridgePoll.step()) {
++        var styleScope003BridgePoll = new BridgePoll3();
++        if (!styleScope003BridgePoll.step()) {
+           try {
+             org.awaitility.Awaitility.await()
+                 .alias("GuidedBridgeIntegrationTest: teardown confirmed")
+@@ -752,29 +749,29 @@
+                 .dontCatchUncaughtExceptions()
+                 .pollDelay(Duration.ZERO)
+                 .pollInterval(Duration.ofMillis(25))
+-                .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++                .atMost(Duration.ofNanos(Math.max(1L, styleScope003BridgeDeadline - System.nanoTime())))
+                 .until(
+                     () -> {
+-                      if (bridgePoll.initialAwaitTick) {
+-                        bridgePoll.initialAwaitTick = false;
++                      if (styleScope003BridgePoll.initialAwaitTick) {
++                        styleScope003BridgePoll.initialAwaitTick = false;
+                         return false;
+                       }
+-                      return bridgePoll.step();
++                      return styleScope003BridgePoll.step();
+                     });
+           } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-            if (!bridgePoll.terminal) {
+-              bridgePoll.step();
+-            }
+-          }
+-        }
+-        if (bridgePoll.failure instanceof Exception exception) {
++            if (!styleScope003BridgePoll.terminal) {
++              styleScope003BridgePoll.step();
++            }
++          }
++        }
++        if (styleScope003BridgePoll.failure instanceof Exception exception) {
+           throw exception;
+         }
+-        if (bridgePoll.failure instanceof Error error) {
++        if (styleScope003BridgePoll.failure instanceof Error error) {
+           throw error;
+         }
+         assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
+-      }
++      
+     } finally {
+       sessions.installStopSender(dispatch::stop);
+     }
+@@ -792,9 +789,8 @@
+     String id = createSession();
+     JsonNode owned = dispatch.assign(controller, id, "assignment", "worker-1");
+     Instant originalLease = Instant.parse(owned.path("leaseExpiresAt").asText());
+-    styleWaitScope004:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(15000);
++    
++      long styleScope004BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(15000);
+       class BridgePoll4 {
+         Throwable failure;
+         boolean terminal;
+@@ -809,7 +805,7 @@
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+-            if (!(!(claimCount(id) >= 2) && System.nanoTime() < bridgeDeadline)) {
++            if (!(!(claimCount(id) >= 2) && System.nanoTime() < styleScope004BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -825,8 +821,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll4();
+-      if (!bridgePoll.step()) {
++      var styleScope004BridgePoll = new BridgePoll4();
++      if (!styleScope004BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgeIntegrationTest: owner renewal recorded")
+@@ -834,29 +830,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope004BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope004BridgePoll.initialAwaitTick) {
++                      styleScope004BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope004BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
+-          }
+-        }
+-      }
+-      if (bridgePoll.failure instanceof Exception exception) {
++          if (!styleScope004BridgePoll.terminal) {
++            styleScope004BridgePoll.step();
++          }
++        }
++      }
++      if (styleScope004BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope004BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(claimCount(id) >= 2).isTrue();
+-    }
++    
+     assertThat(Instant.parse(session(id).path("owner").path("leaseExpiresAt").asText()))
+         .isAfter(originalLease);
+     assertThat(
+@@ -874,9 +870,8 @@
+         id,
+         "cancel-before-context",
+         ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-    styleWaitScope005:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++    
++      long styleScope005BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+       class BridgePoll5 {
+         Throwable failure;
+         boolean terminal;
+@@ -892,7 +887,7 @@
+               throw new InterruptedException();
+             }
+             if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
+-                && System.nanoTime() < bridgeDeadline)) {
++                && System.nanoTime() < styleScope005BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -908,8 +903,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll5();
+-      if (!bridgePoll.step()) {
++      var styleScope005BridgePoll = new BridgePoll5();
++      if (!styleScope005BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgeIntegrationTest: teardown confirmed")
+@@ -917,29 +912,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope005BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope005BridgePoll.initialAwaitTick) {
++                      styleScope005BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope005BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
+-          }
+-        }
+-      }
+-      if (bridgePoll.failure instanceof Exception exception) {
++          if (!styleScope005BridgePoll.terminal) {
++            styleScope005BridgePoll.step();
++          }
++        }
++      }
++      if (styleScope005BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope005BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
+-    }
++    
+     assertThatThrownBy(() -> runner.send("assign", assignment(id), "assignment"))
+         .hasMessage("UNKNOWN_OUTCOME");
+     assertThat(
+@@ -985,9 +980,8 @@
+     ENV.corruptClaimResponse = true;
+     assertThatThrownBy(() -> dispatch.assign(controller, id, "assignment", "worker-1"))
+         .isInstanceOf(GuidedSessionException.class);
+-    styleWaitScope006:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++    
++      long styleScope006BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+       class BridgePoll6 {
+         Throwable failure;
+         boolean terminal;
+@@ -1003,7 +997,7 @@
+               throw new InterruptedException();
+             }
+             if (!(!(session(id).path("state").asText().equals("FAILED"))
+-                && System.nanoTime() < bridgeDeadline)) {
++                && System.nanoTime() < styleScope006BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -1019,8 +1013,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll6();
+-      if (!bridgePoll.step()) {
++      var styleScope006BridgePoll = new BridgePoll6();
++      if (!styleScope006BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgeIntegrationTest: terminal failure recorded")
+@@ -1028,29 +1022,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope006BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope006BridgePoll.initialAwaitTick) {
++                      styleScope006BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope006BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
+-          }
+-        }
+-      }
+-      if (bridgePoll.failure instanceof Exception exception) {
++          if (!styleScope006BridgePoll.terminal) {
++            styleScope006BridgePoll.step();
++          }
++        }
++      }
++      if (styleScope006BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope006BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(session(id).path("state").asText().equals("FAILED")).isTrue();
+-    }
++    
+     assertThat(ENV.navigations.get()).isZero();
+     assertThat(
+             jdbc.queryForObject(
+@@ -1072,9 +1066,8 @@
+         });
+     JsonNode receipt = dispatch.assign(controller, id, "max-fence", "worker-1");
+     assertThat(receipt.path("ownerFence").asInt()).isEqualTo(Integer.MAX_VALUE);
+-    styleWaitScope007:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(15000);
++    
++      long styleScope007BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(15000);
+       class BridgePoll7 {
+         Throwable failure;
+         boolean terminal;
+@@ -1089,7 +1082,7 @@
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+-            if (!(!(claimCount(id) >= 2) && System.nanoTime() < bridgeDeadline)) {
++            if (!(!(claimCount(id) >= 2) && System.nanoTime() < styleScope007BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -1105,8 +1098,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll7();
+-      if (!bridgePoll.step()) {
++      var styleScope007BridgePoll = new BridgePoll7();
++      if (!styleScope007BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgeIntegrationTest: owner renewal recorded")
+@@ -1114,29 +1107,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope007BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope007BridgePoll.initialAwaitTick) {
++                      styleScope007BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope007BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
+-          }
+-        }
+-      }
+-      if (bridgePoll.failure instanceof Exception exception) {
++          if (!styleScope007BridgePoll.terminal) {
++            styleScope007BridgePoll.step();
++          }
++        }
++      }
++      if (styleScope007BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope007BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(claimCount(id) >= 2).isTrue();
+-    }
++    
+     assertThat(session(id).path("owner").path("fence").asInt()).isEqualTo(Integer.MAX_VALUE);
+     assertThat(ENV.navigations.get()).isZero();
+   }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java
+@@ -731,9 +731,8 @@
+         .set("value", ENV.contracts.object().put("kind", "binding").put("bindingId", binding));
+     JsonNode fillLedger = admit(id, reserve(id, fill));
+     advance(id, fillLedger, "fill");
+-    styleWaitScope008:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++    
++      long styleScope008BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+       class BridgePoll1 {
+         Throwable failure;
+         boolean terminal;
+@@ -748,7 +747,7 @@
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+-            if (!(!(ENV.receipt.get() != null) && System.nanoTime() < bridgeDeadline)) {
++            if (!(!(ENV.receipt.get() != null) && System.nanoTime() < styleScope008BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -764,8 +763,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll1();
+-      if (!bridgePoll.step()) {
++      var styleScope008BridgePoll = new BridgePoll1();
++      if (!styleScope008BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgePlannedIT: application fill receipt")
+@@ -773,29 +772,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope008BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope008BridgePoll.initialAwaitTick) {
++                      styleScope008BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope008BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
++          if (!styleScope008BridgePoll.terminal) {
++            styleScope008BridgePoll.step();
+           }
+         }
+       }
+-      if (bridgePoll.failure instanceof Exception exception) {
++      if (styleScope008BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope008BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(ENV.receipt.get() != null).isTrue();
+-    }
++    
+     assertThat(ENV.receipt.get()).isEqualTo(ENV.capture);
+     assertThat(
+             jdbc.queryForObject(
+@@ -824,9 +823,8 @@
+         id,
+         "cancel",
+         ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-    styleWaitScope009:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++    
++      long styleScope009BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+       class BridgePoll2 {
+         Throwable failure;
+         boolean terminal;
+@@ -842,7 +840,7 @@
+               throw new InterruptedException();
+             }
+             if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
+-                && System.nanoTime() < bridgeDeadline)) {
++                && System.nanoTime() < styleScope009BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -858,8 +856,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll2();
+-      if (!bridgePoll.step()) {
++      var styleScope009BridgePoll = new BridgePoll2();
++      if (!styleScope009BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgePlannedIT: teardown confirmed")
+@@ -867,29 +865,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope009BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope009BridgePoll.initialAwaitTick) {
++                      styleScope009BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope009BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
++          if (!styleScope009BridgePoll.terminal) {
++            styleScope009BridgePoll.step();
+           }
+         }
+       }
+-      if (bridgePoll.failure instanceof Exception exception) {
++      if (styleScope009BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope009BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
+-    }
++    
+     assertThatThrownBy(() -> sessions.runnerContext(controller, id, 1)).hasMessage("CANCELLED");
+     // ar-mounted-rules qaOracle (3), moved from the retired configured-region case: the mounted
+     // worker.json carries neither `rules` nor `applicationPolicy`; the read above was authorized by
+@@ -1117,9 +1115,8 @@
+                 .put("sourceInputId", inputId(id, 1)));
+     JsonNode admitted = admit(id, reserve(id, fill));
+     ENV.replaceTarget = true;
+-    styleWaitScope010:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++    
++      long styleScope010BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+       class BridgePoll3 {
+         Throwable failure;
+         boolean terminal;
+@@ -1134,7 +1131,7 @@
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+-            if (!(!(ENV.mutations.get() > 0) && System.nanoTime() < bridgeDeadline)) {
++            if (!(!(ENV.mutations.get() > 0) && System.nanoTime() < styleScope010BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -1150,8 +1147,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll3();
+-      if (!bridgePoll.step()) {
++      var styleScope010BridgePoll = new BridgePoll3();
++      if (!styleScope010BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgePlannedIT: DOM replacement receipt")
+@@ -1159,29 +1156,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope010BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope010BridgePoll.initialAwaitTick) {
++                      styleScope010BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope010BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
++          if (!styleScope010BridgePoll.terminal) {
++            styleScope010BridgePoll.step();
+           }
+         }
+       }
+-      if (bridgePoll.failure instanceof Exception exception) {
++      if (styleScope010BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope010BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(ENV.mutations.get() > 0).isTrue();
+-    }
++    
+     advance(id, admitted, "stale-target");
+     JsonNode result =
+         ENV.contracts.parse(
+@@ -1223,9 +1220,8 @@
+       jdbc.execute("DROP TRIGGER bridge_fail_producer ON studio_guided_producers");
+       jdbc.execute("DROP FUNCTION bridge_fail_producer()");
+     }
+-    styleWaitScope011:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++    
++      long styleScope011BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+       class BridgePollProducerRollback {
+         Throwable failure;
+         boolean terminal;
+@@ -1245,7 +1241,7 @@
+                         String.class,
+                         id)
+                     .equals("UNKNOWN_OUTCOME"))
+-                && System.nanoTime() < bridgeDeadline)) {
++                && System.nanoTime() < styleScope011BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -1261,8 +1257,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePollProducerRollback();
+-      if (!bridgePoll.step()) {
++      var styleScope011BridgePoll = new BridgePollProducerRollback();
++      if (!styleScope011BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgePlannedIT: producer rollback unknown outcome")
+@@ -1270,25 +1266,25 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope011BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope011BridgePoll.initialAwaitTick) {
++                      styleScope011BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope011BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
++          if (!styleScope011BridgePoll.terminal) {
++            styleScope011BridgePoll.step();
+           }
+         }
+       }
+-      if (bridgePoll.failure instanceof Exception exception) {
++      if (styleScope011BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope011BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(
+@@ -1298,7 +1294,7 @@
+                       id)
+                   .equals("UNKNOWN_OUTCOME"))
+           .isTrue();
+-    }
++    
+     assertThat(
+             jdbc.queryForObject(
+                 "SELECT count(*) FROM studio_guided_producers WHERE session_id=?",
+@@ -1335,9 +1331,8 @@
+                 .put("kind", "authoredLiteral")
+                 .put("sourceInputId", input.path("inputId").asText()));
+     advance(id, admit(id, reserve(id, fill)), "configured-fill");
+-    styleWaitScope012:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++    
++      long styleScope012BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+       class BridgePoll4 {
+         Throwable failure;
+         boolean terminal;
+@@ -1352,7 +1347,7 @@
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+-            if (!(!(ENV.receipt.get() != null) && System.nanoTime() < bridgeDeadline)) {
++            if (!(!(ENV.receipt.get() != null) && System.nanoTime() < styleScope012BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -1368,8 +1363,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll4();
+-      if (!bridgePoll.step()) {
++      var styleScope012BridgePoll = new BridgePoll4();
++      if (!styleScope012BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgePlannedIT: application fill receipt")
+@@ -1377,29 +1372,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope012BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope012BridgePoll.initialAwaitTick) {
++                      styleScope012BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope012BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
++          if (!styleScope012BridgePoll.terminal) {
++            styleScope012BridgePoll.step();
+           }
+         }
+       }
+-      if (bridgePoll.failure instanceof Exception exception) {
++      if (styleScope012BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope012BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(ENV.receipt.get() != null).isTrue();
+-    }
++    
+     assertThat(ENV.receipt.get()).isEqualTo(ENV.configInput);
+     assertThat(
+             jdbc.queryForObject(
+@@ -1475,9 +1470,8 @@
+             "SELECT document::text FROM studio_guided_producers WHERE session_id=?",
+             String.class,
+             id);
+-    styleWaitScope013:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(35000);
++    
++      long styleScope013BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(35000);
+       class BridgePoll5 {
+         Throwable failure;
+         boolean terminal;
+@@ -1493,7 +1487,7 @@
+               throw new InterruptedException();
+             }
+             if (!(!(Instant.now().isAfter(firstLease.plusMillis(500)))
+-                && System.nanoTime() < bridgeDeadline)) {
++                && System.nanoTime() < styleScope013BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -1509,8 +1503,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll5();
+-      if (!bridgePoll.step()) {
++      var styleScope013BridgePoll = new BridgePoll5();
++      if (!styleScope013BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgePlannedIT: first lease plus 500 ms")
+@@ -1518,29 +1512,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope013BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope013BridgePoll.initialAwaitTick) {
++                      styleScope013BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope013BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
++          if (!styleScope013BridgePoll.terminal) {
++            styleScope013BridgePoll.step();
+           }
+         }
+       }
+-      if (bridgePoll.failure instanceof Exception exception) {
++      if (styleScope013BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope013BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(Instant.now().isAfter(firstLease.plusMillis(500))).isTrue();
+-    }
++    
+     assertThat(session(id).path("state").asText()).isEqualTo("AWAITING_CLARIFICATION");
+     assertThat(session(id).path("owner").path("fence").asInt()).isEqualTo(1);
+     assertThat(Instant.parse(session(id).path("owner").path("leaseExpiresAt").asText()))
+@@ -1570,9 +1564,8 @@
+     fill.withObject("/operation")
+         .set("value", ENV.contracts.object().put("kind", "binding").put("bindingId", binding));
+     advance(id, admit(id, reserve(id, fill)), "fill-after-renewal");
+-    styleWaitScope014:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++    
++      long styleScope014BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+       class BridgePoll6 {
+         Throwable failure;
+         boolean terminal;
+@@ -1587,7 +1580,7 @@
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+-            if (!(!(ENV.receipt.get() != null) && System.nanoTime() < bridgeDeadline)) {
++            if (!(!(ENV.receipt.get() != null) && System.nanoTime() < styleScope014BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -1603,8 +1596,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll6();
+-      if (!bridgePoll.step()) {
++      var styleScope014BridgePoll = new BridgePoll6();
++      if (!styleScope014BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgePlannedIT: application fill receipt")
+@@ -1612,29 +1605,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope014BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope014BridgePoll.initialAwaitTick) {
++                      styleScope014BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope014BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
++          if (!styleScope014BridgePoll.terminal) {
++            styleScope014BridgePoll.step();
+           }
+         }
+       }
+-      if (bridgePoll.failure instanceof Exception exception) {
++      if (styleScope014BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope014BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(ENV.receipt.get() != null).isTrue();
+-    }
++    
+     assertThat(ENV.receipt.get()).isEqualTo(ENV.capture);
+   }
+ 
+@@ -1650,9 +1643,8 @@
+         id,
+         "cancel-delayed-renewal",
+         ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-    styleWaitScope015:
+-    {
+-      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++    
++      long styleScope015BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+       class BridgePoll7 {
+         Throwable failure;
+         boolean terminal;
+@@ -1668,7 +1660,7 @@
+               throw new InterruptedException();
+             }
+             if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
+-                && System.nanoTime() < bridgeDeadline)) {
++                && System.nanoTime() < styleScope015BridgeDeadline)) {
+               terminal = true;
+               return true;
+             }
+@@ -1684,8 +1676,8 @@
+           }
+         }
+       }
+-      var bridgePoll = new BridgePoll7();
+-      if (!bridgePoll.step()) {
++      var styleScope015BridgePoll = new BridgePoll7();
++      if (!styleScope015BridgePoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("GuidedBridgePlannedIT: teardown confirmed")
+@@ -1693,29 +1685,29 @@
+               .dontCatchUncaughtExceptions()
+               .pollDelay(Duration.ZERO)
+               .pollInterval(Duration.ofMillis(25))
+-              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .atMost(Duration.ofNanos(Math.max(1L, styleScope015BridgeDeadline - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (bridgePoll.initialAwaitTick) {
+-                      bridgePoll.initialAwaitTick = false;
++                    if (styleScope015BridgePoll.initialAwaitTick) {
++                      styleScope015BridgePoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return bridgePoll.step();
++                    return styleScope015BridgePoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+-          if (!bridgePoll.terminal) {
+-            bridgePoll.step();
++          if (!styleScope015BridgePoll.terminal) {
++            styleScope015BridgePoll.step();
+           }
+         }
+       }
+-      if (bridgePoll.failure instanceof Exception exception) {
++      if (styleScope015BridgePoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (bridgePoll.failure instanceof Error error) {
++      if (styleScope015BridgePoll.failure instanceof Error error) {
+         throw error;
+       }
+       assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
+-    }
++    
+     ENV.releaseClaimResponse.countDown();
+     Thread.sleep(200);
+     assertThatThrownBy(() -> runner.send("assign", assignment(id), "assignment"))
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java
+@@ -441,8 +441,7 @@
+                       .isInstanceOf(GuidedSessionException.class));
+       assertThat(attempting.await(2, TimeUnit.SECONDS)).isTrue();
+       long until = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(500);
+-      styleWaitScope016:
+-      {
++      
+         class ItsPollRacepublisherrowlock {
+           Throwable failure;
+           boolean terminal;
+@@ -520,7 +519,7 @@
+         assertThat(itsPoll.waiting)
+             .as("actual publisher waits on PostgreSQL source row lock")
+             .isTrue();
+-      }
++      
+       Thread.sleep(1100);
+       release.countDown();
+       blocker.get(3, TimeUnit.SECONDS);
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -737,8 +737,7 @@
+     OwnedFixtureProcess root = new OwnedFixtureProcess(process, role, generation, wrapper);
+     OWNED_FIXTURE_PROCESSES.add(root);
+     long until = System.nanoTime() + Duration.ofMillis(500).toNanos();
+-    styleWaitScope017:
+-    {
++    
+       // IT-R POLL 1,2: exact original transitions; one old interval owed at most.
+       final var itrRead001Root = root;
+       final var itrRead001Until = until;
+@@ -922,7 +921,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     root.wrapperHash = wrapper == null ? "NOT_A_WRAPPER" : ownedFileHash(wrapper);
+     if (role.equals("guided")) {
+       root.configHash = ownedFileHash(ownedFixtureTemp.resolve("worker.json"));
+@@ -1120,8 +1119,7 @@
+           Integer.parseInt(builder.environment().getOrDefault("OBS007_ORDINARY_POOL_SIZE", "0"));
+       root.readinessNonceHash =
+           GuidedContracts.hash(com.fasterxml.jackson.databind.node.TextNode.valueOf(nonce));
+-      styleWaitScope018:
+-      {
++      
+         // IT-R POLL 3: exact original transitions; one old interval owed at most.
+         final var itrRead003Ready = ready;
+         final var itrRead003Until = until;
+@@ -1286,7 +1284,7 @@
+         } finally {
+ 
+         }
+-      }
++      
+       verifyOwnedRoot(root);
+       assertThat(Files.exists(ready)).as("candidate-owned post-listen marker").isTrue();
+       JsonNode marker = C.parse(Files.readString(ready));
+@@ -1339,8 +1337,7 @@
+     }
+     long until = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+     boolean closed;
+-    styleWaitScope019:
+-    {
++    
+       // IT-R POLL 4: exact original transitions; one old interval owed at most.
+       final var itrRead004Until = until;
+       class ItrState004 {
+@@ -1587,7 +1584,7 @@
+       if (itr004.methodReturned) {
+         return;
+       }
+-    }
++    
+     writeOpenGenerationDiagnostic();
+     throw new IllegalStateException(
+         "Prior generation actual sessions/browser/recordings remain unconfirmed; no restart authorized");
+@@ -2808,8 +2805,7 @@
+               0);
+       long fixtureDeadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+       String fixtureAnnouncement = "";
+-      styleWaitScope020:
+-      {
++      
+         // IT-R POLL 5: exact original transitions; one old interval owed at most.
+         final var itrRead005FixtureDeadline = fixtureDeadline;
+         class ItrState005 {
+@@ -2986,7 +2982,7 @@
+         } finally {
+           fixtureAnnouncement = itr005.fixtureAnnouncement;
+         }
+-      }
++      
+       if (fixtureAnnouncement.isBlank()) {
+         throw new IllegalStateException("Secret fixture readiness deadline");
+       }
+@@ -4612,8 +4608,7 @@
+           }
+           long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+           String teardown;
+-          styleWaitScope021:
+-          {
++          
+             // IT-R POLL 6: exact original transitions; one old interval owed at most.
+             final var itrRead006Deadline = deadline;
+             class ItrState006 {
+@@ -4788,7 +4783,7 @@
+             } finally {
+               teardown = itr006.teardown;
+             }
+-          }
++          
+           cleanup.put("teardownStatus", teardown);
+           assertThat(teardown)
+               .as("actual worker stop/close acknowledgement")
+@@ -8251,8 +8246,7 @@
+     assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+     JsonNode replay;
+     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+-    styleWaitScope022:
+-    {
++    
+       // IT-R POLL 7: exact original transitions; one old interval owed at most.
+       final var itrRead007Second = second;
+       final var itrRead007Deadline = deadline;
+@@ -8421,7 +8415,7 @@
+       } finally {
+         replay = itr007.replay;
+       }
+-    }
++    
+     assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+     assertThat(replay.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+     assertThat(INCREMENTAL_ORDINARY_READS.get() - reads)
+@@ -8724,8 +8718,7 @@
+       Instant lease = Instant.parse(before.session().path("owner").path("leaseExpiresAt").asText());
+       long end = System.nanoTime() + Duration.ofSeconds(12).toNanos();
+       JsonNode renewed;
+-      styleWaitScope023:
+-      {
++      
+         // IT-R POLL 8: exact original transitions; one old interval owed at most.
+         final var itrRead008Before = before;
+         final var itrRead008Lease = lease;
+@@ -8899,7 +8892,7 @@
+         } finally {
+           renewed = itr008.renewed;
+         }
+-      }
++      
+       assertThat(Instant.parse(renewed.path("leaseExpiresAt").asText()))
+           .as(
+               "a real same-owner renewal must occur before the unchanged context transport deadline")
+@@ -10898,8 +10891,7 @@
+     assertThat(hold.failure).as("plan hold released within its bound").isNull();
+     long accepted = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+     // GuidedTranslationStore.state requires an actual transaction (RUNTIME_INCOMPATIBLE otherwise).
+-    styleWaitScope024:
+-    {
++    
+       // IT-R POLL 11: exact original transitions; one old interval owed at most.
+       final var itrRead011Accepted = accepted;
+       class ItrState011 {
+@@ -11063,7 +11055,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     assertThat(sessions.transaction(() -> plans.state(session).path("continuation").asText()))
+         .isEqualTo("MATERIALIZE");
+     Thread.sleep(2500); // >= two real coordinator polls (poll 1000 ms); observed, never shortened
+@@ -11092,8 +11084,7 @@
+       Thread.sleep(100);
+     }
+     long held = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+-    styleWaitScope025:
+-    {
++    
+       // IT-R POLL 14: exact original transitions; one old interval owed at most.
+       final var itrRead014Held = held;
+       class ItrState014 {
+@@ -11255,7 +11246,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     assertThat(INCREMENTAL_ACK_ENTERED.contains(session))
+         .as("append retried after natural expiry; otherwise a liveness finding, never a relaxation")
+         .isTrue();
+@@ -11331,8 +11322,7 @@
+             session);
+     INCREMENTAL_ACK_RELEASE.get(session).countDown();
+     long acked = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+-    styleWaitScope026:
+-    {
++    
+       // IT-R POLL 15: exact original transitions; one old interval owed at most.
+       final var itrRead015Acked = acked;
+       class ItrState015 {
+@@ -11500,7 +11490,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     var delivery =
+         jdbc.queryForMap(
+             "SELECT delivery_id::text AS id,status,context_hash,ack::text AS ack"
+@@ -11622,8 +11612,7 @@
+     assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+     long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+     JsonNode replay;
+-    styleWaitScope027:
+-    {
++    
+       // IT-R POLL 16: exact original transitions; one old interval owed at most.
+       final var itrRead016Execution = execution;
+       final var itrRead016End = end;
+@@ -11792,7 +11781,7 @@
+       } finally {
+         replay = itr016.replay;
+       }
+-    }
++    
+     assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+   }
+ 
+@@ -11805,8 +11794,7 @@
+       throws Exception {
+     hold.release.countDown(); // this sibling never holds its suffix plan
+     long held = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+-    styleWaitScope028:
+-    {
++    
+       // IT-R POLL 17: exact original transitions; one old interval owed at most.
+       final var itrRead017Held = held;
+       class ItrState017 {
+@@ -11968,7 +11956,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     assertThat(INCREMENTAL_ACK_ENTERED.contains(session)).as("v2 ACK pending").isTrue();
+     long fence =
+         sessions.transaction(
+@@ -12488,8 +12476,7 @@
+   private String b2AwaitSettled(String id, int seconds) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(seconds).toNanos();
+     String state;
+-    styleWaitScope029:
+-    {
++    
+       // IT-R POLL 18: exact original transitions; one old interval owed at most.
+       final var itrRead018End = end;
+       class ItrState018 {
+@@ -12664,15 +12651,14 @@
+       } finally {
+         state = itr018.state;
+       }
+-    }
++    
+     return state;
+   }
+ 
+   private String b2AwaitLeft(String id, String from, int seconds) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(seconds).toNanos();
+     String state;
+-    styleWaitScope030:
+-    {
++    
+       // IT-R POLL 19: exact original transitions; one old interval owed at most.
+       final var itrRead019End = end;
+       class ItrState019 {
+@@ -12840,7 +12826,7 @@
+       } finally {
+         state = itr019.state;
+       }
+-    }
++    
+     return state;
+   }
+ 
+@@ -12850,8 +12836,7 @@
+    */
+   private void b2AwaitCheckCurrentGate(int after) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-    styleWaitScope031:
+-    {
++    
+       // IT-R POLL 20: exact original transitions; one old interval owed at most.
+       final var itrRead020End = end;
+       class ItrState020 {
+@@ -13062,7 +13047,7 @@
+       if (itr020.methodReturned) {
+         return;
+       }
+-    }
++    
+     throw new AssertionError(
+         "post-ACK worker checkCurrent SECRET_USE_REVOKED not observed; no other observer credited");
+   }
+@@ -14166,8 +14151,7 @@
+   private void prefixSyncAwaitDiagnostic(
+       PrefixSyncParent parent, int after, String code, boolean gate) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-    styleWaitScope032:
+-    {
++    
+       // IT-R POLL 21: exact original transitions; one old interval owed at most.
+       final var itrRead021End = end;
+       class ItrState021 {
+@@ -14420,7 +14404,7 @@
+       if (itr021.methodReturned) {
+         return;
+       }
+-    }
++    
+     throw new AssertionError(
+         "PFXSYNC intended Java context/gate stage not observed; no earlier refusal or timeout is credited");
+   }
+@@ -14578,8 +14562,7 @@
+     assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+     long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+     JsonNode replay;
+-    styleWaitScope033:
+-    {
++    
+       // IT-R POLL 22: exact original transitions; one old interval owed at most.
+       final var itrRead022Execution = execution;
+       final var itrRead022End = end;
+@@ -14748,7 +14731,7 @@
+       } finally {
+         replay = itr022.replay;
+       }
+-    }
++    
+     assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+     assertThat(replay.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+     assertThat(MODEL_WIRE).hasSize(model);
+@@ -15110,8 +15093,7 @@
+       assertThat(b1ConsumeCommands(parent.id, consumeKey)).isEqualTo(1);
+       cut.release.countDown(); // the original sender: same key/digest, no second runner send
+       long end = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-      styleWaitScope034:
+-      {
++      
+         // IT-R POLL 23: exact original transitions; one old interval owed at most.
+         final var itrRead023End = end;
+         class ItrState023 {
+@@ -15274,7 +15256,7 @@
+         } finally {
+ 
+         }
+-      }
++      
+       assertThat(b1NativeCount(parent.id, admission, "NATIVE_COMPLETED")).isEqualTo(1);
+       assertThat(b1NativeCount(parent.id, admission, "DISPATCH_ENTER")).isEqualTo(1);
+       assertThat(b1ConsumeCommands(parent.id, consumeKey)).isEqualTo(1);
+@@ -17704,8 +17686,7 @@
+ 
+   private ObjectNode b1AwaitDriftCapture(String id) throws Exception {
+     long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+-    styleWaitScope035:
+-    {
++    
+       // IT-R POLL 29: exact original transitions; one old interval owed at most.
+       final var itrRead029Until = until;
+       class ItrState029 {
+@@ -17867,7 +17848,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     return INCREMENTAL_DRIFT_CAPTURE.get(id);
+   }
+ 
+@@ -18086,8 +18067,7 @@
+   private JsonNode b1AwaitTerminal(String id, Duration limit) throws Exception {
+     long end = System.nanoTime() + limit.toNanos();
+     String state;
+-    styleWaitScope036:
+-    {
++    
+       // IT-R POLL 30: exact original transitions; one old interval owed at most.
+       final var itrRead030End = end;
+       class ItrState030 {
+@@ -18256,7 +18236,7 @@
+       } finally {
+         state = itr030.state;
+       }
+-    }
++    
+     return publicCall("/api/v1/studio/guided-sessions/" + id + "/result", null, 200, null);
+   }
+ 
+@@ -18288,8 +18268,7 @@
+ 
+   private void b1AwaitRow(String sql, String id, Duration limit) throws Exception {
+     long end = System.nanoTime() + limit.toNanos();
+-    styleWaitScope037:
+-    {
++    
+       // IT-R POLL 31: exact original transitions; one old interval owed at most.
+       final var itrRead031End = end;
+       class ItrState031 {
+@@ -18451,13 +18430,12 @@
+       } finally {
+ 
+       }
+-    }
++    
+   }
+ 
+   private void b1AwaitSucceeded(String id, int stepIndex, Duration limit) throws Exception {
+     long end = System.nanoTime() + limit.toNanos();
+-    styleWaitScope038:
+-    {
++    
+       // IT-R POLL 32: exact original transitions; one old interval owed at most.
+       final var itrRead032End = end;
+       class ItrState032 {
+@@ -18627,13 +18605,12 @@
+       } finally {
+ 
+       }
+-    }
++    
+   }
+ 
+   private JsonNode b1AwaitQuestion(String id) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+-    styleWaitScope039:
+-    {
++    
+       // IT-R POLL 33: exact original transitions; one old interval owed at most.
+       final var itrRead033End = end;
+       class ItrState033 {
+@@ -18797,7 +18774,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     return publicCall("/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null);
+   }
+ 
+@@ -19814,8 +19791,7 @@
+         assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+         long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+         JsonNode replay;
+-        styleWaitScope040:
+-        {
++        
+           // IT-R POLL 34: exact original transitions; one old interval owed at most.
+           final var itrRead034Execution = execution;
+           final var itrRead034End = end;
+@@ -19986,7 +19962,7 @@
+           } finally {
+             replay = itr034.replay;
+           }
+-        }
++        
+         assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+         assertThat(MODEL_WIRE).hasSize(beforeCalls);
+         assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(beforeLegacy);
+@@ -20417,8 +20393,7 @@
+       assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+       long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+       JsonNode snapshot;
+-      styleWaitScope041:
+-      {
++      
+         // IT-R POLL 35: exact original transitions; one old interval owed at most.
+         final var itrRead035Execution = execution;
+         final var itrRead035Deadline = deadline;
+@@ -20588,7 +20563,7 @@
+         } finally {
+           snapshot = itr035.snapshot;
+         }
+-      }
++      
+       assertThat(snapshot.path("status").asText())
+           .as("joined incremental ordinary replay logs %s", TEMP)
+           .isEqualTo("PASSED");
+@@ -20621,8 +20596,7 @@
+           assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+           JsonNode replay;
+           long secondDeadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+-          styleWaitScope042:
+-          {
++          
+             // IT-R POLL 36: exact original transitions; one old interval owed at most.
+             final var itrRead036Second = second;
+             final var itrRead036SecondDeadline = secondDeadline;
+@@ -20793,7 +20767,7 @@
+             } finally {
+               replay = itr036.replay;
+             }
+-          }
++          
+           assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+           assertThat(replay.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+           assertThat(INCREMENTAL_ORDINARY_READS.get() - reads).isEqualTo(1);
+@@ -20859,8 +20833,7 @@
+     String expected = variant.equals("unknown2") ? "UNKNOWN_OUTCOME" : "FAILED";
+     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+     String state;
+-    styleWaitScope043:
+-    {
++    
+       // IT-R POLL 37: exact original transitions; one old interval owed at most.
+       final var itrRead037Deadline = deadline;
+       class ItrState037 {
+@@ -21029,7 +21002,7 @@
+       } finally {
+         state = itr037.state;
+       }
+-    }
++    
+     assertThat(state).as("prefix refusal retains factual terminal outcome").isEqualTo(expected);
+     assertThat(MODEL_WIRE).hasSize(model);
+     assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
+@@ -21311,8 +21284,7 @@
+   private JsonNode confirmIncrementalPrefix(
+       String id, String variant, UUID test, int model, int legacy, int effects) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+-    styleWaitScope044:
+-    {
++    
+       // IT-R POLL 38: exact original transitions; one old interval owed at most.
+       final var itrRead038Deadline = deadline;
+       class ItrState038 {
+@@ -21481,7 +21453,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     JsonNode waiting = publicCall("/api/v1/studio/guided-sessions/" + id, null, 200, null);
+     assertThat(waiting.path("session").path("state").asText()).isEqualTo("AWAITING_CLARIFICATION");
+     assertThat(MODEL_WIRE).hasSize(model);
+@@ -21820,8 +21792,7 @@
+       }
+       long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+       String outcome;
+-      styleWaitScope045:
+-      {
++      
+         // IT-R POLL 41: exact original transitions; one old interval owed at most.
+         final var itrRead041Until = until;
+         class ItrState041 {
+@@ -21990,7 +21961,7 @@
+         } finally {
+           outcome = itr041.outcome;
+         }
+-      }
++      
+       assertThat(outcome).isIn("CANCELLED", "UNKNOWN_OUTCOME", "FAILED");
+       assertThat(
+               jdbc.queryForObject(
+@@ -22038,8 +22009,7 @@
+ 
+   private void assertActualDriftCallbackAuthorityThenRelease(String id) throws Exception {
+     long until = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-    styleWaitScope046:
+-    {
++    
+       // IT-R POLL 42: exact original transitions; one old interval owed at most.
+       final var itrRead042Until = until;
+       class ItrState042 {
+@@ -22201,7 +22171,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     assertThat(INCREMENTAL_DRIFT_CAPTURE).containsKey(id);
+     ObjectNode actual = INCREMENTAL_DRIFT_CAPTURE.get(id);
+     JsonNode receipt = actual.path("receipt");
+@@ -22322,8 +22292,7 @@
+ 
+   private void assertPendingContextGuardsThenRelease(String id) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-    styleWaitScope047:
+-    {
++    
+       // IT-R POLL 43: exact original transitions; one old interval owed at most.
+       final var itrRead043Deadline = deadline;
+       class ItrState043 {
+@@ -22485,7 +22454,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     assertThat(INCREMENTAL_ACK_ENTERED)
+         .as("actual runner accepted version2 on the original browser before returning ACK")
+         .contains(id);
+@@ -23244,8 +23213,7 @@
+     assertThat(acquisition.path("policy").asText()).isEqualTo("passive-target-1");
+     assertThat(acquisition.path("sourceRevision").asText()).isEqualTo("1");
+     long learningEnd = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+-    styleWaitScope048:
+-    {
++    
+       // IT-R POLL 44: exact original transitions; one old interval owed at most.
+       final var itrRead044Id = id;
+       final var itrRead044LearningEnd = learningEnd;
+@@ -23418,7 +23386,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     var learningState = sessions.transaction(() -> sessions.lock(id));
+     ObjectNode diagnostic =
+         C.object()
+@@ -23590,8 +23558,7 @@
+         assertThat(activeDispatcher.dispatchOnce()).isEqualTo(1);
+         long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+         String state;
+-        styleWaitScope049:
+-        {
++        
+           // IT-R POLL 45: exact original transitions; one old interval owed at most.
+           final var itrRead045ExecutionId = executionId;
+           final var itrRead045End = end;
+@@ -23764,7 +23731,7 @@
+           } finally {
+             state = itr045.state;
+           }
+-        }
++        
+         assertThat(state)
+             .as("execution %s; runner log %s", executionId, TEMP.resolve("ordinary.log"))
+             .isEqualTo("PASSED");
+@@ -23922,8 +23889,7 @@
+     assertThat(noReceipt.statusCode()).isEqualTo(409);
+     assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+     long enteredDeadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+-    styleWaitScope050:
+-    {
++    
+       // IT-R POLL 47: exact original transitions; one old interval owed at most.
+       final var itrRead047EnteredDeadline = enteredDeadline;
+       class ItrState047 {
+@@ -24085,7 +24051,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     assertThat(Files.exists(TEMP.resolve("initial-context-check-entered"))).isTrue();
+     invalidPreReadyReports(failureId);
+     var beforeRollback = failureState(failureId);
+@@ -24102,8 +24068,7 @@
+     }
+     JsonNode snapshot = null;
+     long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+-    styleWaitScope051:
+-    {
++    
+       // IT-R POLL 48: exact original transitions; one old interval owed at most.
+       final var itrRead048Id = id;
+       final var itrRead048Until = until;
+@@ -24272,7 +24237,7 @@
+       } finally {
+         snapshot = itr048.snapshot;
+       }
+-    }
++    
+     assertThat(snapshot).isNotNull();
+     assertThat(snapshot.path("streamComplete").asBoolean()).isTrue();
+     assertThat(snapshot.path("status").asText()).isIn("FAILED", "ERROR");
+@@ -24317,8 +24282,7 @@
+         .containsExactly((byte) 0x1a, (byte) 0x45, (byte) 0xdf, (byte) 0xa3);
+     assertThat(snapshot.toString()).doesNotContain(SAVED);
+     long captureDeadline = System.nanoTime() + Duration.ofSeconds(2).toNanos();
+-    styleWaitScope052:
+-    {
++    
+       // IT-R POLL 49: exact original transitions; one old interval owed at most.
+       final var itrRead049CaptureDeadline = captureDeadline;
+       class ItrState049 {
+@@ -24480,7 +24444,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     assertThat(RECEIVED_FAILURE_REPORTS).hasSizeGreaterThanOrEqualTo(2);
+     for (JsonNode actual : RECEIVED_FAILURE_REPORTS) {
+       assertThat(actual.path("kind").asText()).isEqualTo("FINAL");
+@@ -24954,8 +24918,7 @@
+       String id = startLearning(testId);
+       long deadline = System.nanoTime() + Duration.ofSeconds(60).toNanos();
+       JsonNode missingCheckpoint = null;
+-      styleWaitScope053:
+-      {
++      
+         // IT-R POLL 50: exact original transitions; one old interval owed at most.
+         final var itrRead050Id = id;
+         final var itrRead050Deadline = deadline;
+@@ -25159,7 +25122,7 @@
+         } finally {
+           missingCheckpoint = itr050.missingCheckpoint;
+         }
+-      }
++      
+       assertThat(missingCheckpoint)
+           .as("real committed missing-target observation; logs %s", TEMP)
+           .isNotNull();
+@@ -25210,8 +25173,7 @@
+         assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+         long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+         JsonNode snapshot = null;
+-        styleWaitScope054:
+-        {
++        
+           // IT-R POLL 51: exact original transitions; one old interval owed at most.
+           final var itrRead051Execution = execution;
+           final var itrRead051End = end;
+@@ -25382,7 +25344,7 @@
+           } finally {
+             snapshot = itr051.snapshot;
+           }
+-        }
++        
+         assertThat(snapshot.path("status").asText())
+             .as("async replay logs %s", TEMP)
+             .isEqualTo("PASSED");
+@@ -25446,8 +25408,7 @@
+       String id = startLearning(testId);
+       long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+       String state = "";
+-      styleWaitScope055:
+-      {
++      
+         // IT-R POLL 52: exact original transitions; one old interval owed at most.
+         final var itrRead052Id = id;
+         final var itrRead052Deadline = deadline;
+@@ -25618,7 +25579,7 @@
+         } finally {
+           state = itr052.state;
+         }
+-      }
++      
+       assertThat(state).isEqualTo("AWAITING_CLARIFICATION");
+       JsonNode question =
+           publicCall("/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null);
+@@ -25712,8 +25673,7 @@
+         String id = startLearning(test);
+         long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+         JsonNode checkpoint = null;
+-        styleWaitScope056:
+-        {
++        
+           // IT-R POLL 54: exact original transitions; one old interval owed at most.
+           final var itrRead054Navigations = navigations;
+           final var itrRead054Id = id;
+@@ -25886,7 +25846,7 @@
+           } finally {
+             checkpoint = itr054.checkpoint;
+           }
+-        }
++        
+         assertThat(checkpoint).as("real passive wait before stopping; logs %s", TEMP).isNotNull();
+         if (cancel) {
+           publicCall(
+@@ -25898,8 +25858,7 @@
+         String expected = cancel ? "CANCELLED" : "FAILED";
+         until = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+         String state = "";
+-        styleWaitScope057:
+-        {
++        
+           // IT-R POLL 55: exact original transitions; one old interval owed at most.
+           final var itrRead055Id = id;
+           final var itrRead055Until = until;
+@@ -26071,7 +26030,7 @@
+           } finally {
+             state = itr055.state;
+           }
+-        }
++        
+         assertThat(state).as("delayed terminal; logs %s", TEMP).isEqualTo(expected);
+         var stopped = sessions.transaction(() -> sessions.lock(id));
+         if (!cancel) {
+@@ -26246,8 +26205,7 @@
+         assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+         long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+         JsonNode snapshot;
+-        styleWaitScope058:
+-        {
++        
+           // IT-R POLL 58: exact original transitions; one old interval owed at most.
+           final var itrRead058Execution = execution;
+           final var itrRead058End = end;
+@@ -26418,7 +26376,7 @@
+           } finally {
+             snapshot = itr058.snapshot;
+           }
+-        }
++        
+         assertThat(snapshot.path("status").asText())
+             .as("observed choice logs %s", TEMP)
+             .isEqualTo("PASSED");
+@@ -26598,8 +26556,7 @@
+ 
+   private void awaitState(String id, String expected) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+-    styleWaitScope059:
+-    {
++    
+       // IT-R POLL 60: exact original transitions; one old interval owed at most.
+       final var itrRead060End = end;
+       class ItrState060 {
+@@ -26775,7 +26732,7 @@
+       if (itr060.methodReturned) {
+         return;
+       }
+-    }
++    
+     throw new AssertionError("Expected " + expected + "; logs " + TEMP);
+   }
+ 
+@@ -27106,8 +27063,7 @@
+         assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+         long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+         String status = "";
+-        styleWaitScope060:
+-        {
++        
+           // IT-R POLL 61: exact original transitions; one old interval owed at most.
+           final var itrRead061Execution = execution;
+           final var itrRead061Deadline = deadline;
+@@ -27280,7 +27236,7 @@
+           } finally {
+             status = itr061.status;
+           }
+-        }
++        
+         assertThat(status)
+             .as("actual compiled child login, evidence at %s", TEMP)
+             .isEqualTo("PASSED");
+@@ -27519,8 +27475,7 @@
+   private JsonNode awaitGuidedVideoSettled(String sessionId) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+     JsonNode result;
+-    styleWaitScope061:
+-    {
++    
+       // IT-R POLL 62: exact original transitions; one old interval owed at most.
+       final var itrRead062Deadline = deadline;
+       class ItrState062 {
+@@ -27695,7 +27650,7 @@
+       } finally {
+         result = itr062.result;
+       }
+-    }
++    
+     C.validate("v3/result", result);
+     return result;
+   }
+@@ -28019,8 +27974,7 @@
+     int removed = 0;
+     String stateAtInjection = null;
+     long deadline = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+-    styleWaitScope062:
+-    {
++    
+       // IT-R POLL 63: exact original transitions; one old interval owed at most.
+       final var itrRead063LaunchesBefore = launchesBefore;
+       final var itrRead063SessionId = sessionId;
+@@ -28241,7 +28195,7 @@
+         removed = itr063.removed;
+         stateAtInjection = itr063.stateAtInjection;
+       }
+-    }
++    
+     assertThat(recorderDirectory)
+         .as("guided recorder live file observed mid-session; logs %s", TEMP)
+         .isNotNull();
+@@ -29632,8 +29586,7 @@
+       cut.stopIssued = true;
+       p6Signal("-STOP", Long.toString(cut.parent.pid()));
+       long stoppedBy = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+-      styleWaitScope063:
+-      {
++      
+         // IT-R POLL 64: exact original transitions; one old interval owed at most.
+         final var itrRead064Cut = cut;
+         final var itrRead064StoppedBy = stoppedBy;
+@@ -29797,7 +29750,7 @@
+         } finally {
+ 
+         }
+-      }
++      
+       p6SameProcess(cut.parent.toHandle(), cut.parentStarted);
+       assertThat(p6Status(cut.parent.toHandle()).state().startsWith("T"))
+           .as("own parent actually STOPPED before child cut")
+@@ -30214,8 +30167,7 @@
+ 
+   private static void p6AwaitProcesses(List<P6OwnedPid> owned, boolean gone) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+-    styleWaitScope064:
+-    {
++    
+       // IT-R POLL 66: exact original transitions; one old interval owed at most.
+       final var itrRead066Deadline = deadline;
+       class ItrState066 {
+@@ -30403,7 +30355,7 @@
+       if (itr066.methodReturned) {
+         return;
+       }
+-    }
++    
+     throw new IllegalStateException(
+         gone
+             ? "Owned processes not genuinely reaped"
+@@ -30544,8 +30496,7 @@
+             blocker, VaultScope.of(primaryCsi, "fixture", blockerTest), blockerPublication);
+         assertThat(dispatcher.dispatch(blocker)).isTrue();
+         long until = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+-        styleWaitScope065:
+-        {
++        
+           // IT-R POLL 67: exact original transitions; one old interval owed at most.
+           final var itrRead067Until = until;
+           class ItrState067 {
+@@ -30708,7 +30659,7 @@
+           } finally {
+ 
+           }
+-        }
++        
+         assertThat(Files.exists(TEMP.resolve("initial-context-check-entered"))).isTrue();
+         assertThat("ADMITTED".equals(p6Owner(blocker).get("state"))).isTrue();
+         assertThat(
+@@ -30984,8 +30935,7 @@
+       p3AssertBinding(execution, scope, publication);
+       assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+       long entered = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+-      styleWaitScope066:
+-      {
++      
+         // IT-R POLL 69: exact original transitions; one old interval owed at most.
+         final var itrRead069Entered = entered;
+         class ItrState069 {
+@@ -31148,7 +31098,7 @@
+         } finally {
+ 
+         }
+-      }
++      
+       assertThat(Files.exists(TEMP.resolve("initial-context-check-entered"))).isTrue();
+       assertThat("ADMITTED".equals(p6Owner(execution).get("state"))).isTrue();
+       assertThat(
+@@ -31165,8 +31115,7 @@
+       stopped = true;
+       p6Signal("-STOP", Long.toString(parent.pid()));
+       long stoppedBy = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+-      styleWaitScope067:
+-      {
++      
+         // IT-R POLL 70: exact original transitions; one old interval owed at most.
+         final var itrRead070Parent = parent;
+         final var itrRead070StoppedBy = stoppedBy;
+@@ -31330,7 +31279,7 @@
+         } finally {
+ 
+         }
+-      }
++      
+       assertThat(p6Status(parent.toHandle()).state().startsWith("T"))
+           .as("own ordinary parent actually STOPPED")
+           .isTrue();
+@@ -31341,8 +31290,7 @@
+ 
+       List<JsonNode> runnerLines = List.of();
+       long selfStopBy = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+-      styleWaitScope068:
+-      {
++      
+         // IT-R POLL 72: exact original transitions; one old interval owed at most.
+         final var itrRead072LogStart = logStart;
+         final var itrRead072Execution = execution;
+@@ -31513,7 +31461,7 @@
+         } finally {
+           runnerLines = itr072.runnerLines;
+         }
+-      }
++      
+       writeInitialContextState("{\"pause\":false,\"fail\":false}");
+       paused = false;
+ 
+@@ -32472,8 +32420,7 @@
+ 
+   private ObjectNode p14AwaitAcquisitionWindow(String session, P14Recipe recipe) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+-    styleWaitScope069:
+-    {
++    
+       // IT-R POLL 73: exact original transitions; one old interval owed at most.
+       final var itrRead073Deadline = deadline;
+       class ItrState073 {
+@@ -32661,7 +32608,7 @@
+       if (itr073.methodReturned) {
+         return itr073.returnedValue;
+       }
+-    }
++    
+     throw new AssertionError("C14 authentic target acquisition window was not observed");
+   }
+ 
+@@ -33043,8 +32990,7 @@
+       p6SameProcess(parent.toHandle(), parentStarted);
+       p6Signal("-TERM", Long.toString(parent.pid()));
+       long drainingDeadline = System.nanoTime() + Duration.ofSeconds(2).toNanos();
+-      styleWaitScope070:
+-      {
++      
+         // IT-R POLL 74: exact original transitions; one old interval owed at most.
+         final var itrRead074LogStart = logStart;
+         final var itrRead074Receipts = receipts;
+@@ -33209,7 +33155,7 @@
+         } finally {
+ 
+         }
+-      }
++      
+       assertThat(p3ParentEvents(logStart, receipts, true)[1]).isEqualTo(1);
+       hold.release.countDown();
+       List<JsonNode> reports = new java.util.ArrayList<>();
+@@ -33371,8 +33317,7 @@
+   private static void p3AwaitParentStarted(long offset, int poolSize, long deadline)
+       throws Exception {
+     int observed;
+-    styleWaitScope071:
+-    {
++    
+       // IT-R POLL 75: exact original transitions; one old interval owed at most.
+ 
+       class ItrState075 {
+@@ -33539,7 +33484,7 @@
+       } finally {
+         observed = itr075.observed;
+       }
+-    }
++    
+     assertThat(System.nanoTime() <= deadline).as("original parent readiness deadline").isTrue();
+     assertThat(observed)
+         .as("actual parent startup within original readiness budget")
+@@ -34590,8 +34535,7 @@
+     }
+     long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+     boolean complete;
+-    styleWaitScope072:
+-    {
++    
+       // IT-R POLL 77: exact original transitions; one old interval owed at most.
+       final var itrRead077Deadline = deadline;
+       class ItrState077 {
+@@ -34767,7 +34711,7 @@
+       } finally {
+         complete = itr077.complete;
+       }
+-    }
++    
+     assertThat(complete).as("all required original scalar witnesses settled").isTrue();
+     assertThat(state.failed).as("no lost malformed or failed observer").isFalse();
+     assertThat(Files.exists(TEMP.resolve("p4-revocation-observer-failed"))).isFalse();
+@@ -34813,8 +34757,7 @@
+     for (int producer : producers) {
+       Path file = root.resolve(state.ordinal + "-" + producer + ".json");
+       JsonNode finalSample = null;
+-      styleWaitScope073:
+-      {
++      
+         // IT-R POLL 78: exact original transitions; one old interval owed at most.
+         final var itrRead078Root = root;
+         final var itrRead078Deadline = deadline;
+@@ -35042,7 +34985,7 @@
+         } finally {
+           finalSample = itr078.finalSample;
+         }
+-      }
++      
+       assertThat(finalSample != null)
+           .as("actual producer final ACK/failure processing sample")
+           .isTrue();
+@@ -35293,8 +35236,7 @@
+ 
+   private void p4AssertRegisteredAndNoPasswordEffects() throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+-    styleWaitScope074:
+-    {
++    
+       // IT-R POLL 79: exact original transitions; one old interval owed at most.
+       final var itrRead079Deadline = deadline;
+       class ItrState079 {
+@@ -35456,7 +35398,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     p4AssertObserverPhaseCompleted(P4_PHASE_ORDINAL.get());
+     assertThat(P4_EFFECT_REGISTRATIONS.get()).isPositive();
+     assertThat(P4_PASSWORD_WRITES.get()).isZero();
+@@ -36379,8 +36321,7 @@
+ 
+   private void p8AwaitC6Closed(P4RevocationState state) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+-    styleWaitScope075:
+-    {
++    
+       // IT-R POLL 80: exact original transitions; one old interval owed at most.
+       final var itrRead080Deadline = deadline;
+       class ItrState080 {
+@@ -36550,7 +36491,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     assertThat(state.c6NativeClose).as("original SDK close receipt").isTrue();
+     if (state.c6FenceAvailable) {
+       assertThat(p4OriginalCloseSettled(state.c6Phase) && P4_CLOSED_PHASES.contains(state.c6Phase))
+@@ -36612,8 +36553,7 @@
+     Path samplePath = root.resolve(state.ordinal + "-1.json");
+     JsonNode sample = null;
+     long deadline = System.nanoTime() + Duration.ofSeconds(2).toNanos();
+-    styleWaitScope076:
+-    {
++    
+       // IT-R POLL 81: exact original transitions; one old interval owed at most.
+       final var itrRead081SamplePath = samplePath;
+       final var itrRead081Deadline = deadline;
+@@ -36792,7 +36732,7 @@
+       } finally {
+         sample = itr081.sample;
+       }
+-    }
++    
+     assertThat(sample).as("original SDK launch and selected runtime identity sample").isNotNull();
+     assertThat(sample.path("case").asInt()).isEqualTo(state.ordinal);
+     assertThat(sample.path("producer").asInt()).isEqualTo(1);
+@@ -37640,8 +37580,7 @@
+       throws Exception {
+     assertThat(System.nanoTime() < deadline).as("original terminal observation deadline").isTrue();
+     String actual = "";
+-    styleWaitScope077:
+-    {
++    
+       // IT-R POLL 82: exact original transitions; one old interval owed at most.
+ 
+       class ItrState082 {
+@@ -37810,7 +37749,7 @@
+       } finally {
+         actual = itr082.actual;
+       }
+-    }
++    
+     assertThat(actual).as("actual P3 ordinary terminal status").isEqualTo(expected);
+     return p3Call(p3Cookie, "/api/v1/studio/executions/" + execution, null, 200);
+   }
+@@ -37818,8 +37757,7 @@
+   private JsonNode p3RunnerReport(UUID execution) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+     JsonNode report = P3_FINAL_REPORTS.get(execution);
+-    styleWaitScope078:
+-    {
++    
+       // IT-R POLL 83: exact original transitions; one old interval owed at most.
+       final var itrRead083Deadline = deadline;
+       class ItrState083 {
+@@ -37981,7 +37919,7 @@
+       } finally {
+         report = itr083.report;
+       }
+-    }
++    
+     assertThat(report != null)
+         .as("actual authenticated P3 FINAL was observed by the forwarding filter")
+         .isTrue();
+@@ -38073,8 +38011,7 @@
+     long started = System.nanoTime();
+     long deadline = started + Duration.ofSeconds(120).toNanos();
+     long renewCredentialsAt = started + Duration.ofSeconds(10).toNanos();
+-    styleWaitScope079:
+-    {
++    
+       // IT-R POLL 84: exact original transitions; one old interval owed at most.
+       final var itrRead084Started = started;
+       final var itrRead084Deadline = deadline;
+@@ -38285,7 +38222,7 @@
+       if (itr084.methodReturned) {
+         return;
+       }
+-    }
++    
+   }
+ 
+   /**
+@@ -38342,8 +38279,7 @@
+ 
+   private void p3AwaitTeardown(String id) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-    styleWaitScope080:
+-    {
++    
+       // IT-R POLL 85: exact original transitions; one old interval owed at most.
+       final var itrRead085Deadline = deadline;
+       class ItrState085 {
+@@ -38515,15 +38451,14 @@
+       if (itr085.methodReturned) {
+         return;
+       }
+-    }
++    
+     throw new AssertionError("Actual P3 owner teardown acknowledgement missing");
+   }
+ 
+   private long p3DecodeVideo(UUID execution, JsonNode current) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+     JsonNode report = current;
+-    styleWaitScope081:
+-    {
++    
+       // IT-R POLL 86: exact original transitions; one old interval owed at most.
+       final var itrRead086Deadline = deadline;
+       class ItrState086 {
+@@ -38687,7 +38622,7 @@
+       } finally {
+         report = itr086.report;
+       }
+-    }
++    
+     assertThat(report.path("streamComplete").asBoolean()).isTrue();
+     assertThat(report.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+     String key =
+@@ -40840,8 +40775,7 @@
+   private JsonNode awaitJoinedVideo(UUID execution) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+     JsonNode snapshot;
+-    styleWaitScope082:
+-    {
++    
+       // IT-R POLL 87: exact original transitions; one old interval owed at most.
+       final var itrRead087Deadline = deadline;
+       class ItrState087 {
+@@ -41009,7 +40943,7 @@
+       } finally {
+         snapshot = itr087.snapshot;
+       }
+-    }
++    
+     assertThat(snapshot.path("streamComplete").asBoolean()).isTrue();
+     assertThat(snapshot.path("status").asText()).isEqualTo("PASSED");
+     assertThat(snapshot.path("video").path("status").asText())
+@@ -42544,8 +42478,7 @@
+       Path receipt = directory.resolve("s2-" + s2Epoch + "-1.json");
+       long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+       JsonNode sample = null;
+-      styleWaitScope083:
+-      {
++      
+         // IT-R POLL 89: exact original transitions; one old interval owed at most.
+         final var itrRead089Directory = directory;
+         final var itrRead089Receipt = receipt;
+@@ -42746,7 +42679,7 @@
+         } finally {
+           sample = itr089.sample;
+         }
+-      }
++      
+       assertThat(sample != null)
+           .as("actual selected guided operation/callback completion")
+           .isTrue();
+@@ -43950,8 +43883,7 @@
+ 
+   private void awaitFinalizing(String id) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+-    styleWaitScope084:
+-    {
++    
+       // IT-R POLL 90: exact original transitions; one old interval owed at most.
+       final var itrRead090End = end;
+       class ItrState090 {
+@@ -44133,7 +44065,7 @@
+       if (itr090.methodReturned) {
+         return;
+       }
+-    }
++    
+     throw new AssertionError("Second explicit learning did not finalize; logs " + TEMP);
+   }
+ 
+@@ -46275,8 +46207,7 @@
+                     ? RunnerProcessHarness.GUIDED_MINIMUM_GRACE
+                     : Duration.ofSeconds(30))
+                 .toNanos();
+-    styleWaitScope085:
+-    {
++    
+       // IT-R POLL 94: exact original transitions; one old interval owed at most.
+       final var itrRead094Root = root;
+       final var itrRead094Deadline = deadline;
+@@ -46441,7 +46372,7 @@
+       } finally {
+ 
+       }
+-    }
++    
+     if (process.isAlive()
+         || root.descendants.stream().anyMatch(child -> child.handle().isAlive())) {
+       // Every target carries a previously observed actual ancestry and immutable PID/start/command.
+@@ -46458,8 +46389,7 @@
+         process.destroyForcibly();
+       }
+       deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+-      styleWaitScope086:
+-      {
++      
+         // IT-R POLL 95: exact original transitions; one old interval owed at most.
+         final var itrRead095Root = root;
+         final var itrRead095Deadline = deadline;
+@@ -46625,7 +46555,7 @@
+         } finally {
+ 
+         }
+-      }
++      
+     }
+     assertThat(process.isAlive()).as("registered actual owned fixture root exited").isFalse();
+     assertThat(root.descendants.stream().anyMatch(child -> child.handle().isAlive()))
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java
+@@ -1844,8 +1844,7 @@
+               });
+       assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+       long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+-      styleWaitScope087:
+-      {
++      
+         class ItsPollSecretterminalrowlock {
+           Throwable failure;
+           boolean terminal;
+@@ -1921,7 +1920,7 @@
+           throw error;
+         }
+         assertThat(itsPoll.waited).isTrue();
+-      }
++      
+       releaseWriter.countDown();
+       assertThat(writer.get(10, TimeUnit.SECONDS)).isTrue();
+       assertThat(terminal.get(10, TimeUnit.SECONDS)).isEqualTo(1);
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
+@@ -1030,8 +1030,7 @@
+   /** Waits for the V20 fact; the failure names what the runner did (its log is value-free). */
+   void awaitRecording(String id) throws Exception {
+     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(90_000);
+-    styleWaitScope088:
+-    {
++    
+       class ItsPollEvidencerecording {
+         Throwable failure;
+         boolean terminal;
+@@ -1064,8 +1063,8 @@
+           }
+         }
+       }
+-      var itsPoll = new ItsPollEvidencerecording();
+-      if (!itsPoll.step()) {
++      var styleScope088ItsPoll = new ItsPollEvidencerecording();
++      if (!styleScope088ItsPoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("IT-S Evidence-recording")
+@@ -1076,26 +1075,26 @@
+               .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (itsPoll.initialAwaitTick) {
+-                      itsPoll.initialAwaitTick = false;
++                    if (styleScope088ItsPoll.initialAwaitTick) {
++                      styleScope088ItsPoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return itsPoll.step();
++                    return styleScope088ItsPoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+           // Preserve the original last guard/observation and its assertion/error mapping.
+-          if (!itsPoll.terminal) {
+-            itsPoll.step();
++          if (!styleScope088ItsPoll.terminal) {
++            styleScope088ItsPoll.step();
+           }
+         }
+       }
+-      if (itsPoll.failure instanceof Exception exception) {
++      if (styleScope088ItsPoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (itsPoll.failure instanceof Error error) {
++      if (styleScope088ItsPoll.failure instanceof Error error) {
+         throw error;
+       }
+-    }
++    
+     assertThat(recordingRows(id))
+         .as(
+             "no recording fact: session state="
+@@ -1499,8 +1498,7 @@
+ 
+   static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-    styleWaitScope089:
+-    {
++    
+       class ItsPollGuidedEvidencePendingAppendJoinedITcondition {
+         Throwable failure;
+         boolean terminal;
+@@ -1533,8 +1531,8 @@
+           }
+         }
+       }
+-      var itsPoll = new ItsPollGuidedEvidencePendingAppendJoinedITcondition();
+-      if (!itsPoll.step()) {
++      var styleScope089ItsPoll = new ItsPollGuidedEvidencePendingAppendJoinedITcondition();
++      if (!styleScope089ItsPoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("IT-S GuidedEvidencePendingAppendJoinedIT-condition")
+@@ -1545,26 +1543,26 @@
+               .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (itsPoll.initialAwaitTick) {
+-                      itsPoll.initialAwaitTick = false;
++                    if (styleScope089ItsPoll.initialAwaitTick) {
++                      styleScope089ItsPoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return itsPoll.step();
++                    return styleScope089ItsPoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+           // Preserve the original last guard/observation and its assertion/error mapping.
+-          if (!itsPoll.terminal) {
+-            itsPoll.step();
++          if (!styleScope089ItsPoll.terminal) {
++            styleScope089ItsPoll.step();
+           }
+         }
+       }
+-      if (itsPoll.failure instanceof Exception exception) {
++      if (styleScope089ItsPoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (itsPoll.failure instanceof Error error) {
++      if (styleScope089ItsPoll.failure instanceof Error error) {
+         throw error;
+       }
+-    }
++    
+     assertThat(condition.getAsBoolean()).isTrue();
+   }
+ }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -1340,8 +1340,7 @@
+   private static Map<String, Object> awaitOwnRowBlocker(int holderPid, int waiterPid)
+       throws InterruptedException {
+     long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+-    styleWaitScope090:
+-    {
++    
+       class ItsPollTransportownedrowlock {
+         Throwable failure;
+         boolean terminal;
+@@ -1388,8 +1387,8 @@
+           }
+         }
+       }
+-      var itsPoll = new ItsPollTransportownedrowlock();
+-      if (!itsPoll.step()) {
++      var styleScope090ItsPoll = new ItsPollTransportownedrowlock();
++      if (!styleScope090ItsPoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("IT-S Transport-owned-row-lock")
+@@ -1400,32 +1399,32 @@
+               .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (itsPoll.initialAwaitTick) {
+-                      itsPoll.initialAwaitTick = false;
++                    if (styleScope090ItsPoll.initialAwaitTick) {
++                      styleScope090ItsPoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return itsPoll.step();
++                    return styleScope090ItsPoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+           // Preserve the original last guard/observation and its assertion/error mapping.
+-          if (!itsPoll.terminal) {
+-            itsPoll.step();
++          if (!styleScope090ItsPoll.terminal) {
++            styleScope090ItsPoll.step();
+           }
+         }
+       }
+-      if (itsPoll.failure instanceof InterruptedException interrupted) {
++      if (styleScope090ItsPoll.failure instanceof InterruptedException interrupted) {
+         throw interrupted;
+       }
+-      if (itsPoll.failure instanceof RuntimeException exception) {
++      if (styleScope090ItsPoll.failure instanceof RuntimeException exception) {
+         throw exception;
+       }
+-      if (itsPoll.failure instanceof Error error) {
++      if (styleScope090ItsPoll.failure instanceof Error error) {
+         throw error;
+       }
+-      if (itsPoll.result != null) {
+-        return itsPoll.result;
+-      }
+-    }
++      if (styleScope090ItsPoll.result != null) {
++        return styleScope090ItsPoll.result;
++      }
++    
+     throw new AssertionError("FAIL_TO_REACH_OWN_ROW_LOCK: no actual owned blocker edge observed");
+   }
+ 
+@@ -1738,8 +1737,7 @@
+                 + route.countOnlyDiagnostic(++diagnosticOrdinal, stage, "BEFORE"));
+         long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+         // The final routed query has finished. Observe actual bridge finalizers without new SQL.
+-        styleWaitScope091:
+-        {
++        
+           class ItsPollTransportrouteidleobserve {
+             Throwable failure;
+             boolean terminal;
+@@ -1772,8 +1770,8 @@
+               }
+             }
+           }
+-          var itsPoll = new ItsPollTransportrouteidleobserve();
+-          if (!itsPoll.step()) {
++          var styleScope091ItsPoll = new ItsPollTransportrouteidleobserve();
++          if (!styleScope091ItsPoll.step()) {
+             try {
+               org.awaitility.Awaitility.await()
+                   .alias("IT-S Transport-route-idle-observe")
+@@ -1784,26 +1782,26 @@
+                   .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
+                   .until(
+                       () -> {
+-                        if (itsPoll.initialAwaitTick) {
+-                          itsPoll.initialAwaitTick = false;
++                        if (styleScope091ItsPoll.initialAwaitTick) {
++                          styleScope091ItsPoll.initialAwaitTick = false;
+                           return false;
+                         }
+-                        return itsPoll.step();
++                        return styleScope091ItsPoll.step();
+                       });
+             } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+               // Preserve the original last guard/observation and its assertion/error mapping.
+-              if (!itsPoll.terminal) {
+-                itsPoll.step();
++              if (!styleScope091ItsPoll.terminal) {
++                styleScope091ItsPoll.step();
+               }
+             }
+           }
+-          if (itsPoll.failure instanceof Exception exception) {
++          if (styleScope091ItsPoll.failure instanceof Exception exception) {
+             throw exception;
+           }
+-          if (itsPoll.failure instanceof Error error) {
++          if (styleScope091ItsPoll.failure instanceof Error error) {
+             throw error;
+           }
+-        }
++        
+         System.out.println(
+             "SETUP_ROUTE_IDLE_DIAGNOSTIC "
+                 + route.countOnlyDiagnostic(++diagnosticOrdinal, stage, "AFTER"));
+@@ -2139,8 +2137,7 @@
+     }
+     try {
+       long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+-      styleWaitScope092:
+-      {
++      
+         class ItsPollTransportrouteidlecleanup {
+           Throwable failure;
+           boolean terminal;
+@@ -2173,8 +2170,8 @@
+             }
+           }
+         }
+-        var itsPoll = new ItsPollTransportrouteidlecleanup();
+-        if (!itsPoll.step()) {
++        var styleScope092ItsPoll = new ItsPollTransportrouteidlecleanup();
++        if (!styleScope092ItsPoll.step()) {
+           try {
+             org.awaitility.Awaitility.await()
+                 .alias("IT-S Transport-route-idle-cleanup")
+@@ -2185,26 +2182,26 @@
+                 .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
+                 .until(
+                     () -> {
+-                      if (itsPoll.initialAwaitTick) {
+-                        itsPoll.initialAwaitTick = false;
++                      if (styleScope092ItsPoll.initialAwaitTick) {
++                        styleScope092ItsPoll.initialAwaitTick = false;
+                         return false;
+                       }
+-                      return itsPoll.step();
++                      return styleScope092ItsPoll.step();
+                     });
+           } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+             // Preserve the original last guard/observation and its assertion/error mapping.
+-            if (!itsPoll.terminal) {
+-              itsPoll.step();
++            if (!styleScope092ItsPoll.terminal) {
++              styleScope092ItsPoll.step();
+             }
+           }
+         }
+-        if (itsPoll.failure instanceof Exception exception) {
++        if (styleScope092ItsPoll.failure instanceof Exception exception) {
+           throw exception;
+         }
+-        if (itsPoll.failure instanceof Error error) {
++        if (styleScope092ItsPoll.failure instanceof Error error) {
+           throw error;
+         }
+-      }
++      
+       assertThat(route.idle()).as("actual setup I/O is idle after real ownership drain").isTrue();
+     } catch (Exception | Error cleanup) {
+       failures.add(cleanup);
+@@ -2925,8 +2922,7 @@
+       String initialStageContent = readStageOrEmpty(stageFile);
+       Process itsStageChild = child;
+       String stageContent;
+-      styleWaitScope093:
+-      {
++      
+         class ItsPollTransportcontrollerstage {
+           Throwable failure;
+           boolean terminal;
+@@ -2964,8 +2960,8 @@
+             }
+           }
+         }
+-        var itsPoll = new ItsPollTransportcontrollerstage();
+-        if (!itsPoll.step()) {
++        var styleScope093ItsPoll = new ItsPollTransportcontrollerstage();
++        if (!styleScope093ItsPoll.step()) {
+           try {
+             org.awaitility.Awaitility.await()
+                 .alias("IT-S Transport-controller-stage")
+@@ -2976,27 +2972,27 @@
+                 .atMost(java.time.Duration.ofNanos(Math.max(1L, stageDeadline - System.nanoTime())))
+                 .until(
+                     () -> {
+-                      if (itsPoll.initialAwaitTick) {
+-                        itsPoll.initialAwaitTick = false;
++                      if (styleScope093ItsPoll.initialAwaitTick) {
++                        styleScope093ItsPoll.initialAwaitTick = false;
+                         return false;
+                       }
+-                      return itsPoll.step();
++                      return styleScope093ItsPoll.step();
+                     });
+           } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+             // Preserve the original last guard/observation and its assertion/error mapping.
+-            if (!itsPoll.terminal) {
+-              itsPoll.step();
++            if (!styleScope093ItsPoll.terminal) {
++              styleScope093ItsPoll.step();
+             }
+           }
+         }
+-        if (itsPoll.failure instanceof Exception exception) {
++        if (styleScope093ItsPoll.failure instanceof Exception exception) {
+           throw exception;
+         }
+-        if (itsPoll.failure instanceof Error error) {
++        if (styleScope093ItsPoll.failure instanceof Error error) {
+           throw error;
+         }
+-        stageContent = itsPoll.stageContent;
+-      }
++        stageContent = styleScope093ItsPoll.stageContent;
++      
+       assertThat(stageContent)
+           .as("controller-cut stage marker (childAlive=%s)", child.isAlive())
+           .isEqualTo(expectedStage);
+@@ -4928,8 +4924,7 @@
+   private static void awaitTeardown(java.util.function.BooleanSupplier condition)
+       throws InterruptedException {
+     long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(20);
+-    styleWaitScope094:
+-    {
++    
+       class ItsPollTransportteardown {
+         Throwable failure;
+         boolean terminal;
+@@ -4965,8 +4960,8 @@
+           }
+         }
+       }
+-      var itsPoll = new ItsPollTransportteardown();
+-      if (!itsPoll.step()) {
++      var styleScope094ItsPoll = new ItsPollTransportteardown();
++      if (!styleScope094ItsPoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("IT-S Transport-teardown")
+@@ -4977,29 +4972,29 @@
+               .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (itsPoll.initialAwaitTick) {
+-                      itsPoll.initialAwaitTick = false;
++                    if (styleScope094ItsPoll.initialAwaitTick) {
++                      styleScope094ItsPoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return itsPoll.step();
++                    return styleScope094ItsPoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+           // Preserve the original last guard/observation and its assertion/error mapping.
+-          if (!itsPoll.terminal) {
+-            itsPoll.step();
++          if (!styleScope094ItsPoll.terminal) {
++            styleScope094ItsPoll.step();
+           }
+         }
+       }
+-      if (itsPoll.failure instanceof InterruptedException interrupted) {
++      if (styleScope094ItsPoll.failure instanceof InterruptedException interrupted) {
+         throw interrupted;
+       }
+-      if (itsPoll.failure instanceof RuntimeException exception) {
++      if (styleScope094ItsPoll.failure instanceof RuntimeException exception) {
+         throw exception;
+       }
+-      if (itsPoll.failure instanceof Error error) {
++      if (styleScope094ItsPoll.failure instanceof Error error) {
+         throw error;
+       }
+-    }
++    
+   }
+ 
+   private static void joinUninterruptibly(Thread ownedThread) {
+@@ -5119,8 +5114,7 @@
+   private static void awaitActualStop(PrivatePgRoute route, Scenario scenario, SourceStopOwner work)
+       throws Exception {
+     long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(20);
+-    styleWaitScope095:
+-    {
++    
+       class ItsPollTransportactualstop {
+         Throwable failure;
+         boolean terminal;
+@@ -5188,8 +5182,8 @@
+           }
+         }
+       }
+-      var itsPoll = new ItsPollTransportactualstop();
+-      if (!itsPoll.step()) {
++      var styleScope095ItsPoll = new ItsPollTransportactualstop();
++      if (!styleScope095ItsPoll.step()) {
+         try {
+           org.awaitility.Awaitility.await()
+               .alias("IT-S Transport-actual-stop")
+@@ -5200,29 +5194,29 @@
+               .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
+               .until(
+                   () -> {
+-                    if (itsPoll.initialAwaitTick) {
+-                      itsPoll.initialAwaitTick = false;
++                    if (styleScope095ItsPoll.initialAwaitTick) {
++                      styleScope095ItsPoll.initialAwaitTick = false;
+                       return false;
+                     }
+-                    return itsPoll.step();
++                    return styleScope095ItsPoll.step();
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+           // Preserve the original last guard/observation and its assertion/error mapping.
+-          if (!itsPoll.terminal) {
+-            itsPoll.step();
++          if (!styleScope095ItsPoll.terminal) {
++            styleScope095ItsPoll.step();
+           }
+         }
+       }
+-      if (itsPoll.failure instanceof Exception exception) {
++      if (styleScope095ItsPoll.failure instanceof Exception exception) {
+         throw exception;
+       }
+-      if (itsPoll.failure instanceof Error error) {
++      if (styleScope095ItsPoll.failure instanceof Error error) {
+         throw error;
+       }
+-      if (itsPoll.completed) {
++      if (styleScope095ItsPoll.completed) {
+         return;
+       }
+-    }
++    
+     throw new AssertionError("Actual stop/confirmation/materialization closure did not complete");
+   }
+ 
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java
+@@ -1605,8 +1605,7 @@
+ 
+   static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-    styleWaitScope096:
+-    {
++    
+       class ItsPollGuidedFocusMutationJoinedITcondition {
+         Throwable failure;
+         boolean terminal;
+@@ -1670,7 +1669,7 @@
+       if (itsPoll.failure instanceof Error error) {
+         throw error;
+       }
+-    }
++    
+     assertThat(condition.getAsBoolean()).isTrue();
+   }
+ }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -3899,8 +3899,7 @@
+ 
+     static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+       long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-      styleWaitScope097:
+-      {
++      
+         class ItsPollGuidedPlanningIntegrationTestcondition {
+           Throwable failure;
+           boolean terminal;
+@@ -3964,7 +3963,7 @@
+         if (itsPoll.failure instanceof Error error) {
+           throw error;
+         }
+-      }
++      
+       assertThat(condition.getAsBoolean()).isTrue();
+     }
+   }

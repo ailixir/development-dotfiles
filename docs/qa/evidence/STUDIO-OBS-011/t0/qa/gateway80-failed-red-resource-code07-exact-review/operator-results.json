@@ -1,0 +1,68 @@
+{
+  "kind": "QUINN_SOURCE07_PURE_V8_OPERATOR_CHECKS",
+  "helperSha256": "7e833f19263328126fa8757a1268f91214a4a49a90931b7d370b4da63404624a",
+  "checks": [
+    {
+      "id": "INITIAL_CANONICAL_SAME_BUFFER_BINDER",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_JS_trace_DENIES",
+      "passed": true
+    },
+    {
+      "id": "INITIAL_JS_conflict_DENIES",
+      "passed": true
+    }
+  ],
+  "steps": [
+    {
+      "step": 1,
+      "kind": "initial_facts",
+      "sourceHelperSha256": "7e833f19263328126fa8757a1268f91214a4a49a90931b7d370b4da63404624a"
+    },
+    {
+      "step": 2,
+      "kind": "author_request",
+      "sourceHelperSha256": "7e833f19263328126fa8757a1268f91214a4a49a90931b7d370b4da63404624a",
+      "actualTools": [
+        {
+          "pid": 900100,
+          "ppid": 17932,
+          "toolCallId": "FAKE_ROOT_2",
+          "actualStatus": 0,
+          "separateStatusCaptured": true
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "kind": "completion",
+      "sourceHelperSha256": "7e833f19263328126fa8757a1268f91214a4a49a90931b7d370b4da63404624a",
+      "actualCompletedTools": [
+        {
+          "pid": 900100,
+          "ppid": 17932,
+          "toolCallId": "FAKE_ROOT_2",
+          "actualStatus": 0,
+          "separateStatusCaptured": true
+        },
+        {
+          "pid": 900110,
+          "ppid": 17932,
+          "toolCallId": "FAKE_ROOT_3",
+          "actualStatus": 0,
+          "separateStatusCaptured": true
+        }
+      ]
+    }
+  ],
+  "model": {
+    "sessionId": 76443,
+    "terminalChunkId": "6eb764",
+    "actualExitCode": 0,
+    "actualTargetEffects": 0
+  },
+  "newNodeProcess": false,
+  "actualBashBuiltinExecuted": false
+}

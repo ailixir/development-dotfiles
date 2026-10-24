@@ -1,0 +1,1039 @@
+{
+  "oldGateSha256": "55e5d935a0a38bd2b7477cde55f11b39df7c842ce5efc01494dbc7a1c32513a6",
+  "newGateSha256": "fb0d7b4c8baa46ec1727363d41b38d40f703ac99b4617532aa5b721d0ea0a791",
+  "oldCodes": 62,
+  "newCodes": 161,
+  "exactAstFunctions": [
+    "identities",
+    "fresh",
+    "safe_bytes"
+  ],
+  "BashByteExactSha256": "bf5782294e00ac1509e6145233fa7c97a5085a14663ec475df8e0698d7135f0c",
+  "checks": [
+    {
+      "old55e5Code": "ACTIVE_LOCK_HASH",
+      "oldPredicateCalls": [
+        "need(record['activeLockSha256']==b['activeSha'],'ACTIVE_LOCK_HASH')"
+      ],
+      "newCodes": [
+        "READINESS_UNIT_BINDING",
+        "PERMIT_STATE_MISMATCH"
+      ],
+      "newPredicateCalls": [
+        "need(v['unitLabel']==label and v['rootReleaseSha256']==b['releaseSha'] and v['activeLockSha256']==b['activeSha'],'READINESS_UNIT_BINDING')",
+        "need(a[key]==v[key],'PERMIT_STATE_MISMATCH')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "ACTIVE_LOCK_SHAPE",
+      "oldPredicateCalls": [
+        "need(all(type(c.get(k)) is int and c[k]>0 for k in ('wrapperPid','shellPid'))\n         and all(isinstance(c.get(k),str) and c[k].strip() for k in ('wrapperStart','shellStart'))\n         and isinstance(c.get('lockDevInode'),list) and len(c['lockDevInode'])==2\n         and all(type(x) is int and x>=0 for x in c['lockDevInode']),'ACTIVE_LOCK_SHAPE')"
+      ],
+      "newCodes": [
+        "ACTIVE_LOCK_SHAPE"
+      ],
+      "newPredicateCalls": [
+        "need(all(type(c.get(k)) is int and c[k]>0 for k in ('wrapperPid','shellPid')) and all(isinstance(c.get(k),str) and c[k].strip() for k in ('wrapperStart','shellStart'))\n         and isinstance(c.get('lockDevInode'),list) and len(c['lockDevInode'])==2 and all(type(x) is int and x>=0 for x in c['lockDevInode']),'ACTIVE_LOCK_SHAPE')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "BASELINE_PLAN_HASH",
+      "oldPredicateCalls": [
+        "need(digest(safe_bytes(PLAN))==PLAN_SHA,'BASELINE_PLAN_HASH')"
+      ],
+      "newCodes": [
+        "BASELINE_PLAN_HASH"
+      ],
+      "newPredicateCalls": [
+        "need(digest(safe_bytes(PLAN))==PLAN_SHA,'BASELINE_PLAN_HASH')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "BUILD_DISPOSITION",
+      "oldPredicateCalls": [
+        "need(phase in ('native','restore-compile') and v['phaseState'][phase]=='TERMINAL'\n         and type(build['exit']) is int and build['exit']==0\n         and build['sourceDigest']==source['digest'],'BUILD_DISPOSITION')"
+      ],
+      "newCodes": [
+        "BUILD_DISPOSITION"
+      ],
+      "newPredicateCalls": [
+        "need(build=={'phase':phase,'exit':0,'sourceDigest':SOURCE,'provenanceSha256':b['evidenceHashes'][phase+'/build-provenance.json']},'BUILD_DISPOSITION')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "BUILD_TERMINAL",
+      "oldPredicateCalls": [
+        "need(len(terminal)==1 and type(terminal[0]['exit']) is int and terminal[0]['exit']==0\n         and b['receipts'][phase]['collectorExit']==0,'BUILD_TERMINAL')"
+      ],
+      "newCodes": [
+        "ACTUAL_PHASE_TERMINAL",
+        "ACTUAL_BUILD_PROOF"
+      ],
+      "newPredicateCalls": [
+        "need(len(terminal)==1 and terminal[0]['exit']==receipt['collectorExit'],'ACTUAL_PHASE_TERMINAL')",
+        "need(b['receipts'][phase]['collectorExit']==0 and proof['phase']==phase and proof['exit']==0 and proof['taskStatus']=='EXECUTED'\n         and proof['buildSuccessful'] is True and proof['acceptedSourceEqual'] is True and proof['sourceDigest']==SOURCE,'ACTUAL_BUILD_PROOF')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "CURRENT_AUXILIARY",
+      "oldPredicateCalls": [
+        "need(digest(safe_bytes(ROOT/name))==h,'CURRENT_AUXILIARY')"
+      ],
+      "newCodes": [
+        "CURRENT_AUXILIARY"
+      ],
+      "newPredicateCalls": [
+        "need(digest(safe_bytes(ROOT/name))==h,'CURRENT_AUXILIARY')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "CURRENT_DIST",
+      "oldPredicateCalls": [
+        "need(got==plan['source']['dist']['files'] and len(got)==238,'CURRENT_DIST')"
+      ],
+      "newCodes": [
+        "CURRENT_DIST"
+      ],
+      "newPredicateCalls": [
+        "need(got==plan['source']['dist']['files'] and len(got)==238,'CURRENT_DIST')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "CURRENT_HELM",
+      "oldPredicateCalls": [
+        "need(helm==plan['helm'],'CURRENT_HELM')"
+      ],
+      "newCodes": [
+        "CURRENT_HELM"
+      ],
+      "newPredicateCalls": [
+        "need(helm==plan['helm'],'CURRENT_HELM')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "CURRENT_LOCK_OR_OBSERVATION",
+      "oldPredicateCalls": [
+        "need(live['observationOk'] and live['parentLockCurrent'],'CURRENT_LOCK_OR_OBSERVATION')"
+      ],
+      "newCodes": [
+        "CURRENT_LOCK_OR_OBSERVATION"
+      ],
+      "newPredicateCalls": [
+        "need(live['observationOk'] and live['parentLockCurrent'],'CURRENT_LOCK_OR_OBSERVATION')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "CURRENT_SOURCE",
+      "oldPredicateCalls": [
+        "need(digest(safe_bytes(ROOT/name))==expected[name]\n             and stat.S_IMODE((ROOT/name).stat().st_mode)==modes[name],'CURRENT_SOURCE')"
+      ],
+      "newCodes": [
+        "CURRENT_SOURCE"
+      ],
+      "newPredicateCalls": [
+        "need(digest(safe_bytes(ROOT/name))==expected[name]\n             and stat.S_IMODE((ROOT/name).stat().st_mode)==modes[name],'CURRENT_SOURCE')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "CURRENT_SOURCE_OR_EVIDENCE",
+      "oldPredicateCalls": [
+        "need(live['sourceDigest']==b['ready']['source']['digest'] and live['modesMatch']\n         and live['auxiliaryInputsMatch'] and live['metadataUnchanged'],'CURRENT_SOURCE_OR_EVIDENCE')"
+      ],
+      "newCodes": [
+        "CURRENT_SOURCE_OR_EVIDENCE"
+      ],
+      "newPredicateCalls": [
+        "need(live['sourceDigest']==SOURCE and live['modesMatch'] and live['auxiliaryInputsMatch'] and live['metadataUnchanged'],'CURRENT_SOURCE_OR_EVIDENCE')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "DUPLICATE_METADATA_KEY",
+      "oldPredicateCalls": [
+        "need(key not in result,'DUPLICATE_METADATA_KEY')"
+      ],
+      "newCodes": [
+        "DUPLICATE_METADATA_KEY"
+      ],
+      "newPredicateCalls": [
+        "need(k not in out,'DUPLICATE_METADATA_KEY')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "EVIDENCE_CHANGED",
+      "oldPredicateCalls": [
+        "need(a['evidencePins']==v['evidencePins']==b['evidenceHashes'],'EVIDENCE_CHANGED')"
+      ],
+      "newCodes": [
+        "EVIDENCE_CHANGED"
+      ],
+      "newPredicateCalls": [
+        "need(v['evidencePins']==b['evidenceHashes'],'EVIDENCE_CHANGED')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "EXPECTED_EXIT",
+      "oldPredicateCalls": [
+        "need(type(requested) is int and type(a['expectedWrapperExit']) is int\n         and type(v['expectedWrapperExit']) is int and 0<=requested<=255\n         and requested==a['expectedWrapperExit']==v['expectedWrapperExit'],'EXPECTED_EXIT')"
+      ],
+      "newCodes": [
+        "EXPECTED_EXIT"
+      ],
+      "newPredicateCalls": [
+        "need(type(requested) is int and 0<=requested<=255 and type(v['expectedWrapperExit']) is int and v['expectedWrapperExit']==requested,'EXPECTED_EXIT')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "FILE_CHANGED",
+      "oldPredicateCalls": [
+        "need((before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns)==\n         (after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns),'FILE_CHANGED')"
+      ],
+      "newCodes": [
+        "FILE_CHANGED"
+      ],
+      "newPredicateCalls": [
+        "need((before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns)==\n         (after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns),'FILE_CHANGED')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "FINAL_VERIFICATION",
+      "oldPredicateCalls": [
+        "need(v['status'] in ('VERIFIED','QUALIFIED_VERIFIED')\n         and type(v['verificationExit']) is int and v['verificationExit']==0,'FINAL_VERIFICATION')"
+      ],
+      "newCodes": [
+        "FINAL_VERIFICATION"
+      ],
+      "newPredicateCalls": [
+        "need(v['status'] in ('VERIFIED','QUALIFIED_VERIFIED') and type(v['verificationExit']) is int and v['verificationExit']==0 and v['retroactiveRepairClaim'] is False,'FINAL_VERIFICATION')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "FINAL_VERIFICATION_REQUIRED",
+      "oldPredicateCalls": [
+        "need((HERE/'preunlock-verification.json').is_file(),'FINAL_VERIFICATION_REQUIRED')"
+      ],
+      "newCodes": [
+        "FINAL_VERIFICATION_REQUIRED"
+      ],
+      "newPredicateCalls": [
+        "need((UNIT/'preunlock-verification.json').is_file(),'FINAL_VERIFICATION_REQUIRED')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "FUTURE_INSTALLATION_REQUIRED",
+      "oldPredicateCalls": [
+        "need(re.fullmatch(r'obs011-gst-provisional-\\d{2}',HERE.name)\n         and HERE.parent==T0/'runtime','FUTURE_INSTALLATION_REQUIRED')"
+      ],
+      "newCodes": [
+        "FUTURE_INSTALLATION_REQUIRED"
+      ],
+      "newPredicateCalls": [
+        "need(HERE.name=='control' and UNIT.parent==T0/'runtime' and re.fullmatch(r'obs011-t0-c8-check\\d{2}',UNIT.name),'FUTURE_INSTALLATION_REQUIRED')",
+        "need(HERE.name=='control' and UNIT.parent==T0/'runtime' and re.fullmatch(r'obs011-t0-c8-check\\d{2}',UNIT.name),'FUTURE_INSTALLATION_REQUIRED')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "FUTURE_UNIT_REQUIRED",
+      "oldPredicateCalls": [
+        "need(bool(match) and int(match[1])>=p['minimumFutureUnit']\n         and label==b['installedUnit'],'FUTURE_UNIT_REQUIRED')"
+      ],
+      "newCodes": [
+        "C8_INSTALLATION"
+      ],
+      "newPredicateCalls": [
+        "need(match is not None and int(match[1])>=1 and label==b['installedUnit'],'C8_INSTALLATION')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "GAP_SHAPE",
+      "oldPredicateCalls": [
+        "need(set(v['manualGaps'])<=set(p['gapKeys']),'GAP_SHAPE')",
+        "need(type(receipt.get(key,False)) is bool,'GAP_SHAPE')"
+      ],
+      "newCodes": [
+        "GAP_SHAPE"
+      ],
+      "newPredicateCalls": [
+        "need(gaps<=set(p['gapKeys']),'GAP_SHAPE')",
+        "need(type(receipt.get(extra,False)) is bool,'GAP_SHAPE')",
+        "need(type(receipt.get(key,False)) is bool,'GAP_SHAPE')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "GUARD_HASH",
+      "oldPredicateCalls": [
+        "need(u['hashes']==b['codeHashes'],'GUARD_HASH')"
+      ],
+      "newCodes": [
+        "GUARD_AUTHORITY_HASH"
+      ],
+      "newPredicateCalls": [
+        "need(u['enabled'] is True and u['protocol']==p['protocol'] and u['hashes']==b['codeHashes'],'GUARD_AUTHORITY_HASH')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "HISTORICAL_GAPS",
+      "oldPredicateCalls": [
+        "need(set(p['requiredHistoricalGapCodes'])<=set(history)\n         and a['historicalGapCodes']==v['historicalGapCodes']==history,'HISTORICAL_GAPS')"
+      ],
+      "newCodes": [
+        "HISTORICAL_GAPS"
+      ],
+      "newPredicateCalls": [
+        "need(set(p['requiredHistoricalGapCodes'])<=set(u['historicalGapCodes']) and v['historicalGapCodes']==u['historicalGapCodes'],'HISTORICAL_GAPS')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "HOLDER_CHAIN",
+      "oldPredicateCalls": [
+        "need(cursor in rows and cursor not in seen,'HOLDER_CHAIN')"
+      ],
+      "newCodes": [
+        "HOLDER_CHAIN"
+      ],
+      "newPredicateCalls": [
+        "need(cursor in rows and cursor not in seen,'HOLDER_CHAIN')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "HOLDER_IDENTITY",
+      "oldPredicateCalls": [
+        "need(os.getppid()==shell_pid==pin['shellPid']\n         and rows.get(shell_pid,{}).get('start')==pin['shellStart']\n         and rows.get(wrapper,{}).get('start')==pin['wrapperStart'],'HOLDER_IDENTITY')",
+        "need(fresh.get(wrapper,{}).get('start')==pin['wrapperStart']\n         and fresh.get(shell_pid,{}).get('start')==pin['shellStart'],'HOLDER_IDENTITY')"
+      ],
+      "newCodes": [
+        "HOLDER_IDENTITY"
+      ],
+      "newPredicateCalls": [
+        "need(os.getppid()==shell_pid==pin['shellPid']\n         and rows.get(shell_pid,{}).get('start')==pin['shellStart']\n         and rows.get(wrapper,{}).get('start')==pin['wrapperStart'],'HOLDER_IDENTITY')",
+        "need(fresh.get(wrapper,{}).get('start')==pin['wrapperStart']\n         and fresh.get(shell_pid,{}).get('start')==pin['shellStart'],'HOLDER_IDENTITY')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "IDENTITY_SET",
+      "oldPredicateCalls": [
+        "need(isinstance(rows,list),'IDENTITY_SET')",
+        "need(len(set(out))==len(out),'IDENTITY_SET')",
+        "need(type(x.get('pid')) is int and x['pid']>0 and isinstance(x.get('start'),str)\n             and bool(x['start'].strip()),'IDENTITY_SET')"
+      ],
+      "newCodes": [
+        "IDENTITY_SET"
+      ],
+      "newPredicateCalls": [
+        "need(isinstance(rows,list),'IDENTITY_SET')",
+        "need(len(set(out))==len(out),'IDENTITY_SET')",
+        "need(type(x.get('pid')) is int and x['pid']>0 and isinstance(x.get('start'),str) and bool(x['start'].strip()),'IDENTITY_SET')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "INCOMPLETE_EXIT_MUST_BE_NONZERO",
+      "oldPredicateCalls": [
+        "need(not incomplete or requested!=0,'INCOMPLETE_EXIT_MUST_BE_NONZERO')"
+      ],
+      "newCodes": [
+        "FAILED_C8_NONZERO_RECONCILE",
+        "C8_GREEN_PROOF",
+        "GREEN_EXPECTED_EXIT"
+      ],
+      "newPredicateCalls": [
+        "need(a['fullGateSucceeded'] is False and requested!=0 and v['phaseState']['compile-reconcile']=='TERMINAL','FAILED_C8_NONZERO_RECONCILE')",
+        "need(not a['validationErrors'] and not a['evidenceErrors'] and not b['executionErrors'] and a['fullGateSucceeded'] is True,'C8_GREEN_PROOF')",
+        "need(requested==0 and not gaps,'GREEN_EXPECTED_EXIT')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "INDEPENDENT_QUALIFICATION",
+      "oldPredicateCalls": [
+        "need(qa['role']=='independent-qa' and qa['independentOfRunner'] is True\n             and root['role']=='root' and root['qaQualificationSha256']==b['qaSha'],'INDEPENDENT_QUALIFICATION')"
+      ],
+      "newCodes": [
+        "INDEPENDENT_QUALIFICATION"
+      ],
+      "newPredicateCalls": [
+        "need(qa['role']=='independent-qa' and qa['independentOfRunner'] is True and root['role']=='root' and root['qaQualificationSha256']==b['qaSha'],'INDEPENDENT_QUALIFICATION')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "INVOCATION",
+      "oldPredicateCalls": [
+        "need(len(sys.argv)==4 and re.fullmatch('[0-9a-f]{64}',sys.argv[1]),'INVOCATION')"
+      ],
+      "newCodes": [
+        "INVOCATION"
+      ],
+      "newPredicateCalls": [
+        "need(len(sys.argv)==4,'INVOCATION')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "KERNEL_LOCK_UNKNOWN",
+      "oldPredicateCalls": [
+        "need(error.errno in (errno.EAGAIN,errno.EACCES),'KERNEL_LOCK_UNKNOWN')"
+      ],
+      "newCodes": [
+        "KERNEL_LOCK_UNKNOWN"
+      ],
+      "newPredicateCalls": [
+        "need(error.errno in (errno.EAGAIN,errno.EACCES),'KERNEL_LOCK_UNKNOWN')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "LIVE_OWNED_RESOURCE",
+      "oldPredicateCalls": [
+        "need(not live['liveOwned'] and not live['unexpectedHolderDescendants'] and not live['liveOwnedPorts'],'LIVE_OWNED_RESOURCE')"
+      ],
+      "newCodes": [
+        "LIVE_OWNED_RESOURCE"
+      ],
+      "newPredicateCalls": [
+        "need(not live['liveOwned'] and not live['unexpectedHolderDescendants'] and not live['liveOwnedPorts'],'LIVE_OWNED_RESOURCE')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "LOCK_IDENTITY",
+      "oldPredicateCalls": [
+        "need(not lock.is_symlink() and stat.S_ISREG(info.st_mode)\n         and [info.st_dev,info.st_ino]==pin['lockDevInode'],'LOCK_IDENTITY')",
+        "need((os.fstat(fd).st_dev,os.fstat(fd).st_ino)==(info.st_dev,info.st_ino),'LOCK_IDENTITY')"
+      ],
+      "newCodes": [
+        "LOCK_IDENTITY"
+      ],
+      "newPredicateCalls": [
+        "need(not lock.is_symlink() and stat.S_ISREG(info.st_mode)\n         and [info.st_dev,info.st_ino]==pin['lockDevInode'],'LOCK_IDENTITY')",
+        "need((os.fstat(fd).st_dev,os.fstat(fd).st_ino)==(info.st_dev,info.st_ino),'LOCK_IDENTITY')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "METADATA_BOUND",
+      "oldPredicateCalls": [
+        "need(len(data)<=4*1024*1024,'METADATA_BOUND')"
+      ],
+      "newCodes": [
+        "METADATA_BOUND"
+      ],
+      "newPredicateCalls": [
+        "need(len(data)<=16*1024*1024,'METADATA_BOUND')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "NO_RETROACTIVE_REPAIR",
+      "oldPredicateCalls": [
+        "need(v['retroactiveRepairClaim'] is False,'NO_RETROACTIVE_REPAIR')"
+      ],
+      "newCodes": [
+        "FINAL_VERIFICATION"
+      ],
+      "newPredicateCalls": [
+        "need(v['status'] in ('VERIFIED','QUALIFIED_VERIFIED') and type(v['verificationExit']) is int and v['verificationExit']==0 and v['retroactiveRepairClaim'] is False,'FINAL_VERIFICATION')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "ORIGINAL_COMPILE_REQUIRED",
+      "oldPredicateCalls": [
+        "need(source['disposition']!='RESTORED' or phase=='restore-compile','ORIGINAL_COMPILE_REQUIRED')"
+      ],
+      "newCodes": [
+        "FAILED_C8_NONZERO_RECONCILE",
+        "ACTUAL_BUILD_PROOF",
+        "BUILD_SOURCE_RECEIPT_HASH"
+      ],
+      "newPredicateCalls": [
+        "need(a['fullGateSucceeded'] is False and requested!=0 and v['phaseState']['compile-reconcile']=='TERMINAL','FAILED_C8_NONZERO_RECONCILE')",
+        "need(b['receipts'][phase]['collectorExit']==0 and proof['phase']==phase and proof['exit']==0 and proof['taskStatus']=='EXECUTED'\n         and proof['buildSuccessful'] is True and proof['acceptedSourceEqual'] is True and proof['sourceDigest']==SOURCE,'ACTUAL_BUILD_PROOF')",
+        "need(proof['phaseReceiptSha256']==b['evidenceHashes']['owned-'+phase+'/receipt.json']\n         and proof['sourceBeforeSha256']==b['evidenceHashes'][phase+'/source-before.json']\n         and proof['sourceAfterSha256']==b['evidenceHashes'][phase+'/source-after.json'],'BUILD_SOURCE_RECEIPT_HASH')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "OWNED_PORTS",
+      "oldPredicateCalls": [
+        "need(isinstance(ports,list) and all(type(x) is int and 0<x<65536 for x in ports)\n         and len(set(ports))==len(ports) and a['ownedPorts']==ports,'OWNED_PORTS')"
+      ],
+      "newCodes": [
+        "OWNED_PORTS"
+      ],
+      "newPredicateCalls": [
+        "need(isinstance(ports,list) and len(set(ports))==len(ports) and all(type(x) is int and 0<x<65536 for x in ports),'OWNED_PORTS')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "OWNED_UNION",
+      "oldPredicateCalls": [
+        "need(identities(resource['recordedOwned'])==owned,'OWNED_UNION')"
+      ],
+      "newCodes": [
+        "OWNED_UNION"
+      ],
+      "newPredicateCalls": [
+        "need(identities(v['resources']['recordedOwned'])==owned,'OWNED_UNION')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "OWNERSHIP_CORE_HASH",
+      "oldPredicateCalls": [
+        "need(digest(safe_bytes(CORE))==CORE_SHA,'OWNERSHIP_CORE_HASH')"
+      ],
+      "newCodes": [
+        "OWNERSHIP_CORE_HASH"
+      ],
+      "newPredicateCalls": [
+        "need(digest(safe_bytes(CORE))==CORE_SHA,'OWNERSHIP_CORE_HASH')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "PHASE_ACCOUNTING",
+      "oldPredicateCalls": [
+        "need(set(v['phaseState'])==set(PHASES) and a['phaseState']==v['phaseState'],'PHASE_ACCOUNTING')",
+        "need(state in ('TERMINAL','NOT_STARTED'),'PHASE_ACCOUNTING')"
+      ],
+      "newCodes": [
+        "PHASE_ACCOUNTING"
+      ],
+      "newPredicateCalls": [
+        "need(set(v['phaseState'])==set(PHASES) and v['phaseState']['full-check']=='TERMINAL','PHASE_ACCOUNTING')",
+        "need(state in ('TERMINAL','NOT_STARTED'),'PHASE_ACCOUNTING')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "PHASE_TERMINAL_BINDING",
+      "oldPredicateCalls": [
+        "need(receipt is not None and receipt['status']=='NATIVE_PHASE_TERMINAL'\n             and receipt['rootUnitAuthorizationSha256']==b['releaseSha']\n             and receipt['lockPin']==c\n             and receipt['phase']==phase and type(receipt['collectorExit']) is int\n             and receipt['phaseKeeperSha256']==r['phaseKeeperSha256']\n             and receipt['ownershipCoreSha256']==CORE_SHA,'PHASE_TERMINAL_BINDING')"
+      ],
+      "newCodes": [
+        "PHASE_TERMINAL_BINDING"
+      ],
+      "newPredicateCalls": [
+        "need(receipt is not None and receipt['phase']==phase and receipt['status']=='NATIVE_PHASE_TERMINAL'\n             and receipt['rootUnitAuthorizationSha256']==b['releaseSha'] and receipt['lockPin']==c\n             and receipt['phaseKeeperSha256']==r['phaseKeeperSha256'] and receipt['ownershipCoreSha256']==CORE_SHA\n             and all(type(receipt[k]) is int for k in ('collectorExit','phaseExit','rawNativePhaseExit')),'PHASE_TERMINAL_BINDING')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "POLICY",
+      "oldPredicateCalls": [
+        "need(p['protocol']=='GST_UNLOCK_V1','POLICY')"
+      ],
+      "newCodes": [
+        "POLICY"
+      ],
+      "newPredicateCalls": [
+        "need(p['protocol']=='C8_UNLOCK_V1' and p['maxReadinessAgeSeconds']==60,'POLICY')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "QUALIFICATION_BASIS",
+      "oldPredicateCalls": [
+        "need(a['qualificationEvidenceSha256']==basis,'QUALIFICATION_BASIS')"
+      ],
+      "newCodes": [
+        "QUALIFICATION_SCOPE",
+        "QUALIFICATION_HASH"
+      ],
+      "newPredicateCalls": [
+        "need(q['unitLabel']==label and q['rootReleaseSha256']==b['releaseSha'] and q['qualificationEvidenceSha256']==basis\n                 and q['gaps']==v['gaps'] and q['acceptCurrentQualifiedClosure'] is True and q['historicalRepairClaim'] is False,'QUALIFICATION_SCOPE')",
+        "need(a['qualificationEvidenceSha256']==qualification_basis(v) and a['qaQualificationSha256']==b['qaSha'] and a['rootQualificationSha256']==b['rootQualificationSha'],'QUALIFICATION_HASH')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "QUALIFICATION_HASH",
+      "oldPredicateCalls": [
+        "need(a['qaQualificationSha256']==b['qaSha'] and a['rootQualificationSha256']==b['rootQualificationSha'],'QUALIFICATION_HASH')"
+      ],
+      "newCodes": [
+        "QUALIFICATION_HASH"
+      ],
+      "newPredicateCalls": [
+        "need(a['qualificationEvidenceSha256']==qualification_basis(v) and a['qaQualificationSha256']==b['qaSha'] and a['rootQualificationSha256']==b['rootQualificationSha'],'QUALIFICATION_HASH')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "QUALIFICATION_REQUIRED",
+      "oldPredicateCalls": [
+        "need(v['status']=='QUALIFIED_VERIFIED' and qa is not None and root is not None,'QUALIFICATION_REQUIRED')"
+      ],
+      "newCodes": [
+        "QUALIFICATION_REQUIRED"
+      ],
+      "newPredicateCalls": [
+        "need(v['status']=='QUALIFIED_VERIFIED' and qa is not None and root is not None and requested!=0,'QUALIFICATION_REQUIRED')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "QUALIFICATION_SCOPE",
+      "oldPredicateCalls": [
+        "need(q['unitLabel']==label and q['rootReleaseSha256']==b['releaseSha']\n                 and q['qualificationEvidenceSha256']==basis and q['gaps']==v['gaps']\n                 and q['acceptCurrentQualifiedClosure'] is True and q['historicalRepairClaim'] is False,\n                 'QUALIFICATION_SCOPE')"
+      ],
+      "newCodes": [
+        "QUALIFICATION_SCOPE"
+      ],
+      "newPredicateCalls": [
+        "need(q['unitLabel']==label and q['rootReleaseSha256']==b['releaseSha'] and q['qualificationEvidenceSha256']==basis\n                 and q['gaps']==v['gaps'] and q['acceptCurrentQualifiedClosure'] is True and q['historicalRepairClaim'] is False,'QUALIFICATION_SCOPE')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "QUALIFICATION_SHAPE",
+      "oldPredicateCalls": [
+        "need(v['status']=='VERIFIED','QUALIFICATION_SHAPE')"
+      ],
+      "newCodes": [
+        "QUALIFICATION_SHAPE"
+      ],
+      "newPredicateCalls": [
+        "need(v['status']=='VERIFIED','QUALIFICATION_SHAPE')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "READINESS_HASH",
+      "oldPredicateCalls": [
+        "need(a['decision']=='AUTHORIZE_LOCK_RELEASE' and a['readinessSha256']==b['readinessSha'],'READINESS_HASH')"
+      ],
+      "newCodes": [
+        "READINESS_HASH"
+      ],
+      "newPredicateCalls": [
+        "need(a['decision']=='AUTHORIZE_LOCK_RELEASE' and a['readinessSha256']==b['readinessSha'],'READINESS_HASH')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "RELEASE_HASH",
+      "oldPredicateCalls": [
+        "need(b['releaseSha']==b['expectedReleaseSha'],'RELEASE_HASH')"
+      ],
+      "newCodes": [
+        "RELEASE_HASH"
+      ],
+      "newPredicateCalls": [
+        "need(re.fullmatch('[0-9a-f]{64}',b['expectedReleaseSha']) is not None and b['releaseSha']==b['expectedReleaseSha'],'RELEASE_HASH')",
+        "need(loaded[UNIT/'root-actual-unit-release.json']==expected_release,'RELEASE_HASH')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "RELEASE_SOURCE_SCOPE",
+      "oldPredicateCalls": [
+        "need(len(r['writers'])==3 and {x['file'] for x in r['writers']}==TESTS,'RELEASE_SOURCE_SCOPE')"
+      ],
+      "newCodes": [
+        "ZERO_WRITER_AUTHORITY",
+        "SOURCE_LEASE",
+        "NO_ARBITRARY_OVERLAY"
+      ],
+      "newPredicateCalls": [
+        "need(r['writers']==[] and r['nativeCommandReleased'] is True and r['fullAcceptedSuccessorFreshCheckAuthorized'] is True,'ZERO_WRITER_AUTHORITY')",
+        "need(lease=={'exclusive':True,'sourceDigest':SOURCE,'expectedPlanSha256':r['expectedPlanSha256'],'wholeSourceModes':True,'productWrites':False},'SOURCE_LEASE')",
+        "need(b['plan']['source']['files']==b['expectedFiles'] and b['plan']['source']['digest']==SOURCE,'NO_ARBITRARY_OVERLAY')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "RESOURCE_DISPOSITION",
+      "oldPredicateCalls": [
+        "need(resource['foregroundTerminal'] is True and resource['recordedSetComplete'] is True,'RESOURCE_DISPOSITION')"
+      ],
+      "newCodes": [
+        "RESOURCE_DISPOSITION"
+      ],
+      "newPredicateCalls": [
+        "need(v['resources']['foregroundTerminal'] is True and v['resources']['recordedSetComplete'] is True,'RESOURCE_DISPOSITION')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "ROOT_GUARD_AUTHORITY",
+      "oldPredicateCalls": [
+        "need(u['enabled'] is True and u['protocol']==p['protocol'],'ROOT_GUARD_AUTHORITY')"
+      ],
+      "newCodes": [
+        "GUARD_AUTHORITY_HASH"
+      ],
+      "newPredicateCalls": [
+        "need(u['enabled'] is True and u['protocol']==p['protocol'] and u['hashes']==b['codeHashes'],'GUARD_AUTHORITY_HASH')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "SOURCE_DISPOSITION",
+      "oldPredicateCalls": [
+        "need(source['disposition'] in ('RESTORED','RETAIN_AUTHORIZED_THREE')\n         and a['sourceOverrides']==overrides,'SOURCE_DISPOSITION')"
+      ],
+      "newCodes": [
+        "SOURCE_DISPOSITION"
+      ],
+      "newPredicateCalls": [
+        "need(source=={'disposition':'UNCHANGED_ACCEPTED_SUCCESSOR','digest':SOURCE,'overrides':{},'expectedPlanSha256':r['expectedPlanSha256']},'SOURCE_DISPOSITION')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "SOURCE_HASH",
+      "oldPredicateCalls": [
+        "need(all(isinstance(h,str) and re.fullmatch('[0-9a-f]{64}',h) for h in overrides.values()),'SOURCE_HASH')"
+      ],
+      "newCodes": [
+        "SOURCE_DISPOSITION",
+        "ACCEPTED_SOURCE_DIGEST"
+      ],
+      "newPredicateCalls": [
+        "need(source=={'disposition':'UNCHANGED_ACCEPTED_SUCCESSOR','digest':SOURCE,'overrides':{},'expectedPlanSha256':r['expectedPlanSha256']},'SOURCE_DISPOSITION')",
+        "need(digest(json.dumps(result,separators=(',',':')).encode())==SOURCE,'ACCEPTED_SOURCE_DIGEST')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "SOURCE_MEMBERSHIP",
+      "oldPredicateCalls": [
+        "need(set(names)==set(expected) and len(names)==1808,'SOURCE_MEMBERSHIP')"
+      ],
+      "newCodes": [
+        "SOURCE_MEMBERSHIP"
+      ],
+      "newPredicateCalls": [
+        "need(set(names)==set(expected) and len(names)==1808,'SOURCE_MEMBERSHIP')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "SOURCE_MODE_MEMBERSHIP",
+      "oldPredicateCalls": [
+        "need(set(modes)==set(expected),'SOURCE_MODE_MEMBERSHIP')"
+      ],
+      "newCodes": [
+        "SOURCE_MODE_MEMBERSHIP"
+      ],
+      "newPredicateCalls": [
+        "need(set(modes)==set(expected),'SOURCE_MODE_MEMBERSHIP')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "SOURCE_OVERRIDE_SCOPE",
+      "oldPredicateCalls": [
+        "need((source['disposition']=='RESTORED' and overrides=={})\n         or (source['disposition']=='RETAIN_AUTHORIZED_THREE' and set(overrides)==TESTS\n             and a.get('retainThreeAuthorized') is True and {x['file'] for x in r['writers']}==TESTS),\n         'SOURCE_OVERRIDE_SCOPE')"
+      ],
+      "newCodes": [
+        "SOURCE_DISPOSITION",
+        "NO_ARBITRARY_OVERLAY"
+      ],
+      "newPredicateCalls": [
+        "need(source=={'disposition':'UNCHANGED_ACCEPTED_SUCCESSOR','digest':SOURCE,'overrides':{},'expectedPlanSha256':r['expectedPlanSha256']},'SOURCE_DISPOSITION')",
+        "need(b['plan']['source']['files']==b['expectedFiles'] and b['plan']['source']['digest']==SOURCE,'NO_ARBITRARY_OVERLAY')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "STALE_READINESS",
+      "oldPredicateCalls": [
+        "need(type(stamp) in (int,float) and math.isfinite(stamp)\n         and 0<=now-stamp<=b['policy']['maxReadinessAgeSeconds'],'STALE_READINESS')"
+      ],
+      "newCodes": [
+        "STALE_READINESS"
+      ],
+      "newPredicateCalls": [
+        "need(type(stamp) in (int,float) and math.isfinite(stamp) and 0<=now-stamp<=b['policy']['maxReadinessAgeSeconds'],'STALE_READINESS')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "STICKY_GAPS",
+      "oldPredicateCalls": [
+        "need(set(v['gaps'])==gaps and a['gaps']==v['gaps'],'STICKY_GAPS')"
+      ],
+      "newCodes": [
+        "STICKY_GAPS"
+      ],
+      "newPredicateCalls": [
+        "need(set(v['gaps'])==gaps,'STICKY_GAPS')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "UNEXPECTED_PHASE_RECEIPT",
+      "oldPredicateCalls": [
+        "need(receipt is None,'UNEXPECTED_PHASE_RECEIPT')"
+      ],
+      "newCodes": [
+        "UNEXPECTED_PHASE_RECEIPT"
+      ],
+      "newPredicateCalls": [
+        "need(receipt is None,'UNEXPECTED_PHASE_RECEIPT')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "UNIT_BINDING",
+      "oldPredicateCalls": [
+        "need(record['unitLabel']==label and record['rootReleaseSha256']==b['releaseSha'],'UNIT_BINDING')"
+      ],
+      "newCodes": [
+        "READINESS_UNIT_BINDING",
+        "PERMIT_STATE_MISMATCH"
+      ],
+      "newPredicateCalls": [
+        "need(v['unitLabel']==label and v['rootReleaseSha256']==b['releaseSha'] and v['activeLockSha256']==b['activeSha'],'READINESS_UNIT_BINDING')",
+        "need(a[key]==v[key],'PERMIT_STATE_MISMATCH')"
+      ],
+      "disposition": "EXPLICIT_C8_SCOPE_ADAPTATION",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "UNSAFE_METADATA",
+      "oldPredicateCalls": [
+        "need(path.is_relative_to(ROOT) and not path.is_symlink(),'UNSAFE_METADATA')",
+        "need(all(not p.is_symlink() for p in path.parents if p!=ROOT),'UNSAFE_METADATA')",
+        "need(stat.S_ISREG(before.st_mode),'UNSAFE_METADATA')"
+      ],
+      "newCodes": [
+        "UNSAFE_METADATA"
+      ],
+      "newPredicateCalls": [
+        "need(path.is_relative_to(ROOT) and not path.is_symlink(),'UNSAFE_METADATA')",
+        "need(all(not p.is_symlink() for p in path.parents if p!=ROOT),'UNSAFE_METADATA')",
+        "need(stat.S_ISREG(before.st_mode),'UNSAFE_METADATA')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "WRAPPER_DESCRIPTOR",
+      "oldPredicateCalls": [
+        "need('p'+str(wrapper) in fields and 'i'+str(info.st_ino) in fields,'WRAPPER_DESCRIPTOR')"
+      ],
+      "newCodes": [
+        "WRAPPER_DESCRIPTOR"
+      ],
+      "newPredicateCalls": [
+        "need('p'+str(wrapper) in fields and 'i'+str(info.st_ino) in fields,'WRAPPER_DESCRIPTOR')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    },
+    {
+      "old55e5Code": "WRAPPER_HASH",
+      "oldPredicateCalls": [
+        "need(digest(safe_bytes(WRAPPER))==WRAPPER_SHA and b['release']['lockWrapperSha256']==WRAPPER_SHA,'WRAPPER_HASH')"
+      ],
+      "newCodes": [
+        "WRAPPER_HASH"
+      ],
+      "newPredicateCalls": [
+        "need(digest(safe_bytes(WRAPPER))==WRAPPER_SHA and b['release']['lockWrapperSha256']==WRAPPER_SHA,'WRAPPER_HASH')"
+      ],
+      "disposition": "LABEL_RETAINED_FULL_NEW_PREDICATES_EXPOSED",
+      "scope": "C8 protocol/source/phase changes are deliberate; label reuse alone is not an equivalence claim."
+    }
+  ],
+  "newFullcheckChecks": [
+    "ACCEPTED_MODES_HASH",
+    "ACCEPTED_PLAN_DERIVATION",
+    "ACCEPTED_SOURCE_DIGEST",
+    "ACTIVE_PIN_AUTHORITY",
+    "ACTUAL_2774_STATUS_MULTISET",
+    "ACTUAL_ADMISSION_DENIAL",
+    "ACTUAL_BUILD_LOG_HASH",
+    "ACTUAL_BUILD_NATIVE_ZERO",
+    "ACTUAL_BUILD_PROOF",
+    "ACTUAL_C8_COLLECTION_SCOPE",
+    "ACTUAL_EXECUTED_C8_TASK_REQUIRED",
+    "ACTUAL_EXECUTED_COMPILE_REQUIRED",
+    "ACTUAL_PHASE_TERMINAL",
+    "ACTUAL_PUBLIC_JOINS_REQUIRED",
+    "ASSESSMENT_OUTCOME_CONSISTENCY",
+    "BEFORE_ARCHIVE_DYNAMIC_FACTS",
+    "BEFORE_ARCHIVE_INVENTORY_LINK",
+    "BEFORE_ARCHIVE_MANIFEST_LINK",
+    "BEFORE_ARCHIVE_ORIGINAL_FACTS",
+    "BLOCKED_REPORT_NO_BODY_COPY",
+    "BLOCKED_REPORT_OBSERVATION",
+    "BLOCKED_REPORT_OLD_METADATA_ONLY",
+    "BLOCKED_REPORT_UNCREDITED",
+    "BUILD_SOURCE_RECEIPT_HASH",
+    "BUILD_TASK_EVENT_PROOF_LINK",
+    "C8_GREEN_PROOF",
+    "C8_INSTALLATION",
+    "C8_RAW_SUCCESS",
+    "CATALOG_PROOF_LINK",
+    "CLOSURE_INPUT_BINDING",
+    "CONTROL_PACKAGE_MEMBERSHIP",
+    "COVERAGE_PROOF_LINK",
+    "CURRENT_REPORT_INVENTORY_INCOMPLETE",
+    "CURRENT_REPORT_ORIGINAL_PATH",
+    "CURRENT_REPORT_ORIGINAL_ROOT",
+    "CURRENT_REPORT_PATHS",
+    "CURRENT_REPORT_STATIC_PATHS",
+    "CURRENT_XML_FACT_HASH",
+    "ERROR_ARRAYS",
+    "EXACT_EXECUTION03_API_BINDING",
+    "EXACT_ROOT_BINDING_REQUIRED",
+    "EXACT_SKIP_POLICY_HASH",
+    "EXECUTION_CHECKS_CODE_HASH",
+    "EXECUTION_CHECKS_EXPORTS",
+    "EXECUTION_ERROR_SCHEMA",
+    "EXECUTION_PACKAGE_MEMBERSHIP",
+    "EXECUTION_PROOF_INCOHERENT",
+    "FAILED_C8_NONZERO_RECONCILE",
+    "FINAL_BOUNDARY_HASH",
+    "FIXED_BUILD_COMMAND",
+    "FULL_CATALOG_COUNTS",
+    "GREEN_EXPECTED_EXIT",
+    "GREEN_NO_RECONCILE",
+    "GREEN_RECONCILE_NOT_STARTED",
+    "GUARD_AUTHORITY_HASH",
+    "HOLDER_ARGV_PARENT",
+    "IMMUTABLE_BASE_PLAN",
+    "INHERITED_OR_PROJECT_BOUNDARY",
+    "KEEPER_CODE_LINK",
+    "MANUAL_GAP_BINDING",
+    "NATIVE_TASK_EVENT_PROOF_LINK",
+    "NATIVE_TASK_STATUS_PROOF_LINK",
+    "NO_ARBITRARY_OVERLAY",
+    "NO_SOURCE_WRITE_OR_RETRY",
+    "ONE_UNIT_ONLY",
+    "ORIGINAL_PLAN_SOURCE",
+    "OWNED_PORT_BINDING",
+    "PACKAGE_HASH",
+    "PACKAGE_PINS",
+    "PACKAGE_SCOPE",
+    "PERMIT_STATE_MISMATCH",
+    "PHASE_INVOCATION_ACCOUNTING",
+    "PHASE_VALIDATION_ERROR_LINK",
+    "PINNED_BLOCKED_REPORT_RULE",
+    "PLAN_CATALOG_BINDING",
+    "PRODUCER_HASH",
+    "PUBLIC_JOIN_PROOF_LINK",
+    "PURE_MODULE_IMPORT_SCOPE",
+    "RAW_COLLECTOR_LINK",
+    "RAW_ERROR_LINK",
+    "RAW_EXIT_LINK",
+    "RAW_GAP_LINK",
+    "RAW_NATIVE_LOG_HASH",
+    "RAW_OUTER_ENVELOPE_LINK",
+    "RAW_VALIDATION_PRESERVATION",
+    "READINESS_PROTOCOL",
+    "READINESS_UNIT_BINDING",
+    "REMAINING_OWNED_FACTS",
+    "REPORT_BLOCK_EXPORT",
+    "REPORT_CLASSIFICATION_CODE_HASH",
+    "REPORT_DISPOSITION_UNPROVEN",
+    "REPORT_INVENTORY_CODE_HASH",
+    "REPORT_INVENTORY_EXPORTS",
+    "REPORT_INVENTORY_IMPORT_EXPORT",
+    "REPORT_MANIFEST_SCHEMA",
+    "REPORT_OBSERVATION_METADATA_LINK",
+    "ROOT_ACCEPTED_SUBJECT",
+    "ROOT_CLOSE_REQUEST",
+    "SAME_HELD_PREFLIGHT",
+    "SEPARATE_RECONCILE_AUTHORITY",
+    "SOURCE_CHECKPOINT",
+    "SOURCE_DIST_MAIN",
+    "SOURCE_LEASE",
+    "SOURCE_MODES_AUX",
+    "SOURCE_OVERLAY_ANCESTRY",
+    "TASK_REDUCER_CODE_HASH",
+    "TASK_REDUCER_EXPORTS",
+    "UNKNOWN_ERROR_CLASSIFICATION",
+    "UNREVIEWED_EXTRA_OWNERSHIP",
+    "VALIDATION_OUTCOME",
+    "WHOLE_SOURCE_MODE_ANCESTRY",
+    "ZERO_WRITER_AUTHORITY"
+  ]
+}

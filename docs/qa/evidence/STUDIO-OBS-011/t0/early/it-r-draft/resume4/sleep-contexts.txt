@@ -1,0 +1,2565 @@
+
+### 1 POLL registerOwnedProcess FALL_THROUGH
+733: 
+734:   private static Process registerOwnedProcess(
+735:       Process process, String role, long generation, Path wrapper) throws Exception {
+736:     // Keep the actual root before readiness/identity/metadata can throw; never discard this record.
+737:     OwnedFixtureProcess root = new OwnedFixtureProcess(process, role, generation, wrapper);
+738:     OWNED_FIXTURE_PROCESSES.add(root);
+739:     long until = System.nanoTime() + Duration.ofMillis(500).toNanos();
+740:     while (root.handle.isAlive() && System.nanoTime() < until) {
+741:       // crash-reaper-diagnosis01: ProcessHandle.info() is a fresh OS snapshot on every call and
+742:       // may throw on macOS under load; a short-lived /bin/ps or /bin/kill can also exit between
+743:       // two snapshots. Read identity from ONE snapshot and retry inside the same 500 ms window;
+744:       // still fail-closed below.
+745:       ProcessHandle.Info info;
+746:       try {
+747:         info = root.handle.info();
+748:       } catch (RuntimeException unavailable) {
+749:         Thread.sleep(5);
+750:         continue;
+751:       }
+752:       var observedCommand = info.commandLine();
+753:       if (info.startInstant().isPresent() && observedCommand.isPresent()) {
+754:         root.started = info.startInstant().orElseThrow();
+755:         root.commandHash = ownedCommandHash(observedCommand.orElseThrow());
+756:         break;
+757:       }
+
+### 2 POLL registerOwnedProcess FALL_THROUGH
+742:       // may throw on macOS under load; a short-lived /bin/ps or /bin/kill can also exit between
+743:       // two snapshots. Read identity from ONE snapshot and retry inside the same 500 ms window;
+744:       // still fail-closed below.
+745:       ProcessHandle.Info info;
+746:       try {
+747:         info = root.handle.info();
+748:       } catch (RuntimeException unavailable) {
+749:         Thread.sleep(5);
+750:         continue;
+751:       }
+752:       var observedCommand = info.commandLine();
+753:       if (info.startInstant().isPresent() && observedCommand.isPresent()) {
+754:         root.started = info.startInstant().orElseThrow();
+755:         root.commandHash = ownedCommandHash(observedCommand.orElseThrow());
+756:         break;
+757:       }
+758:       Thread.sleep(5);
+759:     }
+760:     root.wrapperHash = wrapper == null ? "NOT_A_WRAPPER" : ownedFileHash(wrapper);
+761:     if (role.equals("guided")) {
+762:       root.configHash = ownedFileHash(ownedFixtureTemp.resolve("worker.json"));
+763:     }
+764:     ownedProcessEvent("SPAWN", root);
+765:     if (root.handle.isAlive() && (root.started == null || root.commandHash == null)) {
+766:       throw new IllegalStateException(
+
+### 3 POLL startOwnedWorker FAIL_AT_WAIT
+943:       ProcessBuilder builder, String role, long generation, Path wrapper, int port)
+944:       throws Exception {
+945:     String nonce = UUID.randomUUID().toString();
+946:     Path ready = ownedFixtureTemp.resolve("owned-ready-" + nonce + ".json");
+947:     configureOwnedReady(builder, role, generation, nonce, ready, port);
+948:     long until = System.nanoTime() + Duration.ofSeconds(role.equals("secret") ? 10 : 20).toNanos();
+949:     Process process = builder.start();
+950:     try {
+951:       registerOwnedProcess(process, role, generation, wrapper);
+952:       OwnedFixtureProcess root = ownedProcess(process);
+953:       root.poolSize =
+954:           Integer.parseInt(builder.environment().getOrDefault("OBS007_ORDINARY_POOL_SIZE", "0"));
+955:       root.readinessNonceHash =
+956:           GuidedContracts.hash(com.fasterxml.jackson.databind.node.TextNode.valueOf(nonce));
+957:       while (!Files.exists(ready) && System.nanoTime() < until) {
+958:         verifyOwnedRoot(root);
+959:         Thread.sleep(20);
+960:       }
+961:       verifyOwnedRoot(root);
+962:       assertThat(Files.exists(ready)).as("candidate-owned post-listen marker").isTrue();
+963:       JsonNode marker = C.parse(Files.readString(ready));
+964:       assertThat(
+965:               marker.path("nonce").asText().equals(nonce)
+966:                   && marker.path("pid").asLong() == process.pid()
+967:                   && marker.path("role").asText().equals(role)
+
+### 4 POLL verifyPreviousWorkerGenerationClosed MAP_EXCEPTION
+1069:             List.of("PASSED", "FAILED", "ERROR").contains(String.valueOf(row.get("status")))
+1070:                 && "DONE".equals(row.get("ledger_state"))
+1071:                 && (noSend
+1072:                     || reaperStale
+1073:                     || row.get("video_status") != null
+1074:                         && !"PROCESSING".equals(row.get("video_status")));
+1075:       }
+1076:       for (OwnedFixtureProcess root : OWNED_FIXTURE_PROCESSES) {
+1077:         if (root.generation == ownedGeneration && root.wrapper != null) {
+1078:           recordOwnedDescendants(root);
+1079:           closed &= root.descendants.stream().noneMatch(child -> child.handle().isAlive());
+1080:         }
+1081:       }
+1082:       if (closed) {
+1083:         return;
+1084:       }
+1085:       Thread.sleep(30); // No database transaction/session lock is held across this wait.
+1086:     } while (System.nanoTime() < until);
+1087:     writeOpenGenerationDiagnostic();
+1088:     throw new IllegalStateException(
+1089:         "Prior generation actual sessions/browser/recordings remain unconfirmed; no restart authorized");
+1090:   }
+1091: 
+1092:   /** Value-free facts naming which prior-generation item kept the restart guard closed. */
+1093:   private void writeOpenGenerationDiagnostic() {
+
+### 5 POLL <static initializer> (secret fixture bootstrap) MAP_EXCEPTION
+2297:           startOwnedWorker(
+2298:               new ProcessBuilder("node", secretMain.toString())
+2299:                   .redirectOutput(TEMP.resolve("secret-fixture-origin.json").toFile())
+2300:                   .redirectError(TEMP.resolve("secret-fixture.log").toFile()),
+2301:               "secret",
+2302:               0,
+2303:               secretMain,
+2304:               0);
+2305:       long fixtureDeadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+2306:       String fixtureAnnouncement = "";
+2307:       while (fixtureAnnouncement.isBlank() && System.nanoTime() < fixtureDeadline) {
+2308:         if (!SECRET_FIXTURE.isAlive()) {
+2309:           throw new IllegalStateException("Secret fixture exited before readiness");
+2310:         }
+2311:         fixtureAnnouncement = Files.readString(TEMP.resolve("secret-fixture-origin.json")).strip();
+2312:         if (fixtureAnnouncement.isBlank()) {
+2313:           Thread.sleep(20);
+2314:         }
+2315:       }
+2316:       if (fixtureAnnouncement.isBlank()) {
+2317:         throw new IllegalStateException("Secret fixture readiness deadline");
+2318:       }
+2319:       SECRET_ORIGIN = C.parse(fixtureAnnouncement).path("origin").asText();
+2320:       if (!SECRET_ORIGIN.startsWith("http://127.0.0.1:")) {
+2321:         throw new IllegalStateException("Invalid controlled fixture origin");
+
+### 6 POLL cancelFailedTestOwnedSessions (@AfterEach, failed-test path) RETURN_LAST
+3926:           }
+3927:           // w3-qa-ack02 §6 shared guard, read after the cancel: a session that ended before any
+3928:           // assignment has no runtime to stop, so it never reaches CONFIRMED and blocks nothing.
+3929:           if (neverAssignedSettled(owned.getKey())) {
+3930:             cleanup.put("teardownStatus", "NOT_ASSIGNED").put("assigned", 0).put("materialized", 0);
+3931:             continue;
+3932:           }
+3933:           long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+3934:           String teardown;
+3935:           do {
+3936:             teardown =
+3937:                 sessions.transaction(
+3938:                     () -> sessions.lock(owned.getKey()).progress().path("teardownStatus").asText());
+3939:             if (teardown.equals("CONFIRMED")) {
+3940:               break;
+3941:             }
+3942:             Thread.sleep(30);
+3943:           } while (System.nanoTime() < deadline);
+3944:           cleanup.put("teardownStatus", teardown);
+3945:           assertThat(teardown)
+3946:               .as("actual worker stop/close acknowledgement")
+3947:               .isEqualTo("CONFIRMED");
+3948:         } catch (Exception | AssertionError failure) {
+3949:           cleanupUnconfirmed = true;
+3950:           cleanup.put("cleanupFailureClass", failure.getClass().getName());
+
+### 7 POLL b3PublishedPartialDriftStepAndSecondReplay RETURN_LAST
+7278:         UUID.fromString(
+7279:             publicCall(
+7280:                     "/api/v1/studio/tests/" + p.test() + "/execute",
+7281:                     C.object(),
+7282:                     202,
+7283:                     UUID.randomUUID().toString())
+7284:                 .path("executionId")
+7285:                 .asText());
+7286:     assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+7287:     JsonNode replay;
+7288:     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+7289:     do {
+7290:       replay = publicCall("/api/v1/studio/executions/" + second, null, 200, null);
+7291:       if (replay.path("streamComplete").asBoolean()) {
+7292:         break;
+7293:       }
+7294:       Thread.sleep(30);
+7295:     } while (System.nanoTime() < deadline);
+7296:     assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+7297:     assertThat(replay.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+7298:     assertThat(INCREMENTAL_ORDINARY_READS.get() - reads)
+7299:         .as("second run recaptures the original read")
+7300:         .isEqualTo(1);
+7301:     assertThat(VALUES.getLast()).as("fresh bytes, no cached value").isNotEqualTo(firstValue);
+7302:     assertThat(RECEIPTS.getLast()).isEqualTo(VALUES.getLast());
+
+### 8 POLL prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest RETURN_LAST
+7590:   @Test
+7591:   void prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest()
+7592:       throws Exception {
+7593:     try (var parent = prefixSyncParent("HOLD")) {
+7594:       PrefixSyncFacts before = prefixSyncFacts(parent);
+7595:       Instant lease = Instant.parse(before.session().path("owner").path("leaseExpiresAt").asText());
+7596:       long end = System.nanoTime() + Duration.ofSeconds(12).toNanos();
+7597:       JsonNode renewed;
+7598:       do {
+7599:         prefixSyncNoTarget(parent, before);
+7600:         renewed =
+7601:             sessions.transaction(
+7602:                 () -> sessions.lock(parent.id).document().path("owner").deepCopy());
+7603:         if (Instant.parse(renewed.path("leaseExpiresAt").asText()).isAfter(lease)) {
+7604:           break;
+7605:         }
+7606:         Thread.sleep(20);
+7607:       } while (System.nanoTime() < end);
+7608:       assertThat(Instant.parse(renewed.path("leaseExpiresAt").asText()))
+7609:           .as(
+7610:               "a real same-owner renewal must occur before the unchanged context transport deadline")
+7611:           .isAfter(lease);
+7612:       assertThat(renewed.path("workerId"))
+7613:           .isEqualTo(before.session().path("owner").path("workerId"));
+7614:       assertThat(renewed.path("fence")).isEqualTo(before.session().path("owner").path("fence"));
+
+### 9 POLL incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck RETURN_LAST
+8312:             Files.writeString(TEMP.resolve("obs015-native-events.jsonl"), "");
+8313:             int startReads =
+8314:                 COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+8315:             ObjectNode start =
+8316:                 p3StartCommand(test, "fixture")
+8317:                     .put("sourceRevision", edited.path("sourceRevision").asText())
+8318:                     .put("configurationRevision", edited.path("configurationRevision").asText())
+8319:                     .put("baseRevisionId", base.revision().toString());
+8320:             mixed =
+8321:                 p3Call(p3Cookie, "/api/v1/studio/guided-sessions", start, 202)
+8322:                     .path("session")
+8323:                     .path("sessionId")
+8324:                     .asText();
+8325:             final String id = mixed;
+8326:             long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+8327:             while (!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline) {
+8328:               Thread.sleep(10);
+8329:             }
+8330:             assertThat(INCREMENTAL_ACK_ENTERED.contains(id))
+8331:                 .as("actual runner applied v2 on the original browser before its ACK returned")
+8332:                 .isTrue();
+8333:             // A45-1 at the held v2 ACK.
+8334:             var versions =
+8335:                 jdbc.queryForList(
+8336:                     "SELECT context_revision,authored_inputs_hash FROM"
+
+### 10 POLL incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck RETURN_LAST
+8385:             // Real (fake-leaf) Vault rotation after the historical use: the release keeps its read.
+8386:             // The fixture site still expects the v1 value already filled at TWO/1 until the suffix
+8387:             // sign-in has run; its password rotates only before the ordinary replay below.
+8388:             p3Seed(scope, rotated);
+8389:             int reads =
+8390:                 COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+8391:             INCREMENTAL_ACK_RELEASE.get(id).countDown();
+8392:             long acked = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+8393:             while (!"ACKNOWLEDGED"
+8394:                     .equals(
+8395:                         jdbc.queryForObject(
+8396:                             "SELECT status FROM studio_guided_materialization_deliveries"
+8397:                                 + " WHERE session_id=?",
+8398:                             String.class,
+8399:                             id))
+8400:                 && System.nanoTime() < acked) {
+8401:               Thread.sleep(20);
+8402:             }
+8403:             JsonNode ack =
+8404:                 C.parse(
+8405:                     jdbc.queryForObject(
+8406:                         "SELECT ack::text FROM studio_guided_materialization_deliveries"
+8407:                             + " WHERE session_id=?",
+8408:                         String.class,
+8409:                         id));
+
+### 11 POLL b2bAppendAuthority RETURN_LAST
+9269:             String.class,
+9270:             session);
+9271:     String publicationPreparations =
+9272:         jdbc.queryForObject(
+9273:             "SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY preparation_id),'[]'::jsonb)::text"
+9274:                 + " FROM studio_guided_publication_preparations p WHERE session_id=?",
+9275:             String.class,
+9276:             session);
+9277:     hold.release.countDown();
+9278:     assertThat(hold.failure).as("plan hold released within its bound").isNull();
+9279:     long accepted = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+9280:     // GuidedTranslationStore.state requires an actual transaction (RUNTIME_INCOMPATIBLE otherwise).
+9281:     while (!sessions
+9282:             .transaction(() -> plans.state(session).path("continuation").asText())
+9283:             .equals("MATERIALIZE")
+9284:         && System.nanoTime() < accepted) {
+9285:       Thread.sleep(20);
+9286:     }
+9287:     assertThat(sessions.transaction(() -> plans.state(session).path("continuation").asText()))
+9288:         .isEqualTo("MATERIALIZE");
+9289:     Thread.sleep(2500); // >= two real coordinator polls (poll 1000 ms); observed, never shortened
+9290:     assertThat(b2bCount("studio_guided_materialization_versions", session)).isEqualTo(1);
+9291:     assertThat(b2bCount("studio_guided_materialization_deliveries", session)).isZero();
+9292:     long planRevision =
+9293:         sessions.transaction(() -> plans.state(session).path("planRevision").asLong());
+
+### 12 DELIBERATE b2bAppendAuthority -
+9273:             "SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY preparation_id),'[]'::jsonb)::text"
+9274:                 + " FROM studio_guided_publication_preparations p WHERE session_id=?",
+9275:             String.class,
+9276:             session);
+9277:     hold.release.countDown();
+9278:     assertThat(hold.failure).as("plan hold released within its bound").isNull();
+9279:     long accepted = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+9280:     // GuidedTranslationStore.state requires an actual transaction (RUNTIME_INCOMPATIBLE otherwise).
+9281:     while (!sessions
+9282:             .transaction(() -> plans.state(session).path("continuation").asText())
+9283:             .equals("MATERIALIZE")
+9284:         && System.nanoTime() < accepted) {
+9285:       Thread.sleep(20);
+9286:     }
+9287:     assertThat(sessions.transaction(() -> plans.state(session).path("continuation").asText()))
+9288:         .isEqualTo("MATERIALIZE");
+9289:     Thread.sleep(2500); // >= two real coordinator polls (poll 1000 ms); observed, never shortened
+9290:     assertThat(b2bCount("studio_guided_materialization_versions", session)).isEqualTo(1);
+9291:     assertThat(b2bCount("studio_guided_materialization_deliveries", session)).isZero();
+9292:     long planRevision =
+9293:         sessions.transaction(() -> plans.state(session).path("planRevision").asLong());
+9294:     JsonNode references =
+9295:         sessions.transaction(
+9296:             () -> plans.state(session).path("plan").path("sourceReferences").deepCopy());
+9297:     String productionKey = "suffix-materialize-" + planRevision;
+
+### 13 DELIBERATE b2bAppendAuthority -
+9296:             () -> plans.state(session).path("plan").path("sourceReferences").deepCopy());
+9297:     String productionKey = "suffix-materialize-" + planRevision;
+9298:     String immutable = incrementalImmutableSnapshot(session);
+9299:     assertThatThrownBy(
+9300:             () -> service.materialize(controller, session, fence, productionKey, references))
+9301:         .as("exact production append is refused while the real preparation is live")
+9302:         .isInstanceOf(RuntimeException.class);
+9303:     assertThat(incrementalImmutableSnapshot(session)).isEqualTo(immutable);
+9304:     // ---- natural expiry (A46-2): no clock, timestamp, lease or SQL time change ----
+9305:     Instant expires = Instant.parse(proof.path("expiresAt").asText());
+9306:     long renew = System.nanoTime();
+9307:     while (!Instant.now().isAfter(expires.plusMillis(20))) {
+9308:       if (System.nanoTime() >= renew) {
+9309:         refreshFixtureCredentials();
+9310:         renew = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+9311:       }
+9312:       Thread.sleep(100);
+9313:     }
+9314:     long held = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+9315:     while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {
+9316:       Thread.sleep(20);
+9317:     }
+9318:     assertThat(INCREMENTAL_ACK_ENTERED.contains(session))
+9319:         .as("append retried after natural expiry; otherwise a liveness finding, never a relaxation")
+9320:         .isTrue();
+
+### 14 POLL b2bAppendAuthority RETURN_LAST
+9300:             () -> service.materialize(controller, session, fence, productionKey, references))
+9301:         .as("exact production append is refused while the real preparation is live")
+9302:         .isInstanceOf(RuntimeException.class);
+9303:     assertThat(incrementalImmutableSnapshot(session)).isEqualTo(immutable);
+9304:     // ---- natural expiry (A46-2): no clock, timestamp, lease or SQL time change ----
+9305:     Instant expires = Instant.parse(proof.path("expiresAt").asText());
+9306:     long renew = System.nanoTime();
+9307:     while (!Instant.now().isAfter(expires.plusMillis(20))) {
+9308:       if (System.nanoTime() >= renew) {
+9309:         refreshFixtureCredentials();
+9310:         renew = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+9311:       }
+9312:       Thread.sleep(100);
+9313:     }
+9314:     long held = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+9315:     while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {
+9316:       Thread.sleep(20);
+9317:     }
+9318:     assertThat(INCREMENTAL_ACK_ENTERED.contains(session))
+9319:         .as("append retried after natural expiry; otherwise a liveness finding, never a relaxation")
+9320:         .isTrue();
+9321:     // ---- Phase B at the held v2 ACK (A18-1..3, A77-1, A77-3) ----
+9322:     long fence2 =
+9323:         sessions.transaction(
+9324:             () -> sessions.lock(session).document().path("owner").path("fence").asLong());
+
+### 15 POLL b2bAppendAuthority RETURN_LAST
+9385:     String deliveryId =
+9386:         jdbc.queryForObject(
+9387:             "SELECT delivery_id::text FROM studio_guided_materialization_deliveries"
+9388:                 + " WHERE session_id=?",
+9389:             String.class,
+9390:             session);
+9391:     INCREMENTAL_ACK_RELEASE.get(session).countDown();
+9392:     long acked = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+9393:     while (!"ACKNOWLEDGED"
+9394:             .equals(
+9395:                 jdbc.queryForObject(
+9396:                     "SELECT status FROM studio_guided_materialization_deliveries"
+9397:                         + " WHERE session_id=?",
+9398:                     String.class,
+9399:                     session))
+9400:         && System.nanoTime() < acked) {
+9401:       Thread.sleep(25);
+9402:     }
+9403:     var delivery =
+9404:         jdbc.queryForMap(
+9405:             "SELECT delivery_id::text AS id,status,context_hash,ack::text AS ack"
+9406:                 + " FROM studio_guided_materialization_deliveries WHERE session_id=?",
+9407:             session);
+9408:     assertThat(delivery.get("status")).isEqualTo("ACKNOWLEDGED");
+9409:     assertThat(delivery.get("id")).isEqualTo(deliveryId);
+
+### 16 POLL b2bAppendAuthority RETURN_LAST
+9513:         UUID.fromString(
+9514:             publicCall(
+9515:                     "/api/v1/studio/tests/" + test + "/execute",
+9516:                     C.object(),
+9517:                     202,
+9518:                     UUID.randomUUID().toString())
+9519:                 .path("executionId")
+9520:                 .asText());
+9521:     assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+9522:     long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+9523:     JsonNode replay;
+9524:     do {
+9525:       replay = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+9526:       if (replay.path("streamComplete").asBoolean()) {
+9527:         break;
+9528:       }
+9529:       Thread.sleep(30);
+9530:     } while (System.nanoTime() < end);
+9531:     assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+9532:   }
+9533: 
+9534:   /** A77-4: authenticated owner/browser loss while the v2 ACK is pending bumps nothing. */
+9535:   private void b2bOwnerLoss(
+9536:       String session,
+9537:       B2bPlanHold hold,
+
+### 17 POLL b2bOwnerLoss RETURN_LAST
+9528:       }
+9529:       Thread.sleep(30);
+9530:     } while (System.nanoTime() < end);
+9531:     assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+9532:   }
+9533: 
+9534:   /** A77-4: authenticated owner/browser loss while the v2 ACK is pending bumps nothing. */
+9535:   private void b2bOwnerLoss(
+9536:       String session,
+9537:       B2bPlanHold hold,
+9538:       com.citi.put.checks.studio.guided.session.GuidedSessionService service,
+9539:       org.springframework.security.core.Authentication controller)
+9540:       throws Exception {
+9541:     hold.release.countDown(); // this sibling never holds its suffix plan
+9542:     long held = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+9543:     while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {
+9544:       Thread.sleep(20);
+9545:     }
+9546:     assertThat(INCREMENTAL_ACK_ENTERED.contains(session)).as("v2 ACK pending").isTrue();
+9547:     long fence =
+9548:         sessions.transaction(
+9549:             () -> sessions.lock(session).document().path("owner").path("fence").asLong());
+9550:     String pending = incrementalImmutableSnapshot(session);
+9551:     String allocations = b2bRows("studio_guided_allocations", "binding_id", session);
+9552:     String producers = b2bRows("studio_guided_producers", "binding_id", session);
+
+### 18 POLL b2AwaitSettled RETURN_LAST
+10055:           && reference.path("referenceName").asText().equals("PASS")) {
+10056:         return reference.path("referenceId").asText();
+10057:       }
+10058:     }
+10059:     throw new AssertionError("frozen PASS secretRef missing");
+10060:   }
+10061: 
+10062:   private String b2AwaitSettled(String id, int seconds) throws Exception {
+10063:     long end = System.nanoTime() + Duration.ofSeconds(seconds).toNanos();
+10064:     String state;
+10065:     do {
+10066:       state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+10067:       if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED", "SUCCEEDED", "FINALIZING")
+10068:           .contains(state)) {
+10069:         break;
+10070:       }
+10071:       Thread.sleep(25);
+10072:     } while (System.nanoTime() < end);
+10073:     return state;
+10074:   }
+10075: 
+10076:   private String b2AwaitLeft(String id, String from, int seconds) throws Exception {
+10077:     long end = System.nanoTime() + Duration.ofSeconds(seconds).toNanos();
+10078:     String state;
+10079:     do {
+
+### 19 POLL b2AwaitLeft RETURN_LAST
+10068:           .contains(state)) {
+10069:         break;
+10070:       }
+10071:       Thread.sleep(25);
+10072:     } while (System.nanoTime() < end);
+10073:     return state;
+10074:   }
+10075: 
+10076:   private String b2AwaitLeft(String id, String from, int seconds) throws Exception {
+10077:     long end = System.nanoTime() + Duration.ofSeconds(seconds).toNanos();
+10078:     String state;
+10079:     do {
+10080:       state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+10081:       if (!state.equals(from)) {
+10082:         break;
+10083:       }
+10084:       Thread.sleep(25);
+10085:     } while (System.nanoTime() < end);
+10086:     return state;
+10087:   }
+10088: 
+10089:   /**
+10090:    * Exact post-ACK gate: checkCurrent inside translationTransaction entered from advancePrefix
+10091:    * (GuidedTranslationService). No other revocation observer is credited.
+10092:    */
+
+### 20 POLL b2AwaitCheckCurrentGate MAP_EXCEPTION
+10121:           transaction |=
+10122:               type.equals("com.citi.put.checks.studio.guided.session.GuidedSessionService")
+10123:                   && method.startsWith("lambda$translationTransaction");
+10124:           gate |=
+10125:               type.equals("com.citi.put.checks.studio.guided.translation.GuidedTranslationService")
+10126:                   && method.equals("advancePrefix")
+10127:                   && frame.path("line").asInt() == prefixSites().postAck();
+10128:         }
+10129:         if (access && transaction && gate) {
+10130:           matches.add(row);
+10131:         }
+10132:       }
+10133:       if (!matches.isEmpty()) {
+10134:         assertThat(matches.size()).as("one exact post-ACK checkCurrent refusal").isEqualTo(1);
+10135:         return;
+10136:       }
+10137:       Thread.sleep(10);
+10138:     } while (System.nanoTime() < end);
+10139:     throw new AssertionError(
+10140:         "post-ACK worker checkCurrent SECRET_USE_REVOKED not observed; no other observer credited");
+10141:   }
+10142: 
+10143:   private List<JsonNode> b2PrefixSyncEvents(PrefixSyncCut cut, String session) throws Exception {
+10144:     Path file = TEMP.resolve("obs015-prefix-sync-" + cut.key + ".jsonl");
+10145:     if (!Files.exists(file)) {
+
+### 21 POLL prefixSyncAwaitDiagnostic MAP_EXCEPTION
+11306:                     .filter(id -> !id.equals(parent.id))
+11307:                     .allMatch(
+11308:                         id ->
+11309:                             sessions.transaction(
+11310:                                 () ->
+11311:                                     List.of(
+11312:                                             "SUCCEEDED",
+11313:                                             "FAILED",
+11314:                                             "CANCELLED",
+11315:                                             "EXPIRED",
+11316:                                             "PUBLICATION_CONFLICT")
+11317:                                         .contains(
+11318:                                             sessions.lock(id).document().path("state").asText()))))
+11319:             .isTrue();
+11320:         return;
+11321:       }
+11322:       Thread.sleep(10);
+11323:     } while (System.nanoTime() < end);
+11324:     throw new AssertionError(
+11325:         "PFXSYNC intended Java context/gate stage not observed; no earlier refusal or timeout is credited");
+11326:   }
+11327: 
+11328:   private void prefixSyncFinishAndReplay(PrefixSyncParent parent, PrefixSyncFacts before)
+11329:       throws Exception {
+11330:     awaitFinalizing(parent.id);
+
+### 22 POLL prefixSyncFinishAndReplay RETURN_LAST
+11470:         UUID.fromString(
+11471:             publicCall(
+11472:                     "/api/v1/studio/tests/" + parent.test + "/execute",
+11473:                     C.object(),
+11474:                     202,
+11475:                     UUID.randomUUID().toString())
+11476:                 .path("executionId")
+11477:                 .asText());
+11478:     assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+11479:     long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+11480:     JsonNode replay;
+11481:     do {
+11482:       replay = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+11483:       if (replay.path("streamComplete").asBoolean()) {
+11484:         break;
+11485:       }
+11486:       Thread.sleep(30);
+11487:     } while (System.nanoTime() < end);
+11488:     assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+11489:     assertThat(replay.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+11490:     assertThat(MODEL_WIRE).hasSize(model);
+11491:     assertThat(RECEIPTS.getLast()).isEqualTo(VALUES.getLast());
+11492:     assertThat(observedBinding(execution).path("revisionId").asText())
+11493:         .isEqualTo(merged.path("revisionId").asText());
+11494:   }
+
+### 23 POLL incrementalPrefixRecoveryUsesNextUnconsumedCoordinate FALL_THROUGH
+11834:       assertThat(
+11835:               b1Native(parent.id).stream()
+11836:                   .filter(e -> e.path("admissionId").asText().equals(admission))
+11837:                   .toList())
+11838:           .isEmpty();
+11839:       int effects = RECEIPTS.size();
+11840:       b1ReplacementContinue(); // recovery: advancePrefix existing ADMITTED -> dispatch.dispatch
+11841:       JsonNode recovered = b1Action(parent.id, admission);
+11842:       assertThat(recovered.path("state").asText()).isEqualTo("SUCCEEDED");
+11843:       assertThat(recovered.path("dispatchCount").asInt()).isEqualTo(1);
+11844:       assertThat(b1NativeCount(parent.id, admission, "NATIVE_COMPLETED")).isEqualTo(1);
+11845:       String consumeKey = "prefix-dispatch-" + recovered.path("idempotencyKey").asText();
+11846:       assertThat(b1ConsumeCommands(parent.id, consumeKey)).isEqualTo(1);
+11847:       cut.release.countDown(); // the original sender: same key/digest, no second runner send
+11848:       long end = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+11849:       while (b1Count("studio_guided_relearn_switches", parent.id) == 0 && System.nanoTime() < end) {
+11850:         Thread.sleep(20);
+11851:       }
+11852:       assertThat(b1NativeCount(parent.id, admission, "NATIVE_COMPLETED")).isEqualTo(1);
+11853:       assertThat(b1NativeCount(parent.id, admission, "DISPATCH_ENTER")).isEqualTo(1);
+11854:       assertThat(b1ConsumeCommands(parent.id, consumeKey)).isEqualTo(1);
+11855:       assertThat(b1AttemptOneActions(parent.id)).isZero();
+11856:       assertThat(RECEIPTS.size()).as("a fill is not a submit").isEqualTo(effects);
+11857:       assertThat(cut.failure).isNull();
+11858:     }
+
+### 24 DELIBERATE incrementalPrefixRecoveryUsesNextUnconsumedCoordinate -
+11854:       assertThat(b1ConsumeCommands(parent.id, consumeKey)).isEqualTo(1);
+11855:       assertThat(b1AttemptOneActions(parent.id)).isZero();
+11856:       assertThat(RECEIPTS.size()).as("a fill is not a submit").isEqualTo(effects);
+11857:       assertThat(cut.failure).isNull();
+11858:     }
+11859:     // R3: existing DISPATCHING. The real consume committed; the transport send has not started.
+11860:     try (var parent = b1Parent(new B1Spec().edit4().nativeMode("b1b-recover", 1, 0))) {
+11861:       var cut = B1Cut.arm(B1Cut.Kind.CONSUME_COMMIT, parent.id, b1Coordinate(1, 0), 0);
+11862:       assertThat(cut.entered.await(45, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+11863:       assertThat(cut.failure).isNull();
+11864:       String admission = cut.admissionId;
+11865:       assertThat(cut.ledgerState).isEqualTo("DISPATCHING");
+11866:       b1ReplacementContinue(); // recovery: advancePrefix existing DISPATCHING -> lostAcknowledgment
+11867:       assertThat(parent.state()).isEqualTo("UNKNOWN_OUTCOME");
+11868:       p3AwaitTeardown(parent.id); // the runtime stops before the single held capability returns
+11869:       cut.release.countDown();
+11870:       Thread.sleep(2000); // bounded wait for the original sender to reach its refused transport
+11871:       JsonNode action = b1Action(parent.id, admission);
+11872:       assertThat(action.path("state").asText()).isEqualTo("UNKNOWN_OUTCOME");
+11873:       assertThat(action.path("outcomeCode").asText()).isEqualTo("ACK_LOST");
+11874:       assertThat(action.path("dispatchCount").asInt()).isEqualTo(1);
+11875:       assertThat(
+11876:               b1Native(parent.id).stream()
+11877:                   .filter(
+11878:                       e ->
+
+### 25 DELIBERATE incrementalDriftAuthorityRejectsEveryExactJoin -
+12341:           b1StallWorker();
+12342:           b1AwaitNaturalLeaseExpiry(parent.id);
+12343:           expected = "STALE_FENCE";
+12344:         }
+12345:         refreshFixtureCredentials();
+12346:         var reply =
+12347:             b1RawOutcome(
+12348:                 path,
+12349:                 fence,
+12350:                 authentic.toString(),
+12351:                 token("owning-worker", "worker-1", "studio-guided-controller"),
+12352:                 TLS);
+12353:         assertThat(reply.statusCode()).as(late).isEqualTo(409);
+12354:         assertThat(C.parse(reply.body()).path("code").asText()).as(late).isEqualTo(expected);
+12355:         b1ResumeWorker();
+12356:         INCREMENTAL_ACK_RELEASE.get(parent.id).countDown();
+12357:         Thread.sleep(1500);
+12358:         assertThat(b1Count("studio_guided_no_invocation_receipts", parent.id)).isZero();
+12359:         assertThat(b1Count("studio_guided_relearn_switches", parent.id)).isZero();
+12360:         assertThat(b1Count("studio_guided_model_attempts", parent.id)).isZero();
+12361:       }
+12362:     }
+12363:   }
+12364: 
+12365:   /**
+
+### 26 DELIBERATE incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry -
+13100:                         b1Answer(question),
+13101:                         409,
+13102:                         key)
+13103:                     .path("code")
+13104:                     .asText())
+13105:             .isEqualTo("STALE_FENCE");
+13106:       }
+13107:       assertThat(incrementalPendingSnapshot(parent.id)).isEqualTo(pending);
+13108:       assertThat(
+13109:               jdbc.queryForObject(
+13110:                   "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
+13111:                   Integer.class,
+13112:                   parent.id,
+13113:                   b1Step(4)))
+13114:           .isZero();
+13115:       b1ResumeWorker();
+13116:       Thread.sleep(3000);
+13117:       assertThat(parent.state())
+13118:           .as("the late runner lifecycle cannot act on an expired lease")
+13119:           .isEqualTo("AWAITING_CLARIFICATION");
+13120:       parent.cancel();
+13121:       assertThat(parent.state()).isEqualTo("CANCELLED");
+13122:       p3AwaitTeardown(parent.id);
+13123:       assertThat(NAVIGATIONS.get()).as("no new browser").isEqualTo(navigations);
+13124:       assertThat(RECEIPTS).as("no late effect").hasSize(effects);
+
+### 27 DELIBERATE b1AwaitNaturalLeaseExpiry -
+14105:     if (worker.isAlive()) {
+14106:       b1Signal(worker, "-CONT");
+14107:     }
+14108:   }
+14109: 
+14110:   private static void b1Signal(Process worker, String signal) throws Exception {
+14111:     var kill =
+14112:         new ProcessBuilder("kill", signal, Long.toString(worker.pid()))
+14113:             .redirectErrorStream(true)
+14114:             .start();
+14115:     assertThat(kill.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+14116:     assertThat(kill.exitValue()).isZero();
+14117:   }
+14118: 
+14119:   /** Waits for the original owner lease to lapse on both the DB clock and the Java clock. */
+14120:   private Instant b1AwaitNaturalLeaseExpiry(String id) throws Exception {
+14121:     Thread.sleep(1000); // a renewal already on the wire when the worker stopped may still commit
+14122:     JsonNode owner =
+14123:         sessions.transaction(() -> sessions.lock(id).document().path("owner").deepCopy());
+14124:     Instant lease = Instant.parse(owner.path("leaseExpiresAt").asText());
+14125:     long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+14126:     while (true) {
+14127:       JsonNode now =
+14128:           sessions.transaction(() -> sessions.lock(id).document().path("owner").deepCopy());
+14129:       assertThat(now)
+
+### 28 DELIBERATE b1AwaitNaturalLeaseExpiry -
+14126:     while (true) {
+14127:       JsonNode now =
+14128:           sessions.transaction(() -> sessions.lock(id).document().path("owner").deepCopy());
+14129:       assertThat(now)
+14130:           .as("a stalled owner never renews, re-fences or changes worker")
+14131:           .isEqualTo(owner);
+14132:       Boolean dbExpired =
+14133:           jdbc.queryForObject(
+14134:               "SELECT (document->'owner'->>'leaseExpiresAt')::timestamptz < clock_timestamp()"
+14135:                   + " FROM studio_guided_sessions WHERE session_id=?",
+14136:               Boolean.class,
+14137:               id);
+14138:       if (Boolean.TRUE.equals(dbExpired) && Instant.now().isAfter(lease)) {
+14139:         return lease;
+14140:       }
+14141:       assertThat(System.nanoTime()).as("original lease must lapse naturally").isLessThan(end);
+14142:       Thread.sleep(100);
+14143:     }
+14144:   }
+14145: 
+14146:   private static String b1Token(ObjectNode claims, String alg, boolean sign) throws Exception {
+14147:     var encoder = Base64.getUrlEncoder().withoutPadding();
+14148:     String unsigned =
+14149:         encoder.encodeToString(
+14150:                 C.object()
+
+### 29 POLL b1AwaitDriftCapture FAIL_AT_WAIT
+14267:   /** A replacement production coordinator (as confirm-recover); it holds no test authority. */
+14268:   private void b1ReplacementContinue() throws Exception {
+14269:     refreshFixtureCredentials();
+14270:     new com.citi.put.checks.studio.guided.translation.GuidedTranslationCoordinator(
+14271:             plans,
+14272:             sessions,
+14273:             C,
+14274:             URI.create("https://localhost:" + port),
+14275:             TEMP.resolve("coordinator.jwt"))
+14276:         .continueRuns();
+14277:   }
+14278: 
+14279:   private ObjectNode b1AwaitDriftCapture(String id) throws Exception {
+14280:     long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+14281:     while (!INCREMENTAL_DRIFT_CAPTURE.containsKey(id)) {
+14282:       assertThat(System.nanoTime()).isLessThan(until);
+14283:       Thread.sleep(10);
+14284:     }
+14285:     return INCREMENTAL_DRIFT_CAPTURE.get(id);
+14286:   }
+14287: 
+14288:   private static List<JsonNode> b1Native(String id) throws Exception {
+14289:     return Files.readAllLines(TEMP.resolve("obs015-native-events.jsonl")).stream()
+14290:         .filter(line -> !line.isBlank())
+14291:         .map(C::parse)
+
+### 30 POLL b1AwaitTerminal RETURN_LAST
+14492:     }
+14493:     Path file = TEMP.resolve("obs015-prefix-sync-b1-terminal-labels.jsonl");
+14494:     String prior =
+14495:         Files.exists(file, java.nio.file.LinkOption.NOFOLLOW_LINKS) ? Files.readString(file) : "";
+14496:     assertThat(prior.length()).isLessThanOrEqualTo(65536);
+14497:     b1PrivateWrite(file, prior + row + "\n");
+14498:   }
+14499: 
+14500:   private JsonNode b1AwaitTerminal(String id, Duration limit) throws Exception {
+14501:     long end = System.nanoTime() + limit.toNanos();
+14502:     String state;
+14503:     do {
+14504:       state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+14505:       if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED").contains(state)) {
+14506:         break;
+14507:       }
+14508:       Thread.sleep(25);
+14509:     } while (System.nanoTime() < end);
+14510:     return publicCall("/api/v1/studio/guided-sessions/" + id + "/result", null, 200, null);
+14511:   }
+14512: 
+14513:   /** GET /result; the status must be the one its own publication status implies (openapi). */
+14514:   private JsonNode b1ResultPerContract(String id) throws Exception {
+14515:     var response =
+14516:         HttpClient.newBuilder()
+
+### 31 POLL b1AwaitRow FAIL_AT_WAIT
+14527:                     .timeout(Duration.ofSeconds(15))
+14528:                     .header("Cookie", "put_session=" + COOKIE)
+14529:                     .GET()
+14530:                     .build(),
+14531:                 HttpResponse.BodyHandlers.ofString());
+14532:     JsonNode result = C.parse(response.body());
+14533:     boolean pending = result.path("publication").path("status").asText().equals("PENDING");
+14534:     assertThat(response.statusCode()).as(response.body()).isEqualTo(pending ? 202 : 200);
+14535:     C.validate("v3/result", result);
+14536:     return result;
+14537:   }
+14538: 
+14539:   private void b1AwaitRow(String sql, String id, Duration limit) throws Exception {
+14540:     long end = System.nanoTime() + limit.toNanos();
+14541:     while (jdbc.queryForObject(sql, Integer.class, id) == 0) {
+14542:       assertThat(System.nanoTime()).as(sql).isLessThan(end);
+14543:       Thread.sleep(20);
+14544:     }
+14545:   }
+14546: 
+14547:   private void b1AwaitSucceeded(String id, int stepIndex, Duration limit) throws Exception {
+14548:     long end = System.nanoTime() + limit.toNanos();
+14549:     while (jdbc.queryForObject(
+14550:             "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+14551:                 + " AND ordinal=0 AND document->>'state'='SUCCEEDED'",
+
+### 32 POLL b1AwaitSucceeded FAIL_AT_WAIT
+14541:     while (jdbc.queryForObject(sql, Integer.class, id) == 0) {
+14542:       assertThat(System.nanoTime()).as(sql).isLessThan(end);
+14543:       Thread.sleep(20);
+14544:     }
+14545:   }
+14546: 
+14547:   private void b1AwaitSucceeded(String id, int stepIndex, Duration limit) throws Exception {
+14548:     long end = System.nanoTime() + limit.toNanos();
+14549:     while (jdbc.queryForObject(
+14550:             "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+14551:                 + " AND ordinal=0 AND document->>'state'='SUCCEEDED'",
+14552:             Integer.class,
+14553:             id,
+14554:             b1Step(stepIndex))
+14555:         == 0) {
+14556:       assertThat(System.nanoTime()).as("S(%s)#0 SUCCEEDED", stepIndex).isLessThan(end);
+14557:       Thread.sleep(20);
+14558:     }
+14559:   }
+14560: 
+14561:   private JsonNode b1AwaitQuestion(String id) throws Exception {
+14562:     long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+14563:     while (!sessions
+14564:         .transaction(() -> sessions.lock(id).document().path("state").asText())
+14565:         .equals("AWAITING_CLARIFICATION")) {
+
+### 33 POLL b1AwaitQuestion FAIL_AT_WAIT
+14551:                 + " AND ordinal=0 AND document->>'state'='SUCCEEDED'",
+14552:             Integer.class,
+14553:             id,
+14554:             b1Step(stepIndex))
+14555:         == 0) {
+14556:       assertThat(System.nanoTime()).as("S(%s)#0 SUCCEEDED", stepIndex).isLessThan(end);
+14557:       Thread.sleep(20);
+14558:     }
+14559:   }
+14560: 
+14561:   private JsonNode b1AwaitQuestion(String id) throws Exception {
+14562:     long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+14563:     while (!sessions
+14564:         .transaction(() -> sessions.lock(id).document().path("state").asText())
+14565:         .equals("AWAITING_CLARIFICATION")) {
+14566:       assertThat(System.nanoTime()).isLessThan(end);
+14567:       Thread.sleep(25);
+14568:     }
+14569:     return publicCall("/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null);
+14570:   }
+14571: 
+14572:   private static ObjectNode b1Answer(JsonNode question) {
+14573:     return C.object()
+14574:         .put("schemaVersion", 3)
+14575:         .put("clarificationId", question.path("clarificationId").asText())
+
+### 34 POLL incrementalJoinedCase RETURN_LAST
+15574:                     String.class,
+15575:                     execution));
+15576:         assertThat(acceptedConfiguration.path("sourceRevision").asLong())
+15577:             .isEqualTo(((Number) originalRevision.get("source_revision")).longValue());
+15578:         assertThat(acceptedConfiguration.path("configurationRevision").asLong())
+15579:             .isEqualTo(((Number) originalRevision.get("configuration_revision")).longValue());
+15580:         assertThat(binding.path("revisionDigest").asText())
+15581:             .isEqualTo(originalRevision.get("revision_digest"));
+15582:         assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+15583:         long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+15584:         JsonNode replay;
+15585:         do {
+15586:           replay = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+15587:           if (replay.path("streamComplete").asBoolean()) {
+15588:             break;
+15589:           }
+15590:           Thread.sleep(30);
+15591:         } while (System.nanoTime() < end);
+15592:         assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+15593:         assertThat(MODEL_WIRE).hasSize(beforeCalls);
+15594:         assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(beforeLegacy);
+15595:         assertThat(NAVIGATIONS.get()).isEqualTo(beforeNavigations + 1);
+15596:         assertThat(RECEIPTS).hasSize(beforeEffects + 1);
+15597:         assertThat(
+15598:                 jdbc.queryForObject(
+
+### 35 POLL incrementalJoinedCase RETURN_LAST
+16011:       int readsBeforeOrdinary = INCREMENTAL_ORDINARY_READS.get();
+16012:       JsonNode accepted =
+16013:           publicCall(
+16014:               "/api/v1/studio/tests/" + test + "/execute",
+16015:               C.object(),
+16016:               202,
+16017:               UUID.randomUUID().toString());
+16018:       UUID execution = UUID.fromString(accepted.path("executionId").asText());
+16019:       assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+16020:       long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+16021:       JsonNode snapshot;
+16022:       do {
+16023:         snapshot = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+16024:         if (snapshot.path("streamComplete").asBoolean()) {
+16025:           break;
+16026:         }
+16027:         Thread.sleep(30);
+16028:       } while (System.nanoTime() < deadline);
+16029:       assertThat(snapshot.path("status").asText())
+16030:           .as("joined incremental ordinary replay logs %s", TEMP)
+16031:           .isEqualTo("PASSED");
+16032:       assertThat(snapshot.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+16033:       assertThat(INCREMENTAL_ORDINARY_READS.get() - readsBeforeOrdinary)
+16034:           .as("actual ordinary child recaptures each executable read")
+16035:           .isEqualTo(variant.equals("tail1") ? 0 : 1);
+
+### 36 POLL incrementalJoinedCase RETURN_LAST
+16050:               UUID.fromString(
+16051:                   publicCall(
+16052:                           "/api/v1/studio/tests/" + test + "/execute",
+16053:                           C.object(),
+16054:                           202,
+16055:                           UUID.randomUUID().toString())
+16056:                       .path("executionId")
+16057:                       .asText());
+16058:           assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+16059:           JsonNode replay;
+16060:           long secondDeadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+16061:           do {
+16062:             replay = publicCall("/api/v1/studio/executions/" + second, null, 200, null);
+16063:             if (replay.path("streamComplete").asBoolean()) {
+16064:               break;
+16065:             }
+16066:             Thread.sleep(30);
+16067:           } while (System.nanoTime() < secondDeadline);
+16068:           assertThat(replay.path("status").asText()).isEqualTo("PASSED");
+16069:           assertThat(replay.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+16070:           assertThat(INCREMENTAL_ORDINARY_READS.get() - reads).isEqualTo(1);
+16071:           assertThat(VALUES.getLast()).isNotEqualTo(previousPageValue);
+16072:           assertThat(MODEL_WIRE).hasSize(callsAtFinalize);
+16073:           assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(beforeLegacy);
+16074:           assertThat(RECEIPTS.getLast()).isEqualTo("literal-control");
+
+### 37 POLL assertIncrementalTerminalRefusal RETURN_LAST
+16123:     }
+16124:     return refusals;
+16125:   }
+16126: 
+16127:   private void assertIncrementalTerminalRefusal(
+16128:       String id, String variant, UUID test, JsonNode base, int model, int legacy, int effects)
+16129:       throws Exception {
+16130:     String expected = variant.equals("unknown2") ? "UNKNOWN_OUTCOME" : "FAILED";
+16131:     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+16132:     String state;
+16133:     do {
+16134:       state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+16135:       if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED", "FINALIZING")
+16136:           .contains(state)) {
+16137:         break;
+16138:       }
+16139:       Thread.sleep(25);
+16140:     } while (System.nanoTime() < deadline);
+16141:     assertThat(state).as("prefix refusal retains factual terminal outcome").isEqualTo(expected);
+16142:     assertThat(MODEL_WIRE).hasSize(model);
+16143:     assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
+16144:     assertThat(RECEIPTS).hasSize(effects);
+16145:     assertThat(
+16146:             jdbc.queryForObject(
+16147:                 "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=?",
+
+### 38 POLL confirmIncrementalPrefix RETURN_LAST
+16414:                 String.class,
+16415:                 primaryCsi)));
+16416:     return GuidedContracts.canonical(snapshot);
+16417:   }
+16418: 
+16419:   private JsonNode confirmIncrementalPrefix(
+16420:       String id, String variant, UUID test, int model, int legacy, int effects) throws Exception {
+16421:     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+16422:     while (System.nanoTime() < deadline) {
+16423:       String state =
+16424:           sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+16425:       if (state.equals("AWAITING_CLARIFICATION")) {
+16426:         break;
+16427:       }
+16428:       assertThat(List.of("FAILED", "UNKNOWN_OUTCOME", "EXPIRED", "CANCELLED", "FINALIZING"))
+16429:           .doesNotContain(state);
+16430:       Thread.sleep(25);
+16431:     }
+16432:     JsonNode waiting = publicCall("/api/v1/studio/guided-sessions/" + id, null, 200, null);
+16433:     assertThat(waiting.path("session").path("state").asText()).isEqualTo("AWAITING_CLARIFICATION");
+16434:     assertThat(MODEL_WIRE).hasSize(model);
+16435:     assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
+16436:     assertThat(RECEIPTS).hasSize(effects);
+16437:     assertThat(
+16438:             jdbc.queryForObject(
+
+### 39 DELIBERATE confirmIncrementalPrefix -
+16570:               C,
+16571:               URI.create("https://localhost:" + port),
+16572:               TEMP.resolve("coordinator.jwt"));
+16573:       replacement.continueRuns();
+16574:       replacement.continueRuns();
+16575:       assertThat(
+16576:               publicCall(
+16577:                   "/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null))
+16578:           .isEqualTo(question);
+16579:       assertThat(incrementalPendingSnapshot(id)).isEqualTo(pending);
+16580:     }
+16581:     if (variant.equals("confirm-long-wait")) {
+16582:       JsonNode originalPreparation =
+16583:           incrementalPreparationEvent(id, request.path("evidenceHash").asText());
+16584:       Instant originalDeadline = Instant.parse(originalPreparation.path("expiresAt").asText());
+16585:       while (!Instant.now().isAfter(originalDeadline.plusMillis(20))) {
+16586:         Thread.sleep(100);
+16587:       }
+16588:       JsonNode renewed =
+16589:           sessions.transaction(() -> sessions.lock(id).document().path("owner").deepCopy());
+16590:       assertThat(renewed.path("workerId")).isEqualTo(current.path("owner").path("workerId"));
+16591:       assertThat(renewed.path("fence")).isEqualTo(current.path("owner").path("fence"));
+16592:       assertThat(Instant.parse(renewed.path("leaseExpiresAt").asText())).isAfter(originalDeadline);
+16593:       assertThat(incrementalPendingSnapshot(id)).isEqualTo(pending);
+16594:     }
+
+### 40 DELIBERATE confirmIncrementalPrefix -
+16648:       publicCall(
+16649:           "/api/v1/studio/guided-sessions/" + id + "/clarify",
+16650:           answer,
+16651:           409,
+16652:           UUID.randomUUID().toString());
+16653:     }
+16654:     if (variant.equals("confirm-expire")) {
+16655:       // Actual original lifetime elapses. No SQL timestamp rewrite, clock substitution or new
+16656:       // lease.
+16657:       Instant expires = Instant.parse(question.path("expiresAt").asText());
+16658:       long renewCredentialsAt = System.nanoTime();
+16659:       while (!Instant.now().isAfter(expires.plusMillis(20))) {
+16660:         if (System.nanoTime() >= renewCredentialsAt) {
+16661:           refreshFixtureCredentials();
+16662:           renewCredentialsAt = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+16663:         }
+16664:         Thread.sleep(250);
+16665:       }
+16666:       ownedApplicationContext
+16667:           .getBean(com.citi.put.checks.studio.guided.session.GuidedSessionService.class)
+16668:           .expire();
+16669:       publicCall(
+16670:           "/api/v1/studio/guided-sessions/" + id + "/clarify",
+16671:           answer,
+16672:           409,
+
+### 41 POLL confirmIncrementalPrefix RETURN_LAST
+16759:                   return incrementalPublicRaceRequest(
+16760:                       id,
+16761:                       "cancel",
+16762:                       C.object().put("schemaVersion", 3).put("reason", "userRequested"));
+16763:                 });
+16764:         startRace.countDown();
+16765:         assertThat(yes.get(35, java.util.concurrent.TimeUnit.SECONDS).statusCode()).isIn(202, 409);
+16766:         assertThat(no.get(35, java.util.concurrent.TimeUnit.SECONDS).statusCode()).isEqualTo(202);
+16767:       }
+16768:       long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+16769:       String outcome;
+16770:       do {
+16771:         outcome = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+16772:         if (List.of("CANCELLED", "UNKNOWN_OUTCOME", "FAILED").contains(outcome)) {
+16773:           break;
+16774:         }
+16775:         Thread.sleep(20);
+16776:       } while (System.nanoTime() < until);
+16777:       assertThat(outcome).isIn("CANCELLED", "UNKNOWN_OUTCOME", "FAILED");
+16778:       assertThat(
+16779:               jdbc.queryForObject(
+16780:                   "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=?",
+16781:                   Integer.class,
+16782:                   id,
+16783:                   request.path("coordinate").path("stepId").asText(),
+
+### 42 POLL assertActualDriftCallbackAuthorityThenRelease RETURN_LAST
+16809:                   .asBoolean())
+16810:           .isFalse();
+16811:       return request;
+16812:     }
+16813:     String answerKey = UUID.randomUUID().toString();
+16814:     JsonNode accepted =
+16815:         publicCall("/api/v1/studio/guided-sessions/" + id + "/clarify", answer, 202, answerKey);
+16816:     assertThat(
+16817:             publicCall("/api/v1/studio/guided-sessions/" + id + "/clarify", answer, 202, answerKey))
+16818:         .isEqualTo(accepted);
+16819:     return request;
+16820:   }
+16821: 
+16822:   private void assertActualDriftCallbackAuthorityThenRelease(String id) throws Exception {
+16823:     long until = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+16824:     while (!INCREMENTAL_DRIFT_CAPTURE.containsKey(id) && System.nanoTime() < until) {
+16825:       Thread.sleep(10);
+16826:     }
+16827:     assertThat(INCREMENTAL_DRIFT_CAPTURE).containsKey(id);
+16828:     ObjectNode actual = INCREMENTAL_DRIFT_CAPTURE.get(id);
+16829:     JsonNode receipt = actual.path("receipt");
+16830:     long fence = receipt.path("ownerFence").asLong();
+16831:     assertThat(receipt.path("nativeInvocationStarted").asBoolean(true)).isFalse();
+16832:     assertThat(
+16833:             jdbc.queryForObject(
+
+### 43 POLL assertPendingContextGuardsThenRelease RETURN_LAST
+16932:             .timeout(Duration.ofSeconds(10))
+16933:             .header("Authorization", "Bearer " + bearer)
+16934:             .header("X-Owner-Fence", Long.toString(fence))
+16935:             .header("Idempotency-Key", UUID.randomUUID().toString())
+16936:             .header("Content-Type", "application/json")
+16937:             .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+16938:             .build();
+16939:     return HttpClient.newBuilder()
+16940:         .sslContext(tls)
+16941:         .build()
+16942:         .send(request, HttpResponse.BodyHandlers.ofString());
+16943:   }
+16944: 
+16945:   private void assertPendingContextGuardsThenRelease(String id) throws Exception {
+16946:     long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+16947:     while (!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline) {
+16948:       Thread.sleep(10);
+16949:     }
+16950:     assertThat(INCREMENTAL_ACK_ENTERED)
+16951:         .as("actual runner accepted version2 on the original browser before returning ACK")
+16952:         .contains(id);
+16953:     var service =
+16954:         ownedApplicationContext.getBean(
+16955:             com.citi.put.checks.studio.guided.session.GuidedSessionService.class);
+16956:     var materialization =
+
+### 44 POLL actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues (Order 1) RETURN_LAST
+17700:     JsonNode acquisition =
+17701:         sessions.transaction(
+17702:             () -> sessions.lock(id).progress().path("translationAcquisition").deepCopy());
+17703:     assertThat(acquisition.path("allowanceMs").asLong()).isEqualTo(30000);
+17704:     assertThat(acquisition.path("policy").asText()).isEqualTo("passive-target-1");
+17705:     assertThat(acquisition.path("sourceRevision").asText()).isEqualTo("1");
+17706:     long learningEnd = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+17707:     while (System.nanoTime() < learningEnd) {
+17708:       JsonNode current = sessions.transaction(() -> sessions.lock(id).document().deepCopy());
+17709:       if (current.path("state").asText().equals("FINALIZING")) {
+17710:         break;
+17711:       }
+17712:       if (List.of("FAILED", "EXPIRED", "UNKNOWN_OUTCOME", "CANCELLED")
+17713:           .contains(current.path("state").asText())) {
+17714:         break;
+17715:       }
+17716:       Thread.sleep(50);
+17717:     }
+17718:     var learningState = sessions.transaction(() -> sessions.lock(id));
+17719:     ObjectNode diagnostic =
+17720:         C.object()
+17721:             .put("state", learningState.document().path("state").asText())
+17722:             .put("errorCode", learningState.progress().path("errorCode").asText());
+17723:     diagnostic
+17724:         .put("providerFailures", PROVIDER_FAILURES.get())
+
+### 45 POLL actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues (Order 1) RETURN_LAST
+17880:                 C.object(),
+17881:                 202,
+17882:                 UUID.randomUUID().toString());
+17883:         UUID executionId = UUID.fromString(accepted.path("executionId").asText());
+17884:         StudioDispatcher activeDispatcher =
+17885:             observedWorker == null ? dispatcher : observedWorker.getBean(StudioDispatcher.class);
+17886:         assertThat(activeDispatcher.dispatchOnce()).isEqualTo(1);
+17887:         long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+17888:         String state;
+17889:         do {
+17890:           state =
+17891:               jdbc.queryForObject(
+17892:                   "SELECT status FROM ui_test_executions WHERE id=?", String.class, executionId);
+17893:           if (List.of("PASSED", "FAILED", "ERROR").contains(state)) {
+17894:             break;
+17895:           }
+17896:           Thread.sleep(50);
+17897:         } while (System.nanoTime() < end);
+17898:         assertThat(state)
+17899:             .as("execution %s; runner log %s", executionId, TEMP.resolve("ordinary.log"))
+17900:             .isEqualTo("PASSED");
+17901:         assertThat(
+17902:                 jdbc.queryForObject(
+17903:                     "SELECT observed_admission_receipt IS NOT NULL FROM ui_test_executions WHERE"
+17904:                         + " id=?",
+
+### 46 DELIBERATE queuedAndPreReadyRefusals (Order 2) -
+18000:             jdbc.queryForObject(
+18001:                 "SELECT error_code FROM ui_test_executions WHERE id=?", String.class, cancelledId))
+18002:         .isEqualTo("CANCELLED");
+18003:     JsonNode expired =
+18004:         publicCall(
+18005:             "/api/v1/studio/tests/" + testId + "/execute",
+18006:             C.object(),
+18007:             202,
+18008:             UUID.randomUUID().toString());
+18009:     UUID expiredId = UUID.fromString(expired.path("executionId").asText());
+18010:     String expiresAt =
+18011:         jdbc.queryForObject(
+18012:             "SELECT observed_revision_binding->'replayGrant'->>'expiresAt' FROM ui_test_executions"
+18013:                 + " WHERE id=?",
+18014:             String.class,
+18015:             expiredId);
+18016:     Thread.sleep(
+18017:         Math.max(1, Duration.between(Instant.now(), Instant.parse(expiresAt)).toMillis() + 30));
+18018:     assertThat(dispatcher.dispatchOnce()).isZero();
+18019:     assertThat(
+18020:             jdbc.queryForObject(
+18021:                 "SELECT error_code FROM ui_test_executions WHERE id=?", String.class, expiredId))
+18022:         .isEqualTo("AUTHORIZATION_REVOKED");
+18023:     for (UUID id : List.of(cancelledId, expiredId)) {
+18024:       assertThat(
+
+### 47 POLL queuedAndPreReadyRefusals (Order 2) RETURN_LAST
+18040:     String id = accepted.path("executionId").asText();
+18041:     UUID failureId = UUID.fromString(id);
+18042:     preReadyId = failureId;
+18043:     var noReceipt =
+18044:         callback(
+18045:             failureId,
+18046:             failureReport(
+18047:                 failureId,
+18048:                 observedBinding(failureId),
+18049:                 com.fasterxml.jackson.databind.node.NullNode.instance),
+18050:             CALLBACK);
+18051:     assertThat(noReceipt.statusCode()).isEqualTo(409);
+18052:     assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+18053:     long enteredDeadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+18054:     while (!Files.exists(TEMP.resolve("initial-context-check-entered"))
+18055:         && System.nanoTime() < enteredDeadline) {
+18056:       Thread.sleep(20);
+18057:     }
+18058:     assertThat(Files.exists(TEMP.resolve("initial-context-check-entered"))).isTrue();
+18059:     invalidPreReadyReports(failureId);
+18060:     var beforeRollback = failureState(failureId);
+18061:     HOLD_TERMINAL_RETRY.set(true);
+18062:     FAIL_TERMINAL_COMMIT.set(true);
+18063:     writeInitialContextState("{\"pause\":false,\"fail\":true}");
+18064:     try {
+
+### 48 POLL queuedAndPreReadyRefusals (Order 2) RETURN_LAST
+18063:     writeInitialContextState("{\"pause\":false,\"fail\":true}");
+18064:     try {
+18065:       assertThat(retryPaused.await(10, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+18066:       assertThat(TERMINAL_ROLLBACKS.get()).isEqualTo(1);
+18067:       assertThat(failureState(failureId)).isEqualTo(beforeRollback);
+18068:     } finally {
+18069:       HOLD_TERMINAL_RETRY.set(false);
+18070:       retryRelease.countDown();
+18071:     }
+18072:     JsonNode snapshot = null;
+18073:     long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+18074:     while (System.nanoTime() < until) {
+18075:       snapshot = publicCall("/api/v1/studio/executions/" + id, null, 200, null);
+18076:       if (snapshot.path("streamComplete").asBoolean()) {
+18077:         break;
+18078:       }
+18079:       Thread.sleep(50);
+18080:     }
+18081:     assertThat(snapshot).isNotNull();
+18082:     assertThat(snapshot.path("streamComplete").asBoolean()).isTrue();
+18083:     assertThat(snapshot.path("status").asText()).isIn("FAILED", "ERROR");
+18084:     assertThat(snapshot.path("startedAt").isNull()).isTrue();
+18085:     assertThat(snapshot.path("stepResults")).hasSize(3);
+18086:     for (JsonNode step : snapshot.path("stepResults")) {
+18087:       assertThat(step.path("status").asText()).isEqualTo("SKIPPED");
+
+### 49 POLL queuedAndPreReadyRefusals (Order 2) RETURN_LAST
+18110:             .build()
+18111:             .send(
+18112:                 HttpRequest.newBuilder(
+18113:                         URI.create(
+18114:                             "https://localhost:" + port + snapshot.path("videoPath").asText()))
+18115:                     .header("Cookie", "put_session=" + COOKIE)
+18116:                     .header("Range", "bytes=0-3")
+18117:                     .GET()
+18118:                     .build(),
+18119:                 HttpResponse.BodyHandlers.ofByteArray());
+18120:     assertThat(videoResponse.statusCode()).isEqualTo(206);
+18121:     assertThat(videoResponse.body())
+18122:         .containsExactly((byte) 0x1a, (byte) 0x45, (byte) 0xdf, (byte) 0xa3);
+18123:     assertThat(snapshot.toString()).doesNotContain(SAVED);
+18124:     long captureDeadline = System.nanoTime() + Duration.ofSeconds(2).toNanos();
+18125:     while (RECEIVED_FAILURE_REPORTS.size() < 2 && System.nanoTime() < captureDeadline) {
+18126:       Thread.sleep(10);
+18127:     }
+18128:     assertThat(RECEIVED_FAILURE_REPORTS).hasSizeGreaterThanOrEqualTo(2);
+18129:     for (JsonNode actual : RECEIVED_FAILURE_REPORTS) {
+18130:       assertThat(actual.path("kind").asText()).isEqualTo("FINAL");
+18131:       assertThat(actual.toString()).doesNotContain(SAVED);
+18132:     }
+18133:     JsonNode actualFinal = RECEIVED_FAILURE_REPORTS.getLast();
+18134:     var terminal = failureState(failureId);
+
+### 50 POLL asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays (Order 4) RETURN_LAST
+18620:                         && missing) {
+18621:                       return C.object()
+18622:                           .put("generation", progress.path("generation").asInt())
+18623:                           .put("extraPolls", marker.path("totalExtraPolls").asInt())
+18624:                           .put("observationHash", progress.path("observationHash").asText());
+18625:                     }
+18626:                   }
+18627:                   return null;
+18628:                 });
+18629:         var receiptRelease = ASYNC_RECEIPTS.get(beforeNavigations + 1);
+18630:         if (checkpoint != null && receiptRelease != null) {
+18631:           assertThat(RECEIPTS).hasSize(beforeReceipts + 1);
+18632:           missingCheckpoint = checkpoint;
+18633:           receiptRelease.countDown();
+18634:           break;
+18635:         }
+18636:         Thread.sleep(10);
+18637:       }
+18638:       assertThat(missingCheckpoint)
+18639:           .as("real committed missing-target observation; logs %s", TEMP)
+18640:           .isNotNull();
+18641:       awaitFinalizing(id);
+18642:       JsonNode marker =
+18643:           sessions.transaction(
+18644:               () -> sessions.lock(id).progress().path("translationAcquisition").deepCopy());
+
+### 51 POLL asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays (Order 4) RETURN_LAST
+18677:         int beforeAbsent = java.util.Collections.frequency(PASSIVE_REPLAY, "ABSENT");
+18678:         JsonNode accepted =
+18679:             publicCall(
+18680:                 "/api/v1/studio/tests/" + testId + "/execute",
+18681:                 C.object(),
+18682:                 202,
+18683:                 UUID.randomUUID().toString());
+18684:         UUID execution = UUID.fromString(accepted.path("executionId").asText());
+18685:         assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+18686:         long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+18687:         JsonNode snapshot = null;
+18688:         do {
+18689:           snapshot = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+18690:           if (snapshot.path("streamComplete").asBoolean()) {
+18691:             break;
+18692:           }
+18693:           Thread.sleep(30);
+18694:         } while (System.nanoTime() < end);
+18695:         assertThat(snapshot.path("status").asText())
+18696:             .as("async replay logs %s", TEMP)
+18697:             .isEqualTo("PASSED");
+18698:         assertThat(snapshot.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+18699:         assertThat(java.util.Collections.frequency(PASSIVE_REPLAY, "ABSENT"))
+18700:             .isGreaterThan(beforeAbsent);
+18701:         assertThat(
+
+### 52 POLL modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance (Order 5) RETURN_LAST
+18746:   void modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance() throws Exception {
+18747:     int models = MODEL_WIRE.size(), navigations = NAVIGATIONS.get(), receipts = RECEIPTS.size();
+18748:     timingSourceText =
+18749:         "Open " + URL + " or " + URL + "?alternative=two and read the Order reference.";
+18750:     UUID testId = createSource(List.of(timingSourceText, TEXT.get(1), TEXT.get(2)), 1);
+18751:     askTimingSource = true;
+18752:     delayTimingModel = true;
+18753:     try {
+18754:       String id = startLearning(testId);
+18755:       long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+18756:       String state = "";
+18757:       while (System.nanoTime() < deadline) {
+18758:         state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+18759:         if (state.equals("AWAITING_CLARIFICATION")) {
+18760:           break;
+18761:         }
+18762:         Thread.sleep(20);
+18763:       }
+18764:       assertThat(state).isEqualTo("AWAITING_CLARIFICATION");
+18765:       JsonNode question =
+18766:           publicCall("/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null);
+18767:       assertThat(question.path("phase").asText()).isEqualTo("source");
+18768:       String selected = null;
+18769:       for (JsonNode choice : question.path("choices")) {
+18770:         if (choice
+
+### 53 DELIBERATE modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance (Order 5) -
+18762:         Thread.sleep(20);
+18763:       }
+18764:       assertThat(state).isEqualTo("AWAITING_CLARIFICATION");
+18765:       JsonNode question =
+18766:           publicCall("/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null);
+18767:       assertThat(question.path("phase").asText()).isEqualTo("source");
+18768:       String selected = null;
+18769:       for (JsonNode choice : question.path("choices")) {
+18770:         if (choice
+18771:             .path("safeLabel")
+18772:             .asText()
+18773:             .equals("Use authored text: " + URL + "?alternative=two")) {
+18774:           selected = choice.path("choiceId").asText();
+18775:         }
+18776:       }
+18777:       assertThat(selected).isNotBlank();
+18778:       Thread.sleep(1250);
+18779:       JsonNode beforeAnswer =
+18780:           sessions.transaction(
+18781:               () -> sessions.lock(id).progress().path("translationAcquisition").deepCopy());
+18782:       assertThat(beforeAnswer.path("allowanceMs").asLong()).isEqualTo(1000);
+18783:       assertThat(beforeAnswer.path("totalExtraPolls").asInt()).isZero();
+18784:       publicCall(
+18785:           "/api/v1/studio/guided-sessions/" + id + "/clarify",
+18786:           C.object()
+
+### 54 POLL absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork (Order 6) RETURN_LAST
+18848:     for (boolean cancel : List.of(false, true)) {
+18849:       int navigations = NAVIGATIONS.get(), receipts = RECEIPTS.size(), calls = MODEL_WIRE.size();
+18850:       UUID test = createSource(TEXT, cancel ? 30 : 1);
+18851:       asynchronousPage = true;
+18852:       try {
+18853:         String id = startLearning(test);
+18854:         long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+18855:         JsonNode checkpoint = null;
+18856:         while (System.nanoTime() < until) {
+18857:           var current = sessions.transaction(() -> sessions.lock(id));
+18858:           JsonNode marker = current.progress().path("translationAcquisition");
+18859:           if (marker.path("totalExtraPolls").asInt() > 0
+18860:               && ASYNC_RECEIPTS.containsKey(navigations + 1)) {
+18861:             checkpoint = marker.deepCopy();
+18862:             break;
+18863:           }
+18864:           Thread.sleep(10);
+18865:         }
+18866:         assertThat(checkpoint).as("real passive wait before stopping; logs %s", TEMP).isNotNull();
+18867:         if (cancel) {
+18868:           publicCall(
+18869:               "/api/v1/studio/guided-sessions/" + id + "/cancel",
+18870:               C.object().put("schemaVersion", 3).put("reason", "userRequested"),
+18871:               202,
+18872:               UUID.randomUUID().toString());
+
+### 55 POLL absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork (Order 6) RETURN_LAST
+18866:         assertThat(checkpoint).as("real passive wait before stopping; logs %s", TEMP).isNotNull();
+18867:         if (cancel) {
+18868:           publicCall(
+18869:               "/api/v1/studio/guided-sessions/" + id + "/cancel",
+18870:               C.object().put("schemaVersion", 3).put("reason", "userRequested"),
+18871:               202,
+18872:               UUID.randomUUID().toString());
+18873:         }
+18874:         String expected = cancel ? "CANCELLED" : "FAILED";
+18875:         until = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+18876:         String state = "";
+18877:         while (System.nanoTime() < until) {
+18878:           state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+18879:           if (state.equals(expected)) {
+18880:             break;
+18881:           }
+18882:           Thread.sleep(20);
+18883:         }
+18884:         assertThat(state).as("delayed terminal; logs %s", TEMP).isEqualTo(expected);
+18885:         var stopped = sessions.transaction(() -> sessions.lock(id));
+18886:         if (!cancel) {
+18887:           assertThat(stopped.progress().path("errorCode").asText()).isEqualTo("BUDGET_EXCEEDED");
+18888:           assertThat(
+18889:                   stopped
+18890:                       .progress()
+
+### 56 DELIBERATE absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork (Order 6) -
+18892:                       .path("active")
+18893:                       .path("usedMs")
+18894:                       .asLong())
+18895:               .isEqualTo(1000);
+18896:         }
+18897:         var actions = sessions.transaction(() -> sessions.actions(id));
+18898:         assertThat(actions).hasSize(4);
+18899:         assertThat(actions).allMatch(a -> a.path("state").asText().equals("SUCCEEDED"));
+18900:         assertThat(MODEL_KINDS.subList(calls, MODEL_KINDS.size()))
+18901:             .containsExactly(
+18902:                 "SOURCE_PLAN", "NEXT_ACTION", "NEXT_ACTION", "NEXT_ACTION", "NEXT_ACTION");
+18903:         assertThat(RECEIPTS).hasSize(receipts + 1);
+18904:         assertThat(NAVIGATIONS.get()).isEqualTo(navigations + 1);
+18905:         int stoppedCalls = MODEL_WIRE.size();
+18906:         ASYNC_RECEIPTS.get(navigations + 1).countDown();
+18907:         // The real application response may now arrive, but stopped authority cannot continue.
+18908:         Thread.sleep(350);
+18909:         List<ObjectNode> lateActions = sessions.transaction(() -> sessions.actions(id));
+18910:         assertThat(lateActions).isEqualTo(actions);
+18911:         String lateState =
+18912:             sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+18913:         assertThat(lateState).isEqualTo(expected);
+18914:         assertThat(MODEL_WIRE).hasSize(stoppedCalls);
+18915:         assertThat(RECEIPTS).hasSize(receipts + 1);
+18916:         assertThat(NAVIGATIONS.get()).isEqualTo(navigations + 1);
+
+### 57 DELIBERATE observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays (Order 7) -
+18956:                   String.class,
+18957:                   id,
+18958:                   question.path("clarificationId").asText()));
+18959:       JsonNode capture = identity.path("questionCapture");
+18960:       JsonNode originalObservation =
+18961:           C.parse(
+18962:               jdbc.queryForObject(
+18963:                   "SELECT observation::text FROM studio_guided_publication_observations WHERE"
+18964:                       + " session_id=? AND observation_hash=?",
+18965:                   String.class,
+18966:                   id,
+18967:                   capture.path("observationHash").asText()));
+18968:       assertThat(GuidedContracts.hash(originalObservation))
+18969:           .isEqualTo(capture.path("observationHash").asText());
+18970:       assertThat(originalObservation.path("generation")).isEqualTo(question.path("generation"));
+18971:       assertThat(RECEIPTS).hasSize(receipts);
+18972:       Thread.sleep(1250);
+18973:       publicCall(
+18974:           "/api/v1/studio/guided-sessions/" + id + "/clarify",
+18975:           C.object()
+18976:               .put("schemaVersion", 3)
+18977:               .put("clarificationId", question.path("clarificationId").asText())
+18978:               .put("generation", question.path("generation").asInt())
+18979:               .put("choiceId", selected.path("choiceId").asText()),
+18980:           202,
+
+### 58 POLL observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays (Order 7) RETURN_LAST
+19046:       for (int run = 0; run < 2; run++) {
+19047:         JsonNode accepted =
+19048:             publicCall(
+19049:                 "/api/v1/studio/tests/" + testId + "/execute",
+19050:                 C.object(),
+19051:                 202,
+19052:                 UUID.randomUUID().toString());
+19053:         UUID execution = UUID.fromString(accepted.path("executionId").asText());
+19054:         assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+19055:         long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+19056:         JsonNode snapshot;
+19057:         do {
+19058:           snapshot = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+19059:           if (snapshot.path("streamComplete").asBoolean()) {
+19060:             break;
+19061:           }
+19062:           Thread.sleep(30);
+19063:         } while (System.nanoTime() < end);
+19064:         assertThat(snapshot.path("status").asText())
+19065:             .as("observed choice logs %s", TEMP)
+19066:             .isEqualTo("PASSED");
+19067:         assertThat(snapshot.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+19068:         assertThat(
+19069:                 jdbc.queryForObject(
+19070:                     "SELECT artifact::text FROM ui_test_revisions WHERE id=?",
+
+### 59 DELIBERATE originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall (Order 8) -
+19189:                       "SELECT count(*) FROM studio_guided_publication_observations WHERE"
+19190:                           + " session_id=?",
+19191:                       Integer.class,
+19192:                       id))
+19193:               .isEqualTo(1);
+19194:           assertThat(
+19195:                   jdbc.queryForObject(
+19196:                       "SELECT count(*) FROM studio_guided_publications WHERE session_id=?",
+19197:                       Integer.class,
+19198:                       id))
+19199:               .isZero();
+19200:           JsonNode counters =
+19201:               sessions.transaction(() -> sessions.lock(id).document().path("counters").deepCopy());
+19202:           assertThat(counters.path("modelProposals").asInt()).isEqualTo(4);
+19203:           assertThat(counters.path("modelInputTokens").asLong()).isPositive();
+19204:           assertThat(counters.path("modelOutputTokens").asLong()).isPositive();
+19205:           Thread.sleep(1100);
+19206:           assertThat(MODEL_WIRE).hasSize(calls + 4);
+19207:           assertThat(RECEIPTS).hasSize(receipts);
+19208:           assertThat(LEGACY_MODEL_CALLS.get()).isZero();
+19209:           ObjectNode metrics =
+19210:               C.object()
+19211:                   .put("mode", mode)
+19212:                   .put("modelCalls", 4)
+19213:                   .put("rejectedAttemptInputTokens", 20)
+
+### 60 POLL awaitState MAP_EXCEPTION
+19235:       askObservedChoice = false;
+19236:       beforeObservedQuestion = null;
+19237:     }
+19238:   }
+19239: 
+19240:   private void awaitState(String id, String expected) throws Exception {
+19241:     long end = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+19242:     while (System.nanoTime() < end) {
+19243:       String state =
+19244:           sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+19245:       if (state.equals(expected)) {
+19246:         return;
+19247:       }
+19248:       if (List.of("FAILED", "EXPIRED", "UNKNOWN_OUTCOME", "CANCELLED").contains(state)) {
+19249:         throw new AssertionError("Expected " + expected + " but got " + state + "; logs " + TEMP);
+19250:       }
+19251:       Thread.sleep(20);
+19252:     }
+19253:     throw new AssertionError("Expected " + expected + "; logs " + TEMP);
+19254:   }
+19255: 
+19256:   private HttpResponse<String> observedAdmissionHttp(String execution, String body)
+19257:       throws Exception {
+19258:     HttpRequest request =
+19259:         HttpRequest.newBuilder(
+
+### 61 POLL actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel (Order 9) RETURN_LAST
+19573:         assertThat(
+19574:                 COUNTED_VAULT.readCount(
+19575:                         StudioVaultProvider.ReferenceKind.SECRET, vaultScope, "PASS")
+19576:                     - baselineReads)
+19577:             .as("acceptance remains names-only")
+19578:             .isEqualTo(run + 1);
+19579:         assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+19580:         long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+19581:         String status = "";
+19582:         while (System.nanoTime() < deadline) {
+19583:           status =
+19584:               jdbc.queryForObject(
+19585:                   "SELECT status FROM ui_test_executions WHERE id=?", String.class, execution);
+19586:           if (List.of("PASSED", "FAILED", "ERROR").contains(status)) {
+19587:             break;
+19588:           }
+19589:           Thread.sleep(50);
+19590:         }
+19591:         assertThat(status)
+19592:             .as("actual compiled child login, evidence at %s", TEMP)
+19593:             .isEqualTo("PASSED");
+19594:         assertThat(
+19595:                 COUNTED_VAULT.readCount(
+19596:                         StudioVaultProvider.ReferenceKind.SECRET, vaultScope, "PASS")
+19597:                     - baselineReads)
+
+### 62 POLL awaitGuidedVideoSettled RETURN_LAST
+19819: 
+19820:   /** The guided manifest disclosure (AC-5), as the runner writes it. */
+19821:   private static final String GUIDED_DISCLOSURE =
+19822:       "Password fills are rendered as masked dots (password-only rule). A page that later"
+19823:           + " displays a secret in plain text is not protected by this recording.";
+19824: 
+19825:   /** Polls the result (bounded, inside settle-grace) until the video is no longer PROCESSING. */
+19826:   private JsonNode awaitGuidedVideoSettled(String sessionId) throws Exception {
+19827:     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+19828:     JsonNode result;
+19829:     do {
+19830:       result =
+19831:           publicCall("/api/v1/studio/guided-sessions/" + sessionId + "/result", null, 200, null);
+19832:       if (!result.path("evidence").path("video").path("status").asText().equals("PROCESSING")) {
+19833:         break;
+19834:       }
+19835:       Thread.sleep(100);
+19836:     } while (System.nanoTime() < deadline);
+19837:     C.validate("v3/result", result);
+19838:     return result;
+19839:   }
+19840: 
+19841:   private HttpResponse<byte[]> guidedVideoRead(String sessionId, String range, boolean cookie)
+19842:       throws Exception {
+19843:     var builder =
+
+### 63 POLL guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes (Order 9) RETURN_LAST
+20191:                   .filter(
+20192:                       file ->
+20193:                           file.getFileName().toString().endsWith(".webm")
+20194:                               && Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS))
+20195:                   .toList();
+20196:         }
+20197:         if (!live.isEmpty()) {
+20198:           stateAtInjection = state;
+20199:           recorderDirectory = directory;
+20200:           for (Path recorded : live) {
+20201:             Files.delete(recorded);
+20202:             removed++;
+20203:           }
+20204:           break;
+20205:         }
+20206:       }
+20207:       Thread.sleep(20);
+20208:     }
+20209:     assertThat(recorderDirectory)
+20210:         .as("guided recorder live file observed mid-session; logs %s", TEMP)
+20211:         .isNotNull();
+20212:     assertThat(removed).as("the live recording file was removed").isPositive();
+20213:     assertThat(stateAtInjection).isNotNull();
+20214: 
+20215:     // The session still finishes.
+
+### 64 POLL p6CommittedChildCut (Order 26, through p3Case) RETURN_LAST
+21443:                   && "DISPATCH".equals(release.get("decision_stage"))
+21444:                   && "RESOLVED".equals(release.get("outcome")))
+21445:           .isTrue();
+21446:       p4CompareAuditScope(release, used);
+21447:       p3AssertAuditScope(null, execution, scope);
+21448:       assertThat(String.valueOf(owner.get("attempt_id")).equals(release.get("attempt_id")))
+21449:           .isTrue();
+21450:       assertThat(execution.equals(release.get("execution_id"))).isTrue();
+21451:       p6VerifyChild(cut);
+21452:       p6AssertNoFinalManifest(cut);
+21453:       p6SameProcess(cut.parent.toHandle(), cut.parentStarted);
+21454:       cut.stopIssued = true;
+21455:       p6Signal("-STOP", Long.toString(cut.parent.pid()));
+21456:       long stoppedBy = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+21457:       while (System.nanoTime() < stoppedBy
+21458:           && !p6Status(cut.parent.toHandle()).state().startsWith("T")) {
+21459:         Thread.sleep(10);
+21460:       }
+21461:       p6SameProcess(cut.parent.toHandle(), cut.parentStarted);
+21462:       assertThat(p6Status(cut.parent.toHandle()).state().startsWith("T"))
+21463:           .as("own parent actually STOPPED before child cut")
+21464:           .isTrue();
+21465:       p6SameProcess(cut.child, cut.childStarted);
+21466:       assertThat(p6Status(cut.child).group() == cut.child.pid()).isTrue();
+21467:       cut.childTree =
+
+### 65 DELIBERATE p6WaitOriginalDeadline (Order 26) -
+21657:     assertThat(
+21658:             store
+21659:                 .read(com.citi.put.checks.studio.recovery.ManifestKeys.manifestKey(identity))
+21660:                 .isEmpty())
+21661:         .as("no authentic manifest was produced by the physically cut parent")
+21662:         .isTrue();
+21663:   }
+21664: 
+21665:   private void p6WaitOriginalDeadline(P6ChildCut cut) throws Exception {
+21666:     Instant deadline =
+21667:         ((java.sql.Timestamp) p6Owner(cut.execution).get("run_deadline_at")).toInstant();
+21668:     long remaining = Duration.between(Instant.now(), deadline).toMillis();
+21669:     assertThat(remaining)
+21670:         .as("original accepted run deadline within case budget")
+21671:         .isLessThanOrEqualTo(Duration.ofSeconds(620).toMillis());
+21672:     while (Instant.now().isBefore(deadline)) {
+21673:       Thread.sleep(
+21674:           Math.max(1, Math.min(1000, Duration.between(Instant.now(), deadline).toMillis())));
+21675:     }
+21676:   }
+21677: 
+21678:   private static P6OwnedPid p6SnapshotPid(ProcessHandle handle) {
+21679:     // This existing pre-cut inventory also pins ancestry/command for later lifecycle signals.
+21680:     for (OwnedFixtureProcess root : OWNED_FIXTURE_PROCESSES) {
+21681:       if (root.wrapper == null || !root.process.isAlive()) {
+
+### 66 POLL p6AwaitProcesses MAP_EXCEPTION
+21883:             continue;
+21884:           }
+21885:           assertThat(started.map(pid.started()::equals).orElse(false)).isTrue();
+21886:           if (gone) {
+21887:             complete = false;
+21888:           } else {
+21889:             String state = p6Status(pid.handle()).state();
+21890:             if (!state.startsWith("Z") && !"X".equals(state)) {
+21891:               complete = false;
+21892:             }
+21893:           }
+21894:         }
+21895:       }
+21896:       if (complete) {
+21897:         return;
+21898:       }
+21899:       Thread.sleep(20);
+21900:     } while (System.nanoTime() < deadline);
+21901:     throw new IllegalStateException(
+21902:         gone
+21903:             ? "Owned processes not genuinely reaped"
+21904:             : "Owned child group not execution-terminated");
+21905:   }
+21906: 
+21907:   @Test
+
+### 67 POLL p7FaultAndRetry (Order 27) RETURN_LAST
+22027:             .as("original component remains separate; scheduled polling disabled")
+22028:             .isTrue();
+22029:         assertThat(
+22030:                 ownedApplicationContext
+22031:                     .getBean(com.citi.put.checks.studio.StudioExecutionProperties.class)
+22032:                     .dispatcherOrDefault()
+22033:                     .enabledOrDefault())
+22034:             .isFalse();
+22035:       }
+22036:       if (capacity) {
+22037:         p3AssertBinding(
+22038:             blocker, VaultScope.of(primaryCsi, "fixture", blockerTest), blockerPublication);
+22039:         assertThat(dispatcher.dispatch(blocker)).isTrue();
+22040:         long until = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+22041:         while (!Files.exists(TEMP.resolve("initial-context-check-entered"))
+22042:             && System.nanoTime() < until) {
+22043:           Thread.sleep(20);
+22044:         }
+22045:         assertThat(Files.exists(TEMP.resolve("initial-context-check-entered"))).isTrue();
+22046:         assertThat("ADMITTED".equals(p6Owner(blocker).get("state"))).isTrue();
+22047:         assertThat(
+22048:                 jdbc.queryForObject(
+22049:                     "SELECT browser_started_at IS NULL FROM ui_test_executions WHERE id=?",
+22050:                     Boolean.class,
+22051:                     blocker))
+
+### 68 DELIBERATE p7FaultAndRetry (Order 27) -
+22123:         assertThat(owner.get("zero_send_decision_attempt_id") == null).isTrue();
+22124:         assertThat(
+22125:                 "RESOLVED".equals(oldRelease.get("outcome"))
+22126:                     && oldRelease.get("vault_version") != null)
+22127:             .isTrue();
+22128:         assertThat(
+22129:                 jdbc.queryForObject(
+22130:                     "SELECT count(*) FROM studio_observed_no_send_decisions WHERE execution_id=?"
+22131:                         + " AND attempt_id=?",
+22132:                     Integer.class,
+22133:                     execution,
+22134:                     UUID.fromString(attempt)))
+22135:             .isZero();
+22136:         p3AwaitExecution(blocker, "PASSED");
+22137:         // Only the genuine holder is cleaned; global cleanup would cancel the queued retry owner.
+22138:         p3CleanupOrdinary(blocker, p3Cookie, System.nanoTime() + Duration.ofSeconds(60).toNanos());
+22139:         Thread.sleep(
+22140:             Duration.ofSeconds(5).toMillis()); // Original configured Retry-After pacing only.
+22141:       } else {
+22142:         assertThat(P7_OUTAGE_SCOPE.get() == null).isTrue();
+22143:         assertThat(ACTUAL_DISPATCH_DIAGNOSTICS.containsKey(execution)).isFalse();
+22144:         assertThat(owner.get("definite_refusal_attempt_id") == null).isTrue();
+22145:         assertThat(attempt.equals(String.valueOf(owner.get("zero_send_decision_attempt_id"))))
+22146:             .isTrue();
+22147:         assertThat(
+
+### 69 POLL p8PreReadySelfStop (Order 38) RETURN_LAST
+22306:     long logStart = Files.size(TEMP.resolve("ordinary.log"));
+22307:     Process parent = ordinaryWorker;
+22308:     Instant parentStarted = parent.toHandle().info().startInstant().orElseThrow();
+22309:     boolean paused = false;
+22310:     boolean stopped = false;
+22311:     Throwable workflowPrimary = null;
+22312:     try {
+22313:       Files.deleteIfExists(TEMP.resolve("initial-context-check-entered"));
+22314:       writeInitialContextState("{\"pause\":true,\"fail\":false}");
+22315:       paused = true;
+22316:       UUID execution = p3Execute(test);
+22317:       p3AssertBinding(execution, scope, publication);
+22318:       assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+22319:       long entered = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+22320:       while (!Files.exists(TEMP.resolve("initial-context-check-entered"))
+22321:           && System.nanoTime() < entered) {
+22322:         Thread.sleep(20);
+22323:       }
+22324:       assertThat(Files.exists(TEMP.resolve("initial-context-check-entered"))).isTrue();
+22325:       assertThat("ADMITTED".equals(p6Owner(execution).get("state"))).isTrue();
+22326:       assertThat(
+22327:               jdbc.queryForObject(
+22328:                   "SELECT browser_started_at IS NULL FROM ui_test_executions WHERE id=?",
+22329:                   Boolean.class,
+22330:                   execution))
+
+### 70 POLL p8PreReadySelfStop (Order 38) RETURN_LAST
+22326:       assertThat(
+22327:               jdbc.queryForObject(
+22328:                   "SELECT browser_started_at IS NULL FROM ui_test_executions WHERE id=?",
+22329:                   Boolean.class,
+22330:                   execution))
+22331:           .as("held before Ready")
+22332:           .isTrue();
+22333: 
+22334:       // The stall: the owned parent is genuinely stopped across more than one 1 s secret control
+22335:       // window. Timers and sockets in the parent stand still, exactly as in a host sleep.
+22336:       p6SameProcess(parent.toHandle(), parentStarted);
+22337:       stopped = true;
+22338:       p6Signal("-STOP", Long.toString(parent.pid()));
+22339:       long stoppedBy = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+22340:       while (System.nanoTime() < stoppedBy
+22341:           && !p6Status(parent.toHandle()).state().startsWith("T")) {
+22342:         Thread.sleep(10);
+22343:       }
+22344:       assertThat(p6Status(parent.toHandle()).state().startsWith("T"))
+22345:           .as("own ordinary parent actually STOPPED")
+22346:           .isTrue();
+22347:       Thread.sleep(3_000);
+22348:       p6SameProcess(parent.toHandle(), parentStarted);
+22349:       p6Signal("-CONT", Long.toString(parent.pid()));
+22350:       stopped = false;
+
+### 71 DELIBERATE p8PreReadySelfStop (Order 38) -
+22331:           .as("held before Ready")
+22332:           .isTrue();
+22333: 
+22334:       // The stall: the owned parent is genuinely stopped across more than one 1 s secret control
+22335:       // window. Timers and sockets in the parent stand still, exactly as in a host sleep.
+22336:       p6SameProcess(parent.toHandle(), parentStarted);
+22337:       stopped = true;
+22338:       p6Signal("-STOP", Long.toString(parent.pid()));
+22339:       long stoppedBy = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+22340:       while (System.nanoTime() < stoppedBy
+22341:           && !p6Status(parent.toHandle()).state().startsWith("T")) {
+22342:         Thread.sleep(10);
+22343:       }
+22344:       assertThat(p6Status(parent.toHandle()).state().startsWith("T"))
+22345:           .as("own ordinary parent actually STOPPED")
+22346:           .isTrue();
+22347:       Thread.sleep(3_000);
+22348:       p6SameProcess(parent.toHandle(), parentStarted);
+22349:       p6Signal("-CONT", Long.toString(parent.pid()));
+22350:       stopped = false;
+22351: 
+22352:       List<JsonNode> runnerLines = List.of();
+22353:       long selfStopBy = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+22354:       while (System.nanoTime() < selfStopBy) {
+22355:         runnerLines = p8RunnerLines(logStart, execution);
+
+### 72 POLL p8PreReadySelfStop (Order 38) FALL_THROUGH
+22344:       assertThat(p6Status(parent.toHandle()).state().startsWith("T"))
+22345:           .as("own ordinary parent actually STOPPED")
+22346:           .isTrue();
+22347:       Thread.sleep(3_000);
+22348:       p6SameProcess(parent.toHandle(), parentStarted);
+22349:       p6Signal("-CONT", Long.toString(parent.pid()));
+22350:       stopped = false;
+22351: 
+22352:       List<JsonNode> runnerLines = List.of();
+22353:       long selfStopBy = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+22354:       while (System.nanoTime() < selfStopBy) {
+22355:         runnerLines = p8RunnerLines(logStart, execution);
+22356:         if (runnerLines.stream()
+22357:             .anyMatch(line -> "run.cancel_requested".equals(line.path("event").asText()))) {
+22358:           break;
+22359:         }
+22360:         Thread.sleep(20);
+22361:       }
+22362:       writeInitialContextState("{\"pause\":false,\"fail\":false}");
+22363:       paused = false;
+22364: 
+22365:       JsonNode snapshot = p3AwaitExecution(execution, "ERROR");
+22366:       JsonNode finalReport = p3RunnerReport(execution);
+22367:       assertThat(finalReport.path("browserStartedAt").isNull()).isTrue();
+22368:       assertThat(finalReport.path("outcome").path("result").asText()).isEqualTo("ERROR");
+
+### 73 POLL p14AwaitAcquisitionWindow (Orders 33-36 through p14Captured) MAP_EXCEPTION
+23322:       String state = current.path("document").path("state").asText();
+23323:       assertThat(List.of("FAILED", "EXPIRED", "CANCELLED", "UNKNOWN_OUTCOME").contains(state))
+23324:           .as("genuine Field acquisition prerequisite before any terminal substitute")
+23325:           .isFalse();
+23326:       JsonNode active = current.path("progress").path("translationAcquisition").path("active");
+23327:       if (active.path("window").isObject()
+23328:           && active.path("extraPolls").asInt() > 0
+23329:           && active.path("pending").isNull()) {
+23330:         p14AssertAcquisitionIdentity(current, recipe);
+23331:         assertThat(
+23332:                 Instant.parse(active.path("window").path("deadline").asText())
+23333:                     .isAfter(Instant.now()))
+23334:             .as("real acquisition window is still live at phase anchor")
+23335:             .isTrue();
+23336:         return current;
+23337:       }
+23338:       Thread.sleep(20);
+23339:     }
+23340:     throw new AssertionError("C14 authentic target acquisition window was not observed");
+23341:   }
+23342: 
+23343:   private void p14AssertAcquisitionIdentity(JsonNode snapshot, P14Recipe recipe) {
+23344:     JsonNode document = snapshot.path("document"), progress = snapshot.path("progress");
+23345:     JsonNode translation = snapshot.path("translation"), plan = translation.path("plan");
+23346:     JsonNode marker = progress.path("translationAcquisition"), active = marker.path("active");
+
+### 74 POLL p3ConcurrentScopeReplays (Order 12) RETURN_LAST
+23707:             .isTrue();
+23708:         receipts.add(receipt);
+23709:       }
+23710:       assertThat(owned.size()).isBetween(2, 256);
+23711:       p3ScanOwnedChildArguments(children, pair.stream().map(P3ScopeReplay::value).toList());
+23712:       assertThat(hold.calls.get()).isEqualTo(2);
+23713:       assertThat(hold.release.getCount()).isEqualTo(1);
+23714:       assertThat(hold.failed).isFalse();
+23715:       for (P6OwnedPid child : children) {
+23716:         p6SameProcess(child.handle(), child.started());
+23717:       }
+23718:       p6SameProcess(parent.toHandle(), parentStarted);
+23719:       p6Signal("-TERM", Long.toString(parent.pid()));
+23720:       long drainingDeadline = System.nanoTime() + Duration.ofSeconds(2).toNanos();
+23721:       while (p3ParentEvents(logStart, receipts, true)[1] == 0
+23722:           && System.nanoTime() < drainingDeadline) {
+23723:         Thread.sleep(10);
+23724:       }
+23725:       assertThat(p3ParentEvents(logStart, receipts, true)[1]).isEqualTo(1);
+23726:       hold.release.countDown();
+23727:       List<JsonNode> reports = new java.util.ArrayList<>();
+23728:       for (int index = 0; index < pair.size(); index++) {
+23729:         reports.add(
+23730:             p3AwaitExecution(executions.get(index), "PASSED", terminalDeadlines.get(index)));
+23731:       }
+
+### 75 POLL p3AwaitParentStarted RETURN_LAST
+23875:         scan.wipe();
+23876:         if (probe != null) {
+23877:           p6CloseCommand(probe);
+23878:         }
+23879:       }
+23880:     }
+23881:   }
+23882: 
+23883:   private static void p3AwaitParentStarted(long offset, int poolSize, long deadline)
+23884:       throws Exception {
+23885:     int observed;
+23886:     do {
+23887:       observed = p3ParentEvents(offset, List.of(), false)[0];
+23888:       if (observed != 0) {
+23889:         break;
+23890:       }
+23891:       Thread.sleep(10);
+23892:     } while (System.nanoTime() < deadline);
+23893:     assertThat(System.nanoTime() <= deadline).as("original parent readiness deadline").isTrue();
+23894:     assertThat(observed)
+23895:         .as("actual parent startup within original readiness budget")
+23896:         .isEqualTo(poolSize);
+23897:   }
+23898: 
+23899:   private static int[] p3ParentEvents(long offset, List<JsonNode> receipts, boolean concurrentDrain)
+
+### 76 DELIBERATE p3CleanupSnapshot -
+24191:     if (remaining <= 0) {
+24192:       throw new IllegalStateException("Actual ordinary cleanup deadline exhausted");
+24193:     }
+24194:     return Duration.ofNanos(Math.min(Duration.ofSeconds(15).toNanos(), remaining));
+24195:   }
+24196: 
+24197:   private JsonNode p3CleanupSnapshot(UUID execution, String cookie, long deadline)
+24198:       throws Exception {
+24199:     for (; ; ) {
+24200:       long now = System.nanoTime();
+24201:       long delay = Math.max(0, p3NextCleanupGetAt - now);
+24202:       long remaining = deadline - now;
+24203:       if (remaining <= delay) {
+24204:         throw new IllegalStateException("Actual ordinary cleanup wait exceeds deadline");
+24205:       }
+24206:       if (delay > 0) {
+24207:         java.util.concurrent.TimeUnit.NANOSECONDS.sleep(delay);
+24208:       }
+24209:       long requestStarted = System.nanoTime();
+24210:       p3NextCleanupGetAt = requestStarted + Duration.ofSeconds(1).toNanos();
+24211:       var request =
+24212:           HttpRequest.newBuilder(
+24213:                   URI.create(
+24214:                       "https://localhost:" + port + "/api/v1/studio/executions/" + execution))
+24215:               .timeout(p3CleanupRequestTimeout(deadline))
+
+### 77 POLL p4AwaitRevocationObserverCompletion RETURN_LAST
+24941:     long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+24942:     boolean complete;
+24943:     do {
+24944:       synchronized (state) {
+24945:         complete =
+24946:             state.active.isEmpty()
+24947:                 && state.reasonProved
+24948:                 && state.restored
+24949:                 && state.residualSettlements == 1
+24950:                 && state.residualFulfilled != null
+24951:                 && state.ackBracketMicros > 0
+24952:                 && (state.path == 2 || state.closed);
+24953:       }
+24954:       if (complete) {
+24955:         break;
+24956:       }
+24957:       Thread.sleep(20);
+24958:     } while (System.nanoTime() < deadline);
+24959:     assertThat(complete).as("all required original scalar witnesses settled").isTrue();
+24960:     assertThat(state.failed).as("no lost malformed or failed observer").isFalse();
+24961:     assertThat(Files.exists(TEMP.resolve("p4-revocation-observer-failed"))).isFalse();
+24962:   }
+24963: 
+24964:   private void p4SealPrivateProducersAfterOwnerCleanup(P4RevocationState state) throws Exception {
+24965:     if (state.c6Kind == 3) {
+
+### 78 POLL p4SealPrivateProducersAfterOwnerCleanup RETURN_LAST
+25040:               ? state.c6NativeClose
+25041:                   && state.restored
+25042:                   && state.closed
+25043:                   && !sample.path("sealed").booleanValue()
+25044:                   && p4Number(sample, "busy") == 0
+25045:                   && p4Number(sample, "restoreAttempt") > 0
+25046:                   && p4Number(sample, "restoreRefusal") == 0
+25047:                   && p4Number(sample, "cdpCreationPending") == 0
+25048:                   && p4Number(sample, "originalPending") == 0
+25049:                   && p4Number(sample, "pending") == p4Number(sample, "highPending")
+25050:                   && p4Number(sample, "sent") == p4Number(sample, "acked")
+25051:               : sample.path("sealed").booleanValue()) {
+25052:             finalSample = sample;
+25053:             break;
+25054:           }
+25055:         }
+25056:         Thread.sleep(20);
+25057:       } while (System.nanoTime() < deadline);
+25058:       assertThat(finalSample != null)
+25059:           .as("actual producer final ACK/failure processing sample")
+25060:           .isTrue();
+25061:       assertThat(finalSample.path("failed").booleanValue()).isFalse();
+25062:       if (state.c6Kind == 3 && producer == 1) {
+25063:         assertThat(finalSample.path("sealed").booleanValue()).isFalse();
+25064:         assertThat(p4Number(finalSample, "pending"))
+
+### 79 POLL p4AssertRegisteredAndNoPasswordEffects FALL_THROUGH
+25293:         P4_DOCUMENTS.values().stream().filter(witness -> witness.phase == phase).toList();
+25294:     assertThat(documents).isNotEmpty();
+25295:     for (P4DocumentWitness witness : documents) {
+25296:       synchronized (witness) {
+25297:         assertThat(witness.fenced && witness.fenceCompleted)
+25298:             .as("actual final fence ACK and correlated completion receipt")
+25299:             .isTrue();
+25300:         assertThat(witness.acknowledged.size()).isEqualTo(witness.events.size());
+25301:         assertThat(witness.events.containsValue("registered")).isTrue();
+25302:       }
+25303:     }
+25304:   }
+25305: 
+25306:   private void p4AssertRegisteredAndNoPasswordEffects() throws Exception {
+25307:     long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
+25308:     while (!p4OriginalCloseSettled(P4_PHASE_ORDINAL.get()) && System.nanoTime() < deadline) {
+25309:       Thread.sleep(20);
+25310:     }
+25311:     p4AssertObserverPhaseCompleted(P4_PHASE_ORDINAL.get());
+25312:     assertThat(P4_EFFECT_REGISTRATIONS.get()).isPositive();
+25313:     assertThat(P4_PASSWORD_WRITES.get()).isZero();
+25314:     assertThat(P4_NATIVE_SUBMITS.get()).isZero();
+25315:     assertThat(P3_RECEIPTS).isEmpty();
+25316:     assertThat(P3_REPORT_REQUESTS.get()).isZero();
+25317:   }
+
+### 80 POLL p8AwaitC6Closed FALL_THROUGH
+26221:         target,
+26222:         java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+26223:         java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+26224:   }
+26225: 
+26226:   private void p8AwaitC6Closed(P4RevocationState state) throws Exception {
+26227:     long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
+26228:     while (System.nanoTime() < deadline) {
+26229:       synchronized (state) {
+26230:         if (state.c6NativeClose
+26231:             && state.restored
+26232:             && (state.c6Kind == 3 || state.active.isEmpty())
+26233:             && (state.path == 2 || state.closed)) {
+26234:           break;
+26235:         }
+26236:       }
+26237:       Thread.sleep(20);
+26238:     }
+26239:     assertThat(state.c6NativeClose).as("original SDK close receipt").isTrue();
+26240:     if (state.c6FenceAvailable) {
+26241:       assertThat(p4OriginalCloseSettled(state.c6Phase) && P4_CLOSED_PHASES.contains(state.c6Phase))
+26242:           .as("actual original healthy page fence and close receipt")
+26243:           .isTrue();
+26244:     } else {
+26245:       assertThat(
+
+### 81 POLL p8OwnedPrimaryBrowser RETURN_LAST
+26297:     Path samplePath = root.resolve(state.ordinal + "-1.json");
+26298:     JsonNode sample = null;
+26299:     long deadline = System.nanoTime() + Duration.ofSeconds(2).toNanos();
+26300:     while (System.nanoTime() < deadline) {
+26301:       if (Files.exists(samplePath, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+26302:         assertThat(Files.isSymbolicLink(samplePath)).isFalse();
+26303:         assertThat(Files.isRegularFile(samplePath, java.nio.file.LinkOption.NOFOLLOW_LINKS))
+26304:             .isTrue();
+26305:         assertThat(Files.size(samplePath)).isLessThanOrEqualTo(1024);
+26306:         assertThat(Files.getPosixFilePermissions(samplePath))
+26307:             .isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
+26308:         sample = C.parse(Files.readString(samplePath));
+26309:         if (sample.path("contextBound").asBoolean()) {
+26310:           break;
+26311:         }
+26312:       }
+26313:       Thread.sleep(10);
+26314:     }
+26315:     assertThat(sample).as("original SDK launch and selected runtime identity sample").isNotNull();
+26316:     assertThat(sample.path("case").asInt()).isEqualTo(state.ordinal);
+26317:     assertThat(sample.path("producer").asInt()).isEqualTo(1);
+26318:     assertThat(sample.path("epoch").asInt()).isEqualTo(state.ordinal);
+26319:     assertThat(sample.path("contextBound").asBoolean()).isTrue();
+26320:     assertThat(sample.path("failed").isBoolean() && !sample.path("failed").asBoolean()).isTrue();
+26321:     assertThat(sample.size()).isEqualTo(state.c6Kind == 3 ? 19 : 13);
+
+### 82 POLL p3AwaitExecution RETURN_LAST
+27153:   private JsonNode p3AwaitExecution(UUID execution, String expected) throws Exception {
+27154:     return p3AwaitExecution(
+27155:         execution, expected, System.nanoTime() + Duration.ofSeconds(60).toNanos());
+27156:   }
+27157: 
+27158:   private JsonNode p3AwaitExecution(UUID execution, String expected, long deadline)
+27159:       throws Exception {
+27160:     assertThat(System.nanoTime() < deadline).as("original terminal observation deadline").isTrue();
+27161:     String actual = "";
+27162:     do {
+27163:       actual =
+27164:           jdbc.queryForObject(
+27165:               "SELECT status FROM ui_test_executions WHERE id=?", String.class, execution);
+27166:       if (List.of("PASSED", "FAILED", "ERROR").contains(actual)) {
+27167:         break;
+27168:       }
+27169:       Thread.sleep(30);
+27170:     } while (System.nanoTime() < deadline);
+27171:     assertThat(actual).as("actual P3 ordinary terminal status").isEqualTo(expected);
+27172:     return p3Call(p3Cookie, "/api/v1/studio/executions/" + execution, null, 200);
+27173:   }
+27174: 
+27175:   private JsonNode p3RunnerReport(UUID execution) throws Exception {
+27176:     long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+27177:     JsonNode report = P3_FINAL_REPORTS.get(execution);
+
+### 83 POLL p3RunnerReport RETURN_LAST
+27163:       actual =
+27164:           jdbc.queryForObject(
+27165:               "SELECT status FROM ui_test_executions WHERE id=?", String.class, execution);
+27166:       if (List.of("PASSED", "FAILED", "ERROR").contains(actual)) {
+27167:         break;
+27168:       }
+27169:       Thread.sleep(30);
+27170:     } while (System.nanoTime() < deadline);
+27171:     assertThat(actual).as("actual P3 ordinary terminal status").isEqualTo(expected);
+27172:     return p3Call(p3Cookie, "/api/v1/studio/executions/" + execution, null, 200);
+27173:   }
+27174: 
+27175:   private JsonNode p3RunnerReport(UUID execution) throws Exception {
+27176:     long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+27177:     JsonNode report = P3_FINAL_REPORTS.get(execution);
+27178:     while (report == null && System.nanoTime() < deadline) {
+27179:       Thread.sleep(20);
+27180:       report = P3_FINAL_REPORTS.get(execution);
+27181:     }
+27182:     assertThat(report != null)
+27183:         .as("actual authenticated P3 FINAL was observed by the forwarding filter")
+27184:         .isTrue();
+27185:     assertThat(report.path("executionId").asText().equals(execution.toString())).isTrue();
+27186:     var ledger =
+27187:         jdbc.queryForMap(
+
+### 84 POLL incrementalAwaitExpiredTeardownConfirmed MAP_EXCEPTION
+27296:         privateImmutableJson(COHORT_DIRECTORY.resolve("h8-confirm-expire-teardown.json"), evidence);
+27297:         if (!confirmed) {
+27298:           throw new AssertionError("H8: expired teardown not CONFIRMED within 120 s");
+27299:         }
+27300:         assertThat(row.get("state"))
+27301:             .as("H8: CONFIRMED keeps the session EXPIRED")
+27302:             .isEqualTo("EXPIRED");
+27303:         assertThat(row.get("requested"))
+27304:             .as("H8: CONFIRMED removes teardownRequest")
+27305:             .isEqualTo(false);
+27306:         return;
+27307:       }
+27308:       if (now >= renewCredentialsAt) {
+27309:         refreshFixtureCredentials();
+27310:         renewCredentialsAt = now + Duration.ofSeconds(10).toNanos();
+27311:       }
+27312:       Thread.sleep(30); // No transaction or row lock is held across this wait.
+27313:     }
+27314:   }
+27315: 
+27316:   /**
+27317:    * w3-d4 (B3B-1): a cancel can win the race against the coordinator's first assignment. Then
+27318:    * GuidedSessionService.stop has neither a context nor an assignment to address, writes no
+27319:    * teardownStatus and sends nothing: there is no runtime whose stop could be acknowledged. Only
+27320:    * when an assignment row exists must the H8 teardown reach CONFIRMED.
+
+### 85 POLL p3AwaitTeardown MAP_EXCEPTION
+27360:       if (entry.path("kind").asText().equals("text")
+27361:           && entry.path("value").isTextual()
+27362:           && !entry.path("value").asText().isEmpty()) {
+27363:         result.addObject().put("stepId", stepId).put("text", entry.path("value").asText());
+27364:       }
+27365:     }
+27366:   }
+27367: 
+27368:   private void p3AwaitTeardown(String id) throws Exception {
+27369:     long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+27370:     do {
+27371:       if (sessions
+27372:           .transaction(() -> sessions.lock(id).progress().path("teardownStatus").asText())
+27373:           .equals("CONFIRMED")) {
+27374:         return;
+27375:       }
+27376:       Thread.sleep(30);
+27377:     } while (System.nanoTime() < deadline);
+27378:     throw new AssertionError("Actual P3 owner teardown acknowledgement missing");
+27379:   }
+27380: 
+27381:   private long p3DecodeVideo(UUID execution, JsonNode current) throws Exception {
+27382:     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+27383:     JsonNode report = current;
+27384:     while (!report.path("streamComplete").asBoolean() && System.nanoTime() < deadline) {
+
+### 86 POLL p3DecodeVideo RETURN_LAST
+27369:     long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+27370:     do {
+27371:       if (sessions
+27372:           .transaction(() -> sessions.lock(id).progress().path("teardownStatus").asText())
+27373:           .equals("CONFIRMED")) {
+27374:         return;
+27375:       }
+27376:       Thread.sleep(30);
+27377:     } while (System.nanoTime() < deadline);
+27378:     throw new AssertionError("Actual P3 owner teardown acknowledgement missing");
+27379:   }
+27380: 
+27381:   private long p3DecodeVideo(UUID execution, JsonNode current) throws Exception {
+27382:     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+27383:     JsonNode report = current;
+27384:     while (!report.path("streamComplete").asBoolean() && System.nanoTime() < deadline) {
+27385:       Thread.sleep(30);
+27386:       report = p3Call(p3Cookie, "/api/v1/studio/executions/" + execution, null, 200);
+27387:     }
+27388:     assertThat(report.path("streamComplete").asBoolean()).isTrue();
+27389:     assertThat(report.path("video").path("status").asText()).isEqualTo("AVAILABLE");
+27390:     String key =
+27391:         jdbc.queryForObject(
+27392:             "SELECT video_key FROM ui_test_executions WHERE id=?", String.class, execution);
+27393:     Path video = TEMP.resolve("objects").resolve(key).normalize();
+
+### 87 POLL awaitJoinedVideo RETURN_LAST
+29529:     for (char character : value) {
+29530:       if (character != '\0') {
+29531:         return false;
+29532:       }
+29533:     }
+29534:     return true;
+29535:   }
+29536: 
+29537:   private JsonNode awaitJoinedVideo(UUID execution) throws Exception {
+29538:     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+29539:     JsonNode snapshot;
+29540:     do {
+29541:       snapshot = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+29542:       if (snapshot.path("streamComplete").asBoolean()) {
+29543:         break;
+29544:       }
+29545:       Thread.sleep(30);
+29546:     } while (System.nanoTime() < deadline);
+29547:     assertThat(snapshot.path("streamComplete").asBoolean()).isTrue();
+29548:     assertThat(snapshot.path("status").asText()).isEqualTo("PASSED");
+29549:     assertThat(snapshot.path("video").path("status").asText())
+29550:         .as(
+29551:             "video evidence for %s: video=%s, recording log lines=%s",
+29552:             execution, snapshot.path("video"), recordingLogLines(snapshot))
+29553:         .isEqualTo("AVAILABLE");
+
+### 88 DELIBERATE C5ClaimSampler.sample (background sampler thread) -
+30013:                         }
+30014:                       }
+30015:                     }
+30016:                   }
+30017:                 }
+30018:               } finally {
+30019:                 java.util.Arrays.fill(stack, null);
+30020:               }
+30021:             }
+30022:           } finally {
+30023:             java.util.Arrays.fill(snapshot, null);
+30024:             claimSnapshot.clear();
+30025:             callbackSnapshot.clear();
+30026:             claimEntries.clear();
+30027:           }
+30028:           cycles++;
+30029:           Thread.sleep(20); // Diagnostic cadence only; no authority poll/action changed.
+30030:         }
+30031:       } catch (InterruptedException stopped) {
+30032:         Thread.currentThread().interrupt();
+30033:       } catch (Throwable unsupported) {
+30034:         status = Status.FAILED; // No exception/message/raw stack retained or emitted.
+30035:       } finally {
+30036:         synchronized (gate) {
+30037:           executing.clear();
+
+### 89 POLL C5Capture.awaitS2Completion RETURN_LAST
+31094:                   current.isObject()
+31095:                       && current.size() == 13
+31096:                       && current.path("case").asInt(-1) == s2Epoch
+31097:                       && current.path("producer").asInt(-1) == 1
+31098:                       && current.path("epoch").asInt(-1) == s2Epoch)
+31099:               .isTrue();
+31100:           for (String field :
+31101:               List.of("failed", "closed", "restored", "stopFulfilled", "active", "busy")) {
+31102:             assertThat(current.path(field).isBoolean()).isTrue();
+31103:           }
+31104:           assertThat(current.path("failed").booleanValue()).isFalse();
+31105:           if (current.path("closed").booleanValue()) {
+31106:             sample = current;
+31107:             break;
+31108:           }
+31109:         }
+31110:         Thread.sleep(20);
+31111:       } while (System.nanoTime() < deadline);
+31112:       assertThat(sample != null)
+31113:           .as("actual selected guided operation/callback completion")
+31114:           .isTrue();
+31115:       assertThat(
+31116:               sample.path("restored").booleanValue() && sample.path("stopFulfilled").booleanValue())
+31117:           .isTrue();
+31118:       assertThat(sample.path("active").booleanValue() || sample.path("busy").booleanValue())
+
+### 90 POLL awaitFinalizing MAP_EXCEPTION
+32309:         .asText();
+32310:   }
+32311: 
+32312:   private void awaitFinalizing(String id) throws Exception {
+32313:     long end = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+32314:     while (System.nanoTime() < end) {
+32315:       String state =
+32316:           c5Capture != null
+32317:               ? jdbc.queryForObject(
+32318:                   "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id)
+32319:               : sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+32320:       if (List.of("FINALIZING", "FAILED", "EXPIRED", "UNKNOWN_OUTCOME", "CANCELLED")
+32321:           .contains(state)) {
+32322:         assertThat(state).as("second explicit learning; logs %s", TEMP).isEqualTo("FINALIZING");
+32323:         return;
+32324:       }
+32325:       Thread.sleep(50);
+32326:     }
+32327:     throw new AssertionError("Second explicit learning did not finalize; logs " + TEMP);
+32328:   }
+32329: 
+32330:   private UUID arrangeActivation(UUID schedule, UUID testId, UUID revision, long version) {
+32331:     UUID activation = UUID.randomUUID();
+32332:     Instant due =
+32333:         Instant.now()
+
+### 91 DELIBERATE model (fixture model handler) -
+33414:       items.add(
+33415:           obligation(THREE, 1, "assert", "Confirmation", null, null).put("predicate", "visible"));
+33416:       result
+33417:           .putArray("needs")
+33418:           .addObject()
+33419:           .put("needId", "order")
+33420:           .put("producerStepId", ONE)
+33421:           .putArray("consumers")
+33422:           .addObject()
+33423:           .put("stepId", TWO)
+33424:           .put("argumentSlot", "fill.value");
+33425:       return result;
+33426:     }
+33427:     if (delayTimingModel) {
+33428:       delayTimingModel = false;
+33429:       try {
+33430:         Thread.sleep(1250);
+33431:       } catch (InterruptedException interrupted) {
+33432:         Thread.currentThread().interrupt();
+33433:         throw new IllegalStateException("Fixture interrupted");
+33434:       }
+33435:     }
+33436:     JsonNode obligation = context.path("obligations").get(0);
+33437:     String op = obligation.path("operationKind").asText();
+33438:     if (askObservedChoice && op.equals("fill")) {
+
+### 92 DELIBERATE model (fixture model handler) -
+33425:       return result;
+33426:     }
+33427:     if (delayTimingModel) {
+33428:       delayTimingModel = false;
+33429:       try {
+33430:         Thread.sleep(1250);
+33431:       } catch (InterruptedException interrupted) {
+33432:         Thread.currentThread().interrupt();
+33433:         throw new IllegalStateException("Fixture interrupted");
+33434:       }
+33435:     }
+33436:     JsonNode obligation = context.path("obligations").get(0);
+33437:     String op = obligation.path("operationKind").asText();
+33438:     if (askObservedChoice && op.equals("fill")) {
+33439:       askObservedChoice = false;
+33440:       try {
+33441:         Thread.sleep(1250);
+33442:       } catch (InterruptedException interrupted) {
+33443:         Thread.currentThread().interrupt();
+33444:         throw new IllegalStateException("Fixture interrupted");
+33445:       }
+33446:       result.put("status", "CLARIFICATION").putNull("obligationId").putNull("action");
+33447:       var choices =
+33448:           result.putObject("question").put("reason", "AMBIGUOUS_BINDING").putArray("choices");
+33449:       for (String name : List.of("Destination", "Alternate destination")) {
+
+### 93 POLL stopOwnedApplicationJobs RETURN_LAST
+34127:     // All safe captured resources are attempted, even when another resource cannot be confirmed.
+34128:     for (var scheduler : scheduled) {
+34129:       p3AttemptTeardown(failures, scheduler::shutdown);
+34130:     }
+34131:     for (var scheduler : scheduled) {
+34132:       p3AttemptTeardown(failures, () -> awaitOwnedExecutorTermination(scheduler, deadline));
+34133:     }
+34134:     for (var scheduler : simple) {
+34135:       p3AttemptTeardown(
+34136:           failures,
+34137:           () -> {
+34138:             Object tracked =
+34139:                 org.springframework.test.util.ReflectionTestUtils.getField(
+34140:                     scheduler, "activeThreads");
+34141:             assertThat(tracked instanceof java.util.Set<?>).isTrue();
+34142:             while (!((java.util.Set<?>) tracked).isEmpty() && System.nanoTime() < deadline) {
+34143:               Thread.sleep(20);
+34144:             }
+34145:             assertThat(((java.util.Set<?>) tracked).isEmpty())
+34146:                 .as("actual scheduler virtual bodies drained")
+34147:                 .isTrue();
+34148:             scheduler.close();
+34149:           });
+34150:     }
+34151:     for (var executor : executors) {
+
+### 94 POLL stopOwnedProcessTree FALL_THROUGH
+34292:       root.stopping = true;
+34293:       ownedProcessEvent("GRACEFUL_SIGNAL", root);
+34294:       process.destroy();
+34295:     }
+34296:     // I-T1 (ruling W1.5 part 1): a guided runner drains its sessions before it exits (about 63 s
+34297:     // in the worst case), so its graceful stop is given the guided grace. A forced stop is
+34298:     // recorded below (ROOT_FORCE_SIGNAL) and never silently accepted.
+34299:     long deadline =
+34300:         System.nanoTime()
+34301:             + (root.role.equals("guided")
+34302:                     ? RunnerProcessHarness.GUIDED_MINIMUM_GRACE
+34303:                     : Duration.ofSeconds(30))
+34304:                 .toNanos();
+34305:     while ((process.isAlive()
+34306:             || root.descendants.stream().anyMatch(child -> child.handle().isAlive()))
+34307:         && System.nanoTime() < deadline) {
+34308:       Thread.sleep(30);
+34309:     }
+34310:     if (process.isAlive()
+34311:         || root.descendants.stream().anyMatch(child -> child.handle().isAlive())) {
+34312:       // Every target carries a previously observed actual ancestry and immutable PID/start/command.
+34313:       for (OwnedFixtureDescendant child : root.descendants) {
+34314:         if (child.handle().isAlive()) {
+34315:           verifyOwnedDescendant(root, child);
+34316:           ownedProcessEvent("DESCENDANT_FORCE_SIGNAL", root, child);
+
+### 95 POLL stopOwnedProcessTree RETURN_LAST
+34313:       for (OwnedFixtureDescendant child : root.descendants) {
+34314:         if (child.handle().isAlive()) {
+34315:           verifyOwnedDescendant(root, child);
+34316:           ownedProcessEvent("DESCENDANT_FORCE_SIGNAL", root, child);
+34317:           child.handle().destroyForcibly();
+34318:         }
+34319:       }
+34320:       if (process.isAlive()) {
+34321:         verifyOwnedRoot(root);
+34322:         ownedProcessEvent("ROOT_FORCE_SIGNAL", root);
+34323:         process.destroyForcibly();
+34324:       }
+34325:       deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
+34326:       while ((process.isAlive()
+34327:               || root.descendants.stream().anyMatch(child -> child.handle().isAlive()))
+34328:           && System.nanoTime() < deadline) {
+34329:         Thread.sleep(20);
+34330:       }
+34331:     }
+34332:     assertThat(process.isAlive()).as("registered actual owned fixture root exited").isFalse();
+34333:     assertThat(root.descendants.stream().anyMatch(child -> child.handle().isAlive()))
+34334:         .as("all recorded owned descendants actually gone")
+34335:         .isFalse();
+34336:     process.waitFor();
+34337:     ownedProcessEvent("EXIT_CONFIRMED", root);

@@ -1,0 +1,51 @@
+{
+  "kind": "ROOT_EXACT_D2_RUNTIME_ADMISSION",
+  "authorized": true,
+  "soleHeavyLaneOwner": "gateway_implementation",
+  "sourceWriterAllowed": false,
+  "runtimeInvocationCount": 1,
+  "preparationManifestSha256": "78df2b3b8e93bb8f74fa206fd969e9dd4dfded6f8ceab18621198d00941c7f09",
+  "dependencyReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-dependency-root-acceptance07.json",
+    "sha256": "45765a20380e94009e4c985ba46880f5d4942b14bebe1e2baff6ee797a8c5ec1",
+    "reference": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-dependency-root-acceptance07.json@sha256:45765a20380e94009e4c985ba46880f5d4942b14bebe1e2baff6ee797a8c5ec1"
+  },
+  "acceptedFactsSha256": "49db76a0e97aba8406edd27e2ef37c644c573ed5a47af9c5a29a0e4b33832d47",
+  "boundPacketManifestSha256": "c4ee06471e0c11e03ebdd2116c953e4a876382a2276713a1f410e8825b964a11",
+  "expectedSourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+  "expectedDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "expectedImageId": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+  "collectorLabel": "obs011-recovery-20261020-final-linux-d2-smoke03",
+  "resourcePrefix": "obs011-d2-final-03",
+  "outputDirectory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution07/d2-execution01",
+  "rootRuntimeGoSeparateFromBinding": true,
+  "sourceCorrectionManifestSha256": "1b6ac6c046dd173aede93a492491533b4d9156996083698f832ff54ee9a5c315",
+  "sourceCorrectionQa": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-correction01/independent-qa/manifest.json",
+    "sha256": "d5c33394a4c5a61d5fe2ab17d541f2473f89d7e43615305e1542e90c13f08cdd",
+    "bytes": 1179
+  },
+  "sourceCorrectionQaAccepted": true,
+  "rootDependencyIncludesWrapperCorrectionAndShell": true,
+  "canonicalShell": {
+    "path": "/bin/bash",
+    "sha256": "41e7f937a0d2e7e0bc03884595f54f7a892e468087519de1fc53e177b2503308",
+    "mode": "0o555",
+    "versionFirstLine": "GNU bash, version 3.2.57(1)-release (arm64-apple-darwin23)"
+  },
+  "inspectionDiagnosticOwnerSha256": "dc3c2724fbf0e7f79abba0aa2ce31a60058fa86757e42b02fc1e9ccfd0455803",
+  "inspectionDiagnosticFixtureSha256": "b1d881b1d1a0669c83b1e630dbebd87b31bfa02b921b7a68dfeeb2d066dfb9a1",
+  "inspectionDiagnosticSchemaSha256": "9015f9683d7765e4dd207d07a9eaa6f32426de698491256024d2a395d49688bb",
+  "inspectionDiagnosticQa": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation01/independent-qa/manifest.json",
+    "sha256": "fb06b248b27c55f7e67171698381becd60b8b08172374173aa7e7bbf7eb0ce67",
+    "bytes": 1224
+  },
+  "inspectionDiagnosticQaAccepted": true,
+  "rootDependencyIncludesInspectionDiagnostic": true,
+  "atUtc": "2026-10-21T04:46:52.281693+00:00",
+  "rootReviewedDriverSha256": "1a4da0ce1dc6f35eea454e5536262026a8232205ea6abe00256b4586b6c5bb73",
+  "singleExistingCaseDiagnosticOnlyNoAutomaticRetry": true,
+  "anyRuntimePassRequiresIndependentActualQa": true,
+  "requiredLookupFailureStopsDependentSteps": true
+}

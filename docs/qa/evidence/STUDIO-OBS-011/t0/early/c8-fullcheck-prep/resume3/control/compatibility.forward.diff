@@ -1,0 +1,1401 @@
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/55e5-check-map.json
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/55e5-check-map.json
+@@ -1,6 +1,6 @@
+ {
+   "oldGateSha256": "55e5d935a0a38bd2b7477cde55f11b39df7c842ce5efc01494dbc7a1c32513a6",
+-  "newGateSha256": "fb0d7b4c8baa46ec1727363d41b38d40f703ac99b4617532aa5b721d0ea0a791",
++  "newGateSha256": "56020d0d3123339587bcf9e0a7f6968efe125a07a4331d9710b2a3be678d021e",
+   "oldCodes": 62,
+   "newCodes": 161,
+   "exactAstFunctions": [
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/CONTRACT-md.from-b270.diff
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/CONTRACT-md.from-b270.diff
+@@ -1,26 +1,20 @@
+ --- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/CONTRACT.md
+-+++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/CONTRACT.md
+-@@ -1,3 +1,5 @@
+-+> COMPONENT ONLY — execution03 has root-confirmed mandatory C8-EXEC-04 (unsafe report-root/ancestor observation before HOLD). It is unsupported for actual composition. This revision intentionally remains pinned to03; corrected04 requires a new explicit control compatibility binding and exact whole-unit review. No native release exists.
+-+
+++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/CONTRACT.md
++@@ -1,6 +1,6 @@
+  # Fixed contract and proof custody
+  
+- Shared runtime D is t0/runtime/obs011-t0-c8-check01; future labels match obs011-t0-c8-checkNN, never GST. Execution's immutable shared-interface1a77 and manifest335298 are one-way preparation inputs. Root will pin both final manifests in a new composition; neither manifest recursively pins the other. No whole-unit review/release exists here.
+-@@ -25,4 +27,16 @@
++-Shared runtime D is t0/runtime/obs011-t0-c8-check01; future labels match obs011-t0-c8-checkNN, never GST. Execution's immutable shared-interface1a77 and manifest335298 are one-way preparation inputs. Root will pin both final manifests in a new composition; neither manifest recursively pins the other. No whole-unit review/release exists here.
+++Shared runtime D is t0/runtime/obs011-t0-c8-check01; future labels match obs011-t0-c8-checkNN, never GST. Execution04's exact interfacec4faa8 and manifestfb038 are one-way preparation inputs. Root will pin both final manifests in a new composition; neither manifest recursively pins the other. No whole-unit review/release exists here.
++ 
++ Installed control consists of unlock_gate.py, exact reused guard-exit.bash, policy.json, final_verifier.py, postclose.py. Gate argv is exactRootReleaseSHA, actualHeldShellPID, explicitExpectedWrapperExit. Producer argv is exactRootReleaseSHA, actualHeldShellPID. Postclose argv is exactRootReleaseSHA. readonly Bash binds that same SHA and shell PID, and calls the gate with DEVNULL. No command/config accepts an arbitrary source overlay, label/GST source disposition, phase or writer set. Accepted plan9391/catalogd963/mode ancestry and f9c digest are literal closed inputs; source derives independently from original576e plus exactly3 rows.
++ 
++@@ -25,4 +25,8 @@
+  Historical code FULLCHECK03_OWNED_IDENTITY_OBSERVATION_GAP is a prospective machine-readable name for the preserved original03 ownedIdentityObservationGap, not a rewrite or repair of that record. GST03_FORMAT_IDENTITY_GAP and GST03_PREMATURE_UNLOCK_INTERVAL remain exact. Original errors, red outcomes and consumed c212 private dependency remain frozen; no protected raw body is an input to this preparation.
+  
+  
+ -Preparation dependency qualification: after execution335298 sealed, root reported mandatory C8-EXEC-01 (missing assessment.evidenceErrors admission check before reconciliation). That seal is unsupported for actual admission. Preserve it unchanged; corrected execution successor and exact whole-unit Aria/Quinn/root acceptance are PENDING. No control qualification or current recipe may bypass that finding. Reconciliation requires no assessment.evidenceErrors under the corrected normal admission; any wider qualified case needs a new exact reviewed disposition. Parent will compose only the independently accepted tuple. Existing plan9391/catalogd963 pins are immutable here; a changed reviewed plan/catalog requires explicit new control binding. No silent input refresh or mutual manifest recursion.
+-+## Explicit resume2 integration binding — not execution authority
+++## Explicit control03 / execution04 compatibility preparation
+ +
+-+Rootd206 integration01–03 are addressed against immutable execution03 f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692, interface9adcfedf and pure-api16182094. This supersedes the prior unaccepted335298 preparation dependency for this new candidate only; no old seal/review/adoption is rewritten and no whole-unit support is inferred. Source plan9391/catalogd963/f9c/commands remain exact. Actual tuple review/root binding is still PENDING.
+++This fresh component binds execution04fb038 / pure-api375916 / interfacec4faa8. Gate REDUCER_ASSESSOR_SHA changes once from c58c to db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef; no control semantics widen. Task reducer definitions/AST/re-only globals, checks/inventory/classifier/keeper/commands, plan9391/catalogd963/sourcef9c and before-archive/report/closing schemas are exact03. The historical EXACT_EXECUTION03_API_BINDING error-code label remains for predicate continuity; its actual enforced assessor bytes are04. Actual04 source bytes supply the AST reducer during pure replay and any future reviewed invocation.
+ +
+-+The gate pins assessorc58c/checksc980/report_inventory2c29/classificationf13e. It extracts only assessor task_event_proof/task_statuses with re. Printed plain headers are context, not invocation or terminal success; repeated context may legally precede one known explicit terminal. Unknown/reversed/post-terminal/conflicting sequences HOLD. Actual selected build0, BUILD SUCCESSFUL/no BUILD FAILED, real source/log/receipt provenance and fresh output/C8 checks remain mandatory. Green requires all required reducer statuses EXECUTED plus those whole-native proofs; the spelling EXECUTED alone may still mean HEADER_ONLY. Actual build/assessment/coverage taskEventProof values are compared against the actual hash-bound log reducer. One invocation remains the exclusive owned phase/counter, never a printed-marker count.
+-+
+-+The exact report_inventory sibling is privately instantiated from pinned bytes before execution_checks. Its fixed import binding supplies only ROOT_PAGES/canonical_path, not PYTHONPATH/sys.path or a preloaded report_inventory module. Actual loader/API controls run in clean and poisoned-cache contexts, with a global-import trap proving no report_inventory fallback. Only the pure stdlib import set in the sealed API is allowed; no arbitrary plugin mechanism.
+-+
+-+Physical full-check/report-manifest-before-archive.json is read through the existing safe metadata reader and enters evidencePins/loadedHashes, validation manifest SHA, readiness/permit/basis and current metadata rechecks. Coverage SHA→manifest SHA→exact current inventory links and preserved-public-evidence→coverage SHA are all required. CURRENT_REPORT_CLAIM requires complete current XML/link/freshness proof, before-copy originals equal actual archive originals, dynamic facts equal inventory originals, exact20 Jacoco static paths and XML fact hash. Claimed incomplete current HTML is hard HOLD. BLOCKED_AFTER_EXPLICIT_FAILED_TEST instead uses the exact pinned evidenced_failed_test_report_block predicate: complete clean actual Test/public/source/owned proof plus explicit source-DAG blocking; no old XML/body parsing/copying, original/archive/static body facts empty, ratios empty/freshReport false and only stable/regular pre-start uncredited metadata (or absent directory). It earns zero C8/coverage credit. No old inventory fallback, fake freshness or generic qualification can override a hard STANDARD_RECONCILE error.
+-+
+-+All61 prior meaningful controls remain, with only valid new API inventory prerequisites added. There are46 new actual-pure-boundary regressions, including repeated-header success/failure pairs, missing completion/nonzero/cached/unknown tasks, clean/poisoned real pair loader, wrong/missing/tampered/unbound modules, current and blocked manifest drifts, after-load byte drift and actual hard admission errors despite fully matching synthetic QA/root records. These are107 distinct pure controls, not native calls or actual host/lock/runtime evidence. Gate packet/main/producer/observer/postclose and execution mains remain unexecuted.
+-+
+-+Standalone final0 inspection, separate explicit root permit, separate guarded exit within60s before/after current checks and separate postclose remain unchanged. Bashbf57, policy, final producer and postclose bytes are exact b270. All old errors/gaps/holds, zero writers/two explicit phases and root SHA argument convention remain. No readiness/permit/source/native/retry/IR/C8/lifecycle authority exists here. Root must compose the independently accepted manifests without reciprocal seal hashing and recheck the exact actual interface before release.
+++The other4 runtime files (producer/policy/postclose/Bash) remain byte exact. The same107 prior pure controls replayed against04; no new mirrored literal-pin test was added. compatibility.json records exported AST/schema equality and precise source changes. Root8165 adopted the finding/correction-preparation scope, not the fix or actual runtime behavior. Independent correction/whole-unit Aria+Quinn review, exact root composition/release and fresh facts remain OWED. No actual helper/packet/gate/producer/OS/native/private/source invocation, readiness/permit/IR/C8/lane/lifecycle authority or historical repair. Old02/01/E04/E03/all reviews and seals remain unchanged; no reciprocal manifest hash cycle or inferred old review support.
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/CONTRACT.md
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/CONTRACT.md
+@@ -1,8 +1,6 @@
+-> COMPONENT ONLY — execution03 has root-confirmed mandatory C8-EXEC-04 (unsafe report-root/ancestor observation before HOLD). It is unsupported for actual composition. This revision intentionally remains pinned to03; corrected04 requires a new explicit control compatibility binding and exact whole-unit review. No native release exists.
+-
+ # Fixed contract and proof custody
+ 
+-Shared runtime D is t0/runtime/obs011-t0-c8-check01; future labels match obs011-t0-c8-checkNN, never GST. Execution's immutable shared-interface1a77 and manifest335298 are one-way preparation inputs. Root will pin both final manifests in a new composition; neither manifest recursively pins the other. No whole-unit review/release exists here.
++Shared runtime D is t0/runtime/obs011-t0-c8-check01; future labels match obs011-t0-c8-checkNN, never GST. Execution04's exact interfacec4faa8 and manifestfb038 are one-way preparation inputs. Root will pin both final manifests in a new composition; neither manifest recursively pins the other. No whole-unit review/release exists here.
+ 
+ Installed control consists of unlock_gate.py, exact reused guard-exit.bash, policy.json, final_verifier.py, postclose.py. Gate argv is exactRootReleaseSHA, actualHeldShellPID, explicitExpectedWrapperExit. Producer argv is exactRootReleaseSHA, actualHeldShellPID. Postclose argv is exactRootReleaseSHA. readonly Bash binds that same SHA and shell PID, and calls the gate with DEVNULL. No command/config accepts an arbitrary source overlay, label/GST source disposition, phase or writer set. Accepted plan9391/catalogd963/mode ancestry and f9c digest are literal closed inputs; source derives independently from original576e plus exactly3 rows.
+ 
+@@ -27,16 +25,8 @@
+ Historical code FULLCHECK03_OWNED_IDENTITY_OBSERVATION_GAP is a prospective machine-readable name for the preserved original03 ownedIdentityObservationGap, not a rewrite or repair of that record. GST03_FORMAT_IDENTITY_GAP and GST03_PREMATURE_UNLOCK_INTERVAL remain exact. Original errors, red outcomes and consumed c212 private dependency remain frozen; no protected raw body is an input to this preparation.
+ 
+ 
+-## Explicit resume2 integration binding — not execution authority
++## Explicit control03 / execution04 compatibility preparation
+ 
+-Rootd206 integration01–03 are addressed against immutable execution03 f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692, interface9adcfedf and pure-api16182094. This supersedes the prior unaccepted335298 preparation dependency for this new candidate only; no old seal/review/adoption is rewritten and no whole-unit support is inferred. Source plan9391/catalogd963/f9c/commands remain exact. Actual tuple review/root binding is still PENDING.
++This fresh component binds execution04fb038 / pure-api375916 / interfacec4faa8. Gate REDUCER_ASSESSOR_SHA changes once from c58c to db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef; no control semantics widen. Task reducer definitions/AST/re-only globals, checks/inventory/classifier/keeper/commands, plan9391/catalogd963/sourcef9c and before-archive/report/closing schemas are exact03. The historical EXACT_EXECUTION03_API_BINDING error-code label remains for predicate continuity; its actual enforced assessor bytes are04. Actual04 source bytes supply the AST reducer during pure replay and any future reviewed invocation.
+ 
+-The gate pins assessorc58c/checksc980/report_inventory2c29/classificationf13e. It extracts only assessor task_event_proof/task_statuses with re. Printed plain headers are context, not invocation or terminal success; repeated context may legally precede one known explicit terminal. Unknown/reversed/post-terminal/conflicting sequences HOLD. Actual selected build0, BUILD SUCCESSFUL/no BUILD FAILED, real source/log/receipt provenance and fresh output/C8 checks remain mandatory. Green requires all required reducer statuses EXECUTED plus those whole-native proofs; the spelling EXECUTED alone may still mean HEADER_ONLY. Actual build/assessment/coverage taskEventProof values are compared against the actual hash-bound log reducer. One invocation remains the exclusive owned phase/counter, never a printed-marker count.
+-
+-The exact report_inventory sibling is privately instantiated from pinned bytes before execution_checks. Its fixed import binding supplies only ROOT_PAGES/canonical_path, not PYTHONPATH/sys.path or a preloaded report_inventory module. Actual loader/API controls run in clean and poisoned-cache contexts, with a global-import trap proving no report_inventory fallback. Only the pure stdlib import set in the sealed API is allowed; no arbitrary plugin mechanism.
+-
+-Physical full-check/report-manifest-before-archive.json is read through the existing safe metadata reader and enters evidencePins/loadedHashes, validation manifest SHA, readiness/permit/basis and current metadata rechecks. Coverage SHA→manifest SHA→exact current inventory links and preserved-public-evidence→coverage SHA are all required. CURRENT_REPORT_CLAIM requires complete current XML/link/freshness proof, before-copy originals equal actual archive originals, dynamic facts equal inventory originals, exact20 Jacoco static paths and XML fact hash. Claimed incomplete current HTML is hard HOLD. BLOCKED_AFTER_EXPLICIT_FAILED_TEST instead uses the exact pinned evidenced_failed_test_report_block predicate: complete clean actual Test/public/source/owned proof plus explicit source-DAG blocking; no old XML/body parsing/copying, original/archive/static body facts empty, ratios empty/freshReport false and only stable/regular pre-start uncredited metadata (or absent directory). It earns zero C8/coverage credit. No old inventory fallback, fake freshness or generic qualification can override a hard STANDARD_RECONCILE error.
+-
+-All61 prior meaningful controls remain, with only valid new API inventory prerequisites added. There are46 new actual-pure-boundary regressions, including repeated-header success/failure pairs, missing completion/nonzero/cached/unknown tasks, clean/poisoned real pair loader, wrong/missing/tampered/unbound modules, current and blocked manifest drifts, after-load byte drift and actual hard admission errors despite fully matching synthetic QA/root records. These are107 distinct pure controls, not native calls or actual host/lock/runtime evidence. Gate packet/main/producer/observer/postclose and execution mains remain unexecuted.
+-
+-Standalone final0 inspection, separate explicit root permit, separate guarded exit within60s before/after current checks and separate postclose remain unchanged. Bashbf57, policy, final producer and postclose bytes are exact b270. All old errors/gaps/holds, zero writers/two explicit phases and root SHA argument convention remain. No readiness/permit/source/native/retry/IR/C8/lifecycle authority exists here. Root must compose the independently accepted manifests without reciprocal seal hashing and recheck the exact actual interface before release.
++The other4 runtime files (producer/policy/postclose/Bash) remain byte exact. The same107 prior pure controls replayed against04; no new mirrored literal-pin test was added. compatibility.json records exported AST/schema equality and precise source changes. Root8165 adopted the finding/correction-preparation scope, not the fix or actual runtime behavior. Independent correction/whole-unit Aria+Quinn review, exact root composition/release and fresh facts remain OWED. No actual helper/packet/gate/producer/OS/native/private/source invocation, readiness/permit/IR/C8/lane/lifecycle authority or historical repair. Old02/01/E04/E03/all reviews and seals remain unchanged; no reciprocal manifest hash cycle or inferred old review support.
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/DESIGN.md
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/DESIGN.md
+@@ -1,28 +1,16 @@
+-> COMPONENT ONLY — execution03 has root-confirmed mandatory C8-EXEC-04 (unsafe report-root/ancestor observation before HOLD). It is unsupported for actual composition. This revision intentionally remains pinned to03; corrected04 requires a new explicit control compatibility binding and exact whole-unit review. No native release exists.
++# Control03 explicit execution04 compatibility — design before code
+ 
+-# C8 control integration successor — design before code
++Dex/aiox-dev; SAFE011 InProgress/USD500. Aggregate spend unknown. Fresh off-tree control only; preserve control02ead323 and all old seals, reviews/adoptions/source/history. No actual unit or release.
+ 
+-Dex/aiox-dev; SAFE011 InProgress/USD500, aggregate spend unknown. New off-tree control only; preserve b270, its partial20bdd/c441 disposition and all execution seals. Root audit d206 mandates exactly three integration corrections. No actual unit, release, helper/control/producer/OS/private/source/native action.
++Bind corrected execution04fb038 explicitly. Verify exact task_event_proof/task_statuses AST equality to03 and byte-identical execution_checks/report_inventory/classifier/keeper/plan/catalog, plus unchanged report/closing schema. The only runtime code change is REDUCER_ASSESSOR_SHA c58c→db0; literal full-source pin change is necessary even though extracted reducer definitions are exact. Keep all other gate semantics and final producer/policy/postclose/Bash bytes. Retain and replay the same107 pure controls against actual04 source, without new mirrored tests for a literal replacement. Stop on substantive compatibility mismatch.
+ 
+-Use the corrected sealed execution03 task_event_proof/task_statuses definitions by exact assessor hash and AST extraction of only those two pure functions with re. Replace printed-header counts with that exact reducer, preserving raw log hash and all actual native0/BUILD SUCCESSFUL/source/receipt/freshness gates. A plain header is context, never completion or invocation proof; legal repeated contexts plus explicit terminal are evaluated by the shared reducer. No duplicate grammar.
++Only source hashes/component/input paths and related explicit metadata/documentation/verification ancestry change. Preserve old03161 code labels (the historical EXACT_EXECUTION03_API_BINDING label remains; actual byte binding is04). Full task grammar/isolated sibling loader/current-before-archive and failed-report protections, sourcef9c/plan9391/catalogd963/core/commands, hard errors and ownership/source/lease/qualification/fresh60s/separate verifier-permit-exit-postclose ordering remain unchanged.
+ 
+-Use one fixed pure dependency loader for the exact installed report_inventory.py and execution_checks.py pair. Validate both explicit package pins and bytes, construct an isolated module namespace with a fixed report_inventory import binding, and never consult sys.path/PYTHONPATH or preloaded global modules. Both modules are stdlib-only/no top-level I/O. Regressions must call this actual loader boundary with pinned synthetic/public source bytes in a clean namespace, not just isolated extracted functions.
+-
+-Read and hash the physical full-check/report-manifest-before-archive.json. Cross-link coverage manifest hash/current XML inventory and preserved-evidence proof as the final03 interface requires. Its metadata enters evidencePins and loadedHashes, readiness/permit qualification basis and post-observation hash rechecks. Preserve the explicit failed-no-current-report branch without ratios/C8 credit; a claimed current incomplete dynamic tree is a hard error.
+-
+-Keep all other128 control predicates and61 prior meaningful pure controls, exact Bashbf57, original source derivation/whole modes/main/Replay/dist/aux, zero writers, two explicit phases, root SHA argument/held identity/kernel, raw exits/errors, build/source/owned/history/fresh60s and standalone verifier→permit→guardexit→postclose ordering. Hard execution errors stay outside the two qualifiable tokens; no normal reconciliation admission widening. Root later composes exact completed manifests without reciprocal hashing; exact whole-unit Aria/Quinn/root review and all actual fresh facts remain owed. Preparation never writes readiness or grants release/credit.
++Root composition and independent exact whole-unit Aria+Quinn/root review/fresh source/tools/resources/lock/admission remain owed. This is compatibility preparation, not acceptance of the filesystem fix or actual runtime behavior. No helper/gate/producer/packet/observer/assessor/phase main, native/compiler/OS/process/lock/private/runtime artifact/source/network/Git action or delegation. No readiness/permit/IR/C8/lane/lifecycle authority.
+ 
+ 
+-## Explicit resume2 integration binding — not execution authority
++## Explicit control03 / execution04 compatibility preparation
+ 
+-Rootd206 integration01–03 are addressed against immutable execution03 f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692, interface9adcfedf and pure-api16182094. This supersedes the prior unaccepted335298 preparation dependency for this new candidate only; no old seal/review/adoption is rewritten and no whole-unit support is inferred. Source plan9391/catalogd963/f9c/commands remain exact. Actual tuple review/root binding is still PENDING.
++This fresh component binds execution04fb038 / pure-api375916 / interfacec4faa8. Gate REDUCER_ASSESSOR_SHA changes once from c58c to db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef; no control semantics widen. Task reducer definitions/AST/re-only globals, checks/inventory/classifier/keeper/commands, plan9391/catalogd963/sourcef9c and before-archive/report/closing schemas are exact03. The historical EXACT_EXECUTION03_API_BINDING error-code label remains for predicate continuity; its actual enforced assessor bytes are04. Actual04 source bytes supply the AST reducer during pure replay and any future reviewed invocation.
+ 
+-The gate pins assessorc58c/checksc980/report_inventory2c29/classificationf13e. It extracts only assessor task_event_proof/task_statuses with re. Printed plain headers are context, not invocation or terminal success; repeated context may legally precede one known explicit terminal. Unknown/reversed/post-terminal/conflicting sequences HOLD. Actual selected build0, BUILD SUCCESSFUL/no BUILD FAILED, real source/log/receipt provenance and fresh output/C8 checks remain mandatory. Green requires all required reducer statuses EXECUTED plus those whole-native proofs; the spelling EXECUTED alone may still mean HEADER_ONLY. Actual build/assessment/coverage taskEventProof values are compared against the actual hash-bound log reducer. One invocation remains the exclusive owned phase/counter, never a printed-marker count.
+-
+-The exact report_inventory sibling is privately instantiated from pinned bytes before execution_checks. Its fixed import binding supplies only ROOT_PAGES/canonical_path, not PYTHONPATH/sys.path or a preloaded report_inventory module. Actual loader/API controls run in clean and poisoned-cache contexts, with a global-import trap proving no report_inventory fallback. Only the pure stdlib import set in the sealed API is allowed; no arbitrary plugin mechanism.
+-
+-Physical full-check/report-manifest-before-archive.json is read through the existing safe metadata reader and enters evidencePins/loadedHashes, validation manifest SHA, readiness/permit/basis and current metadata rechecks. Coverage SHA→manifest SHA→exact current inventory links and preserved-public-evidence→coverage SHA are all required. CURRENT_REPORT_CLAIM requires complete current XML/link/freshness proof, before-copy originals equal actual archive originals, dynamic facts equal inventory originals, exact20 Jacoco static paths and XML fact hash. Claimed incomplete current HTML is hard HOLD. BLOCKED_AFTER_EXPLICIT_FAILED_TEST instead uses the exact pinned evidenced_failed_test_report_block predicate: complete clean actual Test/public/source/owned proof plus explicit source-DAG blocking; no old XML/body parsing/copying, original/archive/static body facts empty, ratios empty/freshReport false and only stable/regular pre-start uncredited metadata (or absent directory). It earns zero C8/coverage credit. No old inventory fallback, fake freshness or generic qualification can override a hard STANDARD_RECONCILE error.
+-
+-All61 prior meaningful controls remain, with only valid new API inventory prerequisites added. There are46 new actual-pure-boundary regressions, including repeated-header success/failure pairs, missing completion/nonzero/cached/unknown tasks, clean/poisoned real pair loader, wrong/missing/tampered/unbound modules, current and blocked manifest drifts, after-load byte drift and actual hard admission errors despite fully matching synthetic QA/root records. These are107 distinct pure controls, not native calls or actual host/lock/runtime evidence. Gate packet/main/producer/observer/postclose and execution mains remain unexecuted.
+-
+-Standalone final0 inspection, separate explicit root permit, separate guarded exit within60s before/after current checks and separate postclose remain unchanged. Bashbf57, policy, final producer and postclose bytes are exact b270. All old errors/gaps/holds, zero writers/two explicit phases and root SHA argument convention remain. No readiness/permit/source/native/retry/IR/C8/lifecycle authority exists here. Root must compose the independently accepted manifests without reciprocal seal hashing and recheck the exact actual interface before release.
++The other4 runtime files (producer/policy/postclose/Bash) remain byte exact. The same107 prior pure controls replayed against04; no new mirrored literal-pin test was added. compatibility.json records exported AST/schema equality and precise source changes. Root8165 adopted the finding/correction-preparation scope, not the fix or actual runtime behavior. Independent correction/whole-unit Aria+Quinn review, exact root composition/release and fresh facts remain OWED. No actual helper/packet/gate/producer/OS/native/private/source invocation, readiness/permit/IR/C8/lane/lifecycle authority or historical repair. Old02/01/E04/E03/all reviews and seals remain unchanged; no reciprocal manifest hash cycle or inferred old review support.
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/RECIPE-md.from-b270.diff
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/RECIPE-md.from-b270.diff
+@@ -1,26 +1,12 @@
+ --- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/RECIPE.md
+-+++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/RECIPE.md
+-@@ -1,3 +1,5 @@
+-+> COMPONENT ONLY — execution03 has root-confirmed mandatory C8-EXEC-04 (unsafe report-root/ancestor observation before HOLD). It is unsupported for actual composition. This revision intentionally remains pinned to03; corrected04 requires a new explicit control compatibility binding and exact whole-unit review. No native release exists.
+-+
+- # Prepared C8 control recipe — no launch authority
+- 
+- This is a proposed fixed sequence for root after exact whole-unit Aria+Quinn review/adoption, actual accepted sourcef9c, fresh tools/resources/unused label and new exclusive lease. The code has not run against a shell, lock, process, source capture or private input. Do not use any old GST permit/release/readiness/PTY, and do not execute this preparation as authorization.
+-@@ -27,4 +29,16 @@
+++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/RECIPE.md
++@@ -27,4 +27,8 @@
+  Actual fullcheck outcome/native errors/current gaps are distinct from source/build/resource closure readiness. No close, green check or passing pure control grants C8/lane credit, generalW1/main/Replay/IR/F1/GS-Mb/baton/external/custody/lifecycle release. Original03/B1/05 reds, original03 observer gap, GST03 formatter/premature-unlock gaps, old errors and consumed c212 private scope remain. No further private read follows.
+  
+  
+ -Preparation dependency qualification: after execution335298 sealed, root reported mandatory C8-EXEC-01 (missing assessment.evidenceErrors admission check before reconciliation). That seal is unsupported for actual admission. Preserve it unchanged; corrected execution successor and exact whole-unit Aria/Quinn/root acceptance are PENDING. No control qualification or current recipe may bypass that finding. Reconciliation requires no assessment.evidenceErrors under the corrected normal admission; any wider qualified case needs a new exact reviewed disposition. Parent will compose only the independently accepted tuple. Existing plan9391/catalogd963 pins are immutable here; a changed reviewed plan/catalog requires explicit new control binding. No silent input refresh or mutual manifest recursion.
+-+## Explicit resume2 integration binding — not execution authority
+++## Explicit control03 / execution04 compatibility preparation
+ +
+-+Rootd206 integration01–03 are addressed against immutable execution03 f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692, interface9adcfedf and pure-api16182094. This supersedes the prior unaccepted335298 preparation dependency for this new candidate only; no old seal/review/adoption is rewritten and no whole-unit support is inferred. Source plan9391/catalogd963/f9c/commands remain exact. Actual tuple review/root binding is still PENDING.
+++This fresh component binds execution04fb038 / pure-api375916 / interfacec4faa8. Gate REDUCER_ASSESSOR_SHA changes once from c58c to db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef; no control semantics widen. Task reducer definitions/AST/re-only globals, checks/inventory/classifier/keeper/commands, plan9391/catalogd963/sourcef9c and before-archive/report/closing schemas are exact03. The historical EXACT_EXECUTION03_API_BINDING error-code label remains for predicate continuity; its actual enforced assessor bytes are04. Actual04 source bytes supply the AST reducer during pure replay and any future reviewed invocation.
+ +
+-+The gate pins assessorc58c/checksc980/report_inventory2c29/classificationf13e. It extracts only assessor task_event_proof/task_statuses with re. Printed plain headers are context, not invocation or terminal success; repeated context may legally precede one known explicit terminal. Unknown/reversed/post-terminal/conflicting sequences HOLD. Actual selected build0, BUILD SUCCESSFUL/no BUILD FAILED, real source/log/receipt provenance and fresh output/C8 checks remain mandatory. Green requires all required reducer statuses EXECUTED plus those whole-native proofs; the spelling EXECUTED alone may still mean HEADER_ONLY. Actual build/assessment/coverage taskEventProof values are compared against the actual hash-bound log reducer. One invocation remains the exclusive owned phase/counter, never a printed-marker count.
+-+
+-+The exact report_inventory sibling is privately instantiated from pinned bytes before execution_checks. Its fixed import binding supplies only ROOT_PAGES/canonical_path, not PYTHONPATH/sys.path or a preloaded report_inventory module. Actual loader/API controls run in clean and poisoned-cache contexts, with a global-import trap proving no report_inventory fallback. Only the pure stdlib import set in the sealed API is allowed; no arbitrary plugin mechanism.
+-+
+-+Physical full-check/report-manifest-before-archive.json is read through the existing safe metadata reader and enters evidencePins/loadedHashes, validation manifest SHA, readiness/permit/basis and current metadata rechecks. Coverage SHA→manifest SHA→exact current inventory links and preserved-public-evidence→coverage SHA are all required. CURRENT_REPORT_CLAIM requires complete current XML/link/freshness proof, before-copy originals equal actual archive originals, dynamic facts equal inventory originals, exact20 Jacoco static paths and XML fact hash. Claimed incomplete current HTML is hard HOLD. BLOCKED_AFTER_EXPLICIT_FAILED_TEST instead uses the exact pinned evidenced_failed_test_report_block predicate: complete clean actual Test/public/source/owned proof plus explicit source-DAG blocking; no old XML/body parsing/copying, original/archive/static body facts empty, ratios empty/freshReport false and only stable/regular pre-start uncredited metadata (or absent directory). It earns zero C8/coverage credit. No old inventory fallback, fake freshness or generic qualification can override a hard STANDARD_RECONCILE error.
+-+
+-+All61 prior meaningful controls remain, with only valid new API inventory prerequisites added. There are46 new actual-pure-boundary regressions, including repeated-header success/failure pairs, missing completion/nonzero/cached/unknown tasks, clean/poisoned real pair loader, wrong/missing/tampered/unbound modules, current and blocked manifest drifts, after-load byte drift and actual hard admission errors despite fully matching synthetic QA/root records. These are107 distinct pure controls, not native calls or actual host/lock/runtime evidence. Gate packet/main/producer/observer/postclose and execution mains remain unexecuted.
+-+
+-+Standalone final0 inspection, separate explicit root permit, separate guarded exit within60s before/after current checks and separate postclose remain unchanged. Bashbf57, policy, final producer and postclose bytes are exact b270. All old errors/gaps/holds, zero writers/two explicit phases and root SHA argument convention remain. No readiness/permit/source/native/retry/IR/C8/lifecycle authority exists here. Root must compose the independently accepted manifests without reciprocal seal hashing and recheck the exact actual interface before release.
+++The other4 runtime files (producer/policy/postclose/Bash) remain byte exact. The same107 prior pure controls replayed against04; no new mirrored literal-pin test was added. compatibility.json records exported AST/schema equality and precise source changes. Root8165 adopted the finding/correction-preparation scope, not the fix or actual runtime behavior. Independent correction/whole-unit Aria+Quinn review, exact root composition/release and fresh facts remain OWED. No actual helper/packet/gate/producer/OS/native/private/source invocation, readiness/permit/IR/C8/lane/lifecycle authority or historical repair. Old02/01/E04/E03/all reviews and seals remain unchanged; no reciprocal manifest hash cycle or inferred old review support.
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/RECIPE.md
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/RECIPE.md
+@@ -1,5 +1,3 @@
+-> COMPONENT ONLY — execution03 has root-confirmed mandatory C8-EXEC-04 (unsafe report-root/ancestor observation before HOLD). It is unsupported for actual composition. This revision intentionally remains pinned to03; corrected04 requires a new explicit control compatibility binding and exact whole-unit review. No native release exists.
+-
+ # Prepared C8 control recipe — no launch authority
+ 
+ This is a proposed fixed sequence for root after exact whole-unit Aria+Quinn review/adoption, actual accepted sourcef9c, fresh tools/resources/unused label and new exclusive lease. The code has not run against a shell, lock, process, source capture or private input. Do not use any old GST permit/release/readiness/PTY, and do not execute this preparation as authorization.
+@@ -29,16 +27,8 @@
+ Actual fullcheck outcome/native errors/current gaps are distinct from source/build/resource closure readiness. No close, green check or passing pure control grants C8/lane credit, generalW1/main/Replay/IR/F1/GS-Mb/baton/external/custody/lifecycle release. Original03/B1/05 reds, original03 observer gap, GST03 formatter/premature-unlock gaps, old errors and consumed c212 private scope remain. No further private read follows.
+ 
+ 
+-## Explicit resume2 integration binding — not execution authority
++## Explicit control03 / execution04 compatibility preparation
+ 
+-Rootd206 integration01–03 are addressed against immutable execution03 f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692, interface9adcfedf and pure-api16182094. This supersedes the prior unaccepted335298 preparation dependency for this new candidate only; no old seal/review/adoption is rewritten and no whole-unit support is inferred. Source plan9391/catalogd963/f9c/commands remain exact. Actual tuple review/root binding is still PENDING.
++This fresh component binds execution04fb038 / pure-api375916 / interfacec4faa8. Gate REDUCER_ASSESSOR_SHA changes once from c58c to db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef; no control semantics widen. Task reducer definitions/AST/re-only globals, checks/inventory/classifier/keeper/commands, plan9391/catalogd963/sourcef9c and before-archive/report/closing schemas are exact03. The historical EXACT_EXECUTION03_API_BINDING error-code label remains for predicate continuity; its actual enforced assessor bytes are04. Actual04 source bytes supply the AST reducer during pure replay and any future reviewed invocation.
+ 
+-The gate pins assessorc58c/checksc980/report_inventory2c29/classificationf13e. It extracts only assessor task_event_proof/task_statuses with re. Printed plain headers are context, not invocation or terminal success; repeated context may legally precede one known explicit terminal. Unknown/reversed/post-terminal/conflicting sequences HOLD. Actual selected build0, BUILD SUCCESSFUL/no BUILD FAILED, real source/log/receipt provenance and fresh output/C8 checks remain mandatory. Green requires all required reducer statuses EXECUTED plus those whole-native proofs; the spelling EXECUTED alone may still mean HEADER_ONLY. Actual build/assessment/coverage taskEventProof values are compared against the actual hash-bound log reducer. One invocation remains the exclusive owned phase/counter, never a printed-marker count.
+-
+-The exact report_inventory sibling is privately instantiated from pinned bytes before execution_checks. Its fixed import binding supplies only ROOT_PAGES/canonical_path, not PYTHONPATH/sys.path or a preloaded report_inventory module. Actual loader/API controls run in clean and poisoned-cache contexts, with a global-import trap proving no report_inventory fallback. Only the pure stdlib import set in the sealed API is allowed; no arbitrary plugin mechanism.
+-
+-Physical full-check/report-manifest-before-archive.json is read through the existing safe metadata reader and enters evidencePins/loadedHashes, validation manifest SHA, readiness/permit/basis and current metadata rechecks. Coverage SHA→manifest SHA→exact current inventory links and preserved-public-evidence→coverage SHA are all required. CURRENT_REPORT_CLAIM requires complete current XML/link/freshness proof, before-copy originals equal actual archive originals, dynamic facts equal inventory originals, exact20 Jacoco static paths and XML fact hash. Claimed incomplete current HTML is hard HOLD. BLOCKED_AFTER_EXPLICIT_FAILED_TEST instead uses the exact pinned evidenced_failed_test_report_block predicate: complete clean actual Test/public/source/owned proof plus explicit source-DAG blocking; no old XML/body parsing/copying, original/archive/static body facts empty, ratios empty/freshReport false and only stable/regular pre-start uncredited metadata (or absent directory). It earns zero C8/coverage credit. No old inventory fallback, fake freshness or generic qualification can override a hard STANDARD_RECONCILE error.
+-
+-All61 prior meaningful controls remain, with only valid new API inventory prerequisites added. There are46 new actual-pure-boundary regressions, including repeated-header success/failure pairs, missing completion/nonzero/cached/unknown tasks, clean/poisoned real pair loader, wrong/missing/tampered/unbound modules, current and blocked manifest drifts, after-load byte drift and actual hard admission errors despite fully matching synthetic QA/root records. These are107 distinct pure controls, not native calls or actual host/lock/runtime evidence. Gate packet/main/producer/observer/postclose and execution mains remain unexecuted.
+-
+-Standalone final0 inspection, separate explicit root permit, separate guarded exit within60s before/after current checks and separate postclose remain unchanged. Bashbf57, policy, final producer and postclose bytes are exact b270. All old errors/gaps/holds, zero writers/two explicit phases and root SHA argument convention remain. No readiness/permit/source/native/retry/IR/C8/lifecycle authority exists here. Root must compose the independently accepted manifests without reciprocal seal hashing and recheck the exact actual interface before release.
++The other4 runtime files (producer/policy/postclose/Bash) remain byte exact. The same107 prior pure controls replayed against04; no new mirrored literal-pin test was added. compatibility.json records exported AST/schema equality and precise source changes. Root8165 adopted the finding/correction-preparation scope, not the fix or actual runtime behavior. Independent correction/whole-unit Aria+Quinn review, exact root composition/release and fresh facts remain OWED. No actual helper/packet/gate/producer/OS/native/private/source invocation, readiness/permit/IR/C8/lane/lifecycle authority or historical repair. Old02/01/E04/E03/all reviews and seals remain unchanged; no reciprocal manifest hash cycle or inferred old review support.
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/inputs-json.from-b270.diff
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/inputs-json.from-b270.diff
+@@ -1,6 +1,6 @@
+ --- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/inputs.json
+-+++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/inputs.json
+-@@ -1,161 +1,425 @@
+++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/inputs.json
++@@ -1,161 +1,687 @@
+  {
+    "pins": [
+      {
+@@ -28,6 +28,18 @@
+ +      "sha256": "fc6cebf92ea3c28ee99ade20c8505eeb0fb9238b27116311abd04809aa930460"
+ +    },
+ +    {
+++      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/c8-control-resume3-compatibility-context.json",
+++      "sha256": "4c3125321f131e4077c51864253857d623c50e630b242c4bd4a59aaadbc88628"
+++    },
+++    {
+++      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/c8-control-resume3-compatibility-preflight.json",
+++      "sha256": "489c67d94306a03e343cde54b73d6930579fe363deeaafc90c6f36e312418bc4"
+++    },
+++    {
+++      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/c8-control-resume3-compatibility-task.txt",
+++      "sha256": "04fde901f4350adda26e2d5eb5f19c760b5fecb56729f9bc2644f26500fd740a"
+++    },
+++    {
+ +      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-control-integration-audit/findings.json",
+ +      "sha256": "4d1b0bad34fc88198bfb067080b1548a0c1bfadc19621c85d6c541736bf6c86f"
+ +    },
+@@ -196,6 +208,134 @@
+ +      "sha256": "9391e76dd403d45a1c8ab09c428ed6884a762c326959cefa63c781633c687313"
+ +    },
+ +    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/55e5-check-map.json",
+++      "sha256": "63761889543ccb820c62499848e6b0f994fa80976fffd02b74fbc3a33fd9485f"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/CONTRACT-md.from-b270.diff",
+++      "sha256": "43a5349bdb08a92f73e01a80ae2079065a31faf8180bbd5631b2b881f6b4f927"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/CONTRACT.md",
+++      "sha256": "6b6addfd0a0192a3e816f55f3253e486bc16435fc26fcb628c27357400622934"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/DESIGN.md",
+++      "sha256": "0a48a7a27bfc80384aedc34f42afa87d889e9506bc04304a980ab2716c24a162"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/RECIPE-md.from-b270.diff",
+++      "sha256": "3c0e37059a5d8cb1d6e262bfe29b8009c96a5727bb08469c5e64bcf86797a5ce"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/RECIPE.md",
+++      "sha256": "44d40df5670e85a1d69ed2bb9417a40d66ae1b2e12d8280214c415f83506ee8e"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/final_verifier.py",
+++      "sha256": "58eb67cc561a7120033ba005f63bbac677f27f2ed46f836e95cd621b9bd6c598"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/guard-exit.bash",
+++      "sha256": "bf5782294e00ac1509e6145233fa7c97a5085a14663ec475df8e0698d7135f0c"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/inputs-json.from-b270.diff",
+++      "sha256": "7cb3b331760ba49da72f671c035da79e4e88a71904032d20e0172fd33c12bc99"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/inputs.json",
+++      "sha256": "0d695972849492bb8e46fb05c48cfab868bc452cea012993b89aa175e2090319"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/integration-control-results.json",
+++      "sha256": "3bd9c2eec0aa47b3f695ab75bd81a32907fbbd3608639d18dd7683bbed59ebe4"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/integration-map.json",
+++      "sha256": "be2a4ba2290a8c86fdef6fd3278f2121e9bbcd4252ff97492be4e33e75b2b996"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/integration_controls.py",
+++      "sha256": "d7dc8cf074f31df7b4d65cf4a354befd8bd5c118c1aae69d38b87670584d688c"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/manifest.json",
+++      "sha256": "ead32301e2131fe9c7e6ba4a4b1beaf8720c9bba2df5bcd735cdadfdaedff65a"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/policy.json",
+++      "sha256": "94f4ec8af8f588d5866e608caf0960db4270bb1ee80e4ed0ec68d569c8aa7077"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/postclose.py",
+++      "sha256": "44cc63d922e623f8db23b5d08ef395abeb72b04258240ed8db33da9a38cb768a"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/preservation.json",
+++      "sha256": "1169913f8f2235bdfcbc0867fa3d1c4c16128a0037fdf7b1d52c706cc1c774cb"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/pure-control-results.json",
+++      "sha256": "49e0a3669dec83ad6f2d5953d139534fe452e42cceb8e9f352a169ec041ebe8d"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/pure_controls-py.from-b270.diff",
+++      "sha256": "2cf68c005f1ec5cc0be59321ed9e75872fe9774d5bb0c4111fefd88e73b18224"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/pure_controls.py",
+++      "sha256": "835fbce3d37121cf25c3b5f870dc5e73eab3f04a7fd39bbffdbcea658301e0ce"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/receipt-json.from-b270.diff",
+++      "sha256": "297eac29fdb940c93c57f8419a4bbe8d196142effff20d4f3e71af66462dd77c"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/receipt.json",
+++      "sha256": "2173b6d2ab906ceea3c4a5cbe9633646c87a3273e56786dac73afa96f3836417"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/root-bindings.template.json",
+++      "sha256": "f78c06fd681cff1c86d231b2fa48e5f5999b8cc6945cf57418101efb6ed28744"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/runtime-files.json",
+++      "sha256": "d8ff4ece1e2dc9a9b3f14f68aa2a8038784c92b0cfb7962e70492d9f08cab3a8"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/shared-interface-json.from-b270.diff",
+++      "sha256": "9874d82643831903ea73f90a6f63076adab909bfe9b6f67bde8e21567b0706d8"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/shared-interface.json",
+++      "sha256": "53dc93729fee8ee1a37712ba48cca39e1ddd65fe9cad5d8c0182aa441d997e31"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/static-verification.json",
+++      "sha256": "a0145f4e27b48be328f72810c1824b53cc028e372af0f46352bc4ed5b4734ad0"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock-gate-from-55e5.diff",
+++      "sha256": "2a8f04196211d67eba34b50299015d13e4afd6b8e2b15488393dcc3c8011f19d"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock_gate-py.from-b270.diff",
+++      "sha256": "8814f4071f9a714141b7c0086e28f85efb3572e1dda9e02212cb3ed56a3d3907"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock_gate.py",
+++      "sha256": "fb0d7b4c8baa46ec1727363d41b38d40f703ac99b4617532aa5b721d0ea0a791"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/verify_static-py.from-b270.diff",
+++      "sha256": "6bdf41d65c8208c92124b982c3aefd4a516f1f98b596cc2e28fc55224b02a60a"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/verify_static.py",
+++      "sha256": "40bc54a72854ed62859a861382a099b272016825a238f67420edcebaa8c9c991"
+++    },
+++    {
+ +      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/execution/README.md",
+ +      "sha256": "e6734aa58f10563f850d1d38ce44fa53cfa95c878220899e9f4d8063d69b02ee"
+ +    },
+@@ -309,6 +449,126 @@
+ +    },
+ +    {
+ +      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/execution/task_parser_checks.py",
+++      "sha256": "09e1c088b3f8d90884717d9fbeff80bd051f8634f86cc62a7e06d601c8bac43d"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/README.md",
+++      "sha256": "d1397a9e5608e5ad86fe3df1ce6ddada680a820bffd898d9bd0173a654b1a4f2"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/assessor.py",
+++      "sha256": "db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/boundary_checks.py",
+++      "sha256": "aae11b069ba2536baaa36bde26a2715a03b2cce696d9e670d88a46f1e188eddc"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/catalog-metadata.diff",
+++      "sha256": "f67b747f11db25d9d6a7e7f7c693807be3b82178abf856b532adc1ceebbad810"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/core-reuse.json",
+++      "sha256": "f1f343b645775e4caf22f02922a5298d4d4e2e3fa496c1556f897012c8a2f009"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/diff-replay.json",
+++      "sha256": "72b97d943d4f0fabe907be5a4ca03db2e5a04115c5437b5063b2d44c41a8351e"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/evidence_classification.py",
+++      "sha256": "f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/execution_checks.py",
+++      "sha256": "c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/held_preflight.py",
+++      "sha256": "b4e115e190828d72198b63098745fc2c3940c7f1a82f90bc260bd387a459dadf"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/implementation.diff",
+++      "sha256": "06527e4e4a09b34226dab51733c09b7121fe40c21dcc34f022943160c0c6ab12"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/implementation.reverse.diff",
+++      "sha256": "99c4c66289d6ef69615c0ac1150bf7f50bb68680dd76e7d51d2bd965b2e10538"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/input-pins.json",
+++      "sha256": "3355f467910c73c539c00a70cfb57347fff35868ba38f4d6799285999026061c"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/manifest.json",
+++      "sha256": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/phase_keeper.py",
+++      "sha256": "8a47f2e07c2a1528f1339276da9251846cbb4930bc5fb23a980e6481aedf053a"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/plan-metadata.diff",
+++      "sha256": "9b3379659a29b38a27857f69b846505503e011b7b335247c84db857b6fc5c9f6"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/preparation-iterations.json",
+++      "sha256": "8462648048e89ec92af5d1541b0c33bf69254ff50e6e704f05e2667864452321"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/preservation-proof.json",
+++      "sha256": "fbc927e50a6a8c2b49a3f7af7563c8fb57e228fe726b0c8f05e9a101e273e923"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/public_cohort_checks.py",
+++      "sha256": "57452f0bb90315984445fc64f96ca82b1ac10658a1e8c4b959e06186a3985eb8"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/pure-api.json",
+++      "sha256": "3759165d2500a7537ab9d5146a227732181763048e4a5915e163c5c3739badbf"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/pure-check-results.json",
+++      "sha256": "f48da6809c37392d50364f037e5fbf82699f022083b68e34886083d42b4d02c3"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/pure_checks.py",
+++      "sha256": "a74009cc1ceb248cb93c2ee198025664e30a1490e8774a84bfb20efe40077fba"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/report_boundary_checks.py",
+++      "sha256": "645efc7f8a073b4736be942aef82a6df4022a4922292427f1fef95c8a56980f1"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/report_inventory.py",
+++      "sha256": "2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/runtime_support.py",
+++      "sha256": "6412db2ae53cc0129291c7dfcfe3ed336c49478623c9be40811769c9e1575794"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/shared-interface.json",
+++      "sha256": "c4faa88d034b88758673c6e31810ffde8eb82ecedde2ef000d1df38397150eed"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/static-resource-catalog.json",
+++      "sha256": "3be436be6ec4784ee393c16aee0aaf65d7620b4aed9fabfb73c68b4be09e359e"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/successor-catalog.json",
+++      "sha256": "d96334bc0559bad126a82d6f84bd91a0ca1442288c713c764588173cec2e04ba"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/successor-changes.json",
+++      "sha256": "e25cfbe337ac90a81bf518e5dad9c6adb2ede55af88b8fff66d3f65ca1af541a"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/successor-plan.json",
+++      "sha256": "9391e76dd403d45a1c8ab09c428ed6884a762c326959cefa63c781633c687313"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/task_parser_checks.py",
+ +      "sha256": "09e1c088b3f8d90884717d9fbeff80bd051f8634f86cc62a7e06d601c8bac43d"
+ +    },
+ +    {
+@@ -392,6 +652,10 @@
+ -      "sha256": "5c33f02599e2107d5a8a67869de0f6fcd6174be9744b15bfcb7fac298b336011"
+ +      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-c8-control-partial-root-adoption.json",
+ +      "sha256": "c4415baf42a5ba3da87ef23c5a8b8ecedd5afcad320ae859ff190c54115415b2"
+++    },
+++    {
+++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-c8-execution-resume3-findings-root-adoption.json",
+++      "sha256": "8165c12dfaa54fb9863a2d71ec21c0106f7d75dc93293fe4d70a2a11bf4ce176"
+ +    },
+ +    {
+ +      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gst-unit06-closed-green-root-adoption.json",
+@@ -538,26 +802,24 @@
+    ],
+ -  "executionDependencyStatus": "PENDING_CORRECTED_SUCCESSOR_AND_INDEPENDENT_ACCEPTANCE;335298 is immutable preparation input only",
+ -  "noManifestRecursion": true,
+-+  "priorControlManifestSha256": "b270b96cd4bd62c0331d83e9d683300d349210626c8710532de3c852e23f14cd",
+-+  "priorInputManifestSha256": "0af913f9bfb10426ba17bcf5e2194762507640ee3181292690e79ee08e6415e3",
+++  "priorControlManifestSha256": "ead32301e2131fe9c7e6ba4a4b1beaf8720c9bba2df5bcd735cdadfdaedff65a",
+ +  "explicitNewExecutionBinding": {
+-+    "manifestSha256": "f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692",
+-+    "pureApiSha256": "16182094da3b793084cf48b9f24aefaf1e2f19eb4fc6b68866c78d0862d1ea96",
+-+    "interfaceSha256": "9adcfedf3b69cf44b1644978e9561b5077f4584288ba90536855e874a2fb9128",
+++    "manifestSha256": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7",
+++    "pureApiSha256": "3759165d2500a7537ab9d5146a227732181763048e4a5915e163c5c3739badbf",
+++    "interfaceSha256": "c4faa88d034b88758673c6e31810ffde8eb82ecedde2ef000d1df38397150eed",
+ +    "sourceModules": {
+-+      "assessor.py": "c58c1fad815686fcc8598840c6152da15987d0cc43f80e852105c384dc52a43c",
+++      "assessor.py": "db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef",
+ +      "execution_checks.py": "c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194",
+ +      "report_inventory.py": "2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d",
+ +      "evidence_classification.py": "f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5"
+ +    },
+-+    "priorUnsupportedPreparationInputsRemainHistorical": true,
+++    "priorInputsRemainHistorical": true,
+ +    "actualAdmissionAccepted": false
+ +  },
+-+  "executionDependencyStatus": "PENDING_CORRECTED_EXECUTION04_EXPLICIT_COMPATIBILITY_AND_WHOLE_UNIT_REVIEW",
+++  "executionDependencyStatus": "PENDING_ROOT_COMPOSITION_AND_EXACT_WHOLE_UNIT_REVIEW",
+    "privateInputs": [],
+    "actualSourceOrProcessOrLockCapture": false,
+ -  "noSilentHelperInputRefresh": true
+ +  "noSilentHelperInputRefresh": true,
+-+  "noManifestRecursion": true,
+-+  "parentReportedMandatoryFinding": "C8-EXEC-04 in execution03 unsafe report-root/ancestor observation; no actual unit, preserve03 pins, do not silently rebind04"
+++  "noManifestRecursion": true
+  }
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/inputs.json
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/inputs.json
+@@ -25,6 +25,18 @@
+       "sha256": "fc6cebf92ea3c28ee99ade20c8505eeb0fb9238b27116311abd04809aa930460"
+     },
+     {
++      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/c8-control-resume3-compatibility-context.json",
++      "sha256": "4c3125321f131e4077c51864253857d623c50e630b242c4bd4a59aaadbc88628"
++    },
++    {
++      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/c8-control-resume3-compatibility-preflight.json",
++      "sha256": "489c67d94306a03e343cde54b73d6930579fe363deeaafc90c6f36e312418bc4"
++    },
++    {
++      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/c8-control-resume3-compatibility-task.txt",
++      "sha256": "04fde901f4350adda26e2d5eb5f19c760b5fecb56729f9bc2644f26500fd740a"
++    },
++    {
+       "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-control-integration-audit/findings.json",
+       "sha256": "4d1b0bad34fc88198bfb067080b1548a0c1bfadc19621c85d6c541736bf6c86f"
+     },
+@@ -193,6 +205,134 @@
+       "sha256": "9391e76dd403d45a1c8ab09c428ed6884a762c326959cefa63c781633c687313"
+     },
+     {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/55e5-check-map.json",
++      "sha256": "63761889543ccb820c62499848e6b0f994fa80976fffd02b74fbc3a33fd9485f"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/CONTRACT-md.from-b270.diff",
++      "sha256": "43a5349bdb08a92f73e01a80ae2079065a31faf8180bbd5631b2b881f6b4f927"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/CONTRACT.md",
++      "sha256": "6b6addfd0a0192a3e816f55f3253e486bc16435fc26fcb628c27357400622934"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/DESIGN.md",
++      "sha256": "0a48a7a27bfc80384aedc34f42afa87d889e9506bc04304a980ab2716c24a162"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/RECIPE-md.from-b270.diff",
++      "sha256": "3c0e37059a5d8cb1d6e262bfe29b8009c96a5727bb08469c5e64bcf86797a5ce"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/RECIPE.md",
++      "sha256": "44d40df5670e85a1d69ed2bb9417a40d66ae1b2e12d8280214c415f83506ee8e"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/final_verifier.py",
++      "sha256": "58eb67cc561a7120033ba005f63bbac677f27f2ed46f836e95cd621b9bd6c598"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/guard-exit.bash",
++      "sha256": "bf5782294e00ac1509e6145233fa7c97a5085a14663ec475df8e0698d7135f0c"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/inputs-json.from-b270.diff",
++      "sha256": "7cb3b331760ba49da72f671c035da79e4e88a71904032d20e0172fd33c12bc99"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/inputs.json",
++      "sha256": "0d695972849492bb8e46fb05c48cfab868bc452cea012993b89aa175e2090319"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/integration-control-results.json",
++      "sha256": "3bd9c2eec0aa47b3f695ab75bd81a32907fbbd3608639d18dd7683bbed59ebe4"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/integration-map.json",
++      "sha256": "be2a4ba2290a8c86fdef6fd3278f2121e9bbcd4252ff97492be4e33e75b2b996"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/integration_controls.py",
++      "sha256": "d7dc8cf074f31df7b4d65cf4a354befd8bd5c118c1aae69d38b87670584d688c"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/manifest.json",
++      "sha256": "ead32301e2131fe9c7e6ba4a4b1beaf8720c9bba2df5bcd735cdadfdaedff65a"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/policy.json",
++      "sha256": "94f4ec8af8f588d5866e608caf0960db4270bb1ee80e4ed0ec68d569c8aa7077"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/postclose.py",
++      "sha256": "44cc63d922e623f8db23b5d08ef395abeb72b04258240ed8db33da9a38cb768a"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/preservation.json",
++      "sha256": "1169913f8f2235bdfcbc0867fa3d1c4c16128a0037fdf7b1d52c706cc1c774cb"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/pure-control-results.json",
++      "sha256": "49e0a3669dec83ad6f2d5953d139534fe452e42cceb8e9f352a169ec041ebe8d"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/pure_controls-py.from-b270.diff",
++      "sha256": "2cf68c005f1ec5cc0be59321ed9e75872fe9774d5bb0c4111fefd88e73b18224"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/pure_controls.py",
++      "sha256": "835fbce3d37121cf25c3b5f870dc5e73eab3f04a7fd39bbffdbcea658301e0ce"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/receipt-json.from-b270.diff",
++      "sha256": "297eac29fdb940c93c57f8419a4bbe8d196142effff20d4f3e71af66462dd77c"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/receipt.json",
++      "sha256": "2173b6d2ab906ceea3c4a5cbe9633646c87a3273e56786dac73afa96f3836417"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/root-bindings.template.json",
++      "sha256": "f78c06fd681cff1c86d231b2fa48e5f5999b8cc6945cf57418101efb6ed28744"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/runtime-files.json",
++      "sha256": "d8ff4ece1e2dc9a9b3f14f68aa2a8038784c92b0cfb7962e70492d9f08cab3a8"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/shared-interface-json.from-b270.diff",
++      "sha256": "9874d82643831903ea73f90a6f63076adab909bfe9b6f67bde8e21567b0706d8"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/shared-interface.json",
++      "sha256": "53dc93729fee8ee1a37712ba48cca39e1ddd65fe9cad5d8c0182aa441d997e31"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/static-verification.json",
++      "sha256": "a0145f4e27b48be328f72810c1824b53cc028e372af0f46352bc4ed5b4734ad0"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock-gate-from-55e5.diff",
++      "sha256": "2a8f04196211d67eba34b50299015d13e4afd6b8e2b15488393dcc3c8011f19d"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock_gate-py.from-b270.diff",
++      "sha256": "8814f4071f9a714141b7c0086e28f85efb3572e1dda9e02212cb3ed56a3d3907"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock_gate.py",
++      "sha256": "fb0d7b4c8baa46ec1727363d41b38d40f703ac99b4617532aa5b721d0ea0a791"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/verify_static-py.from-b270.diff",
++      "sha256": "6bdf41d65c8208c92124b982c3aefd4a516f1f98b596cc2e28fc55224b02a60a"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/verify_static.py",
++      "sha256": "40bc54a72854ed62859a861382a099b272016825a238f67420edcebaa8c9c991"
++    },
++    {
+       "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/execution/README.md",
+       "sha256": "e6734aa58f10563f850d1d38ce44fa53cfa95c878220899e9f4d8063d69b02ee"
+     },
+@@ -309,6 +449,126 @@
+       "sha256": "09e1c088b3f8d90884717d9fbeff80bd051f8634f86cc62a7e06d601c8bac43d"
+     },
+     {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/README.md",
++      "sha256": "d1397a9e5608e5ad86fe3df1ce6ddada680a820bffd898d9bd0173a654b1a4f2"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/assessor.py",
++      "sha256": "db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/boundary_checks.py",
++      "sha256": "aae11b069ba2536baaa36bde26a2715a03b2cce696d9e670d88a46f1e188eddc"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/catalog-metadata.diff",
++      "sha256": "f67b747f11db25d9d6a7e7f7c693807be3b82178abf856b532adc1ceebbad810"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/core-reuse.json",
++      "sha256": "f1f343b645775e4caf22f02922a5298d4d4e2e3fa496c1556f897012c8a2f009"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/diff-replay.json",
++      "sha256": "72b97d943d4f0fabe907be5a4ca03db2e5a04115c5437b5063b2d44c41a8351e"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/evidence_classification.py",
++      "sha256": "f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/execution_checks.py",
++      "sha256": "c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/held_preflight.py",
++      "sha256": "b4e115e190828d72198b63098745fc2c3940c7f1a82f90bc260bd387a459dadf"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/implementation.diff",
++      "sha256": "06527e4e4a09b34226dab51733c09b7121fe40c21dcc34f022943160c0c6ab12"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/implementation.reverse.diff",
++      "sha256": "99c4c66289d6ef69615c0ac1150bf7f50bb68680dd76e7d51d2bd965b2e10538"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/input-pins.json",
++      "sha256": "3355f467910c73c539c00a70cfb57347fff35868ba38f4d6799285999026061c"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/manifest.json",
++      "sha256": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/phase_keeper.py",
++      "sha256": "8a47f2e07c2a1528f1339276da9251846cbb4930bc5fb23a980e6481aedf053a"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/plan-metadata.diff",
++      "sha256": "9b3379659a29b38a27857f69b846505503e011b7b335247c84db857b6fc5c9f6"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/preparation-iterations.json",
++      "sha256": "8462648048e89ec92af5d1541b0c33bf69254ff50e6e704f05e2667864452321"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/preservation-proof.json",
++      "sha256": "fbc927e50a6a8c2b49a3f7af7563c8fb57e228fe726b0c8f05e9a101e273e923"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/public_cohort_checks.py",
++      "sha256": "57452f0bb90315984445fc64f96ca82b1ac10658a1e8c4b959e06186a3985eb8"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/pure-api.json",
++      "sha256": "3759165d2500a7537ab9d5146a227732181763048e4a5915e163c5c3739badbf"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/pure-check-results.json",
++      "sha256": "f48da6809c37392d50364f037e5fbf82699f022083b68e34886083d42b4d02c3"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/pure_checks.py",
++      "sha256": "a74009cc1ceb248cb93c2ee198025664e30a1490e8774a84bfb20efe40077fba"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/report_boundary_checks.py",
++      "sha256": "645efc7f8a073b4736be942aef82a6df4022a4922292427f1fef95c8a56980f1"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/report_inventory.py",
++      "sha256": "2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/runtime_support.py",
++      "sha256": "6412db2ae53cc0129291c7dfcfe3ed336c49478623c9be40811769c9e1575794"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/shared-interface.json",
++      "sha256": "c4faa88d034b88758673c6e31810ffde8eb82ecedde2ef000d1df38397150eed"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/static-resource-catalog.json",
++      "sha256": "3be436be6ec4784ee393c16aee0aaf65d7620b4aed9fabfb73c68b4be09e359e"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/successor-catalog.json",
++      "sha256": "d96334bc0559bad126a82d6f84bd91a0ca1442288c713c764588173cec2e04ba"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/successor-changes.json",
++      "sha256": "e25cfbe337ac90a81bf518e5dad9c6adb2ede55af88b8fff66d3f65ca1af541a"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/successor-plan.json",
++      "sha256": "9391e76dd403d45a1c8ab09c428ed6884a762c326959cefa63c781633c687313"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/task_parser_checks.py",
++      "sha256": "09e1c088b3f8d90884717d9fbeff80bd051f8634f86cc62a7e06d601c8bac43d"
++    },
++    {
+       "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fullcheck-harness/resume3/harness.py",
+       "sha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae"
+     },
+@@ -375,6 +635,10 @@
+     {
+       "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-c8-control-partial-root-adoption.json",
+       "sha256": "c4415baf42a5ba3da87ef23c5a8b8ecedd5afcad320ae859ff190c54115415b2"
++    },
++    {
++      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-c8-execution-resume3-findings-root-adoption.json",
++      "sha256": "8165c12dfaa54fb9863a2d71ec21c0106f7d75dc93293fe4d70a2a11bf4ce176"
+     },
+     {
+       "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gst-unit06-closed-green-root-adoption.json",
+@@ -401,25 +665,23 @@
+       "sha256": "55e5d935a0a38bd2b7477cde55f11b39df7c842ce5efc01494dbc7a1c32513a6"
+     }
+   ],
+-  "priorControlManifestSha256": "b270b96cd4bd62c0331d83e9d683300d349210626c8710532de3c852e23f14cd",
+-  "priorInputManifestSha256": "0af913f9bfb10426ba17bcf5e2194762507640ee3181292690e79ee08e6415e3",
++  "priorControlManifestSha256": "ead32301e2131fe9c7e6ba4a4b1beaf8720c9bba2df5bcd735cdadfdaedff65a",
+   "explicitNewExecutionBinding": {
+-    "manifestSha256": "f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692",
+-    "pureApiSha256": "16182094da3b793084cf48b9f24aefaf1e2f19eb4fc6b68866c78d0862d1ea96",
+-    "interfaceSha256": "9adcfedf3b69cf44b1644978e9561b5077f4584288ba90536855e874a2fb9128",
++    "manifestSha256": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7",
++    "pureApiSha256": "3759165d2500a7537ab9d5146a227732181763048e4a5915e163c5c3739badbf",
++    "interfaceSha256": "c4faa88d034b88758673c6e31810ffde8eb82ecedde2ef000d1df38397150eed",
+     "sourceModules": {
+-      "assessor.py": "c58c1fad815686fcc8598840c6152da15987d0cc43f80e852105c384dc52a43c",
++      "assessor.py": "db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef",
+       "execution_checks.py": "c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194",
+       "report_inventory.py": "2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d",
+       "evidence_classification.py": "f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5"
+     },
+-    "priorUnsupportedPreparationInputsRemainHistorical": true,
++    "priorInputsRemainHistorical": true,
+     "actualAdmissionAccepted": false
+   },
+-  "executionDependencyStatus": "PENDING_CORRECTED_EXECUTION04_EXPLICIT_COMPATIBILITY_AND_WHOLE_UNIT_REVIEW",
++  "executionDependencyStatus": "PENDING_ROOT_COMPOSITION_AND_EXACT_WHOLE_UNIT_REVIEW",
+   "privateInputs": [],
+   "actualSourceOrProcessOrLockCapture": false,
+   "noSilentHelperInputRefresh": true,
+-  "noManifestRecursion": true,
+-  "parentReportedMandatoryFinding": "C8-EXEC-04 in execution03 unsafe report-root/ancestor observation; no actual unit, preserve03 pins, do not silently rebind04"
++  "noManifestRecursion": true
+ }
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/integration-map.json
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/integration-map.json
+@@ -10,7 +10,7 @@
+         "native_task_log_requirements"
+       ],
+       "binding": {
+-        "assessorSha256": "c58c1fad815686fcc8598840c6152da15987d0cc43f80e852105c384dc52a43c",
++        "assessorSha256": "db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef",
+         "definitions": [
+           "task_event_proof",
+           "task_statuses"
+@@ -48,8 +48,11 @@
+     }
+   ],
+   "prior128LabelsRetained": true,
+-  "knownExecution03MandatoryFinding": "C8-EXEC-04",
+-  "corrected04CompatibilityPending": true,
++  "knownExecution03MandatoryFinding": "Historical C8-EXEC-04; corrected04 source candidate bound, independent acceptance owed",
++  "corrected04CompatibilityPending": false,
+   "release": false,
+-  "readiness": false
++  "readiness": false,
++  "predecessorControlManifestSha256": "ead32301e2131fe9c7e6ba4a4b1beaf8720c9bba2df5bcd735cdadfdaedff65a",
++  "explicitExecution04Compatibility": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7",
++  "wholeUnitReviewAndRootCompositionPending": true
+ }
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/integration_controls.py
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/integration_controls.py
+@@ -1,7 +1,7 @@
+ """Actual new PURE boundaries only. No packet/main/observer/OS or runtime-artifact invocation."""
+ from pathlib import Path
+ import ast,builtins,copy,hashlib,json,math,re,runpy,sys,types
+-O=Path(__file__).resolve().parent;R=next(p for p in O.parents if (p/'AGENTS.md').is_file());E=R/'docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/execution'
++O=Path(__file__).resolve().parent;R=next(p for p in O.parents if (p/'AGENTS.md').is_file());E=R/'docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution'
+ def H(x):return hashlib.sha256(x if isinstance(x,bytes) else x.encode()).hexdigest()
+ def pure_gate():
+  tree=ast.parse((O/'unlock_gate.py').read_text());scope={'re':re,'json':json,'builtins':builtins,'types':types,'hashlib':hashlib,'ast':ast}
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/preservation.json
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/preservation.json
+@@ -5,25 +5,25 @@
+     {
+       "path": "55e5-check-map.json",
+       "priorSha256": "48331f5c41cc49b956ff46ab7e92921d1e2de3b5811fa4a71a4497e68a2eda20",
+-      "successorSha256": "63761889543ccb820c62499848e6b0f994fa80976fffd02b74fbc3a33fd9485f",
++      "successorSha256": "42e3e8749d7fc65339d76a735876283a37cfeb88907e09f6745ca19f6e94f3fa",
+       "exact": false
+     },
+     {
+       "path": "CONTRACT.md",
+       "priorSha256": "8ea6d01cf159860c89a6402d00c7b7973ff175b02bbccc458dc9a940e1d34b87",
+-      "successorSha256": "6b6addfd0a0192a3e816f55f3253e486bc16435fc26fcb628c27357400622934",
++      "successorSha256": "d00ab49cd0b7243b1887fde284233d39f932453414ec3c3f7967af39ed6739a5",
+       "exact": false
+     },
+     {
+       "path": "DESIGN.md",
+       "priorSha256": "8b3d8f3e19f6b594c99c54008c7bcbf736da665f32706e27996a0b65916563fb",
+-      "successorSha256": "0a48a7a27bfc80384aedc34f42afa87d889e9506bc04304a980ab2716c24a162",
++      "successorSha256": "03726042c323107098931b7e85d1815b49648822a493d9c40589e54d65e27e6a",
+       "exact": false
+     },
+     {
+       "path": "RECIPE.md",
+       "priorSha256": "202f27164426c061661dfad45a60c8352c75c5f4623af944f4e5bfcf6de6f39a",
+-      "successorSha256": "44d40df5670e85a1d69ed2bb9417a40d66ae1b2e12d8280214c415f83506ee8e",
++      "successorSha256": "a63976768755b947c69e37058869103c3544549959f299015ecdb2889fda6649",
+       "exact": false
+     },
+     {
+@@ -41,7 +41,7 @@
+     {
+       "path": "inputs.json",
+       "priorSha256": "0af913f9bfb10426ba17bcf5e2194762507640ee3181292690e79ee08e6415e3",
+-      "successorSha256": "0d695972849492bb8e46fb05c48cfab868bc452cea012993b89aa175e2090319",
++      "successorSha256": "a99a5f2cfc7bbfa372d0b6d868a81cf044933824bfa645a32584692a56b6dcd9",
+       "exact": false
+     },
+     {
+@@ -65,13 +65,13 @@
+     {
+       "path": "pure_controls.py",
+       "priorSha256": "c3529a41836d0a9c680d573e7d3c68c73bafc3cd23145c02bde4a7d653551f01",
+-      "successorSha256": "835fbce3d37121cf25c3b5f870dc5e73eab3f04a7fd39bbffdbcea658301e0ce",
++      "successorSha256": "914233d254b3d2331d22431b9c4e2da722ec7cfeb229f113f24ea5cde7128fc7",
+       "exact": false
+     },
+     {
+       "path": "receipt.json",
+       "priorSha256": "e24937a461d2e0809190857ac029e35c83fd931bbae8a898b4d8afc2b841700b",
+-      "successorSha256": "2173b6d2ab906ceea3c4a5cbe9633646c87a3273e56786dac73afa96f3836417",
++      "successorSha256": "0847ad9e01b57aa62116517e13380bafc9dbc97df51019f6deda002027bac4d8",
+       "exact": false
+     },
+     {
+@@ -83,37 +83,37 @@
+     {
+       "path": "runtime-files.json",
+       "priorSha256": "c372a82ea32f793c368cc4e383dd384622f1daef8c722e129db432dff28fed01",
+-      "successorSha256": "d8ff4ece1e2dc9a9b3f14f68aa2a8038784c92b0cfb7962e70492d9f08cab3a8",
++      "successorSha256": "f72973c12f2ec564a07be5318cfd15afbcc1c1c097055c2c4ca9d4ca19391a4d",
+       "exact": false
+     },
+     {
+       "path": "shared-interface.json",
+       "priorSha256": "81ae5ebb936b55477db41d78c556934881774f806fb04a5c88a9fd4be9e563e4",
+-      "successorSha256": "53dc93729fee8ee1a37712ba48cca39e1ddd65fe9cad5d8c0182aa441d997e31",
++      "successorSha256": "ee6fc58d415b6e1455746e4af892235f54cb56ef1734c5a191b6ac2f0a882e34",
+       "exact": false
+     },
+     {
+       "path": "static-verification.json",
+       "priorSha256": "6b998d345242b54995691e2273785c3257a9b0903952965ad8f19e21e3a24cfc",
+-      "successorSha256": "a0145f4e27b48be328f72810c1824b53cc028e372af0f46352bc4ed5b4734ad0",
++      "successorSha256": "801143b2ebba53c8cd32ff127e6520b52091169cb35675219405006f4b6e0aad",
+       "exact": false
+     },
+     {
+       "path": "unlock-gate-from-55e5.diff",
+       "priorSha256": "f7a27a11ec05288fd4bbb5db3e2e2d79a9914d5ae1f9e21f5886ab7865efb5e9",
+-      "successorSha256": "2a8f04196211d67eba34b50299015d13e4afd6b8e2b15488393dcc3c8011f19d",
++      "successorSha256": "18c9bfeb1ea1b699a28a32ac4897a3ee270f435b9fef9e836a1e1059dcd24191",
+       "exact": false
+     },
+     {
+       "path": "unlock_gate.py",
+       "priorSha256": "85ce828f752fda98c3fce55934a77ec2fd39c9f8c1d84600d101a45cc30251ff",
+-      "successorSha256": "fb0d7b4c8baa46ec1727363d41b38d40f703ac99b4617532aa5b721d0ea0a791",
++      "successorSha256": "56020d0d3123339587bcf9e0a7f6968efe125a07a4331d9710b2a3be678d021e",
+       "exact": false
+     },
+     {
+       "path": "verify_static.py",
+       "priorSha256": "85bb31d16552924ea3534f5a95ca5d5f3c543d98ff302a2bbb90f29e94eab952",
+-      "successorSha256": "40bc54a72854ed62859a861382a099b272016825a238f67420edcebaa8c9c991",
++      "successorSha256": "3d1d84c154c7f3d9e83b3781239ba66c8c71d1c0056cc9d551563c025efacda0",
+       "exact": false
+     }
+   ],
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/pure_controls-py.from-b270.diff
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/pure_controls-py.from-b270.diff
+@@ -1,5 +1,5 @@
+ --- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/pure_controls.py
+-+++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/pure_controls.py
+++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/pure_controls.py
+ @@ -1,12 +1,12 @@
+  """Injected synthetic/pinned-public-data controls only; no gate main, observer or subprocess."""
+  from pathlib import Path
+@@ -7,7 +7,7 @@
+ -import ast,collections,copy,hashlib,json,math,re
+ -O=Path(__file__).resolve().parent;R=next(p for p in O.parents if (p/'AGENTS.md').is_file());T=R/'docs/qa/evidence/STUDIO-OBS-011/t0';E=O.parent/'execution'
+ +import ast,builtins,collections,copy,hashlib,json,math,re,types
+-+O=Path(__file__).resolve().parent;R=next(p for p in O.parents if (p/'AGENTS.md').is_file());T=R/'docs/qa/evidence/STUDIO-OBS-011/t0';E=T/'early/c8-fullcheck-prep/resume3/execution'
+++O=Path(__file__).resolve().parent;R=next(p for p in O.parents if (p/'AGENTS.md').is_file());T=R/'docs/qa/evidence/STUDIO-OBS-011/t0';E=T/'early/c8-fullcheck-prep/resume4/execution'
+  def read(p):return json.loads(p.read_text())
+  def H(s):return hashlib.sha256(s.encode()).hexdigest()
+  def pure_scope(path,names,constants=()):
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/pure_controls.py
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/pure_controls.py
+@@ -2,7 +2,7 @@
+ from pathlib import Path
+ from collections import Counter
+ import ast,builtins,collections,copy,hashlib,json,math,re,types
+-O=Path(__file__).resolve().parent;R=next(p for p in O.parents if (p/'AGENTS.md').is_file());T=R/'docs/qa/evidence/STUDIO-OBS-011/t0';E=T/'early/c8-fullcheck-prep/resume3/execution'
++O=Path(__file__).resolve().parent;R=next(p for p in O.parents if (p/'AGENTS.md').is_file());T=R/'docs/qa/evidence/STUDIO-OBS-011/t0';E=T/'early/c8-fullcheck-prep/resume4/execution'
+ def read(p):return json.loads(p.read_text())
+ def H(s):return hashlib.sha256(s.encode()).hexdigest()
+ def pure_scope(path,names,constants=()):
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/receipt-json.from-b270.diff
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/receipt-json.from-b270.diff
+@@ -1,6 +1,6 @@
+ --- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/receipt.json
+-+++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/receipt.json
+-@@ -1,43 +1,40 @@
+++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/receipt.json
++@@ -1,44 +1,31 @@
+  {
+ -  "status": "SEALED_CONTROL_PREPARATION_EXECUTION_SUCCESSOR_PENDING",
+ -  "gateSha256": "85ce828f752fda98c3fce55934a77ec2fd39c9f8c1d84600d101a45cc30251ff",
+@@ -15,15 +15,7 @@
+ -    "identities",
+ -    "fresh",
+ -    "safe_bytes"
+-+  "status": "PREPARED_RESUME2_CONTROL_INTEGRATION_COMPONENT_EXECUTION03_UNSUPPORTED_PENDING04",
+-+  "priorControlManifestSha256": "b270b96cd4bd62c0331d83e9d683300d349210626c8710532de3c852e23f14cd",
+-+  "rootIntegrationAuditManifestSha256": "d206a339b3bb5b8676d1e02e4aea7896c3ba4b97348d94568569e5db5ed451a6",
+-+  "execution03ManifestSha256": "f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692",
+-+  "executionPureApiSha256": "16182094da3b793084cf48b9f24aefaf1e2f19eb4fc6b68866c78d0862d1ea96",
+-+  "gateSha256": "fb0d7b4c8baa46ec1727363d41b38d40f703ac99b4617532aa5b721d0ea0a791",
+-+  "runtimeChangedOnly": [
+-+    "unlock_gate.py"
+-   ],
++-  ],
+ -  "BashBytesExact": true,
+ -  "subjectSourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+ -  "productWriters": 0,
+@@ -31,33 +23,34 @@
+ -    "full-check",
+ -    "compile-reconcile"
+ -  ],
+-+  "BashProducerPostclosePolicyExact": true,
+-+  "old62CodesMapped": 62,
+-+  "old128ControlCodesRetained": true,
+-+  "currentControlCodes": 161,
+++  "status": "PREPARED_CONTROL03_EXPLICIT_EXECUTION04_COMPATIBILITY_REVIEW_PENDING",
+++  "predecessorControlManifestSha256": "ead32301e2131fe9c7e6ba4a4b1beaf8720c9bba2df5bcd735cdadfdaedff65a",
+++  "execution04ManifestSha256": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7",
+++  "pureApiSha256": "3759165d2500a7537ab9d5146a227732181763048e4a5915e163c5c3739badbf",
+++  "interfaceSha256": "c4faa88d034b88758673c6e31810ffde8eb82ecedde2ef000d1df38397150eed",
+++  "gateSha256": "56020d0d3123339587bcf9e0a7f6968efe125a07a4331d9710b2a3be678d021e",
+++  "runtimeGateChange": "one assessor source-SHA literal only",
+++  "taskReducerAstAndApiUnchanged": true,
+++  "reportClosingSchemasUnchanged": true,
+++  "checksInventoryClassifierKeeperCommandsPlanCatalogByteExact": true,
+++  "producerPolicyPostcloseBashExact": true,
+ +  "priorPureControls": 61,
+-+  "actualPureIntegrationControls": 46,
+++  "integrationPureControls": 46,
+ +  "distinctPureControls": 107,
+-+  "scope": "source/static and injected pure boundaries only; no actual packet/main/observer/OS/protected artifact invocation",
+-+  "moduleBindings": {
+-+    "assessor.py": "c58c1fad815686fcc8598840c6152da15987d0cc43f80e852105c384dc52a43c",
+-+    "execution_checks.py": "c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194",
+-+    "report_inventory.py": "2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d",
+-+    "evidence_classification.py": "f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5"
+-+  },
+-+  "pendingMandatoryExecutionFinding": "C8-EXEC-04; preserve explicit03 pins; corrected04 needs fresh explicit compatibility successor/review",
+-+  "sourceReady": false,
+++  "same107ResultsByteExact": true,
+++  "mirroredLiteralPinTestsAdded": false,
+++  "rootCompositionAndIndependentWholeUnitReviewRequired": true,
+++  "actualRuntimeCompatibilityProved": false,
+    "readiness": false,
+ +  "release": false,
+    "permit": false,
+-+  "nativeReleased": false,
+-   "sourceReleased": false,
++-  "sourceReleased": false,
+ -  "nativeReleased": false,
+++  "nativeOrSourceReleased": false,
+    "actualExecution": false,
+ -  "actualGateProducerObserverOrHelperMainExecuted": false,
+ -  "actualSourceProcessCensusLockOSProbePrivateAction": false,
+-+  "actualGateProducerObserverExecutionMain": false,
+-+  "actualPrivateNativeSourceProcessCensusLockOSAction": false,
+++  "actualRuntimePrivateNativeSourceProcessCensusLockOSAction": false,
+    "delegation": false,
+ +  "credit": false,
+    "historicalGapsRepaired": false,
+@@ -70,6 +63,7 @@
+ -    "rootComposesOnlyAcceptedTuple": true,
+ -    "inputRefreshRequiresExplicitBinding": true
+ -  },
+-   "exactWholeUnitAriaQuinnRootReviewRequired": true,
++-  "exactWholeUnitAriaQuinnRootReviewRequired": true,
+    "sharedCeilingUsd": 500,
+    "actualAggregateSpend": "UNAVAILABLE"
++ }
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/receipt.json
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/receipt.json
+@@ -1,41 +1,31 @@
+ {
+-  "status": "PREPARED_RESUME2_CONTROL_INTEGRATION_COMPONENT_EXECUTION03_UNSUPPORTED_PENDING04",
+-  "priorControlManifestSha256": "b270b96cd4bd62c0331d83e9d683300d349210626c8710532de3c852e23f14cd",
+-  "rootIntegrationAuditManifestSha256": "d206a339b3bb5b8676d1e02e4aea7896c3ba4b97348d94568569e5db5ed451a6",
+-  "execution03ManifestSha256": "f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692",
+-  "executionPureApiSha256": "16182094da3b793084cf48b9f24aefaf1e2f19eb4fc6b68866c78d0862d1ea96",
+-  "gateSha256": "fb0d7b4c8baa46ec1727363d41b38d40f703ac99b4617532aa5b721d0ea0a791",
+-  "runtimeChangedOnly": [
+-    "unlock_gate.py"
+-  ],
+-  "BashProducerPostclosePolicyExact": true,
+-  "old62CodesMapped": 62,
+-  "old128ControlCodesRetained": true,
+-  "currentControlCodes": 161,
++  "status": "PREPARED_CONTROL03_EXPLICIT_EXECUTION04_COMPATIBILITY_REVIEW_PENDING",
++  "predecessorControlManifestSha256": "ead32301e2131fe9c7e6ba4a4b1beaf8720c9bba2df5bcd735cdadfdaedff65a",
++  "execution04ManifestSha256": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7",
++  "pureApiSha256": "3759165d2500a7537ab9d5146a227732181763048e4a5915e163c5c3739badbf",
++  "interfaceSha256": "c4faa88d034b88758673c6e31810ffde8eb82ecedde2ef000d1df38397150eed",
++  "gateSha256": "56020d0d3123339587bcf9e0a7f6968efe125a07a4331d9710b2a3be678d021e",
++  "runtimeGateChange": "one assessor source-SHA literal only",
++  "taskReducerAstAndApiUnchanged": true,
++  "reportClosingSchemasUnchanged": true,
++  "checksInventoryClassifierKeeperCommandsPlanCatalogByteExact": true,
++  "producerPolicyPostcloseBashExact": true,
+   "priorPureControls": 61,
+-  "actualPureIntegrationControls": 46,
++  "integrationPureControls": 46,
+   "distinctPureControls": 107,
+-  "scope": "source/static and injected pure boundaries only; no actual packet/main/observer/OS/protected artifact invocation",
+-  "moduleBindings": {
+-    "assessor.py": "c58c1fad815686fcc8598840c6152da15987d0cc43f80e852105c384dc52a43c",
+-    "execution_checks.py": "c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194",
+-    "report_inventory.py": "2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d",
+-    "evidence_classification.py": "f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5"
+-  },
+-  "pendingMandatoryExecutionFinding": "C8-EXEC-04; preserve explicit03 pins; corrected04 needs fresh explicit compatibility successor/review",
+-  "sourceReady": false,
++  "same107ResultsByteExact": true,
++  "mirroredLiteralPinTestsAdded": false,
++  "rootCompositionAndIndependentWholeUnitReviewRequired": true,
++  "actualRuntimeCompatibilityProved": false,
+   "readiness": false,
+   "release": false,
+   "permit": false,
+-  "nativeReleased": false,
+-  "sourceReleased": false,
++  "nativeOrSourceReleased": false,
+   "actualExecution": false,
+-  "actualGateProducerObserverExecutionMain": false,
+-  "actualPrivateNativeSourceProcessCensusLockOSAction": false,
++  "actualRuntimePrivateNativeSourceProcessCensusLockOSAction": false,
+   "delegation": false,
+   "credit": false,
+   "historicalGapsRepaired": false,
+-  "exactWholeUnitAriaQuinnRootReviewRequired": true,
+   "sharedCeilingUsd": 500,
+   "actualAggregateSpend": "UNAVAILABLE"
+ }
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/runtime-files.json
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/runtime-files.json
+@@ -2,7 +2,7 @@
+   "files": [
+     {
+       "path": "control/unlock_gate.py",
+-      "sha256": "fb0d7b4c8baa46ec1727363d41b38d40f703ac99b4617532aa5b721d0ea0a791"
++      "sha256": "56020d0d3123339587bcf9e0a7f6968efe125a07a4331d9710b2a3be678d021e"
+     },
+     {
+       "path": "control/guard-exit.bash",
+@@ -21,6 +21,6 @@
+       "sha256": "44cc63d922e623f8db23b5d08ef395abeb72b04258240ed8db33da9a38cb768a"
+     }
+   ],
+-  "installation": "No installation authorized; explicit03 component, corrected04 compatibility and exact whole-unit reviews pending",
++  "installation": "Prepared explicit04 compatibility component only; new root composition/whole-unit review/release required",
+   "actualInstallation": false
+ }
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/shared-interface-json.from-b270.diff
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/shared-interface-json.from-b270.diff
+@@ -1,18 +1,18 @@
+ --- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/shared-interface.json
+-+++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/shared-interface.json
+++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/shared-interface.json
+ @@ -1,11 +1,11 @@
+  {
+    "protocol": "C8_UNLOCK_V1",
+ -  "status": "PREPARED_ONLY_EXECUTION_SUCCESSOR_PENDING",
+-+  "status": "PREPARED_EXECUTION03_BOUND_COMPONENT_UNSUPPORTED_FOR_ADMISSION_PENDING04",
+++  "status": "PREPARED_EXPLICIT_EXECUTION04_COMPATIBILITY_NO_RELEASE",
+    "runtime": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01",
+ -  "executionPreparationManifestSha256": "3352981d0bec3b88e9a70258125857627aef73e7bc572a85bbc2b709a8fcb5ca",
+ -  "executionInterfaceSha256": "1a77c541278d9bd2e165633db8c478709d713746ccd72e483556a509b7ed02dc",
+-+  "executionPreparationManifestSha256": "f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692",
+-+  "executionInterfaceSha256": "9adcfedf3b69cf44b1644978e9561b5077f4584288ba90536855e874a2fb9128",
+++  "executionPreparationManifestSha256": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7",
+++  "executionInterfaceSha256": "c4faa88d034b88758673c6e31810ffde8eb82ecedde2ef000d1df38397150eed",
+    "executionActualAdmissionAccepted": false,
+ -  "mandatoryDependencyFinding": "C8-EXEC-01: require assessment.evidenceErrors check before reconciliation; root routing immutable execution successor; no actual release",
+-+  "mandatoryDependencyFinding": "C8-EXEC-04; root routing corrected04. Explicit new compatibility successor needed; current03 pins must remain exact.",
+++  "mandatoryDependencyFinding": "C8-EXEC-04 corrected source candidate bound explicitly; independent correction/whole-unit reviews and root composition still owed",
+    "fixedSourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+    "successorPlanSha256": "9391e76dd403d45a1c8ab09c428ed6884a762c326959cefa63c781633c687313",
+    "successorCatalogSha256": "d96334bc0559bad126a82d6f84bd91a0ca1442288c713c764588173cec2e04ba",
+@@ -30,7 +30,7 @@
+    "readiness": false,
+ -  "C8Credit": false
+ +  "C8Credit": false,
+-+  "executionPureApiSha256": "16182094da3b793084cf48b9f24aefaf1e2f19eb4fc6b68866c78d0862d1ea96",
+++  "executionPureApiSha256": "3759165d2500a7537ab9d5146a227732181763048e4a5915e163c5c3739badbf",
+ +  "reportManifestPath": "full-check/report-manifest-before-archive.json",
+ +  "taskReducer": "pinned assessor::task_event_proof+task_statuses; AST-only/re global",
+ +  "fixedPureDependency": "explicit pinned report_inventory plus execution_checks isolated binding; no report_inventory path/cache lookup",
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/shared-interface.json
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/shared-interface.json
+@@ -1,11 +1,11 @@
+ {
+   "protocol": "C8_UNLOCK_V1",
+-  "status": "PREPARED_EXECUTION03_BOUND_COMPONENT_UNSUPPORTED_FOR_ADMISSION_PENDING04",
++  "status": "PREPARED_EXPLICIT_EXECUTION04_COMPATIBILITY_NO_RELEASE",
+   "runtime": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01",
+-  "executionPreparationManifestSha256": "f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692",
+-  "executionInterfaceSha256": "9adcfedf3b69cf44b1644978e9561b5077f4584288ba90536855e874a2fb9128",
++  "executionPreparationManifestSha256": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7",
++  "executionInterfaceSha256": "c4faa88d034b88758673c6e31810ffde8eb82ecedde2ef000d1df38397150eed",
+   "executionActualAdmissionAccepted": false,
+-  "mandatoryDependencyFinding": "C8-EXEC-04; root routing corrected04. Explicit new compatibility successor needed; current03 pins must remain exact.",
++  "mandatoryDependencyFinding": "C8-EXEC-04 corrected source candidate bound explicitly; independent correction/whole-unit reviews and root composition still owed",
+   "fixedSourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+   "successorPlanSha256": "9391e76dd403d45a1c8ab09c428ed6884a762c326959cefa63c781633c687313",
+   "successorCatalogSha256": "d96334bc0559bad126a82d6f84bd91a0ca1442288c713c764588173cec2e04ba",
+@@ -64,7 +64,7 @@
+   "release": false,
+   "readiness": false,
+   "C8Credit": false,
+-  "executionPureApiSha256": "16182094da3b793084cf48b9f24aefaf1e2f19eb4fc6b68866c78d0862d1ea96",
++  "executionPureApiSha256": "3759165d2500a7537ab9d5146a227732181763048e4a5915e163c5c3739badbf",
+   "reportManifestPath": "full-check/report-manifest-before-archive.json",
+   "taskReducer": "pinned assessor::task_event_proof+task_statuses; AST-only/re global",
+   "fixedPureDependency": "explicit pinned report_inventory plus execution_checks isolated binding; no report_inventory path/cache lookup",
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/static-verification.json
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/static-verification.json
+@@ -1,12 +1,10 @@
+ {
+-  "status": "STATIC_AND_PURE_COMPONENT_PASS_PENDING04_COMPATIBILITY",
+-  "priorControls61Exact": true,
+-  "newActualPureBoundaries46Pass": true,
+-  "taskReducerAstOnlyPinned": true,
+-  "actualPairLoaderApiCleanPoisonedPass": true,
+-  "manifestCurrentBlockedDriftPass": true,
+-  "hardAdmissionNotQualifiablePass": true,
+-  "unaffected4RuntimeFilesExact": true,
+-  "noReadinessOrRelease": true,
+-  "noActualRuntimeAction": true
++  "status": "STATIC_AND_107_PURE_COMPATIBILITY_COMPONENT_PASS_REVIEW_PENDING",
++  "assessorPinOnlyRuntimeDelta": true,
++  "actualExportAstSchemaEquality": true,
++  "all107MeaningfullyReplayedActual04": true,
++  "noNewMirroredTests": true,
++  "BashProducerPolicyPostcloseExact": true,
++  "readinessOrRelease": false,
++  "actualRuntimeAction": false
+ }
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock-gate-from-55e5.diff
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/unlock-gate-from-55e5.diff
+@@ -1,5 +1,5 @@
+ --- a/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/unlock_gate.py
+-+++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock_gate.py
+++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/unlock_gate.py
+ @@ -1,8 +1,9 @@
+ -"""Future-unit read-only exit gate. Preparation runs only injected pure controls."""
+ +"""Prepared C8-only gate. Pure checks are injectable; actual main/observe require new release."""
+@@ -26,7 +26,7 @@
+ +SUCCESSOR_CATALOG_SHA='d96334bc0559bad126a82d6f84bd91a0ca1442288c713c764588173cec2e04ba'
+ +ACCEPTED_MODES_SHA='86584b3f710109522709cf0195fdc8f20d30f10988e3ba71f80922e00de96036'
+ +SKIPS_SHA='6bd2a808a40a707397757b3ff4f1a78e5eff8ee37666c7b26271582b14457cac'
+-+REDUCER_ASSESSOR_SHA='c58c1fad815686fcc8598840c6152da15987d0cc43f80e852105c384dc52a43c'
+++REDUCER_ASSESSOR_SHA='db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef'
+ +REPORT_INVENTORY_SHA='2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d'
+ +EXECUTION_CHECKS_SHA='c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194'
+ +CLASSIFICATION_SHA='f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5'
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock_gate-py.from-b270.diff
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/unlock_gate-py.from-b270.diff
+@@ -1,5 +1,5 @@
+ --- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/unlock_gate.py
+-+++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock_gate.py
+++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/unlock_gate.py
+ @@ -1,6 +1,6 @@
+  """Prepared C8-only gate. Pure checks are injectable; actual main/observe require new release."""
+  from pathlib import Path
+@@ -12,7 +12,7 @@
+  SUCCESSOR_CATALOG_SHA='d96334bc0559bad126a82d6f84bd91a0ca1442288c713c764588173cec2e04ba'
+  ACCEPTED_MODES_SHA='86584b3f710109522709cf0195fdc8f20d30f10988e3ba71f80922e00de96036'
+  SKIPS_SHA='6bd2a808a40a707397757b3ff4f1a78e5eff8ee37666c7b26271582b14457cac'
+-+REDUCER_ASSESSOR_SHA='c58c1fad815686fcc8598840c6152da15987d0cc43f80e852105c384dc52a43c'
+++REDUCER_ASSESSOR_SHA='db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef'
+ +REPORT_INVENTORY_SHA='2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d'
+ +EXECUTION_CHECKS_SHA='c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194'
+ +CLASSIFICATION_SHA='f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5'
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/unlock_gate.py
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/unlock_gate.py
+@@ -17,7 +17,7 @@
+ SUCCESSOR_CATALOG_SHA='d96334bc0559bad126a82d6f84bd91a0ca1442288c713c764588173cec2e04ba'
+ ACCEPTED_MODES_SHA='86584b3f710109522709cf0195fdc8f20d30f10988e3ba71f80922e00de96036'
+ SKIPS_SHA='6bd2a808a40a707397757b3ff4f1a78e5eff8ee37666c7b26271582b14457cac'
+-REDUCER_ASSESSOR_SHA='c58c1fad815686fcc8598840c6152da15987d0cc43f80e852105c384dc52a43c'
++REDUCER_ASSESSOR_SHA='db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef'
+ REPORT_INVENTORY_SHA='2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d'
+ EXECUTION_CHECKS_SHA='c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194'
+ CLASSIFICATION_SHA='f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5'
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/verify_static-py.from-b270.diff
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/verify_static-py.from-b270.diff
+@@ -1,5 +1,5 @@
+ --- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/verify_static.py
+-+++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/verify_static.py
+++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/verify_static.py
+ @@ -14,7 +14,7 @@
+   i=read(O/'inputs.json')
+   for p in i['pins']:assert sha(R/p['path'])==p['sha256'],p['path']
+@@ -9,16 +9,16 @@
+   for n in files:ast.parse((O/n).read_text())
+   oldpath=R/'docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-06/unlock_gate.py';old=oldpath.read_text();new=(O/'unlock_gate.py').read_text()
+   assert sha(oldpath)=='55e5d935a0a38bd2b7477cde55f11b39df7c842ce5efc01494dbc7a1c32513a6'
+-@@ -45,5 +45,30 @@
++@@ -45,5 +45,38 @@
+   assert result['actualGateOrProducerOrObserverOrHelperMainExecuted'] is False and result['readinessOrPermitWritten'] is False
+   if (O/'manifest.json').exists():
+    for p in read(O/'manifest.json')['files']:assert sha(O/p['path'])==p['sha256']
+ - print(json.dumps({'status':'STATIC_CONTROL_PREPARATION_PASS_EXECUTION_DEPENDENCY_PENDING','pureControls':61,'oldGateChecksMapped':len(a),'exactOldFunctionAsts':3,'BashExact':True,'actualGateProducerObserverOrExecutionMainRun':False,'readinessOrPermitOrSourceNativeAction':False,'executionSuccessorAcceptanceRequired':True}))
+ + # New integration boundaries are code used by the actual loader, not alternate test grammar.
+-+ baseline=O.parent.parent/'resume1/control';execution=O.parent.parent/'resume3/execution'
+++ baseline=O.parent.parent/'resume1/control';execution=O.parent.parent/'resume4/execution'
+ + assert sha(baseline/'manifest.json')=='b270b96cd4bd62c0331d83e9d683300d349210626c8710532de3c852e23f14cd'
+ + for row in read(baseline/'manifest.json')['files']:assert sha(baseline/row['path'])==row['sha256']
+-+ assert sha(execution/'manifest.json')=='f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692'
+++ assert sha(execution/'manifest.json')=='fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7'
+ + for row in read(execution/'manifest.json')['files']:assert sha(execution/row['path'])==row['sha256']
+ + assert set(check_calls((baseline/'unlock_gate.py').read_text()))<=set(b) and len(check_calls((baseline/'unlock_gate.py').read_text()))==128
+ + for n in ('final_verifier.py','postclose.py','policy.json','guard-exit.bash','root-bindings.template.json'):assert (O/n).read_bytes()==(baseline/n).read_bytes()
+@@ -36,8 +36,16 @@
+ + for const,filename in [('REDUCER_ASSESSOR_SHA','assessor.py'),('REPORT_INVENTORY_SHA','report_inventory.py'),('EXECUTION_CHECKS_SHA','execution_checks.py'),('CLASSIFICATION_SHA','evidence_classification.py')]:assert consts[const]==sha(execution/filename)==api['sources'][filename]['sha256']
+ + integration=read(O/'integration-control-results.json');assert integration['status']=='PURE_ACTUAL_INTEGRATION_BOUNDARIES_PASS' and integration['count']==len(integration['controls'])==46
+ + assert all(x['expected']==x['observed'] for x in integration['controls']) and integration['actualPurePairLoaderAndCoverageAPIExercised'] is True and integration['actualGatePacketProducerObserverOrOSMainExecuted'] is False
+-+ assert 'C8-EXEC-04' in i['parentReportedMandatoryFinding'] and contract['executionActualAdmissionAccepted'] is False
+++ assert i['executionDependencyStatus']=='PENDING_ROOT_COMPOSITION_AND_EXACT_WHOLE_UNIT_REVIEW' and contract['executionActualAdmissionAccepted'] is False
+ + preservation=read(O/'preservation.json');assert preservation['runtimeChangedOnly']==['unlock_gate.py']
+ + for row in preservation['baselineMemberComparisons']:assert sha(baseline/row['path'])==row['priorSha256'] and sha(O/row['path'])==row['successorSha256']
+-+ print(json.dumps({'status':'STATIC_RESUME2_INTEGRATION_COMPONENT_PASS_EXECUTION04_BINDING_PENDING','priorPureControls':61,'newActualPureBoundaryControls':46,'distinctPureControls':107,'oldGateChecksMapped':len(a),'exactOldFunctionAsts':3,'BashExact':True,'actualGateProducerObserverOrExecutionMainRun':False,'readinessOrPermitOrSourceNativeAction':False,'executionSuccessorAcceptanceRequired':True}))
+++ predecessor=O.parent.parent/'resume2/control';compat=read(O/'compatibility.json')
+++ assert compat['reportAndClosingSchemaChanged'] is False and compat['prior107ControlResultsExact'] is True
+++ before=(predecessor/'unlock_gate.py').read_text();after=(O/'unlock_gate.py').read_text()
+++ assert after.replace('db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef','c58c1fad815686fcc8598840c6152da15987d0cc43f80e852105c384dc52a43c')==before
+++ assert read(O/'pure-control-results.json')==read(predecessor/'pure-control-results.json') and read(O/'integration-control-results.json')==read(predecessor/'integration-control-results.json')
+++ for n in ['final_verifier.py','postclose.py','policy.json','guard-exit.bash','root-bindings.template.json']:assert (O/n).read_bytes()==(predecessor/n).read_bytes()
+++ if (O/'compatibility-preservation.json').exists():
+++  for row in read(O/'compatibility-preservation.json')['members']:assert sha(predecessor/row['path'])==row['beforeSha256'] and sha(O/row['path'])==row['afterSha256']
+++ print(json.dumps({'status':'STATIC_CONTROL03_EXECUTION04_COMPATIBILITY_COMPONENT_PASS_REVIEW_PENDING','priorPureControls':61,'newActualPureBoundaryControls':46,'distinctPureControls':107,'oldGateChecksMapped':len(a),'exactOldFunctionAsts':3,'BashExact':True,'actualGateProducerObserverOrExecutionMainRun':False,'readinessOrPermitOrSourceNativeAction':False,'executionSuccessorAcceptanceRequired':True}))
+  if __name__=='__main__':main()
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/verify_static.py
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume3/control/verify_static.py
+@@ -46,10 +46,10 @@
+  if (O/'manifest.json').exists():
+   for p in read(O/'manifest.json')['files']:assert sha(O/p['path'])==p['sha256']
+  # New integration boundaries are code used by the actual loader, not alternate test grammar.
+- baseline=O.parent.parent/'resume1/control';execution=O.parent.parent/'resume3/execution'
++ baseline=O.parent.parent/'resume1/control';execution=O.parent.parent/'resume4/execution'
+  assert sha(baseline/'manifest.json')=='b270b96cd4bd62c0331d83e9d683300d349210626c8710532de3c852e23f14cd'
+  for row in read(baseline/'manifest.json')['files']:assert sha(baseline/row['path'])==row['sha256']
+- assert sha(execution/'manifest.json')=='f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692'
++ assert sha(execution/'manifest.json')=='fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7'
+  for row in read(execution/'manifest.json')['files']:assert sha(execution/row['path'])==row['sha256']
+  assert set(check_calls((baseline/'unlock_gate.py').read_text()))<=set(b) and len(check_calls((baseline/'unlock_gate.py').read_text()))==128
+  for n in ('final_verifier.py','postclose.py','policy.json','guard-exit.bash','root-bindings.template.json'):assert (O/n).read_bytes()==(baseline/n).read_bytes()
+@@ -67,8 +67,16 @@
+  for const,filename in [('REDUCER_ASSESSOR_SHA','assessor.py'),('REPORT_INVENTORY_SHA','report_inventory.py'),('EXECUTION_CHECKS_SHA','execution_checks.py'),('CLASSIFICATION_SHA','evidence_classification.py')]:assert consts[const]==sha(execution/filename)==api['sources'][filename]['sha256']
+  integration=read(O/'integration-control-results.json');assert integration['status']=='PURE_ACTUAL_INTEGRATION_BOUNDARIES_PASS' and integration['count']==len(integration['controls'])==46
+  assert all(x['expected']==x['observed'] for x in integration['controls']) and integration['actualPurePairLoaderAndCoverageAPIExercised'] is True and integration['actualGatePacketProducerObserverOrOSMainExecuted'] is False
+- assert 'C8-EXEC-04' in i['parentReportedMandatoryFinding'] and contract['executionActualAdmissionAccepted'] is False
++ assert i['executionDependencyStatus']=='PENDING_ROOT_COMPOSITION_AND_EXACT_WHOLE_UNIT_REVIEW' and contract['executionActualAdmissionAccepted'] is False
+  preservation=read(O/'preservation.json');assert preservation['runtimeChangedOnly']==['unlock_gate.py']
+  for row in preservation['baselineMemberComparisons']:assert sha(baseline/row['path'])==row['priorSha256'] and sha(O/row['path'])==row['successorSha256']
+- print(json.dumps({'status':'STATIC_RESUME2_INTEGRATION_COMPONENT_PASS_EXECUTION04_BINDING_PENDING','priorPureControls':61,'newActualPureBoundaryControls':46,'distinctPureControls':107,'oldGateChecksMapped':len(a),'exactOldFunctionAsts':3,'BashExact':True,'actualGateProducerObserverOrExecutionMainRun':False,'readinessOrPermitOrSourceNativeAction':False,'executionSuccessorAcceptanceRequired':True}))
++ predecessor=O.parent.parent/'resume2/control';compat=read(O/'compatibility.json')
++ assert compat['reportAndClosingSchemaChanged'] is False and compat['prior107ControlResultsExact'] is True
++ before=(predecessor/'unlock_gate.py').read_text();after=(O/'unlock_gate.py').read_text()
++ assert after.replace('db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef','c58c1fad815686fcc8598840c6152da15987d0cc43f80e852105c384dc52a43c')==before
++ assert read(O/'pure-control-results.json')==read(predecessor/'pure-control-results.json') and read(O/'integration-control-results.json')==read(predecessor/'integration-control-results.json')
++ for n in ['final_verifier.py','postclose.py','policy.json','guard-exit.bash','root-bindings.template.json']:assert (O/n).read_bytes()==(predecessor/n).read_bytes()
++ if (O/'compatibility-preservation.json').exists():
++  for row in read(O/'compatibility-preservation.json')['members']:assert sha(predecessor/row['path'])==row['beforeSha256'] and sha(O/row['path'])==row['afterSha256']
++ print(json.dumps({'status':'STATIC_CONTROL03_EXECUTION04_COMPATIBILITY_COMPONENT_PASS_REVIEW_PENDING','priorPureControls':61,'newActualPureBoundaryControls':46,'distinctPureControls':107,'oldGateChecksMapped':len(a),'exactOldFunctionAsts':3,'BashExact':True,'actualGateProducerObserverOrExecutionMainRun':False,'readinessOrPermitOrSourceNativeAction':False,'executionSuccessorAcceptanceRequired':True}))
+ if __name__=='__main__':main()

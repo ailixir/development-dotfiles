@@ -1,0 +1,27 @@
+{
+  "atUtc": "2026-10-19T06:30:23.659772+00:00",
+  "decision": "Execute exactly independentlyapprovedFIRSTsnapshot-onlyscope once. Nooptionalreads; no retry evenrefusal.",
+  "scopeSha256": "3db69ef3657428b7fd8780c9aa0fab93afb2f9187f9a5764636c7a94107c57f7",
+  "independentReviewSha256": "7fa29242a6d12a19756d91e8b2407f4334fc69d0e6abc3d9f486eedb4287c9bb",
+  "releaseFiles": {
+    "capture-control.json": "c2f21244ef7f6c6d1868547265801f7d7907af167e064499548e7a737fd77c8d",
+    "terminal-proof.json": "8883c2dacfd64d2e07711ff7606eb40e94bf4f6dd134b9ef96cde5d332302422",
+    "public-assessment.json": "2bd08598a9902f2898b2048139bda0c3bce0d2c1af558d26f61832cae2c3ef75",
+    "root-approval.json": "c15b206f96bac2149b3c432a4ef92e51de5025c0d3edf380862e35fb4930144e",
+    "quinn-approval.json": "18f64fb0edf752910c1414d35ec0d3c8f442c3be514c570346cad4978ac13745",
+    "root-authorization.json": "2956e9d4bf1ee78fc6d65dc4edc25053a12fef5f0b464fb457ed89598aa97e55"
+  },
+  "argv": [
+    "/opt/homebrew/opt/python@3.13/bin/python3.13",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/order11-snapshot-manifest-capture/capture_snapshot.py",
+    "--expected-authorization-sha",
+    "2956e9d4bf1ee78fc6d65dc4edc25053a12fef5f0b464fb457ed89598aa97e55",
+    "--expected-root-approval-sha",
+    "c15b206f96bac2149b3c432a4ef92e51de5025c0d3edf380862e35fb4930144e",
+    "--expected-quinn-approval-sha",
+    "18f64fb0edf752910c1414d35ec0d3c8f442c3be514c570346cad4978ac13745"
+  ],
+  "sourceOrNativeLaneCredit": false,
+  "optionalFindingHeld": "SNAP-MANIFEST-IO-01",
+  "original03NegativePreserved": true
+}

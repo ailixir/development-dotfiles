@@ -1,0 +1,1271 @@
+{
+  "kind": "GUARDED_SYNTHETIC_SOURCE_AND_POLICY_CHECKS_ONLY",
+  "passed": 311,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "NO_REAL_EFFECT_MODULE_prepared_public_contract",
+      "pass": true
+    },
+    {
+      "name": "NO_REAL_EFFECT_MODULE_prepared_unit_policy",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_OK",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_OK",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_PENDING",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_PENDING",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_INVALID_CONTRACT",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_INVALID_CONTRACT",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_UNAUTHENTICATED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_UNAUTHENTICATED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_FORBIDDEN_SCOPE",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_FORBIDDEN_SCOPE",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_REVISION_CONFLICT",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_REVISION_CONFLICT",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_STALE_GENERATION",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_STALE_GENERATION",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_TARGET_MISMATCH",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_TARGET_MISMATCH",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_AMBIGUOUS_TARGET",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_AMBIGUOUS_TARGET",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_MISSING_SOURCE",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_MISSING_SOURCE",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_BINDING_ORDER",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_BINDING_ORDER",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_SENSITIVE_SOURCE",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_SENSITIVE_SOURCE",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_ORIGIN_NOT_ALLOWED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_ORIGIN_NOT_ALLOWED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_UNSUPPORTED_SURFACE",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_UNSUPPORTED_SURFACE",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_BUDGET_EXCEEDED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_BUDGET_EXCEEDED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_STALE_FENCE",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_STALE_FENCE",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_IDEMPOTENCY_CONFLICT",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_IDEMPOTENCY_CONFLICT",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_UNKNOWN_OUTCOME",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_UNKNOWN_OUTCOME",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_PUBLICATION_CONFLICT",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_PUBLICATION_CONFLICT",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_RUNTIME_INCOMPATIBLE",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_RUNTIME_INCOMPATIBLE",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_ASSERTION_FAILED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_ASSERTION_FAILED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_CANCELLED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_CANCELLED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_EXPIRED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_EXPIRED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_SECRET_UNAVAILABLE",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_SECRET_UNAVAILABLE",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_SECRET_USE_NOT_AUTHORIZED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_SECRET_USE_NOT_AUTHORIZED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_SECRET_USE_REVOKED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_SECRET_USE_REVOKED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_VAULT_UNAVAILABLE",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_VAULT_UNAVAILABLE",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_LOGIN_REQUIRED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_LOGIN_REQUIRED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_SECRET_TOO_LONG",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_SECRET_TOO_LONG",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_ACK_LOST",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_ACK_LOST",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_TIMEOUT",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_TIMEOUT",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_TARGET_CHANGED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_TARGET_CHANGED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_POLICY_DENIED",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_POLICY_DENIED",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_REFERENCE_MISMATCH",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_REFERENCE_MISMATCH",
+      "pass": true
+    },
+    {
+      "name": "ALLOWLIST_UNKNOWN",
+      "pass": true
+    },
+    {
+      "name": "CLOSED_RECORD_UNKNOWN",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_None",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_''",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_'OTHER'",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_'NONE'",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_'False'",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_'UNKNOWN_NEW'",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_'\u00e9\ud83d\ude00'",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_0",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_1",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_False",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_True",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_[]",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_{}",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_CODE_{'private': 'CANARY'}",
+      "pass": true
+    },
+    {
+      "name": "MISSING_CODE_UNKNOWN",
+      "pass": true
+    },
+    {
+      "name": "FINALIZING_NO_PUBLIC_REQUEST",
+      "pass": true
+    },
+    {
+      "name": "TERMINAL_FAILED",
+      "pass": true
+    },
+    {
+      "name": "TERMINAL_EXPIRED",
+      "pass": true
+    },
+    {
+      "name": "TERMINAL_UNKNOWN_OUTCOME",
+      "pass": true
+    },
+    {
+      "name": "TERMINAL_CANCELLED",
+      "pass": true
+    },
+    {
+      "name": "UNKNOWN_NO_PUBLIC_REQUEST",
+      "pass": true
+    },
+    {
+      "name": "SEPARATE_OBSERVATION_MISMATCH_FINALIZING",
+      "pass": true
+    },
+    {
+      "name": "SEPARATE_OBSERVATION_MISMATCH_EXPIRED",
+      "pass": true
+    },
+    {
+      "name": "SEPARATE_OBSERVATION_MISMATCH_UNKNOWN_OUTCOME",
+      "pass": true
+    },
+    {
+      "name": "SEPARATE_OBSERVATION_MISMATCH_CANCELLED",
+      "pass": true
+    },
+    {
+      "name": "SEPARATE_OBSERVATION_MISMATCH_UNKNOWN",
+      "pass": true
+    },
+    {
+      "name": "WRONG_SUBJECT_SCHEMA_sessionId'wrong'",
+      "pass": true
+    },
+    {
+      "name": "WRONG_SUBJECT_SCHEMA_executionId'wrong'",
+      "pass": true
+    },
+    {
+      "name": "WRONG_SUBJECT_SCHEMA_mode'ordinary'",
+      "pass": true
+    },
+    {
+      "name": "WRONG_SUBJECT_SCHEMA_schemaVersionTrue",
+      "pass": true
+    },
+    {
+      "name": "WRONG_SUBJECT_SCHEMA_schemaVersion3.0",
+      "pass": true
+    },
+    {
+      "name": "WRONG_SUBJECT_SCHEMA_schemaVersion'3'",
+      "pass": true
+    },
+    {
+      "name": "WRONG_SUBJECT_SCHEMA_sessionIdNone",
+      "pass": true
+    },
+    {
+      "name": "WRONG_SUBJECT_SCHEMA_executionId['wrong']",
+      "pass": true
+    },
+    {
+      "name": "NON200_204",
+      "pass": true
+    },
+    {
+      "name": "NON200_301",
+      "pass": true
+    },
+    {
+      "name": "NON200_307",
+      "pass": true
+    },
+    {
+      "name": "NON200_400",
+      "pass": true
+    },
+    {
+      "name": "NON200_401",
+      "pass": true
+    },
+    {
+      "name": "NON200_403",
+      "pass": true
+    },
+    {
+      "name": "NON200_404",
+      "pass": true
+    },
+    {
+      "name": "NON200_429",
+      "pass": true
+    },
+    {
+      "name": "NON200_500",
+      "pass": true
+    },
+    {
+      "name": "PUBLIC202_SEPARATE_STATE_FINALIZING",
+      "pass": true
+    },
+    {
+      "name": "PUBLIC202_SEPARATE_STATE_FAILED",
+      "pass": true
+    },
+    {
+      "name": "PUBLIC202_SEPARATE_STATE_EXPIRED",
+      "pass": true
+    },
+    {
+      "name": "PUBLIC202_SEPARATE_STATE_UNKNOWN_OUTCOME",
+      "pass": true
+    },
+    {
+      "name": "PUBLIC202_SEPARATE_STATE_CANCELLED",
+      "pass": true
+    },
+    {
+      "name": "PUBLIC202_SEPARATE_STATE_UNKNOWN",
+      "pass": true
+    },
+    {
+      "name": "PUBLIC202_AMBIGUOUS_RESULT_FORM_INVALID",
+      "pass": true
+    },
+    {
+      "name": "PUBLIC200_AMBIGUOUS_STATE_FORM_INVALID",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_0",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_1",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_2",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_3",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_4",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_5",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_6",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_7",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_8",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_9",
+      "pass": true
+    },
+    {
+      "name": "MALFORMED_10",
+      "pass": true
+    },
+    {
+      "name": "OWNERSHIP_wrong-cookie",
+      "pass": true
+    },
+    {
+      "name": "OWNERSHIP_wrong-owned-cookie",
+      "pass": true
+    },
+    {
+      "name": "OWNERSHIP_no-owned",
+      "pass": true
+    },
+    {
+      "name": "OWNERSHIP_multiple-owned",
+      "pass": true
+    },
+    {
+      "name": "OWNERSHIP_duplicate-bind",
+      "pass": true
+    },
+    {
+      "name": "SINGLEFLIGHT_SECOND_SAME",
+      "pass": true
+    },
+    {
+      "name": "WRONG_SUBJECT_NOT_CONSUMED",
+      "pass": true
+    },
+    {
+      "name": "OBSERVER_ERROR_CLOSED_NO_RETRY",
+      "pass": true
+    },
+    {
+      "name": "OUTPUT_FAILURE_NO_RETRY_NO_THROW",
+      "pass": true
+    },
+    {
+      "name": "ORIGINAL_ASSERTION_NOT_REPLACED",
+      "pass": true
+    },
+    {
+      "name": "COLLECT_one",
+      "pass": true
+    },
+    {
+      "name": "COLLECT_absent",
+      "pass": true
+    },
+    {
+      "name": "COLLECT_duplicate",
+      "pass": true
+    },
+    {
+      "name": "STRICT_COLLECT_extra-field",
+      "pass": true
+    },
+    {
+      "name": "STRICT_COLLECT_qualified-int",
+      "pass": true
+    },
+    {
+      "name": "STRICT_COLLECT_wrong-class",
+      "pass": true
+    },
+    {
+      "name": "STRICT_COLLECT_failed-to-finalizing",
+      "pass": true
+    },
+    {
+      "name": "STRICT_COLLECT_mismatch-code",
+      "pass": true
+    },
+    {
+      "name": "STRICT_COLLECT_unknown-status",
+      "pass": true
+    },
+    {
+      "name": "STRICT_COLLECT_unknown-code",
+      "pass": true
+    },
+    {
+      "name": "STRICT_COLLECT_unknown-poll",
+      "pass": true
+    },
+    {
+      "name": "STRICT_COLLECT_numeric-schema",
+      "pass": true
+    },
+    {
+      "name": "STRICT_COLLECT_unqualified-known",
+      "pass": true
+    },
+    {
+      "name": "STRICT_RAW_1258",
+      "pass": true
+    },
+    {
+      "name": "STRICT_RAW_649",
+      "pass": true
+    },
+    {
+      "name": "STRICT_RAW_1",
+      "pass": true
+    },
+    {
+      "name": "COLLECT_WRONG_RELEASE_PROVENANCE",
+      "pass": true
+    },
+    {
+      "name": "COLLECT_PROVENANCE_EXTRA",
+      "pass": true
+    },
+    {
+      "name": "PRIVACY_CANARY_0",
+      "pass": true
+    },
+    {
+      "name": "PRIVACY_CANARY_1",
+      "pass": true
+    },
+    {
+      "name": "PRIVACY_CANARY_2",
+      "pass": true
+    },
+    {
+      "name": "PRIVACY_CANARY_3",
+      "pass": true
+    },
+    {
+      "name": "PRIVACY_CANARY_4",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_167",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_LOADER_VERIFIED_BUFFER_FAKE_EXEC_ONLY",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_169",
+      "pass": true
+    },
+    {
+      "name": "LOADER_bad-hash",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_171",
+      "pass": true
+    },
+    {
+      "name": "LOADER_traversal",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_173",
+      "pass": true
+    },
+    {
+      "name": "LOADER_relative",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_175",
+      "pass": true
+    },
+    {
+      "name": "LOADER_empty-component",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_177",
+      "pass": true
+    },
+    {
+      "name": "LOADER_wrong-mode",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_179",
+      "pass": true
+    },
+    {
+      "name": "LOADER_wrong-owner",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_181",
+      "pass": true
+    },
+    {
+      "name": "LOADER_nonregular",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_183",
+      "pass": true
+    },
+    {
+      "name": "LOADER_changed-identity",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_185",
+      "pass": true
+    },
+    {
+      "name": "LOADER_short-read",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_187",
+      "pass": true
+    },
+    {
+      "name": "LOADER_oversized",
+      "pass": true
+    },
+    {
+      "name": "LOADER_CLOSES_ALL_OPENED_189",
+      "pass": true
+    },
+    {
+      "name": "LOADER_no-follow-open-refused",
+      "pass": true
+    },
+    {
+      "name": "EXACT_AUTHORITY_ACCEPTED",
+      "pass": true
+    },
+    {
+      "name": "AUTH_rootAuthorizedFalse",
+      "pass": true
+    },
+    {
+      "name": "AUTH_rootAuthorizedNone",
+      "pass": true
+    },
+    {
+      "name": "AUTH_rootAuthorized1",
+      "pass": true
+    },
+    {
+      "name": "AUTH_limitedSourceWindowQualifiedFalse",
+      "pass": true
+    },
+    {
+      "name": "AUTH_limitedSourceWindowQualifiedNone",
+      "pass": true
+    },
+    {
+      "name": "AUTH_limitedSourceWindowQualified1",
+      "pass": true
+    },
+    {
+      "name": "AUTH_literalScopeCertifiedNonIrFalse",
+      "pass": true
+    },
+    {
+      "name": "AUTH_literalScopeCertifiedNonIrNone",
+      "pass": true
+    },
+    {
+      "name": "AUTH_literalScopeCertifiedNonIr1",
+      "pass": true
+    },
+    {
+      "name": "AUTH_exactQaCodePrivacyReviewedFalse",
+      "pass": true
+    },
+    {
+      "name": "AUTH_exactQaCodePrivacyReviewedNone",
+      "pass": true
+    },
+    {
+      "name": "AUTH_exactQaCodePrivacyReviewed1",
+      "pass": true
+    },
+    {
+      "name": "AUTH_gatewayProperlyClosedFalse",
+      "pass": true
+    },
+    {
+      "name": "AUTH_gatewayProperlyClosedNone",
+      "pass": true
+    },
+    {
+      "name": "AUTH_gatewayProperlyClosed1",
+      "pass": true
+    },
+    {
+      "name": "AUTH_ordinaryPrivateHooksUnchangedSealedFalse",
+      "pass": true
+    },
+    {
+      "name": "AUTH_ordinaryPrivateHooksUnchangedSealedNone",
+      "pass": true
+    },
+    {
+      "name": "AUTH_ordinaryPrivateHooksUnchangedSealed1",
+      "pass": true
+    },
+    {
+      "name": "AUTH_newImmutableWrapperAndGuardBoundFalse",
+      "pass": true
+    },
+    {
+      "name": "AUTH_newImmutableWrapperAndGuardBoundNone",
+      "pass": true
+    },
+    {
+      "name": "AUTH_newImmutableWrapperAndGuardBound1",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_selectedAttemptCapTrue",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_selectedAttemptCap2",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_restoreCompileCapTrue",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_selectedArgv['./gradlew', 'check']",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_compileArgv['./gradlew', 'test']",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_fixtureProfile'incremental2048'",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_C8CreditTrue",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_IRCreditTrue",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_privateObserverReadOrCaptureTrue",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_sourceWriters[]",
+      "pass": true
+    },
+    {
+      "name": "AUTH_EXACT_postimageSha256'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NEGATIVE_MISSING_READINESS",
+      "pass": true
+    },
+    {
+      "name": "DENIAL_HAS_NO_EXIT_WRITE_SOURCE_NATIVE",
+      "pass": true
+    },
+    {
+      "name": "NATIVE_RED_PRESERVED",
+      "pass": true
+    },
+    {
+      "name": "NO_SELECTED_RETRY",
+      "pass": true
+    },
+    {
+      "name": "RESTORE_COMPILE_ONLY_ZERO",
+      "pass": true
+    },
+    {
+      "name": "NO_COMPILE_RETRY",
+      "pass": true
+    },
+    {
+      "name": "ONLY_EXACT_TWO_NATIVE_COMMANDS",
+      "pass": true
+    },
+    {
+      "name": "FINAL_NOT_PERMIT",
+      "pass": true
+    },
+    {
+      "name": "GATE_ZERO_SEPARATE_EXIT_PERMISSION",
+      "pass": true
+    },
+    {
+      "name": "POSTCLOSE_ZERO_NO_CREDIT",
+      "pass": true
+    },
+    {
+      "name": "GUARD_stale-before",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_stale-before",
+      "pass": true
+    },
+    {
+      "name": "GUARD_future-proof",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_future-proof",
+      "pass": true
+    },
+    {
+      "name": "GUARD_stale-after",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_stale-after",
+      "pass": true
+    },
+    {
+      "name": "GUARD_bool-exit",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_bool-exit",
+      "pass": true
+    },
+    {
+      "name": "GUARD_wrong-hash",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_wrong-hash",
+      "pass": true
+    },
+    {
+      "name": "GUARD_missing-actual-hash",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_missing-actual-hash",
+      "pass": true
+    },
+    {
+      "name": "GUARD_uninspected-root",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_uninspected-root",
+      "pass": true
+    },
+    {
+      "name": "GUARD_wrong-inherited",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_wrong-inherited",
+      "pass": true
+    },
+    {
+      "name": "GUARD_empty-unanchored",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_empty-unanchored",
+      "pass": true
+    },
+    {
+      "name": "GUARD_pid-reuse-unqualified",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_pid-reuse-unqualified",
+      "pass": true
+    },
+    {
+      "name": "GUARD_live-owned",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_live-owned",
+      "pass": true
+    },
+    {
+      "name": "GUARD_source-mode",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_ALLOW_source-mode",
+      "pass": true
+    },
+    {
+      "name": "STICKY_ownedIdentityObservationGap",
+      "pass": true
+    },
+    {
+      "name": "STICKY_ownershipOrLockObservationGap",
+      "pass": true
+    },
+    {
+      "name": "STICKY_drainObservationGap",
+      "pass": true
+    },
+    {
+      "name": "STICKY_waitObservationGap",
+      "pass": true
+    },
+    {
+      "name": "STICKY_receiptWriteFailed",
+      "pass": true
+    },
+    {
+      "name": "STICKY_prematureUnlockGap",
+      "pass": true
+    },
+    {
+      "name": "STICKY_resourceObservationGap",
+      "pass": true
+    },
+    {
+      "name": "STICKY_interrupted",
+      "pass": true
+    },
+    {
+      "name": "STICKY_sourceObservationGap",
+      "pass": true
+    },
+    {
+      "name": "STICKY_unrecordedForkObserved",
+      "pass": true
+    },
+    {
+      "name": "STICKY_cleanupUnconfirmed",
+      "pass": true
+    },
+    {
+      "name": "SETUP_FAILURE_CONSUMES_ATTEMPT",
+      "pass": true
+    },
+    {
+      "name": "SETUP_FAILURE_NO_RETRY",
+      "pass": true
+    },
+    {
+      "name": "BASEEXCEPTION_FINALLY_DRAIN_PERSIST",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_no-tests",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_NO_RETRY_no-tests",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_extra-case",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_NO_RETRY_extra-case",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_skip",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_NO_RETRY_skip",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_wrong-selector",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_NO_RETRY_wrong-selector",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_native-bool",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_NO_RETRY_native-bool",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_aftereach-missing",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_NO_RETRY_aftereach-missing",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_collection-gap",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_NO_RETRY_collection-gap",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_private-unsealed",
+      "pass": true
+    },
+    {
+      "name": "SELECTED_FAILED_ACCOUNTING_NO_RETRY_private-unsealed",
+      "pass": true
+    },
+    {
+      "name": "NO_FINAL_WITHOUT_RESTORED_COMPILE",
+      "pass": true
+    },
+    {
+      "name": "NO_GATE_CANDIDATE_SOURCE",
+      "pass": true
+    },
+    {
+      "name": "STRICT_FORWARD",
+      "pass": true
+    },
+    {
+      "name": "STRICT_REVERSE",
+      "pass": true
+    },
+    {
+      "name": "FORWARD_REJECTS_CHANGED_HUNK",
+      "pass": true
+    },
+    {
+      "name": "PREIMAGE_SHA",
+      "pass": true
+    },
+    {
+      "name": "POSTIMAGE_SHA",
+      "pass": true
+    },
+    {
+      "name": "ORIGINAL_ASSERTION_EXACT",
+      "pass": true
+    },
+    {
+      "name": "ORIGINAL_90S_50MS",
+      "pass": true
+    },
+    {
+      "name": "TEST_ANNOTATIONS_UNCHANGED",
+      "pass": true
+    },
+    {
+      "name": "ORDER17_EXACT",
+      "pass": true
+    },
+    {
+      "name": "ONLY_ONE_OBSERVER_HTTP_SEND",
+      "pass": true
+    },
+    {
+      "name": "BYPASS_RAW_RESPONSE_SINK",
+      "pass": true
+    },
+    {
+      "name": "NO_ERROR_OR_BODY_EXPORT",
+      "pass": true
+    },
+    {
+      "name": "NO_PRIVATE_STORE_OR_HOOK_CHANGE",
+      "pass": true
+    },
+    {
+      "name": "SINGLEFLIGHT_CAS",
+      "pass": true
+    },
+    {
+      "name": "STRICT_WIRE_PARSE",
+      "pass": true
+    },
+    {
+      "name": "EXCLUSIVE_NOFOLLOW_OUTPUT",
+      "pass": true
+    },
+    {
+      "name": "GUARD_ONLY_BUILTIN_IN_SUCCESS_BRANCH",
+      "pass": true
+    },
+    {
+      "name": "GUARD_NO_EOF_EXEC_SIGNAL_OR_CLEANUP",
+      "pass": true
+    },
+    {
+      "name": "GUARD_VERIFIED_SAME_CODE_BUFFER",
+      "pass": true
+    },
+    {
+      "name": "POLICY_NO_REAL_ADAPTER_MAIN",
+      "pass": true
+    },
+    {
+      "name": "ZERO_REAL_BOUNDARY_CALLS",
+      "pass": true
+    }
+  ],
+  "sourceSha256Pins": {
+    "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+    "unit_policy.py": "757122dd9dbf2d1cadd85547db2c1f0058088f2f9a9f496c7360f329392e1f53",
+    "public-policy.json": "9a8db66813eb56c297f15a579989f3c04ecae93de20afb0e519ef80994c26c99",
+    "source-binding.json": "83d7bb3c03a181c4e649bc76f283ab02426164064a20f35b454f6698844b75e2",
+    "Replay.preimage.java": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+    "Replay.postimage.java": "0d98bb1931d3e6a2e433cfa8609867dd017a4331424a07de676117ab8db3d436",
+    "observer-fragment.java.txt": "0153a4d415ebd9e9c98d4230adacc4e807a9ed1dc583d8bf859a2dfaf20ebc66",
+    "observer.patch": "ed53e34e186e3e6d65de2bed692ed2b873be6efca79221a1d78e41583348cc57",
+    "observer.reverse.patch": "6aa148a8015f199e065f628f4961c64673e9c2899fa350828cae2105d41a7e45",
+    "guard-public-observe.bash": "bd4e946060dbd3f66332b87c84482f4b5818292ff313dbc8010f60145974c7b4",
+    "test_fixtures.py": "5e354e75e8ed6d95640831fe22e40e8765ab4af68d1847b2780918f69ae29388"
+  },
+  "blockedRealBoundaryCalls": [],
+  "JavaOrBashExecuted": false,
+  "runtimeMainOrAdaptersExecuted": false,
+  "nativePublicPrivateSharedSourceActions": 0,
+  "actualCurrentSourceOrKernelObservation": false,
+  "IRClockStarted": false,
+  "C8Credit": false
+}

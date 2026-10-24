@@ -1,0 +1,171 @@
+{
+  "status": "PASS_BOUNDED_PAIR4_5_RETAINED_CUSTODY_COMPONENT_ONLY",
+  "producerManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-metadata-extraction07/third-measured-resource-read-manifest.json",
+    "sha256": "ff9ae0c174e638abd64b5dbe278bf035b59c8b51d169594498b01a2861d09fb1",
+    "bytes": 946
+  },
+  "toolReceipt": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-metadata-extraction07/execution-tool-receipt-limit03.json",
+    "sha256": "9421ab93ad43f9c76667494218588d4e8dd1f9e838279ed7df465dce0c0c5706",
+    "bytes": 1204
+  },
+  "closedCustody": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-metadata-extraction07/closed-custody-limit03.json",
+    "sha256": "cc1cacffbebeff3ae06fd2e4e7b9b4a6a5cf31d78a53a09216c92fe962b03c6d",
+    "bytes": 45941
+  },
+  "releasedPlan": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-metadata-extraction07/released-read-plan-discovery-limit03.json",
+    "sha256": "b402ff02e845c1824e6fd9aa4e39b30daf242e1e9c9837db4a90ad4c34cb0747",
+    "bytes": 8157
+  },
+  "sourceReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/owner08-source-review.json",
+    "sha256": "11830a56369480f82e53b178a015f3b9193f2c7592cbb53f39cde7b161e3c9a5",
+    "bytes": 4040
+  },
+  "resourceReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/owner-limit03-measured-resource-review.json",
+    "sha256": "aa41ea388740a497d0d3b0af5a1735e268014b48e87ae4702f7c4aa0757342ba",
+    "bytes": 2543
+  },
+  "rawExit": 0,
+  "originalWaitReturned": true,
+  "thisPlanInvocations": 1,
+  "totalExplicitCustodyScopes": 3,
+  "measuredParentEntries": 18242,
+  "prefixCandidatesConsidered": 410,
+  "lanes": [
+    {
+      "slot": 4,
+      "task": "test",
+      "cohortReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final01-task-outputs/test/cohorts/31dac4a9-550b-4599-8144-0ba1bb2f60d3/6be3ad35-3023-438e-98ee-01262774e7b3/cohort.json",
+        "sha256": "caf1f90daf09bf664f72bf3ae3d101a93075c6b9bcff5a5903613007c7a5fbe1",
+        "bytes": 105935
+      },
+      "matchCount": 1,
+      "bindingComplete": true,
+      "terminalLogFacts": {
+        "guided.log": {
+          "bytes": 389,
+          "sha256": "e4c9c3c84b52873f614fb34fc2f25805979c428390237e41fd4738afd81d0686"
+        },
+        "ordinary.log": {
+          "bytes": 1482,
+          "sha256": "25379a6a795ec28dbf37583ed307a97cbcd924460e097006813849aa7251ca68"
+        }
+      },
+      "ownedTempEqual": true,
+      "ownerStream": {
+        "bytes": 1877136,
+        "sha256": "382afd3ab633ae92ad065209b1ca14a54962cd64f308d43278e318c23ccd450d"
+      },
+      "guidedGenerationCount": 3,
+      "generationsContiguousPositive": true,
+      "mappedLogAvailability": "UNREAD_UNVERIFIED",
+      "postScanOwnerBytesNotAssumedSealed": true
+    },
+    {
+      "slot": 4,
+      "task": "guidedIncrementalTest",
+      "cohortReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final01-task-outputs/guidedIncrementalTest/cohorts/82a2a7ea-b158-4a73-b2e4-1d411001a422/8a5200d5-a4f9-486b-8197-3fcf043be69b/cohort.json",
+        "sha256": "e534ae365db950c632ea9da3cc86cac5686467414659f4f90c1a801282af6404",
+        "bytes": 226084
+      },
+      "matchCount": 1,
+      "bindingComplete": true,
+      "terminalLogFacts": {
+        "guided.log": {
+          "bytes": 359,
+          "sha256": "85a45f1776a55a1fe9e4152b7f0249352284035d2e1d3a3c1abfd8d9901d9e54"
+        },
+        "ordinary.log": {
+          "bytes": 352,
+          "sha256": "5bae6d39369a5a86075468f22f0618df02805ac091262ffca5864adf9bf2f2ad"
+        }
+      },
+      "ownedTempEqual": true,
+      "ownerStream": {
+        "bytes": 3397161,
+        "sha256": "0f1ace8c31ce7dd9d4984e2c6c0021aa89f2982a18b3d5e9ac9096f358f5be97"
+      },
+      "guidedGenerationCount": 80,
+      "generationsContiguousPositive": true,
+      "mappedLogAvailability": "UNREAD_UNVERIFIED",
+      "postScanOwnerBytesNotAssumedSealed": true
+    },
+    {
+      "slot": 5,
+      "task": "test",
+      "cohortReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final02-task-outputs/test/cohorts/7fcf9e10-9370-4590-9492-5b21dce9e0a5/72246089-d72e-4778-bf47-bccbded13b97/cohort.json",
+        "sha256": "49f13a46a742373282ef30b57626c7fb7e016a3b82e7d5955aab087db1b3c538",
+        "bytes": 105936
+      },
+      "matchCount": 1,
+      "bindingComplete": true,
+      "terminalLogFacts": {
+        "guided.log": {
+          "bytes": 389,
+          "sha256": "137dd2d359c3783b8d9b6a1bcd5a3b8a94bd8a1182b20b3ab6041a69111a6a6f"
+        },
+        "ordinary.log": {
+          "bytes": 1482,
+          "sha256": "e7e902f29a6ce1fb256a03bedcf23212286cc7b2fcac9fab356a40865df5dc01"
+        }
+      },
+      "ownedTempEqual": true,
+      "ownerStream": {
+        "bytes": 1870804,
+        "sha256": "3a2605ce42221c6aeaa8ff2e17d73a3333e019588fac35d9da2486b0c62c7457"
+      },
+      "guidedGenerationCount": 3,
+      "generationsContiguousPositive": true,
+      "mappedLogAvailability": "UNREAD_UNVERIFIED",
+      "postScanOwnerBytesNotAssumedSealed": true
+    },
+    {
+      "slot": 5,
+      "task": "guidedIncrementalTest",
+      "cohortReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final02-task-outputs/guidedIncrementalTest/cohorts/d3e45c9a-c261-43e4-9a5c-1bf5eec547a9/3b7f6bc4-f696-411d-85a6-11b32350ef29/cohort.json",
+        "sha256": "0eb859e66b993e78b5d8c7bf3601ebb9391ff881c35081532c58319adce63ae6",
+        "bytes": 226084
+      },
+      "matchCount": 1,
+      "bindingComplete": true,
+      "terminalLogFacts": {
+        "guided.log": {
+          "bytes": 359,
+          "sha256": "e524e1c7e4fc236bdef23d00a372922c70a4b609b695ae26e797b9258e8886f4"
+        },
+        "ordinary.log": {
+          "bytes": 352,
+          "sha256": "85a0f2c723fc048afbe8857be875d11e374961c5e7db2b9c568e3db7df84185d"
+        }
+      },
+      "ownedTempEqual": true,
+      "ownerStream": {
+        "bytes": 3424378,
+        "sha256": "beda983f6203858e72793482ee67e18d2f641d6438a4da42f887c547e1157e15"
+      },
+      "guidedGenerationCount": 80,
+      "generationsContiguousPositive": true,
+      "mappedLogAvailability": "UNREAD_UNVERIFIED",
+      "postScanOwnerBytesNotAssumedSealed": true
+    }
+  ],
+  "qualification": [
+    "Unique complete BOTH terminal-log hash/byte equality and explicit ownedTemp/contiguous guided generation proof is established through exact reviewed7ae source plus captured closed result. No private files were reread by QA.",
+    "Deterministic mapped generation-log paths are UNREAD_UNVERIFIED, not evidence that the logs exist or contain required diagnostic facts.",
+    "Current stable owner-stream hashes are not imaginary scan-time seals; later owner EXIT events can append after the original final sink scan.",
+    "Both prior resource stops remain immutable; third scope success does not convert prior incomplete attempts to absence or zero.",
+    "No approved diagnostic payload executed by this custody component; classifications, attribution and whole2custody remain separate pending."
+  ],
+  "diagnosticPayloadsExecuted": false,
+  "privateTempCurrentProductReadsByQa": 0,
+  "furtherReadNativeLifecycleAuthority": false
+}

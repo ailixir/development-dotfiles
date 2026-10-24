@@ -1,0 +1,38 @@
+{
+  "kind": "SOURCE02_EXTERNAL_FIRST_READ_REQUIREMENTS",
+  "externalLoaderPin": {
+    "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-public-observer-java-qualification-prep/resume2/entry_loader.py",
+    "sha256": "7a8e9962c1a2531e5b2df538c2093650b7f8b93284c37897976b14f7bde07d63",
+    "bytes": 4946,
+    "mode": 420
+  },
+  "externalCodeSpecs": [
+    {
+      "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-public-observer-java-qualification-prep/resume2/qualification_controller.py",
+      "sha256": "a76999ccc5ff6f1815f999f3728c32465260d05e181f2a275b46caeb2147ebf2",
+      "bytes": 30850,
+      "mode": 420
+    },
+    {
+      "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-public-observer-java-qualification-prep/resume2/qualification_custody.py",
+      "sha256": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+      "bytes": 9748,
+      "mode": 420
+    },
+    {
+      "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-public-observer-java-qualification-prep/resume2/qualified_relay.py",
+      "sha256": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4",
+      "bytes": 18754,
+      "mode": 420
+    },
+    {
+      "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-public-observer-java-qualification-prep/resume2/public_contract.py",
+      "sha256": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+      "bytes": 16437,
+      "mode": 420
+    }
+  ],
+  "requirement": "Root externally verifies the consumed loader buffer; all four external code specs must match consumed buffers and the later release codePins. Actual root caller/ordinary adapter complete review remains owed.",
+  "installed": false,
+  "actualAuthority": false
+}

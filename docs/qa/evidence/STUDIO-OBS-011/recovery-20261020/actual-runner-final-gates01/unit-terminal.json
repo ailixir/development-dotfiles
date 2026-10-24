@@ -1,0 +1,76 @@
+{
+  "phase": "unit",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-actual-final-unit01",
+    "pnpm",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--minWorkers=1",
+    "--maxWorkers=2"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T03:21:13.802660+00:00",
+  "sourceExclusions": null,
+  "node": "v24.20.0",
+  "pnpm": "10.33.0",
+  "collectorPid": 75590,
+  "rawOuterExit": 0,
+  "endedAtUtc": "2026-10-21T03:21:55.408058+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "pnpm",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--minWorkers=1",
+      "--maxWorkers=2",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-actual-final-unit01-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T03:21:13.954762+00:00",
+    "elapsedSeconds": 41.41,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "eb917380297e103c0f8a7d8765b0e983588a94ea0471d3bc45c989a9bb1f2b16",
+    "testInputStable": true,
+    "testInputDigestBefore": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "testInputDigestAfter": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "vitest": {
+      "success": true,
+      "numPassedTests": 2692,
+      "numFailedTests": 0,
+      "numPendingTests": 25,
+      "numTotalTests": 2717,
+      "numPassedTestSuites": 419,
+      "numFailedTestSuites": 0
+    },
+    "vitestReportSha256": "c6c43a6f48c04741098e1911bb2a26c257b27e58438db571117d1a80cc3e4aa5"
+  },
+  "resultSha256": "4277acc58e37d4e3ed0a3e362ee5e3fd13b894daaaa1993bc5f5f9b8cf5e0088",
+  "logSha256": "eb917380297e103c0f8a7d8765b0e983588a94ea0471d3bc45c989a9bb1f2b16",
+  "postGuardComplete": true,
+  "actualInputDelta": [
+    {
+      "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+      "before": {
+        "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+        "sha256": "a292ad1c7e8a6508d7cae1ed586afeda7f2500718dca88df223d72701d9be8c7",
+        "bytes": 16107
+      },
+      "after": {
+        "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+        "sha256": "809420dc05344c9ecba867d44795ff0c88da17decc008ec5121a2bc2ce7186f2",
+        "bytes": 16213
+      }
+    }
+  ],
+  "fullSourceDependenciesDistProtected21LinksActualCliBrowserEnvStable": true
+}

@@ -1,0 +1,17 @@
+{
+  "allowedXmlType": "java.lang.AssertionError",
+  "attributePrefix": "java.lang.AssertionError: ",
+  "prefixRule": "Require exact allowed XML@type; consume exactly one exact type+colon+ASCIIspace. Reject bare/missing/wrong/duplicated prefix. No lstrip, substring search or recursive normalization.",
+  "primaryBodyRule": "Attribute payload must equal complete primary stack Throwable.toString payload after exactly one printStackTrace newline terminator is removed. Then require original source description line plus the source formatter single trailing ASCIIspace.",
+  "descriptionFormatter": {
+    "jarSha256": "7fbdffa1996d43cc08e2576e01008b07e57bbad2b4741aa6c3ab73ce8511130e",
+    "classSha256": "a4cecd09b567e76fbb7772135893e9c4cec1a313259dbffe86832ab368591787",
+    "exactDescriptionFormatConstant": "[%s] ",
+    "inspection": "Python ZIP/classfile bytes only; no Java",
+    "typeExpansionAuthorized": false
+  },
+  "rootTree": "Exactly original primary OWNED_SINKS AssertionError plus one suppressed CONTEXT_CLOSED AssertionError; no wrapper/cause/extra nodes or allowed-type expansion.",
+  "otherCheckerLogic": "Exact inverse wire delta recovers prior checker bytes; reconcile/profile/semantic/union/provenance/raw-status functions unchanged.",
+  "historical": "Hash-bound B1 raw XML privately confirms prefix/header serialization. Its failures are never controlled-mutant positives, including when prefix primitive recognizes the plain AssertionError.",
+  "currentRuntime": "Actual IR mutation wire/scratch/native proof unexecuted. Unknown actual formats remain incomplete pending named review, no automatic waiver."
+}

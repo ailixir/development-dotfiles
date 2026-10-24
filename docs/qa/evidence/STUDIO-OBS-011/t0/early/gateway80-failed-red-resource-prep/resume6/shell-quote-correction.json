@@ -1,0 +1,32 @@
+{
+  "kind": "SEAL_CALLER_QUOTING_CORRECTION",
+  "changes": [
+    {
+      "path": "guard-failed-red.bash",
+      "oldSha256": "32f9d26019832a027ef185bc4ae44652e71921ef4393dff7c066f61c842a50fa",
+      "newSha256": "b44d934dfe9f2e84c895d513981aa6e38ab9cd79a7eac53a9458c0b38622a804",
+      "changedLines": 3
+    },
+    {
+      "path": "binding-functions.bash",
+      "oldSha256": "32f9d26019832a027ef185bc4ae44652e71921ef4393dff7c066f61c842a50fa",
+      "newSha256": "b44d934dfe9f2e84c895d513981aa6e38ab9cd79a7eac53a9458c0b38622a804",
+      "changedLines": 3
+    },
+    {
+      "path": "bind-command.template.bash",
+      "oldSha256": "07455591a5dd88221eb88577500731e301ab43dbbf2d19c15d05b7d2ab06dbc7",
+      "newSha256": "6cc2638563a371ca1f27b7c68d73e42e6da0bcac5a1550f3859c56aae2513dc3",
+      "changedLines": 3
+    },
+    {
+      "path": "install-loader.bash",
+      "oldSha256": "87e792059adf48cbe8d742af5b3d58a6acf4dffb46f726806e1f3aa8bded69e6",
+      "newSha256": "ae159fff14621496206ea701e3c23a6618bc603a52d4263c518cda37583859b6",
+      "changedLines": 3
+    }
+  ],
+  "reason": "repr singlequotes must not terminate enclosing singlequoted Python body",
+  "runtimeCodeUnchanged": true,
+  "sourceExecutionAfterCorrection": false
+}

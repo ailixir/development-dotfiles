@@ -1,0 +1,81 @@
+{
+  "pins": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475"
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "sha256": "fee7af874cc0875d8dd299f8f9e1a0739ae79347ba0b0de665c81931045cbe74"
+    },
+    {
+      "path": "backend/src/main/resources/application.yml",
+      "sha256": "271fac527d075f996173e6cf1ef52d409d4416d3d6a46114fc541097b3a25f75"
+    },
+    {
+      "path": "backend/src/main/resources/application-test.yml",
+      "sha256": "c99ac391f0a29211cb254bc0c95d298f8c3ab4de647d7ce1b02b431f295683a2"
+    },
+    {
+      "path": "backend/src/test/resources/spring.properties",
+      "sha256": "b0793ea0b99c748077e6c8e53c6fe0a01d6b4d4a6313d68565ce50756c118759"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+      "sha256": "526d8792b6c0b7f7b806d4d4577b4934757b230cd18b82515b75f911123f3ea2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+      "sha256": "bfd853f2af0c409f396bac9c5c466c347ad86a4e400736f12bdc1680e4f17b16"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/GenAiGatewayTransport.java",
+      "sha256": "63607bbac5c3146604586b143edf7ec70196a68e2a59f9a06cee96dc75571688"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewayProperties.java",
+      "sha256": "44b1a118ce320d1e1a2e132409025e1070cd70846baf1e1fd142bb3a44daf0b4"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/RunnerProcessHarness.java",
+      "sha256": "ac559cba169f38b6aa90a61f5fc4be9d0890c37cae2d4e4f427f0d98f4113039"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/successor-plan.json",
+      "sha256": "9391e76dd403d45a1c8ab09c428ed6884a762c326959cefa63c781633c687313"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume4/execution/successor-catalog.json",
+      "sha256": "d96334bc0559bad126a82d6f84bd91a0ca1442288c713c764588173cec2e04ba"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01/root-live-public-method-event-snapshot-01.json",
+      "sha256": "13196a33806cb7b4cd1cbc36957a5c169d083269fe603c395b81c1eacdc2e4cd"
+    }
+  ],
+  "sourceFilesMatchAcceptedPlan": true,
+  "snapshotSilenceSeconds": 521.917374,
+  "snapshotLastMethod": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+  "nextOrderedMethodIsInferenceOnly": true,
+  "catalogRows": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper()",
+      "expectedStatus": "PASS"
+    }
+  ],
+  "staticTimeoutSearch": {
+    "explicitReplayAtTimeoutAnnotation": false,
+    "explicitBuildTaskTimeoutAssignment": false,
+    "junitPlatformPropertiesInFrozenPlan": [],
+    "scope": "Inspected frozen source/build/config only; no runtime/system-property inspection, no universal framework-default claim"
+  },
+  "liveSnapshotNotTerminal": true
+}

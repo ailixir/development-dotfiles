@@ -1,0 +1,39 @@
+{
+  "artifact": "independent-LEFT-draft-static-content-review",
+  "reviewer": "Quinn / independent QA",
+  "isStoryQaVerdict": false,
+  "isW1Approval": false,
+  "isLaneExitApproval": false,
+  "sourceApplicationAuthorized": false,
+  "assessment": "MANDATORY_DATA_ORACLE_CORRECTION_REQUIRED_BEFORE_ATOMIC_UNIT_APPLICATION",
+  "findings": [
+    {
+      "id": "LEFT-DATA-01",
+      "severity": "medium",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/left-data-draft/repo/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "line": 2231,
+      "finding": "Expiry UPDATE triggers immutable identity SQL rejection before commit; asserted GuidedSessionException cannot match and claimed Java expiry branch is not reached.",
+      "requiredFix": "Separate/pin actual immutable-expiry SQL refusal with rollback and honest tier disposition; if Java expiry coverage is claimed, supply a genuinely reaching reviewed setup without weakening immutable migrations/guards. Regenerate and re-review before atomic apply.",
+      "runtimeExecuted": false
+    }
+  ],
+  "mainStaticScopeSupported": true,
+  "combinedAtomicUnitReady": false,
+  "staticPreservationChecksAllPass": true,
+  "evidenceSha256": "ea64b85fb248359a5592c1618db07460ff03f719be25ee7db45514fb1a6c0ba0",
+  "reviewMdSha256": "ec6e8645291f8c1521aea5c023ffcaef3410513fc1b519b8b48401667c06dbb5",
+  "artifactHashes": {
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/left-data-draft/manifest.json": "3c7b6fdcd526c85427f4540127d92cc24a55a00eec0421ce756765fb2505e1b2",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/left-data-draft/left-data-draft.patch": "44b178b913f0b4125a668a726a6b48d9584dce2a9cb250e57d672cad5c5dc259",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/left-main-draft/manifest.json": "174b5d34348b86f97762aa70a75e5c8682509708a9232aaf6fffbde213c9f9ea",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/left-main-draft/left-main-draft.patch": "2aa33a36595d5dc1a61fc76c7cb7cd97ccd829563d1718f8706d1611936a98dd",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/lanes.v7.json": "68f69cc8652d695f920f2f28ec178205c84cb70bd9b80b5d27f38585e0a2165c",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/left-v20-allowed-matches.json": "c4db01b355950b5dd5e76ed89ab20126a8bd6a86b0ff79e8bd15374656e1e130"
+  },
+  "sourceWrites": false,
+  "compilerNodeTestsBuildsRun": false,
+  "gitOperationsRun": false,
+  "diagnosticHandleTouched": false,
+  "budgetCeilingUsd": 500,
+  "actualSpendAvailable": false
+}

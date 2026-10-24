@@ -1,0 +1,27 @@
+{
+  "id": "fixtures01",
+  "stage": "sandbox-after-root-emit-disposition",
+  "executed": false,
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-rt-current-fixtures01",
+    "pnpm",
+    "--dir=/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.fixtures.config.ts",
+    "--minWorkers=1",
+    "--maxWorkers=1"
+  ],
+  "expectedOnly": {
+    "passed": 298,
+    "failed": 0,
+    "skipped": 9,
+    "total": 307
+  }
+}

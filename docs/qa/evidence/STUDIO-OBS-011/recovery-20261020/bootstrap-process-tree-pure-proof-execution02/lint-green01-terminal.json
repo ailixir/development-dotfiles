@@ -1,0 +1,49 @@
+{
+  "id": "lint-green01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs009-recovery-20261020-bootstrap-observation-v2-lint-green01",
+    "pnpm",
+    "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+    "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+    "test/helpers/bootstrapProcessTreeObservation.ts",
+    "test/run/bootstrapProcessTreeObservation.test.ts"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T01:11:27.869435+00:00",
+  "collectorPid": 67734,
+  "rawOuterExit": 0,
+  "endedAtUtc": "2026-10-21T01:11:30.596633+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+      "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "test/helpers/bootstrapProcessTreeObservation.ts",
+      "test/run/bootstrapProcessTreeObservation.test.ts"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T01:11:28.180777+00:00",
+    "elapsedSeconds": 2.41,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+    "testInputStable": true,
+    "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f"
+  },
+  "resultSha256": "dd52de5c517819e3c0ca73eb2dc06732c2acf65abe35f33dc2e70f5ac60649d8",
+  "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+  "privateInputDelta": [],
+  "beforeCopyUnchanged": true,
+  "actualFullSelectedInputsStable": true,
+  "complete238PrivateProductStable": true
+}

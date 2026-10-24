@@ -1,0 +1,9 @@
+G9 source COPY and private staging passed; no native/compiler/Gradle/test ran.
+
+Exact reviewed helper7420 ran once on tool30592, terminal0. Both new buffers contain14,213 independent regular selected files with complete hash/mode/membership/product equality. Actual1814A1 and238E19 plus selected dependencies stayed exact throughCOPY. Entire dependency link inventory is23; only direct SDK.bin is21 and matches every accepted path/target/device/inode/normalized-mode tuple. Fresh copied known cache has191 ordered entries, exact current COPYbefore hash; no190/build-time cache restoration.
+
+Actual input reads explicitly released at2026-10-21T03:30:34.495827+00:00. Every subsequent read/write used the owned private buffers or immutable evidence only. Image/deployment may legitimately advance actual generated state without changing historicalCOPY credit.
+
+Original patch driver78566 terminal0: each dry-run and apply raw0 with no offset/fuzz/reject. Old buffer changes exactly TransportFaultIT consumer and shared ObservedResolver helper; fixed buffer changes exactly shared helper. All other14,213selected rows/modes and238dist entries remain exact. Both variants retain exactly the reviewed300ms writer gap and original25s/10ms/first-error/interrupt/assertion/finally/cleanup behavior. Stage variants remain patched; no premature restoration. Complete per-path before/after hashes are in receipt.json and the staged catalogs.
+
+Future C10 inline hash06fed/selector/lock/commands remain original; no new collector or matrix. Intended sole READ_BEFORE_DECISION-versus-empty RED and fixedGREEN are requirements for separately released native execution, not outcomes of this task. Fresh HTML/exec supplement and exact owned cleanup/restoration remain owed. Root retains heavy/native release; original Replay cap/clock/external obligations unchanged.

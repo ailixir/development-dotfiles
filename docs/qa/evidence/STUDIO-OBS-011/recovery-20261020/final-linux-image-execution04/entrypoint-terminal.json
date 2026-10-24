@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "docker",
+    "image",
+    "inspect",
+    "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "--format",
+    "{{json .Config.Entrypoint}}"
+  ],
+  "startedAtUtc": "2026-10-21T03:39:40.289586+00:00",
+  "pid": 8733,
+  "rawExit": 0,
+  "stdout": "null\n",
+  "stderr": "",
+  "endedAtUtc": "2026-10-21T03:39:40.374760+00:00",
+  "entrypoint": null,
+  "accepted": true,
+  "fullActualInputAndE19Exact": true
+}

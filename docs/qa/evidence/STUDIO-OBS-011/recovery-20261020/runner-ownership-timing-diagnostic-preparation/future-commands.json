@@ -1,0 +1,2464 @@
+{
+  "kind": "UNEXECUTED_ONE_EXISTING_CASE_OBSERVATION_PLAN",
+  "requires": "Independent source review then separate explicit root GO; no derivative or runtime now",
+  "nodePathPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+  "seed": {
+    "env": {
+      "OBS011_RT_FINAL_COMPOSITION": "ALL_PREDECESSORS_APPLIED_LANE_IDLE"
+    },
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-current-plan/prepare-current-sandbox.py",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "seed",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-composed-phase1-execution01/fresh-copy-catalog.json",
+      "e1a989972cd9a63e8dbae513447d213248ca508241d891a3cdcd5ed0ca924394",
+      "/private/tmp/obs011-ownership-timing-20261020-diagnostic01"
+    ],
+    "helperSha256": "4b0d186af5b427fcc250cedfa3b02ec91a7857921c5bafdb2b2245313d1573ac",
+    "catalogSha256": "e1a989972cd9a63e8dbae513447d213248ca508241d891a3cdcd5ed0ca924394",
+    "prerequisites": [
+      "fresh derivative absent",
+      "all actual catalog files/pins equal exact current e1a98997 catalog; changed actual inputs require honest fresh current capture/review, never union/bypass",
+      "all reviewed RT7 candidates/18 protected/accepted0094/FOLD ports exact",
+      "no runtime or actual-source writer; original RT proof trees read only"
+    ],
+    "usesUnchangedExistingFullCopyProfile": true
+  },
+  "verifiedPrivateGeneratedBaselineCopies": {
+    "reason": "Seed helper faithfully copies actualD698. Copy only the exact already-accepted238 private generated outputs to this fresh derivative repo so browser stamp matches accepted009; no product source snapshot overwrite or actual dist destination.",
+    "requiredInitialDestinationMembership": 238,
+    "expectedCopiedDigest": "52bc5a05cdd348c5f62c6bc181210c79f765d15d82dee0abcf01861f6e75cef7",
+    "commands": [
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/compat/index.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/compat/index.d.ts"
+        ],
+        "requiredSourceSha256": "e14e4228b7a55fc35bb9b653a33b1bf7ad4e9ce028ca126d5c741aa856a2f4ac",
+        "requiredAfterSha256": "e14e4228b7a55fc35bb9b653a33b1bf7ad4e9ce028ca126d5c741aa856a2f4ac"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/compat/index.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/compat/index.js"
+        ],
+        "requiredSourceSha256": "24580d93933de596c6c9e1c7d9e94ee3f3ed201620ba3afe42d1b1879ad68574",
+        "requiredAfterSha256": "24580d93933de596c6c9e1c7d9e94ee3f3ed201620ba3afe42d1b1879ad68574"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/compat/index.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/compat/index.js.map"
+        ],
+        "requiredSourceSha256": "530619cad1ae8523a017071796d5f98c37c838642f9043f7be5cfdde8ac077e4",
+        "requiredAfterSha256": "530619cad1ae8523a017071796d5f98c37c838642f9043f7be5cfdde8ac077e4"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/compat/runtime-versions.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/compat/runtime-versions.d.ts"
+        ],
+        "requiredSourceSha256": "be379a02cfe8c67806d70579afd54ad6b2b705f0bce001f5c44eb525c20d52c4",
+        "requiredAfterSha256": "be379a02cfe8c67806d70579afd54ad6b2b705f0bce001f5c44eb525c20d52c4"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/compat/runtime-versions.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/compat/runtime-versions.js"
+        ],
+        "requiredSourceSha256": "4b9a7268abef20db198edda6f1dd0cbc948b9e7317fb16489c9b7c6b10afb7cc",
+        "requiredAfterSha256": "4b9a7268abef20db198edda6f1dd0cbc948b9e7317fb16489c9b7c6b10afb7cc"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/compat/runtime-versions.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/compat/runtime-versions.js.map"
+        ],
+        "requiredSourceSha256": "32039fcfc2b5b047f3713aa6dc78c522084b2aa1bf514247444d9ff9be75825d",
+        "requiredAfterSha256": "32039fcfc2b5b047f3713aa6dc78c522084b2aa1bf514247444d9ff9be75825d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/index.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/index.d.ts"
+        ],
+        "requiredSourceSha256": "29e8447c1e95667d7ea57ed38b21a2713783cb01bb0aa5a4973896e32e608483",
+        "requiredAfterSha256": "29e8447c1e95667d7ea57ed38b21a2713783cb01bb0aa5a4973896e32e608483"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/index.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/index.js"
+        ],
+        "requiredSourceSha256": "d977c10622275448b97543c67b806869ccf5d52737efc52279b019ab95b059aa",
+        "requiredAfterSha256": "d977c10622275448b97543c67b806869ccf5d52737efc52279b019ab95b059aa"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/index.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/index.js.map"
+        ],
+        "requiredSourceSha256": "4d909af04235900d296c1966fb0ff9d083c98cb65b9b5b67fff05a486ace1cd8",
+        "requiredAfterSha256": "4d909af04235900d296c1966fb0ff9d083c98cb65b9b5b67fff05a486ace1cd8"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/observedOperations.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/observedOperations.d.ts"
+        ],
+        "requiredSourceSha256": "69ffbf67fba7dc53bee3984ee0986b814adedd7f1bc3106ab890a3060d233389",
+        "requiredAfterSha256": "69ffbf67fba7dc53bee3984ee0986b814adedd7f1bc3106ab890a3060d233389"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/observedOperations.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/observedOperations.js"
+        ],
+        "requiredSourceSha256": "04af0851e6c6202bec7a2adfe8843ff43cd4f5cf1e8d0175af4d36e463558475",
+        "requiredAfterSha256": "04af0851e6c6202bec7a2adfe8843ff43cd4f5cf1e8d0175af4d36e463558475"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/observedOperations.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/observedOperations.js.map"
+        ],
+        "requiredSourceSha256": "c59a8ac4f1e4ad336b55a1bb1fba338d68ce131701ecdcd26fcf00ef685d71e9",
+        "requiredAfterSha256": "c59a8ac4f1e4ad336b55a1bb1fba338d68ce131701ecdcd26fcf00ef685d71e9"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/observedReplay.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/observedReplay.d.ts"
+        ],
+        "requiredSourceSha256": "d19fceb717af1c608cbd9dc258f222ecbdf5d623b4e0c54d9fc149848bc6761b",
+        "requiredAfterSha256": "d19fceb717af1c608cbd9dc258f222ecbdf5d623b4e0c54d9fc149848bc6761b"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/observedReplay.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/observedReplay.js"
+        ],
+        "requiredSourceSha256": "7bb0cb3315d58c1dd5d0e0537adb7f0005780f31f1766601cef1efb5b18a0557",
+        "requiredAfterSha256": "7bb0cb3315d58c1dd5d0e0537adb7f0005780f31f1766601cef1efb5b18a0557"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/observedReplay.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/observedReplay.js.map"
+        ],
+        "requiredSourceSha256": "195eb60220bebe50a29cb05d4a4a8ead45ee291999a0c84667b57bf90365e4d5",
+        "requiredAfterSha256": "195eb60220bebe50a29cb05d4a4a8ead45ee291999a0c84667b57bf90365e4d5"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/redaction.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/redaction.d.ts"
+        ],
+        "requiredSourceSha256": "21b4ebcc5069267176a14c107e2d1c0c96995e27fa2ad5183108f6c879a109df",
+        "requiredAfterSha256": "21b4ebcc5069267176a14c107e2d1c0c96995e27fa2ad5183108f6c879a109df"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/redaction.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/redaction.js"
+        ],
+        "requiredSourceSha256": "3ea88a6f78d697a947dbff25beb0650a7e61ece8e249ed5f7cc7fc8471e8cbd4",
+        "requiredAfterSha256": "3ea88a6f78d697a947dbff25beb0650a7e61ece8e249ed5f7cc7fc8471e8cbd4"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/redaction.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/redaction.js.map"
+        ],
+        "requiredSourceSha256": "83fe1851578ecd60d31b8fd5abe3182b83e3bb7f84b8a1b9078910640c6d28ba",
+        "requiredAfterSha256": "83fe1851578ecd60d31b8fd5abe3182b83e3bb7f84b8a1b9078910640c6d28ba"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/stepReporter.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/stepReporter.d.ts"
+        ],
+        "requiredSourceSha256": "0499c779a1eff4be70c0c4812983078f0f6706aa43bdacf9bb12f3c9714562ad",
+        "requiredAfterSha256": "0499c779a1eff4be70c0c4812983078f0f6706aa43bdacf9bb12f3c9714562ad"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/stepReporter.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/stepReporter.js"
+        ],
+        "requiredSourceSha256": "7034427de04de5b5464e0c8e3f7a0888fbc824f027a1920e54c72d9b4c519b21",
+        "requiredAfterSha256": "7034427de04de5b5464e0c8e3f7a0888fbc824f027a1920e54c72d9b4c519b21"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/executor/stepReporter.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/executor/stepReporter.js.map"
+        ],
+        "requiredSourceSha256": "2352636c86b77a4fad8917f66027a0f39b923678b55624bad63d0d893b03ac09",
+        "requiredAfterSha256": "2352636c86b77a4fad8917f66027a0f39b923678b55624bad63d0d893b03ac09"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/contracts.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/contracts.d.ts"
+        ],
+        "requiredSourceSha256": "1d2d0eca81334277d3633ff963f4587441a3fd8df68b0c09b7ab11c737127c84",
+        "requiredAfterSha256": "1d2d0eca81334277d3633ff963f4587441a3fd8df68b0c09b7ab11c737127c84"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/contracts.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/contracts.js"
+        ],
+        "requiredSourceSha256": "ba87e5f444b34128a17580e71e303249ccb207a491049e81100ff5c96104afb0",
+        "requiredAfterSha256": "ba87e5f444b34128a17580e71e303249ccb207a491049e81100ff5c96104afb0"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/contracts.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/contracts.js.map"
+        ],
+        "requiredSourceSha256": "bbea7cc2e1a75e58045139bbc5f33d4372946a5a30cdf9b9d8d7be1140d92c5d",
+        "requiredAfterSha256": "bbea7cc2e1a75e58045139bbc5f33d4372946a5a30cdf9b9d8d7be1140d92c5d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/diagnostics.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/diagnostics.d.ts"
+        ],
+        "requiredSourceSha256": "e629703d77508b7b14aa1b334d6792d3adac3dacaf58a0c47e55fc2e377d6c45",
+        "requiredAfterSha256": "e629703d77508b7b14aa1b334d6792d3adac3dacaf58a0c47e55fc2e377d6c45"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/diagnostics.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/diagnostics.js"
+        ],
+        "requiredSourceSha256": "b1e659b2077d8a3483afe16a73fddf945c9d4ec93231e75d49ba853e532fd5fc",
+        "requiredAfterSha256": "b1e659b2077d8a3483afe16a73fddf945c9d4ec93231e75d49ba853e532fd5fc"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/diagnostics.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/diagnostics.js.map"
+        ],
+        "requiredSourceSha256": "1bd43dce388c3bdc0a408ade81d544302ab957802b17fe91be6f01aa6b16d3c5",
+        "requiredAfterSha256": "1bd43dce388c3bdc0a408ade81d544302ab957802b17fe91be6f01aa6b16d3c5"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/evidence.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/evidence.d.ts"
+        ],
+        "requiredSourceSha256": "c93d6de1c4f0e7dfcecf224ad133d37bade8aa13daf8fc5107f2b8b3c7327d6e",
+        "requiredAfterSha256": "c93d6de1c4f0e7dfcecf224ad133d37bade8aa13daf8fc5107f2b8b3c7327d6e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/evidence.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/evidence.js"
+        ],
+        "requiredSourceSha256": "8f43deee29b22fb97d7f5165e36afd21f7632bd010ac6113fa3628571388ced9",
+        "requiredAfterSha256": "8f43deee29b22fb97d7f5165e36afd21f7632bd010ac6113fa3628571388ced9"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/evidence.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/evidence.js.map"
+        ],
+        "requiredSourceSha256": "72285cb16ba585a929132d13736a969726f387c164908faac765fc618bb3cb8d",
+        "requiredAfterSha256": "72285cb16ba585a929132d13736a969726f387c164908faac765fc618bb3cb8d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/journal.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/journal.d.ts"
+        ],
+        "requiredSourceSha256": "4a535832d99d8fabaac74f0dfc57525aa017892d420752d66de53bb96b556d24",
+        "requiredAfterSha256": "4a535832d99d8fabaac74f0dfc57525aa017892d420752d66de53bb96b556d24"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/journal.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/journal.js"
+        ],
+        "requiredSourceSha256": "4c9c80ad38efe8c9ae705715604848266392427377040124ee19bf466f8c32d7",
+        "requiredAfterSha256": "4c9c80ad38efe8c9ae705715604848266392427377040124ee19bf466f8c32d7"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/journal.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/journal.js.map"
+        ],
+        "requiredSourceSha256": "2e2fe707200034e5550b020c98f2926a7c9fef2da4443409078cfbd7e309773d",
+        "requiredAfterSha256": "2e2fe707200034e5550b020c98f2926a7c9fef2da4443409078cfbd7e309773d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/json.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/json.d.ts"
+        ],
+        "requiredSourceSha256": "e52e6b0d74d0c372a8ff369c34754c66afe949cf59e59119b6d1b09dbd7a83cd",
+        "requiredAfterSha256": "e52e6b0d74d0c372a8ff369c34754c66afe949cf59e59119b6d1b09dbd7a83cd"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/json.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/json.js"
+        ],
+        "requiredSourceSha256": "7fff5830abe84007e5c13e0cb91dc5e3de09c90b4a386d50a2a3d5f6ac5ef764",
+        "requiredAfterSha256": "7fff5830abe84007e5c13e0cb91dc5e3de09c90b4a386d50a2a3d5f6ac5ef764"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/json.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/json.js.map"
+        ],
+        "requiredSourceSha256": "c9e7e199080dbdd58e9622b2bebff5bd7788a3860d44be63cfbfbc70848c1dfc",
+        "requiredAfterSha256": "c9e7e199080dbdd58e9622b2bebff5bd7788a3860d44be63cfbfbc70848c1dfc"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/ownership.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/ownership.d.ts"
+        ],
+        "requiredSourceSha256": "f5092de15b328f8a1a3aa902b0c9ae9d8e1be7f9520d82bfce3bcff7da9d9e43",
+        "requiredAfterSha256": "f5092de15b328f8a1a3aa902b0c9ae9d8e1be7f9520d82bfce3bcff7da9d9e43"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/ownership.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/ownership.js"
+        ],
+        "requiredSourceSha256": "7107f182632abd4ac20bf8210d3929719da8c5857c6d2d39e0ae4b303f6c4952",
+        "requiredAfterSha256": "7107f182632abd4ac20bf8210d3929719da8c5857c6d2d39e0ae4b303f6c4952"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/ownership.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/ownership.js.map"
+        ],
+        "requiredSourceSha256": "717facd5ed7ea6fe634f7502aab39678d133ce16152b50b37e1c208c06eb1ad3",
+        "requiredAfterSha256": "717facd5ed7ea6fe634f7502aab39678d133ce16152b50b37e1c208c06eb1ad3"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/policyHash.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/policyHash.d.ts"
+        ],
+        "requiredSourceSha256": "ca9c2fbbe5688272a111ce3295865b7e97d12e6b33a2aad778d15d2604191f7c",
+        "requiredAfterSha256": "ca9c2fbbe5688272a111ce3295865b7e97d12e6b33a2aad778d15d2604191f7c"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/policyHash.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/policyHash.js"
+        ],
+        "requiredSourceSha256": "92b6014a423c57a53d236ef13bf4c00c60ed8617b2d2214c10d05a6bf837af16",
+        "requiredAfterSha256": "92b6014a423c57a53d236ef13bf4c00c60ed8617b2d2214c10d05a6bf837af16"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/policyHash.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/policyHash.js.map"
+        ],
+        "requiredSourceSha256": "33cf187e9b90c0b12e04e7e73977600f5514c6c8f56a6b0b0f77185c126a62ce",
+        "requiredAfterSha256": "33cf187e9b90c0b12e04e7e73977600f5514c6c8f56a6b0b0f77185c126a62ce"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/runtime.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/runtime.d.ts"
+        ],
+        "requiredSourceSha256": "069d8861160f61161d03cd0ab02c09f6d7a7abfc9987281a38aae447bbddbed1",
+        "requiredAfterSha256": "069d8861160f61161d03cd0ab02c09f6d7a7abfc9987281a38aae447bbddbed1"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/runtime.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/runtime.js"
+        ],
+        "requiredSourceSha256": "fa61032216bebfa2f2f1dcdc6c92145957bbd2c24d6ec035d4d243e091c55c80",
+        "requiredAfterSha256": "fa61032216bebfa2f2f1dcdc6c92145957bbd2c24d6ec035d4d243e091c55c80"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/runtime.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/runtime.js.map"
+        ],
+        "requiredSourceSha256": "b292b5bef9bbc1e9fd64afa8cef691d9919d2393f8e4bfd094c7dd52fcda221b",
+        "requiredAfterSha256": "b292b5bef9bbc1e9fd64afa8cef691d9919d2393f8e4bfd094c7dd52fcda221b"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/schemas.json",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/schemas.json"
+        ],
+        "requiredSourceSha256": "205d5ee95baba8223fcd0bea4c5afdeee7f87784590313c4621403bec5b7385c",
+        "requiredAfterSha256": "205d5ee95baba8223fcd0bea4c5afdeee7f87784590313c4621403bec5b7385c"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/transport.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/transport.d.ts"
+        ],
+        "requiredSourceSha256": "40c28268c0a78eff6bb3d13440490fe80904a30df60d786606f9830b77dd49dd",
+        "requiredAfterSha256": "40c28268c0a78eff6bb3d13440490fe80904a30df60d786606f9830b77dd49dd"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/transport.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/transport.js"
+        ],
+        "requiredSourceSha256": "ee733d1784d9e975c7967b2f6d8403320696c64406981091357a18c8965338a6",
+        "requiredAfterSha256": "ee733d1784d9e975c7967b2f6d8403320696c64406981091357a18c8965338a6"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/transport.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/transport.js.map"
+        ],
+        "requiredSourceSha256": "32c528fd74ef396f16c8930c6dd43628abb5f60ded3f05137c4816648f95e9fc",
+        "requiredAfterSha256": "32c528fd74ef396f16c8930c6dd43628abb5f60ded3f05137c4816648f95e9fc"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/types.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/types.d.ts"
+        ],
+        "requiredSourceSha256": "473888f722d44bf3a723256537eeadc51e1dbc9e17913c7f029e7bb796c7183a",
+        "requiredAfterSha256": "473888f722d44bf3a723256537eeadc51e1dbc9e17913c7f029e7bb796c7183a"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/types.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/types.js"
+        ],
+        "requiredSourceSha256": "01ae2a5b120382f9a648ced7ee8507493a134f216d100fc61600c6c9738235d2",
+        "requiredAfterSha256": "01ae2a5b120382f9a648ced7ee8507493a134f216d100fc61600c6c9738235d2"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/guided/types.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/guided/types.js.map"
+        ],
+        "requiredSourceSha256": "4d7418878ebe881c4627afaf0715b2c536744bbbbc43b8ae7d7dc0b0ee0e48dd",
+        "requiredAfterSha256": "4d7418878ebe881c4627afaf0715b2c536744bbbbc43b8ae7d7dc0b0ee0e48dd"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/index.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/index.d.ts"
+        ],
+        "requiredSourceSha256": "f12c0789bef91cb6e147c076cbb3e6d0abbfbb22b328dc7a0e4492a36eeeb323",
+        "requiredAfterSha256": "f12c0789bef91cb6e147c076cbb3e6d0abbfbb22b328dc7a0e4492a36eeeb323"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/index.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/index.js"
+        ],
+        "requiredSourceSha256": "ff2d77a7c1302768671cd291d982bb05de7a246e2efc7ee4506ff1e2937aa019",
+        "requiredAfterSha256": "ff2d77a7c1302768671cd291d982bb05de7a246e2efc7ee4506ff1e2937aa019"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/index.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/index.js.map"
+        ],
+        "requiredSourceSha256": "9980e41ee76b2f15345c261eccdc6d58d6fe846b895ece923ef618b8f58c358a",
+        "requiredAfterSha256": "9980e41ee76b2f15345c261eccdc6d58d6fe846b895ece923ef618b8f58c358a"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/main.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/main.d.ts"
+        ],
+        "requiredSourceSha256": "dfe45208b1e158795b4806ce8d173d2c5a007cb47638d9676d5332a2e0fdf63f",
+        "requiredAfterSha256": "dfe45208b1e158795b4806ce8d173d2c5a007cb47638d9676d5332a2e0fdf63f"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/main.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/main.js"
+        ],
+        "requiredSourceSha256": "dbea85d0591d2a4d6648c4333b6292311fe86445954f8829fc28d15c48eda512",
+        "requiredAfterSha256": "dbea85d0591d2a4d6648c4333b6292311fe86445954f8829fc28d15c48eda512"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/main.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/main.js.map"
+        ],
+        "requiredSourceSha256": "6efed36e3b295cdf1535494dd88628a7eec39775d516c842850a12f1d25bd78d",
+        "requiredAfterSha256": "6efed36e3b295cdf1535494dd88628a7eec39775d516c842850a12f1d25bd78d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/observed-reference.json",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/observed-reference.json"
+        ],
+        "requiredSourceSha256": "7374ac36290415118f9b3985b2b698288dab05e637f2508adb50aed980ac340b",
+        "requiredAfterSha256": "7374ac36290415118f9b3985b2b698288dab05e637f2508adb50aed980ac340b"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/probe.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/probe.d.ts"
+        ],
+        "requiredSourceSha256": "22d176196b49549aac51016d090cd387b7e46677f026fa850539fb77eccc84ae",
+        "requiredAfterSha256": "22d176196b49549aac51016d090cd387b7e46677f026fa850539fb77eccc84ae"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/probe.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/probe.js"
+        ],
+        "requiredSourceSha256": "c9e3f7539c9bc125e9503ace3aa09e1f5da6f5731197d63f6d529f6b382635c3",
+        "requiredAfterSha256": "c9e3f7539c9bc125e9503ace3aa09e1f5da6f5731197d63f6d529f6b382635c3"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/probe.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/probe.js.map"
+        ],
+        "requiredSourceSha256": "f9fd6cea6553d056f8b2cf78331fa3a400e0c0435586f7077cd187e3757c7a35",
+        "requiredAfterSha256": "f9fd6cea6553d056f8b2cf78331fa3a400e0c0435586f7077cd187e3757c7a35"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/admissionClient.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/admissionClient.d.ts"
+        ],
+        "requiredSourceSha256": "9274db92b64a8cc808540570619c7dfdba79bcd2859824fdfda84a60269847b7",
+        "requiredAfterSha256": "9274db92b64a8cc808540570619c7dfdba79bcd2859824fdfda84a60269847b7"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/admissionClient.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/admissionClient.js"
+        ],
+        "requiredSourceSha256": "0a467ebd3a031bc4157ba0d4e3ffde1165cb6fb58e73261293428c80fdb25955",
+        "requiredAfterSha256": "0a467ebd3a031bc4157ba0d4e3ffde1165cb6fb58e73261293428c80fdb25955"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/admissionClient.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/admissionClient.js.map"
+        ],
+        "requiredSourceSha256": "4a4c2a27159e24380850545046787a851311cc7fe4a2dca48c7cccfac9089a19",
+        "requiredAfterSha256": "4a4c2a27159e24380850545046787a851311cc7fe4a2dca48c7cccfac9089a19"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/bounds.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/bounds.d.ts"
+        ],
+        "requiredSourceSha256": "c743ef33814bb0b76c8923070ad3522f602739088db505391a68f9555cfc929a",
+        "requiredAfterSha256": "c743ef33814bb0b76c8923070ad3522f602739088db505391a68f9555cfc929a"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/bounds.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/bounds.js"
+        ],
+        "requiredSourceSha256": "0e97f700da9cadfec848b7d0b60b51de92f36b82c1c6b8be8880b12bd87dcec5",
+        "requiredAfterSha256": "0e97f700da9cadfec848b7d0b60b51de92f36b82c1c6b8be8880b12bd87dcec5"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/bounds.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/bounds.js.map"
+        ],
+        "requiredSourceSha256": "d6eb0301fbb59ea3e18428a8eb593bac0343889ebccdf638d41dbf32e2014384",
+        "requiredAfterSha256": "d6eb0301fbb59ea3e18428a8eb593bac0343889ebccdf638d41dbf32e2014384"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/envelope.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/envelope.d.ts"
+        ],
+        "requiredSourceSha256": "85357248189cf0b8b716b1f9c823afef4e84fc5859147a486a3ff55f7a23cb61",
+        "requiredAfterSha256": "85357248189cf0b8b716b1f9c823afef4e84fc5859147a486a3ff55f7a23cb61"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/envelope.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/envelope.js"
+        ],
+        "requiredSourceSha256": "683cbcb66ca3f084a700ed4affdf5b149c59f5d94a6a9962da1b147c672d1fa2",
+        "requiredAfterSha256": "683cbcb66ca3f084a700ed4affdf5b149c59f5d94a6a9962da1b147c672d1fa2"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/envelope.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/envelope.js.map"
+        ],
+        "requiredSourceSha256": "53005ed86095c9a0cc75b21b7ebea9121a3ca053714ac2ac455e69e5acdfc272",
+        "requiredAfterSha256": "53005ed86095c9a0cc75b21b7ebea9121a3ca053714ac2ac455e69e5acdfc272"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/httpClient.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/httpClient.d.ts"
+        ],
+        "requiredSourceSha256": "8ae52e32851113c67b01d6fb2e6e7bf166ee41f8d069e6adf8f77ef4fe062106",
+        "requiredAfterSha256": "8ae52e32851113c67b01d6fb2e6e7bf166ee41f8d069e6adf8f77ef4fe062106"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/httpClient.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/httpClient.js"
+        ],
+        "requiredSourceSha256": "11692c42bf3c828937441e10dd77e6e8926a0264d3d468dcc922e56e964ed248",
+        "requiredAfterSha256": "11692c42bf3c828937441e10dd77e6e8926a0264d3d468dcc922e56e964ed248"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/httpClient.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/httpClient.js.map"
+        ],
+        "requiredSourceSha256": "5978d5a4179e4a79472c00c764e8ed92718fb15bc0f71b7067168cbd7ab62d5f",
+        "requiredAfterSha256": "5978d5a4179e4a79472c00c764e8ed92718fb15bc0f71b7067168cbd7ab62d5f"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/index.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/index.d.ts"
+        ],
+        "requiredSourceSha256": "0e973a383294c413544ad5973b3a0e8582791b0c3d88ffa2abd66597ff96e800",
+        "requiredAfterSha256": "0e973a383294c413544ad5973b3a0e8582791b0c3d88ffa2abd66597ff96e800"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/index.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/index.js"
+        ],
+        "requiredSourceSha256": "768bfca9f9f2c81078adaa616b71d671cc06f418771f1ebe58586aca20dab1c3",
+        "requiredAfterSha256": "768bfca9f9f2c81078adaa616b71d671cc06f418771f1ebe58586aca20dab1c3"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/index.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/index.js.map"
+        ],
+        "requiredSourceSha256": "6f8e23faa8700f7b2ff52cf2237187eae4673dd64ab14d78d666e6eb6be5faeb",
+        "requiredAfterSha256": "6f8e23faa8700f7b2ff52cf2237187eae4673dd64ab14d78d666e6eb6be5faeb"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/reportClient.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/reportClient.d.ts"
+        ],
+        "requiredSourceSha256": "5fb8687a768cda29a400bff9572a218320cfdd1d20f728fa6c752166c60c6036",
+        "requiredAfterSha256": "5fb8687a768cda29a400bff9572a218320cfdd1d20f728fa6c752166c60c6036"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/reportClient.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/reportClient.js"
+        ],
+        "requiredSourceSha256": "22397b0c6b0fbda0a42bbf800734000326729014aa7ec0521c1bb429f62c1b79",
+        "requiredAfterSha256": "22397b0c6b0fbda0a42bbf800734000326729014aa7ec0521c1bb429f62c1b79"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/reportClient.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/reportClient.js.map"
+        ],
+        "requiredSourceSha256": "71536dc49374b3ef242a63ad75d790d8ccde985c611b6ccdac0bc26199436546",
+        "requiredAfterSha256": "71536dc49374b3ef242a63ad75d790d8ccde985c611b6ccdac0bc26199436546"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/reportingStepReporter.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/reportingStepReporter.d.ts"
+        ],
+        "requiredSourceSha256": "4dd19715e825da96dc7a00dff16e80f3cc14e285cd5629a6ebe2e8568ad33e61",
+        "requiredAfterSha256": "4dd19715e825da96dc7a00dff16e80f3cc14e285cd5629a6ebe2e8568ad33e61"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/reportingStepReporter.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/reportingStepReporter.js"
+        ],
+        "requiredSourceSha256": "bcf3fc04c5cc0e405698bd1782e7673e0a61c529176c4bcda9deea407b6261a2",
+        "requiredAfterSha256": "bcf3fc04c5cc0e405698bd1782e7673e0a61c529176c4bcda9deea407b6261a2"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/reportingStepReporter.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/reportingStepReporter.js.map"
+        ],
+        "requiredSourceSha256": "c4819972a84e64d3cf3d63e7a9203274a4f7686df814ff6c670d93d4cb91fe48",
+        "requiredAfterSha256": "c4819972a84e64d3cf3d63e7a9203274a4f7686df814ff6c670d93d4cb91fe48"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/snapshot.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/snapshot.d.ts"
+        ],
+        "requiredSourceSha256": "a757c9902369f753b6ffe28fabdf1a6bc9547d25dc28491bd87a6b9f263bf588",
+        "requiredAfterSha256": "a757c9902369f753b6ffe28fabdf1a6bc9547d25dc28491bd87a6b9f263bf588"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/snapshot.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/snapshot.js"
+        ],
+        "requiredSourceSha256": "97add1a0511c9239c13b9b08bb1983d94084cb3cfa409be0ba7122eb355ee5a4",
+        "requiredAfterSha256": "97add1a0511c9239c13b9b08bb1983d94084cb3cfa409be0ba7122eb355ee5a4"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/reporting/snapshot.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/reporting/snapshot.js.map"
+        ],
+        "requiredSourceSha256": "40e9e5ea15e1316496f161a2181e4ddf1c7230248bbe953d491e515b52e5bbc4",
+        "requiredAfterSha256": "40e9e5ea15e1316496f161a2181e4ddf1c7230248bbe953d491e515b52e5bbc4"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/appVideoOwnership.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/appVideoOwnership.d.ts"
+        ],
+        "requiredSourceSha256": "afd3c9f3ad37489b52a54d6c197d345e9ad5f3e8d5414c91ca09dbcd943bd905",
+        "requiredAfterSha256": "afd3c9f3ad37489b52a54d6c197d345e9ad5f3e8d5414c91ca09dbcd943bd905"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/appVideoOwnership.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/appVideoOwnership.js"
+        ],
+        "requiredSourceSha256": "9d3f570f9cb495c663d52ce1b03a9a0b226c955624fd24fa1be8373274fb7b32",
+        "requiredAfterSha256": "9d3f570f9cb495c663d52ce1b03a9a0b226c955624fd24fa1be8373274fb7b32"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/appVideoOwnership.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/appVideoOwnership.js.map"
+        ],
+        "requiredSourceSha256": "c49e8c0442617bb2da458d8f4765980162983d4733547ed289bc2d19e2aed178",
+        "requiredAfterSha256": "c49e8c0442617bb2da458d8f4765980162983d4733547ed289bc2d19e2aed178"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/browser.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/browser.d.ts"
+        ],
+        "requiredSourceSha256": "1c42f4d021ee067b2a5a4eaf92cceab9cc45c7f439a0b574633053a0a73f29c6",
+        "requiredAfterSha256": "1c42f4d021ee067b2a5a4eaf92cceab9cc45c7f439a0b574633053a0a73f29c6"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/browser.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/browser.js"
+        ],
+        "requiredSourceSha256": "746193f36a9d4fc427979e646d83034d4d813768fbe0d556235011b42cc6979f",
+        "requiredAfterSha256": "746193f36a9d4fc427979e646d83034d4d813768fbe0d556235011b42cc6979f"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/browser.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/browser.js.map"
+        ],
+        "requiredSourceSha256": "b9028b53be9508e2bbdc5f13d4f6a351e009abf5c0ddc8803791a35ae8f84c4e",
+        "requiredAfterSha256": "b9028b53be9508e2bbdc5f13d4f6a351e009abf5c0ddc8803791a35ae8f84c4e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/browserFactory.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/browserFactory.d.ts"
+        ],
+        "requiredSourceSha256": "2b85bb1fbd8c294e024eb6dd20bf1ec091575945a477828602f809008b6868b3",
+        "requiredAfterSha256": "2b85bb1fbd8c294e024eb6dd20bf1ec091575945a477828602f809008b6868b3"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/browserFactory.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/browserFactory.js"
+        ],
+        "requiredSourceSha256": "6c72abdac6e53eda82f919fdb14d5168aa41cc3f434f94b328703421bcdf798d",
+        "requiredAfterSha256": "6c72abdac6e53eda82f919fdb14d5168aa41cc3f434f94b328703421bcdf798d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/browserFactory.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/browserFactory.js.map"
+        ],
+        "requiredSourceSha256": "04c6552e05a3eceb602dc80db5305b21b9bad11bf064a3381e03ec7cc1085fde",
+        "requiredAfterSha256": "04c6552e05a3eceb602dc80db5305b21b9bad11bf064a3381e03ec7cc1085fde"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/child.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/child.d.ts"
+        ],
+        "requiredSourceSha256": "e7805524afb6f67990a8fcb13c1ed0389c0ab5a09af6887240c87df398ef803e",
+        "requiredAfterSha256": "e7805524afb6f67990a8fcb13c1ed0389c0ab5a09af6887240c87df398ef803e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/child.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/child.js"
+        ],
+        "requiredSourceSha256": "bc768d04c070cb609ccadb025f8ccc1b0f342f34ba418775fe7e592e1aa46d14",
+        "requiredAfterSha256": "bc768d04c070cb609ccadb025f8ccc1b0f342f34ba418775fe7e592e1aa46d14"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/child.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/child.js.map"
+        ],
+        "requiredSourceSha256": "0fb39662749a3002f66403650c55b8d2b9871db95af0aaa5f519dcfeb61e040a",
+        "requiredAfterSha256": "0fb39662749a3002f66403650c55b8d2b9871db95af0aaa5f519dcfeb61e040a"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/childRuntime.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/childRuntime.d.ts"
+        ],
+        "requiredSourceSha256": "3b3838f06c184cde3f362ca49330926964270a2208adf9a494b0c5914225e7ab",
+        "requiredAfterSha256": "3b3838f06c184cde3f362ca49330926964270a2208adf9a494b0c5914225e7ab"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/childRuntime.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/childRuntime.js"
+        ],
+        "requiredSourceSha256": "0ad5e3af36b084d6a3fa10ad4604baf21c0213a16326891df58dbce793f392c4",
+        "requiredAfterSha256": "0ad5e3af36b084d6a3fa10ad4604baf21c0213a16326891df58dbce793f392c4"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/childRuntime.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/childRuntime.js.map"
+        ],
+        "requiredSourceSha256": "55e4d3762cda7841ec77800045cebed00a85fe6ba49aaa200314259ad3523f9e",
+        "requiredAfterSha256": "55e4d3762cda7841ec77800045cebed00a85fe6ba49aaa200314259ad3523f9e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/deadline.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/deadline.d.ts"
+        ],
+        "requiredSourceSha256": "2ee13b3c9ef7d6153f1c32958f4f7d5652e4907f5698cd9ec8e8148da16903f3",
+        "requiredAfterSha256": "2ee13b3c9ef7d6153f1c32958f4f7d5652e4907f5698cd9ec8e8148da16903f3"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/deadline.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/deadline.js"
+        ],
+        "requiredSourceSha256": "ce05166c4183aa6d67a2e843283a70b34ef0b61b7d1b46897968b58edc27f939",
+        "requiredAfterSha256": "ce05166c4183aa6d67a2e843283a70b34ef0b61b7d1b46897968b58edc27f939"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/deadline.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/deadline.js.map"
+        ],
+        "requiredSourceSha256": "fec496143e825b510baebff3fe887c06eb3667d9107224850402e19ab101c8d1",
+        "requiredAfterSha256": "fec496143e825b510baebff3fe887c06eb3667d9107224850402e19ab101c8d1"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/errors.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/errors.d.ts"
+        ],
+        "requiredSourceSha256": "ba692ff4503af246fd570b684fb4044c7b67051986825c369e912ba1db6eb5f8",
+        "requiredAfterSha256": "ba692ff4503af246fd570b684fb4044c7b67051986825c369e912ba1db6eb5f8"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/errors.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/errors.js"
+        ],
+        "requiredSourceSha256": "0722c2bd0dbad9eaec4d16266289450a19f07caffebae2c5a6f7ba4b70a3701e",
+        "requiredAfterSha256": "0722c2bd0dbad9eaec4d16266289450a19f07caffebae2c5a6f7ba4b70a3701e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/errors.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/errors.js.map"
+        ],
+        "requiredSourceSha256": "f43d43976208e3fbeedf8395915984f7d68806270fbd1dd104b0d7fe6fb99ed9",
+        "requiredAfterSha256": "f43d43976208e3fbeedf8395915984f7d68806270fbd1dd104b0d7fe6fb99ed9"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/evidenceUpload.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/evidenceUpload.d.ts"
+        ],
+        "requiredSourceSha256": "a59c54d42702777b54bfcdc609e45b0f7457726b873ebd6b470f5ab16116cf13",
+        "requiredAfterSha256": "a59c54d42702777b54bfcdc609e45b0f7457726b873ebd6b470f5ab16116cf13"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/evidenceUpload.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/evidenceUpload.js"
+        ],
+        "requiredSourceSha256": "eb9bf8068b6233da0acb22172e9bc48bdecbf43a5877444ac44414aa99865015",
+        "requiredAfterSha256": "eb9bf8068b6233da0acb22172e9bc48bdecbf43a5877444ac44414aa99865015"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/evidenceUpload.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/evidenceUpload.js.map"
+        ],
+        "requiredSourceSha256": "28e4505343b38fd149226f829ade24287e5f9649246664c20c4bc989fcb7ed17",
+        "requiredAfterSha256": "28e4505343b38fd149226f829ade24287e5f9649246664c20c4bc989fcb7ed17"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/guidedBrowser.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/guidedBrowser.d.ts"
+        ],
+        "requiredSourceSha256": "79fbc0a4a02ed10af9a2449dc640feb742d1bb3a1c5b8aee521aadc37b6bb44e",
+        "requiredAfterSha256": "79fbc0a4a02ed10af9a2449dc640feb742d1bb3a1c5b8aee521aadc37b6bb44e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/guidedBrowser.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/guidedBrowser.js"
+        ],
+        "requiredSourceSha256": "6b424ea935776e8ae3bd60878dd7901b773355e8e4254bd39ec35117b613626a",
+        "requiredAfterSha256": "6b424ea935776e8ae3bd60878dd7901b773355e8e4254bd39ec35117b613626a"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/guidedBrowser.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/guidedBrowser.js.map"
+        ],
+        "requiredSourceSha256": "5f4e8bc5aec0bf159a1b9b7a6d03c1281a840ae88debb64c620174fd02f497d8",
+        "requiredAfterSha256": "5f4e8bc5aec0bf159a1b9b7a6d03c1281a840ae88debb64c620174fd02f497d8"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/index.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/index.d.ts"
+        ],
+        "requiredSourceSha256": "22664142c4ac526dbc3af4ccdc6ccc6a9613cc7100a628c69915c9e33e1760d4",
+        "requiredAfterSha256": "22664142c4ac526dbc3af4ccdc6ccc6a9613cc7100a628c69915c9e33e1760d4"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/index.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/index.js"
+        ],
+        "requiredSourceSha256": "2913cb3a7de5616c66027ecc44fa15f4c495ea37920a1e78d9ae07112fae24fe",
+        "requiredAfterSha256": "2913cb3a7de5616c66027ecc44fa15f4c495ea37920a1e78d9ae07112fae24fe"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/index.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/index.js.map"
+        ],
+        "requiredSourceSha256": "706e3e17c75d8b89d93e6f5c3a65b464bfbef194d6f79653c14bea934d8334ad",
+        "requiredAfterSha256": "706e3e17c75d8b89d93e6f5c3a65b464bfbef194d6f79653c14bea934d8334ad"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/launcher.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/launcher.d.ts"
+        ],
+        "requiredSourceSha256": "fde5ca65a0da61924c851277b3cb385f929c8c8a8227a9569877a1aea86dea05",
+        "requiredAfterSha256": "fde5ca65a0da61924c851277b3cb385f929c8c8a8227a9569877a1aea86dea05"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/launcher.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/launcher.js"
+        ],
+        "requiredSourceSha256": "5a8bccce67e141738881a75cc4878fd31e4757bd5a0bf3dbe09b574c0388aff8",
+        "requiredAfterSha256": "5a8bccce67e141738881a75cc4878fd31e4757bd5a0bf3dbe09b574c0388aff8"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/launcher.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/launcher.js.map"
+        ],
+        "requiredSourceSha256": "347c3a1cd80da4d264ebd5046916871d814c2485ade0dbf1a01402841bc0d321",
+        "requiredAfterSha256": "347c3a1cd80da4d264ebd5046916871d814c2485ade0dbf1a01402841bc0d321"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/loginRequired.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/loginRequired.d.ts"
+        ],
+        "requiredSourceSha256": "d6a476181dfcad41256165041e9a1294e43fed1f4263c6774e4e38f3c4fbf447",
+        "requiredAfterSha256": "d6a476181dfcad41256165041e9a1294e43fed1f4263c6774e4e38f3c4fbf447"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/loginRequired.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/loginRequired.js"
+        ],
+        "requiredSourceSha256": "c145df964a81ad9c23025a3142dfd6d445c009acf0084c5ea1257db139e02197",
+        "requiredAfterSha256": "c145df964a81ad9c23025a3142dfd6d445c009acf0084c5ea1257db139e02197"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/loginRequired.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/loginRequired.js.map"
+        ],
+        "requiredSourceSha256": "dea333e2a00d55746ab55f7b1671d8cdfd67eb84e1cf787c60db6be554a0861c",
+        "requiredAfterSha256": "dea333e2a00d55746ab55f7b1671d8cdfd67eb84e1cf787c60db6be554a0861c"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/manifest.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/manifest.d.ts"
+        ],
+        "requiredSourceSha256": "c0adbd13aa18b21c4e9dd2618765b5a6f6056c7ef08495b8d877e45dee3191f0",
+        "requiredAfterSha256": "c0adbd13aa18b21c4e9dd2618765b5a6f6056c7ef08495b8d877e45dee3191f0"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/manifest.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/manifest.js"
+        ],
+        "requiredSourceSha256": "7db972328efaac092a40ec3e41f8e160453236f63a6b33d4b02c87fd54f771ef",
+        "requiredAfterSha256": "7db972328efaac092a40ec3e41f8e160453236f63a6b33d4b02c87fd54f771ef"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/manifest.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/manifest.js.map"
+        ],
+        "requiredSourceSha256": "ff0030939ccba99c1a66bc1a9b3ba7c04fb659c33eb1f9d2cdfe4f8e6138886a",
+        "requiredAfterSha256": "ff0030939ccba99c1a66bc1a9b3ba7c04fb659c33eb1f9d2cdfe4f8e6138886a"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/nativeInput.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/nativeInput.d.ts"
+        ],
+        "requiredSourceSha256": "42077e628bd724c44092a7bb5985d1149a517f440ac305ac762afd6c859037a5",
+        "requiredAfterSha256": "42077e628bd724c44092a7bb5985d1149a517f440ac305ac762afd6c859037a5"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/nativeInput.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/nativeInput.js"
+        ],
+        "requiredSourceSha256": "aaa909903af8669d2b03a15cd4fb98ffcbe4e0498fdd62b492280b0d1cbf3e8d",
+        "requiredAfterSha256": "aaa909903af8669d2b03a15cd4fb98ffcbe4e0498fdd62b492280b0d1cbf3e8d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/nativeInput.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/nativeInput.js.map"
+        ],
+        "requiredSourceSha256": "e1d8d66e2bc4d35a992a823234513e76bfbd5aeb2ec932d01f0120a1736973aa",
+        "requiredAfterSha256": "e1d8d66e2bc4d35a992a823234513e76bfbd5aeb2ec932d01f0120a1736973aa"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/objectStore.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/objectStore.d.ts"
+        ],
+        "requiredSourceSha256": "1bc3cd2151ccefb556c9da62a10bfd208f37dfa4e42c5c8f2f975e054324bd30",
+        "requiredAfterSha256": "1bc3cd2151ccefb556c9da62a10bfd208f37dfa4e42c5c8f2f975e054324bd30"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/objectStore.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/objectStore.js"
+        ],
+        "requiredSourceSha256": "22d21f8fe998cf62acca6098c92bf4f56f2cca3853d300af3e89b9a4d875a7aa",
+        "requiredAfterSha256": "22d21f8fe998cf62acca6098c92bf4f56f2cca3853d300af3e89b9a4d875a7aa"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/objectStore.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/objectStore.js.map"
+        ],
+        "requiredSourceSha256": "36b0fbd2c9c55fdde6b7b8fcc2850d51cd4fce5ee8e03067c864ee460b9cd952",
+        "requiredAfterSha256": "36b0fbd2c9c55fdde6b7b8fcc2850d51cd4fce5ee8e03067c864ee460b9cd952"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/objectStoreFactory.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/objectStoreFactory.d.ts"
+        ],
+        "requiredSourceSha256": "ee588d43bfaa2b913e95b339ba7654039d1bf78eebafb6805e4e845abad9c72c",
+        "requiredAfterSha256": "ee588d43bfaa2b913e95b339ba7654039d1bf78eebafb6805e4e845abad9c72c"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/objectStoreFactory.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/objectStoreFactory.js"
+        ],
+        "requiredSourceSha256": "f9d0cdfd0699e1d1994a09fdf49e1cd5087d0524985aeda307013a1fb6a55367",
+        "requiredAfterSha256": "f9d0cdfd0699e1d1994a09fdf49e1cd5087d0524985aeda307013a1fb6a55367"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/objectStoreFactory.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/objectStoreFactory.js.map"
+        ],
+        "requiredSourceSha256": "c3b2314e3cde53b01e6f8e1124a884f819cc4b6d1dfa56bb28e750a0ce56b7a3",
+        "requiredAfterSha256": "c3b2314e3cde53b01e6f8e1124a884f819cc4b6d1dfa56bb28e750a0ce56b7a3"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationCollector.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationCollector.d.ts"
+        ],
+        "requiredSourceSha256": "fc9a63c234b5573668096b0f1ddb65de5e31a45ae475ecefeab2a5a19270a993",
+        "requiredAfterSha256": "fc9a63c234b5573668096b0f1ddb65de5e31a45ae475ecefeab2a5a19270a993"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationCollector.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationCollector.js"
+        ],
+        "requiredSourceSha256": "c6618f3db83565c50341d6639f8e6ba745ba6db44fe622e9acbeffa167e55aef",
+        "requiredAfterSha256": "c6618f3db83565c50341d6639f8e6ba745ba6db44fe622e9acbeffa167e55aef"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationCollector.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationCollector.js.map"
+        ],
+        "requiredSourceSha256": "f9e5c6529edf5c9754a1a1b4ed741634fd5ae969edd5fc257321c8146eacd15b",
+        "requiredAfterSha256": "f9e5c6529edf5c9754a1a1b4ed741634fd5ae969edd5fc257321c8146eacd15b"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationInventory.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationInventory.d.ts"
+        ],
+        "requiredSourceSha256": "5a262f5ccb96fc0f0d6538ceba635a576b80c0216fb2085deeedc6c882ceb55b",
+        "requiredAfterSha256": "5a262f5ccb96fc0f0d6538ceba635a576b80c0216fb2085deeedc6c882ceb55b"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationInventory.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationInventory.js"
+        ],
+        "requiredSourceSha256": "3dceedcb4f560115b3ade7c4db363e5af1f6ed5c0b5f9f9d2551723010a7a4cf",
+        "requiredAfterSha256": "3dceedcb4f560115b3ade7c4db363e5af1f6ed5c0b5f9f9d2551723010a7a4cf"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationInventory.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationInventory.js.map"
+        ],
+        "requiredSourceSha256": "63fcfd043c17d92e2db9e43eed62c46322984dbbe46a3f662793e91ce8768462",
+        "requiredAfterSha256": "63fcfd043c17d92e2db9e43eed62c46322984dbbe46a3f662793e91ce8768462"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationSanitizer.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationSanitizer.d.ts"
+        ],
+        "requiredSourceSha256": "0c02549f73b562d527a95c51cd429a37175fdc4583492af195561c6b99e06de2",
+        "requiredAfterSha256": "0c02549f73b562d527a95c51cd429a37175fdc4583492af195561c6b99e06de2"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationSanitizer.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationSanitizer.js"
+        ],
+        "requiredSourceSha256": "ab76725834a24335dc6816e905148ce6db70f293ebf0e167ce42750a4d778f2b",
+        "requiredAfterSha256": "ab76725834a24335dc6816e905148ce6db70f293ebf0e167ce42750a4d778f2b"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationSanitizer.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationSanitizer.js.map"
+        ],
+        "requiredSourceSha256": "f96aaaad99fded249c1af010000ebf80f5a9c604bf22c13c7a996d83a1f943a9",
+        "requiredAfterSha256": "f96aaaad99fded249c1af010000ebf80f5a9c604bf22c13c7a996d83a1f943a9"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationTypes.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationTypes.d.ts"
+        ],
+        "requiredSourceSha256": "012fbe18f34dab28445216760a2fcbddee2d581cdc372d032f4afb814ecca765",
+        "requiredAfterSha256": "012fbe18f34dab28445216760a2fcbddee2d581cdc372d032f4afb814ecca765"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationTypes.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationTypes.js"
+        ],
+        "requiredSourceSha256": "15d630b20caa21bbdc6395b720e9a2f4b1fe27fbfa3b874e6546c5864c6a3108",
+        "requiredAfterSha256": "15d630b20caa21bbdc6395b720e9a2f4b1fe27fbfa3b874e6546c5864c6a3108"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observationTypes.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observationTypes.js.map"
+        ],
+        "requiredSourceSha256": "bf4170a93b44bdff4b64111c8051175659f806b2a5243dfee3b5562fb81f619e",
+        "requiredAfterSha256": "bf4170a93b44bdff4b64111c8051175659f806b2a5243dfee3b5562fb81f619e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observedBootstrap.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observedBootstrap.d.ts"
+        ],
+        "requiredSourceSha256": "f92102ea98e68788ddc6c574e65fbba7eb73448567657a8365031ecf7087fac0",
+        "requiredAfterSha256": "f92102ea98e68788ddc6c574e65fbba7eb73448567657a8365031ecf7087fac0"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observedBootstrap.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observedBootstrap.js"
+        ],
+        "requiredSourceSha256": "790ce849b5cf0bee5a9a13aef16567da8d089f3019cf64f0a9ab9c706ea42945",
+        "requiredAfterSha256": "790ce849b5cf0bee5a9a13aef16567da8d089f3019cf64f0a9ab9c706ea42945"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observedBootstrap.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observedBootstrap.js.map"
+        ],
+        "requiredSourceSha256": "c1e45070bf425aae52fe9290dfee3cc26919e3b1451122ae405dc32f542d16ac",
+        "requiredAfterSha256": "c1e45070bf425aae52fe9290dfee3cc26919e3b1451122ae405dc32f542d16ac"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observedReplayAdapter.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observedReplayAdapter.d.ts"
+        ],
+        "requiredSourceSha256": "8c3f86f5fa207733b8f84632dd785792937f5c7c6d08fd9f5dbccc6a22e459d0",
+        "requiredAfterSha256": "8c3f86f5fa207733b8f84632dd785792937f5c7c6d08fd9f5dbccc6a22e459d0"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observedReplayAdapter.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observedReplayAdapter.js"
+        ],
+        "requiredSourceSha256": "ba83ecf9ff73f753b57b1555044a7f871a3ed3e612a19b7b846888f40fbc42e3",
+        "requiredAfterSha256": "ba83ecf9ff73f753b57b1555044a7f871a3ed3e612a19b7b846888f40fbc42e3"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/observedReplayAdapter.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/observedReplayAdapter.js.map"
+        ],
+        "requiredSourceSha256": "91bc194dd936b0adeac454d6fef473b8a37d26f5a19bdba5ee29ff09b030c0ae",
+        "requiredAfterSha256": "91bc194dd936b0adeac454d6fef473b8a37d26f5a19bdba5ee29ff09b030c0ae"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/outputRelay.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/outputRelay.d.ts"
+        ],
+        "requiredSourceSha256": "e6e68c7c74630be0f02f6c0716752d047d801cd4a985131cc58667ddc8085c9b",
+        "requiredAfterSha256": "e6e68c7c74630be0f02f6c0716752d047d801cd4a985131cc58667ddc8085c9b"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/outputRelay.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/outputRelay.js"
+        ],
+        "requiredSourceSha256": "a80464e3104965b60d439b56dca01b7090cec3efc0d7831d8dae6893b550ba04",
+        "requiredAfterSha256": "a80464e3104965b60d439b56dca01b7090cec3efc0d7831d8dae6893b550ba04"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/outputRelay.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/outputRelay.js.map"
+        ],
+        "requiredSourceSha256": "89bfbc3835c699adc3eb917942d64754a7e55ee7b116d30c3d33902fe522984f",
+        "requiredAfterSha256": "89bfbc3835c699adc3eb917942d64754a7e55ee7b116d30c3d33902fe522984f"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/passwordControl.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/passwordControl.d.ts"
+        ],
+        "requiredSourceSha256": "5f17dad099a9984ebc689262165073062789db20fee5117bb20e303d2b06e51d",
+        "requiredAfterSha256": "5f17dad099a9984ebc689262165073062789db20fee5117bb20e303d2b06e51d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/passwordControl.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/passwordControl.js"
+        ],
+        "requiredSourceSha256": "43d27639d2d9bf0b12a075b58dd411ac3a3698ad5c19eac0b108671cd9e6d83f",
+        "requiredAfterSha256": "43d27639d2d9bf0b12a075b58dd411ac3a3698ad5c19eac0b108671cd9e6d83f"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/passwordControl.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/passwordControl.js.map"
+        ],
+        "requiredSourceSha256": "725fd4a04c4ee5f02b11fe8168fa5fce6004785796497cfde4428aef49869626",
+        "requiredAfterSha256": "725fd4a04c4ee5f02b11fe8168fa5fce6004785796497cfde4428aef49869626"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/protocol.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/protocol.d.ts"
+        ],
+        "requiredSourceSha256": "9ee376e31db4e1f3e382f01115407d5b5ce9e59fa29bc6d002e656fe9ce36197",
+        "requiredAfterSha256": "9ee376e31db4e1f3e382f01115407d5b5ce9e59fa29bc6d002e656fe9ce36197"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/protocol.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/protocol.js"
+        ],
+        "requiredSourceSha256": "b5ab69287989be4a830cf388cb3030d92eb9659a48f3e37ce718ba7282bd6417",
+        "requiredAfterSha256": "b5ab69287989be4a830cf388cb3030d92eb9659a48f3e37ce718ba7282bd6417"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/protocol.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/protocol.js.map"
+        ],
+        "requiredSourceSha256": "02404336773beab2d6266a1bd7ddc5a67eeddc46a406e22c0c0ebdcb9f51b865",
+        "requiredAfterSha256": "02404336773beab2d6266a1bd7ddc5a67eeddc46a406e22c0c0ebdcb9f51b865"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/recording.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/recording.d.ts"
+        ],
+        "requiredSourceSha256": "ed22cb7b72497c6a4b7db10acdf97c05135eb868f52a5c09377f356d3c7ebf80",
+        "requiredAfterSha256": "ed22cb7b72497c6a4b7db10acdf97c05135eb868f52a5c09377f356d3c7ebf80"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/recording.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/recording.js"
+        ],
+        "requiredSourceSha256": "189763eb32a19696f0a603146e48eedeb3738fd2dec1879ef9e890ef8d34da78",
+        "requiredAfterSha256": "189763eb32a19696f0a603146e48eedeb3738fd2dec1879ef9e890ef8d34da78"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/recording.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/recording.js.map"
+        ],
+        "requiredSourceSha256": "870c962dd9ce18231475e7f139e60874b46df0455f0a9dba6a339b99968d5efe",
+        "requiredAfterSha256": "870c962dd9ce18231475e7f139e60874b46df0455f0a9dba6a339b99968d5efe"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/recordingScratch.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/recordingScratch.d.ts"
+        ],
+        "requiredSourceSha256": "17248db78cfedb6300a9e7710a80fd284c03d735bc8565d8651aae2604f7dc11",
+        "requiredAfterSha256": "17248db78cfedb6300a9e7710a80fd284c03d735bc8565d8651aae2604f7dc11"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/recordingScratch.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/recordingScratch.js"
+        ],
+        "requiredSourceSha256": "7649fcea31de7e5483e925644763f8210be4c478c535e6cc8e8d3538d9adaae7",
+        "requiredAfterSha256": "7649fcea31de7e5483e925644763f8210be4c478c535e6cc8e8d3538d9adaae7"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/recordingScratch.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/recordingScratch.js.map"
+        ],
+        "requiredSourceSha256": "91b7d75f6cabe7c490746063665ef40a9e4f7c3af321275c36fff8bae15c5e9e",
+        "requiredAfterSha256": "91b7d75f6cabe7c490746063665ef40a9e4f7c3af321275c36fff8bae15c5e9e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/s3ObjectStore.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/s3ObjectStore.d.ts"
+        ],
+        "requiredSourceSha256": "35f5be9edd5da25cf6c45fe1d4476c62391aebf2e07ce6d7a65c60efd8f53c1e",
+        "requiredAfterSha256": "35f5be9edd5da25cf6c45fe1d4476c62391aebf2e07ce6d7a65c60efd8f53c1e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/s3ObjectStore.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/s3ObjectStore.js"
+        ],
+        "requiredSourceSha256": "98beffcc64cd283790f2634327bf0e820a4184be65c8d718a2abf99ed04ecca6",
+        "requiredAfterSha256": "98beffcc64cd283790f2634327bf0e820a4184be65c8d718a2abf99ed04ecca6"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/s3ObjectStore.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/s3ObjectStore.js.map"
+        ],
+        "requiredSourceSha256": "1a77f529c785076d5900d90e8640d0cb40834bd1e49ea3ed4d82cfe5197ce41d",
+        "requiredAfterSha256": "1a77f529c785076d5900d90e8640d0cb40834bd1e49ea3ed4d82cfe5197ce41d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/sandbox.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/sandbox.d.ts"
+        ],
+        "requiredSourceSha256": "bacbb57f21efbd9507f6c9820a95f4fb65ce26731d965a5adf0d0c6adf8a0466",
+        "requiredAfterSha256": "bacbb57f21efbd9507f6c9820a95f4fb65ce26731d965a5adf0d0c6adf8a0466"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/sandbox.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/sandbox.js"
+        ],
+        "requiredSourceSha256": "b613209a03635e537092ad5d588878188cdb451fe4d31ba047c44b56318f7d8a",
+        "requiredAfterSha256": "b613209a03635e537092ad5d588878188cdb451fe4d31ba047c44b56318f7d8a"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/sandbox.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/sandbox.js.map"
+        ],
+        "requiredSourceSha256": "991b6c9f660525740e992c88202db2e63b6d5e2029b958cd4cde0d896ec1fadc",
+        "requiredAfterSha256": "991b6c9f660525740e992c88202db2e63b6d5e2029b958cd4cde0d896ec1fadc"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/scratchLayout.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/scratchLayout.d.ts"
+        ],
+        "requiredSourceSha256": "dea19efdbd6ee2835eaad7efd4305b5b589d4ef17c93fb441277a9c6f81c761d",
+        "requiredAfterSha256": "dea19efdbd6ee2835eaad7efd4305b5b589d4ef17c93fb441277a9c6f81c761d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/scratchLayout.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/scratchLayout.js"
+        ],
+        "requiredSourceSha256": "05c6dc5ca1673b5dc288105da27370b6044d72a51ac52359bf91bd02d8d1d0c5",
+        "requiredAfterSha256": "05c6dc5ca1673b5dc288105da27370b6044d72a51ac52359bf91bd02d8d1d0c5"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/scratchLayout.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/scratchLayout.js.map"
+        ],
+        "requiredSourceSha256": "c7a6d629a7d998c701ba22869f0ed316da3f1618dc12ab472a71126b6cc27bf4",
+        "requiredAfterSha256": "c7a6d629a7d998c701ba22869f0ed316da3f1618dc12ab472a71126b6cc27bf4"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/secretUse.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/secretUse.d.ts"
+        ],
+        "requiredSourceSha256": "34f4768f90eaef0fcb0f376f5f98f4c4954835887c27acd6b339f2f12f403d1a",
+        "requiredAfterSha256": "34f4768f90eaef0fcb0f376f5f98f4c4954835887c27acd6b339f2f12f403d1a"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/secretUse.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/secretUse.js"
+        ],
+        "requiredSourceSha256": "046a2603f96c641456f772d512ab4d460ee8766bd64d5b572fffad764f96f622",
+        "requiredAfterSha256": "046a2603f96c641456f772d512ab4d460ee8766bd64d5b572fffad764f96f622"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/secretUse.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/secretUse.js.map"
+        ],
+        "requiredSourceSha256": "867d8e3f398237fb5497f10976600982bb1a98b42a21f9897d6d928298f7ee4b",
+        "requiredAfterSha256": "867d8e3f398237fb5497f10976600982bb1a98b42a21f9897d6d928298f7ee4b"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/timeline.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/timeline.d.ts"
+        ],
+        "requiredSourceSha256": "4a883175d7fc219030e1d99a6a6a000809e99656e620a58098093c57367e7628",
+        "requiredAfterSha256": "4a883175d7fc219030e1d99a6a6a000809e99656e620a58098093c57367e7628"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/timeline.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/timeline.js"
+        ],
+        "requiredSourceSha256": "a7dc4d86de9862b16e1863bc3ba18406007634c1a2b97b5dfa95db3595348451",
+        "requiredAfterSha256": "a7dc4d86de9862b16e1863bc3ba18406007634c1a2b97b5dfa95db3595348451"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/timeline.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/timeline.js.map"
+        ],
+        "requiredSourceSha256": "f6157959f548888bedea563230f9e80622e57e87d7764b55fca455ed6bbaa0e2",
+        "requiredAfterSha256": "f6157959f548888bedea563230f9e80622e57e87d7764b55fca455ed6bbaa0e2"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/tree.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/tree.d.ts"
+        ],
+        "requiredSourceSha256": "beb9aa814904684d6d3fa6fd10e14fb86760f7f028be114113d5b8de566698e6",
+        "requiredAfterSha256": "beb9aa814904684d6d3fa6fd10e14fb86760f7f028be114113d5b8de566698e6"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/tree.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/tree.js"
+        ],
+        "requiredSourceSha256": "fa2e7071b69673a89842eda57667bedfd290e305b9c77e568fb62efe331e255a",
+        "requiredAfterSha256": "fa2e7071b69673a89842eda57667bedfd290e305b9c77e568fb62efe331e255a"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/tree.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/tree.js.map"
+        ],
+        "requiredSourceSha256": "f59abf533454ff32205be07d0a1e6f6b7ae9541d2f7b0810d821df51b892b551",
+        "requiredAfterSha256": "f59abf533454ff32205be07d0a1e6f6b7ae9541d2f7b0810d821df51b892b551"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/versionProbe.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/versionProbe.d.ts"
+        ],
+        "requiredSourceSha256": "9194a3ff48b8404bdfcd391484c2f224e493b7d9aefd2d8f960f7e1bfc58dba5",
+        "requiredAfterSha256": "9194a3ff48b8404bdfcd391484c2f224e493b7d9aefd2d8f960f7e1bfc58dba5"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/versionProbe.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/versionProbe.js"
+        ],
+        "requiredSourceSha256": "91dc643c58376867ef5546934849576664d4c2b31453e6d76bf6eaee6dcae8f8",
+        "requiredAfterSha256": "91dc643c58376867ef5546934849576664d4c2b31453e6d76bf6eaee6dcae8f8"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/run/versionProbe.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/run/versionProbe.js.map"
+        ],
+        "requiredSourceSha256": "d0b0470b76310bf289a15c11b12199ddee9939c7593bd3d996941e1e25dc5a11",
+        "requiredAfterSha256": "d0b0470b76310bf289a15c11b12199ddee9939c7593bd3d996941e1e25dc5a11"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/runtime-versions.json",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/runtime-versions.json"
+        ],
+        "requiredSourceSha256": "41dee95dfda3a7ba7334464f20de4b48b43fd60d2fcd508837d7b6790d0fc14a",
+        "requiredAfterSha256": "41dee95dfda3a7ba7334464f20de4b48b43fd60d2fcd508837d7b6790d0fc14a"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/adapters.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/adapters.d.ts"
+        ],
+        "requiredSourceSha256": "4b4ae306e7ef08c519eacb3003e4a21e0f637a7f41ebb8c13bcc137cf57129f7",
+        "requiredAfterSha256": "4b4ae306e7ef08c519eacb3003e4a21e0f637a7f41ebb8c13bcc137cf57129f7"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/adapters.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/adapters.js"
+        ],
+        "requiredSourceSha256": "944aae1db41b2587c6684a78213f8b32ab44aef92b55c339757ab42e7c222f8b",
+        "requiredAfterSha256": "944aae1db41b2587c6684a78213f8b32ab44aef92b55c339757ab42e7c222f8b"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/adapters.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/adapters.js.map"
+        ],
+        "requiredSourceSha256": "1651597caf06c28852b8363f171ebbd88038830c905b2c4c5084f5b1595f8984",
+        "requiredAfterSha256": "1651597caf06c28852b8363f171ebbd88038830c905b2c4c5084f5b1595f8984"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/application.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/application.d.ts"
+        ],
+        "requiredSourceSha256": "c73c6b1ed53a1011f94f6dfb8141693cccf7576d75cfd864c9448f33a11f8eb6",
+        "requiredAfterSha256": "c73c6b1ed53a1011f94f6dfb8141693cccf7576d75cfd864c9448f33a11f8eb6"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/application.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/application.js"
+        ],
+        "requiredSourceSha256": "6c25a4da5980a44937703c8936f65e3f37f784087cbae66b6bb26f95f40f3ca5",
+        "requiredAfterSha256": "6c25a4da5980a44937703c8936f65e3f37f784087cbae66b6bb26f95f40f3ca5"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/application.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/application.js.map"
+        ],
+        "requiredSourceSha256": "a7a8a4bcd82707589611894d326006fc9dff170f9dc288d8d1d2a3b152db4039",
+        "requiredAfterSha256": "a7a8a4bcd82707589611894d326006fc9dff170f9dc288d8d1d2a3b152db4039"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/capacity.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/capacity.d.ts"
+        ],
+        "requiredSourceSha256": "bff01cde57b36f78435df7f4925bdf09cf368bab7a10d8c8811f06e7f2482f3d",
+        "requiredAfterSha256": "bff01cde57b36f78435df7f4925bdf09cf368bab7a10d8c8811f06e7f2482f3d"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/capacity.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/capacity.js"
+        ],
+        "requiredSourceSha256": "a28721454f2355264d296e843db6840317dd713ddecc0f02472031e25c616014",
+        "requiredAfterSha256": "a28721454f2355264d296e843db6840317dd713ddecc0f02472031e25c616014"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/capacity.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/capacity.js.map"
+        ],
+        "requiredSourceSha256": "0712851c6fb3856e249d20ef28e6db76a0be30688f736ae12bc87adc8a7b1946",
+        "requiredAfterSha256": "0712851c6fb3856e249d20ef28e6db76a0be30688f736ae12bc87adc8a7b1946"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/config.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/config.d.ts"
+        ],
+        "requiredSourceSha256": "eaf45644f7efd111cbc8cc26349fc0b5559cf8d13a3251342e8e5424a4801e4c",
+        "requiredAfterSha256": "eaf45644f7efd111cbc8cc26349fc0b5559cf8d13a3251342e8e5424a4801e4c"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/config.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/config.js"
+        ],
+        "requiredSourceSha256": "9837bbe078d1e4ace2a1cd915e7bad8a7d7e7df2df25879d1385fb228d11debe",
+        "requiredAfterSha256": "9837bbe078d1e4ace2a1cd915e7bad8a7d7e7df2df25879d1385fb228d11debe"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/config.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/config.js.map"
+        ],
+        "requiredSourceSha256": "8d3e4f0d02dfe0f9537bf4a1fc9d76ce3056ee3debba30ba7100097983ef217e",
+        "requiredAfterSha256": "8d3e4f0d02dfe0f9537bf4a1fc9d76ce3056ee3debba30ba7100097983ef217e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/identity.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/identity.d.ts"
+        ],
+        "requiredSourceSha256": "7fdee121fc2d7810f3c272ad62bd01c741a35c9a393d949d3f2124188a6c9bf4",
+        "requiredAfterSha256": "7fdee121fc2d7810f3c272ad62bd01c741a35c9a393d949d3f2124188a6c9bf4"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/identity.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/identity.js"
+        ],
+        "requiredSourceSha256": "178e37ac2ba807e31cb7faf6e84d69a072743148d65e53e49c844661f605c258",
+        "requiredAfterSha256": "178e37ac2ba807e31cb7faf6e84d69a072743148d65e53e49c844661f605c258"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/identity.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/identity.js.map"
+        ],
+        "requiredSourceSha256": "fe8ffe574c52e19b24a15910122101a11ce44874a26498e2be8a560c2525c0cf",
+        "requiredAfterSha256": "fe8ffe574c52e19b24a15910122101a11ce44874a26498e2be8a560c2525c0cf"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/index.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/index.d.ts"
+        ],
+        "requiredSourceSha256": "2b781efe76e0e29da0e9d311cfa164ce69444c1ee9433f2740744fb74e248e26",
+        "requiredAfterSha256": "2b781efe76e0e29da0e9d311cfa164ce69444c1ee9433f2740744fb74e248e26"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/index.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/index.js"
+        ],
+        "requiredSourceSha256": "934c24119ad02dacba34de5513a45fbce06603cfdb4a8c475f8fdb2905f5e5b2",
+        "requiredAfterSha256": "934c24119ad02dacba34de5513a45fbce06603cfdb4a8c475f8fdb2905f5e5b2"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/index.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/index.js.map"
+        ],
+        "requiredSourceSha256": "7c88f05fe885a55b3fb094e6acdb459d28bc298b6b9c05576e7ad1ec0ff082aa",
+        "requiredAfterSha256": "7c88f05fe885a55b3fb094e6acdb459d28bc298b6b9c05576e7ad1ec0ff082aa"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/logging.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/logging.d.ts"
+        ],
+        "requiredSourceSha256": "b1c7613c484ec5a3f5a5005fa11fbce52e8e6995579bfea82144a4341562ed70",
+        "requiredAfterSha256": "b1c7613c484ec5a3f5a5005fa11fbce52e8e6995579bfea82144a4341562ed70"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/logging.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/logging.js"
+        ],
+        "requiredSourceSha256": "f273e29f0f4ba3023ab9ca8c22afba64bdbdf538a5ddfe10ac5e3eea3f05760e",
+        "requiredAfterSha256": "f273e29f0f4ba3023ab9ca8c22afba64bdbdf538a5ddfe10ac5e3eea3f05760e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/logging.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/logging.js.map"
+        ],
+        "requiredSourceSha256": "4a0ad562a373a2d0584929663ba03c57b3001b591341043c21fefe101c6eeddc",
+        "requiredAfterSha256": "4a0ad562a373a2d0584929663ba03c57b3001b591341043c21fefe101c6eeddc"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/routes.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/routes.d.ts"
+        ],
+        "requiredSourceSha256": "8525d84636c3c7c005ca8740276ee46c3f64e4bda7741bb2d117d5d9a73c6483",
+        "requiredAfterSha256": "8525d84636c3c7c005ca8740276ee46c3f64e4bda7741bb2d117d5d9a73c6483"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/routes.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/routes.js"
+        ],
+        "requiredSourceSha256": "e3581588c6d4ee1af3fe3128ab64304f01d5934e20ff7fa13e06b9289f54c767",
+        "requiredAfterSha256": "e3581588c6d4ee1af3fe3128ab64304f01d5934e20ff7fa13e06b9289f54c767"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/routes.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/routes.js.map"
+        ],
+        "requiredSourceSha256": "81610bfa1aeb51897f292f437e28800345121126ac7324b65869a85e28ded8c3",
+        "requiredAfterSha256": "81610bfa1aeb51897f292f437e28800345121126ac7324b65869a85e28ded8c3"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/runCoordinator.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/runCoordinator.d.ts"
+        ],
+        "requiredSourceSha256": "7326c6ae8059d8e35a8f6f65cfee9e999d950227bfb1d001295110afa24f5560",
+        "requiredAfterSha256": "7326c6ae8059d8e35a8f6f65cfee9e999d950227bfb1d001295110afa24f5560"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/runCoordinator.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/runCoordinator.js"
+        ],
+        "requiredSourceSha256": "fcc59360298cdc9223d80870cad0748d95f2db8dd9a630c41b88093f1df6f6e3",
+        "requiredAfterSha256": "fcc59360298cdc9223d80870cad0748d95f2db8dd9a630c41b88093f1df6f6e3"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/runCoordinator.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/runCoordinator.js.map"
+        ],
+        "requiredSourceSha256": "07ef0ade163379064f9155cf59fc32aac5d92723728d1e212c20da3e6e73fbb4",
+        "requiredAfterSha256": "07ef0ade163379064f9155cf59fc32aac5d92723728d1e212c20da3e6e73fbb4"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/scratch.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/scratch.d.ts"
+        ],
+        "requiredSourceSha256": "688607e077fac2df289333de67523ee23fc25329795cf81dc0d4d654a3b4bc9c",
+        "requiredAfterSha256": "688607e077fac2df289333de67523ee23fc25329795cf81dc0d4d654a3b4bc9c"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/scratch.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/scratch.js"
+        ],
+        "requiredSourceSha256": "5de4a7a812333d1491ed6566d326b767f5f5aed6c8d80784bd7eddef114f41e2",
+        "requiredAfterSha256": "5de4a7a812333d1491ed6566d326b767f5f5aed6c8d80784bd7eddef114f41e2"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/scratch.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/scratch.js.map"
+        ],
+        "requiredSourceSha256": "0030a8f56530088bea358017797c93800091011e19f46e7a71e1deb1870471fc",
+        "requiredAfterSha256": "0030a8f56530088bea358017797c93800091011e19f46e7a71e1deb1870471fc"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/server.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/server.d.ts"
+        ],
+        "requiredSourceSha256": "2494a280618798db459c6c2bd1c42ee205490ba4b071af171f7ad1554460f1ea",
+        "requiredAfterSha256": "2494a280618798db459c6c2bd1c42ee205490ba4b071af171f7ad1554460f1ea"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/server.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/server.js"
+        ],
+        "requiredSourceSha256": "385b7541e3ba35d85c0dab636be6ff857a9cc2bc7a6ae1539e56af6a63c692e1",
+        "requiredAfterSha256": "385b7541e3ba35d85c0dab636be6ff857a9cc2bc7a6ae1539e56af6a63c692e1"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/server/server.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/server/server.js.map"
+        ],
+        "requiredSourceSha256": "1d1ed9202a0f4227e5623d353affb719f6ad69570e69ef5cae0bc40ee0a85c16",
+        "requiredAfterSha256": "1d1ed9202a0f4227e5623d353affb719f6ad69570e69ef5cae0bc40ee0a85c16"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedHistory.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedHistory.d.ts"
+        ],
+        "requiredSourceSha256": "fc1769dde3ff7a7a90b5b6150da7c901f2fcc6ed2cc52571b6d7d5ca55885d2f",
+        "requiredAfterSha256": "fc1769dde3ff7a7a90b5b6150da7c901f2fcc6ed2cc52571b6d7d5ca55885d2f"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedHistory.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedHistory.js"
+        ],
+        "requiredSourceSha256": "eb2806c058a10eac0625c258c46a19247491fa5e047cb6ef3fd0ecad757d2729",
+        "requiredAfterSha256": "eb2806c058a10eac0625c258c46a19247491fa5e047cb6ef3fd0ecad757d2729"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedHistory.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedHistory.js.map"
+        ],
+        "requiredSourceSha256": "195dafabdc6bc0d42d4fb337a349b65107f35624ead391c3d780d818abd1f82c",
+        "requiredAfterSha256": "195dafabdc6bc0d42d4fb337a349b65107f35624ead391c3d780d818abd1f82c"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedReferencePolicy.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedReferencePolicy.d.ts"
+        ],
+        "requiredSourceSha256": "5592ec9aa51982bb13134ca851511eaa9fef4322d9c92e83520da05901706b91",
+        "requiredAfterSha256": "5592ec9aa51982bb13134ca851511eaa9fef4322d9c92e83520da05901706b91"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedReferencePolicy.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedReferencePolicy.js"
+        ],
+        "requiredSourceSha256": "d3b08f5e200d9d8ac2aec0646245cbb1fc86ced3b6c2b180454b1392c493b3f1",
+        "requiredAfterSha256": "d3b08f5e200d9d8ac2aec0646245cbb1fc86ced3b6c2b180454b1392c493b3f1"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedReferencePolicy.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedReferencePolicy.js.map"
+        ],
+        "requiredSourceSha256": "19f0c203f79376e9bce9437fc59b400ccdec7c17ed9ee61dedcd1c5608116396",
+        "requiredAfterSha256": "19f0c203f79376e9bce9437fc59b400ccdec7c17ed9ee61dedcd1c5608116396"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedReplay.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedReplay.d.ts"
+        ],
+        "requiredSourceSha256": "8cb1e77dbc9350f8fbd305c42d6a827672592e14959e9e69408229a96789a7b7",
+        "requiredAfterSha256": "8cb1e77dbc9350f8fbd305c42d6a827672592e14959e9e69408229a96789a7b7"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedReplay.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedReplay.js"
+        ],
+        "requiredSourceSha256": "c5eb7344fd1b0c9f55c680166555027ee5eeaa1f39e33b7f338b7500071f6764",
+        "requiredAfterSha256": "c5eb7344fd1b0c9f55c680166555027ee5eeaa1f39e33b7f338b7500071f6764"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedReplay.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedReplay.js.map"
+        ],
+        "requiredSourceSha256": "e3c0f907594edacaa804a09fa37141eef1dd6b1590816f4f47d9dd1afa43b9e2",
+        "requiredAfterSha256": "e3c0f907594edacaa804a09fa37141eef1dd6b1590816f4f47d9dd1afa43b9e2"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedSchemas.json",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedSchemas.json"
+        ],
+        "requiredSourceSha256": "67129bb9d427db3f02018166c74c8adbc0a7846c080cdab0629a1b5e34f79a52",
+        "requiredAfterSha256": "67129bb9d427db3f02018166c74c8adbc0a7846c080cdab0629a1b5e34f79a52"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedSnapshots.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedSnapshots.d.ts"
+        ],
+        "requiredSourceSha256": "08d8b1347f013c4f7feadacc7dff73bbb66dc523fb70e1f4733b926e86db94c1",
+        "requiredAfterSha256": "08d8b1347f013c4f7feadacc7dff73bbb66dc523fb70e1f4733b926e86db94c1"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedSnapshots.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedSnapshots.js"
+        ],
+        "requiredSourceSha256": "73bf164459f8b2b76f206c485a820afcf43e94e84c4d814b2a5628917e7c99fc",
+        "requiredAfterSha256": "73bf164459f8b2b76f206c485a820afcf43e94e84c4d814b2a5628917e7c99fc"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/validator/observedSnapshots.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/validator/observedSnapshots.js.map"
+        ],
+        "requiredSourceSha256": "3de16052a988add624abc98324eeb2075c24c12bdcc10b681e28daa2b1bc9b8f",
+        "requiredAfterSha256": "3de16052a988add624abc98324eeb2075c24c12bdcc10b681e28daa2b1bc9b8f"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/versions.d.ts",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/versions.d.ts"
+        ],
+        "requiredSourceSha256": "4d591da2f0bd73716aa884396df5af999b2f153a79f2030898b9c5ba1c3bdf2e",
+        "requiredAfterSha256": "4d591da2f0bd73716aa884396df5af999b2f153a79f2030898b9c5ba1c3bdf2e"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/versions.js",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/versions.js"
+        ],
+        "requiredSourceSha256": "994763da4f4ec9575c1706afaaec4d7d22df9998567471fb841f3188b1517807",
+        "requiredAfterSha256": "994763da4f4ec9575c1706afaaec4d7d22df9998567471fb841f3188b1517807"
+      },
+      {
+        "argv": [
+          "cp",
+          "-p",
+          "/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner/dist/versions.js.map",
+          "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/dist/versions.js.map"
+        ],
+        "requiredSourceSha256": "59522c9f31f3c392c358fb7d51121a7928452cd6eec6ecc5b198f8b8a6dd802f",
+        "requiredAfterSha256": "59522c9f31f3c392c358fb7d51121a7928452cd6eec6ecc5b198f8b8a6dd802f"
+      }
+    ]
+  },
+  "fixtureOverlay": {
+    "argv": [
+      "cp",
+      "-p",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-ownership-timing-diagnostic-preparation/candidate/studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts",
+      "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts"
+    ],
+    "requiredBeforeSha256": "bd0e0f1b48aa941a58b8aacbd611d6d26940de9daf0be86c8f261e7004edec98",
+    "requiredAfterSha256": "6a36298406f9e90a83cb0ae1dbce899517ffa4d1b1ee28fee03dfa846727a173"
+  },
+  "diagnostic": {
+    "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+      "obs011-recovery-20261020-ownership-timing-diag01",
+      "pnpm",
+      "--dir=/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs011-ownership-timing-20261020-diagnostic01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.fixtures.config.ts",
+      "test/fixtures-tier/guided-secret-ownership.test.ts",
+      "--testNamePattern",
+      "^uses actual mTLS and native focus for guided secret ownership: lost-body-late-grant$",
+      "--minWorkers=1",
+      "--maxWorkers=1"
+    ],
+    "patternIsOneStructuredArgument": true,
+    "VitestChildCommandIndex": 4,
+    "expectedDiscovery": 4,
+    "expectedExecuted": 1,
+    "expectedFilterOmissions": 3,
+    "filterOmissionsNotHistoricalSkipCredit": true,
+    "globalSetupUnchanged": true,
+    "expectedCompletePrivateDistAfterGlobalSetup": "52bc5a05cdd348c5f62c6bc181210c79f765d15d82dee0abcf01861f6e75cef7",
+    "unitOrFullFixtureRerun": false,
+    "testOutcomeMayPassOrFail": "Preserve raw outcome; PASS only non-reproduction, FAIL only this observed execution; no gate or historical-cause credit"
+  },
+  "afterRun": {
+    "closedOutput": "repo/docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution-2/ownership-timing-diagnostic.json",
+    "bind": "all root source/dist pins, full derivative source/dependency catalog, full238dist, canonical CLI modes/hashes and actual browser hash, generated cache exactpath/hash/shape/key delta, raw result/report, one exact identity and3filters",
+    "noImplicitBroadCacheExemption": true,
+    "restore": "fixture finally removes added abort listeners and restores mocks, retaining original error; inverse patch applies only to fresh diagnostic fixture if later explicitly routed, never to actual/original RT trees. Preserve derivative/source/dist/output; no automatic restoration/deletion.",
+    "stopAfterOneTerminalOutcome": true,
+    "noRetryOrFollowupSuite": true
+  }
+}

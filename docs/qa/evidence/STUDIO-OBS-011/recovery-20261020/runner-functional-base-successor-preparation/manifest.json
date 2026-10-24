@@ -1,0 +1,123 @@
+{
+  "kind": "SEALED_SOURCE_ONLY_RT_FUNCTIONAL_BASE_SUCCESSOR_PREVIEW",
+  "createdAt": "2026-10-20T23:32:01.736091+00:00",
+  "story": "STUDIO-OBS-011",
+  "status": "STOP_FOR_INDEPENDENT_SOURCE_QA_NOT_ADMITTED",
+  "candidateHelperSha256": "e38a3fd99798d55d2e46bb2fb1ce0d4c3b9a4b799f5d0c8cfdc16d79af5edaef",
+  "candidateBindingSha256": "95427bbdaf0cc709d50341a7c9d2f7d5e223c56ff54bc6c48ec2e52f7a2cf621",
+  "originalHelperSha256": "4b0d186af5b427fcc250cedfa3b02ec91a7857921c5bafdb2b2245313d1573ac",
+  "originalBindingSha256": "0ceb51bb6ec7c21947bb61d80fb3e6fc2b25010bd78cc7902d7f554e2638ceb7",
+  "exactBusinessPredecessors": 4,
+  "rtNeutralDeltaPaths": 7,
+  "historicalProtectedRowsRetained": 17,
+  "changedOwnershipEqualsS011": false,
+  "unitForecastOnly": {
+    "total": 2676,
+    "passed": 2651,
+    "skipped": 25
+  },
+  "fixtureForecastOnly": {
+    "total": 307,
+    "passed": 298,
+    "skipped": 9
+  },
+  "actualApplication": "UNBOUND",
+  "renewalFinalExecutionQaAndApplication": "UNBOUND",
+  "finalCurrentSourceDependencyDistCatalog": "UNBOUND",
+  "newMeasuredFullEmitAcceptance": "UNBOUND",
+  "privateAndFinalActualFixtureOutputBindings": "SEPARATELY_UNBOUND",
+  "runtimeCaptureSeedTestBuildPerformed": false,
+  "pythonAstParseOnly": true,
+  "artifacts": [
+    {
+      "path": "before/copy-back-binding.json",
+      "sha256": "0ceb51bb6ec7c21947bb61d80fb3e6fc2b25010bd78cc7902d7f554e2638ceb7",
+      "bytes": 8600
+    },
+    {
+      "path": "before/prepare-current-sandbox.py",
+      "sha256": "4b0d186af5b427fcc250cedfa3b02ec91a7857921c5bafdb2b2245313d1573ac",
+      "bytes": 7825
+    },
+    {
+      "path": "candidate/copy-back-binding.json",
+      "sha256": "95427bbdaf0cc709d50341a7c9d2f7d5e223c56ff54bc6c48ec2e52f7a2cf621",
+      "bytes": 14635
+    },
+    {
+      "path": "candidate/prepare-current-sandbox.py",
+      "sha256": "e38a3fd99798d55d2e46bb2fb1ce0d4c3b9a4b799f5d0c8cfdc16d79af5edaef",
+      "bytes": 8202
+    },
+    {
+      "path": "commands-successor.json",
+      "sha256": "e56dd1b6a2461cf2234202b2304e297cfb2df925cb3899852464c1517b9b2cf3",
+      "bytes": 16644
+    },
+    {
+      "path": "copy-back-binding.json.inverse.patch",
+      "sha256": "cb97bd30ec1affb36db013e3b56ec423b265a1e4d63931513771e574c998272b",
+      "bytes": 7708
+    },
+    {
+      "path": "copy-back-binding.json.patch",
+      "sha256": "566f84fe621e93ffa00ae8a79dff48dd6df7678e7c9fc3d61be43e4102894667",
+      "bytes": 7708
+    },
+    {
+      "path": "design.md",
+      "sha256": "20656bbec11312f2abff2ceedc1d0d0348c480a7a1a7c27306c02fa700cdcdba",
+      "bytes": 11143
+    },
+    {
+      "path": "full-unit-forecast-identities.json",
+      "sha256": "c1ff42239337322f245040c093707c8fd5d9bf4a9ccec0e39984fa74a6a7167d",
+      "bytes": 2318668
+    },
+    {
+      "path": "prepare-current-sandbox.py.inverse.patch",
+      "sha256": "48bd663547f2b263ada3906b96011288360578602f5f39e557e6fbe8055e4568",
+      "bytes": 2229
+    },
+    {
+      "path": "prepare-current-sandbox.py.patch",
+      "sha256": "996394b6b34f4945bf7d08b7edcb4c663923080b5a1ebd4fd4cf5e228e369367",
+      "bytes": 2229
+    },
+    {
+      "path": "review-request.md",
+      "sha256": "8d6b7e6cf34f49aa9ea74a25b8b4fb85e3a10828d4486a25bc111970ee2f5535",
+      "bytes": 2605
+    },
+    {
+      "path": "root-integration-admission-unbound.json",
+      "sha256": "8b9bcdd4e79086f3518cca53c43390b6037b5fb057697d5511627c87b9fb3d07",
+      "bytes": 1435
+    },
+    {
+      "path": "selftest-carry.json",
+      "sha256": "9f6992be56ea57cba2b0b9d19112baba89cecf6c016256660a00d89733a6c091",
+      "bytes": 5454
+    },
+    {
+      "path": "six-case-forecast.json",
+      "sha256": "c25257e1c4782be7ce419a96a4b2e4653559ef1136e6efacefedad44c235da77",
+      "bytes": 4713
+    },
+    {
+      "path": "source-only-syntax-and-preservation.json",
+      "sha256": "017491c833115442546953a46333d4fc79a35b844ccd8985a097c0e9628ca560",
+      "bytes": 5654
+    },
+    {
+      "path": "source-pins.json",
+      "sha256": "801628b05931589e9c558ef883a83ef553aaea50df77a97f4ccae53d86bef033",
+      "bytes": 15522
+    },
+    {
+      "path": "static-review-checks.json",
+      "sha256": "91ab43852d43096a24c67c9fc9b8f67c969c2ec271f4956e1e6346e35e4d2ac3",
+      "bytes": 904
+    }
+  ]
+}

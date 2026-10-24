@@ -1,0 +1,136 @@
+{
+  "sourcePreparationOnly": true,
+  "foldAtomicPreimagesArePreparedNotLiteralS011": true,
+  "bodyCopyFromOldFoldForbidden": true,
+  "sourceAnchors": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "unchangedGsSourceAnchors": [
+        {
+          "anchor": "INSERT INTO users(sso_id,name,email)",
+          "gs05Count": 1,
+          "previewCount": 1,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)",
+          "gs05Count": 1,
+          "previewCount": 1,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "Click Order number.",
+          "gs05Count": 2,
+          "previewCount": 2,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "principal.email()",
+          "gs05Count": 3,
+          "previewCount": 3,
+          "oldFoldCandidateCount": 0
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "unchangedGsSourceAnchors": [
+        {
+          "anchor": "NOT (progress ??",
+          "gs05Count": 1,
+          "previewCount": 1,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "\"CUT_PEER\"",
+          "gs05Count": 2,
+          "previewCount": 2,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "gstFixedFrame",
+          "gs05Count": 2,
+          "previewCount": 2,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "Translation state and manifest were initialized by genuine production access.start.",
+          "gs05Count": 5,
+          "previewCount": 5,
+          "oldFoldCandidateCount": 5
+        }
+      ]
+    }
+  ],
+  "finiteFrameMatcher": {
+    "old": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+    "new": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient",
+    "addedGsSite": true,
+    "sameApprovedTypeIdentityMap": true,
+    "vocabularyOrScanCountOrLineExtractionChanged": false,
+    "postFoldClientSource": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/final-candidates/backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+    "postFoldClientSha256": "abea933dbeb42d41403629a293007f952064621751ee1ade98389a8460c36f60",
+    "sendRemainingAndObserverPresent": true,
+    "futureExactObserverSourceRebindingOwed": true
+  },
+  "unresolvedLifecycle": {
+    "id": "FOLD-GST05-LIFECYCLE-OWNERSHIP-01",
+    "status": "UNRESOLVED",
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+    "gs05Sha256": "353bc8ebcf75d373203c58b016ead65648661cfdf47fa950d6230ac238ac7aa5",
+    "referenceLines": [
+      575
+    ],
+    "legacyType": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+    "deletedByOriginalAtomicOperation": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+    "notAnOriginalFoldOperation": true,
+    "unappliedHunk": "UNRESOLVED-Lifecycle-type-port.patch",
+    "decisionRequired": "Exact owner/ruling and eventual operation/source/case binding for the new Lifecycle planner dependency. No extra operation is authorized here."
+  },
+  "intendedDeletesCarriedUnchanged": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "operation": "delete",
+      "preimageSha256": "9823a4d4c907fdb4a7b64449cc8a727b2de9b1160897058f5a6823590f42987d",
+      "candidateSha256": null,
+      "preimageMode": "0o644",
+      "candidateMode": null,
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__bridge__GuidedRunnerClient.java.patch",
+      "patchSha256": "d2f27803cf56b16b3b30093257b2070b42c8900d608731848428568b14538f1f",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java",
+      "operation": "delete",
+      "preimageSha256": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e",
+      "candidateSha256": null,
+      "preimageMode": "0o644",
+      "candidateMode": null,
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationAuthorization.java.patch",
+      "patchSha256": "4adde97989c6791bbae9602e2f0d60d83183b550189b72a25b89c99255d64f49",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "operation": "delete",
+      "preimageSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+      "candidateSha256": null,
+      "preimageMode": "0o644",
+      "candidateMode": null,
+      "patch": "backend__src__main__java__com__citi__put__checks__studio__guided__publication__ObservedValidationClient.java.patch",
+      "patchSha256": "bf2614e2828534952233417dba5d5735f9bf64f0625cc6ad3374046ad063cf29",
+      "ownership": "v7 exact FOLD-final"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java",
+      "operation": "delete",
+      "preimageSha256": "25cd088252ce9a4e0437448d6645a58738ff7b9f9fc069c3883bc26f30aa73b5",
+      "candidateSha256": null,
+      "preimageMode": "0o644",
+      "candidateMode": null,
+      "patch": "backend__src__test__java__com__citi__put__checks__studio__guided__publication__GuidedPublicationAuthorizationIT.java.patch",
+      "patchSha256": "5042dba7e2adba8b15162f0407c6590f6850a050256f56121635c63e08fead76",
+      "ownership": "v7 exact FOLD-final"
+    }
+  ]
+}

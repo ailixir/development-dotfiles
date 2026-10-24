@@ -1,0 +1,9 @@
+# QA provenance format successor17
+
+Semantic QA15 acceptance remains PASS, waiver inactive. Story remains Done, with all18taskmarkers unchanged and one original QA15 lifecycle transition. Patch0.2.21 adds only administrative format compatibility; no new acceptance review or implementation dispatch occurred.
+
+The original gate was valid YAML, but the unchanged SDC metadata regex did not recognize its quoted gate scalar. Multiple old verdict markers placed the original reviewer/revision outside the latest evidence entry. All original QA text remains; a new recognized Review Date entry contains bare reviewer/revision fields and one final gate marker. The external gate now uses bare PASS with every original semantic field preserved and one explicitly typed format-successor provenance field. No framework regex/source was edited.
+
+The exact original read-only command ran ONCE after correction: raw0, result.ok=true, outcome approved, no failures. It recognized PASS, Quinn (@qa; independent SDC reviewer), story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee, Done,18/18 and no QA evidence error. Raw stdout and the original owned wait are captured; no mark flag or phase recovery occurred. The returned old develop/pending state is preserved for root's separately authorized recovery. Actual inline parser fileListCount13 is not substituted for the unchanged declared103entry File List.
+
+Canonical reviewed content remains4a546 before/after, using the unchanged recipe1fc0. QA15 manifest and all15owned artifacts remain byte-exact; its gate-copyed5 is historical, while the canonical external gate has this successor. All AC/PO/dev/FileList/carry/task text and Status are unchanged. Original failed read-only verification and wrong-phase preflight stops remain linked. No status rollback, new lifecycle transition, source/test/native/projection/private-body/SDK/network/provider/other-story/ledger/pointer work was performed.

@@ -1,0 +1,157 @@
+{
+  "kind": "INERT_FAILED_RED_RESOURCE_ONLY_ROOT_AUTHORIZATION_TEMPLATE",
+  "authorizedBy": null,
+  "authorized": false,
+  "expectedWrapperExit": 1,
+  "newNativeInvocations": 0,
+  "sourceWrites": [],
+  "cleanup": false,
+  "normalRoute": "HARD_HOLD",
+  "credit": false,
+  "subject": {
+    "label": "obs009-gateway80-offtree03-20261019",
+    "pty": 29815,
+    "wrapper": {
+      "pid": 3720,
+      "start": "Mon Oct 19 12:48:37 2026",
+      "argvHash": "1d1638cae329a35e35525dbea90f90afea0724722d4b3ae17d673fa8a10670f6"
+    },
+    "shell": {
+      "pid": 3749,
+      "start": "Mon Oct 19 12:48:37 2026",
+      "argvHash": "e693ea77d4dc14554715c43d1be0d346a18945c4ef836b403ed7c46fe14271a8"
+    },
+    "lock": {
+      "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/gradle.lock",
+      "dev": 16777229,
+      "ino": 215213569
+    },
+    "holdSha256": "fd58e6a6d34cb9f3c9c0a100a7bb38109a6913322232691d2528701d5825a073",
+    "releaseSha256": "43ff6885ad33d1084a6a60ccb94390a099e097fd31b35496442b46ebce24ce71",
+    "code06ManifestSha256": "e2e3340b48628c76884d6b243dd69134052e8e2ff3d25f5ab09d94f4e9150585",
+    "sourceReviews": {
+      "architecture": "dd6456fc01575c1eb0afe82cf2793903eccac27a388c5dec4da10d55d7248f92",
+      "qa": "ec64b9b5fb243c9c6bf2a29828e03784cbba720b0b77a4ed3d03c3896db3658a"
+    },
+    "currentHeldOrResourceFactsObservedByDesigner": false
+  },
+  "retainedFailure": {
+    "actualNativeExit": 1,
+    "actualCollectorStatus": 1,
+    "phaseAccepted": false,
+    "phaseStatus": "HOLD",
+    "failureCode": "NATIVE_OWNERSHIP_HOLD",
+    "nativeTimedOut": false,
+    "stickyFlags": [
+      "OWNED_IDENTITY_RACE_OR_INCOMPLETE",
+      "RESIDENT_REPARENTED_OR_UNKNOWN_CANDIDATE"
+    ],
+    "phaseStickyFlags": [
+      "PHASE_FAILED_ValueError"
+    ],
+    "candidateObservationCount": 3,
+    "pureClosedReportAssessment": {
+      "qualification": "EXPECTED_RED_48_INTENDED_ASSERTIONS",
+      "nativeExit": 1,
+      "nativeSuccess": false,
+      "counts": {
+        "skipped": 47,
+        "failed": 48
+      },
+      "all95IdentitiesReconciled": true,
+      "actualRenderFrameCount": null,
+      "actualRenderFrameCountClaimed": false,
+      "credit": false
+    },
+    "assessmentDoesNotQualifyPhase": true,
+    "cause": "UNKNOWN",
+    "postSourceAndPostResourcesProduced": false,
+    "fixedGreenNormalArchiveFinalPermit": "NOT_STARTED_NOT_AUTHORIZED",
+    "historicalGapCodes": [
+      "RED01_OWNED_IDENTITY_RACE_OR_INCOMPLETE",
+      "RED01_RESIDENT_REPARENTED_OR_UNKNOWN_CANDIDATE",
+      "RED01_ONE_CANDIDATE_WITHOUT_START",
+      "RED01_OLD_OBSERVER_BINARY_FINGERPRINT_INCOMPLETE",
+      "RED01_UNRECORDED_FORK_OR_INTERVAL_ABSENCE_NOT_PROVEN",
+      "HISTORICAL_C8_GST_GAPS_UNCHANGED"
+    ],
+    "oldFlagsRepairableByNewPointObservation": false
+  },
+  "compileObligation": "NONE_NODE_ONLY_UNCHANGED_SOURCE",
+  "distinctFailedEntrypointAuthorized": false,
+  "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+  "limits": {
+    "maximumArchiveEntries": 8192,
+    "maximumArchiveBytes": 536870912,
+    "maximumFileBytes": 134217728,
+    "maximumJsonBytes": 16777216,
+    "maximumCensusRows": 16384,
+    "utilityDeadlineSeconds": 15,
+    "freshnessSeconds": 60
+  },
+  "rootInputPins": {},
+  "codePins": {
+    "failed_gateway.py": "d25983908f7c5943ce3deb9430696a010d5dd289060b81950efff08c5c3b78a3",
+    "custody.py": "9186cc86a14a38f7457075fd755e4c4872f319e8ac35301e72db77b15a211361",
+    "protocol.py": "421cc4b4d0e40bd25e56f1a49f53e6cf79b92a9909899a82805348eab73da9ab",
+    "guard-failed-red.bash": "e30955d8a503011be01f28ef42085fb59fa7c465b8f1d7c04aebef792a56e11d",
+    "contract.json": "f45d5b644d4863158cc6f8d560fd5b4ef55592e6b07baa9d526799dce5abfcee",
+    "entry.py": "9348093d5e29b07509af49ca56021a26472811b250142a6aaf84b35889e4922d"
+  },
+  "externalPins": {
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-resume6-red01-terminal-index.json": "67994db98e1cf81d6aabd60899333f3979fd9993eae8b756211c434095288228",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-resume6-red01-failed-terminal-assessment.json": "1a4678333a0a968dfe1c5936ce74b55638b9e3a2a9bffe8c375b724ea8398b7d",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-root-after-negative-held-06.py": "b89e94e647d7702f845a004d98043fffa5c992cc31771417b5f95e5b025a0237",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/fullcheck-harness/resume3/harness.py": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-resume6-exact-review/manifest.json": "dd6456fc01575c1eb0afe82cf2793903eccac27a388c5dec4da10d55d7248f92",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-resume6-exact-review/manifest.json": "ec64b9b5fb243c9c6bf2a29828e03784cbba720b0b77a4ed3d03c3896db3658a",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-red01-failed-resource-design/manifest.json": "6678da2aee002f8fc4e9d923a3166a2e72e8ba9c4715bc27c6ea3137e0ac52cb",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-red01-actual-failed-review/manifest.json": "a2c7f8b85c25d7b9ef1244e7942c99139bdfc9f204fa555a1e830d6a41f6cdba"
+  },
+  "newDirectoryPins": {
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree03-20261019/failed-red-resource-disposition01": null
+  },
+  "pythonRoles": {
+    "launch": {
+      "path": null,
+      "sha256": null
+    },
+    "reported": {
+      "path": null,
+      "sha256": null
+    },
+    "process": {
+      "path": null,
+      "sha256": null
+    },
+    "observedArgument": {
+      "path": null,
+      "sha256": null
+    }
+  },
+  "observationExecutables": {
+    "/bin/ps": {
+      "path": null,
+      "sha256": null
+    },
+    "/usr/sbin/lsof": {
+      "path": null,
+      "sha256": null
+    },
+    "git": {
+      "path": null,
+      "sha256": null
+    }
+  },
+  "binaryModes": {},
+  "binaryHashes": {},
+  "exactIndependentCodeReviewsQualified": false,
+  "newCodeRecordPins": {
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume1/manifest.json": null,
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-exact-review/manifest.json": null,
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-exact-review/manifest.json": null
+  },
+  "currentFactsObserved": false,
+  "actualInstallationAuthorized": false,
+  "actualGuardClosingAuthority": false
+}

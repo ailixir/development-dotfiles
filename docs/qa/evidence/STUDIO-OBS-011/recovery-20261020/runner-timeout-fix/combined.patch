@@ -1,0 +1,241 @@
+--- a/studio-runner/src/run/observedBootstrap.ts
++++ b/studio-runner/src/run/observedBootstrap.ts
+@@ -18,11 +18,38 @@
+   subscribe(listener:()=>void):void{this.listener=listener;if(this.violated)listener();}
+   private fail():void{this.violated=true;for(const page of this.pending)this.closeUnexpected(page);this.listener?.();}
+ }
+-export function boundedStartup<T>(work:()=>Promise<T>,deadline:number,signal?:AbortSignal,maxMs=30000):Promise<T>{
+-  if(signal?.aborted)return Promise.reject(new Error('CANCELLED'));
+-  if(Date.now()>=deadline)return Promise.reject(new Error('TIMEOUT'));
+-  return new Promise<T>((resolve,reject)=>{const abort=()=>{reject(new Error('CANCELLED'));};const timer=setTimeout(()=>{reject(new Error('TIMEOUT'));},Math.max(1,Math.min(maxMs,deadline-Date.now())));signal?.addEventListener('abort',abort,{once:true});
+-    const clear=()=>{clearTimeout(timer);signal?.removeEventListener('abort',abort);};
+-    Promise.resolve().then(work).then(value=>{clear();if(signal?.aborted)reject(new Error('CANCELLED'));else if(Date.now()>=deadline)reject(new Error('TIMEOUT'));else resolve(value);},(error:unknown)=>{clear();reject(error instanceof Error?error:new Error('BOOTSTRAP_FAILED'));});
++// Private identity metadata: no Error property, subtype or wire change.
++const absoluteStartupTimeouts = new WeakMap<Error, number>();
++function absoluteStartupTimeout(error: Error, deadline: number): Error {
++  absoluteStartupTimeouts.set(error, deadline);
++  return error;
++}
++export function isAbsoluteStartupTimeout(error: unknown, deadline: number): boolean {
++  return error instanceof Error && absoluteStartupTimeouts.get(error) === deadline;
++}
++
++export function boundedStartup<T>(work: () => Promise<T>, deadline: number, signal?: AbortSignal, maxMs = 30000): Promise<T> {
++  if (signal?.aborted) return Promise.reject(new Error('CANCELLED'));
++  if (Date.now() >= deadline) return Promise.reject(absoluteStartupTimeout(new Error('TIMEOUT'), deadline));
++  return new Promise<T>((resolve, reject) => {
++    const abort = (): void => { reject(new Error('CANCELLED')); };
++    // Capture the existing delay-selection wall sample once.
++    const remaining = deadline - Date.now();
++    const timer = setTimeout(() => {
++      const error = new Error('TIMEOUT');
++      // A strictly earlier operation cap is not whole-start expiry; equality selects both boundaries.
++      reject(remaining <= maxMs ? absoluteStartupTimeout(error, deadline) : error);
++    }, Math.max(1, Math.min(maxMs, remaining)));
++    signal?.addEventListener('abort', abort, { once: true });
++    const clear = (): void => { clearTimeout(timer); signal?.removeEventListener('abort', abort); };
++    Promise.resolve().then(work).then(value => {
++      clear();
++      if (signal?.aborted) reject(new Error('CANCELLED'));
++      else if (Date.now() >= deadline) reject(absoluteStartupTimeout(new Error('TIMEOUT'), deadline));
++      else resolve(value);
++    }, (error: unknown) => {
++      clear();
++      reject(error instanceof Error ? error : new Error('BOOTSTRAP_FAILED'));
++    });
+   });
+ }
+--- a/studio-runner/src/run/browser.ts
++++ b/studio-runner/src/run/browser.ts
+@@ -46,7 +46,7 @@
+ 
+ import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest } from './browserFactory.js';
+ import {BrowserStartupCleanupFailure} from './browserFactory.js';
+-import {BootstrapPageGuard,boundedStartup} from './observedBootstrap.js';
++import {BootstrapPageGuard,boundedStartup,isAbsoluteStartupTimeout} from './observedBootstrap.js';
+ import {readVersionPaths} from './versionProbe.js';
+ import {validateAppVideoPath} from './appVideoOwnership.js';
+ import { installObservationCollector } from './observationCollector.js';
+@@ -677,7 +677,7 @@
+     const settled=hardClose().then(()=>undefined,()=>undefined);
+     // Past the deadline, or stopped: reject now, the runtime waits for the teardown through `close`. Any other failure rejects once the
+     // teardown has settled, so a launch that rejects has already cleared its scratch (its `close` is then only the memo of that outcome).
+-    if(signal?.aborted!==true&&Date.now()<deadline)await settled;
++    if(signal?.aborted!==true&&!isAbsoluteStartupTimeout(error,deadline)&&Date.now()<deadline)await settled;
+     // A wait the signal ended says CANCELLED; the abort reason says whether that was the deadline or a stop. Any other error is the cause as it is.
+     throw new GuidedLaunchFailure(hardClose,launchFailureCause(error,signal),phase);
+   }
+--- a/studio-runner/test/run/observedBootstrap.test.ts
++++ b/studio-runner/test/run/observedBootstrap.test.ts
+@@ -17,3 +17,43 @@
+ it('rejects abort, asynchronous failure and expiry after late work without accepting a page',async()=>{const controller=new AbortController();controller.abort();await expect(boundedStartup(()=>Promise.resolve('no'),Date.now()+50,controller.signal)).rejects.toThrow('CANCELLED');await expect(boundedStartup(()=>Promise.reject(new Error('probe failed')),Date.now()+50)).rejects.toThrow('probe failed');
+   const next=new AbortController();let done:(value:string)=>void=()=>undefined;const wait=boundedStartup(()=>new Promise<string>(r=>{done=r;}),Date.now()+50,next.signal);await Promise.resolve();const rejected=wait.catch((e:unknown)=>e instanceof Error?e.message:'bad');next.abort();expect(await rejected).toBe('CANCELLED');done('late');
+ });
++
++it('keeps a strictly earlier operation cap final even when work completes before the absolute deadline', async () => {
++  let complete: (value: string) => void = () => undefined;
++  let observed: Promise<unknown> | undefined;
++  vi.useFakeTimers();
++  try {
++    const deadline = Date.now() + 60_000;
++    let accepted = false;
++    const pending = boundedStartup(() => new Promise<string>(resolve => { complete = resolve; }), deadline, undefined, 30_000);
++    observed = pending.then(value => { accepted = true; return value; }, (error: unknown) => error);
++    await Promise.resolve();
++    await vi.advanceTimersByTimeAsync(30_000);
++    const capError = await observed;
++    expect(capError).toBeInstanceOf(Error);
++    expect(capError).toMatchObject({ message: 'TIMEOUT' });
++    expect(accepted).toBe(false);
++    complete('late but before the whole deadline');
++    await Promise.resolve();
++    expect(await observed).toBe(capError);
++    expect(accepted).toBe(false);
++    expect(vi.getTimerCount()).toBe(0);
++  } finally {
++    complete('unit cleanup');
++    try { if (observed !== undefined) await observed; }
++    finally { vi.useRealTimers(); }
++  }
++});
++
++it('preserves a rejected Error("TIMEOUT") identity and own-property shape', async () => {
++  vi.useFakeTimers();
++  try {
++    const ordinary = new Error('TIMEOUT');
++    const originalKeys = Reflect.ownKeys(ordinary);
++    const received = await boundedStartup(() => Promise.reject(ordinary), Date.now() + 50)
++      .then(() => undefined, (error: unknown) => error);
++    expect(received).toBe(ordinary);
++    expect(Reflect.ownKeys(ordinary)).toEqual(originalKeys);
++    expect(vi.getTimerCount()).toBe(0);
++  } finally { vi.useRealTimers(); }
++});
+--- a/studio-runner/test/fixtures-tier/guided-start-deadline.test.ts
++++ b/studio-runner/test/fixtures-tier/guided-start-deadline.test.ts
+@@ -228,3 +228,125 @@
+     decoy.kill('SIGKILL');
+   });
+ });
++
++// Controlled timer/wall disagreement for pending009; not a reproduction of a historical native failure.
++describe('controlled startup timeout-origin handoff for 009', () => {
++  it('hands an absolute startup timeout to the caller before pending teardown when the wall sample is still before its deadline', async () => {
++    const root = await mkdtemp(join(tmpdir(), 'guided-d4-timeout-origin-'));
++    cleanup.push(() => rm(root, { recursive: true, force: true }));
++    let rejectLaunch: (error: Error) => void = () => undefined;
++    let launching: Promise<unknown> | undefined;
++    let fakeTimersInstalled = false;
++    try {
++      vi.stubEnv('TMPDIR', root);
++      const heldWallNow = Date.now();
++      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
++      fakeTimersInstalled = true;
++      vi.spyOn(Date, 'now').mockReturnValue(heldWallNow);
++      let entered: () => void = () => undefined;
++      const launchEntered = new Promise<void>(resolve => { entered = resolve; });
++      const pending = new Promise<Awaited<ReturnType<typeof chromium.launchPersistentContext>>>(
++        (_resolve, reject) => { rejectLaunch = reject; },
++      );
++      // Consume a setup-path rejection too, while passing the exact pending promise to the original launcher.
++      void pending.catch(() => undefined);
++      vi.spyOn(chromium, 'launchPersistentContext').mockImplementation(() => { entered(); return pending; });
++      let replied = false;
++      launching = launchGuidedBrowser(config, 'd4-timeout-origin', () => undefined, undefined, {
++        deadlineEpochMs: heldWallNow + 1_000,
++        signal: new AbortController().signal,
++      }).then(value => { replied = true; return value; }, (error: unknown) => { replied = true; return error; });
++      await Promise.race([
++        launchEntered,
++        launching.then(() => { throw new Error('controlled launch did not enter its mock'); }),
++      ]);
++      await vi.advanceTimersByTimeAsync(1_000);
++      await new Promise<void>(resolve => { setImmediate(resolve); });
++      // The required old-product assertion-red is false: old catch awaits the deliberately pending teardown.
++      expect(replied).toBe(true);
++      const failure = await launching;
++      expect(failure).toBeInstanceOf(GuidedLaunchFailure);
++      expect(failure).toMatchObject({ message: 'CONTEXT_LOST', cause: { message: 'TIMEOUT' }, phase: 'PROCESS' });
++      expect((await readdir(root)).filter(name => name.startsWith('checks-guided-'))).toHaveLength(1);
++      let closed = false;
++      const closing = (failure as GuidedLaunchFailure).close().then(() => { closed = true; });
++      await new Promise<void>(resolve => { setImmediate(resolve); });
++      expect(closed).toBe(false);
++      rejectLaunch(new Error('controlled launch settled'));
++      await closing;
++      await (failure as GuidedLaunchFailure).close();
++      expect(await readdir(root)).toEqual([]);
++    } finally {
++      // Also runs on the intentional red: settle the same launch and memoized close before restoring globals.
++      rejectLaunch(new Error('controlled regression cleanup'));
++      try {
++        if (launching !== undefined) {
++          const result = await launching;
++          if (result instanceof GuidedLaunchFailure) await result.close();
++        }
++        expect(await readdir(root)).toEqual([]);
++        if (fakeTimersInstalled) expect(vi.getTimerCount()).toBe(0);
++      } finally {
++        vi.useRealTimers();
++        vi.restoreAllMocks();
++        vi.unstubAllEnvs();
++      }
++    }
++  });
++
++  it('keeps an earlier operation-cap TIMEOUT on the ordinary cleanup-before-response path', async () => {
++    const root = await mkdtemp(join(tmpdir(), 'guided-d4-operation-cap-'));
++    cleanup.push(() => rm(root, { recursive: true, force: true }));
++    let rejectLaunch: (error: Error) => void = () => undefined;
++    let launching: Promise<unknown> | undefined;
++    let fakeTimersInstalled = false;
++    try {
++      vi.stubEnv('TMPDIR', root);
++      const heldWallNow = Date.now();
++      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
++      fakeTimersInstalled = true;
++      vi.spyOn(Date, 'now').mockReturnValue(heldWallNow);
++      let entered: () => void = () => undefined;
++      const launchEntered = new Promise<void>(resolve => { entered = resolve; });
++      const pending = new Promise<Awaited<ReturnType<typeof chromium.launchPersistentContext>>>(
++        (_resolve, reject) => { rejectLaunch = reject; },
++      );
++      void pending.catch(() => undefined);
++      vi.spyOn(chromium, 'launchPersistentContext').mockImplementation(() => { entered(); return pending; });
++      let replied = false;
++      launching = launchGuidedBrowser(config, 'd4-operation-cap', () => undefined, undefined, {
++        deadlineEpochMs: heldWallNow + 60_000,
++        signal: new AbortController().signal,
++      }).then(value => { replied = true; return value; }, (error: unknown) => { replied = true; return error; });
++      await Promise.race([
++        launchEntered,
++        launching.then(() => { throw new Error('controlled launch did not enter its mock'); }),
++      ]);
++      await vi.advanceTimersByTimeAsync(30_000);
++      await new Promise<void>(resolve => { setImmediate(resolve); });
++      // A blanket TIMEOUT exemption, or marking every timer, would incorrectly reply here.
++      expect(replied).toBe(false);
++      rejectLaunch(new Error('controlled capped launch settled'));
++      const failure = await launching;
++      expect(failure).toBeInstanceOf(GuidedLaunchFailure);
++      expect(failure).toMatchObject({ message: 'CONTEXT_LOST', cause: { message: 'TIMEOUT' }, phase: 'PROCESS' });
++      expect(await readdir(root)).toEqual([]);
++      await (failure as GuidedLaunchFailure).close();
++      await (failure as GuidedLaunchFailure).close();
++    } finally {
++      rejectLaunch(new Error('controlled cap cleanup'));
++      try {
++        if (launching !== undefined) {
++          const result = await launching;
++          if (result instanceof GuidedLaunchFailure) await result.close();
++        }
++        expect(await readdir(root)).toEqual([]);
++        if (fakeTimersInstalled) expect(vi.getTimerCount()).toBe(0);
++      } finally {
++        vi.useRealTimers();
++        vi.restoreAllMocks();
++        vi.unstubAllEnvs();
++      }
++    }
++  });
++});

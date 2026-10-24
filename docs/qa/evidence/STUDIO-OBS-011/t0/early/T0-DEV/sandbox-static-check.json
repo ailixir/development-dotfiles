@@ -1,0 +1,317 @@
+{
+  "sandboxes": {
+    "runner": {
+      "listFile": "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/sandbox-runner-copy-list.txt",
+      "copyCount": 19,
+      "copy": [
+        {
+          "path": "studio-runner",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/specs/studio/openapi.yaml",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/v3",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "tools/build-studio-observed-schemas.cjs",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "tools/check-studio-observed-contracts.cjs",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "tools/studio-current-vector-factory.cjs",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "tools/studio-snapshot-contract-oracle.cjs",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "node_modules/ajv",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "node_modules/ajv-formats",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "node_modules/yaml",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "node_modules/fast-deep-equal",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "node_modules/fast-uri",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "node_modules/json-schema-traverse",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "node_modules/require-from-string",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "helm-chart/put-checks/values-uat.yaml",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "helm-chart/put-checks/values-prod.yaml",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/runbooks/studio-runner.md",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/results.jsonl",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/summary.json",
+          "exists": true,
+          "isSymlink": false
+        }
+      ],
+      "mkdir": [
+        "docs/qa/evidence/STUDIO-OBS-007",
+        "docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair",
+        "docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution-2",
+        "docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate",
+        "docs/qa/evidence/STUDIO-OBS-007/runner-control-focus-candidate",
+        "docs/qa/evidence/STUDIO-OBS-007/runner-login-collision-candidate",
+        "docs/qa/evidence/STUDIO-OBS-013/r13",
+        "docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation"
+      ],
+      "staticPathCheckPassed": true,
+      "runtimeVerified": false,
+      "scope": "type-check, lint, unit and fixtures"
+    },
+    "frontend": {
+      "listFile": "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/sandbox-frontend-copy-list.txt",
+      "copyCount": 16,
+      "copy": [
+        {
+          "path": "frontend",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "dev.sh",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/specs/studio/openapi.yaml",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/specs/studio/examples",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/v3",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/consensus-plan.md",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-008/prep-20261016/t0-rulings/ruling.md",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-008/prep-20261016/implementation-plan.md",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/ux-implementation-plan.json",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-rulings.json",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/rulings/w5-unreadable-and-alias.md",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "docs/architecture/ADR-SC-006-accessibility-scope-functional-only.md",
+          "exists": true,
+          "isSymlink": false
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+          "exists": true,
+          "isSymlink": false
+        }
+      ],
+      "mkdir": [
+        "docs/qa/accessibility"
+      ],
+      "staticPathCheckPassed": true,
+      "runtimeVerified": false,
+      "scope": "type-check, lint, Vitest and build"
+    }
+  },
+  "rootToolPackages": {
+    "ajv": {
+      "version": "8.20.0",
+      "dependencies": {
+        "fast-deep-equal": "^3.1.3",
+        "fast-uri": "^3.0.1",
+        "json-schema-traverse": "^1.0.0",
+        "require-from-string": "^2.0.2"
+      }
+    },
+    "ajv-formats": {
+      "version": "3.0.1",
+      "dependencies": {
+        "ajv": "^8.0.0"
+      }
+    },
+    "yaml": {
+      "version": "2.9.0",
+      "dependencies": {}
+    },
+    "fast-deep-equal": {
+      "version": "3.1.3",
+      "dependencies": {}
+    },
+    "fast-uri": {
+      "version": "3.1.2",
+      "dependencies": {}
+    },
+    "json-schema-traverse": {
+      "version": "1.0.0",
+      "dependencies": {}
+    },
+    "require-from-string": {
+      "version": "2.0.2",
+      "dependencies": {}
+    }
+  },
+  "frontendCopySources": [
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "covered": true
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md",
+      "covered": true
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md",
+      "covered": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-008/prep-20261016/t0-rulings/ruling.md",
+      "covered": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-008/prep-20261016/implementation-plan.md",
+      "covered": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/ux-implementation-plan.json",
+      "covered": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-rulings.json",
+      "covered": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/consensus-plan.md",
+      "covered": true
+    },
+    {
+      "path": "docs/specs/studio/openapi.yaml",
+      "covered": true
+    },
+    {
+      "path": "frontend/src/components/studio/run/executeRefusals.ts",
+      "covered": true
+    },
+    {
+      "path": "frontend/src/components/studio/run/ExecutionProgressView.tsx",
+      "covered": true
+    },
+    {
+      "path": "docs/architecture/ADR-SC-006-accessibility-scope-functional-only.md",
+      "covered": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+      "covered": true
+    },
+    {
+      "path": "frontend/src/components/studio/guided/useGuidedSession.ts",
+      "covered": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/rulings/w5-unreadable-and-alias.md",
+      "covered": true
+    }
+  ],
+  "copySourceCount": 15,
+  "obs008EvidenceSources": [
+    "docs/qa/evidence/STUDIO-OBS-008/prep-20261016/t0-rulings/ruling.md",
+    "docs/qa/evidence/STUDIO-OBS-008/prep-20261016/implementation-plan.md",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/ux-implementation-plan.json",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-rulings.json",
+    "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/rulings/w5-unreadable-and-alias.md"
+  ]
+}

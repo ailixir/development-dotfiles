@@ -1,0 +1,275 @@
+{
+  "status": "WORKSHEET_PREPARED_AFTER_SUITE_TIMES_UNBOUND",
+  "rule": "T0R5: same exact9class list; baseline XML versus final11G/whole6 XML; collector elapsed separately; no causal speedup or isolatedwall inference",
+  "baselineReferences": {
+    "siblings": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/sibling-waits-execution/baseline-public-timing-headers.json",
+      "sha256": "8ef477363ad2e00921bb12197b6d3d6a66311bb89d28556fff1bb25f6c6e96ae",
+      "bytes": 5242,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "Replay": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-replay-reader-preparation/existing-success-duration-estimate.json",
+      "sha256": "2d4cbf95db4b02d21b76a3f343f8e562d36e6dbf9ea3f6edd9baf847988b5cb6",
+      "bytes": 1157,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "prepared05": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-t5-readiness-preparation05/manifest.json",
+      "sha256": "ba96fed586249fe33601241d5ea5d71d4b07a9e1255034a699de76bd048a3b9e",
+      "bytes": 610
+    }
+  },
+  "rows": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "expectedCases": 13,
+      "beforeSuiteSeconds": 26.755,
+      "beforeXmlSha256": "2d9ac059fa294261e2e31b02f03ba968426afdab874b9bf6ecabbc7abbff7ce7",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest.xml",
+        "sha256": "af2bf9c75c09838d7788b634af611bea893d57ea15ff2cb4487e9aa1ce4c1b84",
+        "bytes": 143146,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterSuiteSeconds": null,
+      "afterActualCases": null,
+      "afterClosedProjectionReference": "UNBOUND",
+      "afterState": "UNBOUND_AWAITING_GATEWAY_ORIGINAL_XML_CLOSED_METADATA"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "expectedCases": 36,
+      "beforeSuiteSeconds": 76.579,
+      "beforeXmlSha256": "05a08bcf3671cae70d02e90782c1cfcbcbc738a3b64af2300df0c272e5d1b41f",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.secret.SecretUseAuditIT.xml",
+        "sha256": "d17a9845a3436d4b1a42e528d8b8e5d80b9e90630bfbc193c9f4cb7eee598b1a",
+        "bytes": 628605,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterSuiteSeconds": null,
+      "afterActualCases": null,
+      "afterClosedProjectionReference": "UNBOUND",
+      "afterState": "UNBOUND_AWAITING_GATEWAY_ORIGINAL_XML_CLOSED_METADATA"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "expectedCases": 10,
+      "beforeSuiteSeconds": 49.721,
+      "beforeXmlSha256": "33ad87950c060177afb0ace4ec0d4a12846a26a7475a916472f61da46576d025",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.xml",
+        "sha256": "efa029697355f45089239f12edef17d19fd765a944daa34dab165552459569a5",
+        "bytes": 115667,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterSuiteSeconds": null,
+      "afterActualCases": null,
+      "afterClosedProjectionReference": "UNBOUND",
+      "afterState": "UNBOUND_AWAITING_GATEWAY_ORIGINAL_XML_CLOSED_METADATA"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "expectedCases": 16,
+      "beforeSuiteSeconds": 144.411,
+      "beforeXmlSha256": "7a0aff3745e9223da75232dd6b5241832c3177afc8af24725cc0457c15ec1c71",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT.xml",
+        "sha256": "6ea87e5ad17213150b10910caa0313c0ba38789844c751197957f58bfbf08e05",
+        "bytes": 193377,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterSuiteSeconds": null,
+      "afterActualCases": null,
+      "afterClosedProjectionReference": "UNBOUND",
+      "afterState": "UNBOUND_AWAITING_GATEWAY_ORIGINAL_XML_CLOSED_METADATA"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT",
+      "expectedCases": 2,
+      "beforeSuiteSeconds": 10.542,
+      "beforeXmlSha256": "8a1e10a2c77fef2a92addc06d31cb6645996c1c07a7d2d85f1eb9c71d63a545c",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT.xml",
+        "sha256": "8839d97faf042991e5cf9b0ef70f5e0041c0dd6afeab3d6efa5515e1a2abf2e0",
+        "bytes": 16648,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterSuiteSeconds": null,
+      "afterActualCases": null,
+      "afterClosedProjectionReference": "UNBOUND",
+      "afterState": "UNBOUND_AWAITING_GATEWAY_ORIGINAL_XML_CLOSED_METADATA"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "expectedCases": 57,
+      "beforeSuiteSeconds": 357.76,
+      "beforeXmlSha256": "7c74cd0e9c7b0f2339d2a02a5e8caeeaca88cd5d8b5f2a9ae54e2c7185d091d5",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.xml",
+        "sha256": "b970c1b7dedf4587e0fdc7b03b1ee81f72bb2b976787c10362b21155e5caa206",
+        "bytes": 93345,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterSuiteSeconds": null,
+      "afterActualCases": null,
+      "afterClosedProjectionReference": "UNBOUND",
+      "afterState": "UNBOUND_AWAITING_GATEWAY_ORIGINAL_XML_CLOSED_METADATA"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "expectedCases": 39,
+      "beforeSuiteSeconds": 42.603,
+      "beforeXmlSha256": "427530bb6183665f34a3f241cdcab0ac3466ca1716b4a3c99685c809dface2e7",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.xml",
+        "sha256": "221fca57037eed6520d48ac4c47eb5df617f1d9d7b0bacd90c47f11dbd5bce8e",
+        "bytes": 568427,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterSuiteSeconds": null,
+      "afterActualCases": null,
+      "afterClosedProjectionReference": "UNBOUND",
+      "afterState": "UNBOUND_AWAITING_GATEWAY_ORIGINAL_XML_CLOSED_METADATA"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT",
+      "expectedCases": 2,
+      "beforeSuiteSeconds": 14.889,
+      "beforeXmlSha256": "ceed5d41c5ee9f2f22c0025b571df2a5b9bbbce1c3cb179083eece1d200c0805",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT.xml",
+        "sha256": "9b94a237d9356d2b4b4fefa419713d7ba2a2c0d429a6ba2b44988bc8253f5064",
+        "bytes": 15426,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterSuiteSeconds": null,
+      "afterActualCases": null,
+      "afterClosedProjectionReference": "UNBOUND",
+      "afterState": "UNBOUND_AWAITING_GATEWAY_ORIGINAL_XML_CLOSED_METADATA"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "expectedCases": 46,
+      "beforeSuiteSeconds": 1077.738,
+      "beforeXmlSha256": "dd1a0c7d3e003793785d7ae9df10bfb2e4a5e970e721a2d0a6ece330921ca53a",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+        "sha256": "55fc521eb5c80ba23a7d377a5e3be832a64283987642d0e2dae4139933dd73a9",
+        "bytes": 1764550,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterSuiteSeconds": null,
+      "afterActualCases": null,
+      "afterClosedProjectionReference": "UNBOUND",
+      "afterState": "UNBOUND_AWAITING_GATEWAY_ORIGINAL_XML_CLOSED_METADATA"
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "expectedCases": 62,
+      "beforeSuiteSeconds": 2064.203,
+      "beforeXmlSha256": "d6196af7f3b3fad9e29ad81831c06c54ed24319a48c3f5ce5af3efc29e536b4f",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+        "sha256": "bcdef4e4022d380a8e0a60e8cd5fdd9d8351dae210442abed3e7448b0a31979c",
+        "bytes": 17497021,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterSuiteSeconds": null,
+      "afterActualCases": null,
+      "afterClosedProjectionReference": "UNBOUND",
+      "afterState": "UNBOUND_AWAITING_GATEWAY_ORIGINAL_XML_CLOSED_METADATA"
+    }
+  ],
+  "expectedDistinctClasses": 9,
+  "expectedTaskClassRows": 10,
+  "expectedInvocations": 283,
+  "baselineMatchedSuiteSeconds": "3865.201",
+  "baselineReplaySuiteSeconds": "3141.941",
+  "baselineSiblingSuiteSeconds": "723.260",
+  "beforeWholeCollectorSeconds": 6468.83,
+  "afterWholeCollectorSeconds": 6407.02,
+  "afterWholeCollectorReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+    "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+    "bytes": 6839,
+    "role": "Independent raw safe collector Counter, not XML/cohort/task projection"
+  },
+  "finalMatchedSuiteSeconds": null,
+  "finalMatchedSuiteState": "UNBOUND_AWAITING_ORIGINAL_CLOSED_XML_PROJECTION",
+  "sameNineClassComparisonState": "UNBOUND",
+  "noCollectorWallSubstitutionForClassSuiteSum": true,
+  "focusedSiblingTiming": "DESCRIPTIVE_PREDECESSOR_ONLY",
+  "noTimingInvocationOrXmlParserExecuted": true
+}

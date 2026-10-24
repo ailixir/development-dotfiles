@@ -1,0 +1,58 @@
+{
+  "configSha256": "cb110d944a17da279eefbce363b75cb50c09f753b6705dfd67d40948e1ff3051",
+  "enabled": true,
+  "provider": "v8",
+  "reporters": [
+    "text",
+    "json-summary"
+  ],
+  "directory": "coverage",
+  "thresholds": {
+    "global": {
+      "lines": 85,
+      "statements": 85,
+      "functions": 80,
+      "branches": 80
+    },
+    "scopes": {
+      "src/compat/**": {
+        "lines": 80,
+        "statements": 80,
+        "functions": 80,
+        "branches": 80
+      },
+      "scripts/**": {
+        "lines": 80,
+        "statements": 80,
+        "functions": 80,
+        "branches": 80
+      },
+      "src/server/**": {
+        "lines": 85,
+        "statements": 85,
+        "functions": 80,
+        "branches": 80
+      },
+      "src/reporting/**": {
+        "lines": 85,
+        "statements": 85,
+        "functions": 80,
+        "branches": 80
+      },
+      "src/main.ts": {
+        "lines": 85,
+        "statements": 85,
+        "functions": 80,
+        "branches": 80
+      },
+      "src/run/**": {
+        "lines": 85,
+        "statements": 85,
+        "functions": 80,
+        "branches": 80
+      }
+    }
+  },
+  "configUnchanged": true,
+  "unitExplicitAlternativeConfigOrCoverageFalse": false
+}

@@ -1,0 +1,128 @@
+{
+  "currentCommands": [
+    "python3 -B /Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-source07-bash32-delivery-review/resume1/compatibility.py",
+    "python3 -B /Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-source07-bash32-delivery-review/resume1/verify.py"
+  ],
+  "currentIndependentActual": {
+    "tool": "76318a",
+    "actualExit": 0,
+    "orchestrator": {
+      "pid": 48913,
+      "ppid": 17932,
+      "actualOwnCompletion": null,
+      "outerCompletionOwed": true
+    },
+    "children": [
+      {
+        "case": "public_metadata",
+        "pid": 48914,
+        "ppid": 48913,
+        "version": "3.2.57(1)-release",
+        "actualExit": 0,
+        "expectedExit": 0,
+        "readStatus": "1",
+        "inputSha256": "da0cc360580b7b4a8e70cebaa2c5add4aa0959811d31f48e1119eee77af880ce",
+        "returnedBytes": 17384,
+        "returnedSha256": "da0cc360580b7b4a8e70cebaa2c5add4aa0959811d31f48e1119eee77af880ce",
+        "positiveExact": true,
+        "passed": true,
+        "targetTailPresent": false,
+        "targetEntries": 0
+      },
+      {
+        "case": "whitespace_eof",
+        "pid": 48915,
+        "ppid": 48913,
+        "version": "3.2.57(1)-release",
+        "actualExit": 0,
+        "expectedExit": 0,
+        "readStatus": "1",
+        "inputSha256": "a07b2beaaea6a0da34234767c5a757c304511189726f3ca3525111b6c72a2a1f",
+        "returnedBytes": 42,
+        "returnedSha256": "a07b2beaaea6a0da34234767c5a757c304511189726f3ca3525111b6c72a2a1f",
+        "positiveExact": true,
+        "passed": true,
+        "targetTailPresent": false,
+        "targetEntries": 0
+      },
+      {
+        "case": "truncated",
+        "pid": 48916,
+        "ppid": 48913,
+        "version": "3.2.57(1)-release",
+        "actualExit": 1,
+        "expectedExit": 1,
+        "readStatus": "1",
+        "inputSha256": "cea601ca996870ff740fcfb76252a45a3cca02fd6432e355c4354ce57e530e09",
+        "returnedBytes": 41,
+        "returnedSha256": "cea601ca996870ff740fcfb76252a45a3cca02fd6432e355c4354ce57e530e09",
+        "positiveExact": null,
+        "passed": true,
+        "targetTailPresent": false,
+        "targetEntries": 0
+      },
+      {
+        "case": "extra_byte",
+        "pid": 48917,
+        "ppid": 48913,
+        "version": "3.2.57(1)-release",
+        "actualExit": 1,
+        "expectedExit": 1,
+        "readStatus": "SUCCESS_BRANCH",
+        "inputSha256": "bbb4a64238f5855a8b253429423d270121c91d8031ac89519d5c268b0cabff1e",
+        "returnedBytes": 43,
+        "returnedSha256": "bbb4a64238f5855a8b253429423d270121c91d8031ac89519d5c268b0cabff1e",
+        "positiveExact": null,
+        "passed": true,
+        "targetTailPresent": false,
+        "targetEntries": 0
+      },
+      {
+        "case": "nul",
+        "pid": 48919,
+        "ppid": 48913,
+        "version": "3.2.57(1)-release",
+        "actualExit": 1,
+        "expectedExit": 1,
+        "readStatus": "SUCCESS_BRANCH",
+        "inputSha256": "f890eb762d60edb963122464752aad87de78ea9aeaeb27232199bb7409f9a203",
+        "returnedBytes": 7,
+        "returnedSha256": "49c677d3fc17ce6eb75af8ec9dbca3f909b936c0984a2cc5c2110acd4cffa79b",
+        "positiveExact": null,
+        "passed": true,
+        "targetTailPresent": false,
+        "targetEntries": 0
+      }
+    ],
+    "targetCalls": 0,
+    "onlyFixedSubset": true
+  },
+  "ownHarnessFailure": {
+    "tool": "62fbce",
+    "actualExit": 1,
+    "stage": "Python parser before any Bash launch",
+    "reason": "Review harness quoting SyntaxError",
+    "snapshot": "compatibility-attempt01.py.txt",
+    "actualBashChildren": 0,
+    "correctedBeforeSingleActualBatch": true
+  },
+  "developerHistory": {
+    "originalScopeFailure": "7f2187 actualexternal1/d3d758 preserved; consumed requestf0d1 never reused",
+    "attempt01": "036079 Python1 after one completed actual Bash; rawwaitcodenotretained=null; sentinel marker framing defect",
+    "attempt02": "e37117 Python1 after one completed actual Bash; rawwaitcodenotretained=null; diagnostic field framing defect",
+    "attempt03": "2298c7 Python0/eight actual Bash cases/final literals unchanged",
+    "totalActualBashChildren": 10,
+    "currentCompleteCases": 8,
+    "originalFailureAndBothHarnessFailuresImmutable": true
+  },
+  "historicalReuseOnly": "Metadata27/5/source07/source06 exact unchanged evidence only, no replay; current CLI oldboundary INITIAL_FACTS_RAW_PIN not fullpreflight",
+  "sealWriter": {
+    "pid": 50806,
+    "ppid": 17932,
+    "start": null,
+    "fullFingerprint": null,
+    "actualOwnCompletion": null,
+    "completionSeparatelyOwed": true
+  },
+  "actualRuntimeAuthority": false
+}

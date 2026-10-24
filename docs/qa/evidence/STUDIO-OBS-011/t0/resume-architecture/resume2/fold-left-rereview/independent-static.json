@@ -1,0 +1,569 @@
+{
+  "recordedAt": "2026-10-19T02:36:16.168503+00:00",
+  "isQaVerdict": false,
+  "runtimeVerified": false,
+  "compileVerified": false,
+  "execution": "read-only independent Python strings/digests/patch reconstruction; no author helper executed",
+  "checks": {
+    "sourcePreimagesMatch": true,
+    "exact17Main3TestScope": {
+      "main": 17,
+      "test": 3,
+      "unique": 20
+    },
+    "changedFilesPerSet": {
+      "tree": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java"
+      ],
+      "proposed-final-wiring": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java"
+      ]
+    },
+    "exactlyThreeConfigDifferences": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java"
+    ],
+    "redMainTestsReconstructPrep": true,
+    "finalWiringReconstructsAlternate": true,
+    "finalClockCleanupExact": true,
+    "finalClockHashMatchesBaton": true,
+    "correctedPrepClockMatchesBaton": true,
+    "redClockIncludesCorrectedScope": true,
+    "mutantChains": [
+      {
+        "id": "m1-mint",
+        "matches": true
+      },
+      {
+        "id": "m2-judge",
+        "matches": true
+      },
+      {
+        "id": "m3-claim",
+        "matches": true
+      },
+      {
+        "id": "m4-budget",
+        "matches": true
+      },
+      {
+        "id": "m5-worker",
+        "matches": true
+      }
+    ],
+    "patchHashesAllMatch": true,
+    "originalArtifactsUnchanged": true,
+    "fullSetHashesAllMatch": true,
+    "downstreamServiceBytesIdentical": true,
+    "adapterForwarding": {
+      "2": {
+        "slotBindings": 2,
+        "directHelper": true
+      },
+      "3": {
+        "slotBindings": 2,
+        "directHelper": true
+      },
+      "4": {
+        "slotBindings": 2,
+        "directHelper": true
+      }
+    },
+    "threeClockMethodNames": [
+      "publicationMintAndJudgeReadDatabaseClockWithJvmAheadAndBehind",
+      "databaseExpiredPublicationGrantRefusesDespiteJvmBehind",
+      "publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget"
+    ],
+    "clockMethodsByteIdentical": true,
+    "clockMethodCount": 3,
+    "currentNativeTests": [
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java",
+        "sha256": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+        "names": [
+          "assignmentStopKeyIsTheTeardownHashOfTheUnchangedBodyOnEveryCall",
+          "contextStopKeyFollowsTheIdentityBodyAndItsReason"
+        ]
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java",
+        "sha256": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416",
+        "names": [
+          "keyedAppendIsSentWithTheFrozenLeaseAsCallerDeadline",
+          "unkeyedContextPushPassesNoCallerDeadline"
+        ]
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/input-hashes.json",
+      "sha256": "3036d451a2a3fa5a3d9fdcafe90bad8ef2ffef4f0eadcda30105ef835102c134",
+      "bytes": 4490
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/reconstruction-check.json",
+      "sha256": "d47f6c9342a79d3b55e57f77b7352e07a1c30aadeef4a93c4ce3e498b528b6f0",
+      "bytes": 1713
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/package_drafts.py",
+      "sha256": "effdf7752b4e670f20f29950dfdad9ec4c766dbcad0fccd0919a2d72854c7a30",
+      "bytes": 8657
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/static-check.json",
+      "sha256": "e99806c8db984dfb1a698c8d867605abfc6e9d11243c1e67b4b2966f27106b6c",
+      "bytes": 1052
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/static_check.py",
+      "sha256": "b68f2e905406936c2c34fb525304b589287f43937b358e56ce7a76fdef13d278",
+      "bytes": 4698
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/draft-manifest.json",
+      "sha256": "eb0a1903b850c606cbfe1266928410f13b86fedbe99cc84ff6aa378101e2b47e",
+      "bytes": 8626
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/PRESERVATION-AND-CONFLICT.md",
+      "sha256": "a866780856088b67d5cc5d4a442857b61a9d1d367c0bf4c7f5f2d673154b7e5b",
+      "bytes": 11715
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/original-artifact-hashes.json",
+      "sha256": "224da0758d7b72055a6eb205b9116aa866a546b69f3625c07163c369f1d29a67",
+      "bytes": 12357
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/bind_package.py",
+      "sha256": "a2345fb9944ef2860bdbd1fef646c8f73030d422495c11a604a9700d1cbda20b",
+      "bytes": 5429
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patch-hashes.json",
+      "sha256": "d1357da82de88c223fc00de5fdb800411e852e14f02e82cc78fb2bfbbf08e830",
+      "bytes": 975
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/VERIFY-AFTER-GATES.md",
+      "sha256": "3c4aca0f2ef3a3fc80ced593d5a665610812d9d4bd2b45ceae68f65cb5021f6c",
+      "bytes": 3321
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/CHECKPOINT.md",
+      "sha256": "2dcc96b34297d6b42faba90bafad58d714c7c7c65927a436649d7c2d80db522d",
+      "bytes": 4894
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/final-clock-test-baton.json",
+      "sha256": "5d8d05dd6ab18bc65e77c227f457e1458fe83112fbc4281b176d8e5d2604af40",
+      "bytes": 1010
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/full-set-hashes.json",
+      "sha256": "e9f8b36509f691c934a7e1d5f6cdafa4e8c43fd8369066789f5cedee0745c043",
+      "bytes": 7450
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/verify_reconstruction.py",
+      "sha256": "71a7f32531d1c5ef79eeeb4568461daa7cdb0c1649fd265420b9828f5052358d",
+      "bytes": 7527
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/preservation-map.json",
+      "sha256": "316e014fafb2bc7c645e223d4328ab07cfe953057667e1b4300c1f6f1ac80c6a",
+      "bytes": 5269
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/correction-delta.json",
+      "sha256": "ba06db6e00e01a7c59135cba55aa0964387b1c66790d18206e285573798b4a9a",
+      "bytes": 1566
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/source-and-review-bindings.json",
+      "sha256": "e71440eacf7eab482709128750d31acb213e20df1df711bcd437d6657cf053b4",
+      "bytes": 2063
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/DESIGN.md",
+      "sha256": "c9a219d0f8ff55d6b8b9bbdd7d05631c23aca1031b82edc7bb95ec79fcd73a4a",
+      "bytes": 3964
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/authority-test-port-map.json",
+      "sha256": "f6c3e2edef2c7b40a2b41add66b7fe6f7af97425004bde32a4753509f0d3d043",
+      "bytes": 821
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/plan-bindings.json",
+      "sha256": "f7e4c82b62be8686f1c2aea19657c3e18873baea2a59b8cb0cbc78f366e05936",
+      "bytes": 526
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/REVIEW-DISPOSITIONS.md",
+      "sha256": "10127a72b5c7e8b0383ef6e0926a510c71aa225922641895946ff39323e0b42a",
+      "bytes": 4085
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/05-FINAL-ONLY-clock-fallback-removal.patch",
+      "sha256": "7e74b0da39bd032f2989f02e405c09c08f6644668203909df5d94586fc235d7d",
+      "bytes": 1028
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/02-prep-main-preserving-old-wiring.patch",
+      "sha256": "5a53f4ad07906a35759a75e597f372fd83edbf3b824e58cd7eb4ac4a4546fd71",
+      "bytes": 68171
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/04-PROPOSED-final-wiring-baton.patch",
+      "sha256": "5958e52da188ad35e1e9124dcb05a6f5d9d3bb1970a96aabab66886b931adf78",
+      "bytes": 2059
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/m3-claim.patch",
+      "sha256": "8e8f8535d41c21b5af95fb49f9bb7b9583326121cbb2a6dcd075f29c4c588f45",
+      "bytes": 500
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/m5-worker.patch",
+      "sha256": "8c368f5d7cdcecab4dc83fed973be479ba4c1cd814df77d2ed855197d34ef168",
+      "bytes": 570
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/m1-mint.patch",
+      "sha256": "1d4c328e00239f9aa6ee5325f1a3174a4064029cf1714bfd5d4221d75094d567",
+      "bytes": 749
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/m4-budget.patch",
+      "sha256": "1319b4f5f87a863c0c2d4d4dba2645d8d8e77bca565aecd21f27253eb0d4ad77",
+      "bytes": 589
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/m2-judge.patch",
+      "sha256": "ee8d58938f8bb7484c85dbea6a9950d7ba13a59c62b93b4b1cb0874a13699d54",
+      "bytes": 575
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/03-prep-tests.patch",
+      "sha256": "752325ed18bbe295cff9a76f1ee42acd348932a3e7eef27c6846b02949b9eb6f",
+      "bytes": 14887
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/patches/01-red-first-clock.patch",
+      "sha256": "ceab6439448d271ed839fdc482dcfc046859fae1164a75528818fc747e6558b7",
+      "bytes": 11443
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+      "sha256": "876d4f38cc416055162baa3ee3b4d5a8b72aa77a05b983176e109476021cd407",
+      "bytes": 398
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "sha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+      "bytes": 5123
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "sha256": "4eb8933ac540773c9526109076e412396cfc9e6163e36cd1e3bf777f039b2f24",
+      "bytes": 37912
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "sha256": "0719e4f633f8fcca251fb77852e2ec064b89bcf11294fc369d11b6e2c69ef55e",
+      "bytes": 23016
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+      "sha256": "60e84ab27c1039cda193ae8124cc724d76451bf679fe4c46918d11e2b8c78418",
+      "bytes": 2732
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "sha256": "7c4adda1e4d8c2debec77e612147f528ffbd856df9fecf48208ff2289b15befe",
+      "bytes": 21869
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+      "sha256": "340eb5b7e8af6482aef63ebf0ea387f4d1650ae3cfe073fad117a5dfb79fdbaf",
+      "bytes": 3539
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "sha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+      "bytes": 23279
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "sha256": "3f8c2ca279e0eafcf4dc48edfb9aac4be48a9d6a5e24dfaadb146f39370cc6a0",
+      "bytes": 6484
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java",
+      "sha256": "f9b529587d78b9927f1c0334bde7676f0e923bacf00d4628465bf5d4298c3670",
+      "bytes": 4223
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "sha256": "b70d3122822f83acbdbcaa2e7a0bab4a2c913a967432153b095650cf5339fad1",
+      "bytes": 876
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+      "sha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+      "bytes": 4376
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "a02318fffffc71827bca03a3dd49145e7dc89effa960b688b07c4080f7037bd5",
+      "bytes": 117411
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "b110f81571abf182f88254053792fdefa2554f792d871cd3b674925d47a6aa08",
+      "bytes": 16319
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+      "sha256": "39ed4e0b080aab54449dc4845e0fbee167b57b02ffa4121886a2c91b71a8aa6f",
+      "bytes": 4598
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+      "sha256": "36b4b3c9d517fe4579bbf6f0f0dfae595c55084135e1aeda1a68f898212a68da",
+      "bytes": 20623
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "sha256": "7686cb408e4c8019fdc192c7ed01e8c009010db47cbf5951e2a750737b413dce",
+      "bytes": 21284
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "sha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad",
+      "bytes": 21348
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java",
+      "sha256": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1",
+      "bytes": 10004
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/proposed-final-wiring/backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "sha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+      "bytes": 11085
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+      "sha256": "24c4c76fed7a4bb71e3773ed744f3507cf25f9762d227da6df2f6ded46bf2278",
+      "bytes": 937
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "sha256": "3da9f5b25e98f28097c587488a408abb149deee2496a9cb440d9710fa27111b0",
+      "bytes": 3225
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "sha256": "7eeaa3b49107bc1436adf7d0107dedede12f6ad364a756bc41c716ad828c99ae",
+      "bytes": 12400
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "sha256": "aeb3973501558664b2446a40afa760a92b6e4eb45ba0397448c9ad0d5fab4b75",
+      "bytes": 23034
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+      "sha256": "29eb7654f173c097929f5a32dcf8d6eb092e859e1fc41a59628adfc223ade44e",
+      "bytes": 1517
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "sha256": "8ac947325e24a16590710eb77ba949c02328f97f0227dac0355f796a0798b90a",
+      "bytes": 24520
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+      "sha256": "ec6448d6baef417ffb69366be9f01bd5da13fa87859a2d8c73a1e83956ce6792",
+      "bytes": 5646
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "sha256": "07e6d6cb8043fbd7541a5db39ef2aac5c4747d0129fb8d66f16114db09dbbdc1",
+      "bytes": 21253
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "sha256": "c06279a35213c8b1eea5aca1e84b3b968cba20392e7cb06d6bae21a4d66b967b",
+      "bytes": 6108
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "sha256": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871",
+      "bytes": 849
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "58c846b4f5a0a0029cddcc49a7b46431f2f44d4dedb9a86102c4684064944b86",
+      "bytes": 117406
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "b1ae740ad17255f8c2d80aaaf3edbb621227858996c8aa4dfd1ef313f58fbe50",
+      "bytes": 14745
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+      "sha256": "b55a5224cfaf90dc7776c244142e048a52ea23f63b92ca0ff4f7c29afa367dda",
+      "bytes": 4596
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+      "sha256": "6d96bb1525ab19828f18d872c375851812923e165b6d40bc0f3b36f4af745cb2",
+      "bytes": 20636
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "sha256": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660",
+      "bytes": 21283
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/applicability/backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "sha256": "5b7e47a78f4559ce552bc70d36bc00bc1d3fc15324785b274688173cd5bd5788",
+      "bytes": 17166
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/final-clock-test-baton/backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "sha256": "1bce395fb2204ac1f5ea11175d96288b2e72a4b72dc9030c1a739c324a361af4",
+      "bytes": 10841
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+      "sha256": "876d4f38cc416055162baa3ee3b4d5a8b72aa77a05b983176e109476021cd407",
+      "bytes": 398
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "sha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+      "bytes": 5123
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "sha256": "4eb8933ac540773c9526109076e412396cfc9e6163e36cd1e3bf777f039b2f24",
+      "bytes": 37912
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "sha256": "0719e4f633f8fcca251fb77852e2ec064b89bcf11294fc369d11b6e2c69ef55e",
+      "bytes": 23016
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+      "sha256": "60e84ab27c1039cda193ae8124cc724d76451bf679fe4c46918d11e2b8c78418",
+      "bytes": 2732
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "sha256": "7c4adda1e4d8c2debec77e612147f528ffbd856df9fecf48208ff2289b15befe",
+      "bytes": 21869
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+      "sha256": "340eb5b7e8af6482aef63ebf0ea387f4d1650ae3cfe073fad117a5dfb79fdbaf",
+      "bytes": 3539
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "sha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+      "bytes": 23279
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "sha256": "0a6e7299e32c6aeeda9f1d91fdb3ee8d886964e3e72114c50f47156ce2c04575",
+      "bytes": 6421
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java",
+      "sha256": "f9b529587d78b9927f1c0334bde7676f0e923bacf00d4628465bf5d4298c3670",
+      "bytes": 4223
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "sha256": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871",
+      "bytes": 849
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+      "sha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+      "bytes": 4376
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "a02318fffffc71827bca03a3dd49145e7dc89effa960b688b07c4080f7037bd5",
+      "bytes": 117411
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "b110f81571abf182f88254053792fdefa2554f792d871cd3b674925d47a6aa08",
+      "bytes": 16319
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+      "sha256": "39ed4e0b080aab54449dc4845e0fbee167b57b02ffa4121886a2c91b71a8aa6f",
+      "bytes": 4598
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+      "sha256": "36b4b3c9d517fe4579bbf6f0f0dfae595c55084135e1aeda1a68f898212a68da",
+      "bytes": 20623
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "sha256": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660",
+      "bytes": 21283
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "sha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad",
+      "bytes": 21348
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java",
+      "sha256": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1",
+      "bytes": 10004
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-prep-draft/resume2/tree/backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "sha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+      "bytes": 11085
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-root-state.json",
+      "sha256": "d37801271e4f5e9e43644b7e37b148ad140c9ceba84d09024fda837f636999f0",
+      "bytes": 11987
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/fold-left/review.md",
+      "sha256": "ba397c979e396bfa3e70fc81a0aa799a9b213a4f8e11fc5387cc58587e8d33b8",
+      "bytes": 18355
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "848e102c199e0497ce006528b25c71396c34ed7490f0b822569b000b9bf17d43",
+      "bytes": 8185
+    }
+  ],
+  "rootStateUpdatedAt": "2026-10-19T02:11:08.165932+00:00",
+  "correctedFileHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "b110f81571abf182f88254053792fdefa2554f792d871cd3b674925d47a6aa08",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2"
+  },
+  "finalClockHash": "1bce395fb2204ac1f5ea11175d96288b2e72a4b72dc9030c1a739c324a361af4"
+}

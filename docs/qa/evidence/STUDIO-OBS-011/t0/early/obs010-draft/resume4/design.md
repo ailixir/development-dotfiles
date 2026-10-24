@@ -1,0 +1,7 @@
+# STUDIO-OBS-010 resume4 — DOC-010-03 scope
+
+Morgan applies the PM skill to the explicit narrow correction after reading AGENTS.md and the complete independent resume3 review. Only stale current-package references change. Resume2 and resume3 are historical reviewed packages and remain byte-identical; their inputs and source/review references are retained deliberately. Exclusive writes are resume4/.
+
+The runbook traceability link points to resume4's corrected matrix. The handoff package designation and its sheet location point to resume4. The readiness ledger's current off-tree output paths likewise point to resume4. All product, copy, gate, logging, drift and carrier content stays unchanged from resume3. The pilot and append-only 10.34 preview stay byte-identical to resume3. Exact affected line deltas are recorded separately from regenerated full five-target patches.
+
+Regenerate exact patches against current actual frozen originals and bind previews, bases, historical packages, review/source inputs and hashes. Verify current references for semantic relevance as well as physical resolution: the linked current matrix must include the accepted RBR-12 sources and all five documentary carries. Retain section 14 byte preservation, every runbook/AC/release/blank-sheet denominator and the accepted bounded PM carrier placement with PO application pending. Static checks only; no target application, source/dist edit, runtime/build/test/formatter/Docker/provider call, process signal, git write, contact, story verdict, Done or release-readiness claim.

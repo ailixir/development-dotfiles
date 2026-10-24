@@ -1,0 +1,94 @@
+{
+  "verdict": "PASS_RESERVED_WHOLE_CHECK_6_EXECUTION",
+  "scope": "Original reserved whole6 execution qualification only",
+  "components": {
+    "admission": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/initial-admission.json",
+      "sha256": "273ebe2d64b89dcdbbcbf42ee9d94dbfa697e8c401bfa1c72a514035c56856a5",
+      "bytes": 33505
+    },
+    "nativeAndCollectorCounter": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+      "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+      "bytes": 6839
+    },
+    "coverageAndLedger": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/coverage-and-ledger.json",
+      "sha256": "acca9a5185014666266c963174f182ea8d3b1ca29657f3018461acc7ff87da91",
+      "bytes": 4460
+    },
+    "xmlTimingAndRequiredTaskExecution": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/whole-projection08-closed-component-review.json",
+      "sha256": "84297eedf025cd909a6ca1080d5622bbf244dd5d4b087c7a28aa5793a8a61765",
+      "bytes": 6034
+    },
+    "remainingCohortControls": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/whole-cohort09-result-review.json",
+      "sha256": "27636045919a889ebe0f764fbc1e5ce880f56c4c38832a5da4d57e477b39c1ea",
+      "bytes": 4090
+    },
+    "separatePairCustody": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/pair-custody03-result-review.json",
+      "sha256": "278b9d05424c473984ed14445d970763194597a41842a7c64c9d89497b4e6192",
+      "bytes": 7459
+    }
+  },
+  "dependencies": {
+    "wholeProducer": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/manifest.json",
+      "sha256": "a1f03b5ef1f6af2c7e6df16b49cf489da293ec39955164070fb924205de011e5",
+      "bytes": 225415
+    },
+    "wholeReceipt": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/receipt.json",
+      "sha256": "968a2fac75cc605e0c84f965a265d94296e8f6b5a3224eba1df26da231a9d10c",
+      "bytes": 3342
+    },
+    "closedLedger": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole06-closed-ledger-root-capture.json",
+      "sha256": "4525dc904d9e48e12ca7aa7fc14876e24dbade9d0c1cc13f30a15992dbfe0a8f",
+      "bytes": 9029
+    },
+    "xmlTimingProjection08": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection08/manifest.json",
+      "sha256": "032d39a860b9d8c4f5867b78c4cd367b3be194c31fff1572fd84ac699ebafd56",
+      "bytes": 705
+    },
+    "remainingCohortProjection09": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-cohort-projection09/manifest.json",
+      "sha256": "5e4f7758e68852ec01b45cbbce6e517cd7f33e5996d70b7035dba0625669c348",
+      "bytes": 724
+    },
+    "coverageArchive": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/coverage-archive-manifest.json",
+      "sha256": "bafb409a41375899949a234d347030e4f04f70a9c2ac4a20a1304fbe247d3a95",
+      "bytes": 229561
+    },
+    "currentAdmission": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-root-admission06-reference-shape02.json",
+      "sha256": "ee78a65c34cd5805c27ee05084263a3d663ac5db4bfbb25b3925b4f18731775f",
+      "bytes": 38550
+    },
+    "pairQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/execution-qa/manifest.json",
+      "sha256": "208203ff6c8b760b7b0c45c16040b648fc5cd27bbb74e280d73c977ca952ca36",
+      "bytes": 1304
+    }
+  },
+  "producerPin": "a1f03b5ef1f6af2c7e6df16b49cf489da293ec39955164070fb924205de011e5",
+  "producerArtifacts": 1025,
+  "allProducerArtifactsRootIndependentlyRehashed": true,
+  "qaIndependentProducerHashQualification": "1024 safe producer files independently rehashed; outerlog opaque tuple retained from pinned/root-verified manifest without body reread. All1005 public coverage archive files independently rehashed/path/size/mode checked.",
+  "source": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+  "sourceFiles": 1814,
+  "dist": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "distFiles": 238,
+  "replay": "5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8",
+  "image": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+  "actualLedgerCanonical1to6": "83c90618f491822be6e441b9b5f3134f9b7c5d2b87b6b30d1e1a7fb0c5168ab5",
+  "prior5Canonical": "3884a89edbe280292344abaf3b3b4942db4bcacd1690e1e0ccb69e13eb289673",
+  "ledgerSourceNotWrittenByQa": true,
+  "rawProtectedOriginalBodiesReadByQa": false,
+  "actualCurrentProductInputWalkByQa": false,
+  "productRuntimeTestsProjectionOrParserExecutedByQa": false
+}

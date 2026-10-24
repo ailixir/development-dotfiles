@@ -1,0 +1,38 @@
+{
+  "kind": "INDEPENDENT_QUINN_FAILED_RESOURCE_EXACT_CODE_REVIEW",
+  "decision": "FAIL_HOLD_NEW_SEALED_PACKET_REQUIRED",
+  "subjectManifestSha256": "1ab827247a9329cbadcea077595e57802cf8230ad77f5eaf11e8e223c17a7573",
+  "members": [
+    {
+      "path": "reproduce.py",
+      "sha256": "fbd0b87d0e8f3283004fd7e76bc5cceacd17f0f561980847925742500f9adca4",
+      "bytes": 13630
+    },
+    {
+      "path": "input-pins.json",
+      "sha256": "df7ae2c4f8b689f01147e4220b2063a5e0bde25cff7299be06153dc4c24483ac",
+      "bytes": 7982
+    },
+    {
+      "path": "independent-checks.json",
+      "sha256": "0785216bc1c1cac747abbaeb8768ea995c9138cb6c5270eb1f91c88648381e4c",
+      "bytes": 3951
+    },
+    {
+      "path": "review.md",
+      "sha256": "452e31abfdb283c6aee02ab534bae1ca5bdbb8abb0b211a388549189a7071fef",
+      "bytes": 7799
+    },
+    {
+      "path": "findings.json",
+      "sha256": "a5f7251fe47160d7ed45288ad84e35493c6bd75c77a9526591ba083d549f9861",
+      "bytes": 1893
+    }
+  ],
+  "mandatoryFindings": 5,
+  "authorPureChecksReproduced": 97,
+  "independentResultRecords": 21,
+  "noActualRuntimeOrPrivateActions": true,
+  "noCredit": true,
+  "sealRule": "Manifest seals listed members and does not self-hash."
+}

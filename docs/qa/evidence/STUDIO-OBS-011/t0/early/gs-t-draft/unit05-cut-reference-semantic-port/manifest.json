@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "status": "SEALED_OFF_TREE_BOUNDED_INPUT_DERIVED_REFERENCE_EXPECTATION_PORT_NO_RELEASE",
+  "finding": "GST-CUT-REF-PROVENANCE-01",
+  "files": [
+    {
+      "path": "DESIGN.md",
+      "sha256": "fbce797de8c5aded8a3ac17e6a7cc0fe8fd19fec3f2eb5f6a403820697275087",
+      "bytes": 4759
+    },
+    {
+      "path": "SHA256SUMS",
+      "sha256": "cd885a93184822d072f399c8405f661e0dd9722b328e01735c3e386b6b254455",
+      "bytes": 1087
+    },
+    {
+      "path": "bindings.json",
+      "sha256": "f198a60e7c2a0ca95ea2b1ac6a46d398714f11e755387a1a96ef3f1e2fddba9d",
+      "bytes": 1772
+    },
+    {
+      "path": "delta-from-unit05.patch",
+      "sha256": "f8e820594c8fd33bed3794bf8dcad783115b3b081f41c547a2e522b63d524067",
+      "bytes": 1200
+    },
+    {
+      "path": "inputs.json",
+      "sha256": "db4046074b20e83cbdc6257e9356bcbfe7e6de75e84485cc7d9a0668e86e1869",
+      "bytes": 3549
+    },
+    {
+      "path": "preservation.json",
+      "sha256": "96b847bf24aa02ba5ea6fc95b9b55883e4cf4f38467b858ca104ed5caad5a188",
+      "bytes": 30241
+    },
+    {
+      "path": "receipt.json",
+      "sha256": "96f0074d0380904645dcefdad657510b1721f1276e9a6b7833e66e08ae38bc6f",
+      "bytes": 2638
+    },
+    {
+      "path": "repo/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "sha256": "e35d078a682bbd4535f89d31d2aa56ac33ae73a0b4ec8f5bb2bceafdf2457a02",
+      "bytes": 275689
+    },
+    {
+      "path": "restore-unit05.patch",
+      "sha256": "ba44c1a417ff04aa6f0deeadc7c2f2f2d0efb263c06d3698b805074e2fac9c39",
+      "bytes": 1200
+    },
+    {
+      "path": "setup-input-assertion-map.json",
+      "sha256": "ba3539f41a0cd85b23e5a92f386aefd732ca112b946d84a1fa1f497f40dad815",
+      "bytes": 147103
+    },
+    {
+      "path": "source-witness.json",
+      "sha256": "ecf9ea688b08fdedd7355106f74d546d3029f4a611e16b6f7f8e4b858ac893a1",
+      "bytes": 2966
+    },
+    {
+      "path": "static-check.json",
+      "sha256": "4aa238c7c9318043e944509fe06ec2d8d233003075798c2778c718c212bb3f36",
+      "bytes": 642
+    },
+    {
+      "path": "verify.py",
+      "sha256": "303bc0e521cb31e861b0ff3abcdd1f209f096fd0fd7e9f08bcd858244e6f4cbf",
+      "bytes": 10969
+    }
+  ],
+  "primaryPreviewFiles": 1,
+  "otherTwoBindingsOnly": true,
+  "originalBaselineAssertions": 751,
+  "exactOtherBaselineAssertions": 750,
+  "unit05Assertions": 813,
+  "exactOtherUnit05Assertions": 812,
+  "additiveChecksRetained": 62,
+  "transportExpressions": 541,
+  "exactOtherTransportExpressions": 540,
+  "mappedExpectedOperand": 1,
+  "transportAnnotatedBodiesExact": 31,
+  "orderedMethodsRetained": 80,
+  "expectedCases": 99,
+  "modes": 9,
+  "sentinels": 11,
+  "allPriorPackagesImmutable": true,
+  "runtimeRemedyOrCreditProof": false,
+  "actualSourceNativeOrRetryRelease": false
+}

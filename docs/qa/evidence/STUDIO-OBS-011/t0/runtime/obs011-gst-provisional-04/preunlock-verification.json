@@ -1,0 +1,108 @@
+{
+  "unitLabel": "obs011-gst-provisional-04",
+  "rootReleaseSha256": "c903e2fcb6441c33f5d86e00cee8e248e9e86e443761f637911101c216e6dbef",
+  "activeLockSha256": "8292a3239f8842993e41fc2db177dcbbb8319da179d7c26dcc4c6dd8b72eb272",
+  "status": "VERIFIED",
+  "verificationExit": 0,
+  "verifiedAtEpoch": 1792403605.43676,
+  "expectedWrapperExit": 1,
+  "retroactiveRepairClaim": false,
+  "historicalGapCodes": [
+    "GST03_FORMAT_IDENTITY_GAP",
+    "GST03_PREMATURE_UNLOCK_INTERVAL"
+  ],
+  "phaseState": {
+    "format": "TERMINAL",
+    "native": "TERMINAL",
+    "restore-compile": "TERMINAL"
+  },
+  "evidencePins": {
+    "original-modes.json": "86584b3f710109522709cf0195fdc8f20d30f10988e3ba71f80922e00de96036",
+    "owned-format/receipt.json": "937b228e88bfec3ba060d9e463da9043b5362b5f4a7377acb8fa549c4ba354f1",
+    "owned-native/receipt.json": "c309f4421ba15a8d51cfa41fbe837b03fcb5035fc7c4278e05966f0e16396ff1",
+    "owned-restore-compile/receipt.json": "0535e4ddbaa120c4064e59269707c95503fb6ad51929923a19adcfaff669f271"
+  },
+  "source": {
+    "disposition": "RESTORED",
+    "overrides": {},
+    "digest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617"
+  },
+  "build": {
+    "phase": "restore-compile",
+    "exit": 0,
+    "sourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+    "provenanceSha256": "3d4db9653c50d8e8e1f4ad67f9e513c6ab3e46a598addfa54e179ef3beb89ff6",
+    "preCompileCheckpointSha256": "589bd33a7b3929e66e424bee4809e5a79a4a1ec0d874d716db6e90d3e25f2666",
+    "postCompileCheckpointSha256": "79a41f459b8afc5d6d855f8ef3cf12181e4691f4a7d1fedb1951511e9f31922f",
+    "compileTestJavaActuallyExecuted": true
+  },
+  "resources": {
+    "foregroundTerminal": true,
+    "recordedSetComplete": true,
+    "extraOwned": [
+      {
+        "pid": 4719,
+        "start": "Mon Oct 19 05:47:13 2026"
+      }
+    ],
+    "recordedOwned": [
+      {
+        "pid": 4719,
+        "start": "Mon Oct 19 05:47:13 2026"
+      },
+      {
+        "pid": 9258,
+        "start": "Mon Oct 19 05:49:53 2026"
+      },
+      {
+        "pid": 9300,
+        "start": "Mon Oct 19 05:49:54 2026"
+      },
+      {
+        "pid": 89763,
+        "start": "Mon Oct 19 05:39:07 2026"
+      },
+      {
+        "pid": 89813,
+        "start": "Mon Oct 19 05:39:08 2026"
+      },
+      {
+        "pid": 89910,
+        "start": "Mon Oct 19 05:39:12 2026"
+      },
+      {
+        "pid": 92093,
+        "start": "Mon Oct 19 05:40:35 2026"
+      },
+      {
+        "pid": 92097,
+        "start": "Mon Oct 19 05:40:35 2026"
+      },
+      {
+        "pid": 92124,
+        "start": "Mon Oct 19 05:40:36 2026"
+      },
+      {
+        "pid": 92125,
+        "start": "Mon Oct 19 05:40:36 2026"
+      },
+      {
+        "pid": 92137,
+        "start": "Mon Oct 19 05:40:36 2026"
+      },
+      {
+        "pid": 92216,
+        "start": "Mon Oct 19 05:40:40 2026"
+      },
+      {
+        "pid": 92785,
+        "start": "Mon Oct 19 05:40:57 2026"
+      }
+    ],
+    "ownedPorts": []
+  },
+  "manualGaps": [],
+  "gaps": [],
+  "producerSha256": "3ba406e7a369be01068dfb1b6ee3b1059736d21af23a0efac54fff4fbacb2c30",
+  "resourceBoundarySha256": "c8e907f1e2a3a784ee8c2a454de8b0aa192d55070f1b10146fb5703fc2a6ca52"
+}

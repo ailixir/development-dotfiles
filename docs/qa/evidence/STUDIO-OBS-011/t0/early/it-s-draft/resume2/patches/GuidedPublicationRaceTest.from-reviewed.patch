@@ -1,0 +1,52 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java
+@@ -444,17 +444,22 @@
+       {
+         class ItsPollRacepublisherrowlock {
+           Throwable failure;
++          boolean terminal;
+           boolean slept;
+           boolean initialAwaitTick = true;
+           boolean waiting;
+ 
+           boolean step() {
++            if (terminal) {
++              return true;
++            }
+             try {
+               if (slept && Thread.interrupted()) {
+                 throw new InterruptedException();
+               }
+ 
+               if (!(System.nanoTime() < until && !waiting)) {
++                terminal = true;
+                 return true;
+               }
+               waiting =
+@@ -464,6 +469,7 @@
+                           Boolean.class,
+                           backendPid.get()));
+               if (waiting) {
++                terminal = true;
+                 return true;
+               }
+               if (Thread.interrupted()) {
+@@ -474,6 +480,7 @@
+ 
+             } catch (Throwable caught) {
+               failure = caught;
++              terminal = true;
+               return true;
+             }
+           }
+@@ -498,7 +505,9 @@
+                     });
+           } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+             // Preserve the original last guard/observation and its assertion/error mapping.
+-            itsPoll.step();
++            if (!itsPoll.terminal) {
++              itsPoll.step();
++            }
+           }
+         }
+         if (itsPoll.failure instanceof Exception exception) {

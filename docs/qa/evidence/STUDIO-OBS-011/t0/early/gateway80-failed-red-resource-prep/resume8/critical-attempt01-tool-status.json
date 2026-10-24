@@ -1,0 +1,11 @@
+{
+  "chunk_id": "d62b31",
+  "wall_time_seconds": 0.037469875,
+  "exit_code": 1,
+  "original_token_count": 134,
+  "output": "Traceback (most recent call last):\n  File \"/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume8/critical_check.py\", line 22, in <module>\n    AUTH_BODY=shlex.split(TARGET['control-author-loader.bash'].decode().split('readonly GATEWAY_FR04_AUTHOR_BODY= ',1)[1].split('\\n# Own actual',1)[0])[0]\n                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "targetFunctionsExecuted": 0,
+  "phase": "Harness preload",
+  "reason": "Copied diagnostic AUTH_BODY extraction still used FR04 marker; Source08 loader is FR05. IndexError before result FD/audit/target composition.",
+  "sourceSnapshotMeaning": "Post-failure unchanged executed harness retained before editing; no pre-run snapshot claimed."
+}

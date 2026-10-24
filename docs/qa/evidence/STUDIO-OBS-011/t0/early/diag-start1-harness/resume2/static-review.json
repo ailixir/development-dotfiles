@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-19T02:35:56.384731+00:00",
+  "preparationOnly": true,
+  "harnessMainExecuted": false,
+  "sourceStaged": false,
+  "pythonAst": "PASS",
+  "preservedCriticalFunctionAsts": [
+    "checked",
+    "private_write",
+    "held_parent_lock",
+    "validate_tree",
+    "replace_source"
+  ],
+  "exactSingleBothTaskCollectorCommandUnchanged": true,
+  "onlyKnownSameStartJvmDescendantsWaited": true,
+  "stickyObservationReceiptOwnershipFlagsPreventZeroExit": true,
+  "actualKindRequiredForRole": true,
+  "noSignalSendCalls": true,
+  "originalHarnessPackageUnchanged": true,
+  "immutableDiagPatchSha256": "c38d9a696ea5a34d8358441e3327a8f6957579c69dcb28fe118b98feee91fe83",
+  "candidateSha256": "d5cafe9818f29587cd646d2ac96c70c9b2c9c47c6433645fc0b80ec84d880d6d",
+  "pinnedInputFilesUnchanged": 1240,
+  "readOnlyBaselineIdentities": 6,
+  "readOnlyObserverNewUnowned": 0,
+  "harnessSha256": "e1da38453e3743b41d5650bf5d6760a749a3fe8d40a4207c6b2513d1583fd43e",
+  "planSha256": "6d5284a95d08463a1611268c393ed980ff5088ef55a5135dd420569ca83b3897",
+  "baselineSha256": "fd39b45fd27689034742d5a3205461e9aa4a316baa810f8488216f8f49b7101a",
+  "readOnlyObserverLimits": [
+    "Current observer sample is not future diagnostic start/end evidence",
+    "ps command representation is hashed textual argv representation, not reconstructed argv vector",
+    "No live parent-lock proof/staging/restoration/compiler/class/native lifecycle exercised",
+    "Process identity observation cannot recover missing generations from a polling gap; such a gap forces incomplete/nonzero"
+  ]
+}

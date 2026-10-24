@@ -1,0 +1,92 @@
+{
+  "policy": "Only public case identities, throwable types and project stack frames; no error messages or captured bodies.",
+  "failures": [
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] point=materialized",
+      "time": "967.855",
+      "diagnostics": [
+        {
+          "tag": "failure",
+          "type": "org.opentest4j.AssertionFailedError",
+          "projectFrames": [],
+          "causedByTypes": [],
+          "suppressedTypes": []
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] point=allocation",
+      "time": "0.818",
+      "diagnostics": [
+        {
+          "tag": "failure",
+          "type": "org.opentest4j.AssertionFailedError",
+          "projectFrames": [
+            "com.citi.put.checks.studio.guided.translation.GuidedTranslationService.call(GuidedTranslationService.java:1832)",
+            "com.citi.put.checks.studio.guided.translation.GuidedTranslationService.plan(GuidedTranslationService.java:203)",
+            "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.lambda$actualScannerRecoversEveryCommittedBootstrapWindow$46(GuidedPlanningIntegrationTest.java:1767)",
+            "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.actualScannerRecoversEveryCommittedBootstrapWindow(GuidedPlanningIntegrationTest.java:1766)"
+          ],
+          "causedByTypes": [],
+          "suppressedTypes": []
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[4] point=next",
+      "time": "1.02",
+      "diagnostics": [
+        {
+          "tag": "failure",
+          "type": "org.opentest4j.AssertionFailedError",
+          "projectFrames": [
+            "com.citi.put.checks.studio.guided.session.GuidedSessionException.require(GuidedSessionException.java:67)",
+            "com.citi.put.checks.studio.guided.bridge.GuidedAssignmentStore.acknowledge(GuidedAssignmentStore.java:130)",
+            "com.citi.put.checks.studio.guided.session.GuidedSessionService.lambda$acknowledgeAssignment$43(GuidedSessionService.java:1836)",
+            "com.citi.put.checks.studio.guided.session.GuidedSessionRepository.lambda$transaction$0(GuidedSessionRepository.java:35)",
+            "com.citi.put.checks.studio.guided.session.GuidedSessionRepository.transaction(GuidedSessionRepository.java:35)",
+            "com.citi.put.checks.studio.guided.session.GuidedSessionService.acknowledgeAssignment(GuidedSessionService.java:1830)",
+            "com.citi.put.checks.studio.guided.bridge.GuidedDispatchService.assign(GuidedDispatchService.java:90)",
+            "com.citi.put.checks.studio.guided.bridge.GuidedDispatchService.assign(GuidedDispatchService.java:87)",
+            "com.citi.put.checks.studio.guided.translation.GuidedTranslationService.plan(GuidedTranslationService.java:152)",
+            "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.lambda$actualScannerRecoversEveryCommittedBootstrapWindow$46(GuidedPlanningIntegrationTest.java:1767)",
+            "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.actualScannerRecoversEveryCommittedBootstrapWindow(GuidedPlanningIntegrationTest.java:1766)"
+          ],
+          "causedByTypes": [],
+          "suppressedTypes": []
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT",
+      "name": "aFillWhoseFocusHandlerInsertsHelperTextElsewhereWritesAndTheSessionContinues()",
+      "time": "1070.956",
+      "diagnostics": [
+        {
+          "tag": "failure",
+          "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+          "projectFrames": [],
+          "causedByTypes": [],
+          "suppressedTypes": []
+        }
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT",
+      "name": "aFocusHandlerThatChangesTheTargetItselfStillStopsTheSessionAndWritesNothing()",
+      "time": "1.485",
+      "diagnostics": [
+        {
+          "tag": "failure",
+          "type": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+          "projectFrames": [],
+          "causedByTypes": [],
+          "suppressedTypes": []
+        }
+      ]
+    }
+  ]
+}

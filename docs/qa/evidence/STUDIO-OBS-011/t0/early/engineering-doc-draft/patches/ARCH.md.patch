@@ -1,0 +1,39 @@
+--- a/ARCH.md
++++ b/ARCH.md
+@@ -36,11 +36,11 @@
+    - Complete UI implementation for all features: Check Builder, Checks Studio, Dashboards, Reports
+    - Adaptive layout system that detects standalone vs federated deployment modes
+ 
+-2. **Mock Backend (MSW - Mock Service Worker):**
+-   - Browser-intercepted API layer providing realistic responses during development
+-   - Comprehensive mock data for all check types, CSI entities, execution results
+-   - Located in `src/services/mocks/` with handlers organized by domain
+-   - Enables full application functionality without backend dependency
++2. **Node test mocks (MSW - Mock Service Worker):**
++   - Handlers in `frontend/src/services/mocks/` run only in Node: the Vitest server (`src/services/mocks/studio/server.ts`) and the Playwright `msw` project proxy (`e2e/mswProxy.ts`)
++   - There is no browser worker; development servers use the backend
++   - Vite proxies `/api/v1` to `VITE_API_URL` (default `http://localhost:8080`); federated Webpack uses `REACT_APP_API_BASE_URL` with its `/api` suffix removed (the same default)
++   - Controlled test responses support frontend tests without a backend dependency
+ 
+ 3. **Platform Integration:**
+    - **Federated Mode:** Webpack dev server on port 3002 (`pnpm run dev`)
+@@ -49,7 +49,7 @@
+    - Event-based communication with platform shell for navigation updates
+ 
+ 4. **Development Workflow:**
+-   - Mock-first development using MSW for all API interactions
++   - Backend-connected development servers with Node-only MSW API mocks for Vitest and the Playwright `msw` project
+    - Component-driven development with isolated testing
+    - Build outputs optimized for Module Federation consumption
+ 
+@@ -95,6 +95,10 @@
+     
+ 
+ ### **3.2. Mock Service Strategy**
++
++> **Dated correction — 2026-10-18, STUDIO-OBS-011 CLN-51 (G11).** The plan below is retained as
++> history. Today MSW runs only in the Node Vitest server and Playwright `msw` project proxy named
++> in §2.1. Development servers proxy API traffic to the backend; no browser worker is installed.
+ 
+ To enable independent frontend development and facilitate the prototype-first approach, a mock service layer is a mandatory first step.
+ 

@@ -1,0 +1,36 @@
+{
+  "extraFiniteBindings": [
+    "first-read raw pin:binding-functions.bash",
+    "first-read raw pin:control-author-loader.bash",
+    "first-read raw pin:install-loader.bash",
+    "exact historical JS prefix after variable rename"
+  ],
+  "contractChangedKeys": [
+    "authorityAllowedFields",
+    "initialActorCarrierPath",
+    "initialActorFactsRequired",
+    "sourceGeneration"
+  ],
+  "currentSourceBindings": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/source-bindings.json",
+    "sha256": "6d60e911b83395e9ab19095a22ae2f59849a24a0755b650f43e54835645ac035",
+    "bytes": 4078,
+    "mode": 420
+  },
+  "currentCallerBindings": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/caller-bindings.json",
+    "sha256": "daf194465772a9cffb9988c0f6b7c331c0f2cc13dc1a0fa82d130e588d962c02",
+    "bytes": 1504,
+    "mode": 420
+  },
+  "currentFinalBindings": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/final-bindings.json",
+    "sha256": "bae45dfb35277e35c4dcb5de98a1903b59931c5d6615d6479ac000b4ee42165b",
+    "bytes": 9080,
+    "mode": 420
+  },
+  "initialFacts": "closed original facts -> pure initialFacts/SHA/binder -> readonly sameargv -> actual quoted loader -> CLI -> protocol.initial_actor_facts -> derived union/Complete -> factory revalidation -> first INSTALL state -> setup author -> first qualified negative consumer",
+  "trustedRootCompleteInput": true,
+  "originalTraceMatchedBySource": true,
+  "physicalTraceVerificationOwed": true
+}

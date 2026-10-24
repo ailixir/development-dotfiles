@@ -1,0 +1,48 @@
+{
+  "status": "STATIC_ARTIFACT_CHECKS_ONLY",
+  "compiled": false,
+  "runtimeExecuted": false,
+  "patchReconstructions": [
+    {
+      "patch": "part-b.patch",
+      "reconstructedPaths": 3
+    },
+    {
+      "patch": "S011-owned-seven-paths.patch",
+      "reconstructedPaths": 7
+    },
+    {
+      "patch": "S011-composition.patch",
+      "reconstructedPaths": 9
+    },
+    {
+      "patch": "negative-tests-only.patch",
+      "reconstructedPaths": 1
+    },
+    {
+      "patch": "main-session-after-red.patch",
+      "reconstructedPaths": 2
+    }
+  ],
+  "allForwardedHashesMatch": true,
+  "allMutantHashesMatch": true,
+  "sessionCaseNamesPreserved": 44,
+  "newNegativeCases": 5,
+  "operationProbesOnGreen": 10,
+  "sessionOtherMethodBytesPreserved": true,
+  "partATailBytesPreserved": true,
+  "sevenCallsOneDeclarationOneNonNullPredicate": true,
+  "discoveryCatalogCounts": {
+    "GuidedBridgeIntegrationTest:test": 10,
+    "GuidedBridgePlannedIT:test": 16,
+    "GuidedLifecycleReasonIT:test": 5,
+    "GuidedPlanningIntegrationTest:test": 57,
+    "GuidedServiceTransportFaultIT:test": 39,
+    "GuidedSessionIT:test": 44,
+    "GuidedPublicationReplayIT:test": 46,
+    "GuidedPublicationReplayIT:guidedIncrementalTest": 62,
+    "GuidedAdmissionWithoutTranslationIT:test": 5
+  },
+  "conflictUnresolved": true,
+  "noJavaCompilationOrGateCredit": true
+}

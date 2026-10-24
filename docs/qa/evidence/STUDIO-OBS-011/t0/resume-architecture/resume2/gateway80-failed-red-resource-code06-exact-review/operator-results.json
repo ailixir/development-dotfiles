@@ -1,0 +1,68 @@
+{
+  "kind": "ARIA_CURRENT_PURE_MEMORY_JS_OPERATOR_CHECKS",
+  "passed": 7,
+  "checks": [
+    {
+      "id": "JS_SHA256_KNOWN_VECTOR",
+      "passed": true
+    },
+    {
+      "id": "JS_MISSING_COMPLETION_DENIES",
+      "passed": true
+    },
+    {
+      "id": "JS_NONZERO_AUTHOR_DENIES",
+      "passed": true
+    },
+    {
+      "id": "JS_SAME_BUFFER_BINDER_TAMPER_DENIES",
+      "passed": true
+    },
+    {
+      "id": "JS_BINDER_SAME_COMPLETION_BUFFER",
+      "passed": true
+    },
+    {
+      "id": "JS_QUALIFIED_NEGATIVE_ONE_DISTINCT_FROM_AUTHOR_ZERO",
+      "passed": true
+    },
+    {
+      "id": "JS_WRONG_NEGATIVE_OUTER_STATUS_DENIES",
+      "passed": true
+    }
+  ],
+  "helperSha256": "ac43df7caec7ddb1341f92b197cb3861af7b3292133bb3f5bc29d530e628a506",
+  "steps": [
+    {
+      "step": 1,
+      "kind": "author_request",
+      "helperSha256": "ac43df7caec7ddb1341f92b197cb3861af7b3292133bb3f5bc29d530e628a506",
+      "requestBytes": 11650,
+      "outsideActorEvidenceCarrier": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree03-20261019/failed-red-resource-disposition03/root-setup-ownership.json"
+    },
+    {
+      "step": 2,
+      "kind": "completion",
+      "helperSha256": "ac43df7caec7ddb1341f92b197cb3861af7b3292133bb3f5bc29d530e628a506",
+      "completion": {
+        "buffer": "{\"actors\":[{\"actualStatus\":0,\"completionKind\":\"ACTUAL_EXTERNAL_TOOL_EXIT\",\"pid\":900100,\"ppid\":17932,\"toolEvidence\":[{\"actualStatus\":0,\"separateStatusCaptured\":true,\"toolCallId\":\"FAKE_ROOT_1\"}]},{\"actualStatus\":0,\"completionKind\":\"ACTUAL_EXTERNAL_TOOL_EXIT\",\"pid\":900110,\"ppid\":17932,\"toolEvidence\":[{\"actualStatus\":0,\"separateStatusCaptured\":true,\"toolCallId\":\"FAKE_ROOT_2\"}]}],\"controlSha256\":\"3724053950259d21fa087771d8e0c9bea877e95caf31077691f0315989d60ee0\",\"kind\":\"ROOT_OPERATOR_ATTESTATION\",\"readonlyBuffer\":true,\"roleContractSha256\":\"91362d5e19fad2ad8edce3fc31a66f4cebb30013952c96966e96b62ec0501f2c\",\"separatelyCaptured\":true,\"unit\":\"obs009-gateway80-offtree03-20261019\"}",
+        "sha256": "59538d28bdf51229151427bfc75c2b5c98decb489a054425b8fa2c686da1500e",
+        "bytes": 677,
+        "sourceManifestSha256": "0271a2551728221f771361bfded8eafeefbd11b31584151a599f3a46bd99dba8",
+        "physicalObservation": false,
+        "directWait": false
+      },
+      "binder": "readonly GATEWAY_FR04_SETUP_CONTROL_SHA='3724053950259d21fa087771d8e0c9bea877e95caf31077691f0315989d60ee0'\nreadonly GATEWAY_FR04_SETUP_COMPLETION_SHA='59538d28bdf51229151427bfc75c2b5c98decb489a054425b8fa2c686da1500e'\nreadonly GATEWAY_FR04_SETUP_COMPLETION_BUFFER='{\"actors\":[{\"actualStatus\":0,\"completionKind\":\"ACTUAL_EXTERNAL_TOOL_EXIT\",\"pid\":900100,\"ppid\":17932,\"toolEvidence\":[{\"actualStatus\":0,\"separateStatusCaptured\":true,\"toolCallId\":\"FAKE_ROOT_1\"}]},{\"actualStatus\":0,\"completionKind\":\"ACTUAL_EXTERNAL_TOOL_EXIT\",\"pid\":900110,\"ppid\":17932,\"toolEvidence\":[{\"actualStatus\":0,\"separateStatusCaptured\":true,\"toolCallId\":\"FAKE_ROOT_2\"}]}],\"controlSha256\":\"3724053950259d21fa087771d8e0c9bea877e95caf31077691f0315989d60ee0\",\"kind\":\"ROOT_OPERATOR_ATTESTATION\",\"readonlyBuffer\":true,\"roleContractSha256\":\"91362d5e19fad2ad8edce3fc31a66f4cebb30013952c96966e96b62ec0501f2c\",\"separatelyCaptured\":true,\"unit\":\"obs009-gateway80-offtree03-20261019\"}'\n"
+    },
+    {
+      "step": 3,
+      "kind": "aria_adopt_negative",
+      "negativeActualStatus": 1,
+      "sourceManifestSha256": "0271a2551728221f771361bfded8eafeefbd11b31584151a599f3a46bd99dba8"
+    }
+  ],
+  "nodeProcesses": 0,
+  "toolsInsideHelper": 0,
+  "actualTargetEffects": 0
+}
+

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "status": "UNRESOLVED_REQUIRES_CONSTRAINT_RULING",
+  "finding": "GST-CUT-REF-PROVENANCE-01",
+  "atUtc": "2026-10-19T10:20:20.771142+00:00",
+  "sourceContradictionProven": true,
+  "generatedReferenceIdentityPrefix": "cfg-",
+  "frozenOriginalSummaryReferenceLiteral": "ref-PASS",
+  "genuineSourceAndFrozenLiteralIncompatible": true,
+  "fixtureOnlyCorrectionWithinCurrentConstraintsFound": false,
+  "candidateFiles": 0,
+  "unchangedBaseFiles": 3,
+  "patchesOrDraftManifestSupplied": false,
+  "sourceWitness": {
+    "path": "source-witness.json",
+    "sha256": "11109cd4d8ac3a5a5cb175ecf4e02c7671884e52ad6ba62a3518bf3730f2bd8e"
+  },
+  "staticCheck": {
+    "path": "static-check.json",
+    "sha256": "518c3ea8d7cc4d9df864cbdebf46503c2caa38d29649118a71a3469f17755e41",
+    "result": {
+      "staticOnly": true,
+      "unchangedBaseFiles": 3,
+      "candidateFiles": 0,
+      "methods": 80,
+      "originalAssertions": 751,
+      "cases": 99,
+      "modeVariants": 9,
+      "sentinels": 11,
+      "unit05AllBytesExact": true,
+      "sourceReferencePrefixContradiction": true,
+      "actualWhichConjunctOrRowValueProven": false,
+      "compileSqlNativeOrRuntimeProof": false,
+      "status": "UNRESOLVED_REQUIRES_CONSTRAINT_RULING"
+    }
+  },
+  "actualSummaryRowValuesKnown": false,
+  "whichActualConjunctFailedProven": false,
+  "actualFirstCauseRecovered": false,
+  "javaSqlNativeRuntimeOrProcessActions": false,
+  "productOrOriginalAssertionChanged": false,
+  "sourceNativeOrRetryRelease": false,
+  "credit": false,
+  "requiredRuling": "Retaining real generated manifest/input/summary provenance and immutable main is incompatible with the exact original ref-PASS literal. Architectural/QA/root ruling is required before any changed oracle or identity contract; no such change is proposed or adopted here.",
+  "preservedHolds": [
+    "main506 and migrations immutable",
+    "all original assertions/oracles/timers/planner/SQL/rollback/secret/budget/canary/authority/cleanup/completion subjects",
+    "Replay/generalW1/C8-hard-before-credit",
+    "IR/F1/GS-Mb/lane/baton",
+    "external business/provider/pilot/security inputs",
+    "custody/lifecycle qualifications and all prior/new reds/gaps"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "atUtc": "2026-10-20T06:34:38.227696+00:00",
+  "label": "obs011-recovery-20261020-check01",
+  "terminalToolSession": 62622,
+  "exit": 1,
+  "gradleExit": 1,
+  "counts": {
+    "total": 2774,
+    "passed": 2765,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 9
+  },
+  "taskResults": {
+    "test": {
+      "counts": {
+        "total": 2710,
+        "passed": 2701,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 9
+      },
+      "freshXmlFiles": 331,
+      "freshHtmlIndex": true,
+      "freshExec": true,
+      "execRequired": true,
+      "joinCasesPresent": true,
+      "freshJoinCohorts": 1
+    },
+    "guidedIncrementalTest": {
+      "counts": {
+        "total": 62,
+        "passed": 62,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "freshXmlFiles": 1,
+      "freshHtmlIndex": true,
+      "freshExec": true,
+      "execRequired": true,
+      "joinCasesPresent": true,
+      "freshJoinCohorts": 1
+    },
+    "crossReplicaTest": {
+      "counts": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "freshXmlFiles": 1,
+      "freshHtmlIndex": true,
+      "freshExec": true,
+      "execRequired": true,
+      "joinCasesPresent": false,
+      "freshJoinCohorts": 0
+    }
+  },
+  "failedTasks": [
+    "> Task :checkstyleTest FAILED"
+  ],
+  "exactApprovedSkipMatch": true,
+  "sourceStable": true,
+  "distStable": true,
+  "testInputStable": true,
+  "executedCoverageTaskLines": [
+    "> Task :requireFreshGuidedPartitions",
+    "> Task :jacocoTestReport",
+    "> Task :jacocoTestCoverageVerification"
+  ],
+  "overallGate": "FAIL_CHECKSTYLE; no011 credit; fresh whole check after repair still required",
+  "fullClassSlot": 1,
+  "retryConsumesSoleContingency": true,
+  "diagnosticsDuringFailedRun": "Two actual jcmd progress attachments, disclosed; no equal-load timing claim."
+}

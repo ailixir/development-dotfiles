@@ -1,0 +1,68 @@
+{
+  "kind": "SOURCE_ONLY_D2_TWO_FINDING_CORRECTION_BINDINGS",
+  "executed": false,
+  "actualSourceChanged": false,
+  "actualDistChanged": false,
+  "finalBindings": {
+    "acceptedSourceDigest": null,
+    "acceptedTestInputDigest": null,
+    "acceptedDistDigest": null,
+    "buildContextSha256": null,
+    "finalBuildReceiptSha256": null,
+    "configuredImageReference": null,
+    "measuredImmutableImageId": null,
+    "finalImagePinsReceiptSha256": null,
+    "finalDeployment722ReceiptSha256": null
+  },
+  "bindingDisposition": "UNBOUND: root must fill literals from accepted final build/pins/deployment receipts, review changed dependencies, and release exact future command. Do not infer final image from current source or historical D698.",
+  "historicalDeploymentBaseline": {
+    "sourceDigest": "507228c984235dee043ec3310d84a04710517c9efe143a4ac70ed2c27d3cef1d",
+    "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+    "imageId": "sha256:f8bcb56378b9277f5947a915b25bfdd483e3898ea6dd31681c3ad39d3b616cdf",
+    "passed": 722,
+    "failed": 0,
+    "skipped": 0,
+    "files": 10,
+    "credit": "executed local baseline only; no final-image/D2-step6/cluster/provider credit"
+  },
+  "sourceDependenciesAtPreparation": "Inherited unchanged from ../linux-image-smoke-preparation/bindings.json; no fresh actual-source digest assumed. Final accepted dependency review/binding remains required.",
+  "scope": {
+    "sourceReadOnly": true,
+    "noDockerOrNativeExecution": true,
+    "newTests": 0,
+    "businessAssertionsChanged": 0,
+    "authenticationWeakened": false,
+    "externalCredentialNeeded": false,
+    "privateBodiesReadOrExported": false,
+    "fullReplaySlotCost": 0,
+    "maximumFullReplayAttempts": 6,
+    "chargedAttemptsRemain": [
+      1,
+      2,
+      3
+    ],
+    "reservedAttemptsRemain": [
+      4,
+      5,
+      6
+    ],
+    "originalClockReset": false,
+    "fixtureAdapter": "one-shot off-tree smoke adapter; only bash/Node syntax checks executed; no application imported"
+  },
+  "originalManifestSha256": "605d9b20b3fc96d645a7f2f076a22ab9df8beda80139c301677d451180aca146",
+  "independentNotReadyReviewSha256": "31f7046578138ebfdf98ce5560c983d1b53bc89dbaa01a41e084ca04c255693b",
+  "candidateChanges": [
+    {
+      "original": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-preparation/fixture.mjs",
+      "beforeSha256": "2079981be2e517deca9acff148aa28d12b9dc72a59a2d4b9ea19c306ea5224bd",
+      "candidate": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/fixture.mjs",
+      "afterSha256": "4a6c8474c7c609c25b3c40ea3116094eb9e504d5b3da35f66fe730fdf9f89f91"
+    },
+    {
+      "original": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-preparation/future-smoke.sh",
+      "beforeSha256": "8ba2b767edd9745ac21869b45204efb61a0d4a2f34a8f0f1d8b3c7582dd8c6b1",
+      "candidate": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/future-smoke.sh",
+      "afterSha256": "2b46b5e901df833ce11f570284516515dac8ca48df0119f6a3c97723fbdbc0ad"
+    }
+  ]
+}

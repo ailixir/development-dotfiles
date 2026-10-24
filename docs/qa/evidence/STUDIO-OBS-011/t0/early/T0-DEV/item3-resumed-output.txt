@@ -1,0 +1,185 @@
+##### 01 ls (retired frontend paths + authoring dir)
+ls: frontend/src/components/studio/inference: No such file or directory
+ls: frontend/src/components/studio/review: No such file or directory
+ls: frontend/src/components/studio/runs/index.ts: No such file or directory
+ls: frontend/src/features/studio/authoring: No such file or directory
+ls: frontend/src/services/mocks/studio/index.ts: No such file or directory
+ls: frontend/src/types/studio/legacyTestIr.ts: No such file or directory
+##### 02 grep PinnedStoppedRunRecordingFacts frontend/src
+frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts:74:export interface PinnedStoppedRunRecordingFacts {
+##### 03 retireLegacyStudioWorker in index.tsx/main.tsx
+frontend/src/index.tsx:2:import { retireLegacyStudioWorker } from './utils/retireLegacyStudioWorker';
+frontend/src/index.tsx:5:  if (await retireLegacyStudioWorker()) return;
+frontend/src/main.tsx:3:import { retireLegacyStudioWorker } from './utils/retireLegacyStudioWorker';
+frontend/src/main.tsx:19:    if (await retireLegacyStudioWorker()) return;
+##### 04 compile-review / ChecksStudioPage/confirm in WCAG audit test
+99:  'ChecksStudioPage/compile-review': {},
+100:  'ChecksStudioPage/confirm': {},
+324:  it('surface 4 — ChecksStudioPage, compile-review state', async () => {
+329:    const drift = await scan('ChecksStudioPage/compile-review');
+345:    console.log(`[axe] ChecksStudioPage/confirm: confirm affordances found = ${confirm.length}`);
+347:    const drift = await scan('ChecksStudioPage/confirm');
+##### 05 validate-variables in openapi + StudioController
+docs/specs/studio/openapi.yaml:750:  /tests/{id}/validate-variables:
+backend/src/main/java/com/citi/put/checks/studio/StudioController.java:177:  @PostMapping("/tests/{id}/validate-variables")
+##### 06 CLN-19/20/21 symbol words in backend/src (-w)
+backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java:29755:    // 32 advance, 33 outcome, 34 outcomeV2, 35 completeStep, 36 recordEvidence, 37 consume,
+backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java:30261:                    "recordEvidence",
+backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java:30382:        case "recordEvidence" -> 36;
+backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:593:    service.recordEvidence(worker, id, 1, "evidence", "video-1", "evidence-store-1");
+backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:596:                service.recordEvidence(
+backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java:26:  public static boolean isCanonical(String status) {
+backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java:69:  public Map<Integer, String> allocationIds(JsonNode references, JsonNode context) {
+backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1701:  public JsonNode recordEvidence(
+backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java:160:    public Duration pollIntervalOrDefault() {
+backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java:212:    public Duration readIntervalOrDefault() {
+backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAlreadyExistsException.java:20:  public String getSecretName() {
+backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java:249:  public Optional<String> providerName() {
+backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java:95:  public static boolean isApiAssigned(String runnerErrorCode) {
+backend/src/main/java/com/citi/put/checks/studio/StudioService.java:391:  public AuthoringV2Response updateAuthoring(
+##### 07 read-interval in application.yml
+376:      read-interval: ${STUDIO_SSE_READ_INTERVAL:750ms}
+378:      read-interval-ms: ${STUDIO_SSE_READ_INTERVAL_MS:750}
+##### 08 account-era symbol sweep (per symbol: file:count)
+--- observedAccount
+--- installCookies
+--- addCookies
+--- AccountAccess
+backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md:203:`GuidedProductionSessionAccess` now implements current source/revision checks and `StepVerifier` on the same access object
+--- AWAITING_AUTH
+docs/specs/studio-observed-authoring/contracts/v3/fixtures.json:10776:          "value": "AWAITING_AUTH"
+--- AUTH_CONNECTION_REQUIRED
+docs/specs/studio-observed-authoring/contracts/v3/result.schema.json:176:            "const": "AUTH_CONNECTION_REQUIRED"
+--- accountHandle
+--- accountAuthorization
+--- accountGrantId
+--- accountAbi
+--- accountRef
+tools/check-studio-observed-contracts.cjs:1043:    assert(!JSON.stringify(op).includes('accountRef') && !JSON.stringify(op).includes('authConnection'));
+docs/specs/studio-observed-authoring/contracts/v3/fixtures.json:13711:      "path": "/scope/accountRef",
+--- authConnection
+tools/check-studio-observed-contracts.cjs:1043:    assert(!JSON.stringify(op).includes('accountRef') && !JSON.stringify(op).includes('authConnection'));
+--- ACCOUNT_UNAVAILABLE
+--- ACCOUNT_UNKNOWN
+##### 09 it.skip count in deferred.test.ts
+19
+##### 10 versions.ts + TOTAL_TIMEOUT_MESSAGE
+/**
+ * The one observed contract generation (ADR-SC-005, STUDIO-OBS-012A): `contracts/v3`. The
+ * executable pins (artifact, policy, executor, validator, protocol, profile catalog) are not
+ * restated here; they are the `const`s of the generated v3 schemas (`OBSERVED_PROFILE` in
+ * `validator/observedReferencePolicy.ts`), and build identity is `assertBuild`'s.
+ *
+ * The artifact-1 stamps this module used to declare (artifact envelope, validator schema,
+ * executor, syntax reference and parser versions) were retired by STUDIO-OBS-009 AC-1 P2. The
+ * runtime record names observed identities only: `scripts/write-runtime-versions.mjs` computes
+ * them from the packaged schemas, the reference bundle, the installed browser and the launcher.
+ */
+export const OBSERVED_CONTRACT_VERSION = 3;
+studio-runner/src/run/launcher.ts:390:export const TOTAL_TIMEOUT_MESSAGE = KILL_MESSAGES['total-runtime'];
+studio-runner/test/helpers/runner.ts:51:import { CANCELLED_MESSAGE, TOTAL_TIMEOUT_MESSAGE } from '../../src/run/launcher.js';
+studio-runner/test/helpers/runner.ts:283:  'total-runtime': TOTAL_TIMEOUT_MESSAGE,
+##### 11 OBSERVED_SCHEDULE_AUTH_REQUIRED in backend/src/main
+backend/src/main/resources/db/migration/V16__scheduling.sql:128:        'SCHEDULE_UPDATED', 'SCHEDULE_REMOVED', 'OBSERVED_SCHEDULE_AUTH_REQUIRED')
+backend/src/main/resources/db/migration/V16__scheduling.sql:130:    AND (code <> 'OBSERVED_SCHEDULE_AUTH_REQUIRED' OR decision = 'REFUSED')
+##### 12 translation != null in GuidedSessionService
+177:          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
+191:          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
+370:          if (translation != null && translation.exists(id)) {
+405:          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
+846:            if (translation != null && translation.exists(id)) {
+880:          if (translation != null && translation.exists(id)) {
+1442:          if (translation != null && translation.exists(id)) {
+2013:          if (translation != null && translation.exists(id)) {
+##### 13 instanceof GuidedProductionSessionAccess arms
+662-                      com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess
+737-              com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess
+##### 14 @Test counts GuidedSessionIT / GuidedServiceTransportFaultIT
+backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java:44
+backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java:31
+##### 15 HistoricalV18 / requireV18 by file
+   3 backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java
+  14 backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java
+   8 backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java
+##### 16 Clock.systemUTC / clock.instant in publication trio
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java:85:    Instant deadline = clock.instant().plusMillis(properties.authorizationTtlMs());
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java:96:    require(deadline.isAfter(clock.instant()), "EXPIRED", 409);
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java:50:    return new GuidedPublicationAuthorization(core, ownership, Clock.systemUTC(), properties);
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java:101:        Clock.systemUTC());
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java:118:                  clock.instant());
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java:154:                    clock.instant());
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java:172:                  clock.instant());
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java:231:                    clock.instant());
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java:240:              if (publications.conflict(id, prepared.snapshot().hash(), clock.instant())) {
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java:476:    Instant deadline = clock.instant().plusMillis(properties.validationTimeoutMs());
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java:490:          && Instant.parse(text(cached, "validationDeadline")).isAfter(clock.instant())) {
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java:499:            new PublicationContracts.Claim(id, key, digest, snapshot), clock.instant());
+##### 17 teardown executor markers
+2757:    if (sender == null || !TEARDOWNS_IN_FLIGHT.add(id)) {
+2801:            new java.util.concurrent.ArrayBlockingQueue<>(64),
+2807:            new java.util.concurrent.ThreadPoolExecutor.DiscardPolicy());
+##### 18 runner.validate() in backend/src/main
+backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java:20:    runner.validate();
+##### 19 prepareScheduled
+backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java:137:  public Prepared prepareScheduled(UITest test, UITestRevision revision, String principal) {
+backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:334:      observedGrant = observed.prepareScheduled(test, revision, principal);
+##### 20 studio-runner README headings + runbook lines 13 and 132
+244:| `POST /v1/validate` | Browser-free wrapper over `validateArtifact` with bounded work. Takes **no capacity slot**, so it answers while the pool is saturated. |
+345:Generated source is **never evaluated**. `validateArtifact` parses each step with the TypeScript
+398:## Bounds (AC-10 defaults)
+400:Every bound is configuration. Pass overrides as `validateArtifact(artifact, source, refs, { bounds: { … } })`.
+420:## Accepted language
+491:## Fixture corpora
+| **Sections from STUDIO-OBS-009** | **§14 One entrypoint, TLS everywhere, the one-pod guard and the new Secrets** (written 2026-10-18 by @devops); the `CMD` paragraph of §4 is amended in the same change. §§1-3 and §5-13 were **not** re-audited by this change: §2 in particular still describes 
+| Egress | the **API** pods, on the API Service port | `callback-api`: admission and progress. Without this the terminal report never arrives |
+##### 21 shasum guidedNarratives.ts handlers.ts StudioSecretsService.java
+f8f68c01be22401e8a578bd80a39b5fae42f41ec2da680f6c8ac3b6a1b62b0e7  frontend/src/components/studio/guided/guidedNarratives.ts
+61df7a979249b91424e6841715b4d9832c91a8833ebe87b7aad6d70eea6415ed  frontend/src/services/mocks/studio/handlers.ts
+2178e6099b492978166c38b25a0b3893caf966bc070631d0c8eee1e8fc36de0f  backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java
+##### 22 MSW lines in frontend/README.md, CLAUDE.md, AGENTS.md, ARCH.md
+56:- **VITE_ALLOW_INSECURE_MSW_FALLBACK**: Enables inline API mock fallback when Service Worker cannot run (for example, untrusted internal CA / insecure browser context).
+60:  VITE_ALLOW_INSECURE_MSW_FALLBACK=true pnpm start
+CLAUDE.md:81:### Mock-First Development
+CLAUDE.md:142:- Environment variables in `.env.development` control MSW enablement and API URLs
+AGENTS.md:81:### Mock-First Development
+AGENTS.md:142:- Environment variables in `.env.development` control MSW enablement and API URLs
+40:   - Browser-intercepted API layer providing realistic responses during development
+52:   - Mock-first development using MSW for all API interactions
+101:- **Implementation:** We will use **Mock Service Worker (MSW)**. MSW intercepts outgoing requests from the browser, allowing the UI to be fully developed without any dependency on a live backend.
+##### 23 studioAuthoringV2 in rollout runbook
+133:Keep `STUDIO_GATEWAY_PROVIDER=disabled`, `STUDIO_AUTHORING_V2_ENABLED=false`, and `STUDIO_INCREMENTAL_ENABLED=false` until their respective prerequisites pass. `STUDIO_GATEWAY_MAX_OUTPUT_TOKENS` defaults to 32768. After V19 and compatible API/runner deployment, the v2 authoring UI is separately selected by `window.__CHECKS_CONFIG__.studioAuthoringV2=true` before the bundle loads; the default UI remains compatible with v1. Enabling v2 authoring alone does not enable a model or incremental eligibility.
+##### 24 .ai tracked / dirty counts
+     128
+dirty .ai entries in t0/start-status.txt (start of B1):
+0
+##### 25 studio.compile in backend/build.gradle.kts
+484:            includes = listOf("com.citi.put.checks.studio.compile.gateway")
+539:            includes = listOf("com.citi.put.checks.studio.compile")
+##### 26 ls guided/account and frontend agent-memory
+backend/src/main/java/com/citi/put/checks/studio/guided/account:
+total 0
+drwxr-xr-x   2 brunobuger  staff   64 Oct 10 01:03 .
+drwxr-xr-x  11 brunobuger  staff  352 Oct 13 20:05 ..
+
+frontend/src/.claude/agent-memory/aiox-pm:
+total 0
+drwxr-xr-x  2 brunobuger  staff   64 Oct  5 09:59 .
+drwxr-xr-x  4 brunobuger  staff  128 Oct  5 09:59 ..
+
+frontend/src/.claude/agent-memory/aiox-ux:
+total 0
+drwxr-xr-x  2 brunobuger  staff   64 Oct  5 09:59 .
+drwxr-xr-x  4 brunobuger  staff  128 Oct  5 09:59 ..
+##### 27 longest line per runner guided file
+studio-runner/src/guided/contracts.ts 678
+studio-runner/src/guided/diagnostics.ts 194
+studio-runner/src/guided/evidence.ts 342
+studio-runner/src/guided/journal.ts 127
+studio-runner/src/guided/json.ts 170
+studio-runner/src/guided/ownership.ts 655
+studio-runner/src/guided/policyHash.ts 121
+studio-runner/src/guided/runtime.ts 468
+studio-runner/src/guided/transport.ts 569
+studio-runner/src/guided/types.ts 2385
+studio-runner/src/run/guidedBrowser.ts 222
+##### 28 (brace-count script from proposal 2.3 is run separately by item3_bracecount.py)

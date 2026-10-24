@@ -1,0 +1,57 @@
+{
+  "exactTask": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/bootstrap-process-tree-native-six-resource-assessment-task.txt",
+  "taskSha256": "87e7461f63068dd9171ce56383a361aaa1e4fb7922aa54042b5ef128c537c87c",
+  "contextSha256": "25f8c05cf40811ebef00d8e4f3df0b0a944e708a392348e782169112ab7eb8ca",
+  "commands": [
+    {
+      "stage": "binding-only metadata reader initial assumption",
+      "rawExit": 1,
+      "type": "FileNotFoundError",
+      "correctionRecorded": "binding-reader-initial-assumption-failure.json",
+      "processProbes": false,
+      "mixedBodyReads": 0
+    },
+    {
+      "stage": "binding-only local hash utility path correction",
+      "rawExit": 1,
+      "type": "AttributeError",
+      "correctionRecorded": "binding-reader-path-type-correction.json",
+      "processProbes": false,
+      "mixedBodyReads": 0
+    },
+    {
+      "stage": "verify-current-critical-source-SDK-product-cli-browser",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-resource-assessment01/verify-bindings.py"
+      ],
+      "exit": 0
+    },
+    {
+      "stage": "one bounded existing process-reader/exactcwd observation",
+      "argv": [
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-resource-assessment01/read-owned-scope.mjs"
+      ],
+      "exit": 0,
+      "processReaderInvocationCount": 1,
+      "strictSignal0Only": true
+    },
+    {
+      "stage": "one unique failed-orderly preclear primitive projection",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-resource-assessment01/project-preclear-once.py"
+      ],
+      "exit": 0,
+      "bodyReads": 1
+    }
+  ],
+  "otherResourceProbeIterations": 0,
+  "positiveSignals": 0,
+  "nativeOrTestOrBuildRuns": 0,
+  "actualOrPrivateSourceWrites": 0,
+  "signal0Scope": "only48boundrecordedPIDs plus reader self",
+  "rawPsLsofArgBodiesExported": false,
+  "mixedPayloadExports": false
+}

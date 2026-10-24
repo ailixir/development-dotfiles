@@ -1,0 +1,12 @@
+{
+  "kind": "SOURCE_AND_PRIMARY_API_INFERRED_SCHEDULES_NOT_JAVA_EXECUTION",
+  "cases": [
+    {"case": "oversized body", "schedule": ["headers arrive", "default byte-array handler collects body beyond262144", "send returns only after completion", "length predicate finally rejects"], "defect": "Postcollection rejection does not bound collection."},
+    {"case": "stalled body", "schedule": ["headers complete within15s", "response timer cancelled in cited OpenJDK21 responseAsyncImpl", "readBodyAsync awaits incomplete body", "original assertion remains after synchronous send"], "defect": "No separate body/observer deadline or cancellation/lifetime owner exists in candidate."},
+    {"case": "one application send with internal retry", "schedule": ["single send enters MultiExchange", "qualifying connection or unprocessed failure", "implementation retry path starts another exchange"], "defect": "CAS/send-count only bounds application call count."},
+    {"case": "ordinary-directory substitution before open", "schedule": ["root-created runtime0700 path is replaced by another ordinary directory", "every relative NOFOLLOW open succeeds", "no opened identity/owner/mode comparison occurs", "CREATE_NEW writes into substituted directory"], "defect": "Opened handles protect traversal but do not establish approved namespace identity."}
+  ],
+  "actualJavaHttpFilesystemMutation": false,
+  "installedImplementationClaim": false,
+  "broadSameUidSecurityClaim": false
+}

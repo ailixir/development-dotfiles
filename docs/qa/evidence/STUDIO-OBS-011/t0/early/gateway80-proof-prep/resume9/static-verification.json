@@ -1,0 +1,1319 @@
+{
+  "kind": "SOURCE9_SOURCE_METADATA_STATIC_VERIFICATION",
+  "checks": 327,
+  "results": [
+    {
+      "id": "RUNTIME_EXACT_TESTED_SHA",
+      "passed": true
+    },
+    {
+      "id": "ENTRY_EXACT_TESTED_SHA",
+      "passed": true
+    },
+    {
+      "id": "CURRENT_SNAPSHOT_runtime.py",
+      "passed": true
+    },
+    {
+      "id": "CURRENT_SNAPSHOT_entry.py",
+      "passed": true
+    },
+    {
+      "id": "CURRENT_SNAPSHOT_controls.py",
+      "passed": true
+    },
+    {
+      "id": "CURRENT_SNAPSHOT_six-fix-controls.py",
+      "passed": true
+    },
+    {
+      "id": "NONREMOVABLE_CHECKS_runtime.py",
+      "passed": true
+    },
+    {
+      "id": "NONREMOVABLE_CHECKS_entry.py",
+      "passed": true
+    },
+    {
+      "id": "EXACT_ENTRY_LITERAL_capture-once.bash",
+      "passed": true
+    },
+    {
+      "id": "NO_GLOBAL_OPTION_MUTATION_capture-once.bash",
+      "passed": true
+    },
+    {
+      "id": "NEW_GENERATION_capture-once.bash",
+      "passed": true
+    },
+    {
+      "id": "ENTRY_SHA_HEADER_capture-once.bash",
+      "passed": true
+    },
+    {
+      "id": "LOCAL_CHILD_CONDITIONAL_capture-once.bash",
+      "passed": true
+    },
+    {
+      "id": "EXACT_ENTRY_LITERAL_guard-exit.bash",
+      "passed": true
+    },
+    {
+      "id": "NO_GLOBAL_OPTION_MUTATION_guard-exit.bash",
+      "passed": true
+    },
+    {
+      "id": "NEW_GENERATION_guard-exit.bash",
+      "passed": true
+    },
+    {
+      "id": "ENTRY_SHA_HEADER_guard-exit.bash",
+      "passed": true
+    },
+    {
+      "id": "LOCAL_CHILD_CONDITIONAL_guard-exit.bash",
+      "passed": true
+    },
+    {
+      "id": "EXACT_ENTRY_LITERAL_author-control.template.bash",
+      "passed": true
+    },
+    {
+      "id": "NO_GLOBAL_OPTION_MUTATION_author-control.template.bash",
+      "passed": true
+    },
+    {
+      "id": "NEW_GENERATION_author-control.template.bash",
+      "passed": true
+    },
+    {
+      "id": "ENTRY_SHA_HEADER_author-control.template.bash",
+      "passed": true
+    },
+    {
+      "id": "LOCAL_CHILD_CONDITIONAL_author-control.template.bash",
+      "passed": true
+    },
+    {
+      "id": "EXACT_ENTRY_LITERAL_postclose.template.bash",
+      "passed": true
+    },
+    {
+      "id": "NO_GLOBAL_OPTION_MUTATION_postclose.template.bash",
+      "passed": true
+    },
+    {
+      "id": "NEW_GENERATION_postclose.template.bash",
+      "passed": true
+    },
+    {
+      "id": "ENTRY_SHA_HEADER_postclose.template.bash",
+      "passed": true
+    },
+    {
+      "id": "LOCAL_CHILD_CONDITIONAL_postclose.template.bash",
+      "passed": true
+    },
+    {
+      "id": "CAP_BEFORE_PYTHON",
+      "passed": true
+    },
+    {
+      "id": "GATE0_ONLY_BUILTIN_EXIT",
+      "passed": true
+    },
+    {
+      "id": "NEGATIVE_ALWAYS_DENIES",
+      "passed": true
+    },
+    {
+      "id": "READ_EOF_CONDITIONAL",
+      "passed": true
+    },
+    {
+      "id": "ACTUAL_VARIABLE_FOREGROUND_HASH",
+      "passed": true
+    },
+    {
+      "id": "READONLY_SAME_BUFFER_EVAL",
+      "passed": true
+    },
+    {
+      "id": "SETUP_COMPONENT_STATUS",
+      "passed": true
+    },
+    {
+      "id": "NEGATIVE_COMPONENT_STATUS",
+      "passed": true
+    },
+    {
+      "id": "GATE_COMPONENT_STATUS",
+      "passed": true
+    },
+    {
+      "id": "SHELL_ACCEPTANCE_OWED",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_phaseIds",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_phases",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_node",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_helm",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_dependencies",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_maximumSeconds",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_parentUmask",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_childUmask",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_noRetry",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_noSignals",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_noCleanupByDriver",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_workspace",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_runtime",
+      "passed": true
+    },
+    {
+      "id": "UNCHANGED_NATIVE_PROFILE_protocol",
+      "passed": true
+    },
+    {
+      "id": "ALL39_STATIC_REFERENCES_UNCHANGED",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_legacy-driver.py",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_contracts.py",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_input-manifest.json",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_source-guards.json",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_case-map.json",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_vitest.gateway80.config.mjs",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/fixed-helper.tpl",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/original-helper.tpl",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/.helmignore",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/Chart.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/NOTES.txt",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/_helpers.tpl",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/configmap.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/deployment.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/hpa.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/ingress.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/pdb.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/service.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/serviceaccount.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/studio-runner-service.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/values-dev.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/values-prod.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/values-uat.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/helm-chart/put-checks/values.yaml",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/studio-runner/test/deployment/helm.ts",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/studio-runner/test/helpers/corpus.ts",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/studio-runner/vitest.deployment.config.ts",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/studio-runner/tsconfig.json",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/studio-runner/package.json",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/studio-runner/package-lock.json",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/repo/studio-runner/eslint.config.js",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_banks/integrations.test.ts",
+      "passed": true
+    },
+    {
+      "id": "STATIC_PIN_ownership-core.py",
+      "passed": true
+    },
+    {
+      "id": "TEMPLATE_COMPLETE_FIELDS_ROOT_AUTHORIZATION",
+      "passed": true
+    },
+    {
+      "id": "TEMPLATE_COMPLETE_FIELDS_OWNER_LOCAL_PROFILE_RULING",
+      "passed": true
+    },
+    {
+      "id": "TEMPLATE_COMPLETE_FIELDS_PHASE_DECISION",
+      "passed": true
+    },
+    {
+      "id": "TEMPLATE_COMPLETE_FIELDS_ACTUAL_CLIENT_COMPLETION",
+      "passed": true
+    },
+    {
+      "id": "TEMPLATE_COMPLETE_FIELDS_NEGATIVE_GUARD_STATUS",
+      "passed": true
+    },
+    {
+      "id": "TEMPLATE_COMPLETE_FIELDS_GUARD_ADMISSION",
+      "passed": true
+    },
+    {
+      "id": "TEMPLATE_COMPLETE_FIELDS_ACTUAL_PHASE_ARCHIVE_QA",
+      "passed": true
+    },
+    {
+      "id": "TEMPLATE_COMPLETE_FIELDS_ACTUAL_QA_ROOT_ADOPTION",
+      "passed": true
+    },
+    {
+      "id": "TEMPLATE_COMPLETE_FIELDS_FINAL_CLOSE_PERMIT",
+      "passed": true
+    },
+    {
+      "id": "TEMPLATE_COMPLETE_FIELDS_ACTUAL_WRAPPER_RESULT",
+      "passed": true
+    },
+    {
+      "id": "FUTURE_PENDING_NULL_holdFileSha256",
+      "passed": true
+    },
+    {
+      "id": "FUTURE_PENDING_NULL_candidateBaselineSha256",
+      "passed": true
+    },
+    {
+      "id": "FUTURE_PENDING_NULL_dependencyInventory",
+      "passed": true
+    },
+    {
+      "id": "FUTURE_PENDING_NULL_distModes",
+      "passed": true
+    },
+    {
+      "id": "FUTURE_PENDING_NULL_auxModes",
+      "passed": true
+    },
+    {
+      "id": "FUTURE_PENDING_NULL_actualFreshToolVersions",
+      "passed": true
+    },
+    {
+      "id": "FUTURE_PENDING_NULL_ownerRulingPins",
+      "passed": true
+    },
+    {
+      "id": "PENDING_REQUIRED_EXISTING_FIELDS",
+      "passed": true
+    },
+    {
+      "id": "PENDING_PURPOSE",
+      "passed": true
+    },
+    {
+      "id": "ROOT_AUTHOR_EXPLICIT_RAW_MAP",
+      "passed": true
+    },
+    {
+      "id": "PRIVATE_FD_POLICY_SCHEMA",
+      "passed": true
+    },
+    {
+      "id": "PUBLIC_DISTINCT_SCHEMA",
+      "passed": true
+    },
+    {
+      "id": "EXACT_PROTOCOL",
+      "passed": true
+    },
+    {
+      "id": "EXACT_TERMINAL_STATUS",
+      "passed": true
+    },
+    {
+      "id": "EXACT_DISPOSITION",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_rootProposal",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_rootProposal",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_rootProposal",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_rootRelease",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_rootRelease",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_rootRelease",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_ownerRuling",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_ownerRuling",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_ownerRuling",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_phaseDecision",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_phaseDecision",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_phaseDecision",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_clientActualCompletion",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_clientActualCompletion",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_clientActualCompletion",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_negativeStatus",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_negativeStatus",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_negativeStatus",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_guardAdmission",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_guardAdmission",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_guardAdmission",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_actualQa",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_actualQa",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_actualQa",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_actualReviewAdoption",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_actualReviewAdoption",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_actualReviewAdoption",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_closePermit",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_closePermit",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_closePermit",
+      "passed": true
+    },
+    {
+      "id": "ALL10_FALSE_actualWrapperResult",
+      "passed": true
+    },
+    {
+      "id": "UNSUPPORTED_NULL_actualWrapperResult",
+      "passed": true
+    },
+    {
+      "id": "CLOSED_SCOPE_actualWrapperResult",
+      "passed": true
+    },
+    {
+      "id": "ALL16_GROUPS",
+      "passed": true
+    },
+    {
+      "id": "SITES_EXACT_COUNT",
+      "passed": true
+    },
+    {
+      "id": "CALLBACK_COUNT",
+      "passed": true
+    },
+    {
+      "id": "FUNCTION_COUNT",
+      "passed": true
+    },
+    {
+      "id": "RUNTIME_CLASSES",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:require",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:digest",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:encoded",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:claim",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:validate_claim",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:sha_pin",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:private_policy",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:public_policy",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:check_leaf_policy",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:text_field",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:absolute_field",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:integer_field",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:hash_field",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:hash_map",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:pinned_ref",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:code_review_refs",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:owner_refs",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:directory_bindings",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:validate_python_roles",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:authorization_factory",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:purpose_for_name",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:validate_document",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:validate_immutable_tuple",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:validate_pending_owner_inputs",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:referenced_control",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:accepted_receipt",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:validate_document_links",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:validate_operation_entry_state",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:safe_relative",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Ownership.__init__",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Ownership.acquire",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Ownership.close",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Ownership.finish",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Ownership.metadata",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:file_key",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.__init__",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.open",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.parent",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.info",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.absent",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.read",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.verified",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.mkdir",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.create",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.write_fd",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.write",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Files.copy",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Budget.__init__",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Budget.reserve_entry",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Budget.check_file",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Budget.consume",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Ledger.__init__",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Ledger.append",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Ledger.freeze",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:PendingHolder.__init__",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:PendingHolder.get",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:scoped_text",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:qualify_controller_lock",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:materialized_holder",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:holder_fields",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:no_signal_process",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Context.__init__",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Context.observe",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Context.output",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Context.control",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Context.start_segment",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Context.event",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Context.finish_segment",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Context.failure",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Context.native_snapshot",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:Context.emit_native_fallback",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:load_legacy",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:load_legacy.read_static_or_control",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:load_legacy.get_raw",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:inventory",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:stage_buffer",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:create_workspace",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:install_fixed",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:archive_tree",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:load_core",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:load_core.table_with_current_markers",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:legacy_identity",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:sample",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:remember_relevance",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:restore_sample_history",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:episode",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:boundaries",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:owner_ruling",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:previous_closure",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:bind_entry",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:fresh_source",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:source_tuple",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:inherited_samples",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:journals",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:publish_journal",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:transition",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:run_native",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:native_wait",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:phase_operation",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:ancestor_custody",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:capture",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:immutable_tuple",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:checked_actual_adoption",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:fresh_current",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:final_operation",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:freshness",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:gate_operation",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:held_operation",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:postclose_operation",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:dispatch",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:negative_operation",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:guard_admission",
+      "passed": true
+    },
+    {
+      "id": "SPAN_runtime.py:author_control",
+      "passed": true
+    },
+    {
+      "id": "SPAN_entry.py:need",
+      "passed": true
+    },
+    {
+      "id": "SPAN_entry.py:open_owned",
+      "passed": true
+    },
+    {
+      "id": "SPAN_entry.py:close_owned",
+      "passed": true
+    },
+    {
+      "id": "SPAN_entry.py:bootstrap_read",
+      "passed": true
+    },
+    {
+      "id": "SPAN_entry.py:launch",
+      "passed": true
+    },
+    {
+      "id": "SPAN_entry.py:execute_context",
+      "passed": true
+    },
+    {
+      "id": "RETAINED159_IDS_EXACT",
+      "passed": true
+    },
+    {
+      "id": "ALL_CURRENT_GUARDED_PASS",
+      "passed": true
+    },
+    {
+      "id": "COMBINED_COUNTS_DISTINCT",
+      "passed": true
+    },
+    {
+      "id": "CURRENT_UNIQUE371",
+      "passed": true
+    },
+    {
+      "id": "CURRENT_TEST_RUNTIME_PIN",
+      "passed": true
+    },
+    {
+      "id": "CURRENT_TEST_ENTRY_PIN",
+      "passed": true
+    },
+    {
+      "id": "NO_TARGET_BOUNDARIES",
+      "passed": true
+    },
+    {
+      "id": "PRIOR60_AND45_MEMBERS",
+      "passed": true
+    },
+    {
+      "id": "BOTH_OLD_SIX_FINDINGS_RETAINED",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_API.md",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_IMPLEMENTATION-DESIGN.md",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_README.md",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_RECIPE.md",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_SHELL-BINDING.md",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_author-control.template.bash",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_capture-once.bash",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_check-history.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_check-map.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_claim.schema.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_control-templates.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_controls.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_document-factories.schema.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_entry.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_external-inputs.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_guard-exit.bash",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_guarded-current-results.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt01-controls.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt01-entry.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt01-runtime.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt01.stderr.txt",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt01.stdout.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt02-controls.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt02-entry.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt02-retained.stderr.txt",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt02-retained.stdout.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt02-runtime.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt02-six-fix-controls.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt02-six-fix.stderr.txt",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_history/attempt02-six-fix.stdout.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_install-map.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_integration-map.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_interpretation-sites.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_operation.schema.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_postclose.template.bash",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_preparation-input-pins.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_provenance.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_resource-ownership-map.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_retained-control-attribution.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_runtime.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_scope.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_six-fix-controls.py",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_six-fix-current-results.json",
+      "passed": true
+    },
+    {
+      "id": "UTF8_NO_FORMAT_CHAR_static-checks.py",
+      "passed": true
+    }
+  ],
+  "subjectCodeExecuted": false,
+  "shellExecuted": false,
+  "actualTargetActions": 0,
+  "selectedPublicInputs": 39,
+  "limits": "Source syntax, literal, public-input and documentation consistency only. Current guarded semantic results are reused exactly, not reexecuted by this checker. No actual source/tool/shell/timing or resource acceptance."
+}

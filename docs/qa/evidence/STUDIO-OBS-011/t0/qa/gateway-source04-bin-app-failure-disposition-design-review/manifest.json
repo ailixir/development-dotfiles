@@ -1,0 +1,84 @@
+{
+  "kind": "QUINN_EXACT_BIN_APP_FAILURE_DISPOSITION_DESIGN_REVIEW",
+  "reviewer": "Quinn",
+  "subjectManifestSha256": "77c2f47d3448d216c5ea36a29b24927093b98ea35f4c5e9fd5c0a817f9a6414c",
+  "verdict": "HOLD_DESIGN_CORRECTION_REQUIRED",
+  "mandatoryFindings": [
+    "BINAPP-QA-KNOWNPID-01"
+  ],
+  "mandatoryCount": 1,
+  "payloadCount": 10,
+  "files": [
+    {
+      "path": "SHA256SUMS",
+      "sha256": "ec9723e955159006be8d8e6091d76092885900e0c30415ee277632961cd270ac",
+      "bytes": 701,
+      "mode": 420
+    },
+    {
+      "path": "checks.json",
+      "sha256": "77fa682bb8cec00d5ea0e29103756db245a1f0b7cf0ce89da852193149eecbe8",
+      "bytes": 61735,
+      "mode": 420
+    },
+    {
+      "path": "fake.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "fake.stdout",
+      "sha256": "b9bb52b74c854bca4ca84a4ed3269d6f326db92b49bd137c18910b1194f0a9d8",
+      "bytes": 7649,
+      "mode": 420
+    },
+    {
+      "path": "fake_cases.py",
+      "sha256": "63f3549b8eb3f85e952a1af9f99e8aea3e351ecab4b3d41461412eb99fd86fb3",
+      "bytes": 4549,
+      "mode": 420
+    },
+    {
+      "path": "findings.json",
+      "sha256": "73102daa8337b7939333940f2b4be6534f3e042b87320d9350d678d27bcebdf5",
+      "bytes": 2246,
+      "mode": 420
+    },
+    {
+      "path": "history.json",
+      "sha256": "d5bfde9e83e33edb0123c2cb28f4872d400084f5bce0f5627f5800353af68d20",
+      "bytes": 778,
+      "mode": 420
+    },
+    {
+      "path": "pins.json",
+      "sha256": "3c00ee1dd20c679eab26869f7d956eca70ec253ddc41e9db6c44105cf7c6ed53",
+      "bytes": 53399,
+      "mode": 420
+    },
+    {
+      "path": "review.md",
+      "sha256": "00334dff66626bdef6ed9064bb7067d22588a6e8da1979007301b646192eb261",
+      "bytes": 6447,
+      "mode": 420
+    },
+    {
+      "path": "verify.py",
+      "sha256": "f00cb5112dd1d3a9548d0045933e7d771cc0b31c00242f97160f0c489b497d76",
+      "bytes": 6146,
+      "mode": 420
+    }
+  ],
+  "independentStaticChecks": 1020,
+  "independentFakeChecks": 28,
+  "independentFakeCases": 6,
+  "reusedAuthorFiniteChecks": 756,
+  "reusedAuthorSyntaxOnly": 2,
+  "actualTargetActions": 0,
+  "runtimeResourceReads": 0,
+  "sourceOnly": true,
+  "actualRuntimeAuthority": false,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

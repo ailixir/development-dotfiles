@@ -1,0 +1,113 @@
+{
+  "status": "CONDITIONAL_LATER_PROPOSAL_ONLY_NO_STAGING_APPLICATION",
+  "originalBaseSha256": "14c69d86bf81ebac22411d93961aa61164577110b13772fd3c30759921c9af33",
+  "immutableResume4PreviewSha256": "38b0405fd41bdf27a8bef42d9049764bf1a3a1940e097aa7523be75660d7730b",
+  "immutableStagingSuffixSha256": "7696c1cc4822261f945b6964b3cbf82dc6dbfdb5bf97ba2c3758d820ffeefb15",
+  "registrationSuffixSha256": "7607bb9d91c9f1d8339f4aa584a50499bb661d59c57454e430e8b14af17a41fe",
+  "preferredLaterOrder": "actual original + separately adopted carrier suffix + byte-identical accepted staging suffix + dated actual carrier-state correction overlay, all independently reviewed/rebound before application",
+  "afterCarrierBeforeStagingSha256": "18a0a558f8c3d6b25662d5e49ab0e45d63a3570b2297c56a474d594d823ecad4",
+  "afterCarrierAndUnchangedStagingSuffixSha256": "6cade32db0afbb3f6b91cd4293ea025e2e8317c30571c3e0d4c08c0d709ac47a",
+  "ifStagingAppliedFirst": "Revalidate original+immutable staging suffix as current base, then append byte-identical carrier note. Do not apply original-base full replacement over changed target.",
+  "noTwoSuffixOrderEquivalenceClaim": true,
+  "laterStateOverlays": [
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/10.34-appendix.md",
+      "line": 18,
+      "exactBefore": "| I | AC-23/24 | AC-23 remains external federated-session proof. AC-24 Code view is superseded by 012B deletion; PM now names STUDIO-OBS-008 as carrier of record under the existing DoD and later PO recommendation (PM-010-AC24-CARRIER-20261018). PO registration/application remains pending; preserve dissent. | AC-23: ingress / QA, ED-06 / SPK-02 Q1. AC-24: carrier STUDIO-OBS-008 named; PO application pending; do not tick. |",
+      "sourceSha256": "446b10794349ef72f97ddeb5e7aca4d57c7e7c86a02807769c026824005b4a64",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/10.34-appendix.md",
+      "line": 52,
+      "exactBefore": "| AC-24 | Superseded Code view, deleted by 012B. 008 plan explanation is the successor surface; PM names STUDIO-OBS-008 as carrier of record; existing AC-6 owns the successor explanation. PO application pending; no old criterion pass/tick. | Superseded Code view; PM names STUDIO-OBS-008 under current DoD / ADR disposition; PO application pending | PM choice recorded; PO application pending |",
+      "sourceSha256": "446b10794349ef72f97ddeb5e7aca4d57c7e7c86a02807769c026824005b4a64",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/10.34-appendix.md",
+      "line": 63,
+      "exactBefore": "Register-owner follow-through: after acceptance, PO updates `docs/qa/staging-acceptance-register.md` front matter and origin mappings for surviving/re-cut criteria. Retain legacy dispositions and original skipped/failed history. A green guard over seven original machine-registered IDs cannot prove the other 26. Original 10.34 tasks remain open. PM names STUDIO-OBS-008 in `pm-ac24-carrier-decision.json`; the carrier choice is supplied, while PO/register-owner application remains pending. This proposal does not tick the old criterion or apply a transfer to the frozen register. A11Y-5/6/7, where referenced, remain \u201cdescoped per ADR-SC-006, post-GA backlog\u201d, never PASS/WAIVED; retain functional labels/focus/responsiveness only. The real nontechnical pilot remains in OBS-010.",
+      "sourceSha256": "446b10794349ef72f97ddeb5e7aca4d57c7e7c86a02807769c026824005b4a64",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/10.34-appendix.md",
+      "line": 65,
+      "exactBefore": "PM placement decision PM-010-AC24-CARRIER-20261018 confirms STUDIO-OBS-008 as carrier of record, limited to its existing AC-6 successor explanation. This supplies the PM choice only; independent review and PO/register-owner application remain pending. Original criterion/dissent/history is unchanged; no staging result or external acceptance follows.",
+      "sourceSha256": "446b10794349ef72f97ddeb5e7aca4d57c7e7c86a02807769c026824005b4a64",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/preview/docs/stories/10.34.story.md",
+      "line": 459,
+      "exactBefore": "| I | AC-23/24 | AC-23 remains external federated-session proof. AC-24 Code view is superseded by 012B deletion; PM now names STUDIO-OBS-008 as carrier of record under the existing DoD and later PO recommendation (PM-010-AC24-CARRIER-20261018). PO registration/application remains pending; preserve dissent. | AC-23: ingress / QA, ED-06 / SPK-02 Q1. AC-24: carrier STUDIO-OBS-008 named; PO application pending; do not tick. |",
+      "sourceSha256": "38b0405fd41bdf27a8bef42d9049764bf1a3a1940e097aa7523be75660d7730b",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/preview/docs/stories/10.34.story.md",
+      "line": 493,
+      "exactBefore": "| AC-24 | Superseded Code view, deleted by 012B. 008 plan explanation is the successor surface; PM names STUDIO-OBS-008 as carrier of record; existing AC-6 owns the successor explanation. PO application pending; no old criterion pass/tick. | Superseded Code view; PM names STUDIO-OBS-008 under current DoD / ADR disposition; PO application pending | PM choice recorded; PO application pending |",
+      "sourceSha256": "38b0405fd41bdf27a8bef42d9049764bf1a3a1940e097aa7523be75660d7730b",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/preview/docs/stories/10.34.story.md",
+      "line": 504,
+      "exactBefore": "Register-owner follow-through: after acceptance, PO updates `docs/qa/staging-acceptance-register.md` front matter and origin mappings for surviving/re-cut criteria. Retain legacy dispositions and original skipped/failed history. A green guard over seven original machine-registered IDs cannot prove the other 26. Original 10.34 tasks remain open. PM names STUDIO-OBS-008 in `pm-ac24-carrier-decision.json`; the carrier choice is supplied, while PO/register-owner application remains pending. This proposal does not tick the old criterion or apply a transfer to the frozen register. A11Y-5/6/7, where referenced, remain \u201cdescoped per ADR-SC-006, post-GA backlog\u201d, never PASS/WAIVED; retain functional labels/focus/responsiveness only. The real nontechnical pilot remains in OBS-010.",
+      "sourceSha256": "38b0405fd41bdf27a8bef42d9049764bf1a3a1940e097aa7523be75660d7730b",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/preview/docs/stories/10.34.story.md",
+      "line": 506,
+      "exactBefore": "PM placement decision PM-010-AC24-CARRIER-20261018 confirms STUDIO-OBS-008 as carrier of record, limited to its existing AC-6 successor explanation. This supplies the PM choice only; independent review and PO/register-owner application remain pending. Original criterion/dissent/history is unchanged; no staging result or external acceptance follows.",
+      "sourceSha256": "38b0405fd41bdf27a8bef42d9049764bf1a3a1940e097aa7523be75660d7730b",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/10.34-dispositions.json",
+      "line": 162,
+      "exactBefore": "      \"scope\": \"Superseded Code view deleted by 012B; existing OBS-008 AC-6 plan explanation is the named successor scope. PM names STUDIO-OBS-008 carrier of record; PO/register-owner application pending. Never mark old Code view passed.\",",
+      "sourceSha256": "7b9089b7b88ac9092096df3629f6c2c44ad278646413a34d6d7d89e3391c5e2c",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/10.34-dispositions.json",
+      "line": 163,
+      "exactBefore": "      \"inheritedGate\": \"Superseded Code view; PM names STUDIO-OBS-008 under current DoD / ADR disposition; PO application pending\",",
+      "sourceSha256": "7b9089b7b88ac9092096df3629f6c2c44ad278646413a34d6d7d89e3391c5e2c",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/10.34-dispositions.json",
+      "line": 223,
+      "exactBefore": "  \"carrierDecision\": \"PM-010-AC24-CARRIER-20261018: STUDIO-OBS-008 named; PO/register-owner application pending\",",
+      "sourceSha256": "7b9089b7b88ac9092096df3629f6c2c44ad278646413a34d6d7d89e3391c5e2c",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/traceability.md",
+      "line": 59,
+      "exactBefore": "Exact patches do not close OI-25 until the accepted runbook is applied after root opens the quoted inputs. A prepared facilitator script is not a real pilot; placeholders are unassigned and all denominators remain blank/NOT_RUN. No p95, provider cost, app probe, participant, approval or release verdict is invented. The first-learn disclosure is identical in the runbook and readiness preview and retains `___ steps at p95` with pending T4. 10.34 disposition records PM's STUDIO-OBS-008 carrier choice, with PO/register-owner application pending, and preserves all 33 IDs; Group D is legacy-only, never PASS. ADR-SC-006 remains functional-only.",
+      "sourceSha256": "07a7f9f8674cb2b69303d7d24aca6bed56d63b823f557dae34aab6a4a387c581",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/traceability.md",
+      "line": 77,
+      "exactBefore": "PM-010-AC24-CARRIER-20261018 names STUDIO-OBS-008 carrier of record under 10.34's DoD, later ADR disposition and PO recommendation; existing 008 AC-6 already owns successor plan explanation. `pm-ac24-carrier-decision.json` binds the authority. This supplies the PM choice only: PO application, independent review and all original staging/external gates remain pending. No old criterion is ticked, no new 008 work is invented and no past transfer/acceptance is fabricated.",
+      "sourceSha256": "07a7f9f8674cb2b69303d7d24aca6bed56d63b823f557dae34aab6a4a387c581",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    },
+    {
+      "source": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/preview/docs/qa/evidence/studio-observed-authoring/release-readiness.md",
+      "line": 68,
+      "exactBefore": "| 10.34 single-path staging re-registration |Analyst / PO register owner / PM |Off-tree Groups A\u2026N / all 33 AC proposal prepared; not applied/accepted, no staging criterion passed. PM names STUDIO-OBS-008 as AC-24 carrier of record (existing AC-6 only); PO registration/application and independent review pending. | `docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md`; `docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/traceability.md` (off-tree proposal); `docs/stories/10.34.story.md`; `docs/qa/staging-acceptance-register.md`; `docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/10.34-appendix.md` (off-tree proposal) |2026-10-18 |",
+      "sourceSha256": "8a72c073c25f13c61744ffd51a9ebe06a0e18ac3fbe9737febb939f0c4946ee3",
+      "controlledFutureDelta": "After ACTUAL verified three-target application only, replace carrier-only PO-pending state with \"AC-24 carrier registration applied: <actual receipt path/hash>; all broader Groups A\u2013N/33-AC registration, external proofs and acceptance remain pending\". Preserve five-column ledger shape and all other gate/result text. Prefer a separately reviewed dated overlay; never rewrite immutable resume4."
+    }
+  ],
+  "noAuthorPackageWritten": true
+}

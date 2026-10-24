@@ -1,0 +1,86 @@
+{
+  "kind": "QUINN_SOURCE07_INSTALL_INPUT_AUTHOR_REVIEW_SEAL",
+  "subjectManifestSha256": "044755a1f70943e4eb7523a8a60a45e7feb4ff442a23d91f0ddf8df6cd76072f",
+  "verdict": "CONDITIONAL_SOURCE_ONLY_SUPPORT",
+  "mandatoryFindings": 0,
+  "mandatoryFindingCount": 0,
+  "sourceOnly": true,
+  "actualRuntimeAuthority": false,
+  "files": [
+    {
+      "path": "conditions.json",
+      "sha256": "0469c88532c7106b8cd22fa1ac5bae2b2f334f3e0e28c0bd310e3a2e55615089",
+      "bytes": 7066,
+      "mode": 420
+    },
+    {
+      "path": "critical-results.json",
+      "sha256": "7c878e5092561186c86ff28c737b3a53394816e10c28525762164f05dc3c5ea3",
+      "bytes": 38873,
+      "mode": 420
+    },
+    {
+      "path": "critical.py",
+      "sha256": "b0cfe1c465af62c982c9c713fea83111df0895c2ff3a2ff31467f74f32f8e26a",
+      "bytes": 13385,
+      "mode": 420
+    },
+    {
+      "path": "evidence-and-history.json",
+      "sha256": "676a48c4ae22d6dc1e6476b8032e0a5122778f3349477ddbf3d20df2707f3464",
+      "bytes": 2693,
+      "mode": 420
+    },
+    {
+      "path": "findings.json",
+      "sha256": "974073e54a2ec2f815044f108b090af55af335c0dff4962e81a8fa621692feb8",
+      "bytes": 306,
+      "mode": 420
+    },
+    {
+      "path": "finite-results.json",
+      "sha256": "1a6358095655449d82e29fbfce96cbe8ff26d7615b433b0cf5532cd3a6482309",
+      "bytes": 159959,
+      "mode": 420
+    },
+    {
+      "path": "review-record.json",
+      "sha256": "42f37bbd750995138fa37c3dfc3f027865103bb5facdccbdf9f3a8d35853eeea",
+      "bytes": 1118,
+      "mode": 420
+    },
+    {
+      "path": "review.md",
+      "sha256": "383786d5766b57c53358ffb75d1f5ac4c626d2c0cc1a5e43ebe2c031f66b0594",
+      "bytes": 4471,
+      "mode": 420
+    },
+    {
+      "path": "seal.py",
+      "sha256": "d6bbf3b90cd150b613f5455c3e73276eddf52261740f86e6e091954fd42afdfc",
+      "bytes": 14560,
+      "mode": 420
+    },
+    {
+      "path": "verify.py",
+      "sha256": "0eb1d134760d4392aab8be7a3c7ddccd9fb6067c9ed702a5b9648a3bd5cf962a",
+      "bytes": 6610,
+      "mode": 420
+    }
+  ],
+  "manifestAndChecksumSelfExcluded": true,
+  "explicitMembership": [
+    "conditions.json",
+    "critical-results.json",
+    "critical.py",
+    "evidence-and-history.json",
+    "findings.json",
+    "finite-results.json",
+    "review-record.json",
+    "review.md",
+    "seal.py",
+    "verify.py",
+    "manifest.json",
+    "SHA256SUMS"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "kind": "SANDBOX_VALIDATED009_FOURFILE_CANDIDATE_APPLICATION_HELD_FOR_QA_ROOT",
+  "paths": [
+    {
+      "path": "studio-runner/src/run/observedBootstrap.ts",
+      "requiredActualBeforeSha256": "bbb3436035c9fcbe2fd787412ccb2a039dae3152a902dd4d1f3bbeeb533728d5",
+      "validatedCandidateSha256": "118235cec9ceb30f85ef7ce86f69e1267c053bbeb3b326ad6e0374856f8f906e",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-timeout-fix/green/studio-runner/src/run/observedBootstrap.ts",
+      "validatedSandboxPath": "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/src/run/observedBootstrap.ts"
+    },
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "requiredActualBeforeSha256": "0a1b85fcb121d21f2d4c4c0b262cce3216d4a86097c459a6d82ffa8755f2e1c0",
+      "validatedCandidateSha256": "a94fb77b98a6766d5f11b8cd4b5b1462e6e66e41e3f66f0a9b1303297460d5c5",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-timeout-fix/green/studio-runner/src/run/browser.ts",
+      "validatedSandboxPath": "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/src/run/browser.ts"
+    },
+    {
+      "path": "studio-runner/test/run/observedBootstrap.test.ts",
+      "requiredActualBeforeSha256": "07d9a14d9752bb698cbdacdaeb18872f64450dfd5ce10fc00d95b39122273675",
+      "validatedCandidateSha256": "3452a7d456db97dfed1efeb75f0b73a7ff25abb899013d3863f3df7d9c6b92f7",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-timeout-fix/green/studio-runner/test/run/observedBootstrap.test.ts",
+      "validatedSandboxPath": "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/test/run/observedBootstrap.test.ts"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "requiredActualBeforeSha256": "17b59ff7ad67f2249697c059c266453300f658dc0b9e1846438a34da01fcaef5",
+      "validatedCandidateSha256": "6dcf6e7d85e40a797316b8e6318597dc55235d4d43bf1c9c4d47dcd09293b8d2",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-timeout-fix/green/studio-runner/test/fixtures-tier/guided-start-deadline.test.ts",
+      "validatedSandboxPath": "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/test/fixtures-tier/guided-start-deadline.test.ts"
+    }
+  ],
+  "combinedPatchSha256": "80ba7fb147ea6cfd1d78905e4d12444281090fb189a9d801a325c64b4f4a176e",
+  "testsPatchSha256": "0571a1c535ae07af8880f91c1151f5897bb45fc95560813d322cb6808f0d1ab7",
+  "productPatchSha256": "1695ca06b6bf6906d55a01e4f84300dd349d5d434ff2837280b31f38357d3a49",
+  "runtimeResultsPath": "results.json",
+  "runtimeResultsSha256": "c676185859b5a5a471025861cc7a04f4b9456bac7d9606391775d4d33ab0f6a3",
+  "scopeProof": "Exactoldproductredthenproduct-onlygreenwithidenticaltestbuffers;original19cases/assertionsremain.",
+  "actualApplyReleased": false,
+  "independentFinalQaRequired": true,
+  "requiresFreshActualBeforeHashes": true,
+  "copyDistDependenciesOrOtherFiles": false,
+  "rtMergeReleased": false
+}

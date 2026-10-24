@@ -1,0 +1,157 @@
+{
+  "phaseVerdict": "SLOT4_QUALIFIED_CLOSED_PHASE_ONLY_PAIR_PENDING",
+  "receiptPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final01-results.json",
+  "receiptSha256": "d7a059784339f29206885bc7d434670ee79ab7133c240b22812c97ef857b58f7",
+  "terminalPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/4-terminal.json",
+  "terminalSha256": "e05c2c83c50b95b46209715fba2c70b94a127770d2c241eaaeaa5e29ece5c1af",
+  "readerWaitPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/4-reader-wait.json",
+  "readerWaitSha256": "2142abfe0aada32712633f0c5f505161a2c92985bd2fdf6d2525784d3f265811",
+  "afterGuardSha256": "4bd6d10e49e95e45d3862d40ee3bd7542794bf561591467cc79f1f54adcbb296",
+  "afterSourceSha256": "633a652f48b5d71b6224467c1461520a41037e5c01d03a685387b2baca4addcb",
+  "afterFullCatalogSha256": "1c032f45fa57f754083a5c4793c641d1b9df499f34d87a0c1e51eedbbae8cc85",
+  "counts": {
+    "total": 108,
+    "passed": 108,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "taskCounts": {
+    "test": {
+      "total": 46,
+      "passed": 46,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "guidedIncrementalTest": {
+      "total": 62,
+      "passed": 62,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "exactIdentityStatusCounterIndependent": true,
+  "distinctCases": 108,
+  "expectedNonSingletonVariants": 35,
+  "reader": {
+    "candidateSha256": "5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8",
+    "exactCaseCount": 108,
+    "auditFinalHashes": {
+      "test": "6b12bd49c47207f44ef9e3645bde974495e6f799cad1926cbff267abff38abed",
+      "guidedIncrementalTest": "ee4e92c637f6495ef413f2872480a864b23723535ba4389877c58fb196fa22f2"
+    },
+    "cohortHashes": {
+      "test": "caf1f90daf09bf664f72bf3ae3d101a93075c6b9bcff5a5903613007c7a5fbe1",
+      "guidedIncrementalTest": "e534ae365db950c632ea9da3cc86cac5686467414659f4f90c1a801282af6404"
+    },
+    "reconciled": true,
+    "notQaVerdict": true,
+    "batonRequiresSecondConsecutiveIdenticalGreen": true
+  },
+  "rawExits": {
+    "outer": 0,
+    "tasked": 0,
+    "gradle": 0,
+    "reader": 0
+  },
+  "freshGeneratedOutputMetadataRows": 10,
+  "xmlFiles": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+      "sha256": "c9c319044726777c8848f1944d96b800335bb2bd42c1ffffa2b8cc8110eecdd2",
+      "bytes": 1747186,
+      "mtimeNs": 1792560493361128200,
+      "mode": "0o644",
+      "task": "test"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final01-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+      "sha256": "dc260714655536eea66529158d71dea29fb13bff57ef5917a38d1a24cb2ed838",
+      "bytes": 17636808,
+      "mtimeNs": 1792563056827940000,
+      "mode": "0o644",
+      "task": "guidedIncrementalTest"
+    }
+  ],
+  "htmlFilesCount": 12,
+  "staticCssJsAssetsRetainEarlierMtimes": 6,
+  "execFiles": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final01-task-outputs/test/jacoco/test.exec",
+      "sha256": "780c905bbcd4c38d929983724bd5278b42eff48821b067d05894dac3834d88ac",
+      "bytes": 1014075,
+      "mtimeNs": 1792560492818605000,
+      "mode": "0o644",
+      "task": "test",
+      "nonempty": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final01-task-outputs/guidedIncrementalTest/jacoco/guidedIncrementalTest.exec",
+      "sha256": "f5f6935d2cee66bf97277e014459d55624c173bf6db7dd85b68649bce20f4859",
+      "bytes": 1001513,
+      "mtimeNs": 1792563056017620000,
+      "mode": "0o644",
+      "task": "guidedIncrementalTest",
+      "nonempty": true
+    }
+  ],
+  "sourceA1DistE19AndFullCatalogExactBeforeAfter4": true,
+  "afterGuard": {
+    "sourceRowsAndDistExact": true,
+    "postD2FullInputsExact": true,
+    "protected21CanonicalBrowserEnvironmentExact": true,
+    "chart22Quotes6Exact": true,
+    "image": {
+      "Id": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+      "User": "pwuser",
+      "Cmd": [
+        "sh",
+        "-c",
+        "ulimit -c 0 && exec node dist/main.js"
+      ],
+      "Entrypoint": null,
+      "Os": "linux",
+      "Architecture": "arm64"
+    },
+    "host": {
+      "atUtc": "2026-10-21T06:11:01.975473+00:00",
+      "acPower": true,
+      "lidOpen": true,
+      "rawHostBodiesExported": false
+    }
+  },
+  "originalDriverNativeWait": {
+    "slot": 4,
+    "rawOuterExit": 0,
+    "collectorPid": 69560,
+    "originalPopenWaitReturned": true
+  },
+  "readerWait": {
+    "slot": 4,
+    "rawReaderExit": 0,
+    "stdoutSha256": "d11f616d9d5aa1bef59debe312051e2a2381d15fcebca7bb17873ad060eb2be4",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rawBodiesExported": false
+  },
+  "originalSourceExpectedCaseProvenanceHistoricalNotRuntimePin": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "currentRuntimeCandidate": "5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8",
+  "elapsedSeconds": 3707.88,
+  "privateCohortAuditXmlHtmlLogBodiesReadByQa": false,
+  "finalLedgerContinuityPendingClosedProducer": true,
+  "pairVerdictPending5AndFinalSeal": true,
+  "metadataAuditQualification": "An initial freshness expression incorrectly required cached CSS/JS asset mtimes to be fresh; corrected scope requires generated HTML/index/XML and nonempty exec only. No product command or source changed.",
+  "reportKind": "INTERIM_SLOT4_CLOSED_PHASE_QA_NOT_PAIR_VERDICT",
+  "pairCredit": false,
+  "whole6Authorized": false,
+  "overallPairVerdict": null,
+  "preservedPending": [
+    "slot5 terminal",
+    "slot5 original reader",
+    "after5 guards",
+    "original inhibitor wait",
+    "closed CAS ledger continuity",
+    "root final producer pin"
+  ]
+}

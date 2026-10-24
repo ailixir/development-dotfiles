@@ -1,0 +1,43 @@
+{
+  "reviewer": "Quinn independent QA",
+  "disposition": "SUPPORTED_EXACT_DIAGNOSTIC_AND_WORKER_ONLY_FAILED_UNIT_RECOVERY",
+  "scope": "Prior bounded disposition plus source and root-produced safe metadata consistency; later closed unit requires separate independent review",
+  "taskInputs": [
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gst-unit02-owned-stall-disposition-intent.txt",
+      "sha256": "ac946a61d58fbdfc97a6ccab2a295be02d49c0e164c9898b8fbb7464e709c0db"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gst-unit02-owned-stall-disposition-context.json",
+      "sha256": "bddb8519a4401e9f22175eaf06f8bea7f13495246b4393b422640dc2ac886b20"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gst-unit02-owned-stall-disposition-preflight.json",
+      "sha256": "489c67d94306a03e343cde54b73d6930579fe363deeaafc90c6f36e312418bc4"
+    }
+  ],
+  "mandatoryPinsVerified": 7,
+  "safeMetadataBound": 10,
+  "auditResultSha256": "29e9686354decb208381e261c1294bb6d8329a4c3e253ad3f4d89af65a14c986",
+  "reviewSha256": "3973436bed55c9e108a1dbaf34367068ec83a3ba4e87298d4e9f2464cff8037a",
+  "nativeResult": "ABORTED_FAILED_INCOMPLETE",
+  "full99Proof": false,
+  "taskCollectionComplete": false,
+  "semanticStopCompletion": false,
+  "deadlockProved": false,
+  "originalReplayCauseEstablished": false,
+  "actualActionsByRoot": {
+    "diagnostic": "one jcmd84782 Thread.print; exit0; no target signal",
+    "recovery": "one SIGTERM84782; PID_ABSENT; no SIGKILL"
+  },
+  "rootReportedLaterClosure": "compile reconciliation0 and original sources restored; wrapper/shell exit1 and lock free at07:52:34; separate review owed",
+  "freshKernelVerificationByThisReviewer": false,
+  "rawThreadBodyOrProtectedFailedOutputRead": false,
+  "nativeOrSignalActionByThisReviewer": false,
+  "sourceOrHelperChanged": false,
+  "retryReleased": false,
+  "mainReplayOrGeneralW1Released": false,
+  "C8LaneOrLifecycleCredit": false,
+  "declaredBudgetUsd": 500,
+  "actualAggregateSpend": "unavailable"
+}

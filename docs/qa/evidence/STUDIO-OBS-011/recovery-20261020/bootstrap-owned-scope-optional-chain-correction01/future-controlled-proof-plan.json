@@ -1,0 +1,187 @@
+{
+  "state": "UNEXECUTED_INDEPENDENT_CANDIDATE_QA_AND_SEPARATE_ROOT_RUNTIME_GO_REQUIRED",
+  "nodePathPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+  "pnpmVersion": "10.33.0",
+  "prerequisites": [
+    "Independent bounded two-guard sourceQA and new root runtime task/context/preflight/lane release.",
+    "Current private partialproof01 GREEN4737/e22c/f4cc and exact terminal13995/E19/cache191/actual3eD698/before13993 guards. No new seed/emit.",
+    "Apply ONLY private4737-to-newgreen.patch; honest full new helper source/catalog binding. Do not apply old v2 overlay to current4737 preimage."
+  ],
+  "sequence": [
+    {
+      "id": "types-green-pre01",
+      "executed": false,
+      "sourceStage": "GREEN_OVERLAY",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-owned-scope-v2-types-green-pre01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ]
+    },
+    {
+      "id": "lint-green-pre01",
+      "executed": false,
+      "sourceStage": "GREEN_OVERLAY",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-owned-scope-v2-lint-green-pre01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+        "test/helpers/bootstrapProcessTreeObservation.ts",
+        "test/run/bootstrapProcessTreeObservation.test.ts"
+      ]
+    },
+    {
+      "id": "red01",
+      "executed": false,
+      "sourceStage": "OLD_V2_HELPER_SAME_APPENDED_UNIT",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-owned-scope-v2-red01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/run/bootstrapProcessTreeObservation.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--testNamePattern",
+        "^bootstrap process-tree observation captures the complete owned inventory despite explicitly unknown unrelated process metadata$"
+      ]
+    },
+    {
+      "id": "green01",
+      "executed": false,
+      "sourceStage": "HELPER_ONLY_NEW_GREEN",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-owned-scope-v2-green01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/run/bootstrapProcessTreeObservation.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1"
+      ]
+    },
+    {
+      "id": "types-green01",
+      "executed": false,
+      "sourceStage": "HELPER_ONLY_NEW_GREEN",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-owned-scope-v2-types-green01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ]
+    },
+    {
+      "id": "lint-green01",
+      "executed": false,
+      "sourceStage": "HELPER_ONLY_NEW_GREEN",
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-owned-scope-v2-lint-green01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+        "test/helpers/bootstrapProcessTreeObservation.ts",
+        "test/run/bootstrapProcessTreeObservation.test.ts"
+      ]
+    }
+  ],
+  "stageTransitions": [
+    {
+      "before": "types-green-pre01",
+      "patch": "private4737-to-newgreen.patch",
+      "changes": "helper4737\u2192optional-chain helper only; e22cunit/f4ccfixture exact"
+    },
+    {
+      "before": "red01",
+      "patch": "helper-only-green.inverse.patch",
+      "changes": "only new helper\u2192unmodified v2 b15b; same appended unit/fixture"
+    },
+    {
+      "before": "green01",
+      "patch": "helper-only-green.patch",
+      "admission": "Only genuine primary assertion RED at exact marker/frame with capture undefined/failureCode TABLE_INVALID, correct41discovery/40filters and no alternate setup/suite error.",
+      "changes": "helper only; same test bytes"
+    }
+  ],
+  "primarySelector": "^bootstrap process-tree observation captures the complete owned inventory despite explicitly unknown unrelated process metadata$",
+  "primaryExpectedAssertionLine": 315,
+  "redToGreenSameTestBytes": true,
+  "all41GreenNoFailuresSkipsOrOmissionsRequired": true,
+  "explicitUnitConfig": "vitest.config.ts",
+  "coverageEnabled": false,
+  "finalActualFullUnitCoverage": "OWED; no focused/full coverage equivalence claim",
+  "cache": {
+    "exactPath": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+    "version": "3.2.7",
+    "expectedKeys": 191,
+    "onlyChangedEntry": ":test/run/bootstrapProcessTreeObservation.test.ts",
+    "other190ValuesIncludingFailedNativeEntryExact": true,
+    "onlyFiniteDurationFailedFields": true,
+    "noResetDeleteOrBroadExclusion": true
+  },
+  "productCarry": "Complete238E19/configs/dependencies/browser/production inputs exact; test-only helper/unit excluded from product config. No new emit/RT AST matrix unless a relevant actual delta requires it.",
+  "original37AndLegacyRed": "Retain37 byte-exact controls. Existing legacy counterexample carries only with independent exact source/API semantics concurrence; narrow original primary only if affected, no matrix.",
+  "native": "NO_GO: separate independent pure execution QA/resource/root admission required.",
+  "qualified301PlusSix": "UNFULFILLED; new5+historicalorderly cannot combine; original307 and6 FAIL retained.",
+  "unexpectedFailure": "STOP with actual evidence/no source adjustment/retry",
+  "actualApplication": "NO_GO",
+  "compilerParserTestsNativeExecutedHere": false,
+  "rowTailCorrectionBinding": "buffer-and-patch-bindings.json",
+  "candidate01Primary313WasForecastOnlyRetainedInOldPacket": true,
+  "metadataVectorsWithinSameFourNames": [
+    "unknown state",
+    "empty command",
+    "C0 U+0001",
+    "CR U+000D",
+    "JavaScript line separator U+2028"
+  ],
+  "partialProof01ManifestSha256": "d4be1991a0f61232e02c056f883ecac18fd0f2d6abc45d8a297191146dc7a6a5",
+  "partialProof01Types0Lint1Retained": true,
+  "newStaticValidationRequiredEvenThoughPriorTypes0": true
+}

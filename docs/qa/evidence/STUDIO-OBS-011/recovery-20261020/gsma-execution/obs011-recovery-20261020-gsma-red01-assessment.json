@@ -1,0 +1,33 @@
+{
+  "label": "obs011-recovery-20261020-gsma-red01",
+  "verdict": "INTENDED_OLD_BEHAVIOR_ASSERTION_RED",
+  "collectorExit": 1,
+  "resultSha256": "4a85a8544ed9fcc0a3000ef847980b217aac5f69c1cdfecd6abe9d046d25004f",
+  "counts": {
+    "total": 2,
+    "passed": 0,
+    "failed": 2,
+    "errors": 0,
+    "skipped": 0
+  },
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true,
+  "completeSelectedDiscovery": true,
+  "stageRolledBack": false,
+  "intendedFailures": [
+    {
+      "name": "anIdAlreadyQueuedOrInFlightIsNeverSubmittedTwice",
+      "sourceLine": 169,
+      "actualQueueSize": 2,
+      "expectedQueueSize": 1
+    },
+    {
+      "name": "shedWarnsOncePerIntervalAndTheNextTickKeepsOneDurableAttempt",
+      "sourceLine": 122,
+      "actualWarnings": 0,
+      "expectedWarnings": 1
+    }
+  ],
+  "stageState": "neutral service seam and both exact new tests present; controller/projector old; no lifecycle credit"
+}

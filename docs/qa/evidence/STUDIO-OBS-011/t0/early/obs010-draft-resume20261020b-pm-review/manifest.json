@@ -1,0 +1,35 @@
+{
+  "kind": "INDEPENDENT_PM_BOUNDED_DOCUMENT_CORRECTION_REVIEW",
+  "createdAtUtc": "2026-10-20T03:09:10.216578+00:00",
+  "exclusiveWriteRoot": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020b-pm-review",
+  "subject": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020b",
+  "subjectManifestSha256": "834450ec1f7da042d0629cf1d649351c9f8a1006357a75af12cb312a53adfbe5",
+  "subjectSHA256SUMSSha256": "f6b741a8d12503310bb6bd8052d01c73682a5f32f9992a8dbf47fd552bb7ccbb",
+  "decision": "BOUNDED_SOURCE_ONLY_CORRECTION_ACCEPTED_WITH_ALL_RETAINED_CONDITIONS",
+  "mandatoryFindings": [],
+  "resolvedFinding": "PM010-R1-LANE-LOCATORS",
+  "inheritedPMConditions": "C01-C14 all full exact refs in review.json/review.md",
+  "inheritedQAConditions": "1-10 all full exact refs in review.json/review.md",
+  "isStoryQaGate": false,
+  "isFormalProductAcceptance": false,
+  "isReleaseApproval": false,
+  "authorizesApplicationOrSourceWindowOrRuntime": false,
+  "payloads": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020b-pm-review/inspection.json",
+      "sha256": "2153587f1b37acbd0013abbda512475acc13d54c7fad523bdd8603086ef1fbe4",
+      "bytes": 21736
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020b-pm-review/review.json",
+      "sha256": "eef7672e3cf142e2c321a28c74affad8a4e5a17f9d343e10f76403bd3b375f35",
+      "bytes": 4965
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020b-pm-review/review.md",
+      "sha256": "ff6ccd38c396eab0f29de8ebd0ee59d086de83e5707fb3d79f6bf42b260b6c2b",
+      "bytes": 7752
+    }
+  ],
+  "selfExclusion": "manifest excludes itself; checksum list includes manifest and payloads and excludes itself"
+}

@@ -1,0 +1,31 @@
+{
+  "kind": "SOURCE06_COMPLETE_ACQUISITION_TRANSFER_AND_DISCHARGE",
+  "designBeforeCode": "OWNERSHIP06-DESIGN.md",
+  "states": [
+    "OPEN",
+    "TRANSFERRED",
+    "CLOSED",
+    "UNKNOWN"
+  ],
+  "entryOwner": "System.ownership exists before load; main try includes load",
+  "immediateAcquisitions": [
+    "Custody owner registration before open",
+    "Custody.open_fd token before fstat/validation",
+    "common loader owned_open before validation"
+  ],
+  "temporaryPaths": [
+    "Custody.read",
+    "Custody.create_fd/write",
+    "Custody.replace_exact",
+    "System.read",
+    "System.sink fdopen handle",
+    "System.lock_free"
+  ],
+  "transfer": "Sink token actual handle/closer before fstat; fdopen failure UNKNOWN",
+  "canonical": "Relay ownership view borrows ONLY validated caller directory owners; all temporary/unknown/orphan tokens remain blockers",
+  "discharge": "Effects release checks full ledger before caller close and complete finish after; load partial factories retain before Effects; main retains before load failure",
+  "closeProgress": "UNKNOWN before closer, CLOSED only after successful return; never retry UNKNOWN/CLOSED bare descriptor; reuse distinct token",
+  "constructorAndTransientTests": "acquisition06-check-results.json",
+  "reachedHelpersAndEarlyLoadTests": "ownership06-helper-results.json",
+  "allOriginalActualPlatformAndSourceGatesOwed": true
+}

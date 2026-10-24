@@ -1,0 +1,24 @@
+--- STUDIO-OBS-011.Done.0.2.20.md
++++ STUDIO-OBS-011.Done.0.2.21.md
+@@ -659,6 +659,16 @@
+ ### Lifecycle Transition
+ 
+ QA applied **InReview → Done**, patch **0.2.19**, on 2026-10-21; waiver inactive. This is the original scoped011 gate, not deployment/provider/human approval for009/010.
++
++### Review Date: 2026-10-21 — QA metadata format successor
++
++Reviewed By: Quinn (@qa; independent SDC reviewer)
++Reviewed Revision: story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee
++Waiver Active: false
++
++This entry supplies parser-compatible provenance for the unchanged QA15 acceptance decision. It preserves Done, all original criteria, evidence, qualifications and the single QA15 lifecycle transition. All18 task markers were already checked by root16. Only administrative formatting is updated; no new acceptance review, waiver, lifecycle transition, execution or publication is performed. The original QA15 text and gate snapshot remain dated history.
++
++Gate: PASS → docs/qa/gates/STUDIO-OBS-011-final-sweep-inventory-re-run-leftover-removal-and-code-health-refactors.yml
+ 
+ ## Change Log
+ 
+@@ -687,3 +697,4 @@
+ | 2026-10-21 | 0.2.18 | Development complete — Status: InProgress → InReview. Added dated final Dev Agent Record, actual shared103-entry File List/story-after-hash supplement, carried dispositions and developer task submission; preserved AC/PO/QA Results and failed history. Formal independent QA remains pending; no Done, runtime or external acceptance. | @dev (Dex) |
+ | 2026-10-21 | 0.2.19 | QA Gate PASS — Status: InReview → Done | @qa (Quinn) |
+ | 2026-10-21 | 0.2.20 | Post-gate developer checklist bookkeeping after independent QA PASS: applicable checks and focused configured fallback reviews recorded; independent per-row review and symbol reconciliation accepted. Eventual PR/push routing remains @devops-only with verified gates; conditional N/A because no remote operation was requested or performed. Only three Quality Gates markers resolved; QA-owned Done, QA Results and reviewed canonical content preserved. | @dev (Dex) |
++| 2026-10-21 | 0.2.21 | QA provenance metadata formatting compatibility only; Done and the original QA15 acceptance decision preserved. No second lifecycle transition or implementation review. | @qa (Quinn) |

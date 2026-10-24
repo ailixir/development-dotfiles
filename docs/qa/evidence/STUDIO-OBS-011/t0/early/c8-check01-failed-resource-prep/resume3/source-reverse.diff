@@ -1,0 +1,783 @@
+--- resume3/failed_resource.py
++++ resume2/failed_resource.py
+@@ -18,8 +18,7 @@
+     if not ok: raise Hold(reason)
+ def digest(data): return hashlib.sha256(data).hexdigest()
+ def compact(value): return json.dumps(value,sort_keys=True,separators=(',',':')).encode()
+-def member_name(name): return isinstance(name,str) and bool(name) and '/' not in name and name not in ('.','..') and '\x00' not in name
+-def canonical(name): return member_name(name)
++def canonical(name): return isinstance(name,str) and bool(name) and '/' not in name and name not in ('.','..')
+ 
+ 
+ ROOT = Path('/Users/brunobuger/orca/workspaces/put-checks/ui-studio')
+@@ -91,11 +90,11 @@
+             got=os.fstat(fd);need(self.key(got)==want and stat.S_ISDIR(got.st_mode),'DIRECTORY_CHANGED')
+             named=os.stat('/',follow_symlinks=False) if parent is None else os.stat(name,dir_fd=parent,follow_symlinks=False)
+             need(self.key(named)==want and stat.S_ISDIR(named.st_mode),'DIRECTORY_MOVED_OR_LINKED')
+-    def members(self,_member=member_name):
++    def members(self):
+         self.check();names=os.listdir(self.fd);self.check()
+-        need(all(_member(n) for n in names) and len(names)==len(set(names)),'MEMBER_NAMES');return names
+-    def read(self,name,mode=0o600,_member=member_name):
+-        need(_member(name),'MEMBER_NAME');self.check()
++        need(all(canonical(n) for n in names) and len(names)==len(set(names)),'MEMBER_NAMES');return names
++    def read(self,name,mode=0o600):
++        need(canonical(name),'MEMBER_NAME');self.check()
+         fd=os.open(name,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=self.fd)
+         try:
+             before=os.fstat(fd);need(stat.S_ISREG(before.st_mode) and (mode is None or stat.S_IMODE(before.st_mode)==mode),'MEMBER_MODE')
+@@ -104,14 +103,14 @@
+             key=lambda x:(x.st_dev,x.st_ino,x.st_mode,x.st_size,x.st_mtime_ns)
+             need(key(before)==key(after)==key(named),'MEMBER_CHANGED');self.check();return data
+         finally:os.close(fd)
+-    def absent(self,name,_member=member_name):
+-        need(_member(name),'MEMBER_NAME');self.check()
++    def absent(self,name):
++        self.check()
+         try:os.stat(name,dir_fd=self.fd,follow_symlinks=False)
+         except FileNotFoundError:answer=True
+         else:answer=False
+         self.check();return answer
+-    def write(self,name,value,_member=member_name):
+-        need(_member(name),'OUTPUT_NAME');self.check()
++    def write(self,name,value):
++        need(canonical(name),'OUTPUT_NAME');self.check()
+         fd=os.open(name,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600,dir_fd=self.fd)
+         try:
+             with os.fdopen(fd,'wb',closefd=False) as out:out.write(json.dumps(value,indent=2).encode()+b'\n');out.flush();os.fsync(fd)
+@@ -127,71 +126,13 @@
+     raw=c.read('root-disposition-authorization.json');need(digest(raw)==release_sha,'ROOT_RELEASE_HASH')
+     a=json.loads(raw)
+     need(a.get('authorized') is True and a.get('authorizedBy')=='root' and isinstance(a.get('codePins'),dict),'ROOT_BOOTSTRAP')
+-    buffers={}
+     for name in ('failed_resource.py','predicates.py','guard-failed-resource.bash'):
+-        buffers[name]=c.read(name)
+-        need(digest(buffers[name])==a['codePins'].get(name),'CODE_BEFORE_EXECUTION')
+-    source=buffers['predicates.py'];c.check()
++        need(digest(c.read(name))==a['codePins'].get(name),'CODE_BEFORE_EXECUTION')
++    source=c.read('predicates.py');c.check()
+     scope={'__name__':'_exact_verified_failed_resource_policy'}
+     exec(compile(source,'<verified-predicates>','exec'),scope)
+-    for name in ('PROTOCOL','SOURCE','GAPS','Hold','need','authority','preserved','current','admission','readiness','permit','gate','typed_identity','negative_record','held_record'):globals()[name]=scope[name]
++    for name in ('PROTOCOL','SOURCE','GAPS','Hold','need','canonical','authority','preserved','current','admission','readiness','permit','gate','typed_identity','negative_record','held_record'):globals()[name]=scope[name]
+     return a
+-
+-
+-
+-def verified_bytes(b,path,extra=None):
+-    raw=safe_bytes(path);want=b.get('loaded',{}).get(str(path))
+-    if extra and str(path) in extra:want=extra[str(path)]
+-    if want is not None:need(digest(raw)==want,'IMMUTABLE_INTERPRET_BUFFER_CHANGED')
+-    return raw
+-
+-def verified_read(b,path):
+-    need(str(path) in b['loaded'],'UNBOUND_IMMUTABLE_JSON')
+-    return json.loads(verified_bytes(b,path))
+-
+-def external_buffer(path):
+-    custody=Custody(Path(path).parent)
+-    try:return custody.read(Path(path).name,None)
+-    finally:custody.close()
+-
+-def validate_python_roles(a):
+-    roles=a['pythonRoles'];need(set(roles)=={'launch','reported','process'},'PYTHON_ROLE_SET')
+-    for role,item in roles.items():
+-        need(set(item)=={'path','sha256'} and isinstance(item['path'],str) and Path(item['path']).is_absolute() and str(Path(item['path']).resolve())==item['path'],'PYTHON_ROLE_PATH')
+-        need(digest(external_buffer(item['path']))==item['sha256'],'PYTHON_ROLE_BINARY')
+-    need(str(Path(sys.executable).resolve())==roles['reported']['path'],'PYTHON_REPORTED_ROLE')
+-    need(isinstance(sys.orig_argv,list) and bool(sys.orig_argv) and str(Path(sys.orig_argv[0]).resolve())==roles['launch']['path'],'PYTHON_LAUNCH_ROLE')
+-
+-def client_identity(b,scope,row):
+-    """Exact configured process image, independent of unrelated basename maps."""
+-    pid=row['pid'];roles=b['a']['pythonRoles'];process=roles['process']
+-    before={key:scope['pid_text'](pid,key) for key in ('lstart','comm','command')}
+-    need(before['lstart']==row['start'] and isinstance(before['command'],str) and digest(before['command'].encode())==row['argvHash'],'CLIENT_OBSERVATION_START_ARGV')
+-    need(before['comm']==process['path'],'CLIENT_PROCESS_ROLE')
+-    mappings=scope['capture'](['/usr/sbin/lsof','-nP','-a','-p',str(pid),'-d','txt','-F','n'],(0,))
+-    need(isinstance(mappings,str) and 'n'+process['path'] in mappings.splitlines(),'CLIENT_PROCESS_MAP_MISSING')
+-    image=Path(process['path']);custody=Custody(image.parent)
+-    try:
+-        first=os.stat(image.name,dir_fd=custody.fd,follow_symlinks=False)
+-        key=lambda st:(st.st_dev,st.st_ino,st.st_size,st.st_mtime_ns,st.st_mode)
+-        raw=custody.read(image.name,None);need(digest(raw)==process['sha256'],'CLIENT_PROCESS_FILE_HASH')
+-        need(str(Path(sys.executable).resolve())==roles['reported']['path'] and digest(external_buffer(roles['reported']['path']))==roles['reported']['sha256'],'CLIENT_REPORTED_ROLE')
+-        after={k:scope['pid_text'](pid,k) for k in ('lstart','comm','command')}
+-        need(before==after,'CLIENT_IDENTITY_UNSTABLE')
+-        final_mappings=scope['capture'](['/usr/sbin/lsof','-nP','-a','-p',str(pid),'-d','txt','-F','n'],(0,))
+-        need(isinstance(final_mappings,str) and 'n'+process['path'] in final_mappings.splitlines(),'CLIENT_PROCESS_MAP_UNSTABLE')
+-        need(str(Path(sys.executable).resolve())==roles['reported']['path'] and digest(external_buffer(roles['reported']['path']))==roles['reported']['sha256'],'CLIENT_REPORTED_ROLE_UNSTABLE')
+-        again=custody.read(image.name,None);last=os.stat(image.name,dir_fd=custody.fd,follow_symlinks=False)
+-        need(key(first)==key(last) and digest(again)==process['sha256'],'CLIENT_IMAGE_UNSTABLE');custody.check()
+-    finally:custody.close()
+-    return {**row,'identityComplete':True,'commHash':digest(before['comm'].encode()),'executableHash':digest(process['path'].encode()),'executableFileHash':process['sha256'],'reportedExecutableHash':digest(roles['reported']['path'].encode()),'reportedExecutableFileHash':roles['reported']['sha256'],'launchExecutableHash':digest(roles['launch']['path'].encode())}
+-
+-def negative_header(denial,release_sha,pin_sha,shell_pid,_member=member_name):
+-    need(isinstance(denial,dict) and set(denial)=={'kind','unit','releaseSha256','activeLockSha256','status','shellPid','readinessAbsent','permitAbsent','client','clientJournal','clientJournalSha256'},'NEGATIVE_SCHEMA')
+-    typed_identity(denial['client'])
+-    need(_member(denial['clientJournal']),'NEGATIVE_JOURNAL_MEMBER')
+-    expected={'kind':'NEW_VERIFICATION_CLIENT','mode':'gate','releaseSha256':release_sha,'identity':denial['client']}
+-    negative_record(denial,expected,release_sha,pin_sha,shell_pid)
+ 
+ 
+ def original_membership(actual,wanted):
+@@ -199,14 +140,7 @@
+ 
+ 
+ def write_new(b,name,value):b['custody'].write(name,value)
+-def local_bytes(b,name):
+-    need(member_name(name),'MEMBER_NAME');raw=b['custody'].read(name)
+-    loaded=b.setdefault('loaded',{});key=str(HERE/name)
+-    want=loaded.get(key) or b.get('a',{}).get('pins',{}).get(name)
+-    if want is not None:need(digest(raw)==want,'LOCAL_IMMUTABLE_BUFFER_CHANGED')
+-    loaded[key]=digest(raw);return raw
+-def local(b,name):return json.loads(local_bytes(b,name))
+-
++def local(b,name):return json.loads(b['custody'].read(name))
+ def optional(b,name):return None if b['custody'].absent(name) else local(b,name)
+ 
+ 
+@@ -223,35 +157,31 @@
+         need(name in allowed or re.fullmatch(r'(client-[0-9]+-[0-9a-f]{16}|utility-[0-9]+-[0-9a-f]{16}-[0-9]+)\.json',name),'UNEXPECTED_NAMESPACE_MEMBER');c.read(name)
+     need(a['originalReleaseSha256']==OLD_RELEASE and a['activeLockSha256']==PIN and a['terminalIndexSha256']==INDEX,'EXACT_ORIGINAL_AUTHORITY')
+     loaded={str(HERE/'root-disposition-authorization.json'):release_sha}
+-    buffers={}
+-    def pin(path,want,mode=None):
+-        raw=safe_bytes(path,mode);need(digest(raw)==want,'IMMUTABLE_PIN_CHANGED');loaded[str(path)]=want;buffers[str(path)]=raw;return raw
+-    def verified_json(path,want):return json.loads(pin(path,want))
++    def pin(path,want,mode=None):need(digest(safe_bytes(path,mode))==want,'IMMUTABLE_PIN_CHANGED');loaded[str(path)]=want
+     need(set(a['codePins'])=={'predicates.py','failed_resource.py','guard-failed-resource.bash'},'CODE_SET')
+     for n,h in a['codePins'].items():pin(HERE/n,h,0o600)
+     need(set(a['pins'])=={'retained-contract.json','input-pins.json'},'LOCAL_PIN_SET')
+     for n,h in a['pins'].items():pin(HERE/n,h,0o600)
+-    inputs=json.loads(buffers[str(HERE/'input-pins.json')])
++    inputs=local({'custody':c},'input-pins.json')
+     for row in inputs['records']:pin(ROOT/row['path'],row['sha256'])
+-    index=verified_json(UNIT/'root-terminal-evidence-index-01.json',INDEX);need(len(index['facts'])==27,'TERMINAL_INDEX_SET')
++    index=read(UNIT/'root-terminal-evidence-index-01.json');need(len(index['facts'])==27,'TERMINAL_INDEX_SET')
+     for row in index['facts']:pin(ROOT/row['path'],row['sha256'])
+     need(digest(safe_bytes(UNIT/'root-actual-unit-release.json'))==OLD_RELEASE and digest(safe_bytes(UNIT/'active-lock.json'))==PIN,'ANCESTRY')
+-    old=verified_json(UNIT/'root-actual-unit-release.json',OLD_RELEASE)
++    old=read(UNIT/'root-actual-unit-release.json')
+     for group,directory in (('executionPackagePins','execution'),('controlPackagePins','control')):
+         for rel,h in old[group].items():pin(UNIT/rel,h,0o600)
+         package=Custody(UNIT/directory,0o700)
+         try:original_membership({directory+'/'+n for n in package.members()},old[group])
+         finally:package.close()
+-    retained=json.loads(buffers[str(HERE/'retained-contract.json')]);preserved(a,retained,inputs['retainedContract'])
++    retained=local({'custody':c},'retained-contract.json');preserved(a,retained,inputs['retainedContract'])
+     for role,h in a['reviewPins'].items():
+         row=a['reviewRecords'][role];need(row['sha256']==h,'REVIEW_BINDING');pin(ROOT/row['path'],h)
+-    validate_python_roles(a)
++    need(a['pythonExecutable']==str(Path(sys.executable).resolve()) and digest(safe_bytes(Path(a['pythonExecutable'])))==a['pythonExecutableSha256'],'PYTHON_BINARY')
+     c.check()
+-    return {'a':a,'sha':release_sha,'loaded':loaded,'retained':retained,'custody':c,'pin':verified_json(UNIT/'active-lock.json',PIN),'plan':verified_json(UNIT/'execution/successor-plan.json',old['executionPackagePins']['execution/successor-plan.json']),'utilities':[],'utilityCounter':0}
++    return {'a':a,'sha':release_sha,'loaded':loaded,'retained':retained,'custody':c,'pin':read(UNIT/'active-lock.json'),'plan':read(UNIT/'execution/successor-plan.json'),'utilities':[],'utilityCounter':0}
+ 
+ 
+ def utility_capture(b,command,allowed=(0,)):
+-    need(isinstance(allowed,tuple) and bool(allowed) and all(type(x) is int and x in (0,1) for x in allowed),'UTILITY_ALLOWED_STATUS_SCOPE')
+     need(isinstance(command,list) and command and all(isinstance(x,str) for x in command),'UTILITY_COMMAND')
+     key=command[0];need(key in b['a']['observationExecutables'],'UTILITY_EXECUTABLE')
+     binding=b['a']['observationExecutables'][key];path=Path(binding['path'])
+@@ -263,11 +193,10 @@
+     child=subprocess.Popen(actual,stdin=subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+     b['utilityCounter']+=1
+     need(type(child.pid) is int and child.pid>0,'UTILITY_PID_TYPE')
+-    record={'kind':'SYNCHRONOUS_BOUND_OBSERVATION_UTILITY','client':b['client'],'releaseSha256':b['sha'],'pid':child.pid,'command':actual,'executableSha256':binding['sha256'],'terminal':False,'status':None,'allowedStatuses':list(allowed),'stderrComplete':False,'stderrEmpty':False,'stdoutComplete':False}
++    record={'kind':'SYNCHRONOUS_BOUND_OBSERVATION_UTILITY','client':b['client'],'releaseSha256':b['sha'],'pid':child.pid,'command':actual,'executableSha256':binding['sha256'],'terminal':False,'status':None,'allowedStatuses':list(allowed)}
+     try:
+         output,error=child.communicate(timeout=15)
+-        record.update(terminal=True,status=child.returncode,stderrComplete=isinstance(error,str),stderrEmpty=error=='',stdoutComplete=isinstance(output,str))
+-        need(isinstance(output,str),'UTILITY_STDOUT_INCOMPLETE')
++        record.update(terminal=True,status=child.returncode)
+         if command==['/bin/ps','-ww','-axo','pid=,ppid=,lstart=,command=']:
+             matching=[line.split(None,7) for line in output.splitlines() if line.split(None,1) and line.split(None,1)[0]==str(child.pid)]
+             need(len(matching)==1 and len(matching[0])==8,'CENSUS_UTILITY_ROW_UNKNOWN')
+@@ -276,8 +205,7 @@
+         name='utility-'+str(b['client']['pid'])+'-'+digest(b['client']['start'].encode())[:16]+'-'+str(b['utilityCounter'])+'.json'
+         b['utilities'].append(record)
+         if b.get('clientBound') is True:write_new(b,name,record)
+-    need(record['stdoutComplete'] is True and record['stderrComplete'] is True and record['stderrEmpty'] is True and type(child.returncode) is int and child.returncode in allowed,'UTILITY_FAILED_OR_UNKNOWN')
+-    if child.returncode==1:need(output=='' and key in ('/bin/ps','/usr/sbin/lsof'),'NONEMPTY_NO_RESULT_UTILITY')
++    need(type(child.returncode) is int and child.returncode in allowed,'UTILITY_FAILED_OR_UNKNOWN')
+     b['lastUtility']=record;return output
+ 
+ 
+@@ -305,7 +233,7 @@
+ 
+ 
+ def helpers(b):
+-    core_buffer=safe_bytes(CORE);need(digest(core_buffer)==CORE_SHA,'CORE_HASH');nodes=ast.parse(core_buffer).body
++    need(digest(safe_bytes(CORE))==CORE_SHA,'CORE_HASH');nodes=ast.parse(safe_bytes(CORE)).body
+     names={'sha','utc','regular','capture','pid_text','table','identity','project_role','boundary_inventory'};scope={'ROOT':ROOT}
+     exec(compile(ast.Module(body=[n for n in nodes if isinstance(n,(ast.Import,ast.ImportFrom)) or isinstance(n,ast.FunctionDef) and n.name in names],type_ignores=[]),'<pinned-readonly-core>','exec'),scope)
+     scope['capture']=lambda cmd,allowed=(0,):utility_capture(b,cmd,allowed)
+@@ -317,7 +245,7 @@
+             if row['projectMarkerCandidate'] and scope['project_role'](pid) is None:raise Hold('CURRENT_PROJECT_CANDIDATE_UNKNOWN')
+         return rows
+     scope['table']=table
+-    old=load_fixed_module(UNIT/'control/unlock_gate.py',OLD_GATE_SHA,'_old_source_only');old.safe_bytes=lambda path:verified_bytes(b,path,{str(old.PLAN):old.PLAN_SHA})
++    old=load_fixed_module(UNIT/'control/unlock_gate.py',OLD_GATE_SHA,'_old_source_only');old.safe_bytes=safe_bytes
+     return scope,old
+ 
+ 
+@@ -337,8 +265,8 @@
+     # Full row anchor is completed before the first absence decision.
+     argv=utility_capture(b,['/bin/ps','-ww','-p',str(os.getpid()),'-o','command=']).strip()
+     b['client']['argvHash']=digest(argv.encode())
+-    rows=scope['table']();who=client_identity(b,scope,rows[os.getpid()]);typed_identity(who)
+-    need(who['executableHash']==digest(b['a']['pythonRoles']['process']['path'].encode()) and who['executableFileHash']==b['a']['pythonRoles']['process']['sha256'],'OBSERVED_CLIENT_WRONG_PYTHON')
++    rows=scope['table']();who=scope['identity'](rows[os.getpid()]);typed_identity(who)
++    need(who['executableHash']==digest(b['a']['pythonExecutable'].encode()) and who['executableFileHash']==b['a']['pythonExecutableSha256'],'OBSERVED_CLIENT_WRONG_PYTHON')
+     b['client']=who;name='client-'+str(who['pid'])+'-'+digest(who['start'].encode())[:16]+'.json'
+     journal={'kind':'NEW_VERIFICATION_CLIENT','mode':mode,'releaseSha256':b['sha'],'identity':who}
+     write_new(b,name,journal);b['clientJournal']=name;b['clientBound']=True
+@@ -353,16 +281,16 @@
+         if name.startswith('client-'):
+             item=local(b,name);typed_identity(item['identity']);need(item['kind']=='NEW_VERIFICATION_CLIENT' and item['releaseSha256']==b['sha'],'CLIENT_HISTORY')
+             who=item['identity'];need(name=='client-'+str(who['pid'])+'-'+digest(who['start'].encode())[:16]+'.json','CLIENT_FILENAME')
+-            b['loaded'][str(HERE/name)]=digest(local_bytes(b,name));clients.append(who)
++            b['loaded'][str(HERE/name)]=digest(b['custody'].read(name));clients.append(who)
+     need(any(x==b['client'] for x in clients),'CLIENT_NOT_RECORDED')
+     for name in b['custody'].members():
+         if name.startswith('utility-'):
+             item=local(b,name);typed_identity(item['client'])
+-            need(item['client'] in clients and item['releaseSha256']==b['sha'] and item['kind']=='SYNCHRONOUS_BOUND_OBSERVATION_UTILITY' and item['terminal'] is True and type(item['status']) is int and type(item['pid']) is int and item['pid']>0 and item.get('stdoutComplete') is True and item.get('stderrComplete') is True and item.get('stderrEmpty') is True and isinstance(item.get('allowedStatuses'),list) and all(type(x) is int for x in item['allowedStatuses']) and item['status'] in item['allowedStatuses'],'UTILITY_HISTORY_UNKNOWN')
++            need(item['client'] in clients and item['releaseSha256']==b['sha'] and item['kind']=='SYNCHRONOUS_BOUND_OBSERVATION_UTILITY' and item['terminal'] is True and type(item['status']) is int and type(item['pid']) is int and item['pid']>0 and isinstance(item.get('allowedStatuses'),list) and all(type(x) is int for x in item['allowedStatuses']) and item['status'] in item['allowedStatuses'],'UTILITY_HISTORY_UNKNOWN')
+             need(isinstance(item['command'],list) and item['command'] and all(isinstance(v,str) for v in item['command']),'UTILITY_HISTORY_COMMAND')
+             token='utility-'+str(item['client']['pid'])+'-'+digest(item['client']['start'].encode())[:16]+'-'
+             need(name.startswith(token) and name[len(token):-5].isdigit(),'UTILITY_HISTORY_NAME')
+-            b['loaded'][str(HERE/name)]=digest(local_bytes(b,name))
++            b['loaded'][str(HERE/name)]=digest(b['custody'].read(name))
+     return clients,[x for x in clients if x!=b['client'] and rows.get(x['pid'],{}).get('start')==x['start']]
+ 
+ 
+@@ -371,7 +299,7 @@
+     for name in ('compile-reconcile','owned-compile-reconcile','compile-reconcile-authorization.json'):
+         path=UNIT/name;need(not path.exists() and not path.is_symlink(),'UNAUTHORIZED_COMPILE_PATH_PRESENT')
+     source=old.observe_source({'expectedFiles':b['plan']['source']['files'],'modes':b['plan']['sourceModes']},scope)
+-    receipt=verified_read(b,UNIT/'owned-full-check/receipt.json');roots=verified_read(b,UNIT/'root-live-phase-lineage-01-limited.json')
++    receipt=read(UNIT/'owned-full-check/receipt.json');roots=read(UNIT/'root-live-phase-lineage-01-limited.json')
+     recorded={(x['pid'],x['start']) for x in receipt['ownedIdentities']}
+     for role in ('phaseKeeper','collector'):recorded.add((roots[role]['pid'],roots[role]['start']))
+     need(len(recorded)==2439,'FINITE_RECORDED_UNION')
+@@ -418,26 +346,23 @@
+     live += [x for x in recorded if final_rows.get(x[0],{}).get('start')==x[1]]
+     _,final_prior=inventory_clients(b,final_rows);prior+=final_prior
+     result={'observationOk':True,'metadataUnchanged':unchanged,'codeUnchanged':unchanged,'sourceDigest':source,'sourceExact':source==SOURCE,'recordedCount':len(recorded),'liveOwned':live,'currentUnknown':unknown,'unexpectedDescendants':sorted(unexpected),'ownedListeners':listeners,'inheritedMatched':len(boundary['inheritedMatched']),'boundaryDefects':defects,'clientsComplete':True,'priorClientsLive':prior,'sameHolder':not postclose,'kernelHeld':not free,'kernelFree':free,'controllersAbsentOrReused':all(final_rows.get(pin[r+'Pid'],{}).get('start')!=pin[r+'Start'] for r in ('wrapper','shell')),'clientIdentities':clients,'observedAtEpoch':time.time()}
+-    for name in ('compile-reconcile','owned-compile-reconcile','compile-reconcile-authorization.json'):
+-        path=UNIT/name;need(not path.exists() and not path.is_symlink(),'LATE_FORBIDDEN_COMPILE_PATH')
+-    b['custody'].check();current(result,postclose);return result
++    current(result,postclose);return result
+ 
+ 
+ def pin_local(b,*names):
+-    for name in names:b['loaded'][str(HERE/name)]=digest(local_bytes(b,name))
++    for name in names:b['loaded'][str(HERE/name)]=digest(b['custody'].read(name))
+ 
+ def validate_negative(b):
+-    denial=local(b,'negative-readiness-denial.json');negative_header(denial,b['sha'],PIN,b['pin']['shellPid']);journal=local(b,denial['clientJournal'])
++    denial=local(b,'negative-readiness-denial.json');journal=local(b,denial['clientJournal'])
+     negative_record(denial,journal,b['sha'],PIN,b['pin']['shellPid']);return denial
+ 
+ 
+ def validate_admission(b):
+     ad=local(b,'root-admission.json');admission(ad,b['sha'],PIN);validate_negative(b)
+-    proof=local(b,'held-proof.json');held_record(proof,b['sha'],digest(local_bytes(b,'negative-readiness-denial.json')))
+-    need(type(ad.get('heldProofActualStatus')) is int and ad['heldProofActualStatus']==0 and ad.get('heldProofSeparateStatusCaptured') is True and ad.get('heldProofSha256')==digest(local_bytes(b,'held-proof.json')),'ADMISSION_HELD_PROOF')
+-    need(member_name(proof.get('clientJournal')) and proof['clientJournal']=='client-'+str(proof['client']['pid'])+'-'+digest(proof['client']['start'].encode())[:16]+'.json','HELD_JOURNAL_NAME')
++    proof=local(b,'held-proof.json');held_record(proof,b['sha'],digest(b['custody'].read('negative-readiness-denial.json')))
++    need(type(ad.get('heldProofActualStatus')) is int and ad['heldProofActualStatus']==0 and ad.get('heldProofSeparateStatusCaptured') is True and ad.get('heldProofSha256')==digest(b['custody'].read('held-proof.json')),'ADMISSION_HELD_PROOF')
+     journal=local(b,proof['clientJournal']);need(journal=={'kind':'NEW_VERIFICATION_CLIENT','mode':'held-proof','releaseSha256':b['sha'],'identity':proof['client']} and proof['clientJournalSha256']==digest(compact(journal)),'HELD_PROOF_CLIENT_JOURNAL')
+-    need(ad['negativeDenialSha256']==digest(local_bytes(b,'negative-readiness-denial.json')),'NEGATIVE_HASH')
++    need(ad['negativeDenialSha256']==digest(b['custody'].read('negative-readiness-denial.json')),'NEGATIVE_HASH')
+     pin_local(b,'root-admission.json','negative-readiness-denial.json','held-proof.json');return ad
+ 
+ 
+@@ -451,25 +376,25 @@
+         need(type(requested) is int and requested==1,'SEPARATE_NEGATIVE_STATUS_ONE');validate_negative(b)
+         need(optional(b,'readiness.json') is None and optional(b,'permit.json') is None,'HELD_PROOF_ORDER')
+         first=observe(b);second=observe(b)
+-        write_new(b,'held-proof.json',{'kind':'SAME_HOLDER_AFTER_NEGATIVE_PROOF','unit':'obs011-t0-c8-check01','releaseSha256':b['sha'],'negativeDenialSha256':digest(local_bytes(b,'negative-readiness-denial.json')),'verificationExit':0,'separateNegativeStatus':requested,'client':b['client'],'clientJournal':b['clientJournal'],'clientJournalSha256':digest(compact(local(b,b['clientJournal']))),'before':first,'after':second,'C8Credit':False});return
++        write_new(b,'held-proof.json',{'kind':'SAME_HOLDER_AFTER_NEGATIVE_PROOF','unit':'obs011-t0-c8-check01','releaseSha256':b['sha'],'negativeDenialSha256':digest(b['custody'].read('negative-readiness-denial.json')),'verificationExit':0,'separateNegativeStatus':requested,'client':b['client'],'clientJournal':b['clientJournal'],'clientJournalSha256':digest(compact(local(b,b['clientJournal']))),'before':first,'after':second,'C8Credit':False});return
+     if mode=='final':
+         need(optional(b,'readiness.json') is None and optional(b,'permit.json') is None,'NO_REUSE');validate_admission(b)
+         first=observe(b);second=observe(b)
+-        write_new(b,'readiness.json',{'protocol':PROTOCOL,'kind':'QUALIFIED_FAILED_RESOURCE_READINESS','verificationExit':0,'releaseSha256':b['sha'],'retainedContractSha256':b['a']['retainedContractSha256'],'expectedWrapperExit':1,'historicalGapCodes':GAPS,'C8Credit':False,'verifiedAtEpoch':time.time(),'before':first,'after':second,'admissionSha256':digest(local_bytes(b,'root-admission.json'))});return
++        write_new(b,'readiness.json',{'protocol':PROTOCOL,'kind':'QUALIFIED_FAILED_RESOURCE_READINESS','verificationExit':0,'releaseSha256':b['sha'],'retainedContractSha256':b['a']['retainedContractSha256'],'expectedWrapperExit':1,'historicalGapCodes':GAPS,'C8Credit':False,'verifiedAtEpoch':time.time(),'before':first,'after':second,'admissionSha256':digest(b['custody'].read('root-admission.json'))});return
+     if mode=='gate':
+-        ad=validate_admission(b);ready=local(b,'readiness.json');p=local(b,'permit.json');ready_sha=digest(local_bytes(b,'readiness.json'));before=time.time()
++        ad=validate_admission(b);ready=local(b,'readiness.json');p=local(b,'permit.json');ready_sha=digest(b['custody'].read('readiness.json'));before=time.time()
+         readiness(ready,b['sha'],b['a']['retainedContractSha256'],before);permit(p,ready,ready_sha,b['sha'],before,requested)
+-        need(ready['admissionSha256']==digest(local_bytes(b,'root-admission.json')),'ADMISSION_CHANGED');pin_local(b,'readiness.json','permit.json')
++        need(ready['admissionSha256']==digest(b['custody'].read('root-admission.json')),'ADMISSION_CHANGED');pin_local(b,'readiness.json','permit.json')
+         first=observe(b);second=observe(b);after=time.time()
+         decision=gate(b['a'],b['retained'],local(b,'input-pins.json')['retainedContract'],ad,ready,p,b['sha'],ready_sha,first,second,before,after,requested)
+-        write_new(b,'gate-allow.json',{'decision':decision,'releaseSha256':b['sha'],'readinessSha256':ready_sha,'permitSha256':digest(local_bytes(b,'permit.json')),'before':first,'after':second,'atEpoch':after,'expectedWrapperExit':1,'C8Credit':False});return
++        write_new(b,'gate-allow.json',{'decision':decision,'releaseSha256':b['sha'],'readinessSha256':ready_sha,'permitSha256':digest(b['custody'].read('permit.json')),'before':first,'after':second,'atEpoch':after,'expectedWrapperExit':1,'C8Credit':False});return
+     need(mode=='postclose','MODE');validate_admission(b)
+     result=local(b,'root-wrapper-result.json');allowed=local(b,'gate-allow.json')
+-    need(type(result['actualWrapperExit']) is int and result['actualWrapperExit']==1 and result['separatelyCaptured'] is True and result['releaseSha256']==b['sha'] and result['gateAllowSha256']==digest(local_bytes(b,'gate-allow.json')),'ACTUAL_WRAPPER_RESULT')
+-    need(allowed['decision']=='ALLOW_QUALIFIED_FAILED_RESOURCE_EXIT_ONE' and allowed['releaseSha256']==b['sha'] and allowed['readinessSha256']==digest(local_bytes(b,'readiness.json')) and allowed['permitSha256']==digest(local_bytes(b,'permit.json')),'CLOSE_CHAIN')
++    need(type(result['actualWrapperExit']) is int and result['actualWrapperExit']==1 and result['separatelyCaptured'] is True and result['releaseSha256']==b['sha'] and result['gateAllowSha256']==digest(b['custody'].read('gate-allow.json')),'ACTUAL_WRAPPER_RESULT')
++    need(allowed['decision']=='ALLOW_QUALIFIED_FAILED_RESOURCE_EXIT_ONE' and allowed['releaseSha256']==b['sha'] and allowed['readinessSha256']==digest(b['custody'].read('readiness.json')) and allowed['permitSha256']==digest(b['custody'].read('permit.json')),'CLOSE_CHAIN')
+     ready=local(b,'readiness.json');p=local(b,'permit.json')
+     need(type(allowed['expectedWrapperExit']) is int and allowed['expectedWrapperExit']==1 and allowed['C8Credit'] is False,'GATE_ALLOW_EXIT_TYPE')
+-    readiness(ready,b['sha'],b['a']['retainedContractSha256'],allowed['atEpoch']);permit(p,ready,digest(local_bytes(b,'readiness.json')),b['sha'],allowed['atEpoch'],1)
++    readiness(ready,b['sha'],b['a']['retainedContractSha256'],allowed['atEpoch']);permit(p,ready,digest(b['custody'].read('readiness.json')),b['sha'],allowed['atEpoch'],1)
+     pin_local(b,'root-wrapper-result.json','gate-allow.json','readiness.json','permit.json')
+     first=observe(b,True);second=observe(b,True);write_new(b,'postclose.json',{'status':'QUALIFIED_FAILED_RESOURCE_POSTCLOSE_OBSERVED','releaseSha256':b['sha'],'actualWrapperExit':1,'before':first,'after':second,'historicalGapCodes':GAPS,'C8Credit':False})
+ 
+--- resume3/input-pins.json
++++ resume2/input-pins.json
+@@ -92,146 +92,6 @@
+       "bytes": 166
+     },
+     {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/RECIPE.md",
+-      "sha256": "07f7e206e9c43beb6e4fee5228f64d516bc58a4d0f64e12278f12a8c16966d66",
+-      "bytes": 9239
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/SHA256SUMS",
+-      "sha256": "7fab611cb24d8d65f02b1f539858f416ae69483acd33e75b0ee9e9a15ed6c66c",
+-      "bytes": 2159
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/adapter-check-results-before-census-binding.json",
+-      "sha256": "12e9a30d4feaaa3f8943f766ecbc51b5fb58a5ecb6695f0a27ad5be377c591c0",
+-      "bytes": 5012
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/adapter-check-results-before-client-listener.json",
+-      "sha256": "d32d07170b9dcef8e93d9a1b6d92c8dbc0cd6fbba595e2aa29a199fd37ff774b",
+-      "bytes": 5192
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/adapter-check-results-before-final-schemas.json",
+-      "sha256": "d32d07170b9dcef8e93d9a1b6d92c8dbc0cd6fbba595e2aa29a199fd37ff774b",
+-      "bytes": 5192
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/adapter-check-results-before-utility-integration.json",
+-      "sha256": "fee8c089aaeee371771da24e5ff87edeebe017148f7109e0ad5d43ca206dbce9",
+-      "bytes": 5276
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/adapter-check-results-initial.json",
+-      "sha256": "59af7c84638edac356024851ca6b90df45e9be401e741ec3bf7db09b2d652b5a",
+-      "bytes": 3528
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/adapter-check-results.json",
+-      "sha256": "a82535e0d64ec46c730e8a5a73d2b2835cf656fe1f94323a0e262d9fe9856c56",
+-      "bytes": 5859
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/adapter_checks.py",
+-      "sha256": "6111c982f76ee2e318bd54d5e614bddef0111bd16159a800141963f53fd7be28",
+-      "bytes": 21550
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/changed-code-map.json",
+-      "sha256": "07c47653f5bf561efb7249a439c88906ed8a4658edf905c678e6c93708e3f149",
+-      "bytes": 4441
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/check-history.json",
+-      "sha256": "bdad45e2f1ab5f86d01b802ff464bb893fa5c8fe1483a1abd3c54f82ee2e41dc",
+-      "bytes": 1176
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/failed_resource.py",
+-      "sha256": "d2b16869d66fee4407bd94ab9a39110360ea0275682e076eb27a6e4a503c65e0",
+-      "bytes": 29662
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/findings-resolution.json",
+-      "sha256": "69e05d41dca6f25a065990d50ea41aded4abe0d8f32d854794fc81461622a45a",
+-      "bytes": 2132
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/guard-failed-resource.bash",
+-      "sha256": "bb62fc5d5f7b594e7d43081072b0519d6dcaaa91d2072771796dcd59d7e93c2c",
+-      "bytes": 975
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/input-pins.json",
+-      "sha256": "22461380cac64811c24f80ba1bbf6caefece993c8ce4b5ca5f6d51fd6c6dd53c",
+-      "bytes": 34914
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/install-map.json",
+-      "sha256": "cbc98f0e98151a6a4efb214ee38d695359b41c1e7accb47efbbbef0ea6d2ce1f",
+-      "bytes": 1802
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/manifest.json",
+-      "sha256": "38c5d4cc0ae6477dc0f60a63d3c76792953daca72ab4233e54ae271405728b0b",
+-      "bytes": 5235
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/permit.template.json",
+-      "sha256": "d142462cfc136d2ef8b7298bc4b7cf39a15c001b77cfbe327567f7c790d2ba4a",
+-      "bytes": 307
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/predicates.py",
+-      "sha256": "acacf72b8d998e018178e8e93554d448998b86b39f6ce30346eeeb8fbbe8bf5a",
+-      "bytes": 8957
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/pure-check-results.json",
+-      "sha256": "0a7eea0f785787264cc1575764fa0acb4ab5915db3a86d8fe2f810f807905e44",
+-      "bytes": 7644
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/pure_checks.py",
+-      "sha256": "e5649d401ac9a7ae135a4f8f4e1a1645ec527604bc8ac446727348d017b084b7",
+-      "bytes": 9854
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/retained-contract.json",
+-      "sha256": "1ded4101bbfa934049e41c12c2139c3d43bf5b0a9d6925a064807ec170c46b09",
+-      "bytes": 21101
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/root-admission.template.json",
+-      "sha256": "de2a77e5db3e91ab20b88ff2cf94d0dd74f6b5e20fa19244a56923e0ae4d8ca6",
+-      "bytes": 701
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/root-disposition-authorization.template.json",
+-      "sha256": "8a42f5691442a0851915c67b906751ff17ab575d90741f87092fd8990e339966",
+-      "bytes": 3168
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume2/root-wrapper-result.template.json",
+-      "sha256": "b54c55482e104265fbdfcd8dd8f63eac61e400d1bfed097902461e9d2dca6335",
+-      "bytes": 166
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/root-external-python-main-compatibility-02.json",
+-      "sha256": "fdb559ffdd90bf770b22b68e502e984945dc63ef4e280ad567336db2450170f6",
+-      "bytes": 2661
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/root-external-python-role-bindings-03.json",
+-      "sha256": "8211d3e287e97dffd0bd9f126d51babb9a4ca802ce6d2feaa447d575d4d60289",
+-      "bytes": 1384
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/root-external-python-tool-compatibility-01.json",
+-      "sha256": "eb5e17fdaa0509387bfba9293aec1c0c9ca4f1fbd850b38874f6cfab10c4c9d0",
+-      "bytes": 1157
+-    },
+-    {
+       "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/root-resume1-membership-observation.json",
+       "sha256": "e946f5d447b91b5d9d81804e986a9a7a00584973a01234242c148841040aacf9",
+       "bytes": 1520
+@@ -277,36 +137,6 @@
+       "bytes": 7799
+     },
+     {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-failed-resource-resume2-code-review/findings.json",
+-      "sha256": "e1b1e7b94688378684eaef6eeb54007bee740858a2ab38136a97ec157c29f5f3",
+-      "bytes": 1534
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-failed-resource-resume2-code-review/independent-results.json",
+-      "sha256": "7d4788ab21e3d6d9076d25d5de3e909d08a59e51a70a5cf68c7a6260a6ca5ead",
+-      "bytes": 4422
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-failed-resource-resume2-code-review/input-pins.json",
+-      "sha256": "cf406b133f0559951c7d42f53c2f734c9f67387f88cedf3a697abb2e8869d762",
+-      "bytes": 22979
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-failed-resource-resume2-code-review/manifest.json",
+-      "sha256": "bcea848d7f9693fee7e73e511cf125ff21e661c026151089d9f7e01464137af5",
+-      "bytes": 1209
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-failed-resource-resume2-code-review/reproduce.py",
+-      "sha256": "276cb22fbc2358d593b580f52ef40aede0277ecbd73b153281d6c2cc74a1de00",
+-      "bytes": 10596
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-failed-resource-resume2-code-review/review.md",
+-      "sha256": "1d191cf48c460b9cc55725dd153deac7ecbb541e522d65bf307214568d3ddfed",
+-      "bytes": 8397
+-    },
+-    {
+       "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-check01-terminal-failed-resource-design-review/manifest.json",
+       "sha256": "815738c59684e12628eb26cf8aa18726666d97e4047e93c5cb140bc12acbaf21",
+       "bytes": 1205
+@@ -362,86 +192,6 @@
+       "bytes": 1589
+     },
+     {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/author-adapter-replay.json",
+-      "sha256": "a82535e0d64ec46c730e8a5a73d2b2835cf656fe1f94323a0e262d9fe9856c56",
+-      "bytes": 5859
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/author-legacy-replay.json",
+-      "sha256": "0a7eea0f785787264cc1575764fa0acb4ab5915db3a86d8fe2f810f807905e44",
+-      "bytes": 7644
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/findings.json",
+-      "sha256": "f07b935be4a4558cde8f63eec435027d8a62e4a6291f76aed0ed7852a7ce0a65",
+-      "bytes": 4176
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/independent-check-results.json",
+-      "sha256": "75355c962d3bf2198da0f8782e91339623c27933fa291a47c876de2e50f22cff",
+-      "bytes": 2653
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/independent_checks.py",
+-      "sha256": "1edcaeb01e6039c361b070a516bd5403204092b8ec7ae3f2c40f8cbc7412e09a",
+-      "bytes": 12592
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/input-pins.json",
+-      "sha256": "4d6878ab21c1d780df19ea0c68aeb797cb7f1703d28eb02ca473bb7ea9fa7e5f",
+-      "bytes": 30684
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/manifest.json",
+-      "sha256": "ce1bc79ae517646b00c2082dcb296aca9de4caee9647f1db05ce3dfe4a4cbe7c",
+-      "bytes": 3288
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/prior-findings-disposition.json",
+-      "sha256": "f66727c914f842e5be251f20f7b6d050fef7198e6c04e12d59092aa72a7d09d8",
+-      "bytes": 2611
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/review.json",
+-      "sha256": "80c43a0faeca33cd0571f5a7f9640b9564de01f073ec49b5abf2d21fb972cf0e",
+-      "bytes": 1609
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/review.md",
+-      "sha256": "b32c48ee9295552cd77939fe9680c265c8d2b2851fa2647f8febc95f3705f135",
+-      "bytes": 9265
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/reviewer-check-history.json",
+-      "sha256": "cc61bdc11901c9bfc40077c6a1e02afee6eed6f63308750b7bf99d0defa5d646",
+-      "bytes": 1753
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/source-forward.diff",
+-      "sha256": "bdef2f9437f107650431b0a80e3c57d1eaf3b510b15419e5f5fd9f11fd5783ae",
+-      "bytes": 82649
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/source-locations.json",
+-      "sha256": "a64b75988fb3e72b657b2b1251c9171580bd58b45b3f505a72b8246cfa02ca0e",
+-      "bytes": 1031
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/source-reverse.diff",
+-      "sha256": "fe26d9f2930af587229c22337533c772808323756acbb89bba76385928b4f932",
+-      "bytes": 82670
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/supplemental-check-results.json",
+-      "sha256": "a302e57584ec362f74955ce1ccc76e96f9dc56f13fd9e02cc1ab028e3cb02e80",
+-      "bytes": 867
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/supplemental_checks.py",
+-      "sha256": "d1fd7f29aaa0f06ad5b2dd5533d34df4fa3801ab19782b0e250ebbe3a3132bab",
+-      "bytes": 3069
+-    },
+-    {
+       "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-terminal-failed-resource-design/design.md",
+       "sha256": "e8482fdaabc8dbf0f63f69da8b7f2ef914272865a58eef36c8045f3f0ea13e79",
+       "bytes": 14746
+@@ -485,11 +235,6 @@
+       "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-c8-check01-failed-resource-code01-findings-root-adoption.json",
+       "sha256": "ab992fc507bc3df522f66c8df17da5e6026189de5f1f63f1d0e7de3a91e4858a",
+       "bytes": 2853
+-    },
+-    {
+-      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-c8-check01-failed-resource-code02-findings-root-adoption.json",
+-      "sha256": "81cd935d7e83989d5ae2dd326c1533880081b1963ad0435485f4b1d94e63a136",
+-      "bytes": 4561
+     },
+     {
+       "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-c8-check01-failed-resource-preparation-root-adoption.json",
+@@ -1030,23 +775,5 @@
+   },
+   "rootFindingsAdoptionSha256": "ab992fc507bc3df522f66c8df17da5e6026189de5f1f63f1d0e7de3a91e4858a",
+   "rejectedPacketManifestSha256": "1ab827247a9329cbadcea077595e57802cf8230ad77f5eaf11e8e223c17a7573",
+-  "allFindingsAdopted": true,
+-  "code02RootFindingsAdoptionSha256": "81cd935d7e83989d5ae2dd326c1533880081b1963ad0435485f4b1d94e63a136",
+-  "rejectedCode02ManifestSha256": "38c5d4cc0ae6477dc0f60a63d3c76792953daca72ab4233e54ae271405728b0b",
+-  "pythonRoleFacts": {
+-    "pid": 16529,
+-    "parentPid": 16528,
+-    "start": "Mon Oct 19 11:57:07 2026",
+-    "reportedPython": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+-    "reportedPythonSha256": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095",
+-    "processPython": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+-    "processPythonSha256": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7",
+-    "configuredProcessMapped": true,
+-    "reportedPythonMapped": false,
+-    "rolesIdentical": false,
+-    "observationStatusesAllZero": true,
+-    "observationStderrAllEmpty": true,
+-    "rawMappingListOrArgumentsExported": false
+-  },
+-  "historyFingerprintCauseRemainsUnknown": true
++  "allFindingsAdopted": true
+ }
+--- resume3/root-disposition-authorization.template.json
++++ resume2/root-disposition-authorization.template.json
+@@ -35,11 +35,11 @@
+   ],
+   "pins": {
+     "retained-contract.json": "1ded4101bbfa934049e41c12c2139c3d43bf5b0a9d6925a064807ec170c46b09",
+-    "input-pins.json": "17e657139219e56882aa167991baf2150dd33c63600cb497558d7a8918198b38"
++    "input-pins.json": "22461380cac64811c24f80ba1bbf6caefece993c8ce4b5ca5f6d51fd6c6dd53c"
+   },
+   "codePins": {
+     "predicates.py": "acacf72b8d998e018178e8e93554d448998b86b39f6ce30346eeeb8fbbe8bf5a",
+-    "failed_resource.py": "7f8fa71622d4b7e0cd2a8fa8247f2aed7f6115faf2d7d36f7e55440edafe885b",
++    "failed_resource.py": "d2b16869d66fee4407bd94ab9a39110360ea0275682e076eb27a6e4a503c65e0",
+     "guard-failed-resource.bash": "bb62fc5d5f7b594e7d43081072b0519d6dcaaa91d2072771796dcd59d7e93c2c"
+   },
+   "reviewPins": {
+@@ -76,6 +76,8 @@
+       "sha256": "UNBOUND"
+     }
+   },
++  "pythonExecutable": "UNBOUND_ABSOLUTE_CANONICAL_CURRENT_PYTHON",
++  "pythonExecutableSha256": "UNBOUND",
+   "installationDirectory": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01/failed-resource-disposition01",
+   "observationExecutables": {
+     "/bin/ps": {
+@@ -91,19 +93,5 @@
+       "sha256": "UNBOUND"
+     }
+   },
+-  "implementationPacket": "UNBOUND_CODE03_MANIFEST_AFTER_EXACT_INDEPENDENT_REVIEWS",
+-  "pythonRoles": {
+-    "launch": {
+-      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+-      "sha256": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095"
+-    },
+-    "reported": {
+-      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+-      "sha256": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095"
+-    },
+-    "process": {
+-      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+-      "sha256": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7"
+-    }
+-  }
++  "implementationPacket": "UNBOUND_NEW_RESUME2_MANIFEST_AFTER_INDEPENDENT_REVIEWS"
+ }
+--- resume3/adapter_checks.py
++++ resume2/adapter_checks.py
+@@ -124,13 +124,12 @@
+         pid=True if variant=='bool pid' else 90
+         returncode=False if variant=='bool status' else 1 if variant in ('nonzero','allowed nonzero') else 0
+         def communicate(self,timeout):
+-            if variant=='allowed nonzero':return ('','')
+             if variant=='timeout':raise TimeoutError('synthetic unknown wait')
+             return ('90 20 Mon Oct 19 12:00:01 2026 /bin/ps -ww -axo pid=,ppid=,lstart=,command=','')
+     ns['Path']=UtilityPath;ns['Custody']=BinaryCustody
+     ns['subprocess']=types.SimpleNamespace(Popen=lambda *a,**k:Child(),DEVNULL=-1,PIPE=-2)
+     allowed=(0,1) if variant=='allowed nonzero' else (0,)
+-    check('real utility capture '+variant,lambda b=b,allowed=allowed:original['utility_capture'](b,['/bin/ps','-ww','-p','999','-o','command='] if variant=='allowed nonzero' else ['/bin/ps','-ww','-axo','pid=,ppid=,lstart=,command='],allowed),variant not in ('success','allowed nonzero'))
++    check('real utility capture '+variant,lambda b=b,allowed=allowed:original['utility_capture'](b,['/bin/ps','-ww','-axo','pid=,ppid=,lstart=,command='],allowed),variant not in ('success','allowed nonzero'))
+     if variant=='timeout':assert next(iter(b['custody'].files.values())).find(b'"terminal": false')>=0
+     if variant=='success':assert b['utilities'][0]['observedStart']=='Mon Oct 19 12:00:01 2026'
+ ns['Path']=original['Path'];ns['Custody']=original['Custody'];ns['subprocess']=original['subprocess']
+@@ -143,10 +142,9 @@
+ ns['time']=types.SimpleNamespace(time=lambda:clock[0])
+ ns['utility_capture']=lambda b,cmd,allowed=(0,):who(pid[0])['start'] if cmd[-1]=='lstart=' else 'python fixture'
+ observed=[None]
+-ns['client_identity']=lambda b,scope,row:scope['identity'](row)
+ ns['helpers']=lambda b:({'table':lambda:{pid[0]:who(pid[0])},'identity':lambda row:observed[0] or who(pid[0])},None)
+ def newb():
+-    a=copy.deepcopy(l['a']);a.update(pythonExecutable='/configured/Python',pythonExecutableSha256='b'*64,pythonRoles={k:{'path':'/configured/Python','sha256':'b'*64} for k in ('launch','reported','process')},activeLockSha256=ns['PIN'])
++    a=copy.deepcopy(l['a']);a.update(pythonExecutable='/configured/Python',pythonExecutableSha256='b'*64,activeLockSha256=ns['PIN'])
+     return {'a':a,'sha':'e'*64,'loaded':{},'custody':MemCustody(),'pin':{'shellPid':11},'retained':copy.deepcopy(l['retained']),'utilities':[]}
+ for bad in ('none','path','file','bool pid'):
+     b=newb();observed[0]=who(pid[0])
+@@ -201,7 +199,6 @@
+ owned=[{'pid':1000+i,'start':'old'} for i in range(2438)]
+ ns['read']=lambda path,*a:{'ownedIdentities':owned} if str(path).endswith('receipt.json') else {'phaseKeeper':{'pid':5000,'start':'keeper'},'collector':{'pid':1000,'start':'old'}}
+ ns['safe_bytes']=lambda *a:b''
+-ns['verified_read']=lambda b,path:ns['read'](path)
+ ns['inventory_clients']=lambda b,rows:([who(12)],[])
+ for variant in ('clean','child','listening child','client listener','unknown candidate'):
+     rows={10:{'pid':10,'ppid':1,'start':pin['wrapperStart']},11:{'pid':11,'ppid':10,'start':pin['shellStart']},12:who(12),90:{'pid':90,'ppid':12,'start':'probe','projectMarkerCandidate':False}}
+@@ -219,7 +216,6 @@
+ ns['time']=types.SimpleNamespace(time=lambda:clock[0])
+ ns['utility_capture']=lambda b,cmd,allowed=(0,):who(pid[0])['start'] if cmd[-1]=='lstart=' else 'python fixture'
+ ns['helpers']=lambda b:({'table':lambda:{pid[0]:who(pid[0])},'identity':lambda row:who(pid[0])},None)
+-ns['client_identity']=lambda b,scope,row:scope['identity'](row)
+ def synthetic_observe(b,post=False):
+     rows={pid[0]:who(pid[0])};clients,prior=original['inventory_clients'](b,rows)
+     live=copy.deepcopy(l['live']);live['priorClientsLive']=prior;live['clientIdentities']=clients
+--- resume3/RECIPE.md
++++ resume2/RECIPE.md
+@@ -1,22 +1,22 @@
+-# Resume3 prospective failed-resource protocol
++# Resume2 prospective failed-resource protocol
+ 
+-Preparation only. This packet fixes root-adopted code02 findings81cd935d plus the exact external Python-role compatibility facts; it grants no installation, operational dual exception, admission, readiness, permit, closing, source/main/lane/IR/lifecycle release or C8 credit. Original24-member code02 seal38c5d4cc, earlier17-member code01 seal1ab827 and all failed reviews remain unchanged and bound. Original release9f347db3, execution/control, readonly exit/GST bindings and ordinary HARD HOLD remain unchanged. Selected disposition remains FAILED_RESOURCE, wrapper1, validation INCOMPLETE, full BUILD FAILED, no standalone compile0/bytecode guarantee and no new native/compile path.
++Preparation only. This packet fixes all root-adopted findings from rejected packet01; it grants no installation, operational dual exception, admission, readiness, permit, closing, source/main/lane/IR/lifecycle release or C8 credit. Original17-member seal1ab827 and both failed reviews remain unchanged and bound. Original release9f347db3, execution/control, readonly exit/GST bindings and ordinary HARD HOLD remain unchanged. Selected disposition remains FAILED_RESOURCE, wrapper1, validation INCOMPLETE, full BUILD FAILED, no standalone compile0/bytecode guarantee and no new native/compile path.
+ 
+ ## Exact scope and controls
+ 
+-Install-map.json is inactive. Only five exact reviewed members may later be installed0600 into NEW mode0700 `D/failed-resource-disposition01`: predicates.py, failed_resource.py, guard-failed-resource.bash, retained-contract.json, input-pins.json. Concrete root authorization must separately bind code reviews, exact input/review hashes, the distinct exact Python launch/reported/process path+binary roles and the closed observation-executable bindings for `/bin/ps`, `/usr/sbin/lsof`, `git`. Both explicit exceptions remain false in the template: new closing entrypoint AND no standalone compile-zero requirement. No template is operative.
++Install-map.json is inactive. Only five exact reviewed members may later be installed0600 into NEW mode0700 `D/failed-resource-disposition01`: predicates.py, failed_resource.py, guard-failed-resource.bash, retained-contract.json, input-pins.json. Concrete root authorization must separately bind code reviews, exact input/review hashes, canonical Python path/binary and the closed observation-executable bindings for `/bin/ps`, `/usr/sbin/lsof`, `git`. Both explicit exceptions remain false in the template: new closing entrypoint AND no standalone compile-zero requirement. No template is operative.
+ 
+-Custody opens and retains every ancestor directory via nonfollowing descriptors before enumeration/body/dependency execution. It rechecks descriptor/name identity around fd-relative reads/enumeration/exclusive writes. A moved/linked/replaced ancestor HOLDs; writes never path-open a redirected parent. Local predicates execute the SAME retained buffer whose code hash/mode/custody verified. CORE AST compilation also consumes its exact verified buffer. Immutable input-pins/retained/index/original-release/plan JSON uses verified returned buffers, and later local controls remain hash-bound through the operation. Reused old immutable metadata readers verify every returned buffer; current source observations stay fresh. Custody captures its component-only validator independently of relative metadata canonical validation. Full negative/held schemas and exact journal basenames verify before dereference; nested/slash/dot members cannot reach an intermediate linked body. There is no local import/bootstrap fallback. Exact original package membership includes all five control files including guard-exit.bash, with missing/extra/changed rejection.
++Custody opens and retains every ancestor directory via nonfollowing descriptors before enumeration/body/dependency execution. It rechecks descriptor/name identity around fd-relative reads/enumeration/exclusive writes. A moved/linked/replaced ancestor HOLDs; writes never path-open a redirected parent. Local predicates are fixed-source executed only after retained custody/modes/release/all three code hashes verify; there is no local import/bootstrap fallback. Exact original package membership includes all five control files including guard-exit.bash, with missing/extra/changed rejection.
+ 
+-Every verification client requires a complete observed fingerprint matching the exact configured PROCESS image path/hash before its immutable client journal, independently of the reported launcher. The inactive template binds cached launch/reported BIN `/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13` (866e723f…) and mapped PROCESS APP `/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python` (2e86b5cd…). Exact full hashes are in the template. Before/after PID/start/argv/comm, exact process mappings, file identity/hash and reported-role checks must agree. An unrelated same-basename mapping is not a uniqueness failure and grants no alias authority. Original core inherited-role checks remain unchanged. External self-only facts prove tool compatibility only; the old unknown fingerprint subpredicate remains UNKNOWN. Bootstrap observation utilities are buffered until that full identity binds, then recorded against it; no provisional registration is an ownership exemption. A failed registration creates an unqualified-registration HOLD marker, intentionally blocking any continuation under this packet. No automatic retry or repair is supplied.
++Every verification client requires a complete observed fingerprint matching the configured canonical Python path hash AND binary file hash before its immutable client journal. Bootstrap observation utilities are buffered until that full identity binds, then recorded against it; no provisional registration is an ownership exemption. A failed registration creates an unqualified-registration HOLD marker, intentionally blocking any continuation under this packet. No automatic retry or repair is supplied.
+ 
+-Each synchronous observation utility has a bound executable/command/PID/waited terminal status receipt and closed stdout/stderr completeness flags. Nonempty or incomplete stderr and unexpected statuses HOLD; no raw diagnostics are stored. A command-specific ps/lsof no-result1 requires empty stdout/error streams, with current observation completeness still checked independently. A timeout does not kill it or fabricate exit; its incomplete receipt HOLDs. Census parses each complete line strictly, rejects duplicates/empty/malformed/missing client/parent/controller data, anchors the live client and applicable SAME controllers and identifies its own exact already-waited ps row. Later role probes cannot replace the retained census receipt. Stable project candidates whose role cannot be observed HOLD. Only the exact current client and exact waited census utility are excluded; arbitrary descendants and their listeners are not exempted. New/prior-client survivors or incomplete utility history HOLD. This is finite current observation, never unrecorded-fork/global-quiet proof.
++Each synchronous observation utility has a bound executable/command/PID/waited terminal status receipt. A timeout does not kill it or fabricate exit; its incomplete receipt HOLDs. Census parses each complete line strictly, rejects duplicates/empty/malformed/missing client/parent/controller data, anchors the live client and applicable SAME controllers and identifies its own exact already-waited ps row. Later role probes cannot replace the retained census receipt. Stable project candidates whose role cannot be observed HOLD. Only the exact current client and exact waited census utility are excluded; arbitrary descendants and their listeners are not exempted. New/prior-client survivors or incomplete utility history HOLD. This is finite current observation, never unrecorded-fork/global-quiet proof.
+ 
+ Preservation remains exact: all2774=2762P/1F/11S; fixed9 policy unchanged;22 evidence entries/five validation errors plus native task failures retained;145 historical UNKNOWN and failed old operational fingerprint remain unrepaired; no current merged report/ratios/coverage,987 stale metadata rows uncredited. Runtime mechanically rehashes the bound27 original PUBLIC records, with no private/report body parser or old assessor/closing/main invocation. It reuses only pinned original source observation and selected core read-only functions, with the new strict census/capture wrapper. Whole accepted source/modes/dist/Helm/auxiliary bytes, finite2439 identities, inherited six, project/listener boundary, SAME wrapper/shell start/argv/parent/FD/dev-inode/kernel and current code/evidence are checked twice per final/gate/postclose operation.
+ 
+ ## Future separate operator commands
+ 
+-These commands are reviewable prospective steps only. Root must provide actual absolute N=`D/failed-resource-disposition01`, canonical PY equal to the reviewed authority pythonRoles.launch.path (BIN above), and new immutable RELEASE SHA after exact architecture/QA code reviews and a concrete root dual exception. Root installs exact map members and concrete root-disposition-authorization.json, verifies exclusive0700/0600 custody and pins, and confirms absent NEW readiness/permit. All held commands run in SAME original PTY19501, shell45227/wrapper45226 with exact starts. Each command, actual status capture, inspection and root decision is a separate tool call. Never batch dependent operations.
++These commands are reviewable prospective steps only. Root must provide actual absolute N=`D/failed-resource-disposition01`, canonical PY and new immutable RELEASE SHA after exact architecture/QA code reviews and a concrete root dual exception. Root installs exact map members and concrete root-disposition-authorization.json, verifies exclusive0700/0600 custody and pins, and confirms absent NEW readiness/permit. All held commands run in SAME original PTY19501, shell45227/wrapper45226 with exact starts. Each command, actual status capture, inspection and root decision is a separate tool call. Never batch dependent operations.
+ 
+ 1. Source the new, separately named readonly guard:
+ 
+@@ -52,7 +52,7 @@
+    c8_failed_resource_exit 1
+    ```
+ 
+-   New gate checks strict readiness/permit and age0..60s before observations, two fresh current snapshots, END forbidden-compile path/link checks after expensive census/client accounting, then age/freshness again before exclusive gate-allow0. Only that new gate0 permits the guard's final builtin exit1. Crossing60s or any uncertainty HOLDs; original exit still HOLDs. No native/compile phase is added.
++   New gate checks strict readiness/permit and age0..60s before observations, two fresh current snapshots, then age/freshness again before exclusive gate-allow0. Only that new gate0 permits the guard's final builtin exit1. Crossing60s or any uncertainty HOLDs; original exit still HOLDs. No native/compile phase is added.
+ 6. After PTY completion, inspect its actual wrapper result separately. Root exclusively creates root-wrapper-result.json with actual integer wrapper1, separately captured true, new release and exact gate-allow SHA plus actual tool evidence. Exit1 alone is insufficient without the gate/current-proof chain.
+ 7. From a separate outer root command, invoke postclose alone:
+ 
+@@ -64,8 +64,6 @@
+ 
+ ## Verification
+ 
+-The97 original cases remain, with the earlier documented mode-list spelling adaptation. The67 adapter cases preserve their accepted semantics; harness-only changes inject the new client-image and verified-metadata boundaries and model allowed no-result1 as empty stdout from a single-PID ps observation. The full five-client negative/held-proof/final/gate/postclose sequence passes. Successor_checks adds64 guarded actual-definition pairs, for228 total. These cover changed second policy/CORE/immutable-JSON buffers, schema/name rejection before journal reads, bootstrap-independent member validators, failed stderr at0/1, late forbidden links/markers and the exact cached reported/process pair with unrelated same-basename mappings plus wrong/missing/unstable-role adversaries.
++The pure97 source is retained with one documented harness-only spelling adaptation: its allowed mode assertion adds held-proof, preserving the no-native-path meaning. Adapter_checks executes inspected definitions with in-memory OS/process/custody/client snapshots only; it invokes no actual runtime/helper main or actual OS/process/lock/source observer. It replays all97 and adds67 paired integration checks (164 total), including the full five-client sequence and malformed proof rejection before output. Initial harness exception-class mismatch and intermediate results are preserved in check-history.json; it was a fake-loader class-identity issue, with no predicate weakening.
+ 
+-Operational namespaces default to Blocked modules/GuardPath in the new actual-definition regression harness, then each exercised boundary is replaced explicitly. No actual runtime import/main, OS/process/census/lock/source observer, binary probe, native/compiler/provider/private action or historical fingerprint-cause inference occurred. Only authorized source/preparation reads and preparation output writes ran. Test history and intermediate results remain explicit; none of this is unit readiness.
+-
+-Changed-code-map.json separates source/template deltas against code02 from regenerated proof files. All old24/17 members are preserved at their original paths and reverified/bound. No self-hash fixed point or claim that generated proof hashes are unchanged exists. Independent exact code reviews, root dual exception and every actual operational fact remain pending.
++Changed-code-map.json distinguishes source/template deltas from regenerated proof outputs and omitted packet01 historical result files. Old packet01 files are preserved at their original paths and all17 hashes are reverified/bound. No self-hash fixed point or claim that generated proof hashes are unchanged exists. Independent exact code reviews, root dual exception and every actual operational fact remain pending.

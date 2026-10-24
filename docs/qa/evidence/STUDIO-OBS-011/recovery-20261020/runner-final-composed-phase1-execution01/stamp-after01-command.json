@@ -1,0 +1,18 @@
+{
+  "id": "stamp-after01",
+  "stage": "sandbox-build-metadata-after-canonical-emit",
+  "executed": false,
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-rt-current-stamp-after01",
+    "pnpm",
+    "--dir=/private/tmp/obs011-rt-final-current-20261020-root01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "node",
+    "scripts/write-runtime-versions.mjs"
+  ],
+  "note": "Existing configured-build metadata writer, sandbox only. Necessary because accepted009 browser.js changes and stale copied D698 would retain old launcher hash. Both trees use identical current metadata inputs/browser cache and no SOURCE mutation. Bind raw TSC-only inventory before this step and final full inventory afterward; compare final complete configured-build outputs."
+}

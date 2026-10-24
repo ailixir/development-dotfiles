@@ -1,0 +1,39 @@
+{
+  "atUtc": "2026-10-19T07:47:41.658893+00:00",
+  "signedBy": "root / Orion",
+  "decision": "EXACT_ONE_SHOT_OWNED_THREAD_PRINT_ONLY",
+  "unit": "obs011-gst-provisional-02",
+  "originalUnitMustRemainFailedOrIncomplete": true,
+  "target": {
+    "pid": 84782,
+    "ppid": 84218,
+    "start": "Mon Oct 19 03:40:38 2026",
+    "argvHash": "13bdd14fe32787ce5b68cbd4ac0edf25355a3cc5a5a56c54baace7bf10e40837",
+    "projectMarkerCandidate": true,
+    "identityComplete": true,
+    "commHash": "17c41513aa70a3adec9bfe02602b2b410fecd663fc3089da7d4c71a18dbf9ed9",
+    "executableHash": "17c41513aa70a3adec9bfe02602b2b410fecd663fc3089da7d4c71a18dbf9ed9",
+    "executableFileHash": "19f2cd660267f4fb79a83debff11e8c3d509cd06beb499297e6558b030b8789a"
+  },
+  "targetIdentitySourceSha256": "d35ea9c277a345570a2abb50c9120e0629087e8d107b84410a46483f09105e0a",
+  "jcmdArgv": [
+    "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home/bin/jcmd",
+    "84782",
+    "Thread.print"
+  ],
+  "wallSeconds": 10,
+  "outputCapBytes": 2097152,
+  "rawOutput": "diagnostic-thread-print.private.log",
+  "rawPermissions": "0600 under0700",
+  "stdoutRelease": "Only fixed source-frame classifications; no raw body in model/user output",
+  "noHeapOrCoreOrRepeatOrSigquit": true,
+  "workerSignalAuthorized": false,
+  "diagnosticChildOnlyStop": "If own jcmd exceeds10s/2MiB, terminate own newly launched same-start diagnostic process only and retain timeout/unproven; target worker untouched.",
+  "independentQuinnProvisionalDisposition": "One exact cachedJava21 jcmd84782 Thread.print after fresh complete target identity/executable/argv/parent/start and full ancestor/kernel-lock checks. stdin devnull,10s/2MiB,protectedraw/fixedframeprojection; failureUNPROVEN; no worker or collector signal. Full sealed disposition pending.",
+  "sameLockStillHeld": {
+    "wrapperPid": 82456,
+    "shellPid": 82457,
+    "toolSession": 74865
+  },
+  "sourceOrCreditRelease": false
+}

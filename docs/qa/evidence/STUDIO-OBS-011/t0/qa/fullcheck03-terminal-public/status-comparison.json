@@ -1,0 +1,24 @@
+{
+  "kind": "ACTUAL_STATUS_DELTA_FROM_EXPECTED_CATALOG_NO_EXCLUSIONS",
+  "expected": {
+    "PASS": 2765,
+    "SKIP": 9
+  },
+  "actual": {
+    "PASS": 2764,
+    "FAIL": 1,
+    "SKIP": 9
+  },
+  "changes": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope()",
+      "expectedStatus": "PASS",
+      "actualStatus": "FAIL"
+    }
+  ],
+  "missingCaseIdentities": 0,
+  "extraCaseIdentities": 0,
+  "actualStatusesProjectedOrNormalized": false
+}

@@ -1,0 +1,660 @@
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -79,12 +79,14 @@
+ ## Development Approach
+ 
+ ### Mock-First Development
+-**CRITICAL:** All API interactions use Mock Service Worker (MSW) during development. This enables:
+-- Independent frontend development without backend dependency
+-- Full functionality testing with realistic data
+-- Stakeholder demos before backend completion
+-
+-Mock handlers are located in `frontend/src/services/mocks/` and provide realistic API responses for all check types, CSI data, and execution results.
++The MSW handlers in `frontend/src/services/mocks/` run only in Node: the Vitest server
++(`src/services/mocks/studio/server.ts`) and the Playwright `msw` project proxy (`e2e/mswProxy.ts`).
++There is no browser worker. The standalone Vite dev server proxies `/api/v1` to `VITE_API_URL`
++(default `http://localhost:8080`); federated Webpack derives its target from
++`REACT_APP_API_BASE_URL` using the literal `.replace('/api', '')` transform in
++`frontend/webpack.config.js`, with `http://localhost:8080` as the unset/empty fallback.
++Development servers use the backend; Node test mocks provide
++controlled API responses for independent frontend tests.
+ 
+ ### Module Federation Integration
+ The module exposes `./ChecksModule` via Module Federation and integrates with the PUT Platform Shell using:
+@@ -139,7 +141,7 @@
+ ### Environment Configuration
+ - **Vite dev server** (port 5173) → Standalone mode with full navigation
+ - **Webpack dev server** (port 3002) → Federated mode for platform integration
+-- Environment variables in `.env.development` control MSW enablement and API URLs
++- Environment variables in `.env.development` configure API URLs; there is no browser MSW enablement flag.
+ 
+ ## Development Rules
+ 
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -79,12 +79,14 @@
+ ## Development Approach
+ 
+ ### Mock-First Development
+-**CRITICAL:** All API interactions use Mock Service Worker (MSW) during development. This enables:
+-- Independent frontend development without backend dependency
+-- Full functionality testing with realistic data
+-- Stakeholder demos before backend completion
+-
+-Mock handlers are located in `frontend/src/services/mocks/` and provide realistic API responses for all check types, CSI data, and execution results.
++The MSW handlers in `frontend/src/services/mocks/` run only in Node: the Vitest server
++(`src/services/mocks/studio/server.ts`) and the Playwright `msw` project proxy (`e2e/mswProxy.ts`).
++There is no browser worker. The standalone Vite dev server proxies `/api/v1` to `VITE_API_URL`
++(default `http://localhost:8080`); federated Webpack derives its target from
++`REACT_APP_API_BASE_URL` using the literal `.replace('/api', '')` transform in
++`frontend/webpack.config.js`, with `http://localhost:8080` as the unset/empty fallback.
++Development servers use the backend; Node test mocks provide
++controlled API responses for independent frontend tests.
+ 
+ ### Module Federation Integration
+ The module exposes `./ChecksModule` via Module Federation and integrates with the PUT Platform Shell using:
+@@ -139,7 +141,7 @@
+ ### Environment Configuration
+ - **Vite dev server** (port 5173) → Standalone mode with full navigation
+ - **Webpack dev server** (port 3002) → Federated mode for platform integration
+-- Environment variables in `.env.development` control MSW enablement and API URLs
++- Environment variables in `.env.development` configure API URLs; there is no browser MSW enablement flag.
+ 
+ ## Development Rules
+ 
+--- a/ARCH.md
++++ b/ARCH.md
+@@ -36,11 +36,11 @@
+    - Complete UI implementation for all features: Check Builder, Checks Studio, Dashboards, Reports
+    - Adaptive layout system that detects standalone vs federated deployment modes
+ 
+-2. **Mock Backend (MSW - Mock Service Worker):**
+-   - Browser-intercepted API layer providing realistic responses during development
+-   - Comprehensive mock data for all check types, CSI entities, execution results
+-   - Located in `src/services/mocks/` with handlers organized by domain
+-   - Enables full application functionality without backend dependency
++2. **Node test mocks (MSW - Mock Service Worker):**
++   - Handlers in `frontend/src/services/mocks/` run only in Node: the Vitest server (`src/services/mocks/studio/server.ts`) and the Playwright `msw` project proxy (`e2e/mswProxy.ts`)
++   - There is no browser worker; development servers use the backend
++   - Vite proxies `/api/v1` to `VITE_API_URL` (default `http://localhost:8080`); federated Webpack derives its target from `REACT_APP_API_BASE_URL` using the literal `.replace('/api', '')` transform in `frontend/webpack.config.js`, with `http://localhost:8080` as the unset/empty fallback
++   - Controlled test responses support frontend tests without a backend dependency
+ 
+ 3. **Platform Integration:**
+    - **Federated Mode:** Webpack dev server on port 3002 (`pnpm run dev`)
+@@ -49,7 +49,7 @@
+    - Event-based communication with platform shell for navigation updates
+ 
+ 4. **Development Workflow:**
+-   - Mock-first development using MSW for all API interactions
++   - Backend-connected development servers with Node-only MSW API mocks for Vitest and the Playwright `msw` project
+    - Component-driven development with isolated testing
+    - Build outputs optimized for Module Federation consumption
+ 
+@@ -95,6 +95,10 @@
+     
+ 
+ ### **3.2. Mock Service Strategy**
++
++> **Dated correction — 2026-10-18, STUDIO-OBS-011 CLN-51 (G11).** The plan below is retained as
++> history. Today MSW runs only in the Node Vitest server and Playwright `msw` project proxy named
++> in §2.1. Development servers proxy API traffic to the backend; no browser worker is installed.
+ 
+ To enable independent frontend development and facilitate the prototype-first approach, a mock service layer is a mandatory first step.
+ 
+--- a/docs/runbooks/studio-inference-rollout.md
++++ b/docs/runbooks/studio-inference-rollout.md
+@@ -130,10 +130,18 @@
+ 
+ ## Configuration and local verification
+ 
++> **Dated correction — 2026-10-18, STUDIO-OBS-011 CLN-49 (G11).** The following flag paragraph
++> records the retired v1/v2 rollout; it is not an enablement procedure for the single observed
++> path. Its UI selector and authoring/incremental feature flags no longer exist. Current local
++> wiring is documented in [Studio integrations](studio-integrations.md), and guided/replay
++> deployment inputs in [the runner runbook §14](studio-runner.md#14-one-entrypoint-tls-everywhere-the-one-pod-guard-and-the-new-secrets-studio-obs-009).
++> Gateway configuration remains a separate deployment decision; this note authorizes no provider
++> call or shared-environment enablement.
++
+ Keep `STUDIO_GATEWAY_PROVIDER=disabled`, `STUDIO_AUTHORING_V2_ENABLED=false`, and `STUDIO_INCREMENTAL_ENABLED=false` until their respective prerequisites pass. `STUDIO_GATEWAY_MAX_OUTPUT_TOKENS` defaults to 32768. After V19 and compatible API/runner deployment, the v2 authoring UI is separately selected by `window.__CHECKS_CONFIG__.studioAuthoringV2=true` before the bundle loads; the default UI remains compatible with v1. Enabling v2 authoring alone does not enable a model or incremental eligibility.
+ 
+ The maintained Google Gen AI adapter pins1.71.0 and bounds service-account, user ADC and compute ADC credential transport. Service-account/user stalled refresh and socket cancellation have local wire evidence; compute was source-inspected. External/executable/impersonated credential providers fail closed until separately supported. Live R2D2 auth/model/schema/quota evidence remains SPK-01.
+ 
+-Run development evaluation through `studio-runner/evaluation/README.md`. Its CLI executes the complete API lifecycle and independent fixture oracles, but always reports release readiness false. The sample corpus and scripted lifecycle tests do not substitute for a frozen held-out release corpus. Typed assertion-failure origin is not exposed by the current execution API; intended-failure live cases cannot claim correctness without that evidence.
++Run development evaluation through `studio-runner/evaluation/README.md`. Its CLI provides independent fixture oracles, but always reports release readiness false. The sample corpus and scripted lifecycle tests do not substitute for a frozen held-out release corpus. Typed assertion-failure origin is not exposed by the current execution API; intended-failure live cases cannot claim correctness without that evidence.
+ 
+ The existing frontend local dependency is `file:../../put-core-components`; ensure it resolves to the real built PUT core-components checkout before typecheck/build. This session repaired only the local node_modules symlink to the existing built checkout, without changing the package dependency or adding a replacement library.
+--- a/docs/runbooks/studio-runner.md
++++ b/docs/runbooks/studio-runner.md
+@@ -2,6 +2,15 @@
+ 
+ Current integration setup: [local filesystem and remote AWS S3](studio-integrations.md).
+ That guide supersedes the earlier Sonic/fake-store setup notes below; cloud provisioning remains deferred.
++
++> **Dated static re-audit — 2026-10-18, STUDIO-OBS-011 C-OBS009-3 (G11).** Sections 1–3
++> and 5–13 were compared with the current single-path source and chart templates. The dated
++> V1 assembly/audit records below remain historical; current corrections are marked at each
++> affected section. This is source review, not a render, image, cluster or production acceptance
++> result. Section 4 and all of section 14 remain byte-identical. In particular, §14.4 already
++> contains the UAT upgrade note; its real deployment prerequisites remain open. The §2 connector
++> row below corrects the historical gap recorded in unchanged §14.6. See the STUDIO-OBS-010
++> [guided-authoring runbook](studio-guided-authoring.md) for sessions, drain and abandon.
+ 
+ | Field | Value |
+ |---|---|
+@@ -70,6 +79,14 @@
+ 
+ ## 1. Chromium and the sandbox
+ 
++> **Re-audit — 2026-10-18 (single observed path).** The historical two-writable-mount
++> description below covers replay scratch and `/dev/shm`; guided mode additionally mounts `/tmp`
++> and a separate bounded journal `emptyDir` (`studio-runner-deployment.yaml`). The journal is
++> disjoint from scratch and trust/credential mounts. A local object-store volume is another
++> provider-dependent writable mount. The image's current `CMD` and PID/drain requirements are
++> in unchanged §§4/14.5, rather than the old bare-exec wording below. Non-root, sandbox,
++> read-only root and the unresolved in-cluster sandbox proof remain unchanged.
++
+ *Implements architecture §9.3 ("Run non-root … no privileged mode, restricted service-account
+ access, CPU/memory limits, writable per-run scratch and `/dev/shm`"; "Prove sandbox startup in
+ staging; do not disable it silently to make the image run") and ADR-001 §8.*
+@@ -120,6 +137,16 @@
+ 
+ ## 2. Egress and approved destinations
+ 
++> **Re-audit — 2026-10-18 (single observed path).** The current network-policy template
++> permits API and worker ingress to the runner TLS listener. `callback-api` includes the ordinary
++> API callback port and, only with guided mode on, the TLS connector port (default 8443). The
++> table reflects those two source corrections. The replay callback's ordinary API port has not
++> been made TLS by this note. The separate API guided-ingress policy, narrow backend trust store
++> and certificate pin requirements remain §14.2; no extra destination class is added. The broad
++> object-store IP rule and CNI/approved-target proof still need Platform/SRE and Security evidence.
++> Observed grants bind approved destinations and secret-origin policy; the old job-envelope
++> statement below is historical, not a claim that observed policy is absent.
++
+ *Implements architecture §9.3 ("Permit runner access to the callback API, Sonic, approved targets,
+ and controlled DNS only") and ADR-001 §9.*
+ 
+@@ -128,8 +155,8 @@
+ 
+ | Direction | Peer | Why |
+ |---|---|---|
+-| Ingress | the **worker** pods only, on the runner's Service port | §8.4: the internal routes are not public and the MFE never talks to the runner. Dispatch runs on the worker profile, not the API's |
+-| Egress | the **API** pods, on the API Service port | `callback-api`: admission and progress. Without this the terminal report never arrives |
++| Ingress | the **API and worker** pods, on the runner's TLS Service port | Internal observed validation/dispatch and guided control; the MFE never talks to the runner |
++| Egress | the **API** pods, on the ordinary API Service port and, with guided mode on, `studioRunner.guided.tlsConnector.port` (default 8443) | `callback-api`: replay admission/progress on the ordinary port; guided callbacks/claim on the TLS connector port |
+ | Egress | the object store, port from a values key, with metadata/link-local/private ranges excepted | `object-store` |
+ | Egress | the approved targets, **currently empty** | `target-page` — see below |
+ | Egress | `kube-dns` | Not a destination class. Without it every destination becomes a **silent hang** instead of a refusal |
+@@ -163,6 +190,14 @@
+ ---
+ 
+ ## 3. Evidence storage and expiry
++
++> **Re-audit — 2026-10-18 (single observed path).** Replay evidence remains under the
++> execution/attempt key (`ManifestKeys`); the API applies the snapshot's video status and serves
++> through `ExecutionVideoService`/`VideoObjectServer`. Guided learn-run recordings use the separate
++> `GuidedSessionEvidenceService` path described in the guided-authoring runbook. This review does
++> not certify any cloud principal, endpoint, real lifecycle deletion or credential denial. The
++> current local/AWS S3 integration guide at the top of this document supersedes older Sonic setup
++> wording, while logical expiry and separate writer/reader responsibilities remain.
+ 
+ *Implements architecture §6.2.*
+ 
+@@ -255,6 +290,15 @@
+ 
+ ## 5. Stuck runs — the reapers, the ledger states, and what you may do by hand
+ 
++> **Re-audit — 2026-10-18 (single observed path).** The authoritative dispatch vocabulary
++> is `QUEUED → CLAIMED → DISPATCHING → ADMITTED → RUNNING → FINALIZING → DONE`
++> (`DispatchState`, enforced by `StudioDispatchLedgerStatements`). The shorter table below is a
++> historical explanation, not today's exact stored-state vocabulary: there is no `DISPATCHED`
++> state. Existing reaper/kill-switch transitions, idempotency and the prohibition on manual ledger
++> edits still apply. Guided session lease/teardown state is a different state machine; use the
++> guided-authoring runbook and never redispatch an ambiguous browser action. The explicit
++> dispatcher setting and its packaged-default/Java-default distinction remain as stated.
++
+ *Implements architecture §5.4 (recovery and the reapers) and §5.1.1 (the dispatch ledger).
+ Story 10.18b.*
+ 
+@@ -301,6 +345,13 @@
+ 
+ ## 6. The kill switch
+ 
++> **Re-audit — 2026-10-18 (single observed path).** `StudioAcceptanceService` still checks
++> `studio.execution.enabled` before test lookup; `StudioDispatcher` closes queued/claimed work
++> separately from dispatcher enablement. The switch is a replay-admission control, not a claim
++> that a guided learning session has been cancelled or its browser teardown confirmed. Guided
++> stop/drain/abandon follows the separate guided-authoring procedure; do not infer that disabling
++> replay stops an admitted native action. Reads and recovery remain available.
++
+ *Implements architecture §8.5 and BRD §9 ("a kill switch rejects new executions and closes queued
+ undispatched work explicitly. Already-admitted runs finish/report; reads and recovery remain
+ available"). Story 10.18b, AC-23a.*
+@@ -333,6 +384,13 @@
+ mid-session and orphaning their recordings.
+ 
+ ## 7. SSE — the streaming route, and what a disconnect does *not* mean
++
++> **Re-audit — 2026-10-18 (single observed path).** Existing execution SSE/GET/video
++> authorization and the distinct stream Ingress remain the replay observation path. Guided
++> sessions have their own session/evidence routes; an SSE disconnect never grants authority to
++> cancel or replay an action. `ExecutionVideoService` authorizes via the execution snapshot before
++> reading any object. Real proxy/cookie/idle-timeout/cross-replica observations remain unproven;
++> nothing in this text correction closes SPK-02 or introduces sticky sessions.
+ 
+ *Implements architecture §5.5 and the [SSE viability note](../architecture/studio-sse-viability.md).
+ Story 10.18b, AC-13a.*
+@@ -408,6 +466,13 @@
+ 
+ ## 8. Manifest recovery
+ 
++> **Re-audit — 2026-10-18 (single observed path).** `ManifestKeys` derives
++> `studio/{csiId}/{testId}/{executionId}/{attemptId}.result.json` and the matching `.webm` from
++> immutable identity. `PendingReaper`/`RunningReaper` reconcile durable execution state; recovery
++> reads evidence and does not replay an uncertain browser action. Guided journal/receipt ownership
++> is separate and must not be reconstructed by deleting a journal or choosing a stray recording.
++> Real-store consistency and physical deletion timing remain external measurements.
++
+ *Implements architecture §6.2 and §5.4. Story 10.18b.*
+ 
+ The runner writes evidence to the private store under a fixed prefix and then reports the manifest
+@@ -431,6 +496,14 @@
+ (`ED-03`, OPEN).
+ 
+ ## 9. Identity and authentication — what is closed, and what still exists
++
++> **Re-audit — 2026-10-18 (single observed path).** The three configured bypasses and
++> local-only developer filter remain distinct; no Core identity, Vault policy or credentialed-pilot
++> acceptance is inferred from chart defaults or tests. Current secret access still uses the
++> development entitlement policy and `allowedOrigins`, and the runner has no Vault credentials.
++> The dated compile-path descriptions below are historical. The rebased schema drops plaintext
++> secrets in `V18__drop_plaintext_secrets.sql`, so the older `V25` citation records the former
++> migration numbering. This is a citation correction, not a migration edit or a change to ED-02.
+ 
+ *Implements architecture §9.1. Story 10.18b, AC-19a and AC-20. External dependency **`ED-02`**.*
+ 
+@@ -614,6 +687,11 @@
+ 
+ ## 10. CSRF — an open prerequisite, not a solved problem
+ 
++> **Re-audit — 2026-10-18 (single observed path).** Source still reads `put_session`,
++> enables credentialed CORS and disables Spring CSRF. No platform cookie/SameSite evidence or
++> written accepting control was supplied by this re-audit. The open prerequisite, owner and
++> public-contract change constraint below remain; guided/secret routes do not waive them.
++
+ *Implements architecture §9.1 ("cookie-authenticated mutations require a documented CSRF control").
+ Story 10.18b, AC-21a. Blocked half: **SPK-02 question 7**.*
+ 
+@@ -639,6 +717,14 @@
+ `ED-06`, OPEN.
+ 
+ ## 11. Spring configuration delivery
++
++> **Re-audit — 2026-10-18 (single observed path).** Mounted Spring properties, reserved
++> profile selectors and managed TLS/guided properties remain chart-owned. Current gateway beans
++> bind `studio.gateway.*`; the `studio.compile.gateway.*` wording below is historical and is not
++> a current bean prefix. The chart helper still enumerates legacy compile-gateway override guard
++> spellings; this source review does not assert that those guards protect every new gateway alias.
++> Use dedicated chart gateway values and §14 TLS/token inputs, and retain this guard discrepancy
++> for architecture/DevOps disposition. Secret files and profile/source restrictions are unchanged.
+ 
+ Story 10.27 resolves the AC-18 escalation from story 10.18b. Backend and worker
+ `configOverrides` now render into separate `*-properties` ConfigMaps containing
+@@ -686,6 +772,15 @@
+ ---
+ 
+ ## 12. Rollback — how to take a Studio release back out
++
++> **Re-audit — 2026-10-18 (single observed path).** The old artifact-1 release order in
++> (e) is already marked superseded. The historical V19 hand-cutover and V20–V25 migration citations
++> in (c)/§9 do not describe the rebased classpath: current `V19__guided_governance.sql` is an
++> ordinary Flyway migration, and the Studio lineage is V12–V22. Do not run the old V19 cutover
++> against this schema or assume an artifact-1 application supports the rebased database. Database
++> changes remain forward-only; chart rollback cannot restore a removed schema or evidence.
++> Current upgrade inputs and quiet-window requirements are §14.4 and the guided-authoring runbook.
++> No rollback rehearsal, certificate issuance or deployment is claimed by this note.
+ 
+ *Added by story **10.19** (AC-9), 2026-09-17. **This epic had never written one down**: before this
+ section, the string "rollback" did not occur in this runbook, in `docs/architecture/studio-execution.md`,
+@@ -891,6 +986,14 @@
+ ---
+ 
+ ## 13. Plain-English translation through Vertex AI
++
++> **Re-audit — 2026-10-18 (single observed path).** The model transport now serves
++> observed guided authoring (`studio.gateway.*`); saved observed replay makes no model call.
++> The shipped UAT/production gateway literals and dedicated ConfigMap references below remain
++> configuration, not proof of a live provider request, schema/quota acceptance or user pilot.
++> Guided session/publication and the exact build/catalog/policy inputs additionally follow §14
++> and the guided-authoring runbook. This does not authorize enabling a provider, replacing an
++> approved model or weakening any identity, TLS or authorization gate.
+ 
+ Studio's supported user path starts with ordinary instructions. The API translates them through
+ Vertex AI before review and confirmation; operators must never ask a user to replace those
+--- a/studio-runner/README.md
++++ b/studio-runner/README.md
+@@ -4,7 +4,8 @@
+ 
+ Validation and execution component of the Checks UI Studio (architecture
+ [§3](../docs/architecture/studio-execution.md#3-system-architecture), §4.5, §5.2). It is the only
+-component that ever launches Chromium, and the only one that reads an LLM-proposed artifact.
++component that launches Chromium. It validates the data-only observed artifact against immutable
++evidence and executes the approved observed operations; it does not evaluate model-proposed source.
+ 
+ Layout, toolchain, pinning, CI stages and deployment placement are fixed by
+ [ADR-001](../docs/architecture/ADR-001-studio-runner-scaffolding.md). This README documents what the
+@@ -14,17 +15,19 @@
+ 
+ | Module | Responsibility |
+ |---|---|
+-| `src/validator/` | Artifact envelope checks, default-deny AST validation, argument/reference schemas, bounds. Pure and browser-free. |
+-| `src/executor/` | Trusted executor over a `BrowserAdapter`, `StepReporter` and `ValueResolver`, with outbound redaction. |
++| `src/validator/` | Browser-free observed schema, immutable-history/reference-policy and replay validation, with closed bounds. |
++| `src/executor/` | Observed operation and replay execution, step reporting and outbound redaction. |
+ | `src/compat/` | Reads `dist/runtime-versions.json` (`loadRuntimeVersions`) and refuses a record that lacks a required identity field. The artifact-1 compatibility check was deleted with its engine (STUDIO-OBS-012A); the observed path proves its runtime through the build identity (`assertBuild`). |
+-| `src/server/` | The four internal HTTP routes, the capacity pool, the service-identity check, bounded bodies and structured redacted logging. |
++| `src/server/` | Five ordinary internal HTTP routes, capacity and admission coordination, peer-pin/bearer checks, bounded bodies and structured redacted logging; optional guided transport has its own authorization. |
+ | `src/reporting/` | The admission CAS **client**, the progress/terminal report client, and the `StepReporter` implementation 10.2 left as a seam. |
+ | `src/run/` | The real browser: the `BrowserLauncher` that forks a killable child, the data-only parent↔child protocol, the Playwright adapter, the recording lifecycle and evidence vocabulary, the run-scoped clock and the runner error-code set — plus story 10.13's **runtime deadline** (`deadline.ts`), **process-tree kill and observation** (`tree.ts`) and **captured, redacted child output relay** (`outputRelay.ts`). |
+ | `src/main.ts` | Process entry: configuration, server start, `SIGTERM` drain, scratch clearing at startup and on exit. |
+ | `src/versions.ts` | `OBSERVED_CONTRACT_VERSION` only. The artifact-1 stamps were retired by STUDIO-OBS-009 AC-1 P2; the executable pins are the `const`s of the generated v3 schemas. |
+ 
+-Not yet present: `src/evidence/` (10.14). Uploading a recording, the durable result manifest and
+-the `STORED` evidence state are 10.14's; a recording still lives and dies in scratch.
++Evidence upload, object-store adapters and durable result manifests are implemented under
++`src/run/` (`evidenceUpload.ts`, `objectStore.ts`, `s3ObjectStore.ts`, `manifest.ts`); there is no
++`src/evidence/` directory. `STORED` is earned only after the store acknowledges the upload.
++Scratch cleanup remains separate from durable evidence retention.
+ 
+ ## The two budgets (story 10.13)
+ 
+@@ -136,8 +139,8 @@
+ ### Where the browser runs, and what it may touch
+ 
+ One browser, one context, one page, per run, **in a child process** that exits on every path —
+-success, step failure, launch failure, error. The parent's `/v1/validate`, `/health`, `/ready` and
+-`/v1/runs` stay responsive throughout, on separate bounded resources.
++success, step failure, launch failure, error. The parent's `/v2/validate-observed`, `/health`,
++`/ready` and `/v2/runs` routes stay responsive throughout, on separate bounded resources.
+ 
+ The child is forked with **no arguments** and an enumerated environment (`PATH`, `HOME`, `LANG`,
+ `LC_ALL`, `NODE_OPTIONS`, `PLAYWRIGHT_BROWSERS_PATH`, `DISPLAY`, `XDG_RUNTIME_DIR`, plus `TMPDIR`
+@@ -241,20 +244,25 @@
+ 
+ | Route | Behaviour |
+ |---|---|
+-| `POST /v1/validate` | Browser-free wrapper over `validateArtifact` with bounded work. Takes **no capacity slot**, so it answers while the pool is saturated. |
+-| `POST /v1/runs` | Envelope → artifact → capacity slot → admission CAS → `202`. Nothing starts before the CAS succeeds. |
++| `POST /v2/validate-observed` | Browser-free observed validation with bounded work; takes no capacity slot. |
++| `POST /v2/runs` | Closed observed job → capacity slot → observed admission → `202`. Nothing starts before admission succeeds. |
++| `DELETE /v2/runs/{id}` | Cancel one admitted run: ordered stop, bounded grace and process-tree teardown. |
+ | `GET /health` | Liveness only. Stays `200` while saturated **and** while draining. |
+ | `GET /ready` | Ability to admit safely. Saturation alone keeps it **true**; only draining makes it false. |
+ 
+-All four require a restricted service identity in an `Authorization: Bearer` header, checked on the
+-request head before the body is read, compared in constant time over SHA-256 digests. There is no
+-credential in any URL or query string, inbound or outbound.
++These five ordinary routes require a restricted service identity in an `Authorization: Bearer`
++header, checked on the request head before the body is read, compared in constant time over
++SHA-256 digests. The CA-verified peer is pinned before the bearer: `/health` and `/ready` allow
++the controller or runner self-probe; the other ordinary routes require the controller pin.
++Optional `/internal/v2/studio/guided-sessions/...` transport has its own pin and JWT; it does not
++use ordinary replay authorization. There is no credential in any URL or query string, inbound
++or outbound.
+ 
+ ### Saturated is not draining
+ 
+ These are different conditions with different answers, and conflating them is a real defect:
+ 
+-| Condition | `/v1/runs` | `/ready` | Why |
++| Condition | `POST /v2/runs` | `/ready` | Why |
+ |---|---|---|---|
+ | Pool saturated | `429` + `Retry-After` | **`200`, ready** | The pod is healthy and about to be free. Removing it from its Service for being busy is the opposite of backpressure. |
+ | Draining | `503` | `503`, not ready | The pod is leaving. |
+@@ -298,7 +306,7 @@
+ 
+ ### Drain
+ 
+-`SIGTERM` runs, in this order: readiness goes false → new `/v1/runs` is refused `503` → the
++`SIGTERM` runs, in this order: readiness goes false → new `POST /v2/runs` is refused `503` → the
+ in-flight run finishes and delivers its terminal report (bounded by `DRAIN_TIMEOUT_MS`) → the
+ listener closes → scratch is cleared. Scratch is also cleared at startup, so a pod killed mid-run
+ leaves nothing for the next one to inherit.
+@@ -342,10 +350,15 @@
+ 
+ ## Security model
+ 
+-Generated source is **never evaluated**. `validateArtifact` parses each step with the TypeScript
+-compiler API and accepts only a bounded sequence of `await <permitted call>;` statements drawn from
+-the table in architecture §4.5. Accepted steps are converted to a typed, serializable operation
+-list; the executor then calls its own Playwright methods from that data. There is no `eval`, no
++> **Dated cleanup — 2026-10-18, STUDIO-OBS-011 C-OBS009-3.** The artifact-1 parser,
++> accepted-language rules, bounds and reference/adversarial corpora sections were retired with
++> that engine (STUDIO-OBS-012A). Current observed validation independently derives the frozen
++> plan from immutable evidence; see “Observed replay (artifact 2)” below. This cleanup does not
++> change the destination, secret-use or transport authorization requirements.
++
++Generated source is **never evaluated**.
++
++There is no `eval`, no
+ `Function`, no `vm`, no async IIFE and no dynamic `import()` of artifact content anywhere in the
+ package, and `eslint.boundary-rules.js` makes each of those a lint error (verified by
+ `test/lint-boundary.test.ts`, and re-checked against the emitted `dist/` by
+@@ -358,16 +371,18 @@
+ 
+ ### Secrets
+ 
+-A secret appears in an artifact only as `vars.secret('ID')` and only as the value argument of
+-`fill()` — the single approved position in V1. It is rejected in URLs, selectors, key arguments,
+-assertion arguments and option values. Resolved values are produced by `ValueResolver.secret` at the
+-moment of the action call, are never placed in operation objects, and every outbound failure message
+-passes through a redactor that scrubs known values in plain, URL-encoded, double-URL-encoded and
+-base64 (standard and URL-safe, padded and unpadded) forms.
+-
+-The redactor scrubs *known* values. It cannot prove an arbitrary string is free of secrets, and
+-inline credentials that never go through `vars.secret` are invisible here — the backend rejects
+-known credential patterns before gateway submission (story 10.8).
++Current artifact generation is data-only; there is no `vars.secret`, `ValueResolver` or AST
++argument execution path. A secret fill carries a value-less `secretRef`/`sourceInputId` tied to
++its declared `fill.value` input recipe, step and configuration provenance. Replay receives the
++resolved values in its private run metadata, and guided delivery uses its admitted frame. The
++observed/guided sections below define the current approved-origin, secret-origin, retained
++password-control and names-only authorization boundaries; none permits secret values in URLs,
++selectors, assertions or other argument slots. Outbound diagnostics and failure messages redact
++known values, including their supported encoded variants, before bounds or writes.
++
++The redactor scrubs *known* values. It cannot prove an arbitrary string is free of secrets or
++make inline credentials safe. The backend's pre-gateway credential checks and current
++observed/guided secret-use policy remain required.
+ 
+ On the outbound path the redactor runs over the **serialized** payload — the request body string
+ handed to the HTTP client and the line handed to the log sink — never over the objects behind them.
+@@ -394,117 +409,6 @@
+ 
+ ADR-001 §5 allowed this story one HTTP server library. It took none: `node:https` (the one TLS listener,
+ client certificate required) covers the small route surface with no middleware, so the closure did not grow.
+-
+-## Bounds (AC-10 defaults)
+-
+-Every bound is configuration. Pass overrides as `validateArtifact(artifact, source, refs, { bounds: { … } })`.
+-
+-| Bound | Default | Meaning |
+-|---|---:|---|
+-| `maxArtifactBytes` | 65536 | UTF-8 size of the serialized artifact, checked before anything is parsed |
+-| `maxSteps` | 100 | Entries in one artifact |
+-| `maxCodeLength` | 2048 | Characters in one step's `code` |
+-| `maxStatementsPerStep` | 8 | Statements in one step |
+-| `maxAstDepth` | 24 | AST nesting depth within one statement |
+-| `maxStringLength` | 1024 | Any accepted string literal argument |
+-| `maxSelectorLength` | 512 | CSS selector passed to `locator()` |
+-| `maxUrlLength` | 2048 | URL literal |
+-| `maxRegexLength` | 256 | Regular expression literal including delimiters and flags |
+-| `maxRegexQuantifierNesting` | 1 | Depth of quantified groups tolerated in a regular expression |
+-| `maxOptionKeys` | 8 | Keys in one options object |
+-| `maxDiagnosticsPerStep` | 10 | Diagnostics kept per step before truncation |
+-| `maxDiagnosticMessageLength` | 400 | Characters in a diagnostic message |
+-| `maxExcerptLength` | 120 | Characters of the failing node echoed back |
+-| `maxReferenceNameLength` | 64 | Length of a `vars.get`/`vars.secret` name |
+-
+-## Accepted language
+-
+-`src/validator/language.ts` is the single machine-readable description of the accepted surface:
+-receivers, methods, positional argument kinds and option-key schemas. The reference corpus is keyed
+-on it — `test/reference-manifest.test.ts` fails when a permitted method or option key has no
+-example, and when an example claims a method the surface does not contain — and the backend
+-prompt's syntax reference is meant to be generated from it rather than restated.
+-
+-| Surface | Permitted |
+-|---|---|
+-| Statements | `await <permitted call>;`, up to `maxStatementsPerStep` |
+-| Navigation | `page.goto(url, opts?)`, `page.waitForURL(urlOrRegex, opts?)` |
+-| Locators | chains rooted at `page`: `getByRole`, `getByText`, `getByLabel`, `getByPlaceholder`, `getByTestId`, `locator` (CSS only) |
+-| Actions | `click`, `fill`, `press`, `check`, `uncheck`, `selectOption`, `hover` |
+-| Assertions | `expect(locator).toBeVisible / toContainText / toHaveValue`, `expect(page).toHaveURL / toHaveTitle` |
+-| Arguments | bounded literals, safe regular expressions, enumerated option keys, `vars.get` / `vars.secret` |
+-
+-URLs must be absolute `http`/`https`; `locator()` rejects Playwright selector-engine syntax
+-(`text=`, `xpath=`, `>>`, `:has-text(...)`, …); regular expressions reject backreferences,
+-lookbehind, unpermitted flags and quantifier nesting beyond the configured depth.
+-
+-### Text-entry role equivalence (VAL-031)
+-
+-The compiler cannot see the page, so the role of a text field is a guess: `searchbox`, `textbox`
+-and `combobox` are all things "the search field" can be. For `fill` and `press` only, when the
+-chain's **terminal** segment is `getByRole` with one of those three roles and options limited to
+-`name`/`exact`/`disabled`, `src/run/playwrightAdapter.ts` resolves the target like this:
+-
+-1. The authored role is tried first on every poll. If it matches any visible element (see
+-   visible-only resolution below), it is used, strict mode included.
+-2. Only after it has matched nothing for `min(2 s, timeout/4)` are the other two roles counted,
+-   with the same options, as one `.or()` union. Exactly one match is acted on with the remaining
+-   timeout. Several are refused with a fixed message (`no <role> matched; N other text-entry
+-   controls did — refusing to choose`). `.first()` is never used. If nothing matches by the
+-   deadline, the usual "no element matched" failure is reported.
+-3. `guard()` and the secret-origin check run before any of this.
+-4. Each use writes one line to the child's stderr, which the output relay redacts and bounds:
+-   `text-entry-equivalence: authored=<role> resolved=<role> step=<i>`.
+-
+-`click`, `hover`, `check`, the assertions, other roles, non-terminal segments and any role with
+-`checked`/`expanded`/`selected`/`pressed`/`level` are unchanged. The step report does not yet name
+-the resolved role; adding it is an ADR-002 Class B change.
+-
+-### Visible-only resolution of actions (VAL-040)
+-
+-Real pages carry hidden twins of their controls. Wikipedia's search input has hidden copies with
+-the same placeholder, so `getByPlaceholder('Search Wikipedia')` matched 2 elements. Google's
+-`getByLabel('Search')` matched 6, most of them hidden. Strict mode refused both, even though a
+-hidden element can't be acted on anyway. For the action operations (`click`, `fill`, `press`,
+-`check`, `uncheck`, `hover`, `selectOption`), the adapter narrows the authored locator with
+-`locator.filter({ visible: true })` and polls its count until the step timeout:
+-
+-| Visible matches | Outcome |
+-|---|---|
+-| ≥ 2 | The VAL-028 strict-mode failure, with N the **visible** count: `<action> failed: the locator matched N elements; make the step more specific.` `.first()` is never used. |
+-| exactly 1 | The action runs on it with the remaining timeout. |
+-| 0 until the deadline | `<action> failed: the element was not visible within <t>ms.` if the authored locator matched hidden elements, otherwise `… no element matched the locator within <t>ms.` |
+-
+-- **Assertions are unchanged.** `toBeVisible`, `toContainText` and `toHaveValue` resolve the
+-  unfiltered locator, so their strict-mode and visibility semantics are the same as before.
+-- **With text-entry equivalence**, the authored role and the alternatives' `.or()` union are both
+-  narrowed the same way. A hidden-only authored match therefore counts as no match, and the
+-  settle-window fallback above applies.
+-- **`force: true` opts out.** The author asked to skip actionability, so the authored locator is
+-  used unfiltered, exactly as before.
+-- `guard()` and the secret-origin check still run first.
+-- When the filter changed the outcome (the one visible element had hidden twins, so total > 1),
+-  the child writes one stderr line through the output relay: `visible-only-resolution: step=<i>
+-  total=<n>`. It carries counts only, never the locator text.
+-
+-
+-## Fixture corpora
+-
+-| Directory | Purpose |
+-|---|---|
+-| `fixtures/reference/` | The pinned syntax reference: one valid artifact per permitted method and option key, each asserting the exact `BrowserAdapter` call sequence. `manifest.json` binds every example to the methods and option keys it demonstrates and to the fixture page it targets. |
+-| `fixtures/adversarial/` | One rejected artifact per denial class. Every code in `DIAGNOSTIC_CODES` must have a fixture; a test fails when one does not. |
+-| `fixtures/lint/` | Files containing each construct the execution-boundary lint rules forbid. Excluded from `tsconfig.json` and from `npm run lint` on purpose, and linted programmatically by a test. |
+-| `fixtures/pages/` | Controlled local HTML the reference corpus targets. Every element carries an explicit `role` attribute so the fixture tier can check a locator against the page exactly. Served on loopback by `test/helpers/pageServer.ts` at the paths `manifest.json` binds them to, so a real Chromium reaches them without reaching `example.com` and without a DNS lookup. `popup.html` and `timeline.html` belong to story 10.12 (unsupported multi-page workflow; seek measurement) and are deliberately **not** in `manifest.json` — that file is the pinned syntax reference. |
+-
+-### Adding a reference example
+-
+-1. Add the fixture JSON to `fixtures/reference/` in the shape the existing examples use
+-   (`source`, `references`, `values`, `artifact`, `expectedCalls`).
+-2. Add its entry to `fixtures/reference/manifest.json` with the fixture page it targets. The
+-   `methods`, `optionKeys` and `referenceKinds` fields are re-derived from the validator by
+-   `test/reference-manifest.test.ts`, which prints the exact expected arrays when they disagree —
+-   a declaration cannot claim coverage the example does not have.
+ 
+ ## Versions
+ 
+@@ -575,19 +479,20 @@
+ 2. **Regenerate the record** — `npm run build`, which rewrites `dist/runtime-versions.json`.
+ 3. **Assert the copies** — `npm run check:pins`, and `npm run check:pins -- --require-image` against
+    the rebuilt image so the new `chromiumBuild` and `image` are asserted rather than skipped.
+-4. **Run both corpora** — `npm test` (unit tier: the adversarial corpus and every reference example
+-   against the current validator) and `npm run test:fixtures` inside the pinned image. A reference
+-   example that no longer validates, or an adversarial fixture that is no longer rejected, blocks
+-   the upgrade. This is the fixture-corpus run §4.6 requires before release.
++4. **Run the current fixture gates** — `npm test` (the packaged independent observed-choice
++   reference and existing current negative/unit cases) and `npm run test:fixtures` inside the
++   pinned image. A required reference that no longer validates or a negative case that is no
++   longer rejected blocks the upgrade. This is the current fixture-corpus run §4.6 requires
++   before release; the retired artifact-1 corpora are not an upgrade dependency.
+ 5. **Compatibility is the build identity, not a rule table.** The artifact-1 per-field rule table
+    was deleted with its engine (STUDIO-OBS-012A). The observed path compares the bundle hashes,
+    the Chromium build and the launcher hash it reports (`assertBuild`), so a bump that changes any of
+    them is visible in the next run's identity. Do not reintroduce a range rule speculatively.
+ 6. **Existing recorded runs.** A run records the identity it ran under. After the bump new runs
+    report the new identity; preserve the old runs and do not reinterpret them.
+-7. **Never rewrite approved source.** A revision is recompiled only by an explicit, reconfirmed
+-   authoring action. An upgrade does not silently reinterpret an artifact under the new runtime,
+-   and a vulnerable runtime is not kept alive to preserve replay.
++7. **Never rewrite an approved revision.** An incompatible revision requires explicit,
++   reconfirmed learning and revision replacement. An upgrade does not silently reinterpret an
++   artifact under the new runtime, and a vulnerable runtime is not kept alive to preserve replay.
+ 
+ ### Runtime compatibility
+ 
+@@ -749,7 +654,7 @@
+ actual included corpus. Runtime provenance binds the fixed browser mode, installed executable SHA256
+ and compiled launcher SHA256; startup rejects shell or mismatched installations. A local catalog's
+ image digest is controlled test identity, never image provenance. `check:pins --require-image` retains
+-the Node22/internal-image ED-05 gate even when a public Playwright image supplies a working browser.
++the Node24/internal-image ED-05 gate even when a public Playwright image supplies a working browser.
+ 
+ The authenticated, fenced `/observe` control refreshes actual browser evidence between source steps
+ or after a resolved clarification. It requires the current generation and an idle live context,
+@@ -789,7 +694,7 @@
+ 
+ ### Observed replay (artifact 2)
+ 
+-Observed artifacts use the one collapsed replay profile `{contract: 3}`, compared together with the exact build identity (STUDIO-OBS-012A). The authenticated `POST /v2/validate-observed` endpoint independently derives the plan, operation guards, input recipes and binding graph from original immutable evidence. `POST /v2/runs` uses ordinary admission, capacity, the confined recorded child, cancellation, reporting and evidence upload. Legacy artifact 1 validation, AST semantics and protocol 1 remain separate.
++Observed artifacts use the one collapsed replay profile `{contract: 3}`, compared together with the exact build identity (STUDIO-OBS-012A). The authenticated `POST /v2/validate-observed` endpoint independently derives the plan, operation guards, input recipes and binding graph from original immutable evidence. `POST /v2/runs` uses ordinary admission, capacity, the confined recorded child, cancellation, reporting and evidence upload. Artifact-1 validation, AST semantics and protocol 1 are retired; there is no compatibility fallback. The current produced artifact has version 3 and replay profile `{contract: 3}`.
+ 
+ Enable validation and replay independently with `STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED` and `STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED` (both default false). Trusted startup supplies `STUDIO_RUNNER_OBSERVED_CATALOG_FILE` containing exactly `{profile,build}`, `STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST`, and `STUDIO_RUNNER_OBSERVED_POLICY_FILE` containing the mounted policy projections. The catalog must match packaged schema/reference hashes, the installed Chromium revision and the independently supplied immutable release image digest. A local build records `observedChromiumBuild` separately; it does not assert container provenance or satisfy `check:pins --require-image`.
+ 
+--- a/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md
++++ b/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md
+@@ -165,3 +165,23 @@
+ | CLN-54 | `studio-runner/evaluation/oracle.mjs` and `oracle.test.mjs` | compile-era oracle (Story 10.26) | **C** | Imported by `evaluation/cli.mjs:7` (`validateManifest`, `validate-manifest` command at `:35`), `report.mjs:1` (`summarize`), `oracle.test.mjs:4` and `browser-oracle.test.mjs:10`. | V (@po grep) | Medium: the `validate-manifest` and `oracle-self-test` CLI commands depend on it | Needs a decision before any edit (G2), owner @dev with @qa: retire the compile-era `validate-manifest` / `oracle-self-test` / `summarize` commands from `cli.mjs` and the README, or keep them. Deletion only after that decision and after T4 (guard above). `oracle.test.mjs` is a named drop under G5. |
+ | CLN-55 | `studio-runner/evaluation/report.mjs`, `report.d.mts`, and `studio-runner/test/evaluation/report.test.ts` | compile-era report layer (Story 10.26) | **C** | Imported by `evaluation/cli.mjs:8` (`summarize` at `:44-48`) and `test/evaluation/report.test.ts:9`. | V (@po grep) | Medium: same CLI dependency as CLN-54 | Decided together with CLN-54. `report.test.ts` is a named drop under G5. The EP harness's own report path (`observed-authoring/evaluate.mjs`) is not this file. Confirm that at G1. |
+ | CLN-56 | `studio-runner/evaluation/fixture-server.mjs` and `fixture-server.d.mts` | compile-era fixture server, now a test oracle input | **C** | Imported by `test/evaluation/corpusPages.test.ts:7`, the C04 port-fidelity test that lane EP added on purpose (EP receipt §7 deviation 2): the re-authored C04 page must keep the event vocabulary that `fixture-server.mjs` emits (`corpusPages.test.ts:121-134`). | V (@po grep; EP receipt) | Medium: removing it removes the C04 fidelity proof | Keep unless @qa (corpus owner) agrees to re-home the C04 vocabulary check, for example as a frozen event list in the manifest. Then delete it with that test change named under G5. Not before T4 (guard above). |
++
++
++## 7. Dated static re-verification addendum — 2026-10-18 (STUDIO-OBS-011 11-DOC)
++
++This append-only note preserves §1–§6, all historical row text and totals. It records static
++re-verification and the corresponding 11-DOC correction proposal; application and lifecycle/QA
++acceptance belong to the root's gated merge. Exact source/output hashes and patch applicability
++are in `docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/manifest.json`.
++
++| Item | Current static evidence | Disposition and remaining owner |
++|---|---|---|
++| CLN-44 / Gage X-9 | Post-residue chart scan: **61 distinct `STUDIO_RUNNER_*` tokens** across `helm-chart/` (including comment/prefix tokens and backend aliases); the exact `acceptedEnvKeys` block has **53 complete keys**, all in the loader's **57-key** `KEY_SPECS` set. The remaining four loader keys are INSTANCE_ID, SERVICE_IDENTITY, CALLBACK_IDENTITY and CALLBACK_BASE_URL. | **K remains.** These are three different counts, not 61 rendered runner variables. Static subset proof is not a fresh rendered/deployment test; the final gate remains @devops/@qa's. |
++| CLN-49 / RC-8 | Retired UI selector/authoring/incremental flags survive only in the rollout runbook's historical paragraph; `evaluation/lifecycle.mjs` is absent. The CLI still imports `oracle.mjs`/`report.mjs`, and R-EP v2 carries that layer. | Dated historical flag note and removal of only the live complete-lifecycle claim proposed. **Independent fixture-oracle wording stays.** Actual benchmark/release evidence remains with 009/010. |
++| CLN-51 | No browser worker or studio browser mock module; `server.ts` imports `msw/node`; Playwright uses `e2e/mswProxy.ts`. Vite reads `VITE_API_URL`; active Webpack derives its proxy target from `REACT_APP_API_BASE_URL` with the literal `.replace('/api', '')` transform in `frontend/webpack.config.js`. Each uses localhost:8080 as its unset/empty fallback; this is not a suffix-normalization claim. | Matching CLAUDE/AGENTS wording proposed, ARCH live mechanism corrected and its recorded plan retained with a dated note. Root must confirm the accurate variable distinction; accessibility scope is byte-preserved. |
++| C-OBS009-3 | Artifact-1 Bounds/Accepted language/role-equivalence/visible-only/Fixture corpora/reference-example sections and parser text remain in the current README. Runbook §§1–3/5–13 were source-audited; §2 lacks the guided connector port. | Scoped README removal and dated runbook corrections proposed; §4/§14 byte-identical. §14.4 already contains the UAT upgrade note. Actual TLS/Secret/issuer/cluster prerequisites remain external, not new 11-DOC preconditions. |
++| R-AI | The plan requires archive-first reconciliation of `.ai/` by root/DevOps; this off-tree documentation preparation has no ownership of `.ai/` or git staging. | **Pending root/DevOps archive receipt.** No archive, ignore decision execution or historical closure is claimed here. |
++
++Commands and positive controls, exact key sets, unchanged dated-text checks and named residual
++documentation findings are retained with the patch package. No source, contracts, migrations,
++story lifecycle, historic gate verdict or actual deployment was changed by this addendum.

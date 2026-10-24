@@ -1,0 +1,104 @@
+{
+  "verdict": "PASS_BOUNDED_TWO_WHOLE6_LANE_RETAINED_CUSTODY_COMPONENT_ONLY",
+  "producerManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-metadata-extraction07/whole06-two-lane-read04-manifest.json",
+    "sha256": "0aee7dd46f549ade6bef158e6efd181f2c5bec5da618748efbf9ec935b2c35fb",
+    "bytes": 952
+  },
+  "toolReceipt": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-metadata-extraction07/execution-tool-receipt-whole06-limit04.json",
+    "sha256": "8307ebb9b3fc8aec86a49b0a564522925227285ef76645b1f144094d7de87ad8",
+    "bytes": 1139
+  },
+  "closedCustody": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-metadata-extraction07/closed-custody-whole06-limit04.json",
+    "sha256": "13409e427c6841135fef05b60da3fc3a68975a96abee2898059f3ade8361b7ed",
+    "bytes": 23121
+  },
+  "releasedPlan": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-metadata-extraction07/released-read-plan-whole06-limit04.json",
+    "sha256": "f4040b37ffe2bcd3f99beb55a12778b67d8cb71bdf3b4f863be6aa4849122a70",
+    "bytes": 6314
+  },
+  "dataReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-independent-qa10/whole-custody-disposition.json",
+    "sha256": "d12bdae0ec511080a8a2c3cdb99974ec9f36ba51ea63c4cce90c6e2b848069e8",
+    "bytes": 2284
+  },
+  "sourceSha256": "7ae01dc39a68e3feff5dca54949854730e16502a7bace1c00f21b38a1c8e628a",
+  "originalWaitReturned": true,
+  "rawExit": 0,
+  "thisPlanInvocations": 1,
+  "parentEntriesInspected": 18242,
+  "prefixNamesConsidered": 410,
+  "lanes": [
+    {
+      "task": "test",
+      "cohortReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/cohorts/ae42255e-9a20-4f40-b8ea-a9ae98b4331a/948c7e71-45a4-41ed-a333-0d4c0eda6427/cohort.json",
+        "sha256": "8d8ff2bf642e294c9d13a60c5c9851a4b914076504e6003fdbd3d5330ec7e93d",
+        "bytes": 105936
+      },
+      "matchCount": 1,
+      "bindingComplete": true,
+      "bothTerminalLogFacts": {
+        "guided.log": {
+          "bytes": 389,
+          "sha256": "20afc3d386f23fc5824d09e0e64d8cd1d9c89776b52b04b9e80f6a68a24afb8a"
+        },
+        "ordinary.log": {
+          "bytes": 1482,
+          "sha256": "d22f25139c93ce30840c45835097cfb42e8125086bf35693c0440b60454084d7"
+        }
+      },
+      "ownerStream": {
+        "bytes": 1882527,
+        "sha256": "3c547706510f40a6cbd23f753ec18da9b7466786c1d8b32dca667df91e13de1a"
+      },
+      "ownedTempEqual": true,
+      "guidedGenerationCount": 3,
+      "contiguousPositiveGenerations": true,
+      "generationLogAvailability": "UNREAD_UNVERIFIED",
+      "postScanOwnerBytesNotAssumedSealed": true
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "cohortReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/guidedIncrementalTest/cohorts/dd583c85-a2ab-46af-b2c7-6b73d79b8c25/9cae9572-eff9-4826-a610-9a948342ae6b/cohort.json",
+        "sha256": "4ab4bd8ec8570c8161306a961619464a9645c954dd5c79e1d1fc5ed0094e5e6a",
+        "bytes": 226085
+      },
+      "matchCount": 1,
+      "bindingComplete": true,
+      "bothTerminalLogFacts": {
+        "guided.log": {
+          "bytes": 359,
+          "sha256": "7dec0574c4a0fed57fea6348c764ab6e4d1a99a60156172c00fd6cb3a48f35de"
+        },
+        "ordinary.log": {
+          "bytes": 352,
+          "sha256": "d79b29ca3bc2ae6ab371b893abd154c229986358012003b8356c54e10fdee697"
+        }
+      },
+      "ownerStream": {
+        "bytes": 3383806,
+        "sha256": "51f08b5f27c58b39bba70f98fc1270fd76e81fa2a06ac39495427ffc864a569f"
+      },
+      "ownedTempEqual": true,
+      "guidedGenerationCount": 80,
+      "contiguousPositiveGenerations": true,
+      "generationLogAvailability": "UNREAD_UNVERIFIED",
+      "postScanOwnerBytesNotAssumedSealed": true
+    }
+  ],
+  "legacy968aQualification": "Opaque hash pin of the genuine whole producer terminal receipt; no pair-reader or synthetic108 claim.",
+  "qualification": [
+    "Both unique complete terminal-hash matches and explicit ownedTemp/contiguous-generation proof follow reviewed7ae source plus the captured closed result. QA did not reread private originals.",
+    "Generation-log mapping availability remains UNREAD_UNVERIFIED; the current owner-stream hash is not a fictitious scan-time seal.",
+    "Custody supplies binding, not actual whole diagnostic classification, REL/D4/startup zero, or final T5 credit.",
+    "Prior finite failed scopes and the six-call ceiling remain preserved; no automatic retry."
+  ],
+  "actualWholeDiagnosticsExecutedByThisComponent": false,
+  "qaPrivateCurrentProductReadOrRuntimeExecution": false,
+  "newReadRuntimeClassificationLifecycleAuthority": false
+}

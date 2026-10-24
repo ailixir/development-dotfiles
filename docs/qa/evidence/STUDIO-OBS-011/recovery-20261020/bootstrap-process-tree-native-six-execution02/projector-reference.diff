@@ -1,0 +1,50 @@
+--- docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution01/project-terminal.py
++++ project-terminal.py
+@@ -1,6 +1,6 @@
+ from pathlib import Path
+ import json,hashlib,os,stat,re,collections,math,subprocess,datetime
+-R=Path.cwd();B=R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020';O=B/'bootstrap-process-tree-native-six-execution01';T=Path('/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo');raw=T/'bootstrap-six-raw'
++R=Path.cwd();B=R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020';O=B/'bootstrap-process-tree-native-six-execution02';T=Path('/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo');raw=T/'bootstrap-six-raw02'
+ def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+ def w(n,d):(O/n).write_text(json.dumps(d,indent=2)+'\n')
+ phases=['no-app','captured-unpublished','committed-before-ready','committed-before-ready-orderly','ready-sent-dropped','ready-received-stop']
+@@ -15,13 +15,16 @@
+    f={'file':m[1],'line':int(m[2]),'column':int(m[3])}
+    if f not in frames:frames.append(f)
+  types={m.group(1) for h in heads if (m:=re.match(r'(Error|AssertionError|TypeError|RangeError|SyntaxError|ReferenceError)\b',h))}
+- rows.append({'file':'studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts','ancestorTitles':a['ancestorTitles'],'title':a['title'],'fullName':a['fullName'],'status':a['status'],'failureType':next(iter(types)) if len(types)==1 else ('NONE' if not messages else 'UNKNOWN'),'sourceErrorEnum':next(iter(found)) if len(found)==1 else ('NONE' if not messages else 'UNKNOWN'),'projectFrames':frames})
++ branchReasons={m.group(1) for head in heads if (m:=re.search(r'BOOTSTRAP_PROCESS_TABLE_INVALID:(OUTPUT_SHAPE|ROW_IDENTITY|DUPLICATE_PID|REQUIRED_METADATA)(?![A-Z_])',head))}
++ rows.append({'branchReason':next(iter(branchReasons)) if len(branchReasons)==1 and found=={'BOOTSTRAP_PROCESS_TABLE_INVALID'} else ('NONE' if not messages else 'UNKNOWN'),'file':'studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts','ancestorTitles':a['ancestorTitles'],'title':a['title'],'fullName':a['fullName'],'status':a['status'],'failureType':next(iter(types)) if len(types)==1 else ('NONE' if not messages else 'UNKNOWN'),'sourceErrorEnum':next(iter(found)) if len(found)==1 else ('NONE' if not messages else 'UNKNOWN'),'projectFrames':frames})
+ assert [a['fullName'] for a in rows]==[a['fullName'] for a in expected]
+ counts=dict(collections.Counter(a['status'] for a in rows)); log=(raw/'vitest.log').read_bytes();unhandled=bool(re.search(rb'Unhandled (?:Errors|Rejection|Exception)|unhandledRejection',log))
+ w('native-six-case-reconciliation.json',{'rawReportSha256':sha(raw/'vitest.json'),'rawLogSha256':sha(raw/'vitest.log'),'rawExit':json.loads((O/'fixtures-terminal.json').read_text())['rawNativeExit'],'physicalResultFiles':len(j['testResults']),'reportedSuiteCounts':{k:v for k,v in j.items() if k.startswith('num')},'identitiesAndOrderExact':True,'filterOmissions':0,'counts':counts,'orderedCases':rows,'unhandledBannerPresent':unhandled,'gate':'PASS' if counts=={'passed':6} and not unhandled else 'FAIL','failureBodiesExported':False})
+ # All fresh generated leaves are hashed only; only the two approved JSON schemas are decoded.
+ root=T/'docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs'
+-paths=sorted(p for p in root.rglob('*') if p.is_file()); privateInventory=[]; opaque=[]
++nativeRecord=json.loads((O/'fixtures-terminal.json').read_text());freshStart=datetime.datetime.fromisoformat(nativeRecord['nativeStartedAtUtc']).timestamp()
++freshDirs=[d for d in root.iterdir() if d.is_dir() and d.name.startswith('process-tree-') and d.stat().st_birthtime>=freshStart];assert len(freshDirs)==6
++paths=sorted(p for d in freshDirs for p in d.rglob('*') if p.is_file()); privateInventory=[]; opaque=[]
+ for i,p in enumerate(paths):
+  st=p.lstat(); assert stat.S_ISREG(st.st_mode) and st.st_nlink==1
+  d={'ordinal':i,'sha256':sha(p),'bytes':st.st_size,'extension':p.suffix};opaque.append(d);privateInventory.append({**d,'path':str(p.relative_to(T))})
+@@ -39,7 +42,7 @@
+ def number(v):assert type(v) in (int,float) and math.isfinite(v) and v>=0;return v
+ projection=[];attempts=0
+ for phase in phases:
+- dirs=[p for p in root.iterdir() if p.is_dir() and p.name.startswith('process-tree-'+phase+'-') and not any(p.name.startswith('process-tree-'+q+'-') for q in phases if q!=phase and q.startswith(phase+'-'))]
++ dirs=[p for p in freshDirs if p.is_dir() and p.name.startswith('process-tree-'+phase+'-') and not any(p.name.startswith('process-tree-'+q+'-') for q in phases if q!=phase and q.startswith(phase+'-'))]
+  assert len(dirs)==1,(phase,len(dirs));d=dirs[0]; row={'phase':phase};early=None;final=None
+  for name in ['bootstrap-owned-inventory.json','runner-bootstrap-process-tree.json']:
+   p=d/name
+@@ -73,6 +76,8 @@
+  except ProcessLookupError:state='ESRCH_GONE'
+  except PermissionError:state='UNKNOWN_PERMISSION'
+  owned.append({'role':k,'pid':term[k],'strictSignal0':state})
+-batt=subprocess.run(['/usr/bin/pmset','-g','batt'],capture_output=True,text=True);lid=subprocess.run(['/usr/sbin/ioreg','-r','-k','AppleClamshellState','-d1'],capture_output=True,text=True);states=re.findall(r'"AppleClamshellState"\s*=\s*(Yes|No|true|false)',lid.stdout)
+-w('terminal-host-owned-closure.json',{'atUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'ownedWrappers':owned,'caffeinateReleased':term['caffeinateReleased'],'caffeinateExit':term['caffeinateExit'],'acPower':"'AC Power'" in batt.stdout,'clamshellStates':states,'lidOpen':bool(states) and set(states)<={'No','false'},'pmsetExit':batt.returncode,'ioregExit':lid.returncode,'pmsetRawSha256':hashlib.sha256(batt.stdout.encode()).hexdigest(),'ioregRawSha256':hashlib.sha256(lid.stdout.encode()).hexdigest(),'noSleepHistoryClaim':True,'historicalAllDescendantsGone':'NOT_ESTABLISHED','inhibitorReleaseBoundary':'AFTER_NATIVE_TERMINAL_BEFORE_AFTER_CAPTURE_AND_METADATA_SNAPSHOTS'})
+-print(json.dumps({'counts':counts,'failed':[{'name':r['fullName'],'type':r['failureType'],'code':r['sourceErrorEnum'],'frames':r['projectFrames']} for r in rows if r['status']=='failed'],'projectionReads':attempts,'earlyPresent':sum(x['bootstrap-owned-inventory.json']['state']=='PRESENT_TYPED' for x in projection),'finalPresent':sum(x['runner-bootstrap-process-tree.json']['state']=='PRESENT_TYPED' for x in projection),'ownedWrapperStates':owned}))
++host=json.loads((O/'terminal-host-metadata.json').read_text())
++metadataEnd=datetime.datetime.fromisoformat(term['metadataCollectorEndedAtUtc']);release=datetime.datetime.fromisoformat(term['inhibitorReleasedAtUtc']);nativeEnd=datetime.datetime.fromisoformat(term['nativeEndedAtUtc']);assert nativeEnd<=metadataEnd<=release and term['inhibitorStillRunningThroughMetadata'] and term['caffeinateReleased']
++wj('terminal-host-owned-closure.json',{'atUtc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'ownedWrappers':owned,'caffeinateReleased':term['caffeinateReleased'],'caffeinateExit':term['caffeinateExit'],'hostFactsFromSameOriginalDriverHeldInhibitorMetadata':host,'additionalHostCommandsRun':False,'nativeEndedAtUtc':term['nativeEndedAtUtc'],'metadataCollectorEndedAtUtc':term['metadataCollectorEndedAtUtc'],'inhibitorReleasedAtUtc':term['inhibitorReleasedAtUtc'],'nativeThenMetadataThenRelease':True,'noSleepHistoryClaim':True,'historicalAllDescendantsGone':'NOT_ESTABLISHED','inhibitorReleaseBoundary':'AFTER_NATIVE_AND_ACTUAL_CAPTURE_FULL_SNAPSHOTS_CACHE_CLI_BROWSER_HOST_METADATA'})
++wj('fresh-output-timestamp-custody.json',{'originalNativeStartedAtUtc':term['nativeStartedAtUtc'],'freshSourceAllocatedDirectoryCount':len(freshDirs),'freshGeneratedFileCount':len(paths),'directorySelection':'source-owned process-tree phase mkdtemp directories with birthtime >= this original native start; old first-attempt directories excluded','sourceAllocation':'nativeEvidenceDirectory(process-tree-phase) + exclusive wx nativeJson; unchanged f4ccfixture','oldNativePayloadBodiesRead':False,'oldDirectoriesIncludedInProjection':False})
++print(json.dumps({'counts':counts,'failed':[{'name':r['fullName'],'type':r['failureType'],'code':r['sourceErrorEnum'],'reason':r['branchReason'],'frames':r['projectFrames']} for r in rows if r['status']=='failed'],'projectionReads':attempts,'earlyPresent':sum(x['bootstrap-owned-inventory.json']['state']=='PRESENT_TYPED' for x in projection),'finalPresent':sum(x['runner-bootstrap-process-tree.json']['state']=='PRESENT_TYPED' for x in projection),'ownedWrapperStates':owned,'inhibitorHeldThroughMetadata':True}))

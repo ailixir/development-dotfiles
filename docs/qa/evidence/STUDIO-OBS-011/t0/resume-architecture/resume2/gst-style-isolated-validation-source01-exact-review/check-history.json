@@ -1,0 +1,14 @@
+{
+  "kind":"PRESERVED_ARIA_GST_SOURCE01_REVIEW_HISTORY",
+  "records":[
+    {"tool":"b7d9fa","actualStatus":1,"script":"static01-verify_source.py.txt","stdout":"static01.stdout","stderr":"static01.stderr","classification":"Reviewer metadata schema assumption: candidate manifest members rather than files; no subject function executed."},
+    {"tool":"8310ca","actualStatus":0,"script":"verify_source.py","stdout":"static02.stdout","stderr":"static02.stderr","checks":4552,"classification":"Corrected finite metadata reader supports actual members/files and mode encodings; no subject execution."},
+    {"tool":"c6c00e","actualStatus":0,"subjectFakeFlowReplayedOnce":true,"checks":43,"stdout":"replay43.stdout","stderr":"replay43.stderr"},
+    {"tool":"3c71ae","actualStatus":0,"checks":8,"cases":6,"stdout":"critical01.stdout","stderr":"critical01.stderr","classification":"Bounded paired expected-outcome reproductions; no source safety edit or real target effect."}
+  ],
+  "allOutputsSeparatelyInspected":true,
+  "authorAttempt1And2HistoryPreserved":true,
+  "authorAttempt2InnerCause":"UNKNOWN",
+  "furtherTargetExpansionAfterCompleteBatch":false,
+  "actualResourceNativeSourceActions":0
+}

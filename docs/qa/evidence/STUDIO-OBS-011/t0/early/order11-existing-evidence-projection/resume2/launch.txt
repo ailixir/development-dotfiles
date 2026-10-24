@@ -1,0 +1,7 @@
+UNEXECUTED; no current authorization. After exact Quinn/root release and whole actual closure/public assessment only, from repository root:
+
+python3 docs/qa/evidence/STUDIO-OBS-011/t0/early/order11-existing-evidence-projection/resume2/project_existing.py --expected-authorization-sha ROOT_APPROVED_AUTHORIZATION_SHA256 --expected-root-approval-sha ROOT_APPROVAL_FILE_SHA256 --expected-quinn-approval-sha QUINN_APPROVAL_FILE_SHA256
+
+All three placeholders must be externally supplied exact64hex hashes of the independently approved fixed release files. No current actual private inventory/read is authorized. A missing release fails; output reuse fails. Do not execute to test refusal against actual paths. Pure synthetic validation only: PYTHONDONTWRITEBYTECODE=1 python3 docs/qa/evidence/STUDIO-OBS-011/t0/early/order11-existing-evidence-projection/resume2/contracts_fake.py
+
+Filesystem-only synthetic core verification (UNRELATED to release): PYTHONDONTWRITEBYTECODE=1 python3 docs/qa/evidence/STUDIO-OBS-011/t0/early/order11-existing-evidence-projection/resume2/contracts_fs.py

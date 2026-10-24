@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-synthetic-local-report-source01-exact-review/verify_source.py", line 94, in <module>
+    for name,value in facts.items():check(value is True,'source-counterexample:'+name)
+                                    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-synthetic-local-report-source01-exact-review/verify_source.py", line 11, in check
+    if ok is not True:raise RuntimeError(name)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: source-counterexample:leaseCheckedBeforeSetupOnly

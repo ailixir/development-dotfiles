@@ -1,0 +1,29 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -36,7 +36,7 @@
+    * STUDIO-OBS-015 H8: blocking stop sends (up to 15 s each) never run on the common pool. A full
+    * queue discards the attempt; the durable request stays for the reaper's re-drive.
+    */
+-  private final java.util.concurrent.ThreadPoolExecutor teardowns = teardownExecutor();
++  private java.util.concurrent.ThreadPoolExecutor teardowns = teardownExecutor();
+ 
+   /** STUDIO-OBS-015 aria-warn-ruling01: earliest instant of the next past-window count. */
+   private final java.util.concurrent.atomic.AtomicReference<Instant> nextAbandonedReport =
+@@ -2791,6 +2791,17 @@
+     return TEARDOWNS_IN_FLIGHT.contains(id);
+   }
+ 
++  /** Test seam: replace an unused executor without changing production pool or queue sizes. */
++  void installTeardownExecutor(java.util.concurrent.ThreadPoolExecutor executor) {
++    require(
++        executor != null && !executor.isShutdown() && teardowns.getTaskCount() == 0,
++        "RUNTIME_INCOMPATIBLE",
++        409);
++    var previous = teardowns;
++    teardowns = executor;
++    previous.shutdown();
++  }
++
+   private static java.util.concurrent.ThreadPoolExecutor teardownExecutor() {
+     var executor =
+         new java.util.concurrent.ThreadPoolExecutor(

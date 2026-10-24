@@ -1,0 +1,558 @@
+{
+  "createdUtc": "2026-10-19T01:50:24.591803+00:00",
+  "author": "Pax (@po), historical assessment only",
+  "writesLimitedTo": "docs/qa/evidence/STUDIO-OBS-011/t0/po-historical-prep",
+  "budget": {
+    "declaredUsd": 500,
+    "actualSpend": "unavailable"
+  },
+  "stories": {
+    "008": {
+      "storyPath": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "storySha256": "d2fc7566a72616eab27a146de4e119dfb8a199bfda2c047cd90406a7b5c4f607",
+      "status": "**Done**",
+      "protectedSectionSha256": {
+        "Story": "94c6168649725f9d7b8e6b4eb43d672a5b085167691c5d1242331cb552ad6203",
+        "Acceptance Criteria": "2108467c435a0067c9819cce866628fc6f121272065dd93db9d4dc610ada055b",
+        "Tasks / Subtasks": "2c5a415da301dc75ba20fc1353cfba8b4edcdb3d10e9b868500a4967cd6fd2a2",
+        "Dev Notes": "25d6a15fb26b2019a4eacc068e86eec93e9bda6ba6362add5f40c0f0f2337d23",
+        "File List": "6746ea3016de5cdb6e857328e06845b83acdd998fa295b2106e67f2336794652",
+        "Dev Agent Record": "daa5992ada70e45a17ebbee44dd13840ede8ff621451755c446c7b71859dae47",
+        "QA Results": "17b2e2bb62d0f73ca8fc455df8a7f464e716d226a68d180dc606d3a119f38ef7"
+      },
+      "unchecked": [
+        {
+          "line": 281,
+          "text": "  - [ ] ~~User scope decision 2026-10-17, change 1 (A11): create `frontend/e2e/studio-guided-accessibility.spec.ts`. It runs in a real browser at 1440×900 and 375×812, injects the existing `axe-core` dependency (no new package), and enables and asserts `color-contrast` and `target-size` on the guided states. It also covers the FE-A11Y browser items: busy-state label-in-name, tooltip keyboard reach and the Add-a-step `aria-describedby` association. In `studioWcagAudit.test.tsx`, surfaces 4 and 5 are rewritten to distinct guided states and baseline keys are regenerated; the two rules stay disabled there.~~ [Struck 2026-10-17 by @po (Pax), PO scope decision 2 (user): the spec is not created, the surfaces are not rewritten, and the FE-A11Y items are descoped to the post-GA backlog.]"
+        },
+        {
+          "line": 365,
+          "text": "- [ ] Any eventual PR/push is handed to @devops with verified gates."
+        }
+      ],
+      "fileListPresent": true,
+      "historicalManifest": {
+        "path": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/final-gates/capture-final.json",
+        "sha256": "1d8e9e464e231fa3b948b5051fbb167783297ba8231244489349a65b5f9bc81f",
+        "sourceDigest": "50692d55e40807f67bf959f0d9672d9305d69b72ad693860506a3f7055e12dd3",
+        "distDigest": "897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+        "sourceCount": 1705
+      },
+      "currentSourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+      "currentDistDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "currentEqualsHistorical": false,
+      "driftCounts": {
+        "changed": 119,
+        "missing": 9,
+        "added": 112,
+        "distChanged": 57,
+        "distAdded": 0
+      },
+      "closureMarkersStory": [],
+      "closureMarkersIndex": [],
+      "historicalCollectorRecount": {
+        "path": "docs/qa/evidence/STUDIO-OBS-008/execution-20261017/execution/obs008-final-check01-results.json",
+        "sha256": "cc7c4bd9d26f86dddf08762be88d50e0d1e705a02e8832641feae59aa8b1f0fa",
+        "exit": 0,
+        "recordedCounts": {
+          "total": 2531,
+          "passed": 2506,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 25
+        },
+        "recounted": {
+          "PASS": 2506,
+          "SKIP": 25
+        },
+        "recountByTask": {
+          "test": {
+            "PASS": 2442,
+            "SKIP": 25
+          },
+          "guidedIncrementalTest": {
+            "PASS": 62
+          },
+          "crossReplicaTest": {
+            "PASS": 2
+          }
+        },
+        "skipsExactMultiset": true,
+        "sourceStable": true,
+        "testInputStable": true,
+        "distStable": true,
+        "taskCollectionComplete": true
+      }
+    },
+    "015": {
+      "storyPath": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md",
+      "storySha256": "b6e2befdd32d3e882bdac1152ef7e6d0f9d0a9bec26245de2cb5c96f6bcb1b00",
+      "status": "**Done**",
+      "protectedSectionSha256": {
+        "Story": "23b2a378485f3cd25fa5723f15c4c59931f70f1eda996a6c438fb45ce1a4ba90",
+        "Acceptance Criteria": "243d4fc92aeb3ec696d160732acec3aea188e6a6ce47debc87037c01559ff93d",
+        "Tasks / Subtasks": "695294bf57bdeeef2f335302b018c7f8dc0327a34d1dcb5aad361c34784f9ecf",
+        "Dev Notes": "e6c781cf2dc0eb56e7b66b46f8e160ba9ffd758a89c57af9471817ce38ab1367",
+        "File List": "e84fed0898573476a20f319797629e7d1c6753426b76ebde58e307682daee68a",
+        "Known limitations": "7637e9b25355b61543957466c7d6eb0c323f707e3244fd3a2ea0750057da96d6",
+        "Dev Agent Record": "a5eebd5825bf4abbbaf742dee9e7a820058a4b12759bce7df556fd1f1b64e2b3",
+        "QA Results": "fdb8d030ca1cbb41d374fcb0ac77a20f3a87733f40770ba117345212e3a2bcba"
+      },
+      "unchecked": [
+        {
+          "line": 122,
+          "text": "- [ ] Any eventual PR/push is handed to @devops with verified gates. *(Left open on purpose, Dev 2026-10-17: nothing has been pushed and no PR exists, and the story is not `Done`. Gage's `final-gates07` is a gate run, not the push handoff. When this is handed to @devops, keep `.aiox-core/core/permissions/dispatch-governance.js` out of the 015 commit (QA MNT-002; see \"Outside 015 scope\" in the File List).)*"
+        }
+      ],
+      "fileListPresent": true,
+      "historicalManifest": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/capture-after.json",
+        "sha256": "70333d0eebb5fd6dc51c959daacc1533e41a1a9299ed0e64a349cbafa02c9446",
+        "sourceDigest": "9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884",
+        "distDigest": "897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+        "sourceCount": 1651
+      },
+      "currentSourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+      "currentDistDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "currentEqualsHistorical": false,
+      "driftCounts": {
+        "changed": 196,
+        "missing": 12,
+        "added": 169,
+        "distChanged": 57,
+        "distAdded": 0
+      },
+      "closureMarkersStory": [
+        "STUDIO-OBS-015:digest:source-digest:9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884 dist-digest:897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c"
+      ],
+      "closureMarkersIndex": [
+        "STUDIO-OBS-015:digest:source-digest:9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884 dist-digest:897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c"
+      ],
+      "historicalCollectorRecount": {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt06-20261017T1307-results.json",
+        "sha256": "f3468921f1e451b7afabeb86958f1ae7af60581d1b7ade5082d5405976551a82",
+        "exit": 0,
+        "recordedCounts": {
+          "total": 2476,
+          "passed": 2451,
+          "failed": 0,
+          "errors": 0,
+          "skipped": 25
+        },
+        "recounted": {
+          "PASS": 2451,
+          "SKIP": 25
+        },
+        "recountByTask": {
+          "test": {
+            "PASS": 2387,
+            "SKIP": 25
+          },
+          "guidedIncrementalTest": {
+            "PASS": 62
+          },
+          "crossReplicaTest": {
+            "PASS": 2
+          }
+        },
+        "skipsExactMultiset": true,
+        "sourceStable": true,
+        "testInputStable": true,
+        "distStable": true,
+        "taskCollectionComplete": true
+      }
+    }
+  },
+  "cliChecks": {
+    "008-develop": {
+      "exit": 1,
+      "result": {
+        "ok": false,
+        "phase": "develop",
+        "checks": [
+          "PASS: status left Draft (got Done)",
+          "FAIL: status must not be Done before close (integrity)",
+          "PASS: File List non-empty or tasks checked"
+        ],
+        "failures": [
+          "status must not be Done before close (integrity)"
+        ],
+        "outcome": null,
+        "meta": {
+          "storyId": "STUDIO-OBS-008",
+          "status": "Done",
+          "fileListCount": 19,
+          "qaVerdict": "CONCERNS",
+          "qaReviewer": "Quinn (@qa)",
+          "qaReviewedRevision": "source digest `50692d55e40807f67bf959f0d9672d9305d69b72ad693860506a3f7055e12dd3` (1705 files), dist `897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c`, `openapi.yaml` `b5ecdcad4c5e152d0edde5ad14af1a04438f3d9153b04037ef9ce5bc0ae29244`, story 0.3.17 (sha256 before this edit `81950a05515c1575f2133297e7634a97eafb7acf71658a7a59d14e852e032a15`).",
+          "qaEvidenceError": null,
+          "tasks": {
+            "total": 26,
+            "done": 24
+          }
+        }
+      }
+    },
+    "008-review": {
+      "exit": 0,
+      "result": {
+        "ok": true,
+        "phase": "review",
+        "checks": [
+          "PASS: QA evidence contains an explicit verdict",
+          "PASS: QA verdict present (CONCERNS)",
+          "PASS: QA evidence identifies reviewer",
+          "PASS: QA evidence binds reviewed_revision",
+          "PASS: QA evidence provenance matches the current story/verdict",
+          "PASS: approved QA verdict set status Done (got Done)"
+        ],
+        "failures": [],
+        "outcome": "approved",
+        "meta": {
+          "storyId": "STUDIO-OBS-008",
+          "status": "Done",
+          "fileListCount": 19,
+          "qaVerdict": "CONCERNS",
+          "qaReviewer": "Quinn (@qa)",
+          "qaReviewedRevision": "source digest `50692d55e40807f67bf959f0d9672d9305d69b72ad693860506a3f7055e12dd3` (1705 files), dist `897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c`, `openapi.yaml` `b5ecdcad4c5e152d0edde5ad14af1a04438f3d9153b04037ef9ce5bc0ae29244`, story 0.3.17 (sha256 before this edit `81950a05515c1575f2133297e7634a97eafb7acf71658a7a59d14e852e032a15`).",
+          "qaEvidenceError": null,
+          "tasks": {
+            "total": 26,
+            "done": 24
+          }
+        }
+      }
+    },
+    "008-close": {
+      "exit": 0,
+      "result": {
+        "ok": true,
+        "phase": "close",
+        "checks": [
+          "PASS: status is Done (got Done)",
+          "PASS: approved QA verdict exists (got CONCERNS)",
+          "PASS: QA evidence identifies reviewer",
+          "PASS: QA evidence binds reviewed_revision",
+          "PASS: QA evidence provenance matches the current story/verdict"
+        ],
+        "failures": [],
+        "outcome": null,
+        "meta": {
+          "storyId": "STUDIO-OBS-008",
+          "status": "Done",
+          "fileListCount": 19,
+          "qaVerdict": "CONCERNS",
+          "qaReviewer": "Quinn (@qa)",
+          "qaReviewedRevision": "source digest `50692d55e40807f67bf959f0d9672d9305d69b72ad693860506a3f7055e12dd3` (1705 files), dist `897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c`, `openapi.yaml` `b5ecdcad4c5e152d0edde5ad14af1a04438f3d9153b04037ef9ce5bc0ae29244`, story 0.3.17 (sha256 before this edit `81950a05515c1575f2133297e7634a97eafb7acf71658a7a59d14e852e032a15`).",
+          "qaEvidenceError": null,
+          "tasks": {
+            "total": 26,
+            "done": 24
+          }
+        }
+      }
+    },
+    "015-develop": {
+      "exit": 1,
+      "result": {
+        "ok": false,
+        "phase": "develop",
+        "checks": [
+          "PASS: status left Draft (got Done)",
+          "FAIL: status must not be Done before close (integrity)",
+          "PASS: File List non-empty or tasks checked"
+        ],
+        "failures": [
+          "status must not be Done before close (integrity)"
+        ],
+        "outcome": null,
+        "meta": {
+          "storyId": "STUDIO-OBS-015",
+          "status": "Done",
+          "fileListCount": 126,
+          "qaVerdict": "CONCERNS",
+          "qaReviewer": "Quinn",
+          "qaReviewedRevision": "source-digest:9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884 dist-digest:897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+          "qaEvidenceError": null,
+          "tasks": {
+            "total": 18,
+            "done": 17
+          }
+        }
+      }
+    },
+    "015-review": {
+      "exit": 0,
+      "result": {
+        "ok": true,
+        "phase": "review",
+        "checks": [
+          "PASS: QA evidence contains an explicit verdict",
+          "PASS: QA verdict present (CONCERNS)",
+          "PASS: QA evidence identifies reviewer",
+          "PASS: QA evidence binds reviewed_revision",
+          "PASS: QA evidence provenance matches the current story/verdict",
+          "PASS: approved QA verdict set status Done (got Done)"
+        ],
+        "failures": [],
+        "outcome": "approved",
+        "meta": {
+          "storyId": "STUDIO-OBS-015",
+          "status": "Done",
+          "fileListCount": 126,
+          "qaVerdict": "CONCERNS",
+          "qaReviewer": "Quinn",
+          "qaReviewedRevision": "source-digest:9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884 dist-digest:897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+          "qaEvidenceError": null,
+          "tasks": {
+            "total": 18,
+            "done": 17
+          }
+        }
+      }
+    },
+    "015-close": {
+      "exit": 0,
+      "result": {
+        "ok": true,
+        "phase": "close",
+        "checks": [
+          "PASS: status is Done (got Done)",
+          "PASS: approved QA verdict exists (got CONCERNS)",
+          "PASS: QA evidence identifies reviewer",
+          "PASS: QA evidence binds reviewed_revision",
+          "PASS: QA evidence provenance matches the current story/verdict"
+        ],
+        "failures": [],
+        "outcome": null,
+        "meta": {
+          "storyId": "STUDIO-OBS-015",
+          "status": "Done",
+          "fileListCount": 126,
+          "qaVerdict": "CONCERNS",
+          "qaReviewer": "Quinn",
+          "qaReviewedRevision": "source-digest:9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884 dist-digest:897182d58bbbe5755604d283cddd2af782c1d068dd66e365d3145615f839df9c",
+          "qaEvidenceError": null,
+          "tasks": {
+            "total": 18,
+            "done": 17
+          }
+        }
+      }
+    }
+  },
+  "noLifecycleOrAdministrativeWrites": true,
+  "captureCommand": {
+    "exit": 0,
+    "stdout": "{\"files\": 1808, \"sourceDigest\": \"061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617\", \"distDigest\": \"698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210\"}\n",
+    "stderr": ""
+  },
+  "015HistoricalCloseIntegrity": {
+    "closeFileSha256": "9a686bb5ef7c24aafeb63fe8ba7d2df0a02069ad9e4200c40637bd7c12f33644",
+    "storyEqualsRecordedAfter": true,
+    "protectedSectionComparisons": {
+      "Story": {
+        "actual": "23b2a378485f3cd25fa5723f15c4c59931f70f1eda996a6c438fb45ce1a4ba90",
+        "recorded": "23b2a378485f3cd25fa5723f15c4c59931f70f1eda996a6c438fb45ce1a4ba90",
+        "equal": true
+      },
+      "Acceptance Criteria": {
+        "actual": "243d4fc92aeb3ec696d160732acec3aea188e6a6ce47debc87037c01559ff93d",
+        "recorded": "243d4fc92aeb3ec696d160732acec3aea188e6a6ce47debc87037c01559ff93d",
+        "equal": true
+      },
+      "Tasks / Subtasks": {
+        "actual": "695294bf57bdeeef2f335302b018c7f8dc0327a34d1dcb5aad361c34784f9ecf",
+        "recorded": "695294bf57bdeeef2f335302b018c7f8dc0327a34d1dcb5aad361c34784f9ecf",
+        "equal": true
+      },
+      "Dev Notes": {
+        "actual": "e6c781cf2dc0eb56e7b66b46f8e160ba9ffd758a89c57af9471817ce38ab1367",
+        "recorded": "e6c781cf2dc0eb56e7b66b46f8e160ba9ffd758a89c57af9471817ce38ab1367",
+        "equal": true
+      },
+      "File List": {
+        "actual": "e84fed0898573476a20f319797629e7d1c6753426b76ebde58e307682daee68a",
+        "recorded": "e84fed0898573476a20f319797629e7d1c6753426b76ebde58e307682daee68a",
+        "equal": true
+      },
+      "Known limitations": {
+        "actual": "7637e9b25355b61543957466c7d6eb0c323f707e3244fd3a2ea0750057da96d6",
+        "recorded": "7637e9b25355b61543957466c7d6eb0c323f707e3244fd3a2ea0750057da96d6",
+        "equal": true
+      },
+      "Dev Agent Record": {
+        "actual": "a5eebd5825bf4abbbaf742dee9e7a820058a4b12759bce7df556fd1f1b64e2b3",
+        "recorded": "a5eebd5825bf4abbbaf742dee9e7a820058a4b12759bce7df556fd1f1b64e2b3",
+        "equal": true
+      },
+      "QA Results": {
+        "actual": "fdb8d030ca1cbb41d374fcb0ac77a20f3a87733f40770ba117345212e3a2bcba",
+        "recorded": "fdb8d030ca1cbb41d374fcb0ac77a20f3a87733f40770ba117345212e3a2bcba",
+        "equal": true
+      }
+    },
+    "rowRemovalRestoresRecordedBefore": true,
+    "evidenceHashesRechecked": [
+      {
+        "path": "docs/qa/gates/STUDIO-OBS-015-incremental-re-learn-from-the-first-changed-step.yml",
+        "recordedSha256": "8ad9c27aa1e22d852e36ee6e3839a26a3830065760795396f961ad3c251809c9",
+        "actualSha256": "8ad9c27aa1e22d852e36ee6e3839a26a3830065760795396f961ad3c251809c9",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/gate.md",
+        "recordedSha256": "8eb8784733bf71807cc86d9f3252aa46620f3cf896ebe1c38177797b81b76c1c",
+        "actualSha256": "8eb8784733bf71807cc86d9f3252aa46620f3cf896ebe1c38177797b81b76c1c",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/gate.yaml",
+        "recordedSha256": "8ad9c27aa1e22d852e36ee6e3839a26a3830065760795396f961ad3c251809c9",
+        "actualSha256": "8ad9c27aa1e22d852e36ee6e3839a26a3830065760795396f961ad3c251809c9",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/qa-formal-gate01/map.json",
+        "recordedSha256": "4bb0a7749e4e0056af0d399386b43254c67ace6baebf7b19a0fe781281022080",
+        "actualSha256": "4bb0a7749e4e0056af0d399386b43254c67ace6baebf7b19a0fe781281022080",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/receipt.json",
+        "recordedSha256": "95d2516a23a582ed55d04b7e04395307a4e7bf99efcaad3bf1c137b06d0b4b3f",
+        "actualSha256": "95d2516a23a582ed55d04b7e04395307a4e7bf99efcaad3bf1c137b06d0b4b3f",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/review.md",
+        "recordedSha256": "b3c4eee017e04ad89967af98e1a43498935f656403770cbd3cf5727476bd4398",
+        "actualSha256": "b3c4eee017e04ad89967af98e1a43498935f656403770cbd3cf5727476bd4398",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/capture-before.json",
+        "recordedSha256": "4aac37e37aaaf5c7f12b8fd12a3c67c1833c9c00029bbfaf292937fa6cfae3d3",
+        "actualSha256": "4aac37e37aaaf5c7f12b8fd12a3c67c1833c9c00029bbfaf292937fa6cfae3d3",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/capture-after.json",
+        "recordedSha256": "70333d0eebb5fd6dc51c959daacc1533e41a1a9299ed0e64a349cbafa02c9446",
+        "actualSha256": "70333d0eebb5fd6dc51c959daacc1533e41a1a9299ed0e64a349cbafa02c9446",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/jacoco-line-summary.json",
+        "recordedSha256": "7d730bfb3fada274f10c0e370661de2afc593f4e89e86ecc35a9161b2d4fbbcb",
+        "actualSha256": "7d730bfb3fada274f10c0e370661de2afc593f4e89e86ecc35a9161b2d4fbbcb",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/image-final07-check-pins.json",
+        "recordedSha256": "83bb5b19971137e415a97e98dfcd1ce113a33c08c5f82283982f9e9af2aae004",
+        "actualSha256": "83bb5b19971137e415a97e98dfcd1ce113a33c08c5f82283982f9e9af2aae004",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/final-gates07/guided-start-failed-lines.json",
+        "recordedSha256": "ea55164de07be87a1e53a7273987072295b20193dd080faa08a1a481dd436fc5",
+        "actualSha256": "ea55164de07be87a1e53a7273987072295b20193dd080faa08a1a481dd436fc5",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/execution/final-gate-attempt06-20261017T1307-results.json",
+        "recordedSha256": "f3468921f1e451b7afabeb86958f1ae7af60581d1b7ade5082d5405976551a82",
+        "actualSha256": "f3468921f1e451b7afabeb86958f1ae7af60581d1b7ade5082d5405976551a82",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/runner/rel001-rootcause01/repro/results/verdict.md",
+        "recordedSha256": "71b68559825955222ca40db78df1b68027446d991b28d4733cc05c48086fcee2",
+        "actualSha256": "71b68559825955222ca40db78df1b68027446d991b28d4733cc05c48086fcee2",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json",
+        "recordedSha256": "ce1752f0ff45c314f967eba5848d8a445826829313344a8e86ea18a3f90cfd6e",
+        "actualSha256": "b1ffca82d97e2db125c90133df8575c1d571bc59904bcb0a94a5931e4e10ecb5",
+        "equal": false
+      },
+      {
+        "path": "docs/epics/UI-STUDIO-GA-PLAN.md",
+        "recordedSha256": "43ccee1798b2f9d59b10ca93d49448f28f15711420c1d3cc85a9f4b537a7df51",
+        "actualSha256": "43ccee1798b2f9d59b10ca93d49448f28f15711420c1d3cc85a9f4b537a7df51",
+        "equal": true
+      },
+      {
+        "path": "docs/qa/spikes/SPK-04/README.md",
+        "recordedSha256": "3824fae1a26926d285baa4d79805e97e9f52f4c9bfa03f39ec29d1b0dd298a60",
+        "actualSha256": "3824fae1a26926d285baa4d79805e97e9f52f4c9bfa03f39ec29d1b0dd298a60",
+        "equal": true
+      }
+    ],
+    "originalQaDoneSnapshotGap": "Removing the 0.1.22 row restores the pre-close story exactly (7d3a08c8...). That is not the QA Done-time story: root reports Done at story sha \"b1b6c171...\" and then edited the T0 stale-text parentheticals (CLAUDE-RESUME-STATE.md \"UPDATE ~18:00\"). No copy of the b1b6c171 story exists in the repo, so @po could not diff that root edit; it is reported, not verified.",
+    "idempotencyFixtureNotExecutedHistorically": "The simulated-failure retry fixture of po-close-story.md was not executed; convergence is by per-artifact marker check."
+  },
+  "historicCaseDelta008Vs015": {
+    "removed": 0,
+    "added": 55
+  },
+  "008ClosureSearch": {
+    "roots": [
+      ".ai",
+      "docs/stories/STUDIO-OBSERVED",
+      "docs/qa/evidence/STUDIO-OBS-008",
+      "docs/qa/evidence/STUDIO-OBSERVED-NEXT",
+      ".aiox/sdc/STUDIO-OBS-008"
+    ],
+    "filesSearched": 3582,
+    "exclude": "copied artifact/sandbox/administrative snapshots, binary/non-text and >2MB artifacts",
+    "keyedAdministrativeClosureHits": [],
+    "misleadingCloseLabels": "obs008-be-close01..10 are backend implementation verification labels, not PO closure; f1/f1-closure.md is the implementation join gate"
+  },
+  "008AdministrativeDisposition": {
+    "result": "HARD_FAIL_NO_ADMINISTRATIVE_PATCH",
+    "reason": "QA verdict provenance does not match the current story revision: historical source/dist binding differs from current source/dist; canonical po-close-story requires verified current-revision binding before every administrative write. CLI only checks fields/verdict/story binding, not hash equality.",
+    "alreadyQaDonePreserved": true,
+    "historicalQaVerdict": "CONCERNS, accepted, no new QA verdict",
+    "additionalUncertainty": "008 QA reviewed story hash 81950a... is recorded but original pre-QA/Done-time protected-story copies were not found in the assessed scope; later root T5/QA box changes are documented in CLAUDE-RESUME-STATE.md but not independently byte-diffable against a saved original snapshot."
+  },
+  "trackedFilesBefore": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "d2fc7566a72616eab27a146de4e119dfb8a199bfda2c047cd90406a7b5c4f607",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "b6e2befdd32d3e882bdac1152ef7e6d0f9d0a9bec26245de2cb5c96f6bcb1b00",
+    "docs/stories/STUDIO-OBSERVED/README.md": "3ca0c9f1ec237de419e55374dcdf51a7e0921e29435b5459ddda191e8610cddb",
+    ".ai/STUDIO-OBS-015-close.json": "9a686bb5ef7c24aafeb63fe8ba7d2df0a02069ad9e4200c40637bd7c12f33644",
+    ".ai/STUDIO-OBS-015-close.drift-annotation.json": "dac476602538245080da8e47a49487df5711b39863d7687a26309e56c2724732",
+    ".aiox/sdc/STUDIO-OBS-008/state.json": "80fa150bfec164a84223d5dff31facdc99ec6c953bf2638678bf34b093c8c907",
+    ".aiox/sdc/STUDIO-OBS-015/state.json": "24ab91fba2413795c997fd3acf5ac63c424f79d0c951412aa8c781415d1205c7"
+  },
+  "trackedFilesAfter": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "d2fc7566a72616eab27a146de4e119dfb8a199bfda2c047cd90406a7b5c4f607",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "b6e2befdd32d3e882bdac1152ef7e6d0f9d0a9bec26245de2cb5c96f6bcb1b00",
+    "docs/stories/STUDIO-OBSERVED/README.md": "3ca0c9f1ec237de419e55374dcdf51a7e0921e29435b5459ddda191e8610cddb",
+    ".ai/STUDIO-OBS-015-close.json": "9a686bb5ef7c24aafeb63fe8ba7d2df0a02069ad9e4200c40637bd7c12f33644",
+    ".ai/STUDIO-OBS-015-close.drift-annotation.json": "dac476602538245080da8e47a49487df5711b39863d7687a26309e56c2724732",
+    ".aiox/sdc/STUDIO-OBS-008/state.json": "80fa150bfec164a84223d5dff31facdc99ec6c953bf2638678bf34b093c8c907",
+    ".aiox/sdc/STUDIO-OBS-015/state.json": "24ab91fba2413795c997fd3acf5ac63c424f79d0c951412aa8c781415d1205c7"
+  },
+  "watchedArtifactsUnchanged": true,
+  "referenceHashes": {
+    ".aiox-core/development/tasks/po-close-story.md": "418fbd93861be71900d51e2e2ecba8959b2ca6f4ac2a67abf7d363e7c31763f9",
+    ".aiox-core/core/sdc/phase-verify.js": "7a6a11c48d43c164ceaf71e4a664cbf6557c75a7e44162a9e1c745de820f9302",
+    ".aiox-core/core/sdc/story-meta.js": "3e4d4bd70b5d05a18e0ce31d685bef8541a141c0eb3ef6726c0b9b6f24ec131c",
+    ".aiox-core/core/sdc/progress.js": "8546bd67424d1e095b98a71718d6df3af8bd01886b6e59392fa0ba48f9261a36",
+    ".aiox-core/core/sdc/index.js": "c5afaed8c35bffa6900a8b204589e4e707096ae8a3cff5e469320d0e5cab4a0d",
+    ".aiox-core/cli/commands/sdc/index.js": "062abf615feebb4c86278404ee16c6814e0dd9c3f9f0bd75d43c85c3df9c311d",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/RESUME-HANDOFF-20261018-CODEX.md": "7965d55220905ada4ca1670c941f65360c596697f6970f39b096fcaa94c17212",
+    "docs/qa/evidence/STUDIO-OBSERVED-NEXT/execute-015-008/CLAUDE-RESUME-STATE.md": "e51851a2fa86ef67f57b85fa5548c50946abfd372518df83623f709d4f8e28ae",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md": "395ed4f676fc3a97e1e4c17d085dcc45394365a20dc57fc0d595c5b98a3b4edf",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md": "6363b2b1053fab69cd840998e1cff0e7683e6f0080839df74c6af5f05788d41c",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md": "500b671cda05654b86031b46d5b76d94a2fb7b29bc511dd33bbe138d0a0f0538",
+    "docs/qa/gates/STUDIO-OBS-008-single-path-studio-ui.yml": "040433d8f432cf0735a0877d969752bda2ff984c6ca8fef6d6ef92b6dde9f25d",
+    "docs/qa/gates/STUDIO-OBS-015-incremental-re-learn-from-the-first-changed-step.yml": "8ad9c27aa1e22d852e36ee6e3839a26a3830065760795396f961ad3c251809c9",
+    "docs/qa/evidence/STUDIO-OBS-008/qa-gate-20261017/gate.md": "e371c8174e33f1df2173351997eaf69586a91a5358d536476bbf3ef8abf65f2b",
+    "docs/qa/evidence/STUDIO-OBS-008/qa-gate-20261017/gate.json": "1e15bb2779bc24a585127b89cbed341ef86d5153a69ddc3d7febd6dd564bbb52",
+    "docs/qa/evidence/STUDIO-OBS-015/execution-20261015/po-recording85-decision-user-c/decision.json": "80d2c75ed7bb8129cdf4060535c1d3030daf83eaef43561774c11c96ad2d2601"
+  }
+}

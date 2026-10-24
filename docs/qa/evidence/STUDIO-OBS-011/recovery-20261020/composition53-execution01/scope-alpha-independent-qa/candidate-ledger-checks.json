@@ -1,0 +1,196 @@
+{
+  "candidateSourceVerdict": "SOURCE_CLEAN",
+  "candidateManifestSha256": "35303a0be963af70087d1c9ca0945b83756a36f67100ce0d125b292994c32c06",
+  "preservationSha256": "32280ad57af631aa9e990351a6d170402cec960df74a07e080ce32b8a2a40dd0",
+  "patchSha256": "83dc433c8d712f395c2f1d3c4f812f93d235f292b537dfa25d0e895d9dcc05ed",
+  "editorSha256": "169337e1f5134830d25735cfb2194ca7b6d2e5acd6553497baf66209708e031b",
+  "editCounts": {
+    "REMOVE_INTRODUCED_WRAPPER_CLOSE": 97,
+    "SCOPED_BINDING_REFERENCE": 220,
+    "SCOPED_BINDING_DECLARATION": 38,
+    "REMOVE_INTRODUCED_WRAPPER_OPEN": 97,
+    "REMOVE_UNREFERENCED_LABEL": 97
+  },
+  "sixApprovedFamilyCounts": [
+    {
+      "file": "GuidedBridgeIntegrationTest.java",
+      "name": "bridgeDeadline",
+      "count": 7
+    },
+    {
+      "file": "GuidedBridgeIntegrationTest.java",
+      "name": "bridgePoll",
+      "count": 7
+    },
+    {
+      "file": "GuidedBridgePlannedIT.java",
+      "name": "bridgeDeadline",
+      "count": 8
+    },
+    {
+      "file": "GuidedBridgePlannedIT.java",
+      "name": "bridgePoll",
+      "count": 8
+    },
+    {
+      "file": "GuidedEvidencePendingAppendJoinedIT.java",
+      "name": "itsPoll",
+      "count": 2
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "name": "itsPoll",
+      "count": 6
+    }
+  ],
+  "allFreshNamesUniqueAcrossBatchAndAbsentBefore": true,
+  "everyAliasDeclarationAnd220RefsBoundToOriginalWrapper": true,
+  "onlyExact97PriorIntroducedWrappersAndLabelsRemoved": true,
+  "allInnerOriginalScopesAndNonAliasTextRetainedByExactLedger": true,
+  "files": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "beforeSha256": "ea5635399bca3d0193d5c801b9ba0ed87a1e88703c23a784ba085e1d1426525c",
+      "candidateSha256": "db108c7d67af380572d893db2f4f2fe84a54be0b4564019b580abb0d29150b1c",
+      "exactUtf16LedgerReconstruction": true,
+      "assertionChains": 61,
+      "JUnitMethods": 10,
+      "sleepCalls": 0,
+      "removedIntroducedScopes": 7,
+      "freshScopedVariables": {
+        "styleScope001BridgeDeadline": "bridgeDeadline",
+        "styleScope001BridgePoll": "bridgePoll",
+        "styleScope002BridgeDeadline": "bridgeDeadline",
+        "styleScope002BridgePoll": "bridgePoll",
+        "styleScope003BridgeDeadline": "bridgeDeadline",
+        "styleScope003BridgePoll": "bridgePoll",
+        "styleScope004BridgeDeadline": "bridgeDeadline",
+        "styleScope004BridgePoll": "bridgePoll",
+        "styleScope005BridgeDeadline": "bridgeDeadline",
+        "styleScope005BridgePoll": "bridgePoll",
+        "styleScope006BridgeDeadline": "bridgeDeadline",
+        "styleScope006BridgePoll": "bridgePoll",
+        "styleScope007BridgeDeadline": "bridgeDeadline",
+        "styleScope007BridgePoll": "bridgePoll"
+      }
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "beforeSha256": "cdb113c5f14dbf27cfeb3c26449c2fcc046e04d846e27b720799881c18c9c209",
+      "candidateSha256": "59b0ddb304293d97bffff33b4750bd29c861dcd2e6437c6e2682a0af7892b07b",
+      "exactUtf16LedgerReconstruction": true,
+      "assertionChains": 136,
+      "JUnitMethods": 16,
+      "sleepCalls": 2,
+      "removedIntroducedScopes": 8,
+      "freshScopedVariables": {
+        "styleScope008BridgeDeadline": "bridgeDeadline",
+        "styleScope008BridgePoll": "bridgePoll",
+        "styleScope009BridgeDeadline": "bridgeDeadline",
+        "styleScope009BridgePoll": "bridgePoll",
+        "styleScope010BridgeDeadline": "bridgeDeadline",
+        "styleScope010BridgePoll": "bridgePoll",
+        "styleScope011BridgeDeadline": "bridgeDeadline",
+        "styleScope011BridgePoll": "bridgePoll",
+        "styleScope012BridgeDeadline": "bridgeDeadline",
+        "styleScope012BridgePoll": "bridgePoll",
+        "styleScope013BridgeDeadline": "bridgeDeadline",
+        "styleScope013BridgePoll": "bridgePoll",
+        "styleScope014BridgeDeadline": "bridgeDeadline",
+        "styleScope014BridgePoll": "bridgePoll",
+        "styleScope015BridgeDeadline": "bridgeDeadline",
+        "styleScope015BridgePoll": "bridgePoll"
+      }
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "beforeSha256": "ff4c697a2d3fcd8908e8f330a92a7cdc210075d2cafdb923693e7bbb40921e05",
+      "candidateSha256": "613b78d2e83711455d9a61c52401587c6f94fda8469f06392d43756a9dfb100f",
+      "exactUtf16LedgerReconstruction": true,
+      "assertionChains": 30,
+      "JUnitMethods": 6,
+      "sleepCalls": 1,
+      "removedIntroducedScopes": 1,
+      "freshScopedVariables": {}
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "1a58823a352bbeece3d24cdb5e816f772b736b291afc95a294037d8951fcff93",
+      "candidateSha256": "bcc8622e7179dc9b7d3b9d457225eca80b9d2b320b61765bbccc6dd6416bfe99",
+      "exactUtf16LedgerReconstruction": true,
+      "assertionChains": 2712,
+      "JUnitMethods": 74,
+      "sleepCalls": 21,
+      "removedIntroducedScopes": 70,
+      "freshScopedVariables": {}
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "beforeSha256": "1526b82aec095c214f637d491fcdb99c54ebfc782c50725bc5dd62b18f4eb6c3",
+      "candidateSha256": "3e913d65cddaf764c079bd01e5134953b14e74e2054aa07fde04ffd9503e6c53",
+      "exactUtf16LedgerReconstruction": true,
+      "assertionChains": 225,
+      "JUnitMethods": 36,
+      "sleepCalls": 0,
+      "removedIntroducedScopes": 1,
+      "freshScopedVariables": {}
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "beforeSha256": "31ed08b4c7afbd78f160db51aa1a9e79772341ed8318c88be2835f4ae73f381d",
+      "candidateSha256": "e0e6aec5031e8ab3fcbff1c98eb3b5c15994e46ce19fc20bfdda7d583f3e2ec9",
+      "exactUtf16LedgerReconstruction": true,
+      "assertionChains": 58,
+      "JUnitMethods": 2,
+      "sleepCalls": 0,
+      "removedIntroducedScopes": 2,
+      "freshScopedVariables": {
+        "styleScope088ItsPoll": "itsPoll",
+        "styleScope089ItsPoll": "itsPoll"
+      }
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "beforeSha256": "59cc459f10cd4bf61d92500386f1cac0ea0fd77b94a4ff165956de385a6357ac",
+      "candidateSha256": "8330297d887af175a782963eceabbaac8aedbbae4059b65a603bb41ce1a77096",
+      "exactUtf16LedgerReconstruction": true,
+      "assertionChains": 541,
+      "JUnitMethods": 31,
+      "sleepCalls": 8,
+      "removedIntroducedScopes": 6,
+      "freshScopedVariables": {
+        "styleScope090ItsPoll": "itsPoll",
+        "styleScope091ItsPoll": "itsPoll",
+        "styleScope092ItsPoll": "itsPoll",
+        "styleScope093ItsPoll": "itsPoll",
+        "styleScope094ItsPoll": "itsPoll",
+        "styleScope095ItsPoll": "itsPoll"
+      }
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "beforeSha256": "fa60b74c78a4dbf8e04fe23c0e7a2bef52ba60c4d56b11abdc73f9453389c0e4",
+      "candidateSha256": "3f743d0108ca178c4f8d6aac2a1600bc78385d0b77dff02a3651bb7cae3c9b2f",
+      "exactUtf16LedgerReconstruction": true,
+      "assertionChains": 22,
+      "JUnitMethods": 2,
+      "sleepCalls": 1,
+      "removedIntroducedScopes": 1,
+      "freshScopedVariables": {}
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "beforeSha256": "0ea26aea645b994fc5dbec06c5cd50ae1d6bf250688296720a77efa46d616e5e",
+      "candidateSha256": "041a40098c06b5a2db4a5973905e6a936f4b4b427af84a250a9b870859ca518f",
+      "exactUtf16LedgerReconstruction": true,
+      "assertionChains": 295,
+      "JUnitMethods": 35,
+      "sleepCalls": 0,
+      "removedIntroducedScopes": 1,
+      "freshScopedVariables": {}
+    }
+  ],
+  "reviewerExecutedParserCompilerTests": false,
+  "actualApplicationBoundaryNotYetAudited": true,
+  "all220ReferencesOccurAfterOwnDeclarationAndAreNotMemberSelectors": true
+}

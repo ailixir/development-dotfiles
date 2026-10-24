@@ -1,0 +1,42 @@
+{
+  "status": "PARTIAL_ARCHITECTURE_REVIEW_CORRECTIONS_REQUIRED",
+  "findings": [
+    {
+      "id": "C8-EXEC-01",
+      "severity": "HIGH",
+      "status": "MANDATORY_CORRECTION",
+      "title": "Assessment evidence defects bypass reconciliation and failed-close predicates; public join evidence defects also classified as ordinary validation",
+      "locations": [
+        "phase_keeper.py:38",
+        "phase_keeper.py:39",
+        "phase_keeper.py:40",
+        "assessor.py:82",
+        "assessor.py:189",
+        "assessor.py:190",
+        "assessor.py:233",
+        "execution_checks.py:59",
+        "execution_checks.py:72"
+      ],
+      "pureCounterexamplesConfirmed": true,
+      "freshSuccessorRequired": true
+    },
+    {
+      "id": "C8-EXEC-02",
+      "severity": "HIGH",
+      "status": "MANDATORY_CORRECTION",
+      "title": "Missing dynamic JaCoCo HTML inventory can satisfy coverage proof",
+      "locations": [
+        "assessor.py:196",
+        "assessor.py:207",
+        "assessor.py:218",
+        "execution_checks.py:39"
+      ],
+      "pureCounterexamplesConfirmed": true,
+      "freshSuccessorRequired": true
+    }
+  ],
+  "wholeUnitReviewed": false,
+  "unsealedControlRead": false,
+  "sourceOrNativeRelease": false,
+  "credit": false
+}

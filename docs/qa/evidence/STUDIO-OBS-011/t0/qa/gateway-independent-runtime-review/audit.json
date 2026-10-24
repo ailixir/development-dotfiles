@@ -1,0 +1,1572 @@
+{
+  "scope": "ACTUAL_CORRECTED_TWO_CASE_40_TEMPLATE_COUNTERFACTUALS_ONLY",
+  "dispatchPinsVerified": 176,
+  "suiteTotal": 2,
+  "suitePassed": 2,
+  "suiteFailed": 0,
+  "suiteSkipped": 0,
+  "actualTemplateFrames": 40,
+  "actualNativeAccepts": 12,
+  "actualNamedNativeRefusals": 28,
+  "allNativeFramesOnePerRender": true,
+  "allBuiltinRestorations": true,
+  "allObserverFailuresZero": true,
+  "counterfactualCounts": {
+    "nativeRefusals": 28,
+    "M-RECURSION:target:fixed:False": 2,
+    "nativeAccepts": 12,
+    "M-RECURSION:target:mutant:True": 2,
+    "M-RECURSION:canonical-flat:fixed:False": 2,
+    "M-RECURSION:canonical-flat:mutant:False": 2,
+    "M-RECURSION:legacy-flat:fixed:False": 2,
+    "M-RECURSION:legacy-flat:mutant:False": 2,
+    "M-RECURSION:other-shape:fixed:False": 2,
+    "M-RECURSION:other-shape:mutant:False": 2,
+    "M-RECURSION:custom-flat:fixed:True": 2,
+    "M-RECURSION:custom-flat:mutant:True": 2,
+    "M-NORMALIZED-COMPARISON:target:fixed:False": 2,
+    "M-NORMALIZED-COMPARISON:target:mutant:True": 2,
+    "M-NORMALIZED-COMPARISON:canonical-flat:fixed:False": 2,
+    "M-NORMALIZED-COMPARISON:canonical-flat:mutant:False": 2,
+    "M-NORMALIZED-COMPARISON:legacy-flat:fixed:False": 2,
+    "M-NORMALIZED-COMPARISON:legacy-flat:mutant:False": 2,
+    "M-NORMALIZED-COMPARISON:other-shape:fixed:False": 2,
+    "M-NORMALIZED-COMPARISON:other-shape:mutant:False": 2,
+    "M-NORMALIZED-COMPARISON:custom-flat:fixed:True": 2,
+    "M-NORMALIZED-COMPARISON:custom-flat:mutant:True": 2
+  },
+  "renders": [
+    {
+      "unit": "M-RECURSION",
+      "sequence": 1,
+      "component": "backend",
+      "kind": "target",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "1e43598752d9f6e241eb6994fd8fd99614f93eec1acd0f0c2f9b7fd7665c25b5",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 2,
+      "component": "backend",
+      "kind": "target",
+      "state": "mutant",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "85edce696cccc812d5a948277383a2e2dff5f2bd89b55e241f538d59a2d1e599",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "api",
+        "configMap": "release-name-put-checks-api-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 3,
+      "component": "backend",
+      "kind": "canonical-flat",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "474f90dc11d6d1fd8ea27ebd2cf7f601911fc9b5d7b087cbf50d6852e3d6e034",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 4,
+      "component": "backend",
+      "kind": "canonical-flat",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "592dfa960c0d62cd04f850f1a1c4a6664379956d31550476e9b62d4368bee323",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 5,
+      "component": "backend",
+      "kind": "legacy-flat",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "69ea5d24f23871d544224c07c8480b4301070170d3978f9535a17f34f6034a00",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 6,
+      "component": "backend",
+      "kind": "legacy-flat",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "e8402d866f85dd779d900a03d54c2221c32f2a68d0d8a5a2788e3bfb36be905a",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 7,
+      "component": "backend",
+      "kind": "other-shape",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "da64c61ea985dba6568d93edc0900eeed74be1ae8dafd191695bbfd4aff7721d",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 8,
+      "component": "backend",
+      "kind": "other-shape",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "44ee7636b2d8bd09e7da521eaa5d9c1f898e24fe0e97802d02fb422d81ae5cb1",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 9,
+      "component": "backend",
+      "kind": "custom-flat",
+      "state": "fixed",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "17ac025f97457bd01f0539c2ca76dd9ba992e2338e2850b8b339c265775dae98",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "api",
+        "configMap": "release-name-put-checks-api-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 10,
+      "component": "backend",
+      "kind": "custom-flat",
+      "state": "mutant",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "17ac025f97457bd01f0539c2ca76dd9ba992e2338e2850b8b339c265775dae98",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "api",
+        "configMap": "release-name-put-checks-api-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 11,
+      "component": "worker",
+      "kind": "target",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "86e77893680c0385378ab2e8d31a7b820149ee9147c31c753858bd17c5ef6196",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 12,
+      "component": "worker",
+      "kind": "target",
+      "state": "mutant",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "27744ecd119b90ca51d9040bdb4f0d0bbf061af55d256183155df3e7c2aa7973",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "worker",
+        "configMap": "release-name-put-checks-worker-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 13,
+      "component": "worker",
+      "kind": "canonical-flat",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "09230390b8b5a6815b5ed69fbb04ee672a7e43536ea77685fc5e0224cc7db3b0",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 14,
+      "component": "worker",
+      "kind": "canonical-flat",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "e4bbd4d9a5289cf1b1dc852b6b41ba3212e3bc692ab6fd41efbc44940860ac5c",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 15,
+      "component": "worker",
+      "kind": "legacy-flat",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "c9b359795d0e4d8f1c7ef676445ec611a735dd1f625096f6b7ea490d753cc6c6",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 16,
+      "component": "worker",
+      "kind": "legacy-flat",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "42a50d706acba3774037ca706e2d032489c475222904cf7f22b96d3fba80cc10",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 17,
+      "component": "worker",
+      "kind": "other-shape",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "b1c5d476971710db45973cad3b04c0948cfe8e56998c125f11f2f793611d0cd3",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 18,
+      "component": "worker",
+      "kind": "other-shape",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "3776378983c3830718c3adbbf2f96bfcc4cc2a106a38d8db5c08f5cc99d62ffc",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 19,
+      "component": "worker",
+      "kind": "custom-flat",
+      "state": "fixed",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "0cf020671a7246389d4efecc250a86a88f1eb9d4baaf308799a4103ca9e0fd49",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "worker",
+        "configMap": "release-name-put-checks-worker-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-RECURSION",
+      "sequence": 20,
+      "component": "worker",
+      "kind": "custom-flat",
+      "state": "mutant",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "0cf020671a7246389d4efecc250a86a88f1eb9d4baaf308799a4103ca9e0fd49",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "worker",
+        "configMap": "release-name-put-checks-worker-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 1,
+      "component": "backend",
+      "kind": "target",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "a46e9d8e50377c1e3b1d19c51afafedd4c4be44af9a52f86383c6368896691b9",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 2,
+      "component": "backend",
+      "kind": "target",
+      "state": "mutant",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "be8841bb94942a3ebd2e692f113794cd3bdbd0d3cc70be9a596372bb2a8b0a3e",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "api",
+        "configMap": "release-name-put-checks-api-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 3,
+      "component": "backend",
+      "kind": "canonical-flat",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "d16e67415f8be3ad424d082f0635690018f49f4aebffcfa9c42174135cacf8db",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 4,
+      "component": "backend",
+      "kind": "canonical-flat",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "45084c542699a2bac10ef8110493bab92b261b8f567468aaf21a6f5f93ee4a65",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 5,
+      "component": "backend",
+      "kind": "legacy-flat",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "732f5125e7de2e1f8b958b490d59c7b8a8ba4ddc490d143dc249a0ec68f2077a",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 6,
+      "component": "backend",
+      "kind": "legacy-flat",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "59269ae1af62b77c10bc0bb0297f9e1b009313ab6baf74792e76f46e8da658df",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 7,
+      "component": "backend",
+      "kind": "other-shape",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "9a829262fc5ca9647e7c03ada7dac73febb3e0ffd68d695b932b821383f25253",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 8,
+      "component": "backend",
+      "kind": "other-shape",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "737c19e0a1f2698e76361bafbd2c7515ee28485c9d751820e6576cdf4ad0122e",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 9,
+      "component": "backend",
+      "kind": "custom-flat",
+      "state": "fixed",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "17ac025f97457bd01f0539c2ca76dd9ba992e2338e2850b8b339c265775dae98",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "api",
+        "configMap": "release-name-put-checks-api-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 10,
+      "component": "backend",
+      "kind": "custom-flat",
+      "state": "mutant",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "17ac025f97457bd01f0539c2ca76dd9ba992e2338e2850b8b339c265775dae98",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "api",
+        "configMap": "release-name-put-checks-api-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 11,
+      "component": "worker",
+      "kind": "target",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "c154a12c26e230e5a92739cb82f6678dff5dc2f596d3ba3f10964a2ce8a84b73",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 12,
+      "component": "worker",
+      "kind": "target",
+      "state": "mutant",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "2492c00514a3a7c0a54fc682ab9660ea65b42bd0c3329a6f95474afb67fc8efd",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "worker",
+        "configMap": "release-name-put-checks-worker-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 13,
+      "component": "worker",
+      "kind": "canonical-flat",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "6f252888347dee111c4530145ae7c1a5467c6f534eacdd25bac141a95443569d",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 14,
+      "component": "worker",
+      "kind": "canonical-flat",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "da54859ff592d5d8ec3f82f2016bd1cc5d825f71d9fea129b6270954c987784e",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 15,
+      "component": "worker",
+      "kind": "legacy-flat",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "042a1face69e33963c50774bc08d9828d1f19545d432f3229567597f43118c85",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 16,
+      "component": "worker",
+      "kind": "legacy-flat",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "9234a4acfc9d9f4e7828102a0bb592d0f39af3298b16c97b4f1515b750e328ff",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 17,
+      "component": "worker",
+      "kind": "other-shape",
+      "state": "fixed",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "90ea10e269a5ad23026ba812fd6908eab486e1d8de6d44cfc76ffdd5df4a67dd",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 18,
+      "component": "worker",
+      "kind": "other-shape",
+      "state": "mutant",
+      "actualNativeExit": 1,
+      "accepts": false,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "harnessErrorHash": "5843fde32b1c8ba9cbbfa546fe9faa480853e7601c53e102bebbf250d84f3c9d",
+      "mountedConfiguration": null
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 19,
+      "component": "worker",
+      "kind": "custom-flat",
+      "state": "fixed",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "0cf020671a7246389d4efecc250a86a88f1eb9d4baaf308799a4103ca9e0fd49",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "worker",
+        "configMap": "release-name-put-checks-worker-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    },
+    {
+      "unit": "M-NORMALIZED-COMPARISON",
+      "sequence": 20,
+      "component": "worker",
+      "kind": "custom-flat",
+      "state": "mutant",
+      "actualNativeExit": 0,
+      "accepts": true,
+      "nativeFrameCount": 1,
+      "observerRestored": true,
+      "inputBeforeAfterExact": true,
+      "rawOutputHash": "0cf020671a7246389d4efecc250a86a88f1eb9d4baaf308799a4103ca9e0fd49",
+      "harnessErrorHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mountedConfiguration": {
+        "deploymentRole": "worker",
+        "configMap": "release-name-put-checks-worker-properties",
+        "mountPath": "/etc/put-checks/config",
+        "readOnly": true
+      }
+    }
+  ],
+  "restoredChartArchives": 2,
+  "restoredFilesPerArchive": 22,
+  "restoredModes": "0644",
+  "ownCaseScratchDirectoriesAbsent": true,
+  "repository22ChartUnchanged": true,
+  "package63ArtifactsUnchanged": true,
+  "versions": {
+    "node": "v24.20.0",
+    "helm": "v4.2.0+g0646808"
+  },
+  "wrapperPid": 62354,
+  "wrapperKernelStart": "Mon Oct 19 02:26:34 2026",
+  "wrapperTerminalExit": 0,
+  "recordedWrapperPostwaitAbsent": true,
+  "rawSuiteExit": 0,
+  "authorizationSha256": "716079f965cea83eea5b54796aae5f834b909b273cc6bab9a4cdaa973a6cfabe",
+  "releaseSha256": "73c5cfd60f4eb8c988c56527f3621f120b47e431a6223808b66c9e1a47c78fde",
+  "actualCommandSha256": "c2721997fde9e3070f19c1bf2869cefd1aafefb251613df448feb9f8a84c02c0",
+  "terminalArchiveSha256": "bac7865ab3c58a8314c3f929517faf1218f7bd9ced4fd33800df6fa647c73821",
+  "unitReceiptHashes": {
+    "M-RECURSION": "b761be1f20a388875fe692cf59690fdeeb1db2be7b6ed23e4b3935a6871461a5",
+    "M-NORMALIZED-COMPARISON": "99eed2640b1fd1c0b260e106c7bda18c5ddf92f4253ed790ef149bbbee5477f5"
+  },
+  "workspaceArchiveFiles": 161,
+  "workspaceCleanupCandidate": {
+    "path": "/private/tmp/obs009-gateway-independent-20261019-0622-corrected",
+    "dev": 16777229,
+    "ino": 218715817,
+    "uid": 501,
+    "gid": 0,
+    "mode": "0700",
+    "archive": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway-independent-20261019-0622-corrected/complete-workspace-archive",
+    "files": {
+      "helm-chart/put-checks/.helmignore": {
+        "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+        "mode": "0644",
+        "bytes": 86
+      },
+      "helm-chart/put-checks/Chart.yaml": {
+        "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+        "mode": "0644",
+        "bytes": 263
+      },
+      "helm-chart/put-checks/templates/NOTES.txt": {
+        "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+        "mode": "0644",
+        "bytes": 989
+      },
+      "helm-chart/put-checks/templates/_helpers.tpl": {
+        "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+        "mode": "0644",
+        "bytes": 44353
+      },
+      "helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml": {
+        "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+        "mode": "0644",
+        "bytes": 2789
+      },
+      "helm-chart/put-checks/templates/configmap.yaml": {
+        "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+        "mode": "0644",
+        "bytes": 6068
+      },
+      "helm-chart/put-checks/templates/deployment.yaml": {
+        "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+        "mode": "0644",
+        "bytes": 39697
+      },
+      "helm-chart/put-checks/templates/hpa.yaml": {
+        "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+        "mode": "0644",
+        "bytes": 778
+      },
+      "helm-chart/put-checks/templates/ingress.yaml": {
+        "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+        "mode": "0644",
+        "bytes": 2276
+      },
+      "helm-chart/put-checks/templates/pdb.yaml": {
+        "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+        "mode": "0644",
+        "bytes": 1566
+      },
+      "helm-chart/put-checks/templates/service.yaml": {
+        "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+        "mode": "0644",
+        "bytes": 1544
+      },
+      "helm-chart/put-checks/templates/serviceaccount.yaml": {
+        "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+        "mode": "0644",
+        "bytes": 1440
+      },
+      "helm-chart/put-checks/templates/studio-object-store-pvc.yaml": {
+        "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+        "mode": "0644",
+        "bytes": 1189
+      },
+      "helm-chart/put-checks/templates/studio-runner-deployment.yaml": {
+        "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+        "mode": "0644",
+        "bytes": 26332
+      },
+      "helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml": {
+        "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+        "mode": "0644",
+        "bytes": 4483
+      },
+      "helm-chart/put-checks/templates/studio-runner-scaledobject.yaml": {
+        "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+        "mode": "0644",
+        "bytes": 2732
+      },
+      "helm-chart/put-checks/templates/studio-runner-service.yaml": {
+        "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+        "mode": "0644",
+        "bytes": 2524
+      },
+      "helm-chart/put-checks/templates/studio-sse-ingress.yaml": {
+        "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+        "mode": "0644",
+        "bytes": 5470
+      },
+      "helm-chart/put-checks/values-dev.yaml": {
+        "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+        "mode": "0644",
+        "bytes": 5488
+      },
+      "helm-chart/put-checks/values-prod.yaml": {
+        "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+        "mode": "0644",
+        "bytes": 9186
+      },
+      "helm-chart/put-checks/values-uat.yaml": {
+        "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+        "mode": "0644",
+        "bytes": 9462
+      },
+      "helm-chart/put-checks/values.yaml": {
+        "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+        "mode": "0644",
+        "bytes": 50683
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-01-backend-target-fixed.stderr.txt": {
+        "sha256": "a46e9d8e50377c1e3b1d19c51afafedd4c4be44af9a52f86383c6368896691b9",
+        "mode": "0644",
+        "bytes": 857
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-01-backend-target-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-02-backend-target-mutant.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-02-backend-target-mutant.yaml": {
+        "sha256": "be8841bb94942a3ebd2e692f113794cd3bdbd0d3cc70be9a596372bb2a8b0a3e",
+        "mode": "0644",
+        "bytes": 62305
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-03-backend-canonical-flat-fixed.stderr.txt": {
+        "sha256": "d16e67415f8be3ad424d082f0635690018f49f4aebffcfa9c42174135cacf8db",
+        "mode": "0644",
+        "bytes": 857
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-03-backend-canonical-flat-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-04-backend-canonical-flat-mutant.stderr.txt": {
+        "sha256": "45084c542699a2bac10ef8110493bab92b261b8f567468aaf21a6f5f93ee4a65",
+        "mode": "0644",
+        "bytes": 858
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-04-backend-canonical-flat-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-05-backend-legacy-flat-fixed.stderr.txt": {
+        "sha256": "732f5125e7de2e1f8b958b490d59c7b8a8ba4ddc490d143dc249a0ec68f2077a",
+        "mode": "0644",
+        "bytes": 881
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-05-backend-legacy-flat-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-06-backend-legacy-flat-mutant.stderr.txt": {
+        "sha256": "59269ae1af62b77c10bc0bb0297f9e1b009313ab6baf74792e76f46e8da658df",
+        "mode": "0644",
+        "bytes": 882
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-06-backend-legacy-flat-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-07-backend-other-shape-fixed.stderr.txt": {
+        "sha256": "9a829262fc5ca9647e7c03ada7dac73febb3e0ffd68d695b932b821383f25253",
+        "mode": "0644",
+        "bytes": 865
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-07-backend-other-shape-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-08-backend-other-shape-mutant.stderr.txt": {
+        "sha256": "737c19e0a1f2698e76361bafbd2c7515ee28485c9d751820e6576cdf4ad0122e",
+        "mode": "0644",
+        "bytes": 866
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-08-backend-other-shape-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-09-backend-custom-flat-fixed.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-09-backend-custom-flat-fixed.yaml": {
+        "sha256": "17ac025f97457bd01f0539c2ca76dd9ba992e2338e2850b8b339c265775dae98",
+        "mode": "0644",
+        "bytes": 62320
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-10-backend-custom-flat-mutant.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-10-backend-custom-flat-mutant.yaml": {
+        "sha256": "17ac025f97457bd01f0539c2ca76dd9ba992e2338e2850b8b339c265775dae98",
+        "mode": "0644",
+        "bytes": 62320
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-11-worker-target-fixed.stderr.txt": {
+        "sha256": "c154a12c26e230e5a92739cb82f6678dff5dc2f596d3ba3f10964a2ce8a84b73",
+        "mode": "0644",
+        "bytes": 860
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-11-worker-target-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-12-worker-target-mutant.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-12-worker-target-mutant.yaml": {
+        "sha256": "2492c00514a3a7c0a54fc682ab9660ea65b42bd0c3329a6f95474afb67fc8efd",
+        "mode": "0644",
+        "bytes": 62305
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-13-worker-canonical-flat-fixed.stderr.txt": {
+        "sha256": "6f252888347dee111c4530145ae7c1a5467c6f534eacdd25bac141a95443569d",
+        "mode": "0644",
+        "bytes": 860
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-13-worker-canonical-flat-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-14-worker-canonical-flat-mutant.stderr.txt": {
+        "sha256": "da54859ff592d5d8ec3f82f2016bd1cc5d825f71d9fea129b6270954c987784e",
+        "mode": "0644",
+        "bytes": 861
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-14-worker-canonical-flat-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-15-worker-legacy-flat-fixed.stderr.txt": {
+        "sha256": "042a1face69e33963c50774bc08d9828d1f19545d432f3229567597f43118c85",
+        "mode": "0644",
+        "bytes": 884
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-15-worker-legacy-flat-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-16-worker-legacy-flat-mutant.stderr.txt": {
+        "sha256": "9234a4acfc9d9f4e7828102a0bb592d0f39af3298b16c97b4f1515b750e328ff",
+        "mode": "0644",
+        "bytes": 885
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-16-worker-legacy-flat-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-17-worker-other-shape-fixed.stderr.txt": {
+        "sha256": "90ea10e269a5ad23026ba812fd6908eab486e1d8de6d44cfc76ffdd5df4a67dd",
+        "mode": "0644",
+        "bytes": 868
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-17-worker-other-shape-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-18-worker-other-shape-mutant.stderr.txt": {
+        "sha256": "5843fde32b1c8ba9cbbfa546fe9faa480853e7601c53e102bebbf250d84f3c9d",
+        "mode": "0644",
+        "bytes": 869
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-18-worker-other-shape-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-19-worker-custom-flat-fixed.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-19-worker-custom-flat-fixed.yaml": {
+        "sha256": "0cf020671a7246389d4efecc250a86a88f1eb9d4baaf308799a4103ca9e0fd49",
+        "mode": "0644",
+        "bytes": 62320
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-20-worker-custom-flat-mutant.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-20-worker-custom-flat-mutant.yaml": {
+        "sha256": "0cf020671a7246389d4efecc250a86a88f1eb9d4baaf308799a4103ca9e0fd49",
+        "mode": "0644",
+        "bytes": 62320
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-receipt.json": {
+        "sha256": "99eed2640b1fd1c0b260e106c7bda18c5ddf92f4253ed790ef149bbbee5477f5",
+        "mode": "0644",
+        "bytes": 64917
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/.helmignore": {
+        "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+        "mode": "0644",
+        "bytes": 86
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/Chart.yaml": {
+        "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+        "mode": "0644",
+        "bytes": 263
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/NOTES.txt": {
+        "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+        "mode": "0644",
+        "bytes": 989
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/_helpers.tpl": {
+        "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+        "mode": "0644",
+        "bytes": 44353
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/api-guided-tls-networkpolicy.yaml": {
+        "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+        "mode": "0644",
+        "bytes": 2789
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/configmap.yaml": {
+        "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+        "mode": "0644",
+        "bytes": 6068
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/deployment.yaml": {
+        "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+        "mode": "0644",
+        "bytes": 39697
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/hpa.yaml": {
+        "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+        "mode": "0644",
+        "bytes": 778
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/ingress.yaml": {
+        "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+        "mode": "0644",
+        "bytes": 2276
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/pdb.yaml": {
+        "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+        "mode": "0644",
+        "bytes": 1566
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/service.yaml": {
+        "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+        "mode": "0644",
+        "bytes": 1544
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/serviceaccount.yaml": {
+        "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+        "mode": "0644",
+        "bytes": 1440
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/studio-object-store-pvc.yaml": {
+        "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+        "mode": "0644",
+        "bytes": 1189
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/studio-runner-deployment.yaml": {
+        "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+        "mode": "0644",
+        "bytes": 26332
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/studio-runner-networkpolicy.yaml": {
+        "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+        "mode": "0644",
+        "bytes": 4483
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/studio-runner-scaledobject.yaml": {
+        "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+        "mode": "0644",
+        "bytes": 2732
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/studio-runner-service.yaml": {
+        "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+        "mode": "0644",
+        "bytes": 2524
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates/studio-sse-ingress.yaml": {
+        "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+        "mode": "0644",
+        "bytes": 5470
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/values-dev.yaml": {
+        "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+        "mode": "0644",
+        "bytes": 5488
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/values-prod.yaml": {
+        "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+        "mode": "0644",
+        "bytes": 9186
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/values-uat.yaml": {
+        "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+        "mode": "0644",
+        "bytes": 9462
+      },
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/values.yaml": {
+        "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+        "mode": "0644",
+        "bytes": 50683
+      },
+      "render-evidence-exit2/M-RECURSION-01-backend-target-fixed.stderr.txt": {
+        "sha256": "1e43598752d9f6e241eb6994fd8fd99614f93eec1acd0f0c2f9b7fd7665c25b5",
+        "mode": "0644",
+        "bytes": 865
+      },
+      "render-evidence-exit2/M-RECURSION-01-backend-target-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-02-backend-target-mutant.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-02-backend-target-mutant.yaml": {
+        "sha256": "85edce696cccc812d5a948277383a2e2dff5f2bd89b55e241f538d59a2d1e599",
+        "mode": "0644",
+        "bytes": 62321
+      },
+      "render-evidence-exit2/M-RECURSION-03-backend-canonical-flat-fixed.stderr.txt": {
+        "sha256": "474f90dc11d6d1fd8ea27ebd2cf7f601911fc9b5d7b087cbf50d6852e3d6e034",
+        "mode": "0644",
+        "bytes": 857
+      },
+      "render-evidence-exit2/M-RECURSION-03-backend-canonical-flat-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-04-backend-canonical-flat-mutant.stderr.txt": {
+        "sha256": "592dfa960c0d62cd04f850f1a1c4a6664379956d31550476e9b62d4368bee323",
+        "mode": "0644",
+        "bytes": 858
+      },
+      "render-evidence-exit2/M-RECURSION-04-backend-canonical-flat-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-05-backend-legacy-flat-fixed.stderr.txt": {
+        "sha256": "69ea5d24f23871d544224c07c8480b4301070170d3978f9535a17f34f6034a00",
+        "mode": "0644",
+        "bytes": 881
+      },
+      "render-evidence-exit2/M-RECURSION-05-backend-legacy-flat-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-06-backend-legacy-flat-mutant.stderr.txt": {
+        "sha256": "e8402d866f85dd779d900a03d54c2221c32f2a68d0d8a5a2788e3bfb36be905a",
+        "mode": "0644",
+        "bytes": 882
+      },
+      "render-evidence-exit2/M-RECURSION-06-backend-legacy-flat-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-07-backend-other-shape-fixed.stderr.txt": {
+        "sha256": "da64c61ea985dba6568d93edc0900eeed74be1ae8dafd191695bbfd4aff7721d",
+        "mode": "0644",
+        "bytes": 857
+      },
+      "render-evidence-exit2/M-RECURSION-07-backend-other-shape-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-08-backend-other-shape-mutant.stderr.txt": {
+        "sha256": "44ee7636b2d8bd09e7da521eaa5d9c1f898e24fe0e97802d02fb422d81ae5cb1",
+        "mode": "0644",
+        "bytes": 858
+      },
+      "render-evidence-exit2/M-RECURSION-08-backend-other-shape-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-09-backend-custom-flat-fixed.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-09-backend-custom-flat-fixed.yaml": {
+        "sha256": "17ac025f97457bd01f0539c2ca76dd9ba992e2338e2850b8b339c265775dae98",
+        "mode": "0644",
+        "bytes": 62320
+      },
+      "render-evidence-exit2/M-RECURSION-10-backend-custom-flat-mutant.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-10-backend-custom-flat-mutant.yaml": {
+        "sha256": "17ac025f97457bd01f0539c2ca76dd9ba992e2338e2850b8b339c265775dae98",
+        "mode": "0644",
+        "bytes": 62320
+      },
+      "render-evidence-exit2/M-RECURSION-11-worker-target-fixed.stderr.txt": {
+        "sha256": "86e77893680c0385378ab2e8d31a7b820149ee9147c31c753858bd17c5ef6196",
+        "mode": "0644",
+        "bytes": 868
+      },
+      "render-evidence-exit2/M-RECURSION-11-worker-target-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-12-worker-target-mutant.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-12-worker-target-mutant.yaml": {
+        "sha256": "27744ecd119b90ca51d9040bdb4f0d0bbf061af55d256183155df3e7c2aa7973",
+        "mode": "0644",
+        "bytes": 62321
+      },
+      "render-evidence-exit2/M-RECURSION-13-worker-canonical-flat-fixed.stderr.txt": {
+        "sha256": "09230390b8b5a6815b5ed69fbb04ee672a7e43536ea77685fc5e0224cc7db3b0",
+        "mode": "0644",
+        "bytes": 860
+      },
+      "render-evidence-exit2/M-RECURSION-13-worker-canonical-flat-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-14-worker-canonical-flat-mutant.stderr.txt": {
+        "sha256": "e4bbd4d9a5289cf1b1dc852b6b41ba3212e3bc692ab6fd41efbc44940860ac5c",
+        "mode": "0644",
+        "bytes": 861
+      },
+      "render-evidence-exit2/M-RECURSION-14-worker-canonical-flat-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-15-worker-legacy-flat-fixed.stderr.txt": {
+        "sha256": "c9b359795d0e4d8f1c7ef676445ec611a735dd1f625096f6b7ea490d753cc6c6",
+        "mode": "0644",
+        "bytes": 884
+      },
+      "render-evidence-exit2/M-RECURSION-15-worker-legacy-flat-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-16-worker-legacy-flat-mutant.stderr.txt": {
+        "sha256": "42a50d706acba3774037ca706e2d032489c475222904cf7f22b96d3fba80cc10",
+        "mode": "0644",
+        "bytes": 885
+      },
+      "render-evidence-exit2/M-RECURSION-16-worker-legacy-flat-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-17-worker-other-shape-fixed.stderr.txt": {
+        "sha256": "b1c5d476971710db45973cad3b04c0948cfe8e56998c125f11f2f793611d0cd3",
+        "mode": "0644",
+        "bytes": 860
+      },
+      "render-evidence-exit2/M-RECURSION-17-worker-other-shape-fixed.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-18-worker-other-shape-mutant.stderr.txt": {
+        "sha256": "3776378983c3830718c3adbbf2f96bfcc4cc2a106a38d8db5c08f5cc99d62ffc",
+        "mode": "0644",
+        "bytes": 861
+      },
+      "render-evidence-exit2/M-RECURSION-18-worker-other-shape-mutant.yaml": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-19-worker-custom-flat-fixed.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-19-worker-custom-flat-fixed.yaml": {
+        "sha256": "0cf020671a7246389d4efecc250a86a88f1eb9d4baaf308799a4103ca9e0fd49",
+        "mode": "0644",
+        "bytes": 62320
+      },
+      "render-evidence-exit2/M-RECURSION-20-worker-custom-flat-mutant.stderr.txt": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mode": "0644",
+        "bytes": 0
+      },
+      "render-evidence-exit2/M-RECURSION-20-worker-custom-flat-mutant.yaml": {
+        "sha256": "0cf020671a7246389d4efecc250a86a88f1eb9d4baaf308799a4103ca9e0fd49",
+        "mode": "0644",
+        "bytes": 62320
+      },
+      "render-evidence-exit2/M-RECURSION-receipt.json": {
+        "sha256": "b761be1f20a388875fe692cf59690fdeeb1db2be7b6ed23e4b3935a6871461a5",
+        "mode": "0644",
+        "bytes": 64893
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/.helmignore": {
+        "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+        "mode": "0644",
+        "bytes": 86
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/Chart.yaml": {
+        "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+        "mode": "0644",
+        "bytes": 263
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/NOTES.txt": {
+        "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+        "mode": "0644",
+        "bytes": 989
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/_helpers.tpl": {
+        "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+        "mode": "0644",
+        "bytes": 44353
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/api-guided-tls-networkpolicy.yaml": {
+        "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+        "mode": "0644",
+        "bytes": 2789
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/configmap.yaml": {
+        "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+        "mode": "0644",
+        "bytes": 6068
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/deployment.yaml": {
+        "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+        "mode": "0644",
+        "bytes": 39697
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/hpa.yaml": {
+        "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+        "mode": "0644",
+        "bytes": 778
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/ingress.yaml": {
+        "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+        "mode": "0644",
+        "bytes": 2276
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/pdb.yaml": {
+        "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+        "mode": "0644",
+        "bytes": 1566
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/service.yaml": {
+        "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+        "mode": "0644",
+        "bytes": 1544
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/serviceaccount.yaml": {
+        "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+        "mode": "0644",
+        "bytes": 1440
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/studio-object-store-pvc.yaml": {
+        "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+        "mode": "0644",
+        "bytes": 1189
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/studio-runner-deployment.yaml": {
+        "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+        "mode": "0644",
+        "bytes": 26332
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/studio-runner-networkpolicy.yaml": {
+        "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+        "mode": "0644",
+        "bytes": 4483
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/studio-runner-scaledobject.yaml": {
+        "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+        "mode": "0644",
+        "bytes": 2732
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/studio-runner-service.yaml": {
+        "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+        "mode": "0644",
+        "bytes": 2524
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates/studio-sse-ingress.yaml": {
+        "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+        "mode": "0644",
+        "bytes": 5470
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/values-dev.yaml": {
+        "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+        "mode": "0644",
+        "bytes": 5488
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/values-prod.yaml": {
+        "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+        "mode": "0644",
+        "bytes": 9186
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/values-uat.yaml": {
+        "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+        "mode": "0644",
+        "bytes": 9462
+      },
+      "render-evidence-exit2/M-RECURSION-restored-chart/values.yaml": {
+        "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+        "mode": "0644",
+        "bytes": 50683
+      },
+      "render-evidence-exit2/versions.json": {
+        "sha256": "f4a951601fec4e015d638f4fc525e489e49bd4327b66b9b41330eff1fc9b4b13",
+        "mode": "0644",
+        "bytes": 3710
+      },
+      "studio-runner/.vite-gateway-independent/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json": {
+        "sha256": "b2b43dae901be80e6bef4552aaeb1bffec5bfb9bfc61e2914de160cee1896d05",
+        "mode": "0644",
+        "bytes": 135
+      },
+      "studio-runner/eslint.config.js": {
+        "sha256": "9a90981a969856f3190f82b4bcebf1a04a0fa38abe0a5fc5571f83f01d8e68eb",
+        "mode": "0644",
+        "bytes": 4410
+      },
+      "studio-runner/package-lock.json": {
+        "sha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613",
+        "mode": "0644",
+        "bytes": 213424
+      },
+      "studio-runner/package.json": {
+        "sha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e",
+        "mode": "0644",
+        "bytes": 1481
+      },
+      "studio-runner/test/deployment/gateway-independent-mutants.test.ts": {
+        "sha256": "b6dbbda99916ea1ba25b5e98357eccf3e91a6affc583eb2cc7fda628f45846d6",
+        "mode": "0644",
+        "bytes": 10629
+      },
+      "studio-runner/test/deployment/gateway-native-observer.ts": {
+        "sha256": "6b7225e4a9ac67fbfffc1a4f6383f1e0bcced79bda97ca65f718893403d0637b",
+        "mode": "0644",
+        "bytes": 10183
+      },
+      "studio-runner/test/deployment/helm.ts": {
+        "sha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0",
+        "mode": "0644",
+        "bytes": 23388
+      },
+      "studio-runner/test/helpers/corpus.ts": {
+        "sha256": "63c091d87319035db1673bfbca75d31a02206697ed454f52b3e8f21093dfab79",
+        "mode": "0644",
+        "bytes": 438
+      },
+      "studio-runner/tsconfig.json": {
+        "sha256": "723196d470e796a3638c23d794004b30053e0e334a0bb3f1fa270a0a75075046",
+        "mode": "0644",
+        "bytes": 767
+      },
+      "studio-runner/vitest.deployment.config.ts": {
+        "sha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b",
+        "mode": "0644",
+        "bytes": 3063
+      },
+      "studio-runner/vitest.gateway-independent.config.ts": {
+        "sha256": "73051c9b69ddfcfa1e5bbc2e7df5f2d974cd97edd18c5510b70910f19bede6ac",
+        "mode": "0644",
+        "bytes": 399
+      },
+      "vitest.json": {
+        "sha256": "9385594c692289cbe8268c04502465f4d437bf7c648942bb57acbed3fa5d1dae",
+        "mode": "0644",
+        "bytes": 1482
+      }
+    },
+    "directories": {
+      "helm-chart": "0755",
+      "helm-chart/put-checks": "0755",
+      "helm-chart/put-checks/templates": "0755",
+      "render-evidence-exit2": "0700",
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart": "0755",
+      "render-evidence-exit2/M-NORMALIZED-COMPARISON-restored-chart/templates": "0755",
+      "render-evidence-exit2/M-RECURSION-restored-chart": "0755",
+      "render-evidence-exit2/M-RECURSION-restored-chart/templates": "0755",
+      "studio-runner": "0755",
+      "studio-runner/.vite-gateway-independent": "0755",
+      "studio-runner/.vite-gateway-independent/vitest": "0755",
+      "studio-runner/.vite-gateway-independent/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709": "0755",
+      "studio-runner/test": "0755",
+      "studio-runner/test/deployment": "0755",
+      "studio-runner/test/helpers": "0755"
+    },
+    "symlinks": {
+      "studio-runner/node_modules": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner/node_modules"
+    },
+    "cleanupRequiresFreshExactIdentityAndInventoryRecheck": true,
+    "dependencyTargetMustRemain": true
+  },
+  "oldFailurePreserved": true,
+  "oldThreeRootCleanupRecordVerified": true,
+  "oldCleanupReceiptSha256": "36cdf9456d3fb0ab9c349e4014b7854371da89f8b07f0cce86de84360665747f",
+  "parentEvidenceFileModes": "0600",
+  "ownedEvidenceDirectoryMode": "0700",
+  "reviewNativeHelmNodeCalls": 0,
+  "cleanupPerformed": false,
+  "productSourceApplied": false,
+  "original80CaseOrFullTierOrLaneOrC8LifecycleCredit": false,
+  "boundedYamlReaderScope": "Selected Deployment mounts/references, ConfigMaps and embedded plain mappings; full YAML also parsed by bound actual runtime harness"
+}

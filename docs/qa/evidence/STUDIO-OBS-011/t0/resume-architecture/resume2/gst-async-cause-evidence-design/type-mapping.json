@@ -1,0 +1,110 @@
+{
+  "priorityOrder": true,
+  "onlyRecognizedJdkTypesNoRawNamesExported": [
+    {
+      "type": "java.util.concurrent.ExecutionException",
+      "family": "ASYNC",
+      "reason": "EXECUTION"
+    },
+    {
+      "type": "java.util.concurrent.CompletionException",
+      "family": "ASYNC",
+      "reason": "COMPLETION"
+    },
+    {
+      "type": "java.net.http.HttpConnectTimeoutException",
+      "family": "TIMEOUT",
+      "reason": "CONNECT_TIMEOUT"
+    },
+    {
+      "type": "java.net.http.HttpTimeoutException",
+      "family": "TIMEOUT",
+      "reason": "REQUEST_TIMEOUT"
+    },
+    {
+      "type": "java.util.concurrent.TimeoutException",
+      "family": "TIMEOUT",
+      "reason": "WAIT_TIMEOUT"
+    },
+    {
+      "type": "java.util.concurrent.CancellationException",
+      "family": "CANCELLED",
+      "reason": "CANCELLED"
+    },
+    {
+      "type": "java.lang.InterruptedException",
+      "family": "CANCELLED",
+      "reason": "INTERRUPTED"
+    },
+    {
+      "type": "javax.net.ssl.SSLHandshakeException",
+      "family": "TLS",
+      "reason": "TLS_HANDSHAKE"
+    },
+    {
+      "type": "javax.net.ssl.SSLProtocolException",
+      "family": "TLS",
+      "reason": "TLS_PROTOCOL"
+    },
+    {
+      "type": "javax.net.ssl.SSLPeerUnverifiedException",
+      "family": "TLS",
+      "reason": "TLS_PEER_UNVERIFIED"
+    },
+    {
+      "type": "java.security.cert.CertificateException",
+      "family": "TLS",
+      "reason": "TLS_CERTIFICATE"
+    },
+    {
+      "type": "java.security.cert.CertPathValidatorException",
+      "family": "TLS",
+      "reason": "CERT_PATH_VALIDATION"
+    },
+    {
+      "type": "javax.net.ssl.SSLException",
+      "family": "TLS",
+      "reason": "TLS_OTHER"
+    },
+    {
+      "type": "java.net.ConnectException",
+      "family": "CONNECT",
+      "reason": "CONNECT_FAILURE"
+    },
+    {
+      "type": "java.io.EOFException",
+      "family": "IO",
+      "reason": "EOF"
+    },
+    {
+      "type": "java.nio.channels.ClosedChannelException",
+      "family": "IO",
+      "reason": "CLOSED_CHANNEL"
+    },
+    {
+      "type": "java.net.SocketException",
+      "family": "IO",
+      "reason": "SOCKET_FAILURE"
+    },
+    {
+      "type": "java.io.IOException",
+      "family": "IO",
+      "reason": "IO_OTHER"
+    },
+    {
+      "type": "java.lang.SecurityException",
+      "family": "SECURITY",
+      "reason": "SECURITY_OTHER"
+    }
+  ],
+  "fallback": {
+    "family": "OTHER",
+    "reason": "OTHER"
+  },
+  "reasonDoesNotImply": [
+    "ConnectException does not prove refused port",
+    "SSLHandshakeException does not prove bad certificate or hostname",
+    "TimeoutException does not prove which transport phase stalled"
+  ],
+  "typedThrowableOnly": true
+}

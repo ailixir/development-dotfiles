@@ -1,0 +1,167 @@
+{
+  "kind": "PROSPECTIVE05_OPAQUE_SELF_REPORTED_TEXT_FINGERPRINT_DISPOSITION",
+  "sourceOnly": true,
+  "actualRuntimeAuthorized": false,
+  "actualHelper05Selected": false,
+  "actualPriorMetadataRecordSha256": "7434fed0c03fa3104ecc392aca5b61054f171c29ec39138790d5fc4f3a167ee3",
+  "actualPriorReportedRole": "OTHER",
+  "actualPriorOrigArgv0Role": "APP",
+  "actualReportedRawText": null,
+  "actualReportedTextSha256": null,
+  "actualReportedTextUtf8Bytes": null,
+  "originalFailureCauseAndValues": "UNKNOWN",
+  "currentPolicy": "HOLD",
+  "literals": {
+    "python-self-text.py.txt": {
+      "path": "python-self-text.py.txt",
+      "sha256": "65022489e374d4096adbc2b73b29c8347318ed6bd8be9d3a6b22bfaba7ec5108",
+      "bytes": 3667
+    },
+    "self-text-bootstrap.py.txt": {
+      "path": "self-text-bootstrap.py.txt",
+      "sha256": "553b4544dc3515cc0f24746857e512498c8e8954283248b7580a5575eeb901e0",
+      "bytes": 2073
+    },
+    "direct-function-literal.bash.txt": {
+      "path": "direct-function-literal.bash.txt",
+      "sha256": "e1fd8c2c4561f0e9f2691e70456fdf3bd65f81c7897ed3e83a1c536aea75f4ba",
+      "bytes": 2854
+    },
+    "proposed-invocation.bash.txt": {
+      "path": "proposed-invocation.bash.txt",
+      "sha256": "232e860a9b21d9dc8e4ab0a4211f1401225879a6c29510a6eeb2d5dc27517088",
+      "bytes": 4119
+    },
+    "record-schema.json": {
+      "path": "record-schema.json",
+      "sha256": "55a40c4ddeccd41e6018d2c0fedfe9761863a1ccb91d6edd61ee5a716e2ce33c",
+      "bytes": 2238
+    },
+    "role-contract-concept.json": {
+      "path": "role-contract-concept.json",
+      "sha256": "e83a44c4cd9795e20f54dbcf4cea2dd6538323d7bc34f49b121db499f3050c09",
+      "bytes": 2234
+    },
+    "delivery-proposal.json": {
+      "path": "delivery-proposal.json",
+      "sha256": "720b4508e7dee2eb67d3a853bdec13447d7fb613d563242a5db92f10c114fa10",
+      "bytes": 4197
+    },
+    "freeze-scope-proposal.json": {
+      "path": "freeze-scope-proposal.json",
+      "sha256": "43721651e4d6286d0c587bc612a4b7588ff9914b86be557cfaa62e8a11bdf5c6",
+      "bytes": 3817
+    }
+  },
+  "proposedHelper": {
+    "evidenceKind": "SELF_REPORTED_TEXT_DIGEST",
+    "reads": "Only selfPID/parent and two self-report in-memory values; no text/path normalization or external read.",
+    "limits": {
+      "maxCharactersBeforeEncoding": 4096,
+      "maxUtf8BytesBeforeEncodingAndHash": 4096,
+      "bodyCodeAsciiBytes": 4096,
+      "outputAsciiBytes": 1024
+    },
+    "newNames": [
+      "GATEWAY_SELFTEXT05_SOURCE_BUFFER",
+      "GATEWAY_SELFTEXT05_READ_STATUS",
+      "GATEWAY_SELFTEXT05_STARTED",
+      "GATEWAY_SELFTEXT05_ACTUAL_STATUS",
+      "gateway_python_self_text05_once"
+    ],
+    "newNamesObservedUnused": false,
+    "unusedNamesMustBeProvedUnderNewScope": true,
+    "old04NamesImmutableConsumed": true,
+    "onceCapBeforePython": true,
+    "additionalVerifierChildrenSelected": 0,
+    "metadata0IsQualification": false,
+    "fakeOnlyExecutions": {
+      "body": 16,
+      "bootstrap": 2
+    }
+  },
+  "stageBoundaries": [
+    "Exact current design/QA/root plus NEW separate scope before any05 helper;04scope consumed.",
+    "N02exact8 freeze remains separate rootcontrolled outsideEindex proposal; membershipUNOBSERVED/no implementation or execution.",
+    "Actual fingerprints+fresh priorindex/externalcontrols before any separately selected rolecontract/resourcecode/factory/installer/reviews/rootactualscope."
+  ],
+  "roleContractConcept": {
+    "selected": false,
+    "actualPolicyAuthorized": false,
+    "ifIdentitySemanticsCannotBePreserved": "HOLD_NO_CHANGE",
+    "physical7AndPsLsofProofs": "UNCHANGED_REQUIRED",
+    "selfTextIsPhysicalFileOrImage": false
+  },
+  "typedKnownRecords": {
+    "successfulSetupHelpers": [
+      {
+        "pid": 83174,
+        "ppid": 3749,
+        "start": null,
+        "fullFingerprint": null,
+        "actualSeparateWait": 0
+      },
+      {
+        "pid": 87046,
+        "ppid": 3749,
+        "start": null,
+        "fullFingerprint": null,
+        "actualSeparateWait": 0
+      },
+      {
+        "pid": 92696,
+        "ppid": 3749,
+        "start": null,
+        "fullFingerprint": null,
+        "actualSeparateWait": 0
+      },
+      {
+        "pid": 98057,
+        "ppid": 3749,
+        "start": null,
+        "fullFingerprint": null,
+        "actualSeparateWait": 0
+      }
+    ],
+    "failedProvisionalClient": {
+      "pid": 25986,
+      "ppid": 3749,
+      "start": "Mon Oct 19 18:01:01 2026",
+      "argvHash": "2ae25a44b8c8c82ca88f091e86866f5e66d9dc279fe44b88690b036260b40ad8",
+      "fullFingerprint": null,
+      "actualOuterStatus": 1,
+      "qualificationReached": false,
+      "kind": "FAILED_PROVISIONAL_CLIENT"
+    },
+    "provisionalUtility": {
+      "pid": 26057,
+      "start": "Mon Oct 19 18:01:01 2026",
+      "status": 0,
+      "waited": true,
+      "stdoutComplete": true,
+      "stderrComplete": true,
+      "fullFingerprint": null,
+      "kind": "PROVISIONAL_WAITED_UTILITY",
+      "ppid": null,
+      "parentProvenance": "NOT_EXPORTED_NOT_OBSERVED"
+    },
+    "metadataHelper04": {
+      "pid": 76659,
+      "ppid": 3749,
+      "start": null,
+      "fullFingerprint": null,
+      "actualSeparateWaitStatus": 0,
+      "kind": "SELF_ROLE04_METADATA_ONLY",
+      "qualified": false,
+      "sourceRecordSha256": "7434fed0c03fa3104ecc392aca5b61054f171c29ec39138790d5fc4f3a167ee3"
+    }
+  },
+  "finiteUnion": "Old2255/oldjoins plus actual typed setup4/0, failed25986outer1, utility26057wait0/nullparent, metadata76659status0/nullstartFP, and actualfuture05/freeze/currenthelpers only; no guessedcounts or reuseexemptions.",
+  "freezeState": "EXACT8_PROPOSAL_POSTFAILURE_UNOBSERVED",
+  "timestampCorrection": "Progress02 and negative-only decision atUtc22:05:00Z were manually entered inaccurately and are not actual wall-clock readings. Preserve bytes; actual command start reported18:01:01 local and explicit clock22:01:05UTC after separate status. No future timestamp is proof of phase timing.",
+  "helperTimestamp": null,
+  "newRuntimeNamespaceOrInstallerSelected": false,
+  "failurePredicatesWeakened": false,
+  "source09ProfileBorrowed": false,
+  "allActualFailedResourceAndBusinessGates": "OWED_UNCHANGED"
+}

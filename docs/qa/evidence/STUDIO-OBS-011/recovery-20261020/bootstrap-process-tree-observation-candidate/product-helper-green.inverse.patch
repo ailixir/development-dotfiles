@@ -1,0 +1,21 @@
+--- a/studio-runner/test/helpers/bootstrapProcessTreeObservation.ts
++++ b/studio-runner/test/helpers/bootstrapProcessTreeObservation.ts
+@@ -74,13 +74,11 @@
+   return Object.freeze({ childPid, observedPids: Object.freeze([...pids]), labels: Object.freeze(labels.map(row => Object.freeze({ ...row }))) });
+ }
+ export function captureBootstrapTree(childPid: number): BootstrapProcessTree {
+-  const table = readSnapshot(childPid), byPid = new Map(table.map(row => [row.pid, row]));
+-  const pids = descendantsOf(childPid, table);
+-  const labels = pids.map(pid => {
+-    const row = byPid.get(pid);
+-    if (!row) throw new Error('BOOTSTRAP_PROCESS_TABLE_INVALID');
+-    return { pid, command: row.command };
+-  });
++  // Same strict preflight/API as candidate; the following acquisition remains the original fixture algorithm.
++  readSnapshot(childPid);
++  const pids = descendantsOf(childPid), labels = pids.map(pid => ({
++    pid, command: execFileSync('ps', ['-p', String(pid), '-o', 'comm='], { encoding: 'utf8', timeout: 1000 }).trim(),
++  }));
+   return freezeObservation(childPid, pids, labels);
+ }
+ /** One fresh confirmation only; this function never sends SIGSTOP, waits, retries or filters the inventory. */

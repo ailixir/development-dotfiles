@@ -1,0 +1,66 @@
+import pathlib,json,hashlib,re,csv,collections,subprocess,datetime
+p=pathlib.Path('docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4');q=p;old=p.parent/'resume2';previous=p.parent/'resume3'
+sha=lambda x:hashlib.sha256(pathlib.Path(x).read_bytes()).hexdigest()
+j=lambda n:json.loads((p/n).read_text());m=j('manifest.json');checks={};details={}
+checks['all167CurrentInputBindingsMatch']=len(m['inputs'])==167 and all(pathlib.Path(x['path']).is_file() and sha(x['path'])==x['sha256'] for x in m['inputs']);details['inputDrift']=[x['path'] for x in m['inputs'] if not pathlib.Path(x['path']).is_file() or sha(x['path'])!=x['sha256']]
+checks['packageSHA256SUMSMatch']=all(sha(p/l.split('  ',1)[1])==l.split('  ',1)[0] for l in (p/'SHA256SUMS').read_text().splitlines())
+checks['targetBasesPreviewPatchHashesMatch']=all(pathlib.Path(t['target']).exists()==t['baseExists'] and (not t['baseExists'] or sha(t['target'])==t['baseSha256']) and sha(t['preview'])==t['proposedSha256'] and sha(t['patch'])==t['patchSha256'] for t in m['targets'])
+combined=pathlib.Path(m['combinedPatch']['path']);names=re.findall(r'^\+\+\+ b/(.+)$',combined.read_text(),re.M)
+checks['fiveExactConfinedTargets']=len(names)==5 and set(names)=={t['target'] for t in m['targets']};checks['combinedLiteralConcatenation']=combined.read_bytes()==b''.join(pathlib.Path(t['patch']).read_bytes() for t in m['targets']);checks['combinedHashMatches']=sha(combined)==m['combinedPatch']['sha256'];details['targets']=[]
+for t in m['targets']:
+ lines=pathlib.Path(t['target']).read_text().splitlines(keepends=True) if t['baseExists'] else [];patch=pathlib.Path(t['patch']).read_text().splitlines(keepends=True);out=[];cur=0;i=0
+ while i<len(patch):
+  hit=re.match(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@',patch[i])
+  if not hit:i+=1;continue
+  pos=int(hit[1])-1 if int(hit[2] or 1) else int(hit[1]);out.extend(lines[cur:pos]);cur=pos;i+=1
+  while i<len(patch) and not patch[i].startswith('@@ '):
+   s=patch[i]
+   if s.startswith(' '):assert lines[cur]==s[1:];out.append(s[1:]);cur+=1
+   elif s.startswith('-'):assert lines[cur]==s[1:];cur+=1
+   elif s.startswith('+'):out.append(s[1:])
+   elif s.startswith('\\ No newline'):pass
+   else:raise AssertionError(s)
+   i+=1
+ out.extend(lines[cur:]);b=''.join(out).encode();details['targets'].append({'target':t['target'],'baseSha256':t['baseSha256'],'patchSha256':sha(t['patch']),'outputSha256':hashlib.sha256(b).hexdigest(),'exactReconstruction':b==pathlib.Path(t['preview']).read_bytes()})
+checks['exactInMemoryReconstruction']=all(x['exactReconstruction'] for x in details['targets']);a=subprocess.run(['git','apply','--check',str(combined)],capture_output=True,text=True);checks['readOnlyGitApplyCheck']=a.returncode==0;details['gitApplyCheck']={'exitCode':a.returncode,'stdout':a.stdout,'stderr':a.stderr}
+historical=j('historical-packages-before.json')['inputs'];checks['all67HistoricalPackageFilesPreserved']=len(historical)==67 and all(sha(x['path'])==x['sha256'] for x in historical);checks['historicalFileSetsPreserved']={str(x) for package in ['resume2','resume3'] for x in (p.parent/package).rglob('*') if x.is_file()}=={x['path'] for x in historical}
+refresh=j('root-provenance-input-refresh.json');handoff=pathlib.Path(refresh['path']).read_bytes();n=refresh['prependedBytes'];checks['rootRefreshExactlyPrepended525Bytes']=n==525 and hashlib.sha256(handoff[:n]).hexdigest()==refresh['prependedSha256'] and hashlib.sha256(handoff[n:]).hexdigest()==refresh['beforeSha256']==refresh['originalContentSha256'] and sha(refresh['path'])==refresh['afterSha256'];details['rootRefresh']=refresh
+capture=json.loads(pathlib.Path('docs/qa/evidence/STUDIO-OBS-011/t0/start-capture.json').read_text());quoted=pathlib.Path('docs/qa/evidence/STUDIO-OBS-011/t0/quoted-docs-s011.sha256').read_text().splitlines();qp=[x.split(None,1)[1].strip() for x in quoted];checks['refreshedHandoffOutsideB1CaptureAnd20QuotedInputs']=refresh['path'] not in {x['path'] for x in capture['files']} and len(qp)==20 and refresh['path'] not in qp;details['rootRefreshScopeProof']={'B1Capture':'docs/qa/evidence/STUDIO-OBS-011/t0/start-capture.json','B1CaptureSha256':sha('docs/qa/evidence/STUDIO-OBS-011/t0/start-capture.json'),'quotedInputs':'docs/qa/evidence/STUDIO-OBS-011/t0/quoted-docs-s011.sha256','quotedInputsSha256':sha('docs/qa/evidence/STUDIO-OBS-011/t0/quoted-docs-s011.sha256'),'quotedInputCount':len(qp)}
+arch=json.loads(pathlib.Path('docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/review.json').read_text())['obligations'];r010=[x for x in arch if x['story']=='010'];rx=[x for x in arch if x['classification']=='externally_blocked'];checks['68Architecture21Story010Verbatim']=len(arch)==68 and len(r010)==21 and j('architecture-obligations.json')['obligations']==r010;checks['21GlobalExternalSeparateVerbatim']=len(rx)==21 and j('external-obligations-all-stories.json')['obligations']==rx;checks['010Rows3Local9Dependent9External']=collections.Counter(x['classification'] for x in r010)=={'locally_executable':3,'dependent_on_another_lane':9,'externally_blocked':9}
+tr=j('traceability.json');checks['19RBR21StoryMappings']=len(tr['RBR'])==19 and len(tr['story010Obligations'])==21
+strict=json.loads(pathlib.Path('docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/po/closure-placements-reconciliation.json').read_text());checks['strictLoggingCurrentRowVerbatim']=j('video-logging-current-disposition.json')['dispositionVerbatim']==next(x for x in strict['dispositions'] if x['id']=='VIDEO-LOGGING')
+carryIds=['VIDEO-LOGGING','CACHE-REAUTH','AUDIT-LABEL-PRIVACY','EXTERNAL-READINESS','RECORDING-RUNBOOK-COPY']; carries=tr['storyCarriedFollowups']; strictById={x['id']:x for x in strict['dispositions']}
+checks['fiveStoryCarriesUseCurrentStrictDispositions']=len(carries)==5 and [x['id'] for x in carries]==carryIds and all(x['currentDisposition']==strictById[x['id']]['disposition'] and x['currentDispositionText']==strictById[x['id']]['currentDisposition'] for x in carries)
+evidence=j('release-evidence-map.json');checks['allReleaseEvidenceSourcePathsExist']=all(pathlib.Path(s).is_file() for x in evidence for s in x['sourcePaths']); checks['all70ReleaseRowsMatchMappedGateNames']=collections.Counter([x.split('|')[1].strip() for x in pathlib.Path(m['targets'][2]['preview']).read_text().splitlines() if x.startswith('| ')][1:])==collections.Counter(x['gate'] for x in evidence)
+rbook=pathlib.Path(m['targets'][0]['preview']).read_text();checks['19RBROnceInOrder']=re.findall(r'^### (RBR-\d\d) ',rbook,re.M)==[f'RBR-{n:02}' for n in range(1,20)]
+d=j('10.34-dispositions.json');checks['allGroupsAtoNand33ACIDs']=d['groups']==list('ABCDEFGHIJKLMN') and [x['id'] for x in d['originalACs']]==[f'AC-{n}' for n in range(1,34)];checks['noOldACPass']=all(x['state'] not in ['PASS','DONE','WAIVED'] for x in d['originalACs']);checks['1034OriginalPrefixExact']=pathlib.Path(m['targets'][4]['preview']).read_bytes().startswith(pathlib.Path(m['targets'][4]['target']).read_bytes())
+checks['sheetsUnchangedFromReviewedResume2']=all((p/'sheets'/x.name).read_bytes()==x.read_bytes() for x in (old/'sheets').iterdir() if x.is_file());rows={x.name:list(csv.DictReader(x.open())) for x in (p/'sheets').glob('*.csv')};checks['attemptFocusHeaderOnly']=not rows['pilot-attempts.csv'] and not rows['pilot-focus-targets.csv'];checks['fiveUnassignedZeroParticipantFacts']=len(rows['participant-slots.csv'])==5 and all(r['assignment_state']=='UNASSIGNED' and all(not v for k,v in r.items() if k not in ['slot_id','assignment_state']) for r in rows['participant-slots.csv']);checks['12BlankNOTRUNDenominators']=len(rows['pilot-denominators.csv'])==12 and all(r['state']=='NOT_RUN' and all(not v for k,v in r.items() if k not in ['measure','state']) for r in rows['pilot-denominators.csv'])
+ledger=pathlib.Path(m['targets'][2]['preview']).read_text();table=[x for x in ledger.splitlines() if x.startswith('| ')][1:];checks['70ReleaseRowsFixedShapeAndMapped']=len(table)==70 and len(j('release-evidence-map.json'))==70 and all(len(x.split('|'))==7 for x in table)
+runner=pathlib.Path('docs/runbooks/studio-runner.md').read_bytes();section=runner[runner.index(b'## 14.'):];checks['section14ExactUnchanged12392Bytes']=len(section)==12392 and hashlib.sha256(section).hexdigest()=='4d83b3594c7cab2daa4a4505df1088dbc43c74e55ee4e6f1e9c552ff07880e66' and hashlib.sha256(runner).hexdigest()=='8971ca6b0f5f08b3b35041abe960065d1b6f4fdf4e5fa3b9557a30dd9c16223b' and 'docs/runbooks/studio-runner.md' not in names
+links=[]
+for t in m['targets']:
+ for u in re.findall(r'\]\(([^)]+)\)',pathlib.Path(t['preview']).read_text()):
+  if '://' in u or u.startswith('#'):continue
+  rel,_,anc=u.partition('#');dest=(pathlib.Path(t['target']).parent/rel).resolve();ok=dest.is_file();aok=True
+  if anc and ok:aok=anc in [re.sub(r'[^\w\- ]','',h.lower()).replace(' ','-') for h in re.findall(r'^#+\s+(.+)$',dest.read_text(),re.M)]
+  links.append({'target':t['target'],'url':u,'exists':ok,'anchorResolves':aok})
+checks['11EventualLinksAndAnchorsResolve']=len(links)==11 and all(x['exists'] and x['anchorResolves'] for x in links);details['links']=links;details['semanticStaleLinks']=[x for x in links if '/resume2/traceability.md' in x['url']];details['manifestSha256']=sha(p/'manifest.json');details['combinedPatchSha256']=sha(combined)
+
+refs=j('reference-deltas.json');checks['exactNineReferenceLineDeltas']=sum(x['changedLines'] for x in refs['targets'])==9 and [x['changedLines'] for x in refs['targets']]==[1,0,6,2,0]
+operatorDeltas=[];stale=[]
+for t in m['targets']:
+ prior=(previous/'preview'/t['target']).read_text();current=pathlib.Path(t['preview']).read_text();expected=prior.replace(str(previous)+'/',str(p)+'/')
+ if t['target']=='docs/runbooks/studio-guided-authoring.md':expected=expected.replace('obs010-draft/resume2/traceability.md','obs010-draft/resume4/traceability.md')
+ if t['target'].endswith('/devops-handoff.md'):expected=expected.replace('in the resume2 package:','in the resume4 package:')
+ operatorDeltas.append({'target':t['target'],'exactAuthorizedReferenceSubstitutionsOnly':current==expected})
+ stale.extend({'target':t['target'],'line':n,'text':line} for n,line in enumerate(current.splitlines(),1) if re.search(r'obs010-draft/resume[23]/|in the resume[23] package',line))
+checks['actualProposedTargetDeltaContainsOnlyAuthorizedReferenceChanges']=all(x['exactAuthorizedReferenceSubstitutionsOnly'] for x in operatorDeltas);checks['noStaleCurrentPackagePointersInAnyActualProposedTarget']=not stale;details['narrowTargetDeltas']=operatorDeltas;details['staleCurrentPointers']=stale
+currentUrl='../qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft/resume4/traceability.md';checks['operatorRunbookUsesCurrentTraceabilityMatrix']=currentUrl in rbook and (p/'traceability.md').is_file() and str(p/'preview/docs/runbooks/studio-guided-authoring.md') in (p/'traceability.json').read_text()
+checks['currentMatrixHasAcceptedRBR12SourcesAndFiveCarries']=all(s in tr['RBR'][11]['sourcePaths'] for s in ['studio-runner/src/guided/runtime.ts','docs/architecture/ADR-SC-005-single-path-observed-authoring.md']) and len(tr['storyCarriedFollowups'])==5 and 'DOC-010-01 is accepted' in (p/'traceability.md').read_text() and 'DOC-010-02 is accepted' in (p/'traceability.md').read_text()
+handoff=(p/'preview/docs/qa/evidence/studio-observed-authoring/devops-handoff.md').read_text();checks['operatorHandoffDesignatesCurrentPackageAndSheets']='in the resume4 package:' in handoff and str(p/'sheets')+'/' in handoff
+checks['pilotAnd1034PreviewsByteExactToReviewedResume3']=all((p/'preview'/name).read_bytes()==(previous/'preview'/name).read_bytes() for name in ['docs/qa/evidence/studio-observed-authoring/usability-pilot.md','docs/stories/10.34.story.md'])
+checks['acceptedPMDecisionUnchangedByteExact']=all((p/name).read_bytes()==(previous/name).read_bytes() for name in ['pm-ac24-carrier-decision.json','pm-ac24-carrier-decision.md'])
+checks['allCurrentContentMappingsOnlyRebindOwnedOutputPaths']=all((p/name).read_text()==(previous/name).read_text().replace(str(previous)+'/',str(p)+'/') for name in ['traceability.md','traceability.json','release-evidence-map.json','10.34-dispositions.json','architecture-obligations.json','external-obligations-all-stories.json'])
+checks['historicalReviewProvenanceRetained']=j('review-dispositions.json')['sourceReview']=='docs/qa/evidence/STUDIO-OBS-011/t0/qa/obs010-resume2/review.json' and j('DOC01003-disposition.json')['sourceReview']=='docs/qa/evidence/STUDIO-OBS-011/t0/qa/obs010-resume3/review.md'
+checks['DOC01003AcceptedForNarrowRereview']=j('DOC01003-disposition.json')['decision']=='ACCEPTED_AND_CORRECTED' and j('DOC01003-disposition.json')['independentNarrowRereview']=='PENDING'
+(q/'static-checks.json').write_text(json.dumps({'artifact':'author-resume4-static-package-checks-not-independent-QA','createdAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'isStoryQaVerdict':False,'checks':checks,'allMechanicalChecksPassed':all(checks.values()),'details':details,'runtimeTestsRun':False,'buildsRun':False,'patchesApplied':False,'gitWrites':False,'externalCalls':False},indent=2)+'\n');print(json.dumps({'checks':checks,'allMechanicalChecksPassed':all(checks.values()),'manifest':details['manifestSha256'],'patch':details['combinedPatchSha256']},indent=2))

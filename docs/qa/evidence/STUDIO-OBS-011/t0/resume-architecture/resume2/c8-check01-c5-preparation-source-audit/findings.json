@@ -1,0 +1,39 @@
+{
+  "decision": "SOURCE_PREPARATION_COHERENT_RUNTIME_UNPROVED",
+  "mandatoryStaticContradictions": [],
+  "missingPreconditionProved": false,
+  "uncheckedAsyncBoundaryProved": false,
+  "findings": [
+    {
+      "id": "C5-SOURCE-01",
+      "title": "Correct positive-learning secret and publication precede wrong-secret rotation",
+      "kind": "COHERENT_STATIC_SEQUENCE_NOT_RUNTIME_SUCCESS"
+    },
+    {
+      "id": "C5-SOURCE-02",
+      "title": "Primary fixture entitlement exists without a separate p3Grant",
+      "kind": "CONTRACT_CLARIFICATION_NOT_FIX"
+    },
+    {
+      "id": "C5-SOURCE-03",
+      "title": "Selected helper has one explicit awaitFinalizing call; stale text is not stage identity",
+      "kind": "SOURCE_CALLSITE_FACT_NOT_ACTUAL_STAGE"
+    },
+    {
+      "id": "C5-SOURCE-04",
+      "title": "Public projection does not expose an actual state, failure payload, acknowledgement or cause",
+      "kind": "EVIDENCE_LIMIT"
+    }
+  ],
+  "sourceCorrectionSuggested": null,
+  "sourceMethod": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+  "projectionSha256": "c3b49731371440457941dfa6c45b597cdbf28c7856ed7a3f8407c198bdd90a57",
+  "sourceSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "currentRuntimeStageStateCauseOutcome": "UNPROVED",
+  "actualTerminalClaim": false,
+  "ownedGapRetained": true,
+  "nativeContinuesUntouched": true,
+  "sourceWrites": false,
+  "diagnosticOrControlAuthority": false,
+  "credit": false
+}

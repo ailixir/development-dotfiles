@@ -1,0 +1,76 @@
+{
+  "status": "UNVALIDATED_DRAFT",
+  "runtimeChecksExecuted": false,
+  "rootBarriers": [
+    "B1 and fresh B7 accepted; tree open",
+    "GS-T full three-class gate with all backend/src/main unchanged at S011",
+    "root explicitly releases proof barrier before any main seam or behavior edit"
+  ],
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "baseSha256": "72cdc69c1471eb37f388946619fb5770226ed5512e8a8f5caf5ec8606d560835",
+      "S011Sha256": "72cdc69c1471eb37f388946619fb5770226ed5512e8a8f5caf5ec8606d560835",
+      "draftSha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8",
+      "bytes": 6768,
+      "realSourceMatchesS011": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "baseSha256": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+      "S011Sha256": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+      "draftSha256": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd",
+      "bytes": 4324,
+      "realSourceMatchesS011": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "baseSha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5",
+      "S011Sha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5",
+      "draftSha256": "a4ffef734b485cd121866351aa5c66fffa5883af7e7e67cfef15e8f0e53a0638",
+      "bytes": 127212,
+      "realSourceMatchesS011": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "baseSha256": null,
+      "S011Sha256": null,
+      "draftSha256": "24a4abab1ae25d55d9a123ac51f37f49906221406afc9a5b459e03d216e86df0",
+      "bytes": 9499,
+      "realSourceMatchesS011": null
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "baseSha256": null,
+      "S011Sha256": null,
+      "draftSha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a",
+      "bytes": 10065,
+      "realSourceMatchesS011": null
+    }
+  ],
+  "readOnlyFallbackPin": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/retention/GuidedObservationPrunerIT.java",
+    "sha256": "85847c7059efe38039f75ac8c0d56c54a54b182dd0b495b548f9390f28929d6d",
+    "stillMatchesS011": true
+  },
+  "newTests": [
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedTeardownShedTest",
+      "names": [
+        "shedWarnsOncePerIntervalAndTheNextTickKeepsOneDurableAttempt",
+        "anIdAlreadyQueuedOrInFlightIsNeverSubmittedTwice"
+      ]
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "names": [
+        "nonTerminalHttpResultIsAcceptedAndConformsToV3Result",
+        "terminalSucceededHttpResultRefusesPublicationInsteadOfSavingForever",
+        "manualEnabledFallbackRetainsTerminalSucceededPendingAndHttp200",
+        "disabledPublicationKeepsResultReadAuthorityChecks"
+      ]
+    }
+  ],
+  "namedDrops": [],
+  "sourceApplicationOrder": "root B1/B7 + tree open -> full GS-T unchanged-all-src/main proof -> root releases barrier -> neutral seam and both tests -> assertion-red01/red02 -> three-main behavior unit -> a01 -> three mutants -> independent QA/final gate"
+}

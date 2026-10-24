@@ -1,0 +1,258 @@
+{
+  "kind": "SEALED_EXACT_SOURCE05_INDEPENDENT_ARIA_CODE_REVIEW",
+  "reviewer": "Aria",
+  "subjectManifestSha256": "bd9da067c9d56545171050373a1926f9cd9d061966847ad35db680841cc8e9aa",
+  "protocol": "FAILED_RESOURCE_TYPED_SELF_TEXT_AND_PHYSICAL_ROLES_V1",
+  "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+  "mandatoryFindingCount": 4,
+  "mandatoryFindings": [
+    {
+      "id": "FR05-OWNER-SCALAR-TYPES",
+      "severity": "HIGH",
+      "category": "Owner decision strict scalar types",
+      "source": [
+        {
+          "file": "protocol.py",
+          "symbol": "owner_records"
+        },
+        {
+          "file": "protocol.py",
+          "symbol": "owner_expected"
+        }
+      ],
+      "problem": "owner_records authenticates rawSHA then compares decoded whole dictionaries to owner_expected using Python equality. JSON numeric1/0 compare equal to True/False. Exact decision schema requires literal Boolean fields and integer identity fields; equality alone is not a strict typed validator.",
+      "impact": "A syntactically wrong owner decision can be consumed as an accepted technical/security ruling before factory preflight. This review grants no actual ruling.",
+      "minimumCorrection": "Validate exact closed owner field schema and exact scalar types before semantic equality and any preflight; reject bool/int/float coercions consistently in runtime/factory/CLI. Preserve exact rawSHA before parse and independent owner/code/contract/unit pins.",
+      "validation": "quinn-critical.stdout owner_numeric_boolean_coercion: raw-pinned record authorized1/legacy0/physicalPreserved1 accepted by actual F.preflight; wrong-subject control denied. Independently read actual implementation equality. Exact copies/pins in quinn-evidence-binding.json."
+    },
+    {
+      "id": "FR05-PENDING-CONTROL-AUTHOR",
+      "severity": "HIGH",
+      "category": "Designated last-author and no self-future completion",
+      "source": [
+        {
+          "file": "failed_gateway.py",
+          "symbol": "Unit.require_setup"
+        },
+        {
+          "file": "protocol.py",
+          "symbol": "actor_union"
+        },
+        {
+          "file": "protocol.py",
+          "symbol": "resolve_actor_completions"
+        }
+      ],
+      "problem": "No required designated current control-author row ties that writer to this control with completion pendingNone. actor_union accepts a non-null actualStatus; require_setup requires only known11 subset. The exact pending set therefore comes from caller-supplied omissions/self-completion rather than a mandatory current-author provenance boundary.",
+      "impact": "Self-completed or omitted current author can make the pending set empty and avoid the distinct only-after-actual-completion ROOT_OPERATOR_ATTESTATION requirement.",
+      "minimumCorrection": "Add required typed designated author identity/current-control evidence with pendingNone in every immutable control, enforced by a reviewed actual control producer and consumer. Accumulate all prior/current pending authors, resolve only from separately pinned actual root/operator completion after real status; preserve old controls and fail on omission/conflict/unknown.",
+      "validation": "quinn-critical.stdout current_author_self_completed and current_author_omitted: each actual negative returned1/MISSING_READINESS with client journal and no provisional failure emission, empty attestation. Normal pending author+empty attestation denied. Exact copies/pins in quinn-evidence-binding.json."
+    },
+    {
+      "id": "FR05-CONCRETE-CONTROL-CALLER",
+      "severity": "HIGH",
+      "category": "Reviewed setup/current-control construction and finite completion delivery",
+      "source": [
+        {
+          "file": "RECIPE05.md",
+          "section": "Finite last-author completion"
+        },
+        {
+          "file": "install-cli.py",
+          "symbol": "execute"
+        },
+        {
+          "file": "source-input-loader-role-owning-map.json",
+          "section": "authorityGraph"
+        }
+      ],
+      "problem": "Only installation has reviewed derivation of code/loader/input/binary maps. Setup/later control generation with complete current inputPins, actual dynamic helper/author roster and pending current writer remains prose/inert templates/fixture root_control. The promised externally computed completion-buffer SHA has no sealed finite helper-free operator/builtin construction/hash/adoption path.",
+      "impact": "Actual setup/current-control delivery would require unreviewed root generation or manual map assembly, or an unaccounted helper recursion; current code packet lacks the concrete authorized caller needed to make its finite completion design reviewable.",
+      "minimumCorrection": "Provide one reviewed bounded concrete control factory/author and exact root caller, deriving complete approved current pin maps from same verified inputs, retaining its own PID/parent/pending status. Implement a finite root/operator completion-buffer/hash/binder path with actual separate status inspection and no unaccounted new writer/helper; schema/templates alone are insufficient. No claim that a helper-free mechanism is impossible.",
+      "validation": "Independent full132 API inventory/production graph + recipe/static callerGap; whole-invariant-trace.json. Installer derivation is supported and distinct."
+    },
+    {
+      "id": "FR05-AFTERALLOW-FRESHNESS",
+      "severity": "HIGH",
+      "category": "Original permit/readiness freshness through complete closing suffix",
+      "source": [
+        {
+          "file": "failed_gateway.py",
+          "line": 583,
+          "symbol": "Unit.operate gate"
+        },
+        {
+          "file": "failed_gateway.py",
+          "line": 593,
+          "symbol": "Unit.close"
+        },
+        {
+          "file": "guard-failed-red.bash",
+          "line": 136,
+          "symbol": "outer bootstrap close/finalize and shell exit branch"
+        }
+      ],
+      "problem": "The last freshness check precedes gate-allow write; Unit.close, entry return, outer bootstrap FD closes/finalization and delivery/status then occur without another original-permit/readiness check. The shell accepts child0 and builtin-exits1. Successful late selected work can cross the original window undetected.",
+      "impact": "Gate0/allow and eventual guarded failed-wrapper close may proceed after the same-readiness permit has expired, despite required PRE/POST/after-allow freshness. Cleanup exceptions deny, but successful delayed cleanup does not.",
+      "minimumCorrection": "Qualify the complete concrete caller suffix using the same original permit/readiness and admitted domain after allow publication/all selected cleanup, immediately at the required guarded acceptance boundary; expiry or unknown must latch HOLD/no exit. Preserve consumed caps and actual separate statuses, no refresh/substitute/new clock/ordinary waiver. Do not assume final write/close/delivery is infallible or invent unobserved interval/physical timing proof.",
+      "validation": "quinn-afterallow.stdout actual gate+composed outer GUARD: original1001/before1002, successful final outer entryFD close advances1062; guardPythonStatus0/gateAllowExit0/clean finalized GUARD/no failure emission. Actual Bash builtin not executed. Independently traced complete unchecked suffix in whole-invariant-trace.json."
+    }
+  ],
+  "payloadCount": 24,
+  "files": [
+    {
+      "path": "check-history.json",
+      "sha256": "0c71733ad657d017488c135036e01db0278f43fad876d810e1e63906d6254039",
+      "bytes": 5416,
+      "mode": 420
+    },
+    {
+      "path": "checks.json",
+      "sha256": "85093b168b5fba53a381d427d9652ba0f9f8b1918ab613ede97bd1456f039c99",
+      "bytes": 7838,
+      "mode": 420
+    },
+    {
+      "path": "complete-conditions.json",
+      "sha256": "95bada0055810c63b8496eab9e0e0af1b2b45cd456d1880736f8975b9243a002",
+      "bytes": 88081,
+      "mode": 420
+    },
+    {
+      "path": "critical-attempt01.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "critical-attempt01.stdout",
+      "sha256": "5e88efd42e1eff5524e17a6c5f9874994d2cee5d1994d952e939e0111adf29b1",
+      "bytes": 5358,
+      "mode": 420
+    },
+    {
+      "path": "critical_checks.py",
+      "sha256": "c51d17a9eaeec05fc14138673ecedab2904c773b861156060e808295dfd5a958",
+      "bytes": 10777,
+      "mode": 420
+    },
+    {
+      "path": "findings.json",
+      "sha256": "162b48fc2aa126484e83abcda25a9cb6af0d01dadbb616a888ecc2f722ca0aca",
+      "bytes": 7479,
+      "mode": 420
+    },
+    {
+      "path": "quinn-afterallow.py",
+      "sha256": "07abb3cb57ad44fb92e7ee753b9374fc22757a94824fdb8aa833a4a1ccf78725",
+      "bytes": 5621,
+      "mode": 420
+    },
+    {
+      "path": "quinn-afterallow.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "quinn-afterallow.stdout",
+      "sha256": "6f607bf9a42a540b6aa606c90ddaca917c5b02d22b5bbbc97863f11a5cd5ae5f",
+      "bytes": 1280,
+      "mode": 420
+    },
+    {
+      "path": "quinn-critical-attempt01.py.txt",
+      "sha256": "ff37d361744bcbb2f6a33dcc2d9504971eac564030c1596e6c2bb2be8cef3f72",
+      "bytes": 7151,
+      "mode": 420
+    },
+    {
+      "path": "quinn-critical-attempt01.stderr",
+      "sha256": "d75d4c142b1c7d2feebb71102aa1c7b412fd0baf163e24da545c501fdf74d61d",
+      "bytes": 426,
+      "mode": 420
+    },
+    {
+      "path": "quinn-critical-attempt01.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "quinn-critical.py",
+      "sha256": "b95bdbfeee4fa55e4410fecf06ebe4e2a8dfae233ab6e274e9e397e78f6946f4",
+      "bytes": 6836,
+      "mode": 420
+    },
+    {
+      "path": "quinn-critical.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "quinn-critical.stdout",
+      "sha256": "b32fece63aa518bed89b0c1aab7942d7fba36a8b92cbe174899d63f9e4a30e50",
+      "bytes": 2075,
+      "mode": 420
+    },
+    {
+      "path": "quinn-evidence-binding.json",
+      "sha256": "c5b02fead8e8ecbf752ccb12e8c7e04aaa952cedc240b54d91a685cf88ad3ff8",
+      "bytes": 10344,
+      "mode": 420
+    },
+    {
+      "path": "review-record.json",
+      "sha256": "775431dafe682861cb8d9aa9b9121e16ef3e3d23f2eaf7424be6bfbb67797fe3",
+      "bytes": 8309,
+      "mode": 420
+    },
+    {
+      "path": "review.md",
+      "sha256": "d9f6496ea5eea4010e95c407b5207f835cb68e3048f50763eeeb0344a90f857e",
+      "bytes": 12180,
+      "mode": 420
+    },
+    {
+      "path": "source-bindings.json",
+      "sha256": "1a7be1a8e13ea7315ece7f15bd3f09d2dcb5a97326f4773c15241299aa31d0e4",
+      "bytes": 210367,
+      "mode": 420
+    },
+    {
+      "path": "static-attempt01.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420
+    },
+    {
+      "path": "static-attempt01.stdout",
+      "sha256": "ee3c9ab96c8cdf495e7b67203662522240f6afdc002d995199ac46d2ee542041",
+      "bytes": 204105,
+      "mode": 420
+    },
+    {
+      "path": "verify_source.py",
+      "sha256": "182ff8187d4de791f507cb73aac42e188a6e44c8649927d00f81cf7b37697ccc",
+      "bytes": 8675,
+      "mode": 420
+    },
+    {
+      "path": "whole-invariant-trace.json",
+      "sha256": "b914cecdafa7e81a5fb4beeb13cd4b6dd941ac234ab4293639cbac3afe0f3eab",
+      "bytes": 3372,
+      "mode": 420
+    }
+  ],
+  "manifestSelfExcluded": true,
+  "independentAriaChecks": 34,
+  "independentFiniteChecks": 813,
+  "quinnCounterexamplesBoundWithoutFutureManifestCycle": true,
+  "technicalOwnerDecisionIssued": false,
+  "actualOperationalAuthority": false,
+  "actualActions": 0,
+  "executionReady": false,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

@@ -1,0 +1,30 @@
+{
+  "kind": "ARIA_SOURCE07_PREUSE_TECHNICAL_APPLICABILITY_ASSESSMENT",
+  "reviewer": "Aria",
+  "subjectManifestSha256": "045c5121ff25966eff78d741894684c776448e35c553cceb7765591ff70dd9b1",
+  "verdict": "CONDITIONAL_SOURCE07_METADATA_PREPARATION_AND_EXISTING_QUALIFIED_PROOF_SEQUENCE_SUPPORTED",
+  "currentActualApplicabilityGranted": false,
+  "newRootSourceSpecificConditionalApplicabilityRequired": true,
+  "expectedSharedSourceSha256": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+  "currentSourceEquality": "UNOBSERVED_EXPECTED_ANCESTRY_ONLY",
+  "freshQualifiedProofDeadline": "BEFORE_ADMISSION_ARCHIVE_AND_CLOSING",
+  "explicitStrongerCurrentPreInstallProofConditionIdentified": false,
+  "existingReviewedSourceProofPath": true,
+  "missingReviewedProofBoundary": null,
+  "sourceOnly": true,
+  "targetTests": 0,
+  "targetFunctionsExecuted": 0,
+  "actualResourceActions": 0,
+  "sourceEdits": 0,
+  "metadataAuthorCandidateReadOrReviewed": false,
+  "technicalOwnerDecisionIssued": false,
+  "actualRuntimeAuthorized": false,
+  "sharedUsd500Aggregate": "UNKNOWN",
+  "clarification": "Source guards consume and hash backend SOURCE files for identity evidence. There is no backend executable/build-artifact consumer, Java/Gradle/compiler path or new native invocation in this failed-resource route; no claim is made that backend source bytes are never read.",
+  "history": [
+    {
+      "tool": "765845",
+      "meaning": "A metadata search guessed driver.py; actual sealed package loader names run-private.py. The nonexistent file error was corrected by reading verified-inputs.py. No target execution or source change."
+    }
+  ]
+}

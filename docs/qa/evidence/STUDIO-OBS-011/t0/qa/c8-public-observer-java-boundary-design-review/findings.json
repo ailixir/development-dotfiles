@@ -1,0 +1,28 @@
+{
+  "kind": "INDEPENDENT_QUINN_JAVA_BOUNDARY_DESIGN_REVIEW_ONLY",
+  "subjectManifestSha256": "d9130ec418878668b4309e8e523032565a363f1fcf0c712000c08e9a397f6a8e",
+  "decision": "CONDITIONAL_PREPARATION_ONLY_SUPPORT",
+  "mandatoryDesignFindings": [],
+  "originalJavaFindings": [
+    {"id": "OBS01-BODY-01", "status": "DESIGN_MECHANISM_SUPPORTED_IMPLEMENTATION_AND_ACTUAL_VALIDATION_OWED"},
+    {"id": "OBS01-DEADLINE-02", "status": "DESIGN_MECHANISM_SUPPORTED_IMPLEMENTATION_AND_ACTUAL_VALIDATION_OWED"},
+    {"id": "OBS01-RETRY-03", "status": "DESIGN_MECHANISM_SUPPORTED_IMPLEMENTATION_AND_ACTUAL_VALIDATION_OWED"},
+    {"id": "OBS01-CUSTODY-04", "status": "DESIGN_MECHANISM_SUPPORTED_IMPLEMENTATION_AND_ACTUAL_VALIDATION_OWED"}
+  ],
+  "source03ImplementationBindings": [
+    "NOT_STARTED with zero resources and requests remains valid for explicit no-request statuses; actual started workers require joined termination and successful close accounting",
+    "All post-operation elapsed checks and exact DATA/projection/ACK/COMMIT serialization/hash agreement must be implemented and tested",
+    "Entire new source03 composition requires independent exact architecture and QA/privacy reviews",
+    "Installed cached Darwin/JDK21 Unix peer ABI/provider, loopback/TLS/raw-parser/deadline/cancellation/termination validation remains separately scoped and unexecuted"
+  ],
+  "sourceDesignChecksPassed": 75,
+  "uniqueExplicitInputsVerified": 106,
+  "declaredDesignInputsVerified": 57,
+  "candidateCodeExecuted": false,
+  "actualImplementationPlatformNativeRuntimePrivateActions": 0,
+  "fixedAuxiliaryNamespaceProbedOrCreated": false,
+  "sourceGateOrLeaseIssued": false,
+  "runtimeOrPlatformAuthorizationIssued": false,
+  "C8MainSourceIRLaneLifecycleCredit": false,
+  "oldCandidateAndReviewPacketsPreserved": true
+}

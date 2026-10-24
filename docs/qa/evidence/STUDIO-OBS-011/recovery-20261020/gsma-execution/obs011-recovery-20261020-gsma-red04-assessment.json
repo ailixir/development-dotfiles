@@ -1,0 +1,114 @@
+{
+  "label": "obs011-recovery-20261020-gsma-red04",
+  "verdict": "INTENDED_OLD_BEHAVIOR_ASSERTION_RED_NO_FIXTURE_FAILURES",
+  "collectorExit": 1,
+  "resultSha256": "f81653925da57bbfb8bde8dbd5092173cdcd7da6255534b252f7cf3325dc2d04",
+  "counts": {
+    "total": 9,
+    "passed": 5,
+    "failed": 4,
+    "errors": 0,
+    "skipped": 0
+  },
+  "testcases": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "terminalSucceededHttpResultRefusesPublicationInsteadOfSavingForever()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "deniedDirectResultsCheckAuthorityBeforeBaseLookupWithAndWithoutBase()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "enabledAndReceiptDefaultPathsDoNotAddBasePresenceLookup()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "disabledPublicationKeepsResultReadAuthorityChecks()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "manualEnabledFallbackRetainsTerminalSucceededPendingAndHttp200()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "disabledRetainedSucceededBaseKeepsDirectFallbackPendingAndHttp202()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "nonTerminalHttpResultIsAcceptedAndConformsToV3Result()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "disabledRetainedReceiptKeepsHttpReceiptAuthorityAndCurrentHeadReadiness()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT",
+      "name": "disabledSucceededBaseQueryFailurePropagatesInsteadOfClaimingAbsentBase()",
+      "status": "FAIL"
+    }
+  ],
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true,
+  "taskCollectionComplete": true,
+  "failures": [
+    {
+      "name": "terminalSucceededHttpResultRefusesPublicationInsteadOfSavingForever()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "message": "org.opentest4j.AssertionFailedError: \nexpected: \"REFUSED\"\n but was: \"PENDING\"",
+      "sourceSites": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT.terminalSucceededHttpResultRefusesPublicationInsteadOfSavingForever(GuidedResultPublicationDisabledIT.java:151)"
+      ]
+    },
+    {
+      "name": "enabledAndReceiptDefaultPathsDoNotAddBasePresenceLookup()",
+      "type": "org.mockito.exceptions.verification.WantedButNotInvoked",
+      "message": "Wanted but not invoked:\npublicationBases.find(\n    \"2c0102ce-1449-4a5e-8fbb-afa0584cfcec\"\n);\n-> at com.citi.put.checks.studio.guided.publication.GuidedPublicationBaseRepository.find(GuidedPublicationBaseRepository.java:32)\nActually, there were zero interactions with this mock.\n",
+      "sourceSites": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT.enabledAndReceiptDefaultPathsDoNotAddBasePresenceLookup(GuidedResultPublicationDisabledIT.java:295)"
+      ]
+    },
+    {
+      "name": "nonTerminalHttpResultIsAcceptedAndConformsToV3Result()",
+      "type": "org.opentest4j.AssertionFailedError",
+      "message": "org.opentest4j.AssertionFailedError: \nexpected: \"PREPARING\"\n but was: \"\"",
+      "sourceSites": [
+        "at app//com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT.nonTerminalHttpResultIsAcceptedAndConformsToV3Result(GuidedResultPublicationDisabledIT.java:134)"
+      ]
+    },
+    {
+      "name": "disabledSucceededBaseQueryFailurePropagatesInsteadOfClaimingAbsentBase()",
+      "type": "java.lang.AssertionError",
+      "message": "java.lang.AssertionError: \nExpecting code to raise a throwable.",
+      "sourceSites": [
+        "at com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT.disabledSucceededBaseQueryFailurePropagatesInsteadOfClaimingAbsentBase(GuidedResultPublicationDisabledIT.java:317)"
+      ]
+    }
+  ],
+  "preservedAttemptHistory": [
+    "gsma-red02 fixture/pre-effect+429",
+    "gsma-red03 terminal-immutability fixture failures"
+  ],
+  "noSetupOrCleanupFailures": true,
+  "sourceState": "neutral seam plus corrected result fixture; controller/projector remain old",
+  "lifecycleCredit": false
+}

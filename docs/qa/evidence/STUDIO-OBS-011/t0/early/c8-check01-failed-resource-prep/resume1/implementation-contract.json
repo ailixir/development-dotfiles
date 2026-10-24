@@ -1,0 +1,51 @@
+{
+  "status": "PROPOSAL_ONLY_NO_OPERATIONAL_AUTHORITY",
+  "protocol": "C8_CHECK01_FAILED_RESOURCE_V1",
+  "runtimeNamespace": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01/failed-resource-disposition01",
+  "runtimeMode": "0700",
+  "runtimeMembersMode": "0600",
+  "runtimeMembers": [
+    "predicates.py",
+    "failed_resource.py",
+    "guard-failed-resource.bash",
+    "retained-contract.json",
+    "input-pins.json"
+  ],
+  "newEntrypoint": "c8_failed_resource_exit",
+  "originalExitAndBindings": "UNCHANGED_HARD_HOLD",
+  "dualExplicitRootExceptions": [
+    "newClosingEntrypoint",
+    "noStandaloneCompileZeroRequired"
+  ],
+  "nativeOrCompilePaths": [],
+  "wrapperExit": 1,
+  "freshnessSeconds": 60,
+  "standaloneSequence": [
+    "exact_code_architecture_review",
+    "exact_code_qa_review",
+    "explicit_root_dual_exception",
+    "install_new_namespace",
+    "setup_inspection",
+    "negative1",
+    "separate_actual_status1",
+    "SAME_original_holder_proof",
+    "root_admission",
+    "final0",
+    "separate_inspection",
+    "separate_root_permit",
+    "separate_guarded_exit1",
+    "separate_actual_wrapper_result",
+    "separate_postclose"
+  ],
+  "verificationClients": "Full-fingerprint exclusive per-operation records; incomplete fingerprint or prior survivor HOLD; no unrecorded-fork guarantee",
+  "reuse": "Original gate module source-only observation function and AST-selected pinned core read-only functions; never original closing/main/assessor/producer/native functions",
+  "historicalQualification": "145 UNKNOWN intervals and failed operational full-fingerprint attempt never repaired",
+  "C8Credit": false,
+  "mainLaneIrLifecycleRelease": false,
+  "mandatoryKnownDesignDefects": [],
+  "pending": [
+    "Exact independent architecture code review",
+    "Exact independent QA code review",
+    "New root concrete dual exception and live installation/admission/verification/permit/exit/postclose facts"
+  ]
+}

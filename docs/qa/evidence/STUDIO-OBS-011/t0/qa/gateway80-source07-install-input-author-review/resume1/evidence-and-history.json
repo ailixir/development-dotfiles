@@ -1,0 +1,55 @@
+{
+  "kind": "CURRENT_AND_REUSED_METADATA_AUTHOR_REVIEW_EVIDENCE",
+  "commands": [
+    "python3 -B /Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-source07-install-input-author-review/resume1/critical.py",
+    "python3 -B /Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-source07-install-input-author-review/resume1/verify.py"
+  ],
+  "current": {
+    "criticalTool": "c53656",
+    "actualExit": 0,
+    "assertions": 27,
+    "cases": 5,
+    "extraCases": 0,
+    "newApplicabilityInFakeFS": true,
+    "authorAndCallerExact": true,
+    "finiteTool": "75ab1f",
+    "finiteExit": 0,
+    "checks": 742,
+    "pinRecords": 132,
+    "all21PayloadsAnd22ChecksumRows": true
+  },
+  "reused": {
+    "candidateEvidenceIndex": {
+      "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-source07-install-input-author/resume1/evidence-index.json",
+      "sha256": "e1bd11c3ffc0eb998ad367bcc06ff6e16a4de1abe9449332dfd67daf92e53a26",
+      "bytes": 2606,
+      "mode": 420
+    },
+    "finalBindings": {
+      "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-source07-install-input-author/resume1/final-bindings.json",
+      "sha256": "56a178baf722b5e7f616a9f0c7ed96f52ba852b48e7c1607d68913e8adc25947",
+      "bytes": 1006,
+      "mode": 420
+    },
+    "originalAuthorAttempts": "01/02:11assertions then optionalCLI fixture fails;02 shows missing datetime preload rejected by persistent deny audit.03:27/5 currentfakeactual0/3e99be. Exact author/caller unchanged across3. All original attempt files retained by source manifest.",
+    "unaffectedSource07And06": "Historical exact component/pin references only; no31/39/13 replay or new broad suite"
+  },
+  "independentCriticalOrFiniteFailedAttempts": 0,
+  "nonTargetReadErrors": [
+    "c91729 actual1 requested nonexistent PRECODE-DESIGN.md; corrected to PRECODE.md full read62fa6e",
+    "b83a2e actual1 requested nonexistent preuse review-record.json after successful manifest read; complete actual4member preuse packet then read/bound"
+  ],
+  "actualTargetEffects": 0,
+  "realBoundaryCalls": [],
+  "actualBashBuiltinExecuted": false,
+  "scopeClaim": "Produced scope accepted only through required missing initial facts, not factory graph/preflight/install",
+  "rawScopeInCriticalResults": "Explicit FAKE FS, not an issued actual scope",
+  "writer": {
+    "pid": 36858,
+    "ppid": 17932,
+    "start": null,
+    "fullFingerprint": null,
+    "actualOwnCompletion": null,
+    "externalToolCompletionSeparatelyOwed": true
+  }
+}

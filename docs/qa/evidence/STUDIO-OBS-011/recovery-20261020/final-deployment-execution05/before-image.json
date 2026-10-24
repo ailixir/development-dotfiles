@@ -1,0 +1,12 @@
+{
+  "Id": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+  "User": "pwuser",
+  "Cmd": [
+    "sh",
+    "-c",
+    "ulimit -c 0 && exec node dist/main.js"
+  ],
+  "Entrypoint": null,
+  "Os": "linux",
+  "Architecture": "arm64"
+}

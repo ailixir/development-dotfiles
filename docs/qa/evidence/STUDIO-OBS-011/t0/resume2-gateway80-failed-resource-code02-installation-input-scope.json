@@ -1,0 +1,19 @@
+{
+  "kind": "ROOT_INSTALLATION_CALLER_CLASSIFICATION",
+  "authorizedBy": "root",
+  "authorized": true,
+  "oneUnitExceptionSha256": "4b3ba06c4092e020cf6335caec38ddd2d38ab225fddaadb8d96796d1c21c319c",
+  "installerPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-root-install-failed02.py",
+  "installerSha256": "8e7d1d368ee50bff3a2d996f2bf18c6edac7adb5478501143707e4005b51a492",
+  "classification": "Root-authored filesystem-only installation caller, not part of independently reviewed code02 runtime. Literal bootstrap verifies raw bytes before compiling same buffer. No observer/native/closing call.",
+  "oldReleaseReadTool": "3f6968 actual0; pinned43ff metadata directoryRoots Edev16777229/ino219110222/uid501/mode0700; not freshcontroller/sourceproof",
+  "sourceSyntaxOnlyTool": "2f61d0; installer not executed",
+  "initialSourceDraftCorrectedBeforeExecution": "Retained FD management now closes each read once, preserves unknown close, limits live descriptors, checks retained directory names before/after operations; no executed failing installer attempt",
+  "installAttempt": "Exclusive fixed external root attempt written immediately before first Nmutation; no mutation retry/reset/cleanup",
+  "traceLocation": "t0 external root trace only; N strictnames six code + root-authorization initially",
+  "actualInstallationObserved": false,
+  "nativeInvocations": 0,
+  "sourceWrites": [],
+  "cleanup": false,
+  "atUtc": "2026-10-19T19:57:12.774823+00:00"
+}

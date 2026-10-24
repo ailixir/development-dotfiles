@@ -1,0 +1,664 @@
+{
+  "status": "MEASURED_COMPONENT_ASSEMBLY_FINAL_T5_NOT_ACCEPTED",
+  "finalQaVerdict": null,
+  "references": {
+    "actualApplicationBuild": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application02/execution-qa/manifest.json",
+      "sha256": "7032cd338b78e9d89e95e6d09b40163fa74aabd9b2ce99e48c8d6aaef713f693",
+      "bytes": 778,
+      "role": "accepted component carry"
+    },
+    "runnerFiveGates": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/execution-qa/manifest.json",
+      "sha256": "4624779b021f678a017338c85e8b44408529d53b64ec5035f9b0de5edb89e3c7",
+      "bytes": 916,
+      "role": "accepted component carry"
+    },
+    "frontendRelevantCarry": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/frontend-final-carry02/manifest.json",
+      "sha256": "03672093f3ba6c057e1105e2d451932a12a65838da297c4f8871f14d429318f1",
+      "bytes": 771,
+      "role": "accepted component carry"
+    },
+    "sourceLiveInventory": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-source-inventory03/independent-qa/manifest.json",
+      "sha256": "c26a4230199af546d64ea8bc7b8ae1d62935721ab803f1e5a617cf5bb9c22b73",
+      "bytes": 626,
+      "role": "accepted component carry"
+    },
+    "linuxImage": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-linux-image-execution04/execution-qa/manifest.json",
+      "sha256": "cfb01d05a730ea24667445a37041e33e09454f73e7bad77909e1cc98aacf7c6c",
+      "bytes": 765,
+      "role": "accepted component carry"
+    },
+    "g9StageFile": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-native-execution03/execution-qa/manifest.json",
+      "sha256": "c0b0df799c0569a54053561af5bfcd7ad2aa929ab2f9b4a5d8f667b4a29643c4",
+      "bytes": 739,
+      "role": "accepted component carry"
+    },
+    "deployment722": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/execution-qa/manifest.json",
+      "sha256": "6fcb72a51b17ccab34989ac8a7541940234ba2c9b9831872259426808a213de3",
+      "bytes": 1028,
+      "role": "accepted component carry"
+    },
+    "backendSourcePreparationOnly": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-admission-preparation04/manifest.json",
+      "sha256": "986d9ed6eeb628d57af08650639194083421d3e02c1b3f59516b802e5a8bf20c",
+      "bytes": 827,
+      "role": "source/plan only; no runtime result or release"
+    },
+    "astraPlanRootAdoption": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/astra-three-story-plan-review-current04/root-adoption.json",
+      "sha256": "a05d39967735aba1816d8d11b2dccb9dde3207ef4b9591d3afacbb29cd0ea14a",
+      "bytes": 3022,
+      "role": "source/plan only; no runtime result or release"
+    },
+    "backendPreparationFinalRootReviewOnly": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-preparation04-root-review02.json",
+      "sha256": "20bb4edcf1442fe8c6a3ef92c9a435d073bfaf43f330bac7b071dcda4f428f60",
+      "bytes": 2054,
+      "role": "source/plan only; no runtime result or release"
+    },
+    "emptyDirectoryCleanup": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/empty-directory-cleanup03/manifest.json",
+      "sha256": "8b38c159b9e75f02f5cd9c31b39488b148d336369e7d722ba29a5c1dbaf8ac8c",
+      "bytes": 433,
+      "role": "accepted component carry"
+    },
+    "canonicalStory": {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "7df0b9eb84d4b2a4f35bb219f5d5f1f5891ee00e48e5b928eb3370cbf72b9f6f",
+      "bytes": 116163,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "canonicalInventory": {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md",
+      "sha256": "44b2a365837be747fe56315234d3870a9b0181245de1a1377c19fb56f5e210ea",
+      "bytes": 68653,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "r5Rulings": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/t0-proposal.md",
+      "sha256": "dc9c1376e7908a5a338f281e7bddc76c8e3b3a2a7f9f1c7942e922eaf3495f94",
+      "bytes": 51274,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "countsPreparation": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-case-reconciliation-preparation/manifest.json",
+      "sha256": "3fd31c42500b15431a5e024bacd09c0f79c2aadf5749b48c98d1cbff3aa8f6d0",
+      "bytes": 1684,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "namedDeltaMap": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-case-reconciliation-preparation/named-delta-map.json",
+      "sha256": "08e8550033fb16b4886c7f6fdc702e404404329aed4de1a264d9ded05f5d80e5",
+      "bytes": 16440,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "foldQualifiedMutationCarry": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-case-reconciliation-preparation/fold-mutation-carry.json",
+      "sha256": "f14bfea61d4ab6026adf658e6dd31dd3dbeb3488590fabe0875c780e0a511a7f",
+      "bytes": 7438,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "foldComposedSource": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/manifest.json",
+      "sha256": "d2ca2f6485721bb4f030ada707242f33e6f59770d14d739773c8000ee4dfeb68",
+      "bytes": 5672,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "foldIntegrationQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/c6-and-fold-integration-qa/review.json",
+      "sha256": "97fd82c4797d62d07f9be180b76a50b957b8c4839a8186ae7027d7a2a8b9d2bc",
+      "bytes": 694,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "test001SourceApplicability": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/test001-final-source-applicability03/manifest.json",
+      "sha256": "2d0f4554519f7ef1663cde3507d864fbc2eb77e5ac52edd9e97a07d5a08029d2",
+      "bytes": 489,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "sourceLiveMapping": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-source-inventory03/bindings.json",
+      "sha256": "20886f8cab622a33c0febfab33817ff2974d09f295bd3c0670f47f144a94da4b",
+      "bytes": 721840,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "baselineSiblingTiming": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/sibling-waits-execution/baseline-public-timing-headers.json",
+      "sha256": "8ef477363ad2e00921bb12197b6d3d6a66311bb89d28556fff1bb25f6c6e96ae",
+      "bytes": 5242,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "focusedSiblingTimingNotFinal": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/sibling-waits-execution/timing-receipt.json",
+      "sha256": "1ab0fd00412eaf8b0f3caebb5115fabee3771013f51112c141c94673d4293564",
+      "bytes": 6712,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "baselineReplayTiming": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-replay-reader-preparation/existing-success-duration-estimate.json",
+      "sha256": "2d4cbf95db4b02d21b76a3f343f8e562d36e6dbf9ea3f6edd9baf847988b5cb6",
+      "bytes": 1157,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "runner2676ClosedMap": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-phase2-execution01/unit-reconciliation.json",
+      "sha256": "db74db647a4e3c478fe55b36b34ff05d6eaea42a4578af6c15cf92dd08adf447",
+      "bytes": 1129529,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "runner2717ClosedMap": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/unit-reconciliation.json",
+      "sha256": "8005eeac2ad9e40af82d149beaffdfb944152549dd10cbf0b922176c2b37cf86",
+      "bytes": 1198725,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "backendExpectedIdentities": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-case-reconciliation-preparation/backend-expected-identities.json",
+      "sha256": "dc2d66e3ad0f7464332c804ec6e82dc0bc888e1d8b2aa1a507109d126d34090d",
+      "bytes": 685013,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "currentAstraReview": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/astra-three-story-plan-review-current04/review.md",
+      "sha256": "b7f95b7c1830fb26a7c3dbd4abf12d7a89f6c719f884fc751071052981a6e7fd",
+      "bytes": 12585,
+      "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+    },
+    "prepared05": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-t5-readiness-preparation05/manifest.json",
+      "sha256": "ba96fed586249fe33601241d5ea5d71d4b07a9e1255034a699de76bd048a3b9e",
+      "bytes": 610
+    },
+    "d2FinalQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution08/execution-qa/manifest.json",
+      "sha256": "e00f602cca023c3477272635a97b8c70145e27c98abdaf13066e3b58218b3844",
+      "bytes": 1000,
+      "role": "Accepted actual D2 component"
+    },
+    "pairFinalQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/execution-qa/manifest.json",
+      "sha256": "208203ff6c8b760b7b0c45c16040b648fc5cd27bbb74e280d73c977ca952ca36",
+      "bytes": 1304,
+      "role": "Accepted original reserved4/5 component; separate final diagnostics remain owed"
+    },
+    "pairFinalReadiness": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/execution-qa/readiness.json",
+      "sha256": "727267b0030d59b07c3ec8bd0842999e53eb1cb0ed17ce9f786721c61bdd98b5",
+      "bytes": 2557
+    },
+    "pairProducer": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/manifest.json",
+      "sha256": "b2b17f29c6d13292bc14ac375e09546b90950bb0b8c58ad758f0d90149145c10",
+      "bytes": 4338
+    },
+    "pairRootAdmission": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-root-admission05.json",
+      "sha256": "e5b7db3c1d6a6c5cedb4739155af2a2278cada1ca08292e43bf3378360d54ea3",
+      "bytes": 29124,
+      "role": "Historical actual runtime admission, not new authority"
+    },
+    "finalTupleReview": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-final-tuple-review05.json",
+      "sha256": "3e19516b0616facff1811e9daa30e8ec035aa5894967023fd890bccac2c93973",
+      "bytes": 6493
+    },
+    "wholeProducer": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/manifest.json",
+      "sha256": "a1f03b5ef1f6af2c7e6df16b49cf489da293ec39955164070fb924205de011e5",
+      "bytes": 225415
+    },
+    "wholeReceipt": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/receipt.json",
+      "sha256": "968a2fac75cc605e0c84f965a265d94296e8f6b5a3224eba1df26da231a9d10c",
+      "bytes": 3342
+    },
+    "wholeRawCounterQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+      "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+      "bytes": 6839,
+      "role": "Independent raw safe collector Counter, not XML/cohort/task projection"
+    },
+    "wholeCoverageLedgerQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/coverage-and-ledger.json",
+      "sha256": "acca9a5185014666266c963174f182ea8d3b1ca29657f3018461acc7ff87da91",
+      "bytes": 4460
+    },
+    "closedLedger": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole06-closed-ledger-root-capture.json",
+      "sha256": "4525dc904d9e48e12ca7aa7fc14876e24dbade9d0c1cc13f30a15992dbfe0a8f",
+      "bytes": 9029
+    },
+    "pairDiagnosticsPartial": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-diagnostic-bindings06/manifest.json",
+      "sha256": "d677932b965bf663df5d82ee4633fdc3b18067d2910afea3a34e54881865e149",
+      "bytes": 2353,
+      "role": "Partial custody binding; not projection or absence proof"
+    },
+    "ownerCustodySource08": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-metadata-preparation08/manifest.json",
+      "sha256": "c9621622e7a67b9f7af56a28efda22b1f42419df072922d34198bd9535741e74",
+      "bytes": 2282,
+      "role": "Source-only read preparation; no extraction or diagnostic outcome"
+    },
+    "wholeRawReceipt": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+      "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+      "bytes": 1156707,
+      "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+    }
+  },
+  "acceptedExpectedTuple": {
+    "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "sourceFiles": 1814,
+    "hostDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "hostDistFiles": 238,
+    "imageId": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "freshFinalGuard": null,
+    "directSdkBinLinks": 21,
+    "selectedAllDependencyLinks": 23,
+    "cachePolicy": "current declared191-key snapshot; no force-back of10 legitimately updated deployment values"
+  },
+  "pair": {
+    "componentQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/execution-qa/manifest.json",
+      "sha256": "208203ff6c8b760b7b0c45c16040b648fc5cd27bbb74e280d73c977ca952ca36",
+      "bytes": 1304,
+      "role": "Accepted original reserved4/5 component; separate final diagnostics remain owed"
+    },
+    "readiness": {
+      "createdUtc": "2026-10-21T07:20:48.315012+00:00",
+      "verdict": "PASS_RESERVED_REPLAY_PAIR_4_5",
+      "measuredScope": "Original consecutive full-class slots4/5 only",
+      "producerManifestSha256": "b2b17f29c6d13292bc14ac375e09546b90950bb0b8c58ad758f0d90149145c10",
+      "producerReceiptSha256": "22c6b320144c0eeaa515030e8490dae1402a3b188e3f14684c488af9f3fe9609",
+      "reviewReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/execution-qa/review.md",
+        "sha256": "0f84f79b87eb03f34123ed3cb27ebaaeaccc46db9d425cd5409b4fa5bb82d609",
+        "bytes": 6736
+      },
+      "pairPass": true,
+      "eachRun": {
+        "total": 108,
+        "passed": 108,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "test": 46,
+        "guidedIncrementalTest": 62,
+        "variants": 35
+      },
+      "originalReaderBothExit0": true,
+      "allInputGuardsAndInhibitorWaitQualified": true,
+      "immutableInterimSlot4Preserved": "dda667521498d819d78d30593229b7ec46401e2afb0949e7863618a85fe9339a",
+      "closedLedgerReference": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair05-closed-ledger-root-capture.json",
+        "sha256": "ddbfdbfcb6bd310e8778fd6632df6b7e4c91733c32efca552372acb180d2458d"
+      },
+      "firstThreeActualCanonicalSha256": "6cc5de7b1484e9fb666b691f2e37af056f22742b5d785bffa38095ccfd944611",
+      "actualSlots1to5CanonicalSha256": "3884a89edbe280292344abaf3b3b4942db4bcacd1690e1e0ccb69e13eb289673",
+      "fullLedgerCanonicalSha256": "08380648a1d2ee3e76f5337a203a4bf016dce378002fe794871aff1a540ca751",
+      "chargedSlots": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "maximumCalls": 6,
+      "whole6ChargedOrAuthorized": false,
+      "actualDiagnosticOwnershipBindings": "UNBOUND_TEMP_TASK_GENERATION; separate actual qualification required, no green-to-zero",
+      "whole6AndMergedCoverageQa": false,
+      "finalNineClassTiming": "UNBOUND; whole6 output required",
+      "T5OrStoryDone": false,
+      "findings": [],
+      "remaining": [
+        "Actual postpair diagnostic TEMP/task/generation/cohort binding and separate disposition",
+        "Separate root admission and original whole-check6",
+        "Full count/skip/coverage/nine-class timing and independent integratedT5"
+      ],
+      "nextRuntimeAuthority": "Separate root whole6 admission only; none from QA",
+      "allStoriesRemain": "InProgress",
+      "sharedUsdCeiling": 500,
+      "headroom": "UNKNOWN",
+      "historicalOriginalAnchor": "UNKNOWN_EARLIER_FACTS_TIGHTEN",
+      "cutoffUtc": "2026-10-22T04:35:27.361777Z",
+      "qaMutableLedgerReadOrWritten": false,
+      "qaNewRuntimeReaderProjectionProbeOrPrivateBodyRead": false
+    },
+    "notFinalDiagnosticOrIntegratedQa": true
+  },
+  "whole": {
+    "producer": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/manifest.json",
+      "sha256": "a1f03b5ef1f6af2c7e6df16b49cf489da293ec39955164070fb924205de011e5",
+      "bytes": 225415
+    },
+    "receipt": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/receipt.json",
+      "sha256": "968a2fac75cc605e0c84f965a265d94296e8f6b5a3224eba1df26da231a9d10c",
+      "bytes": 3342
+    },
+    "rawCounterQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+      "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+      "bytes": 6839,
+      "role": "Independent raw safe collector Counter, not XML/cohort/task projection"
+    },
+    "independentCounterFacts": {
+      "fullTaskClassNameStatusCounterExact": true,
+      "total": 2792,
+      "distinct": 2768,
+      "statusCounts": {
+        "PASS": 2783,
+        "SKIP": 9
+      },
+      "taskCounts": {
+        "test": 2728,
+        "guidedIncrementalTest": 62,
+        "crossReplicaTest": 2
+      },
+      "duplicateMultiplicities": {
+        "2": 16,
+        "3": 4
+      },
+      "exactHistoricalSkipMultiset": true
+    },
+    "rawExits": {
+      "driver": 0,
+      "outerTaskedGradle": 0
+    },
+    "elapsedSeconds": 6407.02,
+    "freshReceiptMetadata": {
+      "test": {
+        "cases": 2728,
+        "xml": 334,
+        "htmlTotal": 386,
+        "generatedHtmlFresh": 383,
+        "staticAssetsNotRequiredFresh": 3,
+        "exec": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/jacoco/test.exec",
+          "sha256": "5a4a4ebbf6311ff1ffebe6a44f370fee1aace3f17871d79f49d410474672921d",
+          "bytes": 26638381,
+          "mtimeNs": 1792571355716605572,
+          "mode": "0o644",
+          "task": "test",
+          "nonempty": true
+        },
+        "collectorTaskResult": {
+          "counts": {
+            "total": 2728,
+            "passed": 2719,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 9
+          },
+          "freshXmlFiles": 334,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        }
+      },
+      "guidedIncrementalTest": {
+        "cases": 62,
+        "xml": 1,
+        "htmlTotal": 6,
+        "generatedHtmlFresh": 3,
+        "staticAssetsNotRequiredFresh": 3,
+        "exec": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/guidedIncrementalTest/jacoco/guidedIncrementalTest.exec",
+          "sha256": "e6e0bfbb4296b1697c8dafc88d4c455f9c19abd5be454e2355cf2eca62e895a3",
+          "bytes": 1001455,
+          "mtimeNs": 1792573939350393519,
+          "mode": "0o644",
+          "task": "guidedIncrementalTest",
+          "nonempty": true
+        },
+        "collectorTaskResult": {
+          "counts": {
+            "total": 62,
+            "passed": 62,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": true,
+          "freshJoinCohorts": 1
+        }
+      },
+      "crossReplicaTest": {
+        "cases": 2,
+        "xml": 1,
+        "htmlTotal": 6,
+        "generatedHtmlFresh": 3,
+        "staticAssetsNotRequiredFresh": 3,
+        "exec": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/crossReplicaTest/jacoco/crossReplicaTest.exec",
+          "sha256": "5b095564ac0bdf6be4866dcc7c398bf7349e1859be1a36e15ab2617a170edb8c",
+          "bytes": 907517,
+          "mtimeNs": 1792567596285407690,
+          "mode": "0o644",
+          "task": "crossReplicaTest",
+          "nonempty": true
+        },
+        "collectorTaskResult": {
+          "counts": {
+            "total": 2,
+            "passed": 2,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "freshXmlFiles": 1,
+          "freshHtmlIndex": true,
+          "freshExec": true,
+          "execRequired": true,
+          "joinCasesPresent": false,
+          "freshJoinCohorts": 0
+        }
+      }
+    },
+    "sourceAndInputFacts": {
+      "sameCaptured1814SourceRows": true,
+      "sameCaptured238DistRows": true,
+      "fullCatalogBeforeAfterExact": true,
+      "capturedGuardsAllTrue": true,
+      "currentProductReads": false
+    },
+    "coverageAndClosedLedger": {
+      "status": "PUBLIC_ARCHIVE_COVERAGE_FLOORS_AND_CLOSED_LEDGER_QUALIFIED_WHOLE_PENDING",
+      "producerManifest": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/manifest.json",
+        "sha256": "a1f03b5ef1f6af2c7e6df16b49cf489da293ec39955164070fb924205de011e5",
+        "bytes": 225415
+      },
+      "producerArtifacts": 1025,
+      "independentlyRehashedSafeProducerArtifacts": 1024,
+      "outerLogOnlyOpaqueRootPinRetainedNoBodyReread": {
+        "bytes": 855,
+        "path": "obs011-lean-ir-integrated01-collector-outer.log",
+        "sha256": "2ce650efd14534f037e4755cb2e1afc08b6a702cbdc361a3c60809797680ed0a"
+      },
+      "coverageArchiveManifest": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/coverage-archive-manifest.json",
+        "sha256": "bafb409a41375899949a234d347030e4f04f70a9c2ac4a20a1304fbe247d3a95",
+        "bytes": 229561
+      },
+      "archive": {
+        "files": 1005,
+        "allRelativePathsBytesShaModesExact": true,
+        "actualArchiveSetExact": true,
+        "originalBeforeCopyRowsExact": true,
+        "rawCopyExit": 0,
+        "freshXmlAndHtmlAfterLastSessionInActualRun": true,
+        "currentOriginalReportWalk": false
+      },
+      "publicXml": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/merged-coverage/jacocoTestReport.xml",
+        "sha256": "fd289cf5a47b667dbef57623a41ea40683c90530c03a5bac206c7cbfc3c8d4a7",
+        "bytes": 2700075
+      },
+      "coverage": {
+        "metric": "LINE",
+        "scopes": {
+          "global": {
+            "covered": 23357,
+            "missed": 2112,
+            "total": 25469,
+            "percent": 91.70756606070124,
+            "floorPercent": 70,
+            "pass": true
+          },
+          "dispatch": {
+            "covered": 1529,
+            "missed": 160,
+            "total": 1689,
+            "percent": 90.52693901716992,
+            "floorPercent": 75,
+            "pass": true
+          },
+          "internal": {
+            "covered": 745,
+            "missed": 72,
+            "total": 817,
+            "percent": 91.18727050183598,
+            "floorPercent": 75,
+            "pass": true
+          },
+          "recovery": {
+            "covered": 232,
+            "missed": 29,
+            "total": 261,
+            "percent": 88.88888888888889,
+            "floorPercent": 75,
+            "pass": true
+          },
+          "sse": {
+            "covered": 237,
+            "missed": 19,
+            "total": 256,
+            "percent": 92.578125,
+            "floorPercent": 75,
+            "pass": true
+          }
+        },
+        "mergedInputs": [
+          "test.exec",
+          "guidedIncrementalTest.exec"
+        ],
+        "crossReplicaFreshArchivedNotMerged": true,
+        "wiringBasis": "Accepted unchanged original wiring / captured backend.build.gradle.kts pin and archive manifest; no wiring or threshold changes",
+        "sessions": {
+          "count": 28,
+          "allStartDumpWithinActualRun": true,
+          "earliestStartEpochMs": 1792567596948,
+          "latestDumpEpochMs": 1792573939145,
+          "crossExecMtimeBeforeFirstMergedSession": true,
+          "sessionIdsExported": false
+        },
+        "xmlClasses": 572
+      },
+      "closedLedger": {
+        "reference": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole06-closed-ledger-root-capture.json",
+          "sha256": "4525dc904d9e48e12ca7aa7fc14876e24dbade9d0c1cc13f30a15992dbfe0a8f",
+          "bytes": 9029
+        },
+        "slots": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "firstFiveCanonicalSha256": "3884a89edbe280292344abaf3b3b4942db4bcacd1690e1e0ccb69e13eb289673",
+        "actual1to6CanonicalSha256": "83c90618f491822be6e441b9b5f3134f9b7c5d2b87b6b30d1e1a7fb0c5168ab5",
+        "slot6RecordedNativePendingSeparateAcceptance": true,
+        "maximum": 6,
+        "noSeventh": true,
+        "sourceLedgerWritten": false,
+        "historicalFailuresPreserved": true,
+        "remainingPlannedStringsAreHistoricalNotRetryAuthority": true,
+        "clockAtCharge": {
+          "atUtc": "2026-10-21T07:25:49.669939+00:00",
+          "cutoffUtc": "2026-10-22T04:35:27.361777+00:00",
+          "remainingSeconds": 76177.691844,
+          "reservedTailSeconds": 13303.245,
+          "planningAllowanceNotRuntimeTimeout": true
+        }
+      },
+      "pending": [
+        "required rawXML/publicCollector/expectedCounter reconciliation via authorized closed projection",
+        "full original actual Replay cohort flags/108proof via authorized closed projection",
+        "explicit required task execution facts via authorized closed projection",
+        "final integrated timing/diagnostics are separate owed facts"
+      ],
+      "wholeVerdict": "PENDING",
+      "lifecycleAuthority": false
+    },
+    "remainingClosedProjection": {
+      "rawXmlCounterReconciled": "UNBOUND",
+      "allRequiredGradleTasksExecuted": "UNBOUND",
+      "fullReplayCohortCorpusRetentionPrivacyBudgetAuditClosure": "UNBOUND",
+      "nineClassSuiteTimings": "UNBOUND",
+      "closedDiagnostics": "UNBOUND",
+      "finalWholeIndependentVerdict": "UNBOUND"
+    },
+    "notOmnibusWholePass": true
+  },
+  "existingAcceptedComponents": [
+    "application7032",
+    "runner4624",
+    "FE0367",
+    "sourceLivec26a",
+    "imagecfb0",
+    "G9c0b0",
+    "deployment6fcb",
+    "D2e00f",
+    "pair2082"
+  ],
+  "attempts": {
+    "closedReference": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole06-closed-ledger-root-capture.json",
+      "sha256": "4525dc904d9e48e12ca7aa7fc14876e24dbade9d0c1cc13f30a15992dbfe0a8f",
+      "bytes": 9029
+    },
+    "chargedSlots": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "maximum": 6,
+    "remainingReplayCalls": 0,
+    "noSeventhOrReset": true,
+    "priorFailuresPreserved": true,
+    "ledgerWritten": false
+  },
+  "separate009010": {
+    "externalApprovedReferenceQuestion": "PENDING coordinatorowned; no newquestion/contact",
+    "blocks011WithExternal009010": false,
+    "privateBenchmark105": "accepted separateactualadoptionAFTER011freeze; not011gate/T4/D-C",
+    "providerModelSecurityHumanPilotProof": "UNBOUND_EXTERNAL; no inferredheadroom orconsent",
+    "sharedUsdCeiling": 500,
+    "headroom": "UNKNOWN"
+  },
+  "allStoriesRemain": "InProgress",
+  "sharedUsdCeiling": 500,
+  "headroom": "UNKNOWN",
+  "noCurrentPrivateOrProductReadsOrRuntime": true
+}

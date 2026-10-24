@@ -1,0 +1,12 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java
+@@ -309,8 +309,9 @@
+       try {
+         Files.createFile(
+             stage,
+             PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
++        Thread.sleep(300);
+         Files.writeString(stage, fixedLabel, StandardCharsets.UTF_8);
+         if (new CountDownLatch(1).await(40, TimeUnit.SECONDS)) {
+           throw new IllegalStateException("Unreachable child release");
+         }

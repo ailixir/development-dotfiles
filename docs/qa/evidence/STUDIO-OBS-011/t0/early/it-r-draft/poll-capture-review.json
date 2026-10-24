@@ -1,0 +1,1180 @@
+[
+  {
+    "ids": [
+      1,
+      2
+    ],
+    "batch": "B4",
+    "deadline": "until",
+    "intervalMs": 5,
+    "reads": [
+      "root",
+      "until"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      3
+    ],
+    "batch": "B4",
+    "deadline": "until",
+    "intervalMs": 20,
+    "reads": [
+      "ready",
+      "until",
+      "root"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      4
+    ],
+    "batch": "B4",
+    "deadline": "until",
+    "intervalMs": 30,
+    "reads": [
+      "until",
+      "closed"
+    ],
+    "writes": [
+      "closed"
+    ],
+    "methodReturn": true,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      5
+    ],
+    "batch": "B4",
+    "deadline": "fixtureDeadline",
+    "intervalMs": 20,
+    "reads": [
+      "fixtureDeadline",
+      "fixtureAnnouncement"
+    ],
+    "writes": [
+      "fixtureAnnouncement"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      6
+    ],
+    "batch": "B4",
+    "deadline": "deadline",
+    "intervalMs": 30,
+    "reads": [
+      "deadline",
+      "teardown"
+    ],
+    "writes": [
+      "teardown"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      7
+    ],
+    "batch": "B1",
+    "deadline": "deadline",
+    "intervalMs": 30,
+    "reads": [
+      "second",
+      "replay",
+      "deadline"
+    ],
+    "writes": [
+      "replay"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      8
+    ],
+    "batch": "B2",
+    "deadline": "end",
+    "intervalMs": 20,
+    "reads": [
+      "before",
+      "lease",
+      "end",
+      "renewed"
+    ],
+    "writes": [
+      "renewed"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      9
+    ],
+    "batch": "B2",
+    "deadline": "deadline",
+    "intervalMs": 10,
+    "reads": [
+      "id",
+      "deadline"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      10
+    ],
+    "batch": "B2",
+    "deadline": "acked",
+    "intervalMs": 20,
+    "reads": [
+      "id",
+      "acked"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      11
+    ],
+    "batch": "B2",
+    "deadline": "accepted",
+    "intervalMs": 20,
+    "reads": [
+      "accepted"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      14
+    ],
+    "batch": "B2",
+    "deadline": "held",
+    "intervalMs": 20,
+    "reads": [
+      "held"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      15
+    ],
+    "batch": "B2",
+    "deadline": "acked",
+    "intervalMs": 25,
+    "reads": [
+      "acked"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      16
+    ],
+    "batch": "B1",
+    "deadline": "end",
+    "intervalMs": 30,
+    "reads": [
+      "execution",
+      "end",
+      "replay"
+    ],
+    "writes": [
+      "replay"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      17
+    ],
+    "batch": "B2",
+    "deadline": "held",
+    "intervalMs": 20,
+    "reads": [
+      "held"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      18
+    ],
+    "batch": "B2",
+    "deadline": "end",
+    "intervalMs": 25,
+    "reads": [
+      "end",
+      "state"
+    ],
+    "writes": [
+      "state"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      19
+    ],
+    "batch": "B2",
+    "deadline": "end",
+    "intervalMs": 25,
+    "reads": [
+      "end",
+      "state"
+    ],
+    "writes": [
+      "state"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      20
+    ],
+    "batch": "B2",
+    "deadline": "end",
+    "intervalMs": 10,
+    "reads": [
+      "end"
+    ],
+    "writes": [],
+    "methodReturn": true,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      21
+    ],
+    "batch": "B2",
+    "deadline": "end",
+    "intervalMs": 10,
+    "reads": [
+      "end"
+    ],
+    "writes": [],
+    "methodReturn": true,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      22
+    ],
+    "batch": "B1",
+    "deadline": "end",
+    "intervalMs": 30,
+    "reads": [
+      "execution",
+      "end",
+      "replay"
+    ],
+    "writes": [
+      "replay"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      23
+    ],
+    "batch": "B2",
+    "deadline": "end",
+    "intervalMs": 20,
+    "reads": [
+      "end"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      29
+    ],
+    "batch": "B2",
+    "deadline": "until",
+    "intervalMs": 10,
+    "reads": [
+      "until"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      30
+    ],
+    "batch": "B2",
+    "deadline": "end",
+    "intervalMs": 25,
+    "reads": [
+      "end",
+      "state"
+    ],
+    "writes": [
+      "state"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      31
+    ],
+    "batch": "B2",
+    "deadline": "end",
+    "intervalMs": 20,
+    "reads": [
+      "end"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      32
+    ],
+    "batch": "B2",
+    "deadline": "end",
+    "intervalMs": 20,
+    "reads": [
+      "end"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      33
+    ],
+    "batch": "B2",
+    "deadline": "end",
+    "intervalMs": 25,
+    "reads": [
+      "end"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      34
+    ],
+    "batch": "B1",
+    "deadline": "end",
+    "intervalMs": 30,
+    "reads": [
+      "execution",
+      "end",
+      "replay"
+    ],
+    "writes": [
+      "replay"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      35
+    ],
+    "batch": "B1",
+    "deadline": "deadline",
+    "intervalMs": 30,
+    "reads": [
+      "execution",
+      "deadline",
+      "snapshot"
+    ],
+    "writes": [
+      "snapshot"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      36
+    ],
+    "batch": "B1",
+    "deadline": "secondDeadline",
+    "intervalMs": 30,
+    "reads": [
+      "second",
+      "replay",
+      "secondDeadline"
+    ],
+    "writes": [
+      "replay"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      37
+    ],
+    "batch": "B2",
+    "deadline": "deadline",
+    "intervalMs": 25,
+    "reads": [
+      "deadline",
+      "state"
+    ],
+    "writes": [
+      "state"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      38
+    ],
+    "batch": "B2",
+    "deadline": "deadline",
+    "intervalMs": 25,
+    "reads": [
+      "deadline"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      41
+    ],
+    "batch": "B2",
+    "deadline": "until",
+    "intervalMs": 20,
+    "reads": [
+      "until",
+      "outcome"
+    ],
+    "writes": [
+      "outcome"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      42
+    ],
+    "batch": "B2",
+    "deadline": "until",
+    "intervalMs": 10,
+    "reads": [
+      "until"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      43
+    ],
+    "batch": "B2",
+    "deadline": "deadline",
+    "intervalMs": 10,
+    "reads": [
+      "deadline"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      44
+    ],
+    "batch": "B3",
+    "deadline": "learningEnd",
+    "intervalMs": 50,
+    "reads": [
+      "id",
+      "learningEnd"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      45
+    ],
+    "batch": "B1",
+    "deadline": "end",
+    "intervalMs": 50,
+    "reads": [
+      "executionId",
+      "end",
+      "state"
+    ],
+    "writes": [
+      "state"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      47
+    ],
+    "batch": "B3",
+    "deadline": "enteredDeadline",
+    "intervalMs": 20,
+    "reads": [
+      "enteredDeadline"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      48
+    ],
+    "batch": "B1",
+    "deadline": "until",
+    "intervalMs": 50,
+    "reads": [
+      "id",
+      "snapshot",
+      "until"
+    ],
+    "writes": [
+      "snapshot"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      49
+    ],
+    "batch": "B3",
+    "deadline": "captureDeadline",
+    "intervalMs": 10,
+    "reads": [
+      "captureDeadline"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      50
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 10,
+    "reads": [
+      "id",
+      "deadline",
+      "missingCheckpoint"
+    ],
+    "writes": [
+      "missingCheckpoint"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      51
+    ],
+    "batch": "B1",
+    "deadline": "end",
+    "intervalMs": 30,
+    "reads": [
+      "execution",
+      "end",
+      "snapshot"
+    ],
+    "writes": [
+      "snapshot"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      52
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "id",
+      "deadline",
+      "state"
+    ],
+    "writes": [
+      "state"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      54
+    ],
+    "batch": "B3",
+    "deadline": "until",
+    "intervalMs": 10,
+    "reads": [
+      "navigations",
+      "id",
+      "until",
+      "checkpoint"
+    ],
+    "writes": [
+      "checkpoint"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      55
+    ],
+    "batch": "B3",
+    "deadline": "until",
+    "intervalMs": 20,
+    "reads": [
+      "id",
+      "until",
+      "expected",
+      "state"
+    ],
+    "writes": [
+      "state"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      58
+    ],
+    "batch": "B1",
+    "deadline": "end",
+    "intervalMs": 30,
+    "reads": [
+      "execution",
+      "end",
+      "snapshot"
+    ],
+    "writes": [
+      "snapshot"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      60
+    ],
+    "batch": "B3",
+    "deadline": "end",
+    "intervalMs": 20,
+    "reads": [
+      "end"
+    ],
+    "writes": [],
+    "methodReturn": true,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      61
+    ],
+    "batch": "B1",
+    "deadline": "deadline",
+    "intervalMs": 50,
+    "reads": [
+      "execution",
+      "deadline",
+      "status"
+    ],
+    "writes": [
+      "status"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      62
+    ],
+    "batch": "B1",
+    "deadline": "deadline",
+    "intervalMs": 100,
+    "reads": [
+      "deadline",
+      "result"
+    ],
+    "writes": [
+      "result"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      63
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "launchesBefore",
+      "sessionId",
+      "recorderDirectory",
+      "removed",
+      "stateAtInjection",
+      "deadline"
+    ],
+    "writes": [
+      "recorderDirectory",
+      "removed",
+      "stateAtInjection"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      64
+    ],
+    "batch": "B4",
+    "deadline": "stoppedBy",
+    "intervalMs": 10,
+    "reads": [
+      "cut",
+      "stoppedBy"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      66
+    ],
+    "batch": "B4",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "deadline"
+    ],
+    "writes": [],
+    "methodReturn": true,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      67
+    ],
+    "batch": "B3",
+    "deadline": "until",
+    "intervalMs": 20,
+    "reads": [
+      "until"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      69
+    ],
+    "batch": "B3",
+    "deadline": "entered",
+    "intervalMs": 20,
+    "reads": [
+      "entered"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      70
+    ],
+    "batch": "B4",
+    "deadline": "stoppedBy",
+    "intervalMs": 10,
+    "reads": [
+      "parent",
+      "stoppedBy"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      72
+    ],
+    "batch": "B3",
+    "deadline": "selfStopBy",
+    "intervalMs": 20,
+    "reads": [
+      "logStart",
+      "execution",
+      "runnerLines",
+      "selfStopBy"
+    ],
+    "writes": [
+      "runnerLines"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      73
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "deadline"
+    ],
+    "writes": [],
+    "methodReturn": true,
+    "valueReturn": true
+  },
+  {
+    "ids": [
+      74
+    ],
+    "batch": "B3",
+    "deadline": "drainingDeadline",
+    "intervalMs": 10,
+    "reads": [
+      "logStart",
+      "receipts",
+      "drainingDeadline"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      75
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 10,
+    "reads": [
+      "observed"
+    ],
+    "writes": [
+      "observed"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      77
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "deadline",
+      "complete"
+    ],
+    "writes": [
+      "complete"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      78
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "root",
+      "deadline",
+      "file",
+      "finalSample"
+    ],
+    "writes": [
+      "finalSample"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      79
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "deadline"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      80
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "deadline"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      81
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 10,
+    "reads": [
+      "samplePath",
+      "sample",
+      "deadline"
+    ],
+    "writes": [
+      "sample"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      82
+    ],
+    "batch": "B1",
+    "deadline": "deadline",
+    "intervalMs": 30,
+    "reads": [
+      "actual"
+    ],
+    "writes": [
+      "actual"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      83
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "deadline",
+      "report"
+    ],
+    "writes": [
+      "report"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      84
+    ],
+    "batch": "B2",
+    "deadline": "deadline",
+    "intervalMs": 30,
+    "reads": [
+      "started",
+      "deadline",
+      "renewCredentialsAt"
+    ],
+    "writes": [
+      "renewCredentialsAt"
+    ],
+    "methodReturn": true,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      85
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 30,
+    "reads": [
+      "deadline"
+    ],
+    "writes": [],
+    "methodReturn": true,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      86
+    ],
+    "batch": "B1",
+    "deadline": "deadline",
+    "intervalMs": 30,
+    "reads": [
+      "deadline",
+      "report"
+    ],
+    "writes": [
+      "report"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      87
+    ],
+    "batch": "B1",
+    "deadline": "deadline",
+    "intervalMs": 30,
+    "reads": [
+      "deadline",
+      "snapshot"
+    ],
+    "writes": [
+      "snapshot"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      89
+    ],
+    "batch": "B3",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "directory",
+      "receipt",
+      "deadline",
+      "sample"
+    ],
+    "writes": [
+      "sample"
+    ],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      90
+    ],
+    "batch": "B3",
+    "deadline": "end",
+    "intervalMs": 50,
+    "reads": [
+      "end"
+    ],
+    "writes": [],
+    "methodReturn": true,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      93
+    ],
+    "batch": "B4",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "deadline",
+      "tracked"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      94
+    ],
+    "batch": "B4",
+    "deadline": "deadline",
+    "intervalMs": 30,
+    "reads": [
+      "root",
+      "deadline"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  },
+  {
+    "ids": [
+      95
+    ],
+    "batch": "B4",
+    "deadline": "deadline",
+    "intervalMs": 20,
+    "reads": [
+      "root",
+      "deadline"
+    ],
+    "writes": [],
+    "methodReturn": false,
+    "valueReturn": false
+  }
+]

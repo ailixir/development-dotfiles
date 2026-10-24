@@ -1,0 +1,18 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java
+@@ -1,5 +1,6 @@
+ package com.citi.put.checks.studio.guided.bridge;
+ 
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.ArgumentMatchers.anyLong;
+@@ -29,7 +30,7 @@
+   private final GuidedContracts contracts = new GuidedContracts();
+   private final Authentication controller = mock(Authentication.class);
+   private final GuidedSessionService sessions = mock(GuidedSessionService.class);
+-  private final GuidedRunnerClient runner = mock(GuidedRunnerClient.class);
++  private final HttpRunnerDispatchClient runner = mock(HttpRunnerDispatchClient.class);
+   private final GuidedDispatchService dispatch =
+       new GuidedDispatchService(sessions, mock(GuidedMaterializationService.class), runner);
+   private final ObjectNode context =

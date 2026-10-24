@@ -1,0 +1,31 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
+@@ -20,7 +20,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.evidence.GuidedRecordingKeys;
+ import com.citi.put.checks.studio.guided.evidence.GuidedRecordingProperties;
+ import com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceInternalController;
+@@ -501,8 +501,8 @@
+     }
+ 
+     @Bean
+-    GuidedRunnerClient runner() {
+-      return new GuidedRunnerClient(
++    HttpRunnerDispatchClient runner() {
++      return new HttpRunnerDispatchClient(
+           URI.create("https://127.0.0.1:" + RUNNER_PORT),
+           TLS,
+           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -513,7 +513,7 @@
+     GuidedDispatchService dispatch(
+         GuidedSessionService sessions,
+         GuidedMaterializationService materialization,
+-        GuidedRunnerClient runner) {
++        HttpRunnerDispatchClient runner) {
+       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
+       sessions.installStopSender(dispatch::stop);
+       return dispatch;

@@ -1,0 +1,20 @@
+--- a/studio-runner/test/helpers/bootstrapProcessTreeObservation.ts
++++ b/studio-runner/test/helpers/bootstrapProcessTreeObservation.ts
+@@ -79,7 +79,7 @@
+     if (required.has(row.pid) && row.metadata.kind !== 'KNOWN') throw invalidTable('REQUIRED_METADATA');
+   }
+   const self = rows.find(row => row.pid === process.pid), child = rows.find(row => row.pid === childPid);
+-  if (self?.metadata.kind !== 'KNOWN' || !liveState(self.metadata.state)) throw new Error('BOOTSTRAP_PROCESS_SELF_MISSING');
++  if (!self || self.metadata.kind !== 'KNOWN' || !liveState(self.metadata.state)) throw new Error('BOOTSTRAP_PROCESS_SELF_MISSING');
+   // The caller supplies its actual fork handle PID. The same table must bind it directly to this observer.
+   if (!child || child.ppid !== process.pid || child.metadata.kind !== 'KNOWN' ||
+       !liveState(child.metadata.state) || probeBootstrapPid(childPid) !== 'ALIVE') {
+@@ -96,7 +96,7 @@
+   const pids = descendantsOf(childPid, table);
+   const labels = pids.map(pid => {
+     const row = byPid.get(pid);
+-    if (row?.metadata.kind !== 'KNOWN') throw invalidTable('REQUIRED_METADATA');
++    if (!row || row.metadata.kind !== 'KNOWN') throw invalidTable('REQUIRED_METADATA');
+     return { pid, command: row.metadata.command };
+   });
+   return freezeObservation(childPid, pids, labels);

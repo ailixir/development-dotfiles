@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "phase": "restore-compile",
+  "status": "NATIVE_PHASE_TERMINAL",
+  "phases": [
+    {
+      "phase": "COLLECTOR_WAIT",
+      "atUtc": "2026-10-19T08:41:09.289607+00:00",
+      "pid": 93102,
+      "ownedIdentityCount": 1
+    },
+    {
+      "phase": "COLLECTOR_WAIT",
+      "atUtc": "2026-10-19T08:41:14.402394+00:00",
+      "pid": 93102,
+      "ownedIdentityCount": 2
+    },
+    {
+      "phase": "NATIVE_PHASE_TERMINAL",
+      "atUtc": "2026-10-19T08:41:18.414435+00:00",
+      "exit": 0
+    }
+  ],
+  "evidenceErrors": [],
+  "command": [
+    "./gradlew",
+    "--offline",
+    "compileTestJava",
+    "--no-daemon"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend",
+  "rootUnitAuthorizationSha256": "2e705692283c0e4fbc6bd8661c2eee19416c22d6baac4cf7ccde5505163acfd0",
+  "phaseKeeperSha256": "b6bd13ec275f236b9f457667cbb9709eaa6347c88f5ea8492accd7cd112ef9fb",
+  "ownershipCoreSha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+  "lockPin": {
+    "atUtc": "2026-10-19T08:29:48.111007+00:00",
+    "wrapperPid": 72960,
+    "wrapperStart": "Mon Oct 19 04:29:37 2026",
+    "wrapperArgvSha256": "1d1638cae329a35e35525dbea90f90afea0724722d4b3ae17d673fa8a10670f6",
+    "shellPid": 72961,
+    "shellStart": "Mon Oct 19 04:29:37 2026",
+    "lockDevInode": [
+      16777229,
+      215213569
+    ],
+    "kernelExclusiveLockObserved": true,
+    "toolSession": 70580,
+    "sourceWriterScope": "Only root-authorized complete GS-T three tests; no lane credit"
+  },
+  "sourceWriterScope": "Only the three released GS-T tests",
+  "noLaneCredit": true,
+  "automaticRetry": false,
+  "collectorPid": 93102,
+  "collectorStartedAtUtc": "2026-10-19T08:41:09.210833+00:00",
+  "collectorExit": 0,
+  "ownedJvmTerminalProof": [
+    {
+      "pid": 93102,
+      "start": "Mon Oct 19 04:41:09 2026",
+      "proof": "PID_ABSENT"
+    },
+    {
+      "pid": 93138,
+      "start": "Mon Oct 19 04:41:09 2026",
+      "proof": "PID_ABSENT"
+    }
+  ],
+  "remainingOwnedNonJvmFacts": [],
+  "ownedIdentities": [
+    {
+      "pid": 93102,
+      "ppid": 93098,
+      "start": "Mon Oct 19 04:41:09 2026",
+      "argvHash": "6609afeb19706392fd53df834347d1e7f7902646bea481d2279b14cc2adfa367",
+      "projectMarkerCandidate": true,
+      "javaPreviouslyProved": true,
+      "executableState": "JAVA",
+      "identityObservation": "MATCHED",
+      "executableObservation": "JAVA",
+      "observationError": false
+    },
+    {
+      "pid": 93138,
+      "ppid": 93102,
+      "start": "Mon Oct 19 04:41:09 2026",
+      "argvHash": "76b51467dd45ca073c5717216588277759004a793004125508f4b902e4a7dbc2",
+      "projectMarkerCandidate": true,
+      "javaPreviouslyProved": true,
+      "executableState": "JAVA",
+      "identityObservation": "MATCHED",
+      "executableObservation": "JAVA",
+      "observationError": false
+    }
+  ],
+  "collectorTerminatedAtUtc": "2026-10-19T08:41:18.414344+00:00"
+}

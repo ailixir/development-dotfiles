@@ -1,0 +1,51 @@
+{
+  "decision": "FAIL_HOLD_NEW_SEALED_PACKET_REQUIRED",
+  "subjectManifestSha256": "1ab827247a9329cbadcea077595e57802cf8230ad77f5eaf11e8e223c17a7573",
+  "mandatoryFindings": [
+    {
+      "id": "FR-CODE-01",
+      "severity": "HIGH",
+      "title": "Original control membership excludes pinned shell guard",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume1/failed_resource.py",
+      "line": 109,
+      "status": "OPEN"
+    },
+    {
+      "id": "FR-CODE-02",
+      "severity": "HIGH",
+      "title": "Destination parent custody not retained through exclusive writes/enumeration",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume1/failed_resource.py",
+      "line": 62,
+      "status": "OPEN"
+    },
+    {
+      "id": "FR-CODE-03",
+      "severity": "HIGH",
+      "title": "Unbound verification-client descendants and listeners are exempted",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume1/failed_resource.py",
+      "line": 175,
+      "status": "OPEN"
+    },
+    {
+      "id": "FR-CODE-04",
+      "severity": "HIGH",
+      "title": "Empty census/unresolved stable candidate becomes quiet",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume1/failed_resource.py",
+      "line": 172,
+      "status": "OPEN"
+    },
+    {
+      "id": "FR-CODE-05",
+      "severity": "HIGH",
+      "title": "Predicate source executes before custody/hash verification",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-failed-resource-prep/resume1/failed_resource.py",
+      "line": 13,
+      "status": "OPEN"
+    }
+  ],
+  "originalRoute": "IMMUTABLE_HARD_HOLD",
+  "nativeOrCompileRequired": false,
+  "actualRuntimeOrPrivateActions": 0,
+  "rootOperationalExceptionIssuedByThisReview": false,
+  "credit": false
+}

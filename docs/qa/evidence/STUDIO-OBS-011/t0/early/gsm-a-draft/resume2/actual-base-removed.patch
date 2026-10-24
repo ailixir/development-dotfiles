@@ -1,0 +1,12 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -3008,8 +3008,7 @@
+                 : Set.of("FAILED", "CANCELLED", "EXPIRED", "UNKNOWN_OUTCOME").contains(state)
+                         || (!publicationBase
+                             && !publicationPolicy.enabled().getAsBoolean()
+-                            && state.equals("SUCCEEDED")
+-                            && !publicationPolicy.baseExists().test(id))
++                            && state.equals("SUCCEEDED"))
+                     ? "REFUSED"
+                     : "PENDING")
+         .putNull("receipt");

@@ -1,0 +1,11 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -25720,7 +25720,7 @@
+         return true;
+       }
+       String state = status.get();
+-      return "X".equals(state) || state.startsWith("Z") || !isAlive.getAsBoolean();
++      return "X".equals(state) || state.startsWith("Z");
+     } catch (RuntimeException | AssertionError unknown) {
+       return false; // Unknown state keeps the original verification failure.
+     }

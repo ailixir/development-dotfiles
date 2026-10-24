@@ -1,0 +1,37 @@
+{
+  "kind": "SOURCE03_BEFORE_ONE_BOUNDED_FAKE_BATCH_INSPECTION",
+  "files": [
+    {
+      "path": "pure_controller.py",
+      "sha256": "ba2b00b09426dee74c8d8d7827f2e925c36c8223cf7f14b475ffeeebc9595464",
+      "bytes": 24103
+    },
+    {
+      "path": "selected_adapter.py",
+      "sha256": "4c7abad2b75c1849d0b0f706bb446ef3b6bbd6737e8908871bd20be96fb171c4",
+      "bytes": 5319
+    },
+    {
+      "path": "fake_flow.py",
+      "sha256": "01a87057e1ef294aa8820c8bab04a36e4fe8c0dabb82abcdc465d45b231bd3ff",
+      "bytes": 27516
+    }
+  ],
+  "rootSafe": {
+    "tool": "dac67e",
+    "inspection": "93fa1b",
+    "actualExit": 0,
+    "safe": true,
+    "threats": []
+  },
+  "readCompleteProof": "all65subject/26reviewpayloadsverified; bothcompletecriticalscripts andbothwhole reviews read beforedesign d98247",
+  "effects": "All target OS/path/process/clock/FFI/fcntl/thread/socket/helper/native/copy/ownership/finalobserver/publication are samecompilednamespace FakePort/FakeET/FakePath; ownpacketandstdlib preload before unchanged permanentdenyaudit/-B; no importmain/helper fallthrough",
+  "expectedCurrentChecks": {
+    "retainedSource02": 74,
+    "newInitialClockPairs": 10,
+    "newCases": 5,
+    "total": 84
+  },
+  "reviewerWholesalesReplayed": false,
+  "actualNativeResourceAuthority": false
+}

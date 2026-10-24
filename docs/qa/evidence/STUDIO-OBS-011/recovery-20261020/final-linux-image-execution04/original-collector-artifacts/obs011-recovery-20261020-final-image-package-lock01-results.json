@@ -1,0 +1,24 @@
+{
+  "command": [
+    "docker",
+    "run",
+    "--rm",
+    "--network=none",
+    "--read-only",
+    "--entrypoint",
+    "node",
+    "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "-e",
+    "const fs=require('node:fs'),c=require('node:crypto');console.log(JSON.stringify(Object.fromEntries(['package.json','package-lock.json'].map(p=>[p,c.createHash('sha256').update(fs.readFileSync('/app/'+p)).digest('hex')]))))"
+  ],
+  "cwd": "studio-runner",
+  "started": "2026-10-21T03:39:50.219096+00:00",
+  "elapsedSeconds": 1.05,
+  "exit": 0,
+  "sourceStable": true,
+  "distStable": true,
+  "logSha256": "d73c240812e6e00653859f7b3e787e8eb6ad0f554983d08b43a9307b1cf62e2a",
+  "testInputStable": true,
+  "testInputDigestBefore": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+  "testInputDigestAfter": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc"
+}

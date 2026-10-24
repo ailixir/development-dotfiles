@@ -1,0 +1,83 @@
+[
+  {
+    "stage": "00-test001",
+    "batches": [],
+    "sourceSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+    "candidateSha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+    "incrementalPatchSha256": "390c124ddc289fce12590c15e583fdfa21b2cf82cba2d53048af86b7061e7add",
+    "fromOriginalPatchSha256": "390c124ddc289fce12590c15e583fdfa21b2cf82cba2d53048af86b7061e7add",
+    "remainingSleeps": 95
+  },
+  {
+    "stage": "01-b1",
+    "batches": [
+      "B1"
+    ],
+    "sourceSha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+    "candidateSha256": "07ef9fe937ea24f3a544289016c74123161afaa76a8786c6fbc668718dd8c2c8",
+    "incrementalPatchSha256": "386021e9fd62c368e9e84c7e9b494c3825efe6b6164fe9d319f5da41a44fd418",
+    "fromOriginalPatchSha256": "d403b266469d2b6f064492a240a8785f3da5391aec1f4342fef7554e9ba7e74f",
+    "remainingSleeps": 80
+  },
+  {
+    "stage": "02-b2",
+    "batches": [
+      "B1",
+      "B2"
+    ],
+    "sourceSha256": "07ef9fe937ea24f3a544289016c74123161afaa76a8786c6fbc668718dd8c2c8",
+    "candidateSha256": "772398e1b84fdb3c03ecf692685fb9a5ae3f76b6d81d6c0d980d72e3a41955f7",
+    "incrementalPatchSha256": "530ab7e7f3ba6fff611a4bfb48738a511d5a081acdf99b1765e578a752fdf2da",
+    "fromOriginalPatchSha256": "0bbcc57d3e21c0e7270e192e25b9ab251d6de05b599ae356c3e53f7546271627",
+    "remainingSleeps": 57
+  },
+  {
+    "stage": "03-b3",
+    "batches": [
+      "B1",
+      "B2",
+      "B3"
+    ],
+    "sourceSha256": "772398e1b84fdb3c03ecf692685fb9a5ae3f76b6d81d6c0d980d72e3a41955f7",
+    "candidateSha256": "3d9712871710704874c3aff4a3c5b79a62534ef370c07ef7fe5951869954d8ea",
+    "incrementalPatchSha256": "995b5256353333eed248ebf365b0eb12750f587c73044bc7bb86d6d96972706f",
+    "fromOriginalPatchSha256": "b75a14698fc45cc9d85379e3c843b223c69e08415f1ba51d2d3ba390645ce599",
+    "remainingSleeps": 33
+  },
+  {
+    "stage": "04-b4",
+    "batches": [
+      "B1",
+      "B2",
+      "B3",
+      "B4"
+    ],
+    "sourceSha256": "3d9712871710704874c3aff4a3c5b79a62534ef370c07ef7fe5951869954d8ea",
+    "candidateSha256": "98aec4f908d92c89a5d50155e35702eb8b8e3c98270d82655f212b328ca0e42c",
+    "incrementalPatchSha256": "a2d22ff800759d7de82e2fba35c75ec46b0b4227b3795f4487dbd64bcde3bfcf",
+    "fromOriginalPatchSha256": "b2ad9874d82a2402b0e6782f28d928ebbad7be80edab79a09ec898d1282fc0a0",
+    "remainingSleeps": 21
+  },
+  {
+    "stage": "04-b4-carry6",
+    "batches": [
+      "B1",
+      "B2",
+      "B3",
+      "B4"
+    ],
+    "carriedPollIds": [
+      1,
+      2,
+      4,
+      6,
+      93,
+      95
+    ],
+    "sourceSha256": "3d9712871710704874c3aff4a3c5b79a62534ef370c07ef7fe5951869954d8ea",
+    "candidateSha256": "555e143fd8519184acaf404a1de2230d9792b51128605aca74f7b6761cfd3490",
+    "incrementalPatchSha256": "8a0d5406672732030f2bd04ef36a181a22548b3084dfb5f6dfddb39940e987cd",
+    "fromOriginalPatchSha256": "4dd5e567f6fcd724d53d904758bbeff01ba76898e1a383e108618890ecbdd850",
+    "remainingSleeps": 27
+  }
+]

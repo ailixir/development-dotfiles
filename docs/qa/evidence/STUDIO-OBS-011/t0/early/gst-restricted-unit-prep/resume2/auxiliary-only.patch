@@ -1,0 +1,12 @@
+--- original/gst-three-only.init.gradle
++++ resume2/gst-three-only.init.gradle
+@@ -4,6 +4,9 @@
+ gradle.projectsEvaluated {
+     def p = gradle.rootProject
+     def expectedProject = new File('/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend').canonicalFile
++    // Only the observed exact buildSrc child may bypass this main-build formatter hook.
++    def expectedAuxiliary = new File(expectedProject, 'buildSrc')
++    if (p.projectDir.canonicalFile == expectedAuxiliary && gradle.parent != null) return
+     if (p.projectDir.canonicalFile != expectedProject) throw new GradleException('GST_HOLD_PROJECT')
+     def relative = [
+         'src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java',

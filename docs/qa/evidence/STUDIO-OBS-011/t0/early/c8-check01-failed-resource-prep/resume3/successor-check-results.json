@@ -1,0 +1,267 @@
+{
+  "scope": "GUARDED_ACTUAL_AST_DEFINITIONS_WITH_IN_MEMORY_BOUNDARIES_ONLY",
+  "priorCases": 164,
+  "newCases": 64,
+  "total": 228,
+  "passed": 228,
+  "failed": 0,
+  "actualRuntimeImportsMainsOsNativePrivateActions": 0,
+  "cases": [
+    {
+      "case": "policy same",
+      "passed": true
+    },
+    {
+      "case": "policy bad first",
+      "passed": true
+    },
+    {
+      "case": "policy changed second",
+      "passed": true
+    },
+    {
+      "case": "CORE same",
+      "passed": true
+    },
+    {
+      "case": "CORE bad first",
+      "passed": true
+    },
+    {
+      "case": "CORE changed second",
+      "passed": true
+    },
+    {
+      "case": "verified JSON input-pins.json",
+      "passed": true
+    },
+    {
+      "case": "changed JSON rejected before interpret input-pins.json",
+      "passed": true
+    },
+    {
+      "case": "verified JSON retained-contract.json",
+      "passed": true
+    },
+    {
+      "case": "changed JSON rejected before interpret retained-contract.json",
+      "passed": true
+    },
+    {
+      "case": "verified JSON root-actual-unit-release.json",
+      "passed": true
+    },
+    {
+      "case": "changed JSON rejected before interpret root-actual-unit-release.json",
+      "passed": true
+    },
+    {
+      "case": "verified JSON root-terminal-evidence-index-01.json",
+      "passed": true
+    },
+    {
+      "case": "changed JSON rejected before interpret root-terminal-evidence-index-01.json",
+      "passed": true
+    },
+    {
+      "case": "verified JSON successor-plan.json",
+      "passed": true
+    },
+    {
+      "case": "changed JSON rejected before interpret successor-plan.json",
+      "passed": true
+    },
+    {
+      "case": "local verified input-pins.json",
+      "passed": true
+    },
+    {
+      "case": "local changed input-pins.json",
+      "passed": true
+    },
+    {
+      "case": "local verified retained-contract.json",
+      "passed": true
+    },
+    {
+      "case": "local changed retained-contract.json",
+      "passed": true
+    },
+    {
+      "case": "unshadowable member nested/proof.json",
+      "passed": true
+    },
+    {
+      "case": "unshadowable output nested/proof.json",
+      "passed": true
+    },
+    {
+      "case": "unshadowable member ../proof.json",
+      "passed": true
+    },
+    {
+      "case": "unshadowable output ../proof.json",
+      "passed": true
+    },
+    {
+      "case": "unshadowable member /proof.json",
+      "passed": true
+    },
+    {
+      "case": "unshadowable output /proof.json",
+      "passed": true
+    },
+    {
+      "case": "unshadowable member .",
+      "passed": true
+    },
+    {
+      "case": "unshadowable output .",
+      "passed": true
+    },
+    {
+      "case": "unshadowable member nested//proof.json",
+      "passed": true
+    },
+    {
+      "case": "unshadowable output nested//proof.json",
+      "passed": true
+    },
+    {
+      "case": "schema before journal True",
+      "passed": true
+    },
+    {
+      "case": "schema before journal False",
+      "passed": true
+    },
+    {
+      "case": "held schema/name before journal valid",
+      "passed": true
+    },
+    {
+      "case": "held schema/name before journal nested/proof.json",
+      "passed": true
+    },
+    {
+      "case": "held schema/name before journal ../proof.json",
+      "passed": true
+    },
+    {
+      "case": "held schema/name before journal True",
+      "passed": true
+    },
+    {
+      "case": "utility status/stderr (0, '', 'p12\\nn*:8080\\n')",
+      "passed": true
+    },
+    {
+      "case": "utility status/stderr (1, '', '')",
+      "passed": true
+    },
+    {
+      "case": "utility status/stderr (0, 'SYNTHETIC_PRIVATE_ERROR', '')",
+      "passed": true
+    },
+    {
+      "case": "utility status/stderr (1, 'SYNTHETIC_PRIVATE_ERROR', '')",
+      "passed": true
+    },
+    {
+      "case": "utility status/stderr (1, '', 'partial')",
+      "passed": true
+    },
+    {
+      "case": "utility status/stderr (2, '', '')",
+      "passed": true
+    },
+    {
+      "case": "utility status/stderr (False, '', '')",
+      "passed": true
+    },
+    {
+      "case": "utility status/stderr (0, None, '')",
+      "passed": true
+    },
+    {
+      "case": "utility status/stderr (0, '', None)",
+      "passed": true
+    },
+    {
+      "case": "mapped Python exact cached pair extra basename",
+      "passed": true
+    },
+    {
+      "case": "mapped Python missing map",
+      "passed": true
+    },
+    {
+      "case": "mapped Python wrong map",
+      "passed": true
+    },
+    {
+      "case": "mapped Python wrong process hash",
+      "passed": true
+    },
+    {
+      "case": "mapped Python wrong reported path",
+      "passed": true
+    },
+    {
+      "case": "mapped Python wrong reported hash",
+      "passed": true
+    },
+    {
+      "case": "mapped Python wrong comm role",
+      "passed": true
+    },
+    {
+      "case": "mapped Python unstable start",
+      "passed": true
+    },
+    {
+      "case": "mapped Python unstable argv",
+      "passed": true
+    },
+    {
+      "case": "mapped Python unstable comm",
+      "passed": true
+    },
+    {
+      "case": "mapped Python unstable mapping",
+      "passed": true
+    },
+    {
+      "case": "mapped Python unstable image",
+      "passed": true
+    },
+    {
+      "case": "role authority exact cached roles",
+      "passed": true
+    },
+    {
+      "case": "role authority wrong launch argv",
+      "passed": true
+    },
+    {
+      "case": "role authority wrong reported",
+      "passed": true
+    },
+    {
+      "case": "role authority wrong binary",
+      "passed": true
+    },
+    {
+      "case": "role authority missing process",
+      "passed": true
+    },
+    {
+      "case": "late compile marker False",
+      "passed": true
+    },
+    {
+      "case": "late compile marker True",
+      "passed": true
+    }
+  ]
+}

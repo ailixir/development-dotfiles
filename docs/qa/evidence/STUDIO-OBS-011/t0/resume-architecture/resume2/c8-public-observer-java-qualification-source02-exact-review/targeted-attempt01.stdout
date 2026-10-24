@@ -1,0 +1,658 @@
+{
+  "kind": "ARIA_SOURCE02_NATIVE_PROJECTION_CLEANUP_PRESERVATION",
+  "checks": 22,
+  "results": [
+    {
+      "name": "REMOVE_ONLY_YIELD_RESTORES_SERVE_AST",
+      "passed": true
+    },
+    {
+      "name": "ARIA_TOTAL_SERIALIZABLE_valid0",
+      "passed": true
+    },
+    {
+      "name": "ARIA_ONE_RETURN_NO_SECOND_WAIT_valid0",
+      "passed": true
+    },
+    {
+      "name": "ARIA_VALID_PENDING_QA_PRESERVED",
+      "passed": true
+    },
+    {
+      "name": "ARIA_CAP_NOT_RESET_valid0",
+      "passed": true
+    },
+    {
+      "name": "ARIA_TOTAL_SERIALIZABLE_bad_status_archive",
+      "passed": true
+    },
+    {
+      "name": "ARIA_ONE_RETURN_NO_SECOND_WAIT_bad_status_archive",
+      "passed": true
+    },
+    {
+      "name": "ARIA_INVALID_FIELDS_NULL",
+      "passed": true
+    },
+    {
+      "name": "ARIA_INDEPENDENT_CONFIRMED_DRAIN_SURVIVES",
+      "passed": true
+    },
+    {
+      "name": "ARIA_CAP_NOT_RESET_bad_status_archive",
+      "passed": true
+    },
+    {
+      "name": "ARIA_TOTAL_SERIALIZABLE_returned_null",
+      "passed": true
+    },
+    {
+      "name": "ARIA_ONE_RETURN_NO_SECOND_WAIT_returned_null",
+      "passed": true
+    },
+    {
+      "name": "ARIA_NULL_IS_RETURNED_NOT_UNATTEMPTED",
+      "passed": true
+    },
+    {
+      "name": "ARIA_NULL_UNKNOWN_ACTUAL_REFS_RETAINED",
+      "passed": true
+    },
+    {
+      "name": "ARIA_CAP_NOT_RESET_returned_null",
+      "passed": true
+    },
+    {
+      "name": "ARIA_TOTAL_SERIALIZABLE_known_failed_status_unknown_wait",
+      "passed": true
+    },
+    {
+      "name": "ARIA_ONE_RETURN_NO_SECOND_WAIT_known_failed_status_unknown_wait",
+      "passed": true
+    },
+    {
+      "name": "ARIA_FAILED_STATUS_CANNOT_INVENT_WAIT",
+      "passed": true
+    },
+    {
+      "name": "ARIA_FALSE_WAIT_RETAINS_BLOCKERS",
+      "passed": true
+    },
+    {
+      "name": "ARIA_CAP_NOT_RESET_known_failed_status_unknown_wait",
+      "passed": true
+    },
+    {
+      "name": "ARIA_NO_HOSTILE_CALLBACKS",
+      "passed": true
+    },
+    {
+      "name": "ARIA_UNCHANGED_PERSISTENT_AUDIT_ZERO_REAL",
+      "passed": true
+    }
+  ],
+  "cases": [
+    {
+      "kind": "valid0",
+      "result": {
+        "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+        "status": "QUALIFICATION_EVIDENCE_COMPLETE_PENDING_QA_ROOT",
+        "mode": "parser",
+        "attemptConsumed": true,
+        "primaryReason": "NONE",
+        "cleanupReason": "NONE",
+        "canonicalClosed": true,
+        "nativeStatus": 0,
+        "nativeWaited": true,
+        "nativeResultReceived": true,
+        "nativeProjectionReason": "NONE",
+        "nativeDrainState": "CONFIRMED",
+        "requestSha256": "decb2f90164a3ff308330c8b019fb4a10c027d62461f67a4717b71471228ab25",
+        "inputPostcheckCompleted": true,
+        "releaseSha256": "2ea262c52785363834ec4981443cb3ddbb34704caf6610feda52e1b03bee1de6",
+        "codePins": {
+          "qualification_controller.py": "a76999ccc5ff6f1815f999f3728c32465260d05e181f2a275b46caeb2147ebf2",
+          "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+          "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+          "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+        },
+        "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+        "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "projectionSha256": null,
+        "relayReceipt": null,
+        "relayPrimaryReason": "NONE",
+        "ownership": [
+          {
+            "number": 1,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 2,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 3,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 4,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 5,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 6,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 7,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 8,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 9,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 10,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 11,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 12,
+            "kind": "NATIVE_PROCESS",
+            "state": "CLOSED"
+          },
+          {
+            "number": 13,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 14,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 15,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 16,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 17,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 18,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 19,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 20,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          }
+        ],
+        "partialShortCreated": false,
+        "shortNamespace": null,
+        "socketNode": null,
+        "namespaceMetadataState": "NOT_CREATED",
+        "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+      }
+    },
+    {
+      "kind": "bad_status_archive",
+      "result": {
+        "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+        "status": "HOLD",
+        "mode": "parser",
+        "attemptConsumed": true,
+        "primaryReason": "NATIVE_UNKNOWN",
+        "cleanupReason": "NONE",
+        "canonicalClosed": true,
+        "nativeStatus": null,
+        "nativeWaited": true,
+        "nativeResultReceived": true,
+        "nativeProjectionReason": "NATIVE_UNKNOWN",
+        "nativeDrainState": "CONFIRMED",
+        "requestSha256": "decb2f90164a3ff308330c8b019fb4a10c027d62461f67a4717b71471228ab25",
+        "inputPostcheckCompleted": true,
+        "releaseSha256": "2ea262c52785363834ec4981443cb3ddbb34704caf6610feda52e1b03bee1de6",
+        "codePins": {
+          "qualification_controller.py": "a76999ccc5ff6f1815f999f3728c32465260d05e181f2a275b46caeb2147ebf2",
+          "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+          "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+          "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+        },
+        "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+        "nativeArchiveSha256": null,
+        "projectionSha256": null,
+        "relayReceipt": null,
+        "relayPrimaryReason": "NONE",
+        "ownership": [
+          {
+            "number": 1,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 2,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 3,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 4,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 5,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 6,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 7,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 8,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 9,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 10,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 11,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 12,
+            "kind": "NATIVE_PROCESS",
+            "state": "CLOSED"
+          },
+          {
+            "number": 13,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 14,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 15,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 16,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 17,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 18,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 19,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 20,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          }
+        ],
+        "partialShortCreated": false,
+        "shortNamespace": null,
+        "socketNode": null,
+        "namespaceMetadataState": "NOT_CREATED",
+        "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+      }
+    },
+    {
+      "kind": "returned_null",
+      "result": {
+        "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+        "status": "HOLD",
+        "mode": "parser",
+        "attemptConsumed": true,
+        "primaryReason": "SCHEMA",
+        "cleanupReason": "CLEANUP_UNCONFIRMED",
+        "canonicalClosed": false,
+        "nativeStatus": null,
+        "nativeWaited": null,
+        "nativeResultReceived": true,
+        "nativeProjectionReason": "ABSENT",
+        "nativeDrainState": "UNKNOWN",
+        "requestSha256": "decb2f90164a3ff308330c8b019fb4a10c027d62461f67a4717b71471228ab25",
+        "inputPostcheckCompleted": true,
+        "releaseSha256": "2ea262c52785363834ec4981443cb3ddbb34704caf6610feda52e1b03bee1de6",
+        "codePins": {
+          "qualification_controller.py": "a76999ccc5ff6f1815f999f3728c32465260d05e181f2a275b46caeb2147ebf2",
+          "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+          "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+          "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+        },
+        "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+        "nativeArchiveSha256": null,
+        "projectionSha256": null,
+        "relayReceipt": null,
+        "relayPrimaryReason": "NONE",
+        "ownership": [
+          {
+            "number": 1,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 2,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 3,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 4,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 5,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 6,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 7,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 8,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 9,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 10,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 11,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 12,
+            "kind": "NATIVE_PROCESS",
+            "state": "OPEN"
+          },
+          {
+            "number": 13,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 14,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 15,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 16,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 17,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 18,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 19,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 20,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          }
+        ],
+        "partialShortCreated": false,
+        "shortNamespace": null,
+        "socketNode": null,
+        "namespaceMetadataState": "NOT_CREATED",
+        "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+      }
+    },
+    {
+      "kind": "known_failed_status_unknown_wait",
+      "result": {
+        "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+        "status": "HOLD",
+        "mode": "parser",
+        "attemptConsumed": true,
+        "primaryReason": "NATIVE_UNKNOWN",
+        "cleanupReason": "CLEANUP_UNCONFIRMED",
+        "canonicalClosed": false,
+        "nativeStatus": 1,
+        "nativeWaited": false,
+        "nativeResultReceived": true,
+        "nativeProjectionReason": "NONE",
+        "nativeDrainState": "UNKNOWN",
+        "requestSha256": "decb2f90164a3ff308330c8b019fb4a10c027d62461f67a4717b71471228ab25",
+        "inputPostcheckCompleted": true,
+        "releaseSha256": "2ea262c52785363834ec4981443cb3ddbb34704caf6610feda52e1b03bee1de6",
+        "codePins": {
+          "qualification_controller.py": "a76999ccc5ff6f1815f999f3728c32465260d05e181f2a275b46caeb2147ebf2",
+          "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+          "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+          "qualified_relay.py": "1c80cf0e14ad09c5ea809238b1812170951f2369f2b72c0378ab06eb5a56c5d4"
+        },
+        "controlSha256": "9947f82948a67c730edbb0a4fc56c6a7926a9815afd4f9a828ae7fe50f394928",
+        "nativeArchiveSha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "projectionSha256": null,
+        "relayReceipt": null,
+        "relayPrimaryReason": "NONE",
+        "ownership": [
+          {
+            "number": 1,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 2,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 3,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 4,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 5,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 6,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 7,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 8,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 9,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 10,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 11,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 12,
+            "kind": "NATIVE_PROCESS",
+            "state": "OPEN"
+          },
+          {
+            "number": 13,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 14,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 15,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 16,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 17,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 18,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 19,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          },
+          {
+            "number": 20,
+            "kind": "DIRECTORY",
+            "state": "CLOSED"
+          }
+        ],
+        "partialShortCreated": false,
+        "shortNamespace": null,
+        "socketNode": null,
+        "namespaceMetadataState": "NOT_CREATED",
+        "actualQualificationAcceptanceRequiresIndependentQaRoot": true
+      }
+    }
+  ],
+  "whole498Replayed": false,
+  "unchanged135Replayed": false,
+  "prior921Replayed": false,
+  "prefixReverseProof": true,
+  "singleReadyYieldRetained": true,
+  "subjectSafetyAstEdited": false,
+  "arbitraryCallbacks": [],
+  "forbiddenBoundaryCalls": [],
+  "actualJavaCompilerFixtureTlsUnixPeerPlatformActions": 0,
+  "limitations": "Synthetic ordinary adapter/identity/source/input authority and cooperative scheduling; no real thread/host/native or qualification evidence."
+}

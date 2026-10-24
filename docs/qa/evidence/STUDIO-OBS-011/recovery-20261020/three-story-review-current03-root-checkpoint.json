@@ -1,0 +1,61 @@
+{
+  "kind": "ASTRA_HIGH_CURRENT03_PLAN_REVIEW_RUNNING_ACTUAL_APPLICATION_GUARD_STOP_BENCHMARK_QA_ACCEPTED",
+  "atUtc": "2026-10-21T02:53:27.889551+00:00",
+  "allStoriesComplete": false,
+  "stories": {
+    "009": "InProgress",
+    "010": "InProgress",
+    "011": "InProgress"
+  },
+  "heavyLaneOwner": null,
+  "actualApplication": {
+    "status": "STOPPED_BEFORE_SOURCE_MUTATION_OR_BUILD",
+    "sourceWrites": 0,
+    "configuredBuildInvocations": 0,
+    "freshActualSourceCaptureReached": false,
+    "stopManifest": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/preflight-stop-manifest.json",
+      "sha256": "8cf236f9cc9c524705cf3e805220de1fec262d7096bf12e5d99d7e76e16c7a93"
+    },
+    "reason": "SINGLE_QA_OWNED_PRODUCER_MANIFEST_ENTRY_SUPERSEDED_BY_ACCEPTED_FINAL_QA_SEAL",
+    "producerOtherArtifactsVerified": 35,
+    "overlapPath": "execution-qa/binding-checks.json",
+    "historicalExpectedSha256": "405c03cbefc56cb5747a883ad0eae515a0baa546ee949aaa8704e3af551f5dfd",
+    "currentFinalQaSha256": "5d111f5f538c16271a02abef61f8e47829b00ac5aab1f160bfbe0f9ae519e089",
+    "retryOrGuardWaiverAuthorizedByThisCheckpoint": false
+  },
+  "benchmark": {
+    "status": "ROOT_ACCEPTS_INDEPENDENT_LOCAL_PRIVATE_PROOF_READY_FOR_SEPARATE_ACTUAL_ADOPTION_WINDOW",
+    "producer": {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-execution04/manifest.json",
+      "sha256": "1482bd77f54c70e7bff77d1b9bf35f0bf48356928d84f18927537f936800a5bc"
+    },
+    "qa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/benchmark-report-private-proof-execution04/execution-qa/manifest.json",
+      "sha256": "b6b036f9b68d3e104eebd12433eb05eb925f04c32e28fcc690708a77f356d169"
+    },
+    "rootRehashedProducerArtifacts": 142,
+    "rootRehashedQaArtifacts": 6,
+    "currentActualSourceReadAfterRelease": false,
+    "actualAdoptionOrProviderOr011OrLifecycleAcceptance": false
+  },
+  "astra": {
+    "agent": "/root/astra_three_story_plan_review_current03",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "high",
+    "status": "RUNNING",
+    "intent": {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/astra-three-story-plan-review-current03-task.txt",
+      "sha256": "d3adc58f63ebcafe9886d6a942303b75d54db42fcf2c736d17c20b29b26ce13c"
+    },
+    "context": {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/astra-three-story-plan-review-current03-context.txt",
+      "sha256": "75bc13745d3dfc7f11a0b7f664f86ea6e3427bc9cd2523ec73a1cb05014e2ca4"
+    },
+    "preflight": {
+      "exit": 0,
+      "safe": true,
+      "threats": []
+    }
+  }
+}

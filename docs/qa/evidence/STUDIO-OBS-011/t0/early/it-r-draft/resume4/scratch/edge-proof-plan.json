@@ -1,0 +1,241 @@
+{
+  "status": "UNEXECUTED_NO_COMPILER_JAVA_PROBE",
+  "pairs": [
+    {
+      "row": 29,
+      "scenario": "FINAL_CONDITION_SUCCESS"
+    },
+    {
+      "row": 29,
+      "scenario": "NO_AWAIT_SUCCESS"
+    },
+    {
+      "row": 29,
+      "scenario": "LATE_SUCCESS_FLAG"
+    },
+    {
+      "row": 29,
+      "scenario": "LATE_THROW"
+    },
+    {
+      "row": 29,
+      "scenario": "LATE_ERROR"
+    },
+    {
+      "row": 29,
+      "scenario": "INITIAL_SUCCESS_PREINTERRUPTED"
+    },
+    {
+      "row": 29,
+      "scenario": "DURING_INTERVAL_INTERRUPT"
+    },
+    {
+      "row": 31,
+      "scenario": "FINAL_CONDITION_SUCCESS"
+    },
+    {
+      "row": 31,
+      "scenario": "NO_AWAIT_SUCCESS"
+    },
+    {
+      "row": 31,
+      "scenario": "LATE_SUCCESS_FLAG"
+    },
+    {
+      "row": 31,
+      "scenario": "LATE_THROW"
+    },
+    {
+      "row": 31,
+      "scenario": "LATE_ERROR"
+    },
+    {
+      "row": 31,
+      "scenario": "INITIAL_SUCCESS_PREINTERRUPTED"
+    },
+    {
+      "row": 31,
+      "scenario": "DURING_INTERVAL_INTERRUPT"
+    },
+    {
+      "row": 32,
+      "scenario": "FINAL_CONDITION_SUCCESS"
+    },
+    {
+      "row": 32,
+      "scenario": "NO_AWAIT_SUCCESS"
+    },
+    {
+      "row": 32,
+      "scenario": "LATE_SUCCESS_FLAG"
+    },
+    {
+      "row": 32,
+      "scenario": "LATE_THROW"
+    },
+    {
+      "row": 32,
+      "scenario": "LATE_ERROR"
+    },
+    {
+      "row": 32,
+      "scenario": "INITIAL_SUCCESS_PREINTERRUPTED"
+    },
+    {
+      "row": 32,
+      "scenario": "DURING_INTERVAL_INTERRUPT"
+    },
+    {
+      "row": 33,
+      "scenario": "FINAL_CONDITION_SUCCESS"
+    },
+    {
+      "row": 33,
+      "scenario": "NO_AWAIT_SUCCESS"
+    },
+    {
+      "row": 33,
+      "scenario": "LATE_SUCCESS_FLAG"
+    },
+    {
+      "row": 33,
+      "scenario": "LATE_THROW"
+    },
+    {
+      "row": 33,
+      "scenario": "LATE_ERROR"
+    },
+    {
+      "row": 33,
+      "scenario": "INITIAL_SUCCESS_PREINTERRUPTED"
+    },
+    {
+      "row": 33,
+      "scenario": "DURING_INTERVAL_INTERRUPT"
+    },
+    {
+      "row": 83,
+      "scenario": "ENTERED_DEADLINE"
+    },
+    {
+      "row": 83,
+      "scenario": "NO_AWAIT_SUCCESS"
+    },
+    {
+      "row": 83,
+      "scenario": "LATE_SUCCESS_FLAG"
+    },
+    {
+      "row": 83,
+      "scenario": "LATE_THROW"
+    },
+    {
+      "row": 83,
+      "scenario": "LATE_ERROR"
+    },
+    {
+      "row": 83,
+      "scenario": "DURING_INTERVAL_INTERRUPT"
+    },
+    {
+      "row": 86,
+      "scenario": "ENTERED_DEADLINE"
+    },
+    {
+      "row": 86,
+      "scenario": "NO_AWAIT_SUCCESS"
+    },
+    {
+      "row": 86,
+      "scenario": "LATE_SUCCESS_FLAG"
+    },
+    {
+      "row": 86,
+      "scenario": "LATE_THROW"
+    },
+    {
+      "row": 86,
+      "scenario": "LATE_ERROR"
+    },
+    {
+      "row": 86,
+      "scenario": "DURING_INTERVAL_INTERRUPT"
+    },
+    {
+      "row": 5,
+      "scenario": "BLANK_CROSSED_INTERRUPT"
+    },
+    {
+      "row": 5,
+      "scenario": "BLANK_CROSSED_CLEAR"
+    },
+    {
+      "row": 5,
+      "scenario": "INITIAL_SUCCESS_PREINTERRUPTED"
+    },
+    {
+      "row": 5,
+      "scenario": "LIVENESS_ERROR"
+    },
+    {
+      "row": 5,
+      "scenario": "DURING_INTERVAL_INTERRUPT"
+    },
+    {
+      "row": 6,
+      "scenario": "DEADLINE_FIRST_NO_BODY"
+    },
+    {
+      "row": 38,
+      "scenario": "DEADLINE_FIRST_NO_BODY"
+    },
+    {
+      "row": 84,
+      "scenario": "H8_NO_AWAIT_CONFIRMED"
+    },
+    {
+      "row": 84,
+      "scenario": "H8_NO_AWAIT_TIMEOUT"
+    },
+    {
+      "row": 84,
+      "scenario": "H8_WRITE_ERROR"
+    },
+    {
+      "row": 84,
+      "scenario": "DURING_INTERVAL_INTERRUPT"
+    },
+    {
+      "row": 84,
+      "scenario": "LATE_H8_CONFIRMED"
+    },
+    {
+      "row": 84,
+      "scenario": "LATE_H8_WRITE_ERROR"
+    }
+  ],
+  "originalSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "fullCorrectedCandidateSha256": "98aec4f908d92c89a5d50155e35702eb8b8e3c98270d82655f212b328ca0e42c",
+  "javaSourceSha256": "5bfbde725744f735c5c60932882bbd6e72ac3c2fe63600df9a57d1620bf80aaf",
+  "instrumentation": "source-bindings.json exact original/corrected block hashes and replacement operations; fake collaborators/clock only in scratch.",
+  "comparisons": [
+    "mapped result class",
+    "actual condition/report/body read count",
+    "actual immutable-writer call count and closed CONFIRMED/TIMEOUT outcome",
+    "credential-refresh/liveness side-effect count",
+    "interrupt flag",
+    "exact first injected Exception/Error reference",
+    "actual no-main-Await bound<=0 branch",
+    "late actual callback completion beyond actual frameworkbound",
+    "actual owned during-interval sleep frame/state coordination"
+  ],
+  "finalFreshReads": "Original independent method-tail reads/assertions are not removed/replaced by these block probes; exact stage-undo/source-preservation and native runtime proof remain required.",
+  "notProved": [
+    "Java syntax/API/type compatibility",
+    "runtime pair comparisons",
+    "native/DB/provider behavior",
+    "hard timing/scheduling identity",
+    "all fault-branch evidence for conditionalcarry6",
+    "complete story/lane gates"
+  ]
+}

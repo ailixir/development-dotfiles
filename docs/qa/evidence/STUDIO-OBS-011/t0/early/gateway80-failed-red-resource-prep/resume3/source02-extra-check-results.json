@@ -1,0 +1,94 @@
+{
+  "kind": "REQUIRED_EXTRA_CUSTODY_CAP_CONTROL_ACTUAL_FUNCTION_CASES",
+  "passed": 19,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "CUSTODY_WRONG_UID_BEFORE_BODY",
+      "pass": true
+    },
+    {
+      "name": "WRONG_UID_NO_BODY_READ",
+      "pass": true
+    },
+    {
+      "name": "NOFOLLOW_LEAF_LINK",
+      "pass": true
+    },
+    {
+      "name": "LINK_TARGET_NOT_OPENED",
+      "pass": true
+    },
+    {
+      "name": "LEAF_IDENTITY_CHANGED_DURING_READ",
+      "pass": true
+    },
+    {
+      "name": "ARCHIVE_ENTRY_CAP_BEFORE_UNBOUNDED_COPY",
+      "pass": true
+    },
+    {
+      "name": "ARCHIVE_FILE_CAP_BEFORE_BODY",
+      "pass": true
+    },
+    {
+      "name": "OVERSIZE_BODY_NOT_READ",
+      "pass": true
+    },
+    {
+      "name": "ARCHIVE_TOTAL_BYTE_CAP",
+      "pass": true
+    },
+    {
+      "name": "PREEXISTING_CONTROL_NOT_SELF_PINNED",
+      "pass": true
+    },
+    {
+      "name": "PREEXISTING_CONTROL_REQUIRES_ROOT_PIN_MAP",
+      "pass": true
+    },
+    {
+      "name": "EXPLICIT_HASH_CANNOT_OVERRIDE_ROOT_PIN",
+      "pass": true
+    },
+    {
+      "name": "SAME_BYTES_MAPPED_BINARY_INODE_CHANGED",
+      "pass": true
+    },
+    {
+      "name": "CURRENT_PARENT_CHANGED_HOLD",
+      "pass": true
+    },
+    {
+      "name": "NO_PUBLISH_BEFORE_CLIENT_HOLDER_CUSTODY",
+      "pass": true
+    },
+    {
+      "name": "NO_UNQUALIFIED_READINESS_CREATED",
+      "pass": true
+    },
+    {
+      "name": "READONLY_PREQUAL_CONSUMPTION_ALL_SIX_PHASES",
+      "pass": true
+    },
+    {
+      "name": "BOTH_ACTUAL_FRESHNESS_CALLS_BRACKET_OBSERVE",
+      "pass": true
+    },
+    {
+      "name": "ZERO_REAL_BOUNDARY_CALLS",
+      "pass": true
+    }
+  ],
+  "realBoundaryCalls": [],
+  "consumedProductionPins": {
+    "failed_gateway.py": "cbc8a9e34b70697227afbde28312ef9e6233f5d147b700e73a2af834fc9311a9",
+    "custody.py": "28734fb5f9c8a53736027b1887fdf5585b3a31cae64d1cae9ac9930bbcb10000",
+    "protocol.py": "7420eefc62e4a5a652a4b35a09b783fd7c7ea378af16a211686ebd6fd78e36b2",
+    "contract.json": "f45d5b644d4863158cc6f8d560fd5b4ef55592e6b07baa9d526799dce5abfcee",
+    "entry.py": "da015600c5b620e145f71af45ab4a915260c62369c10f62b1cb4ab16bd757a1e",
+    "guard-failed-red.bash": "87cad704023ec86ce1bccfaa8680fbf255f04ec06c93e38d2d155de8dc101c84"
+  },
+  "fixtureHarnessSha256": "6994003ca8bc008b68a191fb14a8c7f7c3cfbd8026d1afba57bcf43e562a46fb",
+  "actualRuntimeNativeBaselineOrOsActions": 0
+}

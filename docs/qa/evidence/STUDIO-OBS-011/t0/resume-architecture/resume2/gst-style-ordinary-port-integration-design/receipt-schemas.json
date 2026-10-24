@@ -1,0 +1,343 @@
+{
+  "kind": "NEW_EXPLICIT_STAGE_COMPLETION_EXTERNAL_ADOPTION_SCHEMA_DESIGN",
+  "runtimeImplementation": false,
+  "candidate": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "kind": {
+        "const": "GST_PHASE_CANDIDATE_V1"
+      },
+      "acceptance": {
+        "const": "PENDING_EXTERNAL_COMPLETION"
+      },
+      "gateAuthority": {
+        "const": false
+      },
+      "resourceClosureAccepted": {
+        "const": false
+      },
+      "credit": {
+        "const": false
+      },
+      "unit": {
+        "type": "string"
+      },
+      "phase": {
+        "enum": [
+          "prepare",
+          "format",
+          "verify",
+          "regression",
+          "formatted-source-review",
+          "archive",
+          "final",
+          "gate",
+          "postclose"
+        ]
+      },
+      "sequence": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "previousExternalOutcome": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "planSha256": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "codeControlClaimLeasePins": {
+        "type": "object"
+      },
+      "bodyEvidencePin": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "stagedProjectHash": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "stagedTransition": {
+        "type": "string"
+      },
+      "historyPin": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      }
+    },
+    "required": [
+      "kind",
+      "acceptance",
+      "gateAuthority",
+      "resourceClosureAccepted",
+      "credit",
+      "unit",
+      "phase",
+      "sequence",
+      "previousExternalOutcome",
+      "planSha256",
+      "codeControlClaimLeasePins",
+      "bodyEvidencePin",
+      "stagedProjectHash",
+      "stagedTransition",
+      "historyPin"
+    ]
+  },
+  "completion": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "kind": {
+        "const": "GST_LOGICAL_COMPLETION_DELIVERY_V1"
+      },
+      "unit": {
+        "type": "string"
+      },
+      "phase": {
+        "type": "string"
+      },
+      "stageRawSha256": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "finalSourceSnapshotSha256": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "phaseOwnershipState": {
+        "enum": [
+          "KNOWN_REFS_CLOSED",
+          "UNKNOWN"
+        ]
+      },
+      "logicalEligibility": {
+        "type": "boolean"
+      },
+      "physicalPublicationAccepted": {
+        "const": false
+      },
+      "gateAuthority": {
+        "const": false
+      },
+      "originalPermitSha256": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "validatedActualClockFacts": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      },
+      "clockFailureReason": {
+        "enum": [
+          "NONE",
+          "UNKNOWN",
+          "EXPIRED",
+          "REVERSED",
+          "MALFORMED"
+        ]
+      },
+      "primaryReason": {
+        "type": "string"
+      },
+      "cleanupReasons": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "claim": {
+        "const": {
+          "protocol": "GST_LOCAL_BUILD_REPORT_WITH_FINITE_SAMPLED_OBSERVATIONS_V1",
+          "claimSet": "LOCAL_GST_FORMAT_STYLE_TEST_REPORTS_WITH_FINITE_SAMPLES",
+          "guarantees": {
+            "strongExecutableObjectIdentityProved": false,
+            "kernelMainMappedVnodeEqualityProved": false,
+            "highResolutionProcessIdentityProved": false,
+            "launchTimeExecutableObjectBound": false,
+            "completeIntervalHistoryProved": false,
+            "exhaustiveDescendantDiscoveryProved": false,
+            "adversarialReplacementRaceExcluded": false,
+            "globalQuietProved": false,
+            "legacyOrdinaryGateSatisfied": false,
+            "intervalCaptureClaimed": false
+          },
+          "unsupportedEvidence": {
+            "kernelStartSeconds": {
+              "value": null,
+              "reason": "NOT_PROVED_BY_GST_LOCAL_BUILD_REPORT_CONTRACT"
+            },
+            "kernelStartMicroseconds": {
+              "value": null,
+              "reason": "NOT_PROVED_BY_GST_LOCAL_BUILD_REPORT_CONTRACT"
+            },
+            "kernelMainExecutableObject": {
+              "value": null,
+              "reason": "NOT_PROVED_BY_GST_LOCAL_BUILD_REPORT_CONTRACT"
+            },
+            "mainMappedObjectEquality": {
+              "value": null,
+              "reason": "NOT_PROVED_BY_GST_LOCAL_BUILD_REPORT_CONTRACT"
+            },
+            "launchTimeObjectBinding": {
+              "value": null,
+              "reason": "NOT_PROVED_BY_GST_LOCAL_BUILD_REPORT_CONTRACT"
+            },
+            "strongPlatformCertificateSha256": {
+              "value": null,
+              "reason": "NOT_PROVED_BY_GST_LOCAL_BUILD_REPORT_CONTRACT"
+            }
+          },
+          "historicalIdentityUncertainty": true,
+          "legacyOrdinaryGateSatisfied": false,
+          "intervalCaptureClaimed": false,
+          "resourceClosureAccepted": false,
+          "credit": false,
+          "C8": false,
+          "cleanupAuthorized": false,
+          "sourceWrites": [],
+          "policySelected": false,
+          "namedOwnerDecisions": {
+            "Aria": null,
+            "Quinn": null,
+            "root": null
+          },
+          "actualAuthority": false
+        }
+      }
+    },
+    "required": [
+      "kind",
+      "unit",
+      "phase",
+      "stageRawSha256",
+      "finalSourceSnapshotSha256",
+      "phaseOwnershipState",
+      "logicalEligibility",
+      "physicalPublicationAccepted",
+      "gateAuthority",
+      "originalPermitSha256",
+      "validatedActualClockFacts",
+      "clockFailureReason",
+      "primaryReason",
+      "cleanupReasons",
+      "claim"
+    ]
+  },
+  "externalAdoption": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "kind": {
+        "const": "ROOT_GST_ACTUAL_OUTCOME_ADOPTION_V1"
+      },
+      "authorizedBy": {
+        "const": "root"
+      },
+      "stageRawSha256": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "completionBufferSha256": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "actualSeparateOuterStatus": {
+        "type": "integer",
+        "const": 0
+      },
+      "actualToolEvidencePin": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "actualRequiredQaRootPins": {
+        "type": "object"
+      },
+      "originalPermitSha256": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "previousExternalOutcome": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "exactCodeCallerClaimOwnerPins": {
+        "type": "object"
+      },
+      "scope": {
+        "const": "ONE_EXACT_GST_LOCAL_REPORT_PHASE_OUTCOME_NOT_WRAPPER_CLOSURE"
+      },
+      "sourceApplyOrCredit": {
+        "const": false
+      }
+    },
+    "required": [
+      "kind",
+      "authorizedBy",
+      "stageRawSha256",
+      "completionBufferSha256",
+      "actualSeparateOuterStatus",
+      "actualToolEvidencePin",
+      "actualRequiredQaRootPins",
+      "originalPermitSha256",
+      "previousExternalOutcome",
+      "exactCodeCallerClaimOwnerPins",
+      "scope",
+      "sourceApplyOrCredit"
+    ]
+  },
+  "semanticValidation": [
+    "Closedfieldshapealone grantsnoactualfacts. Exactunit/phase/sequence/pins/status/context/rulings mustmatch independentlyverifiedactualbuffers. Noarbitraryopaqueobjects,subclassget/truthiness/rawoutput/exceptiontext exported.",
+    "Candidatecannotcontainaccepted:true, successfulstatusasgateauthorityorfinalsourcefactsnotyetobserved. Immutableafterstage.",
+    "Completionserialization/deliveryisfallibleandmayoccurafterlogicalguard. Failed/partial/unobserveddeliveryorouterstatuscannotbeadopted evenifcandidateexists.",
+    "Invalidactualclockfactsremaininternallyretainedbyidentity/history andpublicprojectedonlytoclosedfailuremarkers; neverexportarbitraryrawinvalidvalue. Do notinventunconsumedclockfacts.",
+    "RootadoptionrequiresapplicableactualQA/rootphasegates. Itdoesnotwaivestrongordinary/source/security/timingrequirements orauthorizephysicalclose.",
+    "Externaloutcomekeyiscompoundverifiedtuple; nofuturehash/selfhashcycle or memorybool->persistedacceptance.",
+    "Report+archive+final+permit+afterallow+wrapper+postcloseclosure usesseparateactualfacts; anyUNKNOWNstaysHOLD."
+  ]
+}

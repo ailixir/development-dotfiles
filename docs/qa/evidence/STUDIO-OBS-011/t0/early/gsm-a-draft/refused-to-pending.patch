@@ -1,0 +1,11 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -2999,7 +2999,7 @@
+                         || (!publicationBase
+                             && !publicationEnabled.getAsBoolean()
+                             && state.equals("SUCCEEDED"))
+-                    ? "REFUSED"
++                    ? "PENDING"
+                     : "PENDING")
+         .putNull("receipt");
+     ObjectNode readinessProjection = contracts.object();

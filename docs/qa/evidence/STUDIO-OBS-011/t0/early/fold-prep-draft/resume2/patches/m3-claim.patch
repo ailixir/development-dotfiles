@@ -1,0 +1,11 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java
+@@ -161,7 +161,7 @@
+                   attempt.attemptId(),
+                   attempt.claimId(),
+                   prepared.snapshot().hash(),
+-                  clock.instant());
++                  Clock.systemUTC().instant());
+             });
+         ObjectNode outgoing =
+             contracts

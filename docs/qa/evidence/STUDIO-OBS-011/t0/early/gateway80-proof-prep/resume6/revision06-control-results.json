@@ -1,0 +1,435 @@
+{
+  "kind": "SOURCE06_ACTUAL_FUNCTIONS_ALL_EXERCISED_BOUNDARIES_FAKED",
+  "checks": [
+    {
+      "case": "actual-held-fields:valid",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-held-fields:wrong-pid",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:missing-pid",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:duplicate-pid",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:missing-fd",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:duplicate-fd",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:malformed-fd",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:leading-zero-fd",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:wrong-inode",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:duplicate-inode",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:missing-name",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:wrong-name",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:trailing-field",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-held-fields:no-final-newline",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:scope",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:scope",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:package-manifest",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:package-manifest",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:source-plan",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:source-plan",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:copy-manifest",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:copy-manifest",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:case-map",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:case-map",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:runtime-H",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:runtime-H",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:candidate",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:candidate",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:release",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:release",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:decision",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:decision",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:receipt",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:receipt",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:consumed",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:consumed",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:readiness",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:readiness",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:permit",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:permit",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "same-buffer:observation",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "same-buffer-wrong-pin:observation",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "unbound-control-does-not-self-authorize",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-leaf-FD-JSON:valid",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-leaf-FD-JSON:leaf-link",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-leaf-FD-JSON:parent-link",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-leaf-FD-JSON:wrong-pin",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-package-verified-buffer:valid",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-package-verified-buffer:member-substitution",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-package-verified-buffer:manifest-substitution",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-package-verified-buffer:member-mode",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-package-verified-buffer:member-parent-link",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-CORE-same-verified-AST-buffer",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-baseline-regular-same-buffer",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-no-signal-lifecycle:waited0",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-no-signal-lifecycle:waited1",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-no-signal-lifecycle:stderr",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-no-signal-lifecycle:timeout",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-no-signal-lifecycle:communication-error",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-no-signal-lifecycle:spawn-error",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-no-signal-lifecycle:bool-status",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-no-signal-lifecycle:incomplete-output",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-timeout-post-C4-retains-partial-UNKNOWN",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-observer-history:prior-absent",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-observer-history:prior-same-start",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-observer-history:prior-reused",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-observer-history:unknown-child",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-observer-history:bool-status",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:valid",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:controller-start",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:controller-argv",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:controller-parent",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:observer-parent",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:wrong-returned-pid",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:lost-fd",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:inode",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:kernel-free",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:umask",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:H-mode",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:E-mode",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:E-extra",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "actual-capture-zero-output-pre-C4:W-present",
+      "passed": true,
+      "expected": "HOLD"
+    },
+    {
+      "case": "complete-actual-capture-flow-six-synthetic-inherited-all-boundaries-faked",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "readonly-cap-includes-prequalification-exit:0",
+      "passed": true,
+      "expected": "ACCEPT"
+    },
+    {
+      "case": "readonly-cap-includes-prequalification-exit:1",
+      "passed": true,
+      "expected": "ACCEPT"
+    }
+  ],
+  "count": 85,
+  "allExpected": true,
+  "unfakedBoundaryCalls": [],
+  "actualNativeProcessObserverLockBaselinePrivateOrRuntimeActions": 0,
+  "runtimeOrSourceRelease": false
+}

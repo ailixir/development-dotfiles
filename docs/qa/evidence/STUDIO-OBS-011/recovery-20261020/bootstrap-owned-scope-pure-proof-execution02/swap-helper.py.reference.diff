@@ -1,0 +1,10 @@
+--- docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-owned-scope-pure-proof-execution01/swap-helper.py
++++ swap-helper.py
+@@ -1,6 +1,6 @@
+ from pathlib import Path
+ import json,hashlib,runpy,subprocess,sys
+-R=Path.cwd();O=Path(__file__).resolve().parent;B=R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020';C=B/'bootstrap-owned-scope-row-tail-correction01';S=Path('/private/tmp/obs009-bootstrap-observation-20261020-proof01');P1=B/'bootstrap-process-tree-pure-proof-execution01';snap=runpy.run_path(str(P1/'input-snapshot.py'))['snapshot'];key=sys.argv[1];assert key in ['red','green'];out=O/('helper-only-'+key+'-application.json');assert not out.exists()
++R=Path.cwd();O=Path(__file__).resolve().parent;B=R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020';C=B/'bootstrap-owned-scope-optional-chain-correction01';S=Path('/private/tmp/obs009-bootstrap-observation-20261020-proof01');P1=B/'bootstrap-process-tree-pure-proof-execution01';snap=runpy.run_path(str(P1/'input-snapshot.py'))['snapshot'];key=sys.argv[1];assert key in ['red','green'];out=O/('helper-only-'+key+'-application.json');assert not out.exists()
+ def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+ def w(n,d):(O/n).write_text(json.dumps(d,indent=2)+'\n')
+ if key=='red':assert json.loads((O/'lint-green-pre01-terminal.json').read_text())['rawOuterExit']==0;previous=json.loads((O/'lint-green-pre01-private-after.json').read_text());filename='helper-only-green.inverse.patch';beforeStage='green';afterStage='red'

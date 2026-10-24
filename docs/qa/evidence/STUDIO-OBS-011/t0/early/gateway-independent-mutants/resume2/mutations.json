@@ -1,0 +1,44 @@
+{
+  "status": "STATIC_PREPARATION_NATIVE_UNEXECUTED",
+  "acceptedHelperSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+  "originalDraftPatchSha256": "30080476f4b6fdf3a7c1ec3dd7ad06ef050ff6342f5cca6a73000110bff68b0d",
+  "originalDraftManifestSha256": "2fb7008ce20c4a5de47c17b790daa0bfb66e25a00452351b4b08ed6a944ea516",
+  "mutants": [
+    {
+      "id": "M-RECURSION",
+      "target": "helm-chart/put-checks/templates/_helpers.tpl",
+      "preimageSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "candidateSha256": "aaf4c73fb38eb2d391ab38b79e2f17df0c8a389f681d990e605d221c7f174d74",
+      "preimageMode": "0644",
+      "candidateMode": "0644",
+      "forwardPatch": "mutants/M-RECURSION/forward.patch",
+      "forwardPatchSha256": "6fbdecd1608f66899d7036e99da98612aaa69ed4d24e7d2d8a71d743e79871f9",
+      "restorePatch": "mutants/M-RECURSION/restore.patch",
+      "restorePatchSha256": "3bc2bf3ffc539f8d0e3a03a2b30f8b9dbd011fc8a4d1ee30e225c0587e50d76b",
+      "sourceCandidate": "mutants/M-RECURSION/repo/helm-chart/put-checks/templates/_helpers.tpl",
+      "exactOldFragment": "{{- include \"put-checks.springConfig.validateProperties\" (dict \"values\" $value \"path\" $path) -}}\n",
+      "exactNewFragment": "",
+      "witnessShape": "nested",
+      "unaffectedOtherShape": "relaxed",
+      "runtimeStatus": "UNEXECUTED"
+    },
+    {
+      "id": "M-NORMALIZED-COMPARISON",
+      "target": "helm-chart/put-checks/templates/_helpers.tpl",
+      "preimageSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "candidateSha256": "2aefb17257b11a1e1ce0a29c355e0cced5c8a69ef33099d5fbb567bc20c62115",
+      "preimageMode": "0644",
+      "candidateMode": "0644",
+      "forwardPatch": "mutants/M-NORMALIZED-COMPARISON/forward.patch",
+      "forwardPatchSha256": "fc2aa4328e6b815c1e19a3dd1c730a995d3857ab15525e35e6aef33c622f26ba",
+      "restorePatch": "mutants/M-NORMALIZED-COMPARISON/restore.patch",
+      "restorePatchSha256": "940290ece699c9d29cccbdbe2e95eab2060a6e448bc232ca4726cfb0ec3a876a",
+      "sourceCandidate": "mutants/M-NORMALIZED-COMPARISON/repo/helm-chart/put-checks/templates/_helpers.tpl",
+      "exactOldFragment": "(has $normalized $protected)",
+      "exactNewFragment": "(has (regexReplaceAll \"[^A-Za-z0-9]\" $path \"\") $protected)",
+      "witnessShape": "relaxed",
+      "unaffectedOtherShape": "nested",
+      "runtimeStatus": "UNEXECUTED"
+    }
+  ]
+}

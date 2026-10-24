@@ -1,0 +1,23 @@
+{
+  "kind": "INDEPENDENT_ARIA_CODE08B_COMPLETE_FINDINGS",
+  "reviewer": "Aria",
+  "subjectManifestSha256": "7fec05dfe1ea4d59447b10f2b79ed9516c0a56fce51236581381edc001f7e8e6",
+  "verdict": "PASS_SOURCE_ONLY_EXACT_CORRECTION",
+  "mandatoryFindingCount": 0,
+  "mandatoryFindings": [],
+  "advisories": [],
+  "allMandatoryFindingsTogether": true,
+  "allChangedAndInheritedCategoriesAssessed": true,
+  "resolvedSourceFinding": {
+    "id": "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS",
+    "scope": "Exact Source08b successor reader dispatch only; original Source08 HOLD preserved",
+    "reason": "Approved self.s.path normalization precedes registry membership; the same normalized variable reaches declared bound or the unchanged unregistered fallback",
+    "method": "Independent source/AST inspection and exact binding verification; developer45/4 evidence reused without duplication"
+  },
+  "sourceOnly": true,
+  "technicalOwnerDecisionIssued": false,
+  "phaseBEntered": false,
+  "actualAuthority": false,
+  "credit": false,
+  "allStoriesComplete": false
+}

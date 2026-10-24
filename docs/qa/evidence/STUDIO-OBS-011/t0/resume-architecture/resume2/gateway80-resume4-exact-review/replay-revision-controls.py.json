@@ -1,0 +1,338 @@
+{
+  "file": "revision-controls.py",
+  "count": 70,
+  "checks": [
+    {
+      "name": "actual.custody:chart-root-to-product",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.custody:chart-repo-parent",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.custody:chart-helm-parent",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.custody:real-chart-root",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.custody:real-chart-parent",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.custody:dedicated-archive-root",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.custody:archive-repo-parent",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.custody:evidence-root",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.custody:owned-root",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.install:top-link-before-write",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.copy:destination-file-link",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.copy:destination-dangling-link",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.copy:existing-regular-destination",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.copy:normal-anchored-exclusive",
+      "actual": "ACCEPT"
+    },
+    {
+      "name": "actual.inventory:allowed-dependency-entry-no-target-traversal",
+      "actual": "ACCEPT"
+    },
+    {
+      "name": "actual.make_copy:dangling-workspace-target",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.make_copy:normal-finite-owned-copy",
+      "actual": "ACCEPT"
+    },
+    {
+      "name": "actual.install:normal-original-to-fixed-same-inode",
+      "actual": "ACCEPT"
+    },
+    {
+      "name": "actual.archive:preserves-native-cache-directory-modes",
+      "actual": "ACCEPT"
+    },
+    {
+      "name": "actual.copy:product-destination-not-a-write-root",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.install:linked-repo",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.install:linked-helm",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.install:linked-chart",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.install:linked-helper",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.custody:retained-directory-replaced",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.chart_guard:reviewer-injected-top-follow-reproduction",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.imported.boundary:global-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.final:global-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.gate:global-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.boundary:global-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.final:global-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.gate:global-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.boundary:comm-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.final:comm-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.gate:comm-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.boundary:comm-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.final:comm-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.gate:comm-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.boundary:cwd-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.final:cwd-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.gate:cwd-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.boundary:cwd-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.final:cwd-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.gate:cwd-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.boundary:txt-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.final:txt-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.gate:txt-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.boundary:comm-only-late-node",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.final:comm-only-late-node",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.gate:comm-only-late-node",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.boundary:valid-complete-observations",
+      "actual": "ACCEPT"
+    },
+    {
+      "name": "actual.imported.worker:verified-unrelated",
+      "actual": "ACCEPT"
+    },
+    {
+      "name": "actual.imported.postclose:valid-complete-observation",
+      "actual": "ACCEPT"
+    },
+    {
+      "name": "actual.imported.postclose:global-rc1",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.postclose:global-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.postclose:comm-empty",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.postclose:comm-only-late-node",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    },
+    {
+      "name": "actual.imported.monitor:global-rc1",
+      "actual": "HOLD_RAW_NATIVE0"
+    },
+    {
+      "name": "actual.imported.monitor:global-empty",
+      "actual": "HOLD_RAW_NATIVE0"
+    },
+    {
+      "name": "actual.imported.monitor:comm-empty",
+      "actual": "HOLD_RAW_NATIVE0"
+    },
+    {
+      "name": "actual.imported.monitor:comm-only-late-node",
+      "actual": "HOLD_RAW_NATIVE0"
+    },
+    {
+      "name": "actual.monitor:reviewer-root10A-to-unrelated10B",
+      "actual": "TERMINAL_NO_OWNERSHIP_TRANSFER"
+    },
+    {
+      "name": "actual.monitor:reuse-before-initial-direct-binding",
+      "actual": "HOLD_NO_MANUFACTURED_OWNER"
+    },
+    {
+      "name": "actual.monitor:known-reparented-root-keeps-real-descendant-closure",
+      "actual": "TERMINAL_EXACT_REAL_LINEAGE"
+    },
+    {
+      "name": "actual.monitor:unjoined-resident-role-is-UNKNOWN-not-owner",
+      "actual": "HOLD"
+    },
+    {
+      "name": "actual.entry:normal-fixed-package",
+      "actual": "ACCEPT"
+    },
+    {
+      "name": "actual.entry:parent-link",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.entry:module-link",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": true
+    },
+    {
+      "name": "actual.guards:approved-canonical-readonly-tool-alias",
+      "actual": "ACCEPT"
+    },
+    {
+      "name": "actual.guards:tool-alias-target-drift",
+      "actual": "HOLD",
+      "noFakeWriteOrTraversal": false
+    }
+  ]
+}

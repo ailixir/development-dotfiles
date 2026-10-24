@@ -1,0 +1,203 @@
+{
+  "kind": "SOURCE_ONLY_EXACT_RT7_BOOTSTRAP3_ACTUAL_APPLICATION_AND_BUILD_PLAN",
+  "atUtc": "2026-10-21T02:38:37.232879+00:00",
+  "receiptSha256": "32a98b376b5a34ba59b45a2319d98666b678739669434c5311625d57bf5bfb0b",
+  "tenCodeBindingSha256": "8610989ee10727ce450eb08c038bb278cd8b69fa6844ec7ceed63719b8b0c481",
+  "all12ProposedBindingSha256": "c6b4a5502eb7b5b2835bae97bab11459d89b5e79edca1cf5431b7973f643bea8",
+  "guardedApplyScriptSha256": "b7f0aa174a192107a52e8b36339d0d32bbb10d4ef0bbca6d1042a122f180287c",
+  "buildPlanSha256": "b710250b9c506fb2243a212d1be65ba5d0d74f412890cfeaf1831be6ad79cb4a",
+  "sourceReadinessSha256": "94219dab245e7f3831d4c31554f222e8f1b4450025e7ff46c1ae6ebb2ec41653",
+  "rootQualifiedCompositionAdoptionSha256": "0ae96f8ae3e47a9a7590fedb4c14d7caa7eb0bfbe1b2e807c8263cfce73a30ab",
+  "codePaths": 10,
+  "existing": 8,
+  "absent": 2,
+  "separateProposedDocs": 2,
+  "measuredPreservedBinSymlinks": 21,
+  "actualApplication": "UNEXECUTED",
+  "actualBuild": "UNEXECUTED",
+  "sourceWindowAdmission": "PENDING_ROOT",
+  "newActualSourceDigest": "MEASURE_FRESH_NOT_FORCE_3e",
+  "artifactCount": 36,
+  "artifacts": [
+    {
+      "path": "after/studio-runner/src/guided/contracts.ts",
+      "sha256": "aca6c15478449f55ea8d2e70b792d8f3b432bf49866a12e5c78788015a83e4af",
+      "bytes": 13928
+    },
+    {
+      "path": "after/studio-runner/src/guided/diagnostics.ts",
+      "sha256": "e24521cb6e6c6742ca8dc1f09ef0cd89e6f15c2381727c2b712d2829c18cfa63",
+      "bytes": 5739
+    },
+    {
+      "path": "after/studio-runner/src/guided/evidence.ts",
+      "sha256": "de432f3a64d6557d4813c646228388efbb67fb7419c83efc2c57215cae53d503",
+      "bytes": 15484
+    },
+    {
+      "path": "after/studio-runner/src/guided/json.ts",
+      "sha256": "66ccda992e3d59bc9d01a02665fa356383f54e04020315bff763e2f4262530e8",
+      "bytes": 2650
+    },
+    {
+      "path": "after/studio-runner/src/guided/transport.ts",
+      "sha256": "c02401d3f99bdf317220634250f54ad8b7ff0eb3a69ab70c68c18925c5585b1c",
+      "bytes": 18319
+    },
+    {
+      "path": "after/studio-runner/src/run/guidedBrowser.ts",
+      "sha256": "59b4d23a2b06e9ffdf3371221970371c5fd8d4e4fe2df4b9acaf51dd2a0a72f0",
+      "bytes": 9874
+    },
+    {
+      "path": "after/studio-runner/test/deferred.test.ts",
+      "sha256": "90f886fa3edd85f3a4246d40e097fe1ff1bd7863830c47dd81a74247ad539461",
+      "bytes": 18565
+    },
+    {
+      "path": "after/studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "sha256": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba",
+      "bytes": 15819
+    },
+    {
+      "path": "after/studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "sha256": "ab10aa5a188d07aba698704af1f43abd5f6f86ff1c90f8922f7c8ea17435c998",
+      "bytes": 6846
+    },
+    {
+      "path": "after/studio-runner/test/run/bootstrapProcessTreeObservation.test.ts",
+      "sha256": "e22cfa670de9996381663b29f60d23a6590aa72a5cccd4dcfd76b77c865ee7bd",
+      "bytes": 21540
+    },
+    {
+      "path": "application-binding.json",
+      "sha256": "c6b4a5502eb7b5b2835bae97bab11459d89b5e79edca1cf5431b7973f643bea8",
+      "bytes": 9957
+    },
+    {
+      "path": "apply-reviewed.py",
+      "sha256": "b7f0aa174a192107a52e8b36339d0d32bbb10d4ef0bbca6d1042a122f180287c",
+      "bytes": 4006
+    },
+    {
+      "path": "before/studio-runner/src/guided/contracts.ts",
+      "sha256": "ac79e4bfac089a04c9caf929a45979ac2c4e1febfca7b1cb1cba1a01b1f7016d",
+      "bytes": 13652
+    },
+    {
+      "path": "before/studio-runner/src/guided/diagnostics.ts",
+      "sha256": "df12988fdcc0b23c0915a57933c4798c868abded0ccb52e5926fdeec3a094683",
+      "bytes": 5691
+    },
+    {
+      "path": "before/studio-runner/src/guided/evidence.ts",
+      "sha256": "b3f34f14d71a0668e63e90fd1415c3d3134ae521bd1d0e82c517496d33c15b50",
+      "bytes": 15290
+    },
+    {
+      "path": "before/studio-runner/src/guided/json.ts",
+      "sha256": "113713fd50d5eab8a49b0740e68ae6b12d55d150c459f4c135f317e78de7b39d",
+      "bytes": 2608
+    },
+    {
+      "path": "before/studio-runner/src/guided/transport.ts",
+      "sha256": "527471dfbe446c3fc2396c71158bd339d9bb33f73f5139994d7e58e7d84190ed",
+      "bytes": 17735
+    },
+    {
+      "path": "before/studio-runner/src/run/guidedBrowser.ts",
+      "sha256": "63f899ef688df31f3608c4a0b10f86ea5e63b710410bb32eb7f4d374cd2d63ae",
+      "bytes": 9864
+    },
+    {
+      "path": "before/studio-runner/test/deferred.test.ts",
+      "sha256": "ddcf66b2d50bdbf2be169138868db406a84ec1bacc54dcedf929ac87ec4c431f",
+      "bytes": 18896
+    },
+    {
+      "path": "before/studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "sha256": "7b928dc51eef99343cdeefdb1cbf8055c70b7d46c2ed086073ec380f92c17fb1",
+      "bytes": 15002
+    },
+    {
+      "path": "code-forward.patch",
+      "sha256": "da7f1ad190045313984d937895f91ea1b6203a71779d57353b030082af4a19fc",
+      "bytes": 103855
+    },
+    {
+      "path": "code-inverse.patch",
+      "sha256": "ce98b48c1a6d74af81a72f697c9845ac8e540d3b2122a8c724f616e0f8b69c46",
+      "bytes": 103855
+    },
+    {
+      "path": "docs-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "sha256": "009402b8ac8adb9a031f66b524b515b2919833f444dd4aca98265f4ee8960e01",
+      "bytes": 248805
+    },
+    {
+      "path": "docs-after/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "7df0b9eb84d4b2a4f35bb219f5d5f1f5891ee00e48e5b928eb3370cbf72b9f6f",
+      "bytes": 116163
+    },
+    {
+      "path": "docs-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "sha256": "8cf73bbebc7aec214f4fe7454dc3fb9c5f043680a0170cc7b01f95590587fb21",
+      "bytes": 246418
+    },
+    {
+      "path": "docs-before/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "2b5e38a6454ee00487208f188db8f67108ea7bede62fa65e7a00832a2a7181a4",
+      "bytes": 113321
+    },
+    {
+      "path": "documentation-binding-proposed.json",
+      "sha256": "a92a52018e406985e951b9edd4f9e61b1d711e2d85924ebcd049bccaf9230828",
+      "bytes": 1770
+    },
+    {
+      "path": "documentation-forward.patch",
+      "sha256": "1974e3897c3ed3fe94a0375a6413a0d452ed6c9715010cde01842fc58c7ed400",
+      "bytes": 10445
+    },
+    {
+      "path": "documentation-inverse.patch",
+      "sha256": "f174376a96928a6593e79ad468f7b9f3eb2750a6c32b7416eb01ec696fae2601",
+      "bytes": 10445
+    },
+    {
+      "path": "evidence-and-source-readiness-binding.json",
+      "sha256": "94219dab245e7f3831d4c31554f222e8f1b4450025e7ff46c1ae6ebb2ec41653",
+      "bytes": 1027
+    },
+    {
+      "path": "matching-actual-build-plan.json",
+      "sha256": "b710250b9c506fb2243a212d1be65ba5d0d74f412890cfeaf1831be6ad79cb4a",
+      "bytes": 3653
+    },
+    {
+      "path": "ordered-application-and-capture-plan.json",
+      "sha256": "39d0bf5c31d41aea9cab87abd735c14032c5daf431ae0397b9ba656ed9bccc81",
+      "bytes": 2416
+    },
+    {
+      "path": "preparation-context-count-discrepancy.json",
+      "sha256": "2913dd7f87d86a90dd603ce0cba27f691c7958cefc8c02f6cdfc580252a61790",
+      "bytes": 704
+    },
+    {
+      "path": "protected-and-tool-source-pins.json",
+      "sha256": "b284a3b68b3697f6225f058636a882589092046b9c9f1a6c430b6a9eeef6c0fe",
+      "bytes": 6824
+    },
+    {
+      "path": "receipt.md",
+      "sha256": "32a98b376b5a34ba59b45a2319d98666b678739669434c5311625d57bf5bfb0b",
+      "bytes": 4750
+    },
+    {
+      "path": "ten-code-path-binding.json",
+      "sha256": "8610989ee10727ce450eb08c038bb278cd8b69fa6844ec7ceed63719b8b0c481",
+      "bytes": 77359
+    }
+  ]
+}

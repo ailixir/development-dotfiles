@@ -1,0 +1,33 @@
+{
+  "kind": "BOUNDED_SOURCE_ONLY_QA_REVIEW_MANIFEST",
+  "reviewedPacketManifestSha256": "a8c83522c8f22c4e5d5cde27278d0084459d22030075f1270b25bad4f224a3b1",
+  "payloads": [
+    {
+      "path": "check_documents.py",
+      "bytes": 12251,
+      "sha256": "10cfd25b15d158aba7c0f82b955cd109b33b4c6590f8af675139adbb1bd1638e"
+    },
+    {
+      "path": "findings.json",
+      "bytes": 934,
+      "sha256": "217db091a8cbc3bb25cbcff5bcd05f2507f5b510af612f1a71c3d2393b36c417"
+    },
+    {
+      "path": "integrity.json",
+      "bytes": 17648,
+      "sha256": "1f8dd9cf04889c994919b458cf60a8afe6f9c1efc7dc2c6bf6b6433db936bd5e"
+    },
+    {
+      "path": "review.md",
+      "bytes": 16039,
+      "sha256": "3b0c2b0fd99f0317d62af439026f69335a94abcb4c65ee4aaef62c4fe1113fd2"
+    }
+  ],
+  "manifestExcludes": [
+    "manifest.json",
+    "SHA256SUMS"
+  ],
+  "checksumExcludes": [
+    "SHA256SUMS"
+  ]
+}

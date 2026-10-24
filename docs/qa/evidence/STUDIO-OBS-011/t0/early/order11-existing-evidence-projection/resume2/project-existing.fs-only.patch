@@ -1,0 +1,222 @@
+--- original/project_existing.py
++++ resume2/project_existing.py
+@@ -352,74 +352,151 @@
+  check(out)
+ 
+ class ExactIO:
+- """No glob/listdir/walk/search method. Private operations require already-verified permit."""
++ """Bounded exact-locator IO; retained descriptor identity, no enumeration or retry."""
+  PUBLIC_FILES={'authorization':'root-authorization.json','root_approval':'root-approval.json','quinn_approval':'quinn-approval.json','terminal':'terminal-proof.json','assessment':'public-assessment.json'}
++ def __init__(self):self.output_chain=None
++ def _identity(self,st):return (st.st_dev,st.st_ino,st.st_uid,st.st_gid,st.st_mode)
++ def _close_chain(self,chain):
++  failed=False
++  for item in reversed(chain):
++   if 'fd' in item:
++    try:os.close(item['fd'])
++    except OSError:failed=True
++  if failed:raise Refused('DIRECTORY_CLOSE_FAILURE')
++ def _check_chain(self,chain):
++  for item in chain:
++   if 'alias' in item:
++    parent,before,target=item['alias'];after=os.stat('var',dir_fd=parent,follow_symlinks=False)
++    require(stable_stat(after)==stable_stat(before) and os.readlink('var',dir_fd=parent)==target,'MACOS_ALIAS_CHANGED')
++   else:
++    current=os.fstat(item['fd']);require(self._identity(current)==self._identity(item['stat']),'OPEN_DIRECTORY_CHANGED')
++    named=os.stat(item['name'],dir_fd=item['parent'],follow_symlinks=False) if item['parent'] is not None else os.stat('/',follow_symlinks=False)
++    require(self._identity(named)==self._identity(current),'DIRECTORY_ENTRY_SUBSTITUTED')
++ def _extend(self,chain,parts):
++  for name in parts:
++   require(name not in {'','..','.'} and '/' not in name and '\x00' not in name,'DIRECTORY_COMPONENT')
++   parent=next(item['fd'] for item in reversed(chain) if 'fd' in item)
++   before=os.stat(name,dir_fd=parent,follow_symlinks=False)
++   require(stat.S_ISDIR(before.st_mode),'DIRECTORY_SYMLINK_OR_TYPE')
++   fd=os.open(name,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=parent)
++   chain.append({'fd':fd,'stat':before,'parent':parent,'name':name})
++   require(self._identity(os.fstat(fd))==self._identity(before),'DIRECTORY_OPEN_IDENTITY_MISMATCH')
++  self._check_chain(chain);return chain
++ def _dirs(self,path):
++  text=str(path);parts=PurePosixPath(text).parts
++  require(parts and parts[0]=='/' and '..' not in parts and '\x00' not in text,'ABSOLUTE_ANCHORED_LOCATOR')
++  chain=[]
++  try:
++   before=os.stat('/',follow_symlinks=False);fd=os.open('/',os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
++   chain.append({'fd':fd,'stat':before,'parent':None,'name':'/'})
++   require(stat.S_ISDIR(before.st_mode) and self._identity(os.fstat(fd))==self._identity(before),'ANCHOR_OPEN_IDENTITY')
++   tail=list(parts[1:])
++   if tail and tail[0]=='var':
++    alias=os.stat('var',dir_fd=fd,follow_symlinks=False)
++    if stat.S_ISLNK(alias.st_mode):
++     target=os.readlink('var',dir_fd=fd)
++     require(target in {'/private/var','private/var'},'UNAPPROVED_MACOS_ALIAS')
++     chain.append({'alias':(fd,alias,target)});tail=['private','var',*tail[1:]]
++   return self._extend(chain,tail)
++  except BaseException:
++   self._close_chain(chain);raise
++ def _read_at(self,chain,name,cap,expected=None,owner=None,mode=None):
++  parent=next(item['fd'] for item in reversed(chain) if 'fd' in item)
++  before=os.stat(name,dir_fd=parent,follow_symlinks=False)
++  require(stat.S_ISREG(before.st_mode),'INPUT_LEAF_SYMLINK_OR_TYPE')
++  fd=os.open(name,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=parent)
++  try:
++   opened=os.fstat(fd)
++   require(stat.S_ISREG(opened.st_mode) and stable_stat(opened)==stable_stat(before),'INPUT_OPENED_IDENTITY_MISMATCH')
++   require(opened.st_size<=cap and (owner is None or opened.st_uid==owner) and (mode is None or stat.S_IMODE(opened.st_mode)==mode),'INPUT_OPENED_OWNER_MODE_SIZE')
++   if expected is not None:
++    require((opened.st_dev,opened.st_ino,opened.st_uid,stat.S_IMODE(opened.st_mode),opened.st_size)==(expected['dev'],expected['ino'],expected['uid'],expected['mode'],expected['bytes']),'INPUT_APPROVED_FD_BINDING')
++   self._check_chain(chain)
++   require(stable_stat(os.stat(name,dir_fd=parent,follow_symlinks=False))==stable_stat(opened),'INPUT_LEAF_SUBSTITUTED')
++   raw=b''
++   while len(raw)<=cap:
++    chunk=os.read(fd,min(65536,cap+1-len(raw)))
++    if not chunk:break
++    raw+=chunk
++   require(len(raw)==opened.st_size and len(raw)<=cap and stable_stat(os.fstat(fd))==stable_stat(opened),'INPUT_READ_CHANGED')
++   require(stable_stat(os.stat(name,dir_fd=parent,follow_symlinks=False))==stable_stat(opened),'INPUT_LEAF_SUBSTITUTED')
++   self._check_chain(chain);return raw
++  finally:
++   try:os.close(fd)
++   except OSError:raise Refused('INPUT_CLOSE_FAILURE') from None
++ def _regular(self,path,cap,expected=None,owner=None,mode=None,private_parent=False):
++  path=PurePosixPath(str(path));chain=self._dirs(path.parent)
++  try:
++   if private_parent:
++    st=os.fstat(next(item['fd'] for item in reversed(chain) if 'fd' in item));require(st.st_uid==os.getuid() and stat.S_IMODE(st.st_mode)==448,'RELEASE_DIRECTORY_NOT_PRIVATE')
++   return self._read_at(chain,path.name,cap,expected,owner,mode)
++  finally:self._close_chain(chain)
+  def read_public(self,alias):
+   if alias in self.PUBLIC_FILES:
+-   release=HERE/'release';rst=os.lstat(release)
+-   require(stat.S_ISDIR(rst.st_mode) and not stat.S_ISLNK(rst.st_mode) and rst.st_uid==os.getuid() and stat.S_IMODE(rst.st_mode)==448,'RELEASE_DIRECTORY_NOT_PRIVATE')
+-   path=release/self.PUBLIC_FILES[alias]
+-   fst=os.lstat(path);require(stat.S_ISREG(fst.st_mode) and fst.st_uid==os.getuid() and stat.S_IMODE(fst.st_mode)==384,'RELEASE_FILE_NOT_PRIVATE')
+-  else:
+-   suffix={'receipt':'results','before':'before','after':'after'}[alias];path=ROOT/'docs/qa/evidence/STUDIO-OBS-011/execution'/f"{C['executionLabel']}-{suffix}.json"
+-  return self._regular(path,33554432)
+- def _regular(self,path,cap):
+-  fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
++   return self._regular(HERE/'release'/self.PUBLIC_FILES[alias],33554432,owner=os.getuid(),mode=384,private_parent=True)
++  suffix={'receipt':'results','before':'before','after':'after'}[alias]
++  return self._regular(ROOT/'docs/qa/evidence/STUDIO-OBS-011/execution'/f"{C['executionLabel']}-{suffix}.json",33554432)
++ def claim_output(self,permit):
++  require(permit.get('scope',{}).get('purpose')==C['purpose'] and self.output_chain is None,'NO_OUTPUT_PERMISSION')
++  chain=self._dirs(HERE)
+   try:
+-   before=os.fstat(fd);require(stat.S_ISREG(before.st_mode) and before.st_size<=cap,'UNSAFE_APPROVED_FILE')
+-   data=b''
+-   while len(data)<=cap:
+-    chunk=os.read(fd,min(65536,cap+1-len(data)))
+-    if not chunk:break
+-    data+=chunk
+-   require(len(data)<=cap and stable_stat(os.fstat(fd))==stable_stat(before),'APPROVED_FILE_CHANGED');return data
+-  finally:os.close(fd)
+- def claim_output(self,permit):
+-  require(permit.get('scope',{}).get('purpose')==C['purpose'],'NO_OUTPUT_PERMISSION')
+-  os.mkdir(HERE/'released-projection-01',0o700) # O_EXCL directory creation; failure forbids private reads/retry.
++   parent=next(item['fd'] for item in reversed(chain) if 'fd' in item)
++   os.mkdir('released-projection-01',0o700,dir_fd=parent)
++   self._extend(chain,['released-projection-01']);st=os.fstat(chain[-1]['fd'])
++   require(st.st_uid==os.getuid() and stat.S_IMODE(st.st_mode)==448,'OUTPUT_DIRECTORY_OWNER_MODE')
++   self.output_chain=chain
++  except BaseException:
++   self._close_chain(chain);raise
+  def read_manifest(self,permit):
+   require(permit.get('scope',{}).get('purpose')==C['purpose'],'NO_PRIVATE_PERMISSION')
+-  path=HERE/'release/private-input-manifest.json';st=os.lstat(path)
+-  require(stat.S_ISREG(st.st_mode) and st.st_uid==os.getuid() and stat.S_IMODE(st.st_mode)==384,'PRIVATE_MANIFEST_MODE')
+-  return self._regular(path,65536)
++  return self._regular(HERE/'release/private-input-manifest.json',65536,owner=os.getuid(),mode=384,private_parent=True)
+  def read_default_xml(self,permit,row):
+   require(permit.get('scope',{}).get('purpose')==C['purpose'] and row['role']=='default_xml','NO_XML_PERMISSION')
+-  path=ROOT/row['path'];st=os.lstat(path)
+-  require(stat.S_ISREG(st.st_mode) and (st.st_dev,st.st_ino,st.st_uid,stat.S_IMODE(st.st_mode),st.st_size)==(row['dev'],row['ino'],row['uid'],row['mode'],row['bytes']),'XML_FILE_BINDING')
+-  raw=self._regular(path,2097152);require(digest(raw)==row['sha256'],'XML_BYTES_CHANGED');return raw
++  raw=self._regular(ROOT/row['path'],2097152,expected=row)
++  require(digest(raw)==row['sha256'],'XML_BYTES_CHANGED');return raw
+  def read_inputs(self,permit,m,xml_raw):
+   require(permit.get('scope',{}).get('purpose')==C['purpose'],'NO_PRIVATE_PERMISSION')
+-  # Exact source-derived root, never an enumerated or guessed inherited fixture.
+-  root=Path(m['root']['path']);resolved=root.resolve(strict=True)
+-  require(resolved.is_absolute() and resolved.name.startswith('obs007-joined-'),'PRIVATE_ROOT_LOCATOR')
+-  root_fd=os.open(resolved,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
++  chain=self._dirs(m['root']['path'])
+   try:
+-   st=os.fstat(root_fd);r=m['root'];require((st.st_dev,st.st_ino,st.st_uid,stat.S_IMODE(st.st_mode))==(r['dev'],r['ino'],r['uid'],r['mode']) and st.st_uid==os.getuid(),'PRIVATE_ROOT_IDENTITY_OR_MODE')
++   st=os.fstat(next(item['fd'] for item in reversed(chain) if 'fd' in item));r=m['root']
++   require((st.st_dev,st.st_ino,st.st_uid,stat.S_IMODE(st.st_mode))==(r['dev'],r['ino'],r['uid'],r['mode']) and st.st_uid==os.getuid(),'PRIVATE_ROOT_IDENTITY_OR_MODE')
+    data={}
+    for row in m['files']:
+     role=row['role']
+     if role=='default_xml':raw=xml_raw
+     else:
+-     parts=PurePosixPath(row['path']).parts;require(parts and '..' not in parts and not PurePosixPath(row['path']).is_absolute(),'PRIVATE_PATH_ESCAPE')
+-     parent=os.dup(root_fd)
++     path=PurePosixPath(row['path']);require(path.parts and '..' not in path.parts and not path.is_absolute(),'PRIVATE_PATH_ESCAPE')
++     child_chain=list(chain)
+      try:
+-      for part in parts[:-1]:
+-       child=os.open(part,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=parent);os.close(parent);parent=child
+-      fd=os.open(parts[-1],os.O_RDONLY|os.O_NOFOLLOW,dir_fd=parent)
+-      try:
+-       st=os.fstat(fd);require(stat.S_ISREG(st.st_mode) and (st.st_dev,st.st_ino,st.st_uid,stat.S_IMODE(st.st_mode),st.st_size)==(row['dev'],row['ino'],row['uid'],row['mode'],row['bytes']) and st.st_uid==os.getuid(),'PRIVATE_FILE_IDENTITY_MODE')
+-       caps={'snapshot_initial18':1048576,'guided_log':16777216,'owned_events':8388608};cap=caps[role];require(st.st_size<=cap,'PRIVATE_ROLE_SIZE')
+-       raw=b''
+-       while len(raw)<=cap:
+-        chunk=os.read(fd,min(65536,cap+1-len(raw)))
+-        if not chunk:break
+-        raw+=chunk
+-       require(len(raw)<=cap and stable_stat(os.fstat(fd))==stable_stat(st),'PRIVATE_FILE_CHANGED')
+-      finally:os.close(fd)
+-     finally:os.close(parent)
++      self._extend(child_chain,path.parts[:-1])
++      raw=self._read_at(child_chain,path.name,{'snapshot_initial18':1048576,'guided_log':16777216,'owned_events':8388608}[role],expected=row,owner=os.getuid())
++     finally:self._close_chain(child_chain[len(chain):])
+     require(len(raw)==row['bytes'] and digest(raw)==row['sha256'],'PRIVATE_INPUT_CHANGED');data[role]=raw
+-   return data
+-  finally:os.close(root_fd)
++   self._check_chain(chain);return data
++  finally:self._close_chain(chain)
++ def write_output(self,output):
++  chain=self.output_chain;require(chain is not None,'NO_CLAIMED_OUTPUT');validate_output(output)
++  payload=canonical(output)+b'\n';require(len(payload)<=16384,'OUTPUT_SIZE_BOUND');self._check_chain(chain)
++  parent=next(item['fd'] for item in reversed(chain) if 'fd' in item)
++  fd=os.open('projection.json',os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600,dir_fd=parent)
++  try:
++   opened=os.fstat(fd);require(stat.S_ISREG(opened.st_mode) and opened.st_uid==os.getuid() and stat.S_IMODE(opened.st_mode)==384,'OUTPUT_FILE_OWNER_MODE')
++   require(self._identity(os.stat('projection.json',dir_fd=parent,follow_symlinks=False))==self._identity(opened),'OUTPUT_LEAF_SUBSTITUTED')
++   self._check_chain(chain);offset=0
++   while offset<len(payload):
++    written=os.write(fd,payload[offset:]);require(type(written) is int and 0<written<=len(payload)-offset,'OUTPUT_WRITE_FAILURE');offset+=written
++   os.fsync(fd);after=os.fstat(fd)
++   require(self._identity(after)==self._identity(opened) and after.st_size==len(payload) and self._identity(os.stat('projection.json',dir_fd=parent,follow_symlinks=False))==self._identity(opened),'OUTPUT_FILE_CHANGED')
++   self._check_chain(chain)
++  except OSError:raise Refused('OUTPUT_WRITE_OR_SYNC_FAILED') from None
++  finally:
++   try:os.close(fd)
++   except OSError:raise Refused('OUTPUT_CLOSE_FAILURE') from None
++ def close(self):
++  chain=self.output_chain;self.output_chain=None
++  if chain is not None:
++   try:self._check_chain(chain)
++   finally:self._close_chain(chain)
+ 
+ def run(io,expected,local,now=None):
+  # First fixed authorization refusal occurs before private manifest/root/stat/open.
+@@ -461,14 +538,10 @@
+  p=ClosedArgumentParser(description=__doc__)
+  for role in ['authorization','root-approval','quinn-approval']:p.add_argument('--expected-'+role+'-sha',required=True)
+  args=p.parse_args();expected={k.replace('-','_'):getattr(args,'expected_'+k.replace('-','_')+'_sha') for k in ['authorization','root-approval','quinn-approval']}
+- output=run(ExactIO(),expected,local_bindings());folder=HERE/'released-projection-01'
+- fd=os.open(folder/'projection.json',os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
++ reader=ExactIO()
+  try:
+-  payload=canonical(output)+b'\n';offset=0
+-  while offset<len(payload):
+-   written=os.write(fd,payload[offset:]);require(written>0,'OUTPUT_WRITE_FAILURE');offset+=written
+-  os.fsync(fd)
+- finally:os.close(fd)
++  output=run(reader,expected,local_bindings());reader.write_output(output)
++ finally:reader.close()
+  print(json.dumps({'status':output['status'],'cause':'UNPROVEN','privateRawExported':False,'nativeOrLaneCredit':False}))
+ if __name__=='__main__':
+  try:main()

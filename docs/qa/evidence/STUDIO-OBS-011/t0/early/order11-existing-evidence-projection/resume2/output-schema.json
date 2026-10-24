@@ -1,0 +1,765 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "status": {
+      "const": "BOUNDED_EXISTING_EVIDENCE_ONLY_CAUSE_UNPROVEN"
+    },
+    "caseAlias": {
+      "const": "ORDER11_INVOCATION12_SCOPE4_SESSION18"
+    },
+    "warningOrdinalJoin": {
+      "const": "EXACT_WARNING_TO_POST_CLEANUP_SOURCE_SNAPSHOT"
+    },
+    "warningTimestampUtc": {
+      "const": "2026-10-19T04:32:05.758082+00:00"
+    },
+    "snapshot": {
+      "type": "object",
+      "properties": {
+        "phase": {
+          "const": "AFTER_INNER_CLEANUP_NOT_ASSERTION_ENTRY"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "PREPARING",
+            "OBSERVING",
+            "PROPOSING",
+            "ACTING",
+            "AWAITING_CLARIFICATION",
+            "FINALIZING",
+            "SUCCEEDED",
+            "PUBLICATION_CONFLICT",
+            "FAILED",
+            "UNKNOWN_OUTCOME",
+            "CANCELLED",
+            "EXPIRED",
+            "OTHER"
+          ]
+        },
+        "errorCode": {
+          "type": "string",
+          "enum": [
+            "OK",
+            "PENDING",
+            "INVALID_CONTRACT",
+            "UNAUTHENTICATED",
+            "FORBIDDEN_SCOPE",
+            "REVISION_CONFLICT",
+            "STALE_GENERATION",
+            "TARGET_MISMATCH",
+            "AMBIGUOUS_TARGET",
+            "MISSING_SOURCE",
+            "BINDING_ORDER",
+            "SENSITIVE_SOURCE",
+            "ORIGIN_NOT_ALLOWED",
+            "UNSUPPORTED_SURFACE",
+            "BUDGET_EXCEEDED",
+            "STALE_FENCE",
+            "IDEMPOTENCY_CONFLICT",
+            "UNKNOWN_OUTCOME",
+            "PUBLICATION_CONFLICT",
+            "RUNTIME_INCOMPATIBLE",
+            "ASSERTION_FAILED",
+            "CANCELLED",
+            "EXPIRED",
+            "SECRET_UNAVAILABLE",
+            "SECRET_USE_NOT_AUTHORIZED",
+            "SECRET_USE_REVOKED",
+            "VAULT_UNAVAILABLE",
+            "LOGIN_REQUIRED",
+            "SECRET_TOO_LONG",
+            "ACK_LOST",
+            "TIMEOUT",
+            "TARGET_CHANGED",
+            "POLICY_DENIED",
+            "REFERENCE_MISMATCH",
+            "OTHER"
+          ]
+        },
+        "bootstrapPhase": {
+          "type": "string",
+          "enum": [
+            "SOURCE_PLAN",
+            "PLAN_ACCEPTED",
+            "MATERIALIZED",
+            "ALLOCATED",
+            "CONTEXT_PENDING",
+            "READY",
+            "OTHER"
+          ]
+        },
+        "materializationPresent": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "phase",
+        "state",
+        "errorCode",
+        "bootstrapPhase",
+        "materializationPresent"
+      ],
+      "additionalProperties": false
+    },
+    "diagnosticCandidate": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "const": "context"
+        },
+        "elapsedMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "runtimePhase": {
+          "type": "string",
+          "enum": [
+            "VALIDATE",
+            "JOURNAL",
+            "RECORDER",
+            "LAUNCH",
+            "WITHHOLD",
+            "BLANK_MATCH",
+            "BOOTSTRAP_CALLBACK",
+            "STARTED"
+          ]
+        },
+        "launchPhase": {
+          "type": "string",
+          "enum": [
+            "PROFILE",
+            "PROCESS",
+            "PROBE",
+            "STARTUP_PAGE",
+            "APP_PAGE",
+            "ROUTING",
+            "BLANK_DOCUMENT",
+            "UNPROVEN_NOT_RECORDED"
+          ]
+        },
+        "loss": {
+          "type": "string",
+          "enum": [
+            "PAGE_CRASH",
+            "EXTRA_PAGE",
+            "BROWSER_DISCONNECTED",
+            "ROUTE_FAILURE",
+            "UNPROVEN_NOT_RECORDED"
+          ]
+        },
+        "producerAssociation": {
+          "const": "SOURCE_OWNED_GUIDED_GENERATION_INTERVAL_AT_PUBLIC_WARNING"
+        },
+        "links": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": [
+                  "Error",
+                  "GuidedStartFailure",
+                  "GuidedLaunchFailure",
+                  "NonError",
+                  "REDACTED_UNKNOWN"
+                ]
+              },
+              "code": {
+                "type": "string",
+                "enum": [
+                  "ACTION_ORDER",
+                  "ADMISSION_DENIED",
+                  "ALREADY_CONSUMED",
+                  "AUTH_DENIED",
+                  "BINDING_DENIED",
+                  "BINDING_ORDER",
+                  "BINDING_UNAVAILABLE",
+                  "BOOTSTRAP_FAILED",
+                  "BUDGET_EXCEEDED",
+                  "BUSY",
+                  "CALLBACK_DENIED",
+                  "CANCELLED",
+                  "CAPACITY",
+                  "CONTEXT_LOST",
+                  "CONTEXT_REVISION",
+                  "DIAGNOSTICS_DENIED",
+                  "IDEMPOTENCY_CONFLICT",
+                  "IDENTITY_MISMATCH",
+                  "INPUT_IDENTITY",
+                  "JOURNAL_UNAVAILABLE",
+                  "LEASE_LOST",
+                  "OBSERVATION_UNAVAILABLE",
+                  "PASSWORD_CONTROL_READ_REFUSED",
+                  "POLICY_DENIED",
+                  "POLICY_REFUSED",
+                  "PREPARATION_DENIED",
+                  "PROFILE_MISMATCH",
+                  "PROFILE_PREFERENCES_REQUIRED",
+                  "RECORDING_FAILED",
+                  "REVOKED",
+                  "SCHEMA",
+                  "SCHEMA_CONFIGURATION",
+                  "STALE_OBSERVATION",
+                  "TARGET_CHANGED",
+                  "TARGET_DRIFT",
+                  "TIMEOUT",
+                  "UNKNOWN_OUTCOME",
+                  "REDACTED_UNKNOWN"
+                ]
+              },
+              "phase": {
+                "type": "string",
+                "enum": [
+                  "VALIDATE",
+                  "JOURNAL",
+                  "RECORDER",
+                  "LAUNCH",
+                  "WITHHOLD",
+                  "BLANK_MATCH",
+                  "BOOTSTRAP_CALLBACK",
+                  "STARTED",
+                  "PROFILE",
+                  "PROCESS",
+                  "PROBE",
+                  "STARTUP_PAGE",
+                  "APP_PAGE",
+                  "ROUTING",
+                  "BLANK_DOCUMENT"
+                ]
+              },
+              "loss": {
+                "type": "string",
+                "enum": [
+                  "PAGE_CRASH",
+                  "EXTRA_PAGE",
+                  "BROWSER_DISCONNECTED",
+                  "ROUTE_FAILURE"
+                ]
+              },
+              "errno": {
+                "const": "REDACTED_UNKNOWN"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "TARGET_CLOSED",
+                  "TIMEOUT"
+                ]
+              },
+              "exitCode": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": -999,
+                "maximum": 999
+              },
+              "signal": {
+                "type": "string",
+                "enum": [
+                  "NONE",
+                  "REDACTED_UNKNOWN"
+                ]
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false,
+            "dependentRequired": {
+              "exitCode": [
+                "signal"
+              ],
+              "signal": [
+                "exitCode"
+              ]
+            },
+            "allOf": [
+              {
+                "if": {
+                  "required": [
+                    "phase"
+                  ]
+                },
+                "then": {
+                  "oneOf": [
+                    {
+                      "properties": {
+                        "name": {
+                          "const": "GuidedStartFailure"
+                        },
+                        "phase": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATE",
+                            "JOURNAL",
+                            "RECORDER",
+                            "LAUNCH",
+                            "WITHHOLD",
+                            "BLANK_MATCH",
+                            "BOOTSTRAP_CALLBACK",
+                            "STARTED"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "name": {
+                          "const": "GuidedLaunchFailure"
+                        },
+                        "phase": {
+                          "type": "string",
+                          "enum": [
+                            "PROFILE",
+                            "PROCESS",
+                            "PROBE",
+                            "STARTUP_PAGE",
+                            "APP_PAGE",
+                            "ROUTING",
+                            "BLANK_DOCUMENT"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "if": {
+                  "required": [
+                    "loss"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "name": {
+                      "const": "GuidedStartFailure"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "name": {
+                      "const": "GuidedLaunchFailure"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "phase"
+                  ]
+                }
+              }
+            ]
+          },
+          "prefixItems": [
+            {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "enum": [
+                        "Error",
+                        "GuidedStartFailure",
+                        "GuidedLaunchFailure",
+                        "NonError",
+                        "REDACTED_UNKNOWN"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ACTION_ORDER",
+                        "ADMISSION_DENIED",
+                        "ALREADY_CONSUMED",
+                        "AUTH_DENIED",
+                        "BINDING_DENIED",
+                        "BINDING_ORDER",
+                        "BINDING_UNAVAILABLE",
+                        "BOOTSTRAP_FAILED",
+                        "BUDGET_EXCEEDED",
+                        "BUSY",
+                        "CALLBACK_DENIED",
+                        "CANCELLED",
+                        "CAPACITY",
+                        "CONTEXT_LOST",
+                        "CONTEXT_REVISION",
+                        "DIAGNOSTICS_DENIED",
+                        "IDEMPOTENCY_CONFLICT",
+                        "IDENTITY_MISMATCH",
+                        "INPUT_IDENTITY",
+                        "JOURNAL_UNAVAILABLE",
+                        "LEASE_LOST",
+                        "OBSERVATION_UNAVAILABLE",
+                        "PASSWORD_CONTROL_READ_REFUSED",
+                        "POLICY_DENIED",
+                        "POLICY_REFUSED",
+                        "PREPARATION_DENIED",
+                        "PROFILE_MISMATCH",
+                        "PROFILE_PREFERENCES_REQUIRED",
+                        "RECORDING_FAILED",
+                        "REVOKED",
+                        "SCHEMA",
+                        "SCHEMA_CONFIGURATION",
+                        "STALE_OBSERVATION",
+                        "TARGET_CHANGED",
+                        "TARGET_DRIFT",
+                        "TIMEOUT",
+                        "UNKNOWN_OUTCOME",
+                        "REDACTED_UNKNOWN"
+                      ]
+                    },
+                    "phase": {
+                      "type": "string",
+                      "enum": [
+                        "VALIDATE",
+                        "JOURNAL",
+                        "RECORDER",
+                        "LAUNCH",
+                        "WITHHOLD",
+                        "BLANK_MATCH",
+                        "BOOTSTRAP_CALLBACK",
+                        "STARTED",
+                        "PROFILE",
+                        "PROCESS",
+                        "PROBE",
+                        "STARTUP_PAGE",
+                        "APP_PAGE",
+                        "ROUTING",
+                        "BLANK_DOCUMENT"
+                      ]
+                    },
+                    "loss": {
+                      "type": "string",
+                      "enum": [
+                        "PAGE_CRASH",
+                        "EXTRA_PAGE",
+                        "BROWSER_DISCONNECTED",
+                        "ROUTE_FAILURE"
+                      ]
+                    },
+                    "errno": {
+                      "const": "REDACTED_UNKNOWN"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "TARGET_CLOSED",
+                        "TIMEOUT"
+                      ]
+                    },
+                    "exitCode": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": -999,
+                      "maximum": 999
+                    },
+                    "signal": {
+                      "type": "string",
+                      "enum": [
+                        "NONE",
+                        "REDACTED_UNKNOWN"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false,
+                  "dependentRequired": {
+                    "exitCode": [
+                      "signal"
+                    ],
+                    "signal": [
+                      "exitCode"
+                    ]
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "required": [
+                          "phase"
+                        ]
+                      },
+                      "then": {
+                        "oneOf": [
+                          {
+                            "properties": {
+                              "name": {
+                                "const": "GuidedStartFailure"
+                              },
+                              "phase": {
+                                "type": "string",
+                                "enum": [
+                                  "VALIDATE",
+                                  "JOURNAL",
+                                  "RECORDER",
+                                  "LAUNCH",
+                                  "WITHHOLD",
+                                  "BLANK_MATCH",
+                                  "BOOTSTRAP_CALLBACK",
+                                  "STARTED"
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "properties": {
+                              "name": {
+                                "const": "GuidedLaunchFailure"
+                              },
+                              "phase": {
+                                "type": "string",
+                                "enum": [
+                                  "PROFILE",
+                                  "PROCESS",
+                                  "PROBE",
+                                  "STARTUP_PAGE",
+                                  "APP_PAGE",
+                                  "ROUTING",
+                                  "BLANK_DOCUMENT"
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "if": {
+                        "required": [
+                          "loss"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "name": {
+                            "const": "GuidedStartFailure"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "name": {
+                            "const": "GuidedLaunchFailure"
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ]
+                      },
+                      "then": {
+                        "required": [
+                          "phase"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "properties": {
+                    "name": {
+                      "const": "GuidedStartFailure"
+                    },
+                    "code": {
+                      "const": "CONTEXT_LOST"
+                    },
+                    "phase": {
+                      "type": "string",
+                      "enum": [
+                        "VALIDATE",
+                        "JOURNAL",
+                        "RECORDER",
+                        "LAUNCH",
+                        "WITHHOLD",
+                        "BLANK_MATCH",
+                        "BOOTSTRAP_CALLBACK",
+                        "STARTED"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "code",
+                    "phase"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "workerLineOrdinal": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16777216
+        },
+        "association": {
+          "const": "CANONICAL_PREFIX_MATCH_ONLY_UNPROVEN_EXACT_SESSION"
+        },
+        "timestamp": {
+          "const": "UNPROVEN_NOT_RECORDED"
+        },
+        "causeCompleteness": {
+          "const": "UNPROVEN_NOT_RECORDED"
+        },
+        "sourceLinkCapReached": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "operation",
+        "elapsedMs",
+        "runtimePhase",
+        "launchPhase",
+        "loss",
+        "producerAssociation",
+        "links",
+        "workerLineOrdinal",
+        "association",
+        "timestamp",
+        "causeCompleteness",
+        "sourceLinkCapReached"
+      ],
+      "additionalProperties": false
+    },
+    "firstStoppingWriter": {
+      "const": "UNPROVEN_NO_TIMESTAMPED_SOURCE_TRACE"
+    },
+    "stateChronology": {
+      "const": "UNPROVEN_NO_TIMESTAMPED_SOURCE_TRACE"
+    },
+    "assignmentChronology": {
+      "const": "UNPROVEN_NO_SOURCE_SNAPSHOT_FIELD"
+    },
+    "contextDeliveryChronology": {
+      "const": "UNPROVEN_NO_SOURCE_SNAPSHOT_FIELD"
+    },
+    "cause": {
+      "const": "UNPROVEN"
+    },
+    "rawCollectorExit": {
+      "type": "integer",
+      "minimum": -255,
+      "maximum": 255,
+      "not": {
+        "const": 0
+      }
+    },
+    "rawGradleExit": {
+      "type": "integer",
+      "minimum": -255,
+      "maximum": 255,
+      "not": {
+        "const": 0
+      }
+    },
+    "rawTaskCollectionComplete": {
+      "type": "boolean"
+    },
+    "rawReceiptSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "rawOutcomeDisposition": {
+      "const": "WHOLE_RAW_RECEIPT_RETAINED_WITHOUT_WAIVER"
+    },
+    "observationGapSticky": {
+      "const": true
+    },
+    "inputBindings": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "default_xml",
+              "snapshot_initial18",
+              "guided_log",
+              "owned_events"
+            ]
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 33554432
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "0o600",
+              "0o640",
+              "0o644"
+            ]
+          }
+        },
+        "required": [
+          "role",
+          "sha256",
+          "bytes",
+          "mode"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "privateRawExported": {
+      "const": false
+    },
+    "nativeOrLaneCredit": {
+      "const": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "status",
+    "caseAlias",
+    "warningOrdinalJoin",
+    "warningTimestampUtc",
+    "snapshot",
+    "diagnosticCandidate",
+    "firstStoppingWriter",
+    "stateChronology",
+    "assignmentChronology",
+    "contextDeliveryChronology",
+    "cause",
+    "rawCollectorExit",
+    "rawGradleExit",
+    "rawTaskCollectionComplete",
+    "rawReceiptSha256",
+    "rawOutcomeDisposition",
+    "observationGapSticky",
+    "inputBindings",
+    "privateRawExported",
+    "nativeOrLaneCredit"
+  ],
+  "additionalProperties": false,
+  "$comment": "Executable validate_output additionally enforces exact role-set uniqueness, link cap boolean and source summaries; serialized output capped16KiB. Schema is review documentation; parser has no external dependency."
+}

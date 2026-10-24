@@ -1,0 +1,81 @@
+{
+  "kind": "UNPROVED_QUESTIONS_NOT_DIAGNOSIS_OR_DIAGNOSTIC_AUTHORITY",
+  "afterActualTerminalOnly": true,
+  "minimalSafeTypedEvidence": [
+    {
+      "question": "What did the selected wait observe?",
+      "safeFields": [
+        "fixed source method/call-site label",
+        "sessionState: closed enum or UNKNOWN",
+        "public failureCode: approved closed enum or null"
+      ],
+      "exclude": [
+        "raw result or failure payload",
+        "free-text message/stack/log tail",
+        "session/execution/private locator or correlation id"
+      ]
+    },
+    {
+      "question": "Which preparation milestone was actually acknowledged?",
+      "safeFields": [
+        "startAccepted boolean",
+        "bootstrapPhase closed enum or UNKNOWN",
+        "metadataAcknowledgementMatchesFrozenContext boolean or UNKNOWN",
+        "initialBlankAcknowledged boolean or UNKNOWN",
+        "finalizingReached boolean",
+        "publicationReceiptConfirmed boolean",
+        "teardownConfirmed boolean"
+      ],
+      "exclude": [
+        "context/authoredInputs/observation bodies",
+        "raw identifiers/hashes or private binding material"
+      ]
+    },
+    {
+      "question": "Did the exact guarded inputs and current observation satisfy admission?",
+      "safeFields": [
+        "actorScopeMatches boolean or UNKNOWN",
+        "approvedPolicyMatches boolean or UNKNOWN",
+        "secretPreflightOutcome approved enum or UNKNOWN",
+        "sourcePlanAdmitted boolean or UNKNOWN",
+        "inputProvenanceMatches boolean or UNKNOWN",
+        "observationAvailable boolean or UNKNOWN",
+        "passwordControlCardinality bounded integer or UNKNOWN",
+        "requiredTargetUnique boolean or UNKNOWN",
+        "secretPreparationOutcome approved enum or UNKNOWN"
+      ],
+      "exclude": [
+        "secret values or derived encodings",
+        "page text/DOM/locator",
+        "provider/model prompt/response body",
+        "actual secret-read contents"
+      ]
+    },
+    {
+      "question": "Is any later ordinary behavior established?",
+      "safeFields": [
+        "ordinaryAcceptanceReached boolean or UNKNOWN",
+        "ordinaryDispatchReached boolean or UNKNOWN",
+        "ordinaryTerminalStatus approved enum or UNKNOWN"
+      ],
+      "exclude": [
+        "assuming wrong-password replay began from helper32322 or stale assertion text"
+      ]
+    }
+  ],
+  "constraints": [
+    "A separately authorized fixed-schema public projection must establish subject scope internally while exporting only approved booleans/enums/counts; no private join/locator is derived here.",
+    "Prefer one existing safe typed milestone/error projection sufficient to disambiguate the failed positive preparation, not bulk diagnostics or new instrumentation.",
+    "This audit authorizes no evidence read/export, provider request, source write, retry, timeout adjustment, IR start, process/lock/control action or credit.",
+    "No old Order11/privatec212 attribution, timing/concurrency cause, current terminal result or bootstrap stage is imported."
+  ],
+  "hypothesesAllUnproved": [
+    "Actual async bootstrap/metadata/initialBlank acknowledgement mismatch or absence",
+    "Actual terminal state/public refusal during positive learning",
+    "Actual live observation/target/input/secret admission mismatch",
+    "Ambient case-only fixture selector/runtime readiness issue",
+    "Later ordinary phase or wrong-password behavior"
+  ],
+  "sourceCorrectionRecommended": null,
+  "ifFutureCorrectionProposed": "Require independently reviewed bounded semantic need and exact original/main/Replay/source baseline and current root authority after terminal; preserve all business oracles, cases, privacy and ownership boundaries."
+}

@@ -1,0 +1,626 @@
+[
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 1,
+    "oldSource": "assert sha(D/'root-actual-unit-release.json')=='da402a685c7de417d61263fe78b7fe06992f323397437c6332435f626783252f'",
+    "oldAstSha256": "4fac773741fda9108528e63b263b46f6d452989b5004f2217520c2c6fd25e3c8",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Replace consumed05 release with explicit invalid06 placeholder, installation binding and later root-bound SHA equality before runtime inputs."
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 2,
+    "oldSource": "assert sha(core)=='a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae'",
+    "oldAstSha256": "e494c468985af980ff9f628f374d2d43a80d4eb8a9f9d55b86fa49b98c6cd823",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 3,
+    "oldSource": "assert sha(plan_path)=='576ebf9f01c0025cacc3bc6c7d6f4c747f8f84bb1f118a547cf11e21f7c94673'",
+    "oldAstSha256": "312c6dcccd998eed1d59d626c739ae2f4a3121a9aceb53032e20f073d4da5c89",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 4,
+    "oldSource": "assert set(actual)==set(expected) and len(actual)==1808",
+    "oldAstSha256": "7df19be1ccd24dd272ca043ef5e9813745846b106833b98f27500675bd220d97",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 5,
+    "oldSource": "assert set(modes)==set(expected)",
+    "oldAstSha256": "7b86d889814f5cb1612ad65a2383e0d17fa7247ec5b9c16bda12d66d6b8593b2",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 6,
+    "oldSource": "assert len([n for n in actual if n.startswith('backend/src/main/')])==506",
+    "oldAstSha256": "53f43bf962271d93c664bee5feb64823cc6e9556f76fcc96dd835f5c9d7c32ab",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 7,
+    "oldSource": "assert got==plan['source']['dist']['files'] and len(got)==238",
+    "oldAstSha256": "b5f2bf142fbf5167cd96929c6c4add24b8a229b544e836f52501cdf324359beb",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 8,
+    "oldSource": "assert not gaps, 'Current gap requires separate exact independent qualification; keep hold'",
+    "oldAstSha256": "838b5b7c0d85abb2c6fda2084630aee53f670cb02a57dff72126e9dab25fa5d7",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 9,
+    "oldSource": "assert read(U/'restore-compile-exit.json')['exit']==0",
+    "oldAstSha256": "f68b36c3637ac5f3ff123af35d608326ecf2e89f7a69a5df1e5eab3309abc85c",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 10,
+    "oldSource": "assert before['files']==after['files']==plan['source']['files']",
+    "oldAstSha256": "147f449fc60f93807a9f4044178b68b3b17f630660b7e3f7a00f1acf5b2838a9",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 11,
+    "oldSource": "assert before['digest']==after['digest']==plan['source']['digest']",
+    "oldAstSha256": "36a1c607a54f8445229a4305ff62882a525941fe5343d538a1b3e3b36b713e1b",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 12,
+    "oldSource": "assert before['dist']==after['dist']==plan['source']['dist']",
+    "oldAstSha256": "ad85b4ad1687d24a43c69320f38f780924606b3cc6729c3a3622e58226dde745",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 13,
+    "oldSource": "assert provenance['sourceDigest']==after['digest'] and provenance['compileTestJavaActuallyExecuted'] is True",
+    "oldAstSha256": "5600aa3b640531a8b140e34a5a29d203644787f83c099e73c6ff4caec51f5d83",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 14,
+    "oldSource": "assert provenance['sameSourceExactBeforeAndAfterCompile'] is True and provenance['buildSuccessful'] is True",
+    "oldAstSha256": "2a89385594edaa070bc8ad13c99e28b80148d5b3fe8a93b750b813239b988c1d",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 15,
+    "oldSource": "assert provenance['restoreCompileReceiptSha256']==evidence['owned-restore-compile/receipt.json']",
+    "oldAstSha256": "b0777ec6adab40a354d42762e1798b5fb92906e12e0572049f9132f19af5142f",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 16,
+    "oldSource": "assert provenance['restoreCompileLogSha256']==sha(U/'restore-compile.log')",
+    "oldAstSha256": "5eafe0c420acc5cd58f2d6b0fe60439a3db4929afa46f9883b5e8b5261bc17ef",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 17,
+    "oldSource": "assert provenance['sourceCheckpointSha256']==sha(U/'restored.json')",
+    "oldAstSha256": "233e94e295d60ffaa76cd356cacc953ab1bc4205c13386f9ad3aea88a95fd287",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 18,
+    "oldSource": "assert '> Task :compileTestJava' in lines and any(s.startswith('BUILD SUCCESSFUL in ') for s in lines)",
+    "oldAstSha256": "c0ce8ab79ec15a758cb6822182ccb54cb8ee7ad3e797719d9af6a998ec97e88b",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 19,
+    "oldSource": "assert len(boundary['inheritedMatched'])==6",
+    "oldAstSha256": "ac9cb1356d3864e24491d68f86a04e1eeda0ed80b618644e73386bdc09e1d296",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 20,
+    "oldSource": "assert not any(boundary[n] for n in ('inheritedIdentityChanged','incompleteStableIdentities','otherProjectFacts'))",
+    "oldAstSha256": "3c1762831d4311484b0e0e4656314f2a8dd942f739b1fce12432212ab3acdfd4",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 21,
+    "oldSource": "assert all(rows.get(pid,{}).get('start')!=start for pid,start in owned)",
+    "oldAstSha256": "2ae37ce12831e582587f830f516993d71f5353dab060f5748785ffd1f6954dc4",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 22,
+    "oldSource": "assert rows[pin['shellPid']]['ppid']==pin['wrapperPid']",
+    "oldAstSha256": "88bc719351f21d72d0d2fc992f3f94cf1890da2bdfdec2c9951a18ef194c943f",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 23,
+    "oldSource": "assert rows[pin['wrapperPid']]['argvHash']==pin['wrapperArgvSha256']",
+    "oldAstSha256": "3794fef16307fd19b831f1540f24fa9e0d3352b1ee8b081187d3544eb1b7c9db",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 24,
+    "oldSource": "assert sha(lock.with_name('with-gradle-lock.py'))==A['lockWrapperSha256']",
+    "oldAstSha256": "feede6f1a08b4283609241770b90af5acb2533023a518f612c92107419a6f54e",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 25,
+    "oldSource": "assert not (R/name).is_symlink() and sha(R/name)==expected[name]",
+    "oldAstSha256": "43ae3bc95d237ace5a1b4cddf8352893970ae652c1968f80b5a0f0ae59ef859d",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 26,
+    "oldSource": "assert stat.S_IMODE((R/name).stat().st_mode)==modes[name]",
+    "oldAstSha256": "3b925ac85a94df1dbc9a2ffde857af1ca053ee3bfb3941636060077ce659cf90",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 27,
+    "oldSource": "assert all(sha(R/n)==h for n,h in plan[group].items())",
+    "oldAstSha256": "0df190c66f1b495941305eabae061e05a7444d283bdf997896c8109614c72ee0",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 28,
+    "oldSource": "assert sha(D/name)==h",
+    "oldAstSha256": "bae95ba8471a7aa337365945865848fd8f314c0b7f0bc0757a820a93abd298ff",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 29,
+    "oldSource": "assert receipt['status']=='NATIVE_PHASE_TERMINAL' and receipt['collectorExit']==code",
+    "oldAstSha256": "221e8649202d1d4c2920a741b80492e74d04e6abbec5b4b86f709596df482b53",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Retain both checks as separate exact status/phase and typed collectorExit assertions; additional command/interrupt checks strengthen."
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 30,
+    "oldSource": "assert receipt['rootUnitAuthorizationSha256']==sha(D/'root-actual-unit-release.json')",
+    "oldAstSha256": "1c76d71c19b7d7d0b6b62dab0e776e9ac15c748d6ca6627e3c0dbf26eab817d6",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 31,
+    "oldSource": "assert receipt['lockPin']==pin and receipt['phaseKeeperSha256']==A['phaseKeeperSha256']",
+    "oldAstSha256": "352a5cb63c2c2a53e8c4de65e229e559c8b7c2c1c00811bc20fe02cb2439e374",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 32,
+    "oldSource": "assert receipt['ownershipCoreSha256']==sha(core)",
+    "oldAstSha256": "10a85de68afd2beccbd4c1bbc6eff022507a1cdf856ac81c5dc94c999e1745be",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 33,
+    "oldSource": "assert len(terminal)==1 and terminal[0]['exit']==code",
+    "oldAstSha256": "d5bf9e6d54d4b609b45fd930f526652262ee975dd8d36baa53c8e8abee4c5342",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 34,
+    "oldSource": "assert not receipt['evidenceErrors'] and not receipt.get('remainingOwnedNonJvmFacts')",
+    "oldAstSha256": "e0083c70c00a1cfedcaa642b3bc036a0b370004c49e2eeb24d5787d2b4a05e11",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 35,
+    "oldSource": "assert rows[pin[kind+'Pid']]['start']==pin[kind+'Start']",
+    "oldAstSha256": "2153222e7cc43b65a209ae8c73e58a044d8b37e938f6a5fae4869bc7fb90d788",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 36,
+    "oldSource": "assert [info.st_dev,info.st_ino]==pin['lockDevInode']",
+    "oldAstSha256": "6516c103ccfdfcd89700c205a4ed8aebf1871cd90ce7cb9a213cab5151d31aa0",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 37,
+    "oldSource": "assert 'p'+str(pin['wrapperPid']) in fields and 'i'+str(info.st_ino) in fields",
+    "oldAstSha256": "95a881b6e2c68d5b13b9612689d7a1a7f59a7e2335bc3af2675b25445e1946bb",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 38,
+    "oldSource": "assert type(receipt.get(key,False)) is bool",
+    "oldAstSha256": "56cfa00b0f9184642242ab3a9442ac8820902d489a91bec6b5a3e6351af8e1ab",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-failed-normal-restored.template.py",
+    "oldAssertionOrdinal1Based": 39,
+    "oldSource": "assert error.errno in (errno.EAGAIN,errno.EACCES)",
+    "oldAstSha256": "ffc1358ca3757bbca3e9522344293cd192969c6a834ef46d964d34ae694c0dca",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 1,
+    "oldSource": "assert sha(D/'root-actual-unit-release.json')=='da402a685c7de417d61263fe78b7fe06992f323397437c6332435f626783252f'",
+    "oldAstSha256": "4fac773741fda9108528e63b263b46f6d452989b5004f2217520c2c6fd25e3c8",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Replace consumed05 release with explicit invalid06 placeholder, installation binding and later root-bound SHA equality before runtime inputs."
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 2,
+    "oldSource": "assert sha(core)=='a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae'",
+    "oldAstSha256": "e494c468985af980ff9f628f374d2d43a80d4eb8a9f9d55b86fa49b98c6cd823",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 3,
+    "oldSource": "assert sha(plan_path)=='576ebf9f01c0025cacc3bc6c7d6f4c747f8f84bb1f118a547cf11e21f7c94673'",
+    "oldAstSha256": "312c6dcccd998eed1d59d626c739ae2f4a3121a9aceb53032e20f073d4da5c89",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 4,
+    "oldSource": "assert set(actual)==set(expected) and len(actual)==1808",
+    "oldAstSha256": "7df19be1ccd24dd272ca043ef5e9813745846b106833b98f27500675bd220d97",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 5,
+    "oldSource": "assert set(modes)==set(expected)",
+    "oldAstSha256": "7b86d889814f5cb1612ad65a2383e0d17fa7247ec5b9c16bda12d66d6b8593b2",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 6,
+    "oldSource": "assert len([n for n in actual if n.startswith('backend/src/main/')])==506",
+    "oldAstSha256": "53f43bf962271d93c664bee5feb64823cc6e9556f76fcc96dd835f5c9d7c32ab",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 7,
+    "oldSource": "assert got==plan['source']['dist']['files'] and len(got)==238",
+    "oldAstSha256": "b5f2bf142fbf5167cd96929c6c4add24b8a229b544e836f52501cdf324359beb",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 8,
+    "oldSource": "assert not gaps, 'Current gap requires separate exact independent qualification; keep hold'",
+    "oldAstSha256": "838b5b7c0d85abb2c6fda2084630aee53f670cb02a57dff72126e9dab25fa5d7",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 9,
+    "oldSource": "assert read(U/'restore-compile-exit.json')['exit']==0",
+    "oldAstSha256": "f68b36c3637ac5f3ff123af35d608326ecf2e89f7a69a5df1e5eab3309abc85c",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Retained success requires missing restore-compile receipt/exit and NOT_STARTED; successful native0 is build phase instead."
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 10,
+    "oldSource": "assert before['files']==after['files']==plan['source']['files']",
+    "oldAstSha256": "147f449fc60f93807a9f4044178b68b3b17f630660b7e3f7a00f1acf5b2838a9",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Retained success compares all four checkpoints exactly to1808 baseline with exactly3 archive-bound overrides; current source/modes also checked."
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 11,
+    "oldSource": "assert before['digest']==after['digest']==plan['source']['digest']",
+    "oldAstSha256": "36a1c607a54f8445229a4305ff62882a525941fe5343d538a1b3e3b36b713e1b",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Retained success requires recomputed exact digest equality formatted/before/after/phase-after-native and actual collector input digests."
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 12,
+    "oldSource": "assert before['dist']==after['dist']==plan['source']['dist']",
+    "oldAstSha256": "ad85b4ad1687d24a43c69320f38f780924606b3cc6729c3a3622e58226dde745",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Retained success checks all four checkpoint dist documents equal original plan dist; live dist membership/bytes unchanged."
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 13,
+    "oldSource": "assert provenance['sourceDigest']==after['digest'] and provenance['compileTestJavaActuallyExecuted'] is True",
+    "oldAstSha256": "5600aa3b640531a8b140e34a5a29d203644787f83c099e73c6ff4caec51f5d83",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 14,
+    "oldSource": "assert provenance['sameSourceExactBeforeAndAfterCompile'] is True and provenance['buildSuccessful'] is True",
+    "oldAstSha256": "2a89385594edaa070bc8ad13c99e28b80148d5b3fe8a93b750b813239b988c1d",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 15,
+    "oldSource": "assert provenance['restoreCompileReceiptSha256']==evidence['owned-restore-compile/receipt.json']",
+    "oldAstSha256": "b0777ec6adab40a354d42762e1798b5fb92906e12e0572049f9132f19af5142f",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Retained success binds nativeReceiptSha256 to actual terminal owned-native receipt."
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 16,
+    "oldSource": "assert provenance['restoreCompileLogSha256']==sha(U/'restore-compile.log')",
+    "oldAstSha256": "5eafe0c420acc5cd58f2d6b0fe60439a3db4929afa46f9883b5e8b5261bc17ef",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Retained success binds nativeGradleLogSha256 to actual native log and collector logSha256."
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 17,
+    "oldSource": "assert provenance['sourceCheckpointSha256']==sha(U/'restored.json')",
+    "oldAstSha256": "233e94e295d60ffaa76cd356cacc953ab1bc4205c13386f9ad3aea88a95fd287",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Retained success binds actual native before/after checkpoint hashes and independent source consistency."
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 18,
+    "oldSource": "assert '> Task :compileTestJava' in lines and any(s.startswith('BUILD SUCCESSFUL in ') for s in lines)",
+    "oldAstSha256": "c0ce8ab79ec15a758cb6822182ccb54cb8ee7ad3e797719d9af6a998ec97e88b",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Retained success requires exact executed compileTestJava and test lines plus BUILD SUCCESSFUL in the hash-bound actual native log."
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 19,
+    "oldSource": "assert len(boundary['inheritedMatched'])==6",
+    "oldAstSha256": "ac9cb1356d3864e24491d68f86a04e1eeda0ed80b618644e73386bdc09e1d296",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 20,
+    "oldSource": "assert not any(boundary[n] for n in ('inheritedIdentityChanged','incompleteStableIdentities','otherProjectFacts'))",
+    "oldAstSha256": "3c1762831d4311484b0e0e4656314f2a8dd942f739b1fce12432212ab3acdfd4",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 21,
+    "oldSource": "assert all(rows.get(pid,{}).get('start')!=start for pid,start in owned)",
+    "oldAstSha256": "2ae37ce12831e582587f830f516993d71f5353dab060f5748785ffd1f6954dc4",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 22,
+    "oldSource": "assert rows[pin['shellPid']]['ppid']==pin['wrapperPid']",
+    "oldAstSha256": "88bc719351f21d72d0d2fc992f3f94cf1890da2bdfdec2c9951a18ef194c943f",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 23,
+    "oldSource": "assert rows[pin['wrapperPid']]['argvHash']==pin['wrapperArgvSha256']",
+    "oldAstSha256": "3794fef16307fd19b831f1540f24fa9e0d3352b1ee8b081187d3544eb1b7c9db",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 24,
+    "oldSource": "assert sha(lock.with_name('with-gradle-lock.py'))==A['lockWrapperSha256']",
+    "oldAstSha256": "feede6f1a08b4283609241770b90af5acb2533023a518f612c92107419a6f54e",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 25,
+    "oldSource": "assert not (R/name).is_symlink() and sha(R/name)==expected[name]",
+    "oldAstSha256": "43ae3bc95d237ace5a1b4cddf8352893970ae652c1968f80b5a0f0ae59ef859d",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 26,
+    "oldSource": "assert stat.S_IMODE((R/name).stat().st_mode)==modes[name]",
+    "oldAstSha256": "3b925ac85a94df1dbc9a2ffde857af1ca053ee3bfb3941636060077ce659cf90",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 27,
+    "oldSource": "assert all(sha(R/n)==h for n,h in plan[group].items())",
+    "oldAstSha256": "0df190c66f1b495941305eabae061e05a7444d283bdf997896c8109614c72ee0",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 28,
+    "oldSource": "assert sha(D/name)==h",
+    "oldAstSha256": "bae95ba8471a7aa337365945865848fd8f314c0b7f0bc0757a820a93abd298ff",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 29,
+    "oldSource": "assert receipt['status']=='NATIVE_PHASE_TERMINAL' and receipt['collectorExit']==code",
+    "oldAstSha256": "221e8649202d1d4c2920a741b80492e74d04e6abbec5b4b86f709596df482b53",
+    "disposition": "EXPLICIT_BRANCH_OR_BINDING_MAP",
+    "mapping": "Retain both checks as separate exact status/phase and typed collectorExit assertions; additional command/interrupt checks strengthen."
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 30,
+    "oldSource": "assert receipt['rootUnitAuthorizationSha256']==sha(D/'root-actual-unit-release.json')",
+    "oldAstSha256": "1c76d71c19b7d7d0b6b62dab0e776e9ac15c748d6ca6627e3c0dbf26eab817d6",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 31,
+    "oldSource": "assert receipt['lockPin']==pin and receipt['phaseKeeperSha256']==A['phaseKeeperSha256']",
+    "oldAstSha256": "352a5cb63c2c2a53e8c4de65e229e559c8b7c2c1c00811bc20fe02cb2439e374",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 32,
+    "oldSource": "assert receipt['ownershipCoreSha256']==sha(core)",
+    "oldAstSha256": "10a85de68afd2beccbd4c1bbc6eff022507a1cdf856ac81c5dc94c999e1745be",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 33,
+    "oldSource": "assert len(terminal)==1 and terminal[0]['exit']==code",
+    "oldAstSha256": "d5bf9e6d54d4b609b45fd930f526652262ee975dd8d36baa53c8e8abee4c5342",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 34,
+    "oldSource": "assert not receipt['evidenceErrors'] and not receipt.get('remainingOwnedNonJvmFacts')",
+    "oldAstSha256": "e0083c70c00a1cfedcaa642b3bc036a0b370004c49e2eeb24d5787d2b4a05e11",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 35,
+    "oldSource": "assert rows[pin[kind+'Pid']]['start']==pin[kind+'Start']",
+    "oldAstSha256": "2153222e7cc43b65a209ae8c73e58a044d8b37e938f6a5fae4869bc7fb90d788",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 36,
+    "oldSource": "assert [info.st_dev,info.st_ino]==pin['lockDevInode']",
+    "oldAstSha256": "6516c103ccfdfcd89700c205a4ed8aebf1871cd90ce7cb9a213cab5151d31aa0",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 37,
+    "oldSource": "assert 'p'+str(pin['wrapperPid']) in fields and 'i'+str(info.st_ino) in fields",
+    "oldAstSha256": "95a881b6e2c68d5b13b9612689d7a1a7f59a7e2335bc3af2675b25445e1946bb",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 38,
+    "oldSource": "assert type(receipt.get(key,False)) is bool",
+    "oldAstSha256": "56cfa00b0f9184642242ab3a9442ac8820902d489a91bec6b5a3e6351af8e1ab",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  },
+  {
+    "template": "verify-success-retain-three.template.py",
+    "oldAssertionOrdinal1Based": 39,
+    "oldSource": "assert error.errno in (errno.EAGAIN,errno.EACCES)",
+    "oldAstSha256": "ffc1358ca3757bbca3e9522344293cd192969c6a834ef46d964d34ae694c0dca",
+    "disposition": "EXACT_AST_PRESERVED",
+    "mapping": null
+  }
+]

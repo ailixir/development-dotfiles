@@ -1,0 +1,71 @@
+{
+  "kind": "EXPLICIT_AND_DEPLOYED_CONSTRUCTION_PROOF_SOURCE_ONLY",
+  "constructorCategories": [
+    {
+      "signature": "ObjectMapper, execution, runner (3args)",
+      "state": "run/validation transport builder and runner-token source; no guided setup",
+      "representatives": [
+        "HttpRunnerDispatchClientTest.java:51",
+        "JobBodyLeakTest.java:109",
+        "DeReadyCarryForwardTest.java:111"
+      ],
+      "managedFactoryExample": "DeReadyCarryForwardTest.StubGateway.observedRunner; explicit plain HTTP config remains intact because operation initializer is no longer method-injected.",
+      "candidatePreservation": "Exact existing signature/body unchanged; no guidedClient/explicitValidationOrigin mode heuristic required."
+    },
+    {
+      "signature": "ObjectMapper, execution, runner, StudioRunnerTls (4args)",
+      "state": "mandatory supplied TLS on base transports; explicit run configuration retained",
+      "representatives": [
+        "RunnerTlsClientCertIT.java:728",
+        "ObservedCoRunIT.java:410",
+        "StudioRunnerPropertiesProfileTest.java:275"
+      ],
+      "candidatePreservation": "Exact signature/body unchanged; annotation moved to new deployed constructor."
+    },
+    {
+      "signature": "ObjectMapper, execution, runner, StudioRunnerTls, contracts, origin, token (7args)",
+      "state": "explicit base + guided clients initialized from caller values",
+      "representatives": [
+        "HttpRunnerDispatchClientTest.java:471"
+      ],
+      "candidatePreservation": "Exact signature/body unchanged; no later Spring endpoint/token/TLS/contracts overwrite."
+    },
+    {
+      "signature": "URI, SSLContext, token, contracts (4args)",
+      "state": "explicit guided operation client",
+      "representatives": [
+        "GuidedBridgeIntegrationTest.java:174",
+        "GuidedBridgePlannedIT.java:343",
+        "GuidedEvidencePendingAppendJoinedIT.java:505",
+        "GuidedPlanningIntegrationTest.java:462",
+        "GuidedFocusMutationJoinedIT.java:648"
+      ],
+      "candidatePreservation": "Exact signature/body unchanged; factory beans need no unrelated deployed TLS bean/environment."
+    },
+    {
+      "signature": "URI, HttpClient, token, contracts (4args)",
+      "state": "explicit validation client including intentional null-origin refusal",
+      "representatives": [
+        "ObservedArtifactLowererTest.java:119,142,170"
+      ],
+      "candidatePreservation": "Exact signature/body unchanged; supplied validationOrigin/token/contracts/client remain; guided operations still fail closed at guidedClient null."
+    },
+    {
+      "signature": "ObjectMapper, execution, runner, StudioRunnerTls, contracts, Environment (NEW6args)",
+      "state": "sole @Autowired component constructor",
+      "candidatePreservation": "Mandatory dependencies, exact same tls argument delegates to4arg then ordinary initializer once; no provider lookup/optional dependency/default trust."
+    }
+  ],
+  "existingDirectInitializerCalls": [
+    "HttpRunnerDispatchClientTest.java:423",
+    "HttpRunnerDispatchClientTest.java:450"
+  ],
+  "initializerPackageVisibilitySignatureAndBodyUnchanged": true,
+  "legacyComparison": {
+    "guided": "Old GuidedRunnerClient had final explicit origin/client/token/contracts and no autowired initializer; explicit guided constructors retain that behavior.",
+    "validation": "Old ObservedValidationClient had final explicit endpoint/client/token/contracts and no autowired initializer; explicit validation constructors retain that behavior.",
+    "dispatch": "Old dispatch constructor used explicit3/4arg run transports without this folded operations postprocessor."
+  },
+  "providerAlternativeRejected": "Guarding guidedClient!=null or explicitValidationOrigin preserves explicit operation clients but misses managed explicit3/4arg run-only objects; a broader mode flag is unnecessary when deployed-only initialization lives in the sole deployed constructor.",
+  "scope": "Source diagnosis/design only; missing bean facts supplied by closed failure catalog, no raw failure bodies read."
+}

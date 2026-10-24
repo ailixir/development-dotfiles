@@ -1,0 +1,98 @@
+{
+  "5": {
+    "before": "interface Schema { $id?: string; $ref?: string; const?: unknown; enum?: unknown[]; type?: string | string[]; properties?: Record<string, Schema>; required?: string[]; additionalProperties?: boolean | Schema; propertyNames?: Schema; minProperties?: number; maxProperties?: number; items?: Schema; minItems?: number; maxItems?: number; uniqueItems?: boolean; minLength?: number; maxLength?: number; minimum?: number; maximum?: number; pattern?: string; format?: string; oneOf?: Schema[]; allOf?: Schema[]; not?: Schema; if?: Schema; then?: Schema; else?: Schema; definitions?: Record<string, Schema>; contains?: Schema; dependencies?: Record<string, Schema | string[] | boolean> }",
+    "after": "interface Schema {\n  $id?: string; $ref?: string; const?: unknown; enum?: unknown[]; type?: string | string[];\n  properties?: Record<string, Schema>; required?: string[]; additionalProperties?: boolean | Schema;\n  propertyNames?: Schema; minProperties?: number; maxProperties?: number; items?: Schema;\n  minItems?: number; maxItems?: number; uniqueItems?: boolean; minLength?: number; maxLength?: number;\n  minimum?: number; maximum?: number; pattern?: string; format?: string; oneOf?: Schema[]; allOf?: Schema[];\n  not?: Schema; if?: Schema; then?: Schema; else?: Schema; definitions?: Record<string, Schema>; contains?: Schema;\n  dependencies?: Record<string, Schema | string[] | boolean>\n}"
+  },
+  "10": {
+    "before": "  if (typeof value === 'string') { insist(!/[\\uD800-\\uDBFF](?![\\uDC00-\\uDFFF])|(?<![\\uD800-\\uDBFF])[\\uDC00-\\uDFFF]/u.test(value), 'INVALID_UNICODE'); return JSON.stringify(value); }",
+    "after": "  if (typeof value === 'string') {\n    insist(!/[\\uD800-\\uDBFF](?![\\uDC00-\\uDFFF])|(?<![\\uD800-\\uDBFF])[\\uDC00-\\uDFFF]/u.test(value), 'INVALID_UNICODE');\n    return JSON.stringify(value);\n  }"
+  },
+  "14": {
+    "before": "  return `{${Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([k,v]) => { insist(/^[\\x20-\\x7e]+$/u.test(k), 'SCHEMA'); return `${JSON.stringify(k)}:${canonical(v)}`; }).join(',')}}`;",
+    "after": "  return `{${Object.entries(value)\n    .sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)\n    .map(([k,v]) => {\n      insist(/^[\\x20-\\x7e]+$/u.test(k), 'SCHEMA');\n      return `${JSON.stringify(k)}:${canonical(v)}`;\n    }).join(',')}}`;"
+  },
+  "17": {
+    "before": "const supportedKeywords = new Set(['$id','$schema','$ref','title','description','default','const','enum','type','properties','propertyNames','minProperties','maxProperties','required','additionalProperties','items','minItems','maxItems','uniqueItems','minLength','maxLength','minimum','maximum','pattern','format','oneOf','allOf','not','if','then','else','definitions','contains','dependencies']);",
+    "after": "const supportedKeywords = new Set([\n  '$id','$schema','$ref','title','description','default','const','enum','type','properties','propertyNames',\n  'minProperties','maxProperties','required','additionalProperties','items','minItems','maxItems','uniqueItems',\n  'minLength','maxLength','minimum','maximum','pattern','format','oneOf','allOf','not','if','then','else',\n  'definitions','contains','dependencies'\n]);"
+  },
+  "37": {
+    "before": "      insist(typeof schema.$ref === 'string' && Object.keys(record).every(key => ['$ref','title','description'].includes(key)), 'SCHEMA_CONFIGURATION');",
+    "after": "      insist(typeof schema.$ref === 'string' &&\n        Object.keys(record).every(key => ['$ref','title','description'].includes(key)), 'SCHEMA_CONFIGURATION');"
+  },
+  "40": {
+    "before": "    if (schema.type !== undefined) insist((Array.isArray(schema.type)?schema.type:[schema.type]).every(type=>['null','string','boolean','integer','object','array'].includes(type)), 'SCHEMA_CONFIGURATION');",
+    "after": "    if (schema.type !== undefined) insist(\n      (Array.isArray(schema.type)?schema.type:[schema.type])\n        .every(type=>['null','string','boolean','integer','object','array'].includes(type)), 'SCHEMA_CONFIGURATION');"
+  },
+  "41": {
+    "before": "    for (const keyword of ['minItems','maxItems','minLength','maxLength','minimum','maximum','minProperties','maxProperties']) if (record[keyword] !== undefined) insist(Number.isSafeInteger(record[keyword]), 'SCHEMA_CONFIGURATION');",
+    "after": "    for (const keyword of ['minItems','maxItems','minLength','maxLength','minimum','maximum','minProperties','maxProperties'])\n      if (record[keyword] !== undefined) insist(Number.isSafeInteger(record[keyword]), 'SCHEMA_CONFIGURATION');"
+  },
+  "42": {
+    "before": "    if (schema.additionalProperties !== undefined) insist(typeof schema.additionalProperties === 'boolean' || typeof schema.additionalProperties === 'object', 'SCHEMA_CONFIGURATION');",
+    "after": "    if (schema.additionalProperties !== undefined) insist(\n      typeof schema.additionalProperties === 'boolean' || typeof schema.additionalProperties === 'object', 'SCHEMA_CONFIGURATION');"
+  },
+  "44": {
+    "before": "    if (schema.required !== undefined) insist(Array.isArray(schema.required) && schema.required.every(key=>typeof key==='string') && new Set(schema.required).size===schema.required.length, 'SCHEMA_CONFIGURATION');",
+    "after": "    if (schema.required !== undefined) insist(Array.isArray(schema.required) &&\n      schema.required.every(key=>typeof key==='string') && new Set(schema.required).size===schema.required.length, 'SCHEMA_CONFIGURATION');"
+  },
+  "46": {
+    "before": "    if (schema.pattern !== undefined) { insist(typeof schema.pattern==='string','SCHEMA_CONFIGURATION'); try { new RegExp(schema.pattern,'u'); } catch { throw new Error('SCHEMA_CONFIGURATION'); } }",
+    "after": "    if (schema.pattern !== undefined) {\n      insist(typeof schema.pattern==='string','SCHEMA_CONFIGURATION');\n      try { new RegExp(schema.pattern,'u'); } catch { throw new Error('SCHEMA_CONFIGURATION'); }\n    }"
+  },
+  "52": {
+    "before": "    for (const keyword of ['items','not','if','then','else','propertyNames','contains']) if (record[keyword] !== undefined) walk(record[keyword],base);",
+    "after": "    for (const keyword of ['items','not','if','then','else','propertyNames','contains'])\n      if (record[keyword] !== undefined) walk(record[keyword],base);"
+  },
+  "56": {
+    "before": "        if (Array.isArray(dependency)) insist(dependency.every(key => typeof key === 'string') && new Set(dependency).size === dependency.length, 'SCHEMA_CONFIGURATION');",
+    "after": "        if (Array.isArray(dependency)) insist(\n          dependency.every(key => typeof key === 'string') && new Set(dependency).size === dependency.length, 'SCHEMA_CONFIGURATION');"
+  },
+  "61": {
+    "before": "    if (typeof additional === 'object') { insist(additional && !Array.isArray(additional) && Object.keys(additional).length > 0, 'SCHEMA_CONFIGURATION'); walk(additional, base); }",
+    "after": "    if (typeof additional === 'object') {\n      insist(additional && !Array.isArray(additional) && Object.keys(additional).length > 0, 'SCHEMA_CONFIGURATION');\n      walk(additional, base);\n    }"
+  },
+  "62": {
+    "before": "    for (const keyword of ['oneOf','allOf']) if (record[keyword] !== undefined) { const children=record[keyword]; insist(Array.isArray(children)&&children.length>0,'SCHEMA_CONFIGURATION'); for(const child of children)walk(child,base); }",
+    "after": "    for (const keyword of ['oneOf','allOf']) if (record[keyword] !== undefined) {\n      const children=record[keyword]; insist(Array.isArray(children)&&children.length>0,'SCHEMA_CONFIGURATION');\n      for(const child of children)walk(child,base);\n    }"
+  },
+  "73": {
+    "before": "        insist(target && typeof target==='object' && Object.hasOwn(target,key),'SCHEMA_CONFIGURATION'); target=(target as Record<string,unknown>)[key];",
+    "after": "        insist(target && typeof target==='object' && Object.hasOwn(target,key),'SCHEMA_CONFIGURATION');\n        target=(target as Record<string,unknown>)[key];"
+  },
+  "84": {
+    "before": "    for(const child of [...(schema.oneOf??[]),...(schema.allOf??[]),schema.not,schema.if,schema.then,schema.else,...Object.values(schema.dependencies??{}).filter((dependency): dependency is Schema => typeof dependency === 'object' && !Array.isArray(dependency))])if(child)acyclic(child);",
+    "after": "    for(const child of [\n      ...(schema.oneOf??[]),...(schema.allOf??[]),schema.not,schema.if,schema.then,schema.else,\n      ...Object.values(schema.dependencies??{})\n        .filter((dependency): dependency is Schema => typeof dependency === 'object' && !Array.isArray(dependency))\n    ])if(child)acyclic(child);"
+  },
+  "101": {
+    "before": "    if (!types.some(t => t === 'null' ? value === null : t === 'array' ? Array.isArray(value) : t === 'integer' ? Number.isSafeInteger(value) : t === 'object' ? typeof value === 'object' && value !== null && !Array.isArray(value) : typeof value === t)) return false;",
+    "after": "    if (!types.some(t => t === 'null' ? value === null : t === 'array' ? Array.isArray(value) :\n      t === 'integer' ? Number.isSafeInteger(value) :\n      t === 'object' ? typeof value === 'object' && value !== null && !Array.isArray(value) : typeof value === t)) return false;"
+  },
+  "105": {
+    "before": "    if (length < (s.minLength ?? 0) || length > (s.maxLength ?? Infinity) || (s.pattern && !new RegExp(s.pattern, 'u').test(value))) return false;",
+    "after": "    if (length < (s.minLength ?? 0) || length > (s.maxLength ?? Infinity) ||\n      (s.pattern && !new RegExp(s.pattern, 'u').test(value))) return false;"
+  },
+  "119": {
+    "before": "  if (Array.isArray(value) && (value.length < (s.minItems ?? 0) || value.length > (s.maxItems ?? Infinity) || (s.items && !value.every(v => matches(s.items ?? {},v))) || (s.uniqueItems && new Set(value.map(canonical)).size !== value.length))) return false;",
+    "after": "  if (Array.isArray(value) && (value.length < (s.minItems ?? 0) || value.length > (s.maxItems ?? Infinity) ||\n    (s.items && !value.every(v => matches(s.items ?? {},v))) ||\n    (s.uniqueItems && new Set(value.map(canonical)).size !== value.length))) return false;"
+  },
+  "123": {
+    "before": "      if (Array.isArray(dependency) ? dependency.some(required => !Object.hasOwn(record,required)) : typeof dependency === 'boolean' ? !dependency : !matches(dependency,record)) return false;",
+    "after": "      if (Array.isArray(dependency) ? dependency.some(required => !Object.hasOwn(record,required)) :\n        typeof dependency === 'boolean' ? !dependency : !matches(dependency,record)) return false;"
+  },
+  "127": {
+    "before": "    if (typeof s.additionalProperties === 'object' && Object.entries(record).some(([key, item]) => !Object.hasOwn(s.properties ?? {}, key) && !matches(s.additionalProperties as Schema, item))) return false;",
+    "after": "    if (typeof s.additionalProperties === 'object' && Object.entries(record).some(([key, item]) =>\n      !Object.hasOwn(s.properties ?? {}, key) && !matches(s.additionalProperties as Schema, item))) return false;"
+  },
+  "139": {
+    "before": "  while(pending.length){const entry=pending.pop();insist(entry&&entry.depth<=64&&++nodes<=1000000,'SCHEMA');if(entry.value&&typeof entry.value==='object')for(const child of Object.values(entry.value))pending.push({value:child,depth:entry.depth+1});}",
+    "after": "  while(pending.length){\n    const entry=pending.pop();insist(entry&&entry.depth<=64&&++nodes<=1000000,'SCHEMA');\n    if(entry.value&&typeof entry.value==='object')\n      for(const child of Object.values(entry.value))pending.push({value:child,depth:entry.depth+1});\n  }"
+  },
+  "146": {
+    "before": "export const identityKeys = ['schemaVersion','sessionId','workerId','ownerFence','scopeHash','contextId','contextRevision','sourceRevision','configurationRevision','versions'] as const;",
+    "after": "export const identityKeys = [\n  'schemaVersion','sessionId','workerId','ownerFence','scopeHash','contextId','contextRevision',\n  'sourceRevision','configurationRevision','versions'\n] as const;"
+  },
+  "147": {
+    "before": "export function identity(value: BridgeIdentity): BridgeIdentity { return Object.fromEntries(identityKeys.map(k => [k,value[k]])) as unknown as BridgeIdentity; }",
+    "after": "export function identity(value: BridgeIdentity): BridgeIdentity {\n  return Object.fromEntries(identityKeys.map(k => [k,value[k]])) as unknown as BridgeIdentity;\n}"
+  }
+}

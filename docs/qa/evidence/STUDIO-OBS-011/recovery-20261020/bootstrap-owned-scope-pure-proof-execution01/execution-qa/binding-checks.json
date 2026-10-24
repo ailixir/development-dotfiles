@@ -1,0 +1,89 @@
+{
+  "verdict": "NOT_READY_STATIC_LINT",
+  "producerManifestSha256": "d4be1991a0f61232e02c056f883ecac18fd0f2d6abc45d8a297191146dc7a6a5",
+  "producerArtifactsRehashed": 50,
+  "rawTypesOuterChild": [
+    0,
+    0
+  ],
+  "rawLintOuterChild": [
+    1,
+    1
+  ],
+  "actualTwoLintFindings": [
+    {
+      "file": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "line": 82,
+      "column": 7,
+      "severity": "error",
+      "rule": "@typescript-eslint/prefer-optional-chain",
+      "message": "Prefer using an optional chain expression instead, as it is more concise and easier to read."
+    },
+    {
+      "file": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "line": 99,
+      "column": 9,
+      "severity": "error",
+      "rule": "@typescript-eslint/prefer-optional-chain",
+      "message": "Prefer using an optional chain expression instead, as it is more concise and easier to read."
+    }
+  ],
+  "initialTypesMeasuredForHelper": "4737be3497203ed973ee9bcb3d6978903d3a7f4b1ba1b63af214a9167cc9701a",
+  "all41Discovery": "UNEXECUTED",
+  "redGreenAndFinalTypesLint": "UNRUN_NO_CREDIT",
+  "actual1812And238MetadataExact": true,
+  "actualSelected13993MetadataExact": true,
+  "private13995OnlyChangedRows": [
+    "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+    "studio-runner/test/run/bootstrapProcessTreeObservation.test.ts"
+  ],
+  "beforeCopy13993Exact": true,
+  "private238E19Exact": true,
+  "all191CachePairsStrictValidUniqueAndUnchanged": true,
+  "nativeCacheFailedTrueRetained": true,
+  "closedRuntimeCliBrowserBindingsExact": true,
+  "allSixAdmissionPinsExact": true,
+  "sourceFixOrRetryInOriginalRun": false,
+  "originalToolSessions": [
+    {
+      "id": "prepare",
+      "originalTool": 47561,
+      "toolExit": 0
+    },
+    {
+      "id": "types-green-pre01",
+      "originalTool": 45421,
+      "collectorPid": 39447,
+      "toolExit": 0,
+      "outerExit": 0,
+      "childExit": 0
+    },
+    {
+      "id": "lint-green-pre01",
+      "originalTool": 49293,
+      "collectorPid": 39891,
+      "toolExit": 1,
+      "outerExit": 1,
+      "childExit": 1
+    },
+    {
+      "id": "red01",
+      "state": "UNRUN_BLOCKED_BY_INITIAL_LINT_FAIL"
+    },
+    {
+      "id": "green01",
+      "state": "UNRUN_BLOCKED_BY_INITIAL_LINT_FAIL"
+    },
+    {
+      "id": "types-green01",
+      "state": "UNRUN_BLOCKED_BY_INITIAL_LINT_FAIL"
+    },
+    {
+      "id": "lint-green01",
+      "state": "UNRUN_BLOCKED_BY_INITIAL_LINT_FAIL"
+    }
+  ],
+  "lane": "RELEASED_PRODUCER_CLOSED_METADATA",
+  "historicalMissingInventoryCleanup": "NOT_ESTABLISHED",
+  "runtimeOrNativeQaGo": false
+}

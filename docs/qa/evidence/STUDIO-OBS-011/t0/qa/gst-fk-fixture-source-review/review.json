@@ -1,0 +1,62 @@
+{
+  "reviewer": "Quinn / independent source QA",
+  "decision": "SUPPORTED_EXACT_SOURCE_CORRECTION_ONLY_NO_WRITER_OR_RETRY_RELEASE",
+  "candidateManifestSha256": "f28852c72f6a778f9606116a5ceb284a231a6195e587b937be070bb316204556",
+  "reviewSha256": "87a4aaa9ff16c1bcff75efa6f2d89da7f11ceb502e86c189ddacf2551bbe88bb",
+  "auditSha256": "dcc7bf8c7b93a6ac2bf75421605f3f85e52ab19ec74698b152eb73601f29fa02",
+  "taskInputs": [
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gst-fk-fixture-source-review-intent.txt",
+      "sha256": "ef147a38a34f4dec2695f775ed24c130154a4c174be1bcb5f8a8ff6c814117b3"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gst-fk-fixture-source-review-context.json",
+      "sha256": "feb6368b67801d1e2d9ccdc3f736ef8bb747d695687278be834340e8092947fb"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gst-fk-fixture-source-review-preflight.json",
+      "sha256": "489c67d94306a03e343cde54b73d6930579fe363deeaafc90c6f36e312418bc4"
+    }
+  ],
+  "checks": {
+    "assignedPins": 24,
+    "manifestMembers": 18,
+    "mainOriginal": 506,
+    "migrationsOriginal": 22,
+    "seedOriginal": 1,
+    "completeCandidates": 3,
+    "newFixtureHelpers": 2,
+    "duplicateInstallRemovalCarried": true,
+    "orderedMethods": 80,
+    "originalAssertionExpressions": 751,
+    "nineModesPreserved": true,
+    "expectedCases": 99,
+    "sentinelInvocations": 11,
+    "patchesReconstructed": 4,
+    "ownershipAndTimersChanged": false
+  },
+  "evidenceLimits": {
+    "lifecycleObservedInsertFailures": 5,
+    "runtimeConstraint": "UNPROVEN",
+    "sessionCases": "UNEXECUTED44",
+    "full99XmlProof": false,
+    "assignmentCause": "OPEN",
+    "ownershipStallCause": "OPEN",
+    "successorRuntimeOrCompileOrSqlValidation": false,
+    "completeRemedy": false
+  },
+  "outsideScope": "Future unsealed two-site observer",
+  "releases": {
+    "sourceWriter": false,
+    "retry": false,
+    "native": false,
+    "mainReplay": false,
+    "generalW1": false,
+    "C8": false,
+    "laneACLifecycleCredit": false
+  },
+  "privateRawOrNativeActions": false,
+  "delegation": false,
+  "declaredBudgetUsd": 500,
+  "aggregateActualSpend": "unavailable"
+}

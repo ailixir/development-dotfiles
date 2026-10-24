@@ -1,0 +1,390 @@
+{
+  "scope": "PROVISIONAL_CLOSED_DEFAULT_PUBLIC_DIAGNOSIS_ONLY_NOT_FULL_EXECUTION_ASSESSMENT",
+  "atUtc": "2026-10-19T05:17:32.809717+00:00",
+  "rootDiagnosticSha256": "e9d0bbeba8160c1c177b913da872091a9118440903a9e1ba6b3251b5a59cf9dd",
+  "sourceHashes": {
+    "backend/build.gradle.kts": "fee7af874cc0875d8dd299f8f9e1a0739ae79347ba0b0de665c81931045cbe74",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475"
+  },
+  "closureNativeMarkers": {
+    "> Task :test FAILED": [
+      6487
+    ],
+    "> Task :retainOriginalGuidedCohort": [
+      6491
+    ],
+    "> Task :guidedIncrementalTest": [
+      6493
+    ]
+  },
+  "artifactFacts": [
+    {
+      "role": "closed-default-Replay-public-XML",
+      "sha256": "8782ad62192a4d1514c38a8ba320faf5e8c1ab5f8094da32d5e77a7787aed767",
+      "bytes": 1704561,
+      "mtimeNs": 1792386679978321422,
+      "mode": "0o600",
+      "stableAcrossRead": true,
+      "freshAfterCollectorStart": true
+    },
+    {
+      "role": "closed-default-cohort",
+      "sha256": "3a0d5100763ba7edfd782d82c6826d4f098803b984a209633c36d6c85c23065d",
+      "bytes": 101921,
+      "mtimeNs": 1792385297611814127,
+      "mode": "0o600",
+      "stableAcrossRead": true,
+      "freshAfterCollectorStart": true
+    },
+    {
+      "role": "model-budget-evidence-after-each",
+      "sha256": "1a2e0d5e1bcd08e529b5a0b9200d75809814c94b46a366aebfed00ee145d8a91",
+      "bytes": 14082,
+      "mtimeNs": 1792384326737272654,
+      "mode": "0o600",
+      "stableAcrossRead": true,
+      "freshAfterCollectorStart": true
+    },
+    {
+      "role": "model-budget-evidence-final",
+      "sha256": "1a2e0d5e1bcd08e529b5a0b9200d75809814c94b46a366aebfed00ee145d8a91",
+      "bytes": 14082,
+      "mtimeNs": 1792385292068517387,
+      "mode": "0o600",
+      "stableAcrossRead": true,
+      "freshAfterCollectorStart": true
+    },
+    {
+      "role": "responses-after-each",
+      "sha256": "82a1ab109cdb7489fdf30f2c5401e59f00962ab3c35012b96e50790be8e0980e",
+      "bytes": 17475,
+      "mtimeNs": 1792384327206273410,
+      "mode": "0o600",
+      "stableAcrossRead": true,
+      "freshAfterCollectorStart": true
+    },
+    {
+      "role": "responses-final",
+      "sha256": "88a36bc4a794b2530987a4274097c7dbc12098d834eea0870a4acf7c034b79e8",
+      "bytes": 18620,
+      "mtimeNs": 1792385292069112221,
+      "mode": "0o600",
+      "stableAcrossRead": true,
+      "freshAfterCollectorStart": true
+    },
+    {
+      "role": "privacy-final",
+      "sha256": "ffb613ea4105291a949e4ba6f559ddf48ead910d06b0024aaae72d3e7d75d075",
+      "bytes": 89772,
+      "mtimeNs": 1792385297082118972,
+      "mode": "0o600",
+      "stableAcrossRead": true,
+      "freshAfterCollectorStart": true
+    },
+    {
+      "role": "previous-invocation-after-each-response",
+      "sha256": "67790eed0603d647ff7ceb3822ac9f9db73ab6ff2780896c345371d5dc14365f",
+      "bytes": 3581,
+      "mtimeNs": 1792384308991770543,
+      "mode": "0o600",
+      "stableAcrossRead": true,
+      "freshAfterCollectorStart": true
+    }
+  ],
+  "xml": {
+    "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+    "name": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope()",
+    "tests": 46,
+    "failures": 1,
+    "errors": 0,
+    "caseSeconds": 18.246,
+    "exceptionType": "org.opentest4j.AssertionFailedError",
+    "expected": "FINALIZING",
+    "actual": "FAILED",
+    "sourceFileFrames": [
+      {
+        "file": "GuidedPublicationReplayIT.java",
+        "line": 32322
+      },
+      {
+        "file": "GuidedPublicationReplayIT.java",
+        "line": 20361
+      },
+      {
+        "file": "GuidedPublicationReplayIT.java",
+        "line": 24056
+      },
+      {
+        "file": "GuidedPublicationReplayIT.java",
+        "line": 20329
+      }
+    ],
+    "hasSuppressedFailure": false
+  },
+  "cohortFlags": {
+    "auditComplete": true,
+    "auditEvents": 312,
+    "budgetEvidenceComplete": true,
+    "declaredOutputCeiling": 4000,
+    "finalScansAttempted": true,
+    "modelEvidenceComplete": true,
+    "privacyComplete": true,
+    "producersDrained": true,
+    "responseEvidenceComplete": true,
+    "retentionFailures": 0
+  },
+  "invocation": {
+    "method": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope",
+    "invocationOrdinal": 12,
+    "variantOrdinal": 0,
+    "variant": "singleton",
+    "passed": false,
+    "afterEachComplete": true
+  },
+  "sessionFacts": [
+    {
+      "sessionOrdinal": 15,
+      "attempts": 7,
+      "modelKinds": {
+        "SOURCE_PLAN": 1,
+        "NEXT_ACTION": 6
+      },
+      "actualCounters": {
+        "modelInputTokens": 108097,
+        "modelOutputTokens": 28000,
+        "modelProposals": 7
+      },
+      "sessionLimits": {
+        "maxModelInputTokensTotal": 786432,
+        "maxModelOutputTokensTotal": 98304,
+        "maxModelProposals": 100
+      },
+      "sourcePlanObligations": 6,
+      "sourcePlanReferences": 3,
+      "allCallsEvaluatedBodyServedTerminalRecorded": true,
+      "allAttemptWiresFound": true,
+      "allFinalDispositionReadApplied": true
+    },
+    {
+      "sessionOrdinal": 16,
+      "attempts": 7,
+      "modelKinds": {
+        "SOURCE_PLAN": 1,
+        "NEXT_ACTION": 6
+      },
+      "actualCounters": {
+        "modelInputTokens": 108097,
+        "modelOutputTokens": 28000,
+        "modelProposals": 7
+      },
+      "sessionLimits": {
+        "maxModelInputTokensTotal": 786432,
+        "maxModelOutputTokensTotal": 98304,
+        "maxModelProposals": 100
+      },
+      "sourcePlanObligations": 6,
+      "sourcePlanReferences": 3,
+      "allCallsEvaluatedBodyServedTerminalRecorded": true,
+      "allAttemptWiresFound": true,
+      "allFinalDispositionReadApplied": true
+    },
+    {
+      "sessionOrdinal": 17,
+      "attempts": 7,
+      "modelKinds": {
+        "SOURCE_PLAN": 1,
+        "NEXT_ACTION": 6
+      },
+      "actualCounters": {
+        "modelInputTokens": 108097,
+        "modelOutputTokens": 28000,
+        "modelProposals": 7
+      },
+      "sessionLimits": {
+        "maxModelInputTokensTotal": 786432,
+        "maxModelOutputTokensTotal": 98304,
+        "maxModelProposals": 100
+      },
+      "sourcePlanObligations": 6,
+      "sourcePlanReferences": 3,
+      "allCallsEvaluatedBodyServedTerminalRecorded": true,
+      "allAttemptWiresFound": true,
+      "allFinalDispositionReadApplied": true
+    },
+    {
+      "sessionOrdinal": 18,
+      "attempts": 1,
+      "modelKinds": {
+        "SOURCE_PLAN": 1
+      },
+      "actualCounters": {
+        "modelInputTokens": 12609,
+        "modelOutputTokens": 4000,
+        "modelProposals": 1
+      },
+      "sessionLimits": {
+        "maxModelInputTokensTotal": 786432,
+        "maxModelOutputTokensTotal": 98304,
+        "maxModelProposals": 100
+      },
+      "sourcePlanObligations": 6,
+      "sourcePlanReferences": 3,
+      "allCallsEvaluatedBodyServedTerminalRecorded": true,
+      "allAttemptWiresFound": true,
+      "allFinalDispositionReadApplied": true
+    }
+  ],
+  "sessionOrdinalsAtPrivacyFinal": [
+    15,
+    16,
+    17,
+    18
+  ],
+  "fourthAxisInference": {
+    "axis": 4,
+    "basis": "Four accepted tracked sessions within this reset invocation; only one successful202 guided start per sequential axis and no other creation in the method. Public source/budget/response/privacy artifacts agree on four. Existing source checks must complete before the next axis start.",
+    "sameCsiEnvironmentAsAxis1NewTest": true,
+    "labelSecondLearningUsedAsEvidence": false
+  },
+  "boundedLogWindow": {
+    "leftPreviousAfterEachUtc": "2026-10-19T04:31:48.991771+00:00",
+    "rightCurrentAfterEachUtc": "2026-10-19T04:32:07.206273+00:00",
+    "exactAssertionTime": false,
+    "admittedActionGroups": [
+      {
+        "localGroupOrdinal": 1,
+        "timestamp": "2026-10-19T00:31:50.422922-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "navigate"
+      },
+      {
+        "localGroupOrdinal": 1,
+        "timestamp": "2026-10-19T00:31:50.966942-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "fill"
+      },
+      {
+        "localGroupOrdinal": 1,
+        "timestamp": "2026-10-19T00:31:51.267064-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "fill"
+      },
+      {
+        "localGroupOrdinal": 1,
+        "timestamp": "2026-10-19T00:31:51.834932-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "click"
+      },
+      {
+        "localGroupOrdinal": 1,
+        "timestamp": "2026-10-19T00:31:52.173003-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "click"
+      },
+      {
+        "localGroupOrdinal": 1,
+        "timestamp": "2026-10-19T00:31:52.495433-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "assert"
+      },
+      {
+        "localGroupOrdinal": 2,
+        "timestamp": "2026-10-19T00:31:54.978847-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "navigate"
+      },
+      {
+        "localGroupOrdinal": 2,
+        "timestamp": "2026-10-19T00:31:55.518929-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "fill"
+      },
+      {
+        "localGroupOrdinal": 2,
+        "timestamp": "2026-10-19T00:31:55.835738-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "fill"
+      },
+      {
+        "localGroupOrdinal": 2,
+        "timestamp": "2026-10-19T00:31:56.408536-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "click"
+      },
+      {
+        "localGroupOrdinal": 2,
+        "timestamp": "2026-10-19T00:31:56.747836-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "click"
+      },
+      {
+        "localGroupOrdinal": 2,
+        "timestamp": "2026-10-19T00:31:57.090415-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "assert"
+      },
+      {
+        "localGroupOrdinal": 3,
+        "timestamp": "2026-10-19T00:31:59.518799-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "navigate"
+      },
+      {
+        "localGroupOrdinal": 3,
+        "timestamp": "2026-10-19T00:32:00.040039-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "fill"
+      },
+      {
+        "localGroupOrdinal": 3,
+        "timestamp": "2026-10-19T00:32:00.386259-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "fill"
+      },
+      {
+        "localGroupOrdinal": 3,
+        "timestamp": "2026-10-19T00:32:00.922545-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "click"
+      },
+      {
+        "localGroupOrdinal": 3,
+        "timestamp": "2026-10-19T00:32:01.30602-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "click"
+      },
+      {
+        "localGroupOrdinal": 3,
+        "timestamp": "2026-10-19T00:32:01.652567-04:00",
+        "eventType": "GUIDED_ACTION_ADMITTED",
+        "obligationKind": "assert"
+      }
+    ],
+    "contextRefusals": [
+      {
+        "timestampUtc": "2026-10-19T04:32:05.758082+00:00",
+        "logger": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+        "closedRunnerCode": "CONTEXT_LOST",
+        "lineSha256": "96749834ed11d6c36b270eb4819c5d425befe98b04b69c502c2b9a019d48e0b2",
+        "matchesOneOfThreeObservedAuditSessionIds": false,
+        "exactFourthSessionIdentityBinding": "NOT_PRESENT_IN_PUBLIC_METADATA"
+      }
+    ],
+    "warningExactFailingSessionJoin": false
+  },
+  "missingPublicStartFacts": {
+    "GUIDED_START_FAILED": true,
+    "phase": true,
+    "loss": true,
+    "causeChain": true,
+    "firstStoppingWriter": true
+  },
+  "cause": "UNPROVEN",
+  "minimalRemedyPrepared": false,
+  "rawFailureMessageOrStackOrIdentityOrPrivatePathExported": false,
+  "privateArtifactReads": 0,
+  "sourceWrites": 0,
+  "nativeCalls": 0,
+  "wholeCollectorTerminalOrCoverageOrLaneCreditClaim": false,
+  "originalOwnedIdentityObservationGapRemains": true
+}

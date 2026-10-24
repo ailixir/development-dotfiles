@@ -1,0 +1,30 @@
+{
+  "kind": "ROOT_ACTUAL_SOURCE07_METADATA_PREPARATION_BOOTSTRAP_FAILURE",
+  "subject": "obs009-gateway80-offtree03-20261019",
+  "actualToolCallId": "7f2187",
+  "actualStatus": 1,
+  "separateExternalToolCompletion": true,
+  "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT",
+  "requestSha256": "f0d1fb6f0ed594c6c3d32124848946ea95eddee536e88afcdfeb78ed8f2ba2f5",
+  "rootScopeSha256": "820f4b12161b8b2229288a4f56e25a3c906469bdee98f14d4e6f8c8d93c78470",
+  "actualBashPid": 39213,
+  "actualBashParentPid": 17932,
+  "builtinReadStatus": 2,
+  "bufferBytes": 0,
+  "pythonAuthorLaunched": false,
+  "oldEDirectoryOpened": false,
+  "outsideDirectoryCreationAttempted": false,
+  "N03Created": false,
+  "currentSourceOrHolderQualified": false,
+  "actualRuntimeAuthority": false,
+  "credit": false,
+  "failedAttemptConsumedNoRetry": true,
+  "output": "/bin/bash: line 6: read: -N: invalid option\nread: usage: read [-ers] [-u fd] [-t timeout] [-p prompt] [-a array] [-n nchars] [-d delim] [name ...]\nSOURCE07_META_BUILTIN_READ_STATUS=2\nSOURCE07_META_AUTHOR_STATUS=1\nSOURCE07_META_CALLER_PID=39213\nSOURCE07_META_CALLER_PPID=17932\nSOURCE07_META_BUFFER_BYTES=0\ndeclare -r GATEWAY_S07_META_BUFFER=\"\"\n",
+  "concreteDefect": "Reviewed metadata caller uses read -N, unsupported by actual /bin/bash3.2.57. Same defect present in three inactive Source07 first-read delivery aids. Need separately reviewed Bash3.2-compatible delivery literals, without modifying sealed runtime/owner/source contracts.",
+  "recordWriter": {
+    "pid": 40159,
+    "parentPid": 17932,
+    "ownFutureStatus": null,
+    "externalCompletionOwed": true
+  }
+}

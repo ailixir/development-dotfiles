@@ -1,0 +1,112 @@
+{
+  "at": "2026-10-19T02:49:42.916965+00:00",
+  "purpose": "Import verified history only; skipped phases/current timestamps, no fabricated old verification, QA verdict, closure or lifecycle change",
+  "commands": [
+    {
+      "command": [
+        "node",
+        "tools/aiox-local.cjs",
+        "sdc",
+        "mark",
+        "STUDIO-OBS-015",
+        "develop",
+        "--status",
+        "skipped",
+        "--notes",
+        "Historical import at current timestamp. Story already QA Done. Develop verifier currently fails Done-before-close integrity; it is not marked passed. Existing development was completed before runtime reconciliation. Evidence: docs/qa/evidence/STUDIO-OBS-011/t0/po-historical-prep/audit.json. No prior verification invented."
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "node",
+        "tools/aiox-local.cjs",
+        "sdc",
+        "mark",
+        "STUDIO-OBS-015",
+        "review",
+        "--status",
+        "skipped",
+        "--notes",
+        "Historical independent Quinn CONCERNS and QA InReview-to-Done at story 0.1.21 imported. No new review or QA verdict. Reviewed source 9d18f5550ac830bd2164bf4b4261f6d10ec8fd43b837e4bf9e9c990dc7cb5884 differs from current later-story source. Existing QA provenance and historical limits retained. Evidence: po-historical-prep/audit.json.",
+        "--outcome",
+        "approved"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "node",
+        "tools/aiox-local.cjs",
+        "sdc",
+        "mark",
+        "STUDIO-OBS-015",
+        "close",
+        "--status",
+        "skipped",
+        "--notes",
+        "Historical administrative transaction imported, not rerun. Existing .ai/STUDIO-OBS-015-close.json and exactly one story/index closure key verified; current story and all eight protected sections equal recorded post-close hashes. No new closure, source verification or lifecycle transition claimed. Evidence: docs/qa/evidence/STUDIO-OBS-011/t0/po-historical-prep/audit.json."
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "node",
+        "tools/aiox-local.cjs",
+        "sdc",
+        "mark",
+        "STUDIO-OBS-008",
+        "develop",
+        "--status",
+        "skipped",
+        "--notes",
+        "Historical import at current timestamp. Story already QA Done. Develop verifier currently fails Done-before-close integrity; it is not marked passed. Existing development was completed before runtime reconciliation. Evidence: docs/qa/evidence/STUDIO-OBS-011/t0/po-historical-prep/audit.json. No prior verification invented."
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "node",
+        "tools/aiox-local.cjs",
+        "sdc",
+        "mark",
+        "STUDIO-OBS-008",
+        "review",
+        "--status",
+        "skipped",
+        "--notes",
+        "Historical independent Quinn CONCERNS and QA InReview-to-Done at story 0.3.18 imported. No new review or QA verdict. Reviewed source 50692d55e40807f67bf959f0d9672d9305d69b72ad693860506a3f7055e12dd3 differs from current later-story source. Actual new close HARD_FAIL: current-revision binding mismatch; close remains pending. Evidence: docs/qa/evidence/STUDIO-OBS-011/t0/po-historical-prep/audit.json.",
+        "--outcome",
+        "approved"
+      ],
+      "exit": 0
+    }
+  ],
+  "protectedBefore": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "d2fc7566a72616eab27a146de4e119dfb8a199bfda2c047cd90406a7b5c4f607",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "b6e2befdd32d3e882bdac1152ef7e6d0f9d0a9bec26245de2cb5c96f6bcb1b00",
+    "docs/stories/STUDIO-OBSERVED/README.md": "3ca0c9f1ec237de419e55374dcdf51a7e0921e29435b5459ddda191e8610cddb",
+    ".ai/STUDIO-OBS-015-close.json": "9a686bb5ef7c24aafeb63fe8ba7d2df0a02069ad9e4200c40637bd7c12f33644"
+  },
+  "results": {
+    "015": {
+      "status": "completed",
+      "currentPhase": null,
+      "stateSha256": "4c856bec898f139e787a035a400d49ac2a76e882335716952dd7d6d068de1184"
+    },
+    "008": {
+      "status": "running",
+      "currentPhase": "close",
+      "stateSha256": "3fe0ce7d3a2120bff777e72ee1146e2aa973c32daed836951165b1a0c09227b5"
+    }
+  },
+  "protectedAfter": {
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "d2fc7566a72616eab27a146de4e119dfb8a199bfda2c047cd90406a7b5c4f607",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md": "b6e2befdd32d3e882bdac1152ef7e6d0f9d0a9bec26245de2cb5c96f6bcb1b00",
+    "docs/stories/STUDIO-OBSERVED/README.md": "3ca0c9f1ec237de419e55374dcdf51a7e0921e29435b5459ddda191e8610cddb",
+    ".ai/STUDIO-OBS-015-close.json": "9a686bb5ef7c24aafeb63fe8ba7d2df0a02069ad9e4200c40637bd7c12f33644"
+  },
+  "finished": "2026-10-19T02:49:43.151009+00:00",
+  "protectedUnchanged": true,
+  "008CloseStillHardFail": true
+}

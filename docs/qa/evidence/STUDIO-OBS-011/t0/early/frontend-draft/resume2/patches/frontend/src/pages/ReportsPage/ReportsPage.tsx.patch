@@ -1,0 +1,11 @@
+--- a/frontend/src/pages/ReportsPage/ReportsPage.tsx
++++ b/frontend/src/pages/ReportsPage/ReportsPage.tsx
+@@ -141,7 +141,7 @@
+   const [saving, setSaving] = useState(false);
+ 
+ 
+-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
++  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+     setSelectedTab(newValue);
+   };
+ 

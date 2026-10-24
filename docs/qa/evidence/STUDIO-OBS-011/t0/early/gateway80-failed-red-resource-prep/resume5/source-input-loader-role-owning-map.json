@@ -1,0 +1,116 @@
+{
+  "sourceGeneration": 5,
+  "sourceFiles": {
+    "protocol.py": "94de31b89a2709a91b156b9226940fb3a94298901bf268c80a0b03d409a86a5e",
+    "custody.py": "e81ae1a019c78161863700bfe34f9abb71d9fb9040e464a7b3eaa5c73c8bddda",
+    "failed_gateway.py": "cc7f8f885e7d44d3d97a0c02b7070cf7898ffac7a1f7f0afca6fe2db0bbd13d9",
+    "factory.py": "350aab787687e4aefe29d2b620e44edb9e5c620673e39c54d69f68acfda30df8",
+    "installer.py": "35d08ee534b2341eac93930190ee1bc92edc89e8b0ca4605553c6add17c9785b",
+    "install-cli.py": "266bc6a32895f21ff9b47c389ad38da86138b59aebc14866dafe847047342897",
+    "entry.py": "3d110c53d0cf376ae3dfb81077b2dd4a7f936cd3ead9153b78126fff8f7f267d",
+    "buffer-bootstrap-inline.py": "2a61a924e45efbad31c4dcc9dc5f3eccb1753277f6ee0c90ab2df93eb3937e6c",
+    "buffer-verifier-inline.py": "bdd29949ce59a4b29f70046d29f8db31515a63d6778b039f913ebccddb3b47cc",
+    "shell-buffer-verify.py": "3f03d91cbb0fb122b489a7779c0239b8a25646bc138fc71c26a5c8fca1da1439",
+    "guard-failed-red.bash": "afd95b569e25bfb6f850615eaa9f6cf010508a1ae5f43eb70fbb4c005ddc1129",
+    "binding-functions.bash": "afd95b569e25bfb6f850615eaa9f6cf010508a1ae5f43eb70fbb4c005ddc1129",
+    "binding-wrapper.bash": "6fb120523eeddcf77e2b641c5eece93a1c324638631e6b0f3572bb7f0a27b6a7",
+    "install-loader.bash": "4b2ac6504c6ce14a09678530585a9b47f95ca4da0d02b17ef91dfdaec3b92662",
+    "contract.json": "5dcd8c276b9454cf2df1d7cc1e3ac2d9feb3d7e96561ef1578a8c1243f08f660"
+  },
+  "physicalRoles": {
+    "requestedLaunchBIN": {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13",
+      "sha256": "866e723f721119dc74a98c62fca2209db6cc9ef3f6b1ad3e6f751c58af2bb095"
+    },
+    "sampledProcessAPP": {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+      "sha256": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7"
+    },
+    "origArgv0CanonicalAPP": {
+      "path": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+      "sha256": "2e86b5cd2920c6cea9b318dc904c63291c376f615a3e64e91bafea25e0c442c7"
+    }
+  },
+  "selfTextConstraints": {
+    "reported": {
+      "kind": "SELF_REPORTED_TEXT_DIGEST",
+      "encoding": "STRICT_UTF8",
+      "normalization": "NONE",
+      "status": "COMPLETE",
+      "expectedUtf8Bytes": 44,
+      "expectedTextSha256": "6ca8f35c51bc4625b88aba368e0e3e6b52bd4f043902a68ceae684135a43d0f2",
+      "physicalPath": null,
+      "provenanceRoleOnly": "OTHER"
+    },
+    "origArgv0": {
+      "kind": "SELF_REPORTED_TEXT_DIGEST",
+      "encoding": "STRICT_UTF8",
+      "normalization": "NONE",
+      "status": "COMPLETE",
+      "expectedUtf8Bytes": 124,
+      "expectedTextSha256": "246e02e7d1db128f0eb0625c3692aad64a4bc811387aa4a58d4914b479242165",
+      "independentLiteralEqualityRequired": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+      "provenanceRoleOnly": "APP"
+    }
+  },
+  "selfTextPhysicalRole": false,
+  "utilityRoles": {
+    "/bin/ps": {
+      "path": "/bin/ps",
+      "sha256": "f2211a1d7ff5e5c2e034df4acf450e30ffeec4e5ed632f21948d7181a1c493b6"
+    },
+    "/usr/sbin/lsof": {
+      "path": "/usr/sbin/lsof",
+      "sha256": "8a76f446149b77c31d9b769ef7b0b2d4fa3550805303103b081886c5d8d68de4"
+    },
+    "git": {
+      "path": "/opt/homebrew/Cellar/git/2.43.2/bin/git",
+      "sha256": "5c9b91ebbfb0e2b6d759a082d3b9d18886d52e2fee333cd245b00561db632d8c"
+    }
+  },
+  "remainingPhysicalRoles": {
+    "node": {
+      "path": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+      "sha256": "9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a"
+    },
+    "helm": {
+      "path": "/opt/homebrew/Cellar/helm/4.2.0/bin/helm",
+      "sha256": "87c4f99aa4edc63a5536838123680bece0e63c51019e515b122ba27f6276a3c9"
+    }
+  },
+  "rawSelfReads": "Exactly two attributes in System.python; bounded conversion returns only metadata; orig literal independently required",
+  "ownerRulings": {
+    "paths": {
+      "Aria": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01/owner-ruling-Aria.json",
+      "Quinn": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01/owner-ruling-Quinn.json",
+      "root": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01/owner-ruling-root.json"
+    },
+    "validator": "protocol.owner_records/owner_expected",
+    "firstRead": "External raw ownerSHA checked before JSON, before pending/attempt/mkdir",
+    "notTemplatesOrPhaseAuthority": true
+  },
+  "codeReviewPaths": [
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code05-exact-review/manifest.json",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code05-exact-review/manifest.json"
+  ],
+  "loaders": {
+    "installer": "install-loader SAME verified CLI bytes; CLI same verified source manifest/helper bytes; factory derives all maps/7witnesses",
+    "runtime": "guard SAME verified entry bytes; entry authority SHA before parse then code SHA before compile; Unit owner/index/external metadata buffers before qualification",
+    "binding": "Actual readonly SAME variable verify before eval; no producer/reopen/settings change",
+    "completion": "Parent/operator actual completed status0 -> readonly bounded memory argv+externalSHA -> same rawSHA check before parse -> exact accumulated pending set/PID/parent/provenance -> numeric absence; no writer recursion",
+    "finalizers": "GUARD/INSTALL_LOADER/DIRECT_RUN/DIRECT_INSTALL_CLI or explicit CALLER tokens; selected cleanup complete before sole emission"
+  },
+  "authorityGraph": [
+    "code05source and exact independent reviews",
+    "three outside actual owner rulings against that exactcode",
+    "raw root install scope and approved current directory facts",
+    "complete finite input+7physical witness acquisition and PURE preflight",
+    "outside pending draft/attempt",
+    "exclusive N03 marker/actualopenedfact/same draft finalize",
+    "six exactcode+auth0600",
+    "SHA-pinned setup/current controls excluding self/future hashes",
+    "actual separately captured last-author completion and SAME readonly argv memory attestation",
+    "each distinct actual phase/QA/root/final/permit/wrapper/postclose"
+  ],
+  "actualRuntimeAuthority": false
+}

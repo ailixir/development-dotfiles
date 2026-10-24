@@ -1,0 +1,43 @@
+{
+  "phase": "lint",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-actual-final-lint01",
+    "pnpm",
+    "--config.package-manager-strict=false",
+    "run",
+    "lint"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T03:20:52.112169+00:00",
+  "sourceExclusions": null,
+  "node": "v24.20.0",
+  "pnpm": "10.33.0",
+  "collectorPid": 74829,
+  "rawOuterExit": 0,
+  "endedAtUtc": "2026-10-21T03:21:05.231381+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "pnpm",
+      "--config.package-manager-strict=false",
+      "run",
+      "lint"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T03:20:52.392906+00:00",
+    "elapsedSeconds": 12.83,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "c702886099dc77008d17c1ddcf28f837a92521c56b5664eeddfdee232e9c6c68",
+    "testInputStable": true,
+    "testInputDigestBefore": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "testInputDigestAfter": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc"
+  },
+  "resultSha256": "bb26fd509b4c4a519ec29ced099a2fe052e50dfd30f6cb1e107c0506b4951a88",
+  "logSha256": "c702886099dc77008d17c1ddcf28f837a92521c56b5664eeddfdee232e9c6c68",
+  "postGuardComplete": true,
+  "actualInputDelta": [],
+  "fullSourceDependenciesDistProtected21LinksActualCliBrowserEnvStable": true
+}

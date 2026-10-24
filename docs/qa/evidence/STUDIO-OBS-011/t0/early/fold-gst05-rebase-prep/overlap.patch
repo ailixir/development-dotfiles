@@ -1,0 +1,113 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java
+@@ -13,14 +13,14 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+ import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
+ import com.citi.put.checks.studio.guided.publication.GuidedPlanPublisher;
+-import com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorization;
++import com.citi.put.checks.studio.dispatch.DispatchAuthorization;
+ import com.citi.put.checks.studio.guided.publication.GuidedPublicationBaseRepository;
+ import com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceRepository;
+ import com.citi.put.checks.studio.guided.publication.GuidedPublicationProperties;
+ import com.citi.put.checks.studio.guided.publication.GuidedPublicationRepository;
+ import com.citi.put.checks.studio.guided.publication.ObservedReplayPins;
+ import com.citi.put.checks.studio.guided.publication.ObservedReplayProperties;
+-import com.citi.put.checks.studio.guided.publication.ObservedValidationClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.fasterxml.jackson.databind.JsonNode;
+ import com.fasterxml.jackson.databind.ObjectMapper;
+ import com.fasterxml.jackson.databind.node.ObjectNode;
+@@ -1719,7 +1719,7 @@
+   }
+ 
+   private JsonNode publish(String id, String key, JsonNode request) {
+-    var validator = org.mockito.Mockito.mock(ObservedValidationClient.class);
++    var validator = org.mockito.Mockito.mock(HttpRunnerDispatchClient.class);
+     var publisher =
+         new GuidedPlanPublisher(
+             repository,
+@@ -1730,7 +1730,7 @@
+             contracts,
+             org.mockito.Mockito.mock(ObservedReplayPins.class),
+             validator,
+-            org.mockito.Mockito.mock(GuidedPublicationAuthorization.class),
++            org.mockito.Mockito.mock(DispatchAuthorization.class),
+             access,
+             new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608),
+             new ObservedReplayProperties(
+@@ -1941,7 +1941,7 @@
+         ignored -> {
+           var runner =
+               org.mockito.Mockito.mock(
+-                  com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.class);
++                  com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.class);
+           org.mockito.stubbing.Answer<JsonNode> contextReply =
+               call -> {
+                 JsonNode context = call.getArgument(1);
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -18,7 +18,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
+ import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
+ import com.citi.put.checks.studio.secrets.SecretAuditLifecycle;
+@@ -467,7 +467,7 @@
+                     && secret.equals("PASS")));
+     sessions.installStopSender(dispatch::stop);
+     var observer =
+-        GuidedRunnerClient.class.getDeclaredMethod(
++        HttpRunnerDispatchClient.class.getDeclaredMethod(
+             "observeRequestBytes", java.util.function.Consumer.class);
+     observer.setAccessible(true);
+     observer.invoke(
+@@ -751,7 +751,7 @@
+         sessions.installStopSender(
+             (contextToStop, reason) -> stopWork.send(dispatch, contextToStop, reason));
+         var observer =
+-            GuidedRunnerClient.class.getDeclaredMethod(
++            HttpRunnerDispatchClient.class.getDeclaredMethod(
+                 "observeRequestBytes", java.util.function.Consumer.class);
+         observer.setAccessible(true);
+         observer.invoke(
+@@ -2093,7 +2093,7 @@
+     sessions.installStopSender(
+         (contextToStop, reason) -> stopWork.send(dispatch, contextToStop, reason));
+     var observer =
+-        GuidedRunnerClient.class.getDeclaredMethod(
++        HttpRunnerDispatchClient.class.getDeclaredMethod(
+             "observeRequestBytes", java.util.function.Consumer.class);
+     observer.setAccessible(true);
+     observer.invoke(
+@@ -3268,7 +3268,7 @@
+       SSLContext tls = SSLContext.getInstance("TLS");
+       tls.init(km.getKeyManagers(), tm.getTrustManagers(), new SecureRandom());
+       var receiver =
+-          new GuidedRunnerClient(
++          new HttpRunnerDispatchClient(
+               URI.create(cfg.path("runner").asText()),
+               tls,
+               () -> cfg.path("runnerToken").asText(),
+@@ -5238,8 +5238,8 @@
+     }
+   }
+ 
+-  private static GuidedRunnerClient client() {
+-    return new GuidedRunnerClient(
++  private static HttpRunnerDispatchClient client() {
++    return new HttpRunnerDispatchClient(
+         URI.create("https://localhost:" + RELAY.getAddress().getPort()),
+         TLS,
+         () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -5393,7 +5393,7 @@
+ 
+   private static String gstFixedFrame(StackTraceElement frame) {
+     String type = frame.getClassName(), method = frame.getMethodName();
+-    if (type.equals("com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient")) {
++    if (type.equals("com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient")) {
+       return switch (method) {
+         case "send" -> "CLIENT_SEND";
+         case "remaining" -> "CLIENT_DEADLINE";

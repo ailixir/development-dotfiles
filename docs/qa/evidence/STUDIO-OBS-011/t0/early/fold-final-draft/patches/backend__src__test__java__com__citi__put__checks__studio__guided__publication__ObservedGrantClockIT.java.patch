@@ -1,0 +1,11 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java
+@@ -109,7 +109,7 @@
+   private record Event(String kind, Instant value) {}
+ 
+   @SpyBean private JdbcTemplate jdbc;
+-  @SpyBean private GuidedPublicationAuthorization accounts;
++  @SpyBean private PublicationGrantAuthority accounts;
+   @SpyBean private ObservedReplayAuthorizer authorizer;
+   @Autowired private StudioService studio;
+   @Autowired private StudioAcceptanceService acceptance;

@@ -1,0 +1,154 @@
+{
+  "sourceOnly": true,
+  "executableValidators": [
+    "authorization_factory",
+    "validate_document",
+    "validate_document_links",
+    "validate_operation_entry_state"
+  ],
+  "commonRequired": [
+    "protocol",
+    "claimSet",
+    "guarantees",
+    "historicalIdentityUncertainty",
+    "unsupportedEvidence",
+    "credit",
+    "C8",
+    "cleanupAuthorized",
+    "sourceWrites",
+    "purpose"
+  ],
+  "roleRequiredFields": {
+    "ROOT_AUTHORIZATION": [
+      "authorizedBy",
+      "authorized",
+      "label",
+      "packetManifestSha256",
+      "sourceDigest",
+      "canonicalPythonRoles",
+      "directoryRoots",
+      "nodeCanonicalPath",
+      "nodeSha256",
+      "helmCanonicalPath",
+      "helmSha256",
+      "dependenciesRealpath",
+      "safeEnvironment",
+      "boundBasePath",
+      "previousFailedUnitClosure",
+      "previousFailedUnitProperlyClosedAndAdopted",
+      "independentCodeReviewPins",
+      "pendingOwnerRulingRefs",
+      "ownerRulingPins",
+      "holdFileSha256",
+      "candidateBaselineSha256",
+      "dependencyInventory",
+      "distModes",
+      "auxModes",
+      "actualFreshToolVersions"
+    ],
+    "OWNER_LOCAL_PROFILE_RULING": [
+      "owner",
+      "profileAuthorized",
+      "packetManifestSha256",
+      "independentCodeReviewPins",
+      "strongInitialSubjectReplacedOnlyForThisLocalProfile"
+    ],
+    "PHASE_DECISION": [
+      "authorizedBy",
+      "phase",
+      "authorized",
+      "releaseSha256",
+      "precedingReceipts"
+    ],
+    "ACTUAL_CLIENT_COMPLETION": [
+      "authorizedBy",
+      "actualCollectorExit",
+      "actualToolCompleted",
+      "separatelyCaptured",
+      "actualToolReference",
+      "journalSha256"
+    ],
+    "NEGATIVE_GUARD_STATUS": [
+      "authorizedBy",
+      "actualNegativeStatus",
+      "separatelyCaptured",
+      "sameOriginalHeldShell",
+      "denialSha256",
+      "actualToolReference"
+    ],
+    "GUARD_ADMISSION": [
+      "authorizedBy",
+      "negativeExitActualStatus",
+      "heldProofActualStatus",
+      "readonlyParentGuardInspected",
+      "heldProofSha256",
+      "negativeStatusSha256",
+      "heldProofActualCompletionSha256"
+    ],
+    "ACTUAL_PHASE_ARCHIVE_QA": [
+      "reviewer",
+      "actualPhaseAndArchiveReviewed",
+      "mandatoryFindings",
+      "immutableTuple",
+      "ownerRulingPins"
+    ],
+    "ACTUAL_QA_ROOT_ADOPTION": [
+      "authorizedBy",
+      "actualPhaseAndArchiveQaAdopted",
+      "actualQaReviewName",
+      "actualQaReviewSha256",
+      "ownerRulingPins"
+    ],
+    "FINAL_CLOSE_PERMIT": [
+      "authorizedBy",
+      "issuedAtEpoch",
+      "actualFinalStatus",
+      "finalResultAndReadinessSeparatelyInspected",
+      "expectedWrapperExit",
+      "readinessSha256",
+      "finalResultSha256",
+      "ownerRulingPins",
+      "actualToolReference",
+      "finalActualCompletionSha256"
+    ],
+    "ACTUAL_WRAPPER_RESULT": [
+      "authorizedBy",
+      "actualWrapperExit",
+      "separatelyCaptured",
+      "allowCloseSha256",
+      "actualToolReference",
+      "gateActualCompletionSha256"
+    ]
+  },
+  "strictness": "All fields are mandatory at their reached stage; exact purposes/types/roles/closed scope/raw pins/canonical paths are checked. Unknown future derived pending facts must remain null. Required predecessor, actual completion, inspection and root authority links are checked before write. Source9 does not manufacture observations or tool statuses.",
+  "pendingOnlyNullFields": [
+    "holdFileSha256",
+    "candidateBaselineSha256",
+    "dependencyInventory",
+    "distModes",
+    "auxModes",
+    "actualFreshToolVersions",
+    "ownerRulingPins"
+  ],
+  "pendingRequiredExteriorInputs": [
+    "independentCodeReviewPins",
+    "pendingOwnerRulingRefs",
+    "previousFailedUnitClosure",
+    "canonicalPythonRoles",
+    "all existing directory/tool/source/environment bindings"
+  ],
+  "currentControlPolicy": {
+    "uid": "ACTUAL_CURRENT_UID",
+    "regular": true,
+    "mode": 384,
+    "links": 1,
+    "metadataBeforeBodyAndInterpretation": true
+  },
+  "publicSourceReviewPolicy": {
+    "uid": "ACTUAL_CURRENT_UID",
+    "regular": true,
+    "mode": 420,
+    "links": 1
+  },
+  "roleDataSources": "Exterior independently pinned root request plus exact complete current private raw pin map; no self-pinned control or current-state cache."
+}

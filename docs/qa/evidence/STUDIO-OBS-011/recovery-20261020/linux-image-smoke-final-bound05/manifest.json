@@ -1,0 +1,51 @@
+{
+  "kind": "D2_FAILURE_ONLY_DIAGNOSTIC_BINDING07",
+  "files": [
+    {
+      "path": "future-smoke.sh",
+      "sha256": "ea56c0ef2c45b4107a726b3c26cfd5cb35a96e51d18820da5d28463f6a414455"
+    },
+    {
+      "path": "fixture.mjs",
+      "sha256": "b1d881b1d1a0669c83b1e630dbebd87b31bfa02b921b7a68dfeeb2d066dfb9a1"
+    },
+    {
+      "path": "bindings.json",
+      "sha256": "1c80b87ccdeaed683cacd259554a6a118deced2d675d916cc6d150d58b77f55e"
+    },
+    {
+      "path": "future-command-and-bindings.json",
+      "sha256": "0cfe4005c31f82cccc428b8197af4f417b67fc83073956e5293ffe684c1bb3b9"
+    }
+  ],
+  "measurementFactsSha256": "49db76a0e97aba8406edd27e2ef37c644c573ed5a47af9c5a29a0e4b33832d47",
+  "sourceCorrectionSuccessor": {
+    "ownerManifestSha256": "1b6ac6c046dd173aede93a492491533b4d9156996083698f832ff54ee9a5c315",
+    "sourceQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-correction01/independent-qa/manifest.json",
+      "sha256": "d5c33394a4c5a61d5fe2ab17d541f2473f89d7e43615305e1542e90c13f08cdd",
+      "bytes": 1179
+    },
+    "canonicalShell": {
+      "path": "/bin/bash",
+      "sha256": "41e7f937a0d2e7e0bc03884595f54f7a892e468087519de1fc53e177b2503308",
+      "mode": "0o555",
+      "versionFirstLine": "GNU bash, version 3.2.57(1)-release (arm64-apple-darwin23)"
+    },
+    "historicalScriptSha256": "2b46b5e901df833ce11f570284516515dac8ca48df0119f6a3c97723fbdbc0ad",
+    "candidateScriptSha256": "ea56c0ef2c45b4107a726b3c26cfd5cb35a96e51d18820da5d28463f6a414455"
+  },
+  "inspectionDiagnosticSuccessor": {
+    "ownerManifestSha256": "dc3c2724fbf0e7f79abba0aa2ce31a60058fa86757e42b02fc1e9ccfd0455803",
+    "fixtureSha256": "b1d881b1d1a0669c83b1e630dbebd87b31bfa02b921b7a68dfeeb2d066dfb9a1",
+    "schemaSha256": "9015f9683d7765e4dd207d07a9eaa6f32426de698491256024d2a395d49688bb",
+    "sourceQa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation01/independent-qa/manifest.json",
+      "sha256": "fb06b248b27c55f7e67171698381becd60b8b08172374173aa7e7bbf7eb0ce67",
+      "bytes": 1224
+    },
+    "historicalFixtureSha256": "4a6c8474c7c609c25b3c40ea3116094eb9e504d5b3da35f66fe730fdf9f89f91",
+    "failureOnly": true
+  },
+  "executionReleased": false
+}

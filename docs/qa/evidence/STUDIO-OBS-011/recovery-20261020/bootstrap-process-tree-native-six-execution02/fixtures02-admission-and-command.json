@@ -1,0 +1,37 @@
+{
+  "label": "obs009-recovery-20261020-bootstrap-native-six02",
+  "argv": [
+    "pnpm",
+    "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.fixtures.config.ts",
+    "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+    "--minWorkers=1",
+    "--maxWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/bootstrap-six-raw02/vitest.json"
+  ],
+  "cwd": "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+  "rawReportPath": "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/bootstrap-six-raw02/vitest.json",
+  "rawLogPath": "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/bootstrap-six-raw02/vitest.log",
+  "driverPid": 72979,
+  "directExistingRouting": true,
+  "runRunnerFixtureCollectorCalled": false,
+  "fileNameFilters": [
+    "test/fixtures-tier/observed-bootstrap-process-tree.test.ts"
+  ],
+  "testNamePattern": null,
+  "configGlobalSetupUnchanged": true,
+  "nativeExecutionCount": 1,
+  "caffeinateArgv": [
+    "/usr/bin/caffeinate",
+    "-i"
+  ],
+  "rootAdmissionSha256": "0eba6bd0619f8d070e2a240cf0b05d6743ca2377cf0b211bde9d133cd5e5e68d",
+  "continuousAwakeClaim": false
+}

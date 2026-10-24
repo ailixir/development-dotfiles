@@ -1,0 +1,207 @@
+--- a/docs/runbooks/studio-runner.md
++++ b/docs/runbooks/studio-runner.md
+@@ -2,6 +2,15 @@
+ 
+ Current integration setup: [local filesystem and remote AWS S3](studio-integrations.md).
+ That guide supersedes the earlier Sonic/fake-store setup notes below; cloud provisioning remains deferred.
++
++> **Dated static re-audit — 2026-10-18, STUDIO-OBS-011 C-OBS009-3 (G11).** Sections 1–3
++> and 5–13 were compared with the current single-path source and chart templates. The dated
++> V1 assembly/audit records below remain historical; current corrections are marked at each
++> affected section. This is source review, not a render, image, cluster or production acceptance
++> result. Section 4 and all of section 14 remain byte-identical. In particular, §14.4 already
++> contains the UAT upgrade note; its real deployment prerequisites remain open. The §2 connector
++> row below corrects the historical gap recorded in unchanged §14.6. See the STUDIO-OBS-010
++> [guided-authoring runbook](studio-guided-authoring.md) for sessions, drain and abandon.
+ 
+ | Field | Value |
+ |---|---|
+@@ -70,6 +79,14 @@
+ 
+ ## 1. Chromium and the sandbox
+ 
++> **Re-audit — 2026-10-18 (single observed path).** The historical two-writable-mount
++> description below covers replay scratch and `/dev/shm`; guided mode additionally mounts `/tmp`
++> and a separate bounded journal `emptyDir` (`studio-runner-deployment.yaml`). The journal is
++> disjoint from scratch and trust/credential mounts. A local object-store volume is another
++> provider-dependent writable mount. The image's current `CMD` and PID/drain requirements are
++> in unchanged §§4/14.5, rather than the old bare-exec wording below. Non-root, sandbox,
++> read-only root and the unresolved in-cluster sandbox proof remain unchanged.
++
+ *Implements architecture §9.3 ("Run non-root … no privileged mode, restricted service-account
+ access, CPU/memory limits, writable per-run scratch and `/dev/shm`"; "Prove sandbox startup in
+ staging; do not disable it silently to make the image run") and ADR-001 §8.*
+@@ -120,6 +137,16 @@
+ 
+ ## 2. Egress and approved destinations
+ 
++> **Re-audit — 2026-10-18 (single observed path).** The current network-policy template
++> permits API and worker ingress to the runner TLS listener. `callback-api` includes the ordinary
++> API callback port and, only with guided mode on, the TLS connector port (default 8443). The
++> table reflects those two source corrections. The replay callback's ordinary API port has not
++> been made TLS by this note. The separate API guided-ingress policy, narrow backend trust store
++> and certificate pin requirements remain §14.2; no extra destination class is added. The broad
++> object-store IP rule and CNI/approved-target proof still need Platform/SRE and Security evidence.
++> Observed grants bind approved destinations and secret-origin policy; the old job-envelope
++> statement below is historical, not a claim that observed policy is absent.
++
+ *Implements architecture §9.3 ("Permit runner access to the callback API, Sonic, approved targets,
+ and controlled DNS only") and ADR-001 §9.*
+ 
+@@ -128,8 +155,8 @@
+ 
+ | Direction | Peer | Why |
+ |---|---|---|
+-| Ingress | the **worker** pods only, on the runner's Service port | §8.4: the internal routes are not public and the MFE never talks to the runner. Dispatch runs on the worker profile, not the API's |
+-| Egress | the **API** pods, on the API Service port | `callback-api`: admission and progress. Without this the terminal report never arrives |
++| Ingress | the **API and worker** pods, on the runner's TLS Service port | Internal observed validation/dispatch and guided control; the MFE never talks to the runner |
++| Egress | the **API** pods, on the ordinary API Service port and, with guided mode on, `studioRunner.guided.tlsConnector.port` (default 8443) | `callback-api`: replay admission/progress on the ordinary port; guided callbacks/claim on the TLS connector port |
+ | Egress | the object store, port from a values key, with metadata/link-local/private ranges excepted | `object-store` |
+ | Egress | the approved targets, **currently empty** | `target-page` — see below |
+ | Egress | `kube-dns` | Not a destination class. Without it every destination becomes a **silent hang** instead of a refusal |
+@@ -163,6 +190,14 @@
+ ---
+ 
+ ## 3. Evidence storage and expiry
++
++> **Re-audit — 2026-10-18 (single observed path).** Replay evidence remains under the
++> execution/attempt key (`ManifestKeys`); the API applies the snapshot's video status and serves
++> through `ExecutionVideoService`/`VideoObjectServer`. Guided learn-run recordings use the separate
++> `GuidedSessionEvidenceService` path described in the guided-authoring runbook. This review does
++> not certify any cloud principal, endpoint, real lifecycle deletion or credential denial. The
++> current local/AWS S3 integration guide at the top of this document supersedes older Sonic setup
++> wording, while logical expiry and separate writer/reader responsibilities remain.
+ 
+ *Implements architecture §6.2.*
+ 
+@@ -255,6 +290,15 @@
+ 
+ ## 5. Stuck runs — the reapers, the ledger states, and what you may do by hand
+ 
++> **Re-audit — 2026-10-18 (single observed path).** The authoritative dispatch vocabulary
++> is `QUEUED → CLAIMED → DISPATCHING → ADMITTED → RUNNING → FINALIZING → DONE`
++> (`DispatchState`, enforced by `StudioDispatchLedgerStatements`). The shorter table below is a
++> historical explanation, not today's exact stored-state vocabulary: there is no `DISPATCHED`
++> state. Existing reaper/kill-switch transitions, idempotency and the prohibition on manual ledger
++> edits still apply. Guided session lease/teardown state is a different state machine; use the
++> guided-authoring runbook and never redispatch an ambiguous browser action. The explicit
++> dispatcher setting and its packaged-default/Java-default distinction remain as stated.
++
+ *Implements architecture §5.4 (recovery and the reapers) and §5.1.1 (the dispatch ledger).
+ Story 10.18b.*
+ 
+@@ -301,6 +345,13 @@
+ 
+ ## 6. The kill switch
+ 
++> **Re-audit — 2026-10-18 (single observed path).** `StudioAcceptanceService` still checks
++> `studio.execution.enabled` before test lookup; `StudioDispatcher` closes queued/claimed work
++> separately from dispatcher enablement. The switch is a replay-admission control, not a claim
++> that a guided learning session has been cancelled or its browser teardown confirmed. Guided
++> stop/drain/abandon follows the separate guided-authoring procedure; do not infer that disabling
++> replay stops an admitted native action. Reads and recovery remain available.
++
+ *Implements architecture §8.5 and BRD §9 ("a kill switch rejects new executions and closes queued
+ undispatched work explicitly. Already-admitted runs finish/report; reads and recovery remain
+ available"). Story 10.18b, AC-23a.*
+@@ -333,6 +384,13 @@
+ mid-session and orphaning their recordings.
+ 
+ ## 7. SSE — the streaming route, and what a disconnect does *not* mean
++
++> **Re-audit — 2026-10-18 (single observed path).** Existing execution SSE/GET/video
++> authorization and the distinct stream Ingress remain the replay observation path. Guided
++> sessions have their own session/evidence routes; an SSE disconnect never grants authority to
++> cancel or replay an action. `ExecutionVideoService` authorizes via the execution snapshot before
++> reading any object. Real proxy/cookie/idle-timeout/cross-replica observations remain unproven;
++> nothing in this text correction closes SPK-02 or introduces sticky sessions.
+ 
+ *Implements architecture §5.5 and the [SSE viability note](../architecture/studio-sse-viability.md).
+ Story 10.18b, AC-13a.*
+@@ -408,6 +466,13 @@
+ 
+ ## 8. Manifest recovery
+ 
++> **Re-audit — 2026-10-18 (single observed path).** `ManifestKeys` derives
++> `studio/{csiId}/{testId}/{executionId}/{attemptId}.result.json` and the matching `.webm` from
++> immutable identity. `PendingReaper`/`RunningReaper` reconcile durable execution state; recovery
++> reads evidence and does not replay an uncertain browser action. Guided journal/receipt ownership
++> is separate and must not be reconstructed by deleting a journal or choosing a stray recording.
++> Real-store consistency and physical deletion timing remain external measurements.
++
+ *Implements architecture §6.2 and §5.4. Story 10.18b.*
+ 
+ The runner writes evidence to the private store under a fixed prefix and then reports the manifest
+@@ -431,6 +496,14 @@
+ (`ED-03`, OPEN).
+ 
+ ## 9. Identity and authentication — what is closed, and what still exists
++
++> **Re-audit — 2026-10-18 (single observed path).** The three configured bypasses and
++> local-only developer filter remain distinct; no Core identity, Vault policy or credentialed-pilot
++> acceptance is inferred from chart defaults or tests. Current secret access still uses the
++> development entitlement policy and `allowedOrigins`, and the runner has no Vault credentials.
++> The dated compile-path descriptions below are historical. The rebased schema drops plaintext
++> secrets in `V18__drop_plaintext_secrets.sql`, so the older `V25` citation records the former
++> migration numbering. This is a citation correction, not a migration edit or a change to ED-02.
+ 
+ *Implements architecture §9.1. Story 10.18b, AC-19a and AC-20. External dependency **`ED-02`**.*
+ 
+@@ -614,6 +687,11 @@
+ 
+ ## 10. CSRF — an open prerequisite, not a solved problem
+ 
++> **Re-audit — 2026-10-18 (single observed path).** Source still reads `put_session`,
++> enables credentialed CORS and disables Spring CSRF. No platform cookie/SameSite evidence or
++> written accepting control was supplied by this re-audit. The open prerequisite, owner and
++> public-contract change constraint below remain; guided/secret routes do not waive them.
++
+ *Implements architecture §9.1 ("cookie-authenticated mutations require a documented CSRF control").
+ Story 10.18b, AC-21a. Blocked half: **SPK-02 question 7**.*
+ 
+@@ -639,6 +717,14 @@
+ `ED-06`, OPEN.
+ 
+ ## 11. Spring configuration delivery
++
++> **Re-audit — 2026-10-18 (single observed path).** Mounted Spring properties, reserved
++> profile selectors and managed TLS/guided properties remain chart-owned. Current gateway beans
++> bind `studio.gateway.*`; the `studio.compile.gateway.*` wording below is historical and is not
++> a current bean prefix. The chart helper still enumerates legacy compile-gateway override guard
++> spellings; this source review does not assert that those guards protect every new gateway alias.
++> Use dedicated chart gateway values and §14 TLS/token inputs, and retain this guard discrepancy
++> for architecture/DevOps disposition. Secret files and profile/source restrictions are unchanged.
+ 
+ Story 10.27 resolves the AC-18 escalation from story 10.18b. Backend and worker
+ `configOverrides` now render into separate `*-properties` ConfigMaps containing
+@@ -686,6 +772,15 @@
+ ---
+ 
+ ## 12. Rollback — how to take a Studio release back out
++
++> **Re-audit — 2026-10-18 (single observed path).** The old artifact-1 release order in
++> (e) is already marked superseded. The historical V19 hand-cutover and V20–V25 migration citations
++> in (c)/§9 do not describe the rebased classpath: current `V19__guided_governance.sql` is an
++> ordinary Flyway migration, and the Studio lineage is V12–V22. Do not run the old V19 cutover
++> against this schema or assume an artifact-1 application supports the rebased database. Database
++> changes remain forward-only; chart rollback cannot restore a removed schema or evidence.
++> Current upgrade inputs and quiet-window requirements are §14.4 and the guided-authoring runbook.
++> No rollback rehearsal, certificate issuance or deployment is claimed by this note.
+ 
+ *Added by story **10.19** (AC-9), 2026-09-17. **This epic had never written one down**: before this
+ section, the string "rollback" did not occur in this runbook, in `docs/architecture/studio-execution.md`,
+@@ -891,6 +986,14 @@
+ ---
+ 
+ ## 13. Plain-English translation through Vertex AI
++
++> **Re-audit — 2026-10-18 (single observed path).** The model transport now serves
++> observed guided authoring (`studio.gateway.*`); saved observed replay makes no model call.
++> The shipped UAT/production gateway literals and dedicated ConfigMap references below remain
++> configuration, not proof of a live provider request, schema/quota acceptance or user pilot.
++> Guided session/publication and the exact build/catalog/policy inputs additionally follow §14
++> and the guided-authoring runbook. This does not authorize enabling a provider, replacing an
++> approved model or weakening any identity, TLS or authorization gate.
+ 
+ Studio's supported user path starts with ordinary instructions. The API translates them through
+ Vertex AI before review and confirmation; operators must never ask a user to replace those

@@ -1,0 +1,75 @@
+{
+  "scope": "affected documentary/in-memory checks only; unaffected substantive source review reused",
+  "errors": [],
+  "currentChecksumRows": 32,
+  "predecessorChecksumRows": 30,
+  "inheritedReviewChecksums": {
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-pm-review-r2": 6,
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020-qa-review": 5
+  },
+  "context": {
+    "classification": "HISTORICAL_CONTEXT_ONLY_NON_NORMATIVE",
+    "origin": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/resume-20261020/coordinator-plan.json",
+    "capturedAtUtc": "2026-10-20T03:04:55.893775+00:00",
+    "snapshot": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs010-draft-resume20261020b/context/coordinator-plan.historical.json",
+    "rawSha256": "8beed302c7f28116935df37430ef5f3162710fced66a15161d3de86ba081d13b",
+    "bytes": 4901,
+    "readCountThisCorrection": 1,
+    "contentConfersAuthority": false,
+    "liveOriginByteStabilityRequiredForApproval": false,
+    "originalCapturedPlanHistoricalProvenance": {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/resume-20261020/coordinator-plan.json",
+      "sha256": "bf4059ed78e2e7d8f629551b16f7b95d08101a30bc8beb9385df3e3a8ba20ebb",
+      "bytes": 3836
+    },
+    "oldBytesAvailableOrReconstructed": false,
+    "oldHashClaimedCurrent": false,
+    "interpretation": "PM recorded mutable coordinator progress drift, not a product defect. Only this immutable snapshot is sealed; future live-plan edits neither invalidate fixed product/document bases nor grant authority.",
+    "mutableOriginReadByReview": false
+  },
+  "targets": [
+    {
+      "target": "docs/runbooks/studio-guided-authoring.md",
+      "baseExists": true,
+      "baseSha256": "9727657a78268acda3e95d634da1eeeeaff36680b4691ab3f0f3d5fcb6d00855",
+      "verification": "byte-identical patch/preview; exact predecessor QA reconstruction reused"
+    },
+    {
+      "target": "docs/qa/evidence/studio-observed-authoring/usability-pilot.md",
+      "baseExists": false,
+      "baseSha256": null,
+      "verification": "byte-identical patch/preview; exact predecessor QA reconstruction reused"
+    },
+    {
+      "target": "docs/qa/evidence/studio-observed-authoring/release-readiness.md",
+      "baseExists": false,
+      "baseSha256": null,
+      "verification": "new independent exact reconstruction"
+    },
+    {
+      "target": "docs/qa/evidence/studio-observed-authoring/devops-handoff.md",
+      "baseExists": false,
+      "baseSha256": null,
+      "verification": "new independent exact reconstruction"
+    },
+    {
+      "target": "docs/stories/10.34.story.md",
+      "baseExists": true,
+      "baseSha256": "14c69d86bf81ebac22411d93961aa61164577110b13772fd3c30759921c9af33",
+      "verification": "byte-identical patch/preview; exact predecessor QA reconstruction reused"
+    }
+  ],
+  "fixedInputsVerified": 61,
+  "outputsVerified": 31,
+  "unchangedPayloadsCompared": 17,
+  "ownPathOnlyPayloadsCompared": 3,
+  "architectureObjects": 21,
+  "RBRRows": 19,
+  "releaseRows": 70,
+  "stagingACs": 33,
+  "mandatoryCorrectionSatisfied": "PM010-R1-LANE-LOCATORS; direct R1 a\u2013c/R1 d/rule \u00a71.4 citations only, credit pending",
+  "oldPlanStabilityConditionInherited": false,
+  "productTestsRun": false,
+  "packetCodeExecuted": false,
+  "patchApplicationPerformed": false
+}

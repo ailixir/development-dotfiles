@@ -1,0 +1,48 @@
+{
+  "reviewer": "Aria",
+  "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+  "subjectManifestSha256": "fd7cce1e0ee7da9c41cb0746f00b78b35fd41269f822776719ba1d2f6f18aa6f",
+  "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+  "mandatoryFindingCount": 1,
+  "mandatoryFindings": [
+    {
+      "id": "C8JQ01-ARCH-01",
+      "mandatory": true,
+      "severity": "HIGH",
+      "category": "Total closed typed projection of failed NativeWait",
+      "locations": [
+        "qualification_controller.py:335 Invocation.validate_native",
+        "qualification_controller.py:344 Invocation.cleanup_owned",
+        "qualification_controller.py:368 Invocation.snapshot",
+        "schemas.json NativeWait/QualificationResult"
+      ],
+      "establishedBehavior": "Quinn actual-controller pair: invalid status/archive sentinel strings correctly reject with HOLD/NATIVE_UNKNOWN but snapshot forwards them unchanged. Aria actual-controller pair: truthy non-dict NativeWait records primarySCHEMA/cleanupCLEANUP_UNCONFIRMED with retained ownership, then snapshot raises AttributeError and returns no closed result. Positive parser remains typed and closes.",
+      "impact": "Rejected upstream adapter values can cross the declared closed public result boundary or prevent final result production. No real secret disclosure, false qualification, actual native action or resource leak is claimed.",
+      "requiredCorrection": "One total typed native-result projection on success and every failure. Preserve independently validated scalar facts, use null/UNKNOWN and closed reason literals for invalid/unavailable values, never serialize rejected arbitrary values or call unsafe methods on an unvalidated container. Preserve primary/cleanup/known child/wait/owner references and consumed cap; no retry, invented terminality or status conversion.",
+      "requiredPairs": [
+        "Valid native result preserves pending-QA behavior.",
+        "Malformed status/hash/wait/container including bool types yields a closed serializable failed record without arbitrary values or escaped snapshot error.",
+        "Primary and cleanup remain separate; unconfirmed actual resources remain retained; known confirmed failed drain stays failed."
+      ],
+      "evidence": [
+        "targeted_checks.py",
+        "targeted-attempt01.stdout",
+        "qa-binding.json"
+      ],
+      "sameCategoryAsQuinn": "C8JQ01-QA-01"
+    }
+  ],
+  "sourceOnly": true,
+  "conditions": [
+    "This is whole review of selected inactive definitions/harness/interfaces, not an installed ordinary adapter/controller integration. Complete ordinary native-adapter implementation and exact root caller must be independently reviewed/pinned under ORDINARY_ADAPTER and external loader authority before actual use; no unreviewed root-helper bypass.",
+    "Production fragment0153 remains byte-identical.135source+222flow/15 current Python checks are fake-boundary proofs;24 Java vectors are declared and0 executed. Prior921 proof is exact reused attribution, not replayed or added to357.",
+    "One cooperative READY yield with reverse AST proof is disclosed. Models prove neither actual threads/cross-process startup/timing nor installed peer/TLS/Unix/ABI behavior. Early enrollment fails closed; no deterministic real startup scheduling proof or Gradle/Java/subtree exemption is granted.",
+    "All compiler/JDK/Jackson/classfiles/keytool/password generator/PKCS12/fixture/canonical tools, actual blocked write, ordinary admission/current source/resource/custody/alias/native wait/output/archive/drain facts remain unqualified. No cache/API/provider/identity mechanism or new probe is selected.",
+    "Actual current Gateway/source04 proper failed close/archiveQA/final/separate60s permit/wrapper1/postclose0/actualQAroot precedes any heavy qualification. New ordinary holder/lease/input/mode/compile/native/archiveQA/final/permit/guard/postclose/root duties remain owed.",
+    "Source09 limited profile is NOT integrated here; C8 ordinary gate and source-window/root731/T0/NONIR/business cap1/Order17/default4000/Replayb8f9 restoration/at most one restored compile0/IR/skips/21externalinputs/lifecycle holds remain unchanged. Private C5/C212 closed; earlier FAILED cause/stage UNKNOWN.",
+    "No source-window, installation, namespace, fixture, compiler, native, readiness, permit, cleanup or credit authority is issued; correction needs exact new source review."
+  ],
+  "actualOperationalAuthority": false,
+  "javaVectorsExecuted": 0,
+  "credit": false
+}

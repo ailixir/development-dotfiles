@@ -1,0 +1,12 @@
+/**
+     * Returns the total number of times that
+     * the thread associated with this {@code ThreadInfo}
+     * waited for notification.
+     * I.e. the number of times that a thread has been
+     * in the {@link java.lang.Thread.State#WAITING WAITING}
+     * or {@link java.lang.Thread.State#TIMED_WAITING TIMED_WAITING} state.
+     *
+     * @return the total number of times that the thread
+     * was in the {@code WAITING} or {@code TIMED_WAITING} state.
+     */
+    public long getWaitedCount()

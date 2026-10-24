@@ -1,0 +1,316 @@
+{
+  "status": "ACTUAL_TIMING_COMPONENT_INDEPENDENTLY_QUALIFIED_FINAL_T5_PENDING",
+  "beforeWorksheetReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-t5-result-assembly07/timing-join-worksheet.json",
+    "sha256": "e0a15d7b40d4082acb07e5983a2947c7b4189798641122c3c2c24cb1ca84ad0e",
+    "bytes": 14222
+  },
+  "closedProjectionReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection08/closed-projection.json",
+    "sha256": "de3d5cf1fc05737945800395769067c921e38749de982a641590e4ec2ebcb393",
+    "bytes": 513882
+  },
+  "componentQaReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/whole-projection08-closed-component-review.json",
+    "sha256": "84297eedf025cd909a6ca1080d5622bbf244dd5d4b087c7a28aa5793a8a61765",
+    "bytes": 6034
+  },
+  "rows": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "invocations": 13,
+      "beforeSecondsDecimal": "26.755",
+      "afterSecondsDecimal": "26.683",
+      "signedDeltaSecondsDecimal": "-0.072",
+      "beforeXmlSha256": "2d9ac059fa294261e2e31b02f03ba968426afdab874b9bf6ecabbc7abbff7ce7",
+      "afterXmlSha256": "af2bf9c75c09838d7788b634af611bea893d57ea15ff2cb4487e9aa1ce4c1b84",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest.xml",
+        "sha256": "af2bf9c75c09838d7788b634af611bea893d57ea15ff2cb4487e9aa1ce4c1b84",
+        "bytes": 143146,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterFailures": 0,
+      "afterErrors": 0,
+      "afterSkips": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "invocations": 36,
+      "beforeSecondsDecimal": "76.579",
+      "afterSecondsDecimal": "75.036",
+      "signedDeltaSecondsDecimal": "-1.543",
+      "beforeXmlSha256": "05a08bcf3671cae70d02e90782c1cfcbcbc738a3b64af2300df0c272e5d1b41f",
+      "afterXmlSha256": "d17a9845a3436d4b1a42e528d8b8e5d80b9e90630bfbc193c9f4cb7eee598b1a",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.secret.SecretUseAuditIT.xml",
+        "sha256": "d17a9845a3436d4b1a42e528d8b8e5d80b9e90630bfbc193c9f4cb7eee598b1a",
+        "bytes": 628605,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterFailures": 0,
+      "afterErrors": 0,
+      "afterSkips": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "invocations": 10,
+      "beforeSecondsDecimal": "49.721",
+      "afterSecondsDecimal": "50.095",
+      "signedDeltaSecondsDecimal": "+0.374",
+      "beforeXmlSha256": "33ad87950c060177afb0ace4ec0d4a12846a26a7475a916472f61da46576d025",
+      "afterXmlSha256": "efa029697355f45089239f12edef17d19fd765a944daa34dab165552459569a5",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.xml",
+        "sha256": "efa029697355f45089239f12edef17d19fd765a944daa34dab165552459569a5",
+        "bytes": 115667,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterFailures": 0,
+      "afterErrors": 0,
+      "afterSkips": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "invocations": 16,
+      "beforeSecondsDecimal": "144.411",
+      "afterSecondsDecimal": "146.89",
+      "signedDeltaSecondsDecimal": "+2.479",
+      "beforeXmlSha256": "7a0aff3745e9223da75232dd6b5241832c3177afc8af24725cc0457c15ec1c71",
+      "afterXmlSha256": "6ea87e5ad17213150b10910caa0313c0ba38789844c751197957f58bfbf08e05",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT.xml",
+        "sha256": "6ea87e5ad17213150b10910caa0313c0ba38789844c751197957f58bfbf08e05",
+        "bytes": 193377,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterFailures": 0,
+      "afterErrors": 0,
+      "afterSkips": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT",
+      "invocations": 2,
+      "beforeSecondsDecimal": "10.542",
+      "afterSecondsDecimal": "10.337",
+      "signedDeltaSecondsDecimal": "-0.205",
+      "beforeXmlSha256": "8a1e10a2c77fef2a92addc06d31cb6645996c1c07a7d2d85f1eb9c71d63a545c",
+      "afterXmlSha256": "8839d97faf042991e5cf9b0ef70f5e0041c0dd6afeab3d6efa5515e1a2abf2e0",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT.xml",
+        "sha256": "8839d97faf042991e5cf9b0ef70f5e0041c0dd6afeab3d6efa5515e1a2abf2e0",
+        "bytes": 16648,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterFailures": 0,
+      "afterErrors": 0,
+      "afterSkips": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "invocations": 57,
+      "beforeSecondsDecimal": "357.76",
+      "afterSecondsDecimal": "362.426",
+      "signedDeltaSecondsDecimal": "+4.666",
+      "beforeXmlSha256": "7c74cd0e9c7b0f2339d2a02a5e8caeeaca88cd5d8b5f2a9ae54e2c7185d091d5",
+      "afterXmlSha256": "b970c1b7dedf4587e0fdc7b03b1ee81f72bb2b976787c10362b21155e5caa206",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.xml",
+        "sha256": "b970c1b7dedf4587e0fdc7b03b1ee81f72bb2b976787c10362b21155e5caa206",
+        "bytes": 93345,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterFailures": 0,
+      "afterErrors": 0,
+      "afterSkips": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "invocations": 39,
+      "beforeSecondsDecimal": "42.603",
+      "afterSecondsDecimal": "43.689",
+      "signedDeltaSecondsDecimal": "+1.086",
+      "beforeXmlSha256": "427530bb6183665f34a3f241cdcab0ac3466ca1716b4a3c99685c809dface2e7",
+      "afterXmlSha256": "221fca57037eed6520d48ac4c47eb5df617f1d9d7b0bacd90c47f11dbd5bce8e",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.xml",
+        "sha256": "221fca57037eed6520d48ac4c47eb5df617f1d9d7b0bacd90c47f11dbd5bce8e",
+        "bytes": 568427,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterFailures": 0,
+      "afterErrors": 0,
+      "afterSkips": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT",
+      "invocations": 2,
+      "beforeSecondsDecimal": "14.889",
+      "afterSecondsDecimal": "15.38",
+      "signedDeltaSecondsDecimal": "+0.491",
+      "beforeXmlSha256": "ceed5d41c5ee9f2f22c0025b571df2a5b9bbbce1c3cb179083eece1d200c0805",
+      "afterXmlSha256": "9b94a237d9356d2b4b4fefa419713d7ba2a2c0d429a6ba2b44988bc8253f5064",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT.xml",
+        "sha256": "9b94a237d9356d2b4b4fefa419713d7ba2a2c0d429a6ba2b44988bc8253f5064",
+        "bytes": 15426,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterFailures": 0,
+      "afterErrors": 0,
+      "afterSkips": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "invocations": 46,
+      "beforeSecondsDecimal": "1077.738",
+      "afterSecondsDecimal": "1086.466",
+      "signedDeltaSecondsDecimal": "+8.728",
+      "beforeXmlSha256": "dd1a0c7d3e003793785d7ae9df10bfb2e4a5e970e721a2d0a6ece330921ca53a",
+      "afterXmlSha256": "55fc521eb5c80ba23a7d377a5e3be832a64283987642d0e2dae4139933dd73a9",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+        "sha256": "55fc521eb5c80ba23a7d377a5e3be832a64283987642d0e2dae4139933dd73a9",
+        "bytes": 1764550,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterFailures": 0,
+      "afterErrors": 0,
+      "afterSkips": 0
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "invocations": 62,
+      "beforeSecondsDecimal": "2064.203",
+      "afterSecondsDecimal": "2094.171",
+      "signedDeltaSecondsDecimal": "+29.968",
+      "beforeXmlSha256": "d6196af7f3b3fad9e29ad81831c06c54ed24319a48c3f5ce5af3efc29e536b4f",
+      "afterXmlSha256": "bcdef4e4022d380a8e0a60e8cd5fdd9d8351dae210442abed3e7448b0a31979c",
+      "afterXmlInventory": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+        "sha256": "bcdef4e4022d380a8e0a60e8cd5fdd9d8351dae210442abed3e7448b0a31979c",
+        "bytes": 17497021,
+        "inventorySource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-integrated01-results.json",
+          "sha256": "c17f43d50043d4d1e950ed2695321c8883f266b0d6d85daebb9059e30256fcb5",
+          "bytes": 1156707,
+          "role": "Safe collector inventory; only metadata used, no own Counter/XML parser"
+        },
+        "bodyReadHere": false
+      },
+      "afterFailures": 0,
+      "afterErrors": 0,
+      "afterSkips": 0
+    }
+  ],
+  "classes": 9,
+  "taskClassRows": 10,
+  "invocations": 283,
+  "beforeMatchedSuiteSeconds": "3865.201",
+  "afterMatchedSuiteSeconds": "3911.173",
+  "signedMatchedSuiteDeltaSeconds": "+45.972",
+  "suiteObservation": "Matched suite total increased45.972 seconds; no improvement inferred.",
+  "wholeCollectorElapsedSeparate": {
+    "beforeSecondsDecimal": "6468.83",
+    "afterSecondsDecimal": "6407.02",
+    "signedDeltaSecondsDecimal": "-61.81",
+    "notSubstituteForSuiteTotal": true,
+    "notCausalSpeedup": true
+  },
+  "originalProjection08": {
+    "rawExit": 2,
+    "projectionComplete": false,
+    "stopReason": "REQUIRED_EXISTING_WHOLE_OUTPUT_PROJECTION_INCOMPLETE",
+    "replayCohorts": null,
+    "testRenderedExecutedHeaderCount": 40,
+    "markerCountNotNativeInvocationCount": true,
+    "preserved": true
+  },
+  "acceptedComponentScope": {
+    "xml": {
+      "files": 336,
+      "rows": 2792,
+      "distinct": 2768,
+      "fullXmlRawCollectorExpectedCounterIndependentlyEqual": true,
+      "exactHistoricalSkips": 9,
+      "duplicateMultiplicityRetained": true
+    },
+    "requiredTasks": {
+      "all7HaveExecutedHeaders": true,
+      "allRenderedStatusesExecutedNoCacheSkipFailMissing": true,
+      "testHeaderCount": 40,
+      "other6HeaderCounts": 1,
+      "exactlyOneRenderedHeaderNotOriginalRequirement": true,
+      "markerCountIsNotNativeOrTaskInvocationCount": true,
+      "originalSuccessfulCheckAndFresh3TaskOutputsAndReportIndependentlyQualifiedInPriorQa": true,
+      "executionQualified": true
+    },
+    "notFullCohortOrDiagnosticQa": true
+  },
+  "newXmlParserTimingRunOrProjectionExecuted": false,
+  "criterionVerdict": null
+}

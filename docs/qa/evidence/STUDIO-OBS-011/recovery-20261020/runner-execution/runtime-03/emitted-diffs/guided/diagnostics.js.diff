@@ -1,0 +1,23 @@
+--- before-dist/guided/diagnostics.js
++++ after-dist/guided/diagnostics.js
+@@ -6,7 +6,8 @@
+     const redactor = 'redact' in knownValues ? knownValues : createRedactor(knownValues);
+     const text = error instanceof Error ? redactor.redact(error.name) + ': ' + redactor.redact(error.message) : 'Unknown error: ' + typeof error;
+     // Scalar redaction precedes interpolation; re-scrub any variant spanning the safe fields.
+-    const redacted = redactor.redact(text).replace(/\s+/gu, ' ').replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/gu, '�').trim();
++    const redacted = redactor.redact(text).replace(/\s+/gu, ' ')
++        .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/gu, '�').trim();
+     let bytes = 0, bounded = '';
+     for (const character of redacted) {
+         const length = Buffer.byteLength(character);
+@@ -82,7 +83,9 @@
+             break;
+     }
+     const operation = facts.operation === 'assign' || facts.operation === 'context' ? facts.operation : 'other';
+-    return 'GUIDED_START_FAILED ' + JSON.stringify({ operation, session: hash(facts.sessionId).slice(0, 16), elapsedMs: Math.max(0, Math.round(facts.elapsedMs)), links }) + '\n';
++    return 'GUIDED_START_FAILED ' + JSON.stringify({
++        operation, session: hash(facts.sessionId).slice(0, 16), elapsedMs: Math.max(0, Math.round(facts.elapsedMs)), links
++    }) + '\n';
+ }
+ /** Bounded, non-authoritative sidecar. Consumption/recovery never reads this file. */
+ export class GuidedDiagnostics {

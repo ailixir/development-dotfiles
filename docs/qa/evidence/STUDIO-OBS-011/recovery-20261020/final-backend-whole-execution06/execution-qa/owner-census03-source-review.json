@@ -1,0 +1,31 @@
+{
+  "status": "SOURCE_CLEAN_FOR_SEPARATELY_RELEASED_NAMES_ONLY_RESOURCE_CENSUS",
+  "source": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-name-census03/census.py.txt",
+    "sha256": "12979ab875d63ee65867ff3ff634e7005e2c97a824102ae0609d49c717eec96a",
+    "bytes": 1606
+  },
+  "boundedAssessment": [
+    "Exactly one fixed canonical parent is opened component-by-component with directory/no-follow descriptors. Parent ownership and directory type checked.",
+    "Only direct entry names are consumed for the fixed obs007-joined- prefix counter. No child stat, type test, directory open, hash or body read is present.",
+    "Only finite counts, booleans and fixed failure enums are printed. Names, PIDs, auth/session values and arbitrary errors are not exported.",
+    "A complete result requires descriptor parent device/inode/mode/UID/mtime/ctime stability after complete enumeration. Exceptions, changed parent and cap exhaustion remain incomplete.",
+    "65536 entries are eligible for prefix processing; one additional entry is consumed solely to detect exhaustion, counted as65537 and not prefix-processed. Such a result exits2/incomplete. This is a finite overflow sentinel, not complete-census credit."
+  ],
+  "resourceCap": {
+    "processedDirectEntries": 65536,
+    "maximumConsumedIncludingOverflowSentinel": 65537,
+    "prefixCountersAreNamesNotProvenDirectories": true
+  },
+  "limitations": [
+    "Resource cardinality only; prefix matching names do not prove custody or directory identity/ownership.",
+    "No file absence, actual diagnostic result, zero recurrence or native/runtime authority.",
+    "Any later selected-file read needs a separately measured finite plan, independent review, root release and fresh preflight.",
+    "Original first and second finite-resource stops retain all unknowns and immutable history."
+  ],
+  "reviewGrantsExecutionAuthority": false,
+  "sourceParsedOrExecutedByQa": false,
+  "privateTempCurrentProductReads": 0,
+  "wholeVerdict": "PENDING_SEPARATE_OUTPUT_PROJECTION",
+  "lifecycleAuthority": false
+}

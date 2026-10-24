@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "loaderRoot": "Root externally verifies consumed entry_loader.py raw SHA before compile; never a self/future pin",
+  "bootstrap": "Load records every FD immediately, verifies all four external source buffers and closes every acquired FD before compiling any; UNKNOWN retains owner/buffers and denies interpretation normal/optimized.",
+  "graph": [
+    "external loader literal pin",
+    "external four code specs",
+    "same verified code buffers",
+    "protected release/decision/control raw pins",
+    "finite current inputs+ordinary adapter/admission",
+    "consumed one-mode decision",
+    "actual exclusive READY metadata",
+    "actual launched JVM + repeated exact identities",
+    "DATA/provisional closed projection/ACK/COMMIT/EOF",
+    "actual native/receiver/ledger drain",
+    "archive actualQA/root/final/permit/wrapper/postclose"
+  ],
+  "inputFamilies": [
+    {
+      "name": "release",
+      "firstInterpreter": "strict + validate_release",
+      "pin": "external release spec/raw SHA/600/UID/bytes/current metadata"
+    },
+    {
+      "name": "decision",
+      "firstInterpreter": "strict + validate_decision",
+      "pin": "external decision spec/raw SHA/600/UID/bytes"
+    },
+    {
+      "name": "launch control",
+      "firstInterpreter": "strict + validate_control",
+      "pin": "external spec/raw SHA/600/UID/bytes and release control SHA"
+    },
+    {
+      "name": "source code",
+      "firstInterpreter": "Load.load before compile",
+      "pin": "all four external specs and actual current source SHA equals loaded buffer SHA"
+    },
+    {
+      "name": "tools/classes/Jackson/fixture/ordinary adapter",
+      "firstInterpreter": "Invocation.verify_inputs before and after native",
+      "pin": "finite literal pin graph plus ordinary current admission/aliases/closed class-directory membership"
+    },
+    {
+      "name": "peer identity",
+      "firstInterpreter": "identity/PeerBinding",
+      "pin": "actual owned process + exact release JAVA + actual controller parent; twice before and twice during enrollment"
+    },
+    {
+      "name": "native/output",
+      "firstInterpreter": "validate_native/mode_evidence",
+      "pin": "actual owned handle/wait/request SHA/complete immutable bounded stdout/actual archive"
+    },
+    {
+      "name": "DATA/COMMIT",
+      "firstInterpreter": "SyntheticRelay.validate_data/Relay.validate_commit",
+      "pin": "actual enrolled peer/control/nonce/closed schemas/caps/deadline/current custody"
+    }
+  ],
+  "immediateOwners": [
+    "bootstrap FD before fstat",
+    "Custody owner before first open; token before fstat/validation/return",
+    "Resource actual selector/listener/connection before fileno/flags/metadata/return",
+    "Boundary actual event/thread reference before return",
+    "ordinary native process and output ownership before metadata/factory return including partial launch",
+    "controller returned native handle token before identity",
+    "partial directory creation flag before postcreate custody check"
+  ],
+  "states": [
+    "OPEN",
+    "TRANSFERRED",
+    "CLOSED",
+    "UNKNOWN"
+  ],
+  "unknown": "retain actual owner/handle/closer; never bare-FD retry",
+  "exemptions": "Only two initialized caller DIRECTORY owners during relay closure; no process/subtree/pending exemption",
+  "cleanup": "Every safe owned close/drain is attempted while preserving primary and cleanup independently; unresolved receiver/native/bootstrap/temp stays retained. No force close/signal/unlink/reuse.",
+  "partialMetadata": "created flag records successful mkdir even if a subsequent constructor/check fails; shortNamespace/socketNode stay null until actually acquired; no inode fiction",
+  "actualNamespaces": "UNCREATED_UNOBSERVED"
+}

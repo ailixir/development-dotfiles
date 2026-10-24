@@ -1,0 +1,410 @@
+{
+  "schemaVersion": 1,
+  "selectedCaseWasLostBodyLateGrant": true,
+  "capacity": 64,
+  "overflow": false,
+  "instrumentationFailed": false,
+  "originalCleanupComplete": true,
+  "mocksRestored": true,
+  "records": [
+    {
+      "event": "schedule-enter",
+      "monoMs": 453.405916,
+      "wallMs": 1792536413779,
+      "observerEndMonoMs": 453.426166,
+      "fields": {
+        "nextRenewalWallMs": null,
+        "secretContext": false
+      }
+    },
+    {
+      "event": "schedule-return",
+      "monoMs": 453.468625,
+      "wallMs": 1792536413779,
+      "observerEndMonoMs": 453.471666,
+      "fields": {
+        "nextRenewalWallMs": null,
+        "secretContext": false
+      }
+    },
+    {
+      "event": "request-claim-enter",
+      "monoMs": 462.730166,
+      "wallMs": 1792536413789,
+      "observerEndMonoMs": 462.737166,
+      "fields": {
+        "initial": true,
+        "nextRenewalWallMs": null,
+        "secretContext": false
+      }
+    },
+    {
+      "event": "claim-port-enter",
+      "monoMs": 462.957791,
+      "wallMs": 1792536413789,
+      "observerEndMonoMs": 462.967916,
+      "fields": {
+        "timeoutMs": 10000,
+        "aborted": false
+      }
+    },
+    {
+      "event": "request-claim-sync-return",
+      "monoMs": 464.0515,
+      "wallMs": 1792536413790,
+      "observerEndMonoMs": 464.05675,
+      "fields": {
+        "initial": true
+      }
+    },
+    {
+      "event": "complete-ack",
+      "monoMs": 469.517333,
+      "wallMs": 1792536413795,
+      "observerEndMonoMs": 469.522166,
+      "fields": {
+        "lastAckT0MonoMs": null,
+        "focusSeen": false
+      }
+    },
+    {
+      "event": "grant-validated",
+      "monoMs": 469.792375,
+      "wallMs": 1792536413796,
+      "observerEndMonoMs": 469.795458,
+      "fields": {
+        "initial": true,
+        "stopped": false
+      }
+    },
+    {
+      "event": "schedule-enter",
+      "monoMs": 469.821333,
+      "wallMs": 1792536413796,
+      "observerEndMonoMs": 469.8235,
+      "fields": {
+        "nextRenewalWallMs": null,
+        "secretContext": false
+      }
+    },
+    {
+      "event": "schedule-return",
+      "monoMs": 469.834791,
+      "wallMs": 1792536413796,
+      "observerEndMonoMs": 469.8365,
+      "fields": {
+        "nextRenewalWallMs": null,
+        "secretContext": false
+      }
+    },
+    {
+      "event": "schedule-enter",
+      "monoMs": 473.163666,
+      "wallMs": 1792536413799,
+      "observerEndMonoMs": 473.170708,
+      "fields": {
+        "nextRenewalWallMs": null,
+        "secretContext": true
+      }
+    },
+    {
+      "event": "schedule-return",
+      "monoMs": 473.180791,
+      "wallMs": 1792536413799,
+      "observerEndMonoMs": 473.183541,
+      "fields": {
+        "nextRenewalWallMs": 1792536414799,
+        "secretContext": true
+      }
+    },
+    {
+      "event": "request-claim-enter",
+      "monoMs": 1478.966916,
+      "wallMs": 1792536414805,
+      "observerEndMonoMs": 1478.988458,
+      "fields": {
+        "initial": false,
+        "nextRenewalWallMs": 1792536414799,
+        "secretContext": true
+      }
+    },
+    {
+      "event": "claim-port-enter",
+      "monoMs": 1481.35525,
+      "wallMs": 1792536414807,
+      "observerEndMonoMs": 1481.359166,
+      "fields": {
+        "timeoutMs": 1000,
+        "aborted": false
+      }
+    },
+    {
+      "event": "request-claim-sync-return",
+      "monoMs": 1483.642166,
+      "wallMs": 1792536414810,
+      "observerEndMonoMs": 1483.646041,
+      "fields": {
+        "initial": false
+      }
+    },
+    {
+      "event": "complete-ack",
+      "monoMs": 1492.004041,
+      "wallMs": 1792536414818,
+      "observerEndMonoMs": 1492.008291,
+      "fields": {
+        "lastAckT0MonoMs": null,
+        "focusSeen": false
+      }
+    },
+    {
+      "event": "grant-validated",
+      "monoMs": 1492.831541,
+      "wallMs": 1792536414819,
+      "observerEndMonoMs": 1492.83425,
+      "fields": {
+        "initial": false,
+        "stopped": false
+      }
+    },
+    {
+      "event": "schedule-enter",
+      "monoMs": 1493.073708,
+      "wallMs": 1792536414819,
+      "observerEndMonoMs": 1493.074916,
+      "fields": {
+        "nextRenewalWallMs": 1792536415799,
+        "secretContext": true
+      }
+    },
+    {
+      "event": "schedule-return",
+      "monoMs": 1493.081833,
+      "wallMs": 1792536414819,
+      "observerEndMonoMs": 1493.082416,
+      "fields": {
+        "nextRenewalWallMs": 1792536415799,
+        "secretContext": true
+      }
+    },
+    {
+      "event": "request-claim-enter",
+      "monoMs": 2474.063875,
+      "wallMs": 1792536415800,
+      "observerEndMonoMs": 2474.069916,
+      "fields": {
+        "initial": false,
+        "nextRenewalWallMs": 1792536415799,
+        "secretContext": true
+      }
+    },
+    {
+      "event": "claim-port-enter",
+      "monoMs": 2474.124291,
+      "wallMs": 1792536415800,
+      "observerEndMonoMs": 2474.125583,
+      "fields": {
+        "timeoutMs": 1000,
+        "aborted": false
+      }
+    },
+    {
+      "event": "request-claim-sync-return",
+      "monoMs": 2475.06925,
+      "wallMs": 1792536415801,
+      "observerEndMonoMs": 2475.070625,
+      "fields": {
+        "initial": false
+      }
+    },
+    {
+      "event": "complete-ack",
+      "monoMs": 2479.282041,
+      "wallMs": 1792536415805,
+      "observerEndMonoMs": 2479.284083,
+      "fields": {
+        "lastAckT0MonoMs": 2479.280833,
+        "focusSeen": true
+      }
+    },
+    {
+      "event": "grant-validated",
+      "monoMs": 2479.4965,
+      "wallMs": 1792536415805,
+      "observerEndMonoMs": 2479.498083,
+      "fields": {
+        "initial": false,
+        "stopped": false
+      }
+    },
+    {
+      "event": "schedule-enter",
+      "monoMs": 2479.5265,
+      "wallMs": 1792536415805,
+      "observerEndMonoMs": 2479.52725,
+      "fields": {
+        "nextRenewalWallMs": 1792536416799,
+        "secretContext": true
+      }
+    },
+    {
+      "event": "schedule-return",
+      "monoMs": 2479.536041,
+      "wallMs": 1792536415805,
+      "observerEndMonoMs": 2479.536666,
+      "fields": {
+        "nextRenewalWallMs": 1792536416799,
+        "secretContext": true
+      }
+    },
+    {
+      "event": "request-claim-enter",
+      "monoMs": 3474.138208,
+      "wallMs": 1792536416800,
+      "observerEndMonoMs": 3474.144416,
+      "fields": {
+        "initial": false,
+        "nextRenewalWallMs": 1792536416799,
+        "secretContext": true
+      }
+    },
+    {
+      "event": "claim-port-enter",
+      "monoMs": 3474.196333,
+      "wallMs": 1792536416800,
+      "observerEndMonoMs": 3474.197416,
+      "fields": {
+        "timeoutMs": 1000,
+        "aborted": false
+      }
+    },
+    {
+      "event": "request-claim-sync-return",
+      "monoMs": 3475.437916,
+      "wallMs": 1792536416801,
+      "observerEndMonoMs": 3475.443416,
+      "fields": {
+        "initial": false
+      }
+    },
+    {
+      "event": "claim-abort-event",
+      "monoMs": 4473.870875,
+      "wallMs": 1792536417800,
+      "observerEndMonoMs": 4473.877583,
+      "fields": {
+        "timeoutMs": 1000,
+        "aborted": true
+      }
+    },
+    {
+      "event": "stop-entry",
+      "monoMs": 4475.304625,
+      "wallMs": 1792536417801,
+      "observerEndMonoMs": 4475.311416,
+      "fields": {
+        "reason": "LEASE_LOST",
+        "alreadyStopped": false
+      }
+    },
+    {
+      "event": "invalidate-enter",
+      "monoMs": 4475.401416,
+      "wallMs": 1792536417801,
+      "observerEndMonoMs": 4475.403916,
+      "fields": {
+        "stopped": false
+      }
+    },
+    {
+      "event": "invalidate-return",
+      "monoMs": 4475.489083,
+      "wallMs": 1792536417801,
+      "observerEndMonoMs": 4475.490041,
+      "fields": {
+        "stopped": true
+      }
+    },
+    {
+      "event": "runtime-stop-enter",
+      "monoMs": 4475.535583,
+      "wallMs": 1792536417801,
+      "observerEndMonoMs": 4475.537041,
+      "fields": {
+        "reason": "LEASE_LOST",
+        "stopped": false
+      }
+    },
+    {
+      "event": "invalidate-enter",
+      "monoMs": 4475.613458,
+      "wallMs": 1792536417802,
+      "observerEndMonoMs": 4475.614166,
+      "fields": {
+        "stopped": true
+      }
+    },
+    {
+      "event": "invalidate-return",
+      "monoMs": 4475.615083,
+      "wallMs": 1792536417802,
+      "observerEndMonoMs": 4475.615416,
+      "fields": {
+        "stopped": true
+      }
+    },
+    {
+      "event": "runtime-post-stop-observer",
+      "monoMs": 4475.64425,
+      "wallMs": 1792536417802,
+      "observerEndMonoMs": 4475.645875,
+      "fields": {
+        "reason": "LEASE_LOST",
+        "stopped": true,
+        "observedMonoMs": 4475.634291,
+        "observedWallMs": 1792536417802
+      }
+    },
+    {
+      "event": "claim-rejected",
+      "monoMs": 4475.658625,
+      "wallMs": 1792536417802,
+      "observerEndMonoMs": 4475.65925,
+      "fields": {
+        "timeoutMs": 1000
+      }
+    },
+    {
+      "event": "runtime-stop-enter",
+      "monoMs": 4499.381166,
+      "wallMs": 1792536417825,
+      "observerEndMonoMs": 4499.386041,
+      "fields": {
+        "reason": "UNKNOWN_OUTCOME",
+        "stopped": true
+      }
+    },
+    {
+      "event": "runtime-post-stop-observer",
+      "monoMs": 4499.395291,
+      "wallMs": 1792536417825,
+      "observerEndMonoMs": 4499.39725,
+      "fields": {
+        "reason": "UNKNOWN_OUTCOME",
+        "stopped": true,
+        "observedMonoMs": 4475.634291,
+        "observedWallMs": 1792536417802
+      }
+    },
+    {
+      "event": "stop-entry",
+      "monoMs": 5010.940458,
+      "wallMs": 1792536418337,
+      "observerEndMonoMs": 5010.948916,
+      "fields": {
+        "reason": "CONTEXT_LOST",
+        "alreadyStopped": true
+      }
+    }
+  ]
+}

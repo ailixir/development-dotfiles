@@ -1,0 +1,50 @@
+{
+  "kind": "EXACT_SOURCE_COMPOSITION_REFRESH_NOT_RUNTIME",
+  "previousPacketUnmodified": true,
+  "acceptedStyle03AlreadyApplied": true,
+  "oldStylePatchReapplied": false,
+  "realPreimagesChanged": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java"
+  ],
+  "incomingCandidatesChanged": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java"
+  ],
+  "finalCandidatesChanged": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java"
+  ],
+  "other55FinalCandidateHashesEqual": true,
+  "exactTransportChangeOnlyTheAcceptedSwitchBlock": true,
+  "orderedMappings": [
+    [
+      "case \"claim\"",
+      "CLAIM"
+    ],
+    [
+      "case \"observations\"",
+      "OBSERVATIONS"
+    ],
+    [
+      "case \"bootstrap-evidence\"",
+      "BOOTSTRAP_EVIDENCE"
+    ],
+    [
+      "case \"outcomes\"",
+      "OUTCOMES"
+    ],
+    [
+      "default",
+      "OTHER"
+    ]
+  ],
+  "nullSelectorAndExistingCatchUnchanged": true,
+  "allOtherTransportBytesUnchanged": true,
+  "oldSwitchBlockSha256": "809ba2cec99c53d2def5c589cfb4651268c89af64ff0f8b7bc84e596a2375d59",
+  "acceptedSwitchBlockSha256": "5fa01432aaf246e17291766f2ab64009ec5f9a242b2a1cede09c050336e5036e",
+  "priorManifestSha256": "c47ff6077db971a206498726c94fc2bef74e8df399fa2cc49085c40d1aedaa86",
+  "style03ResultSha256": "352a8255e6fa8eb9821215ae5b189fa907d821b4d3ca58e668e4826af4aaefea",
+  "acceptedStyle03Exit": 0,
+  "actualStyle03ChecksAreNotFinalCandidateRuntimeProof": true,
+  "globalSourceStabilityClaimed": false
+}

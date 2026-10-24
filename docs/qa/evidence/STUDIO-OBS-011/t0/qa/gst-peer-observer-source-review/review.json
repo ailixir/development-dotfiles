@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "QUINN",
+  "createdAtUtc": "2026-10-19T09:20:37.942254+00:00",
+  "disposition": "SUPPORTED_SOURCE_ONLY_PEER_ADDENDUM_WITH_EXPLICIT_UNKNOWN_JOIN_LIMITS",
+  "requiredSourceCorrections": [],
+  "addendumManifestSha256": "28d7a4f131589a50ce4ec0e00bee412764758e6bee131cfb55e224dc3640dd5c",
+  "preimageSha256": "6aca12f6ef2834ee9e8e34a047994f87a7f2be3b6ad990e61b67d457b1b30b48",
+  "postimageSha256": "322164060758b36eba7b33a768617032508aa4a533ea6e042d197966eaf64be0",
+  "dispatchPinsVerified": 9,
+  "sealedArtifactsVerified": 6,
+  "declaredSourcePublicPinsVerified": 16,
+  "patchHunks": 4,
+  "exactWholeSourceReversal": true,
+  "originalClassifierOnlySiteSubstitution": true,
+  "sourceFixtureObjectAssociationProved": true,
+  "newPeerReferenceReadCount": 1,
+  "newPeerSubjectStateWriteCount": 0,
+  "newSite": "CUT_PEER",
+  "newFrameTokens": [
+    "PEER_CALLBACK",
+    "PEER_RELAY"
+  ],
+  "existingFilterOtherwiseExact": true,
+  "pureRecordControls": {
+    "accepted": 3,
+    "rejected": 7
+  },
+  "sameRequestTimestampOrFirstCauseJoinProved": false,
+  "nullOrMissingMeansNoPeerFailure": false,
+  "preScenarioOverwriteLateWriteLimitsRetained": true,
+  "unknownRuntimeCauseRetained": true,
+  "deliveryJavaGroovyOrTimingVerified": false,
+  "fullComposedCandidateReviewed": false,
+  "julDeferred": true,
+  "newLoggerJfrActivation": false,
+  "gst03QualifiedFailedClosureAndHistoricalGapsRetained": true,
+  "gst03Control01Severity": "HIGH",
+  "gst03Control01Remediation": "IN_PROGRESS; unaffected by peer observer",
+  "documentationNotes": [
+    "README cites dispatch.assign as3081; exact pinned source has dispatch.assign3078 and planner.bootstrap3081. Ordering conclusion is unchanged."
+  ],
+  "sourceNativeRetryGeneralW1MainReplayReleased": false,
+  "laneC8OrLifecycleCredit": false,
+  "nativeCompilerFormatterHelperProcessSignalOrPrivateIO": false,
+  "reviewMdSha256": "b9565089871eab8ab84ebc98b2aeaaa83f2f1535a3b2d37708adb3178057b266",
+  "auditSha256": "962e17f393b7d87f2a44b121c0536eb241f90bb8e7ec30d730826dd56d48d725",
+  "inputManifestSha256": "abeb2bd9fada280f62798aa0b9e66523b2f992908310a90db327e0058c46b21d",
+  "budgetCeilingUsd": 500,
+  "aggregateSpendAvailable": false
+}

@@ -1,0 +1,14 @@
+{
+  "kind":"ARIA_GST_SOURCE02_SINGLE_BOUNDED_REVIEW_HISTORY",
+  "records":[
+    {"tool":"6bca31","actualStatus":0,"script":"critical_checks.py","checks":25,"cases":12,"stdout":"critical.stdout","stderr":"critical.stderr","classification":"Inspected exact fixture prefix with reverse proof and unchanged permanent audit; no safety AST edits or old suite replay."},
+    {"tool":"afd38c","actualStatus":0,"classification":"Separately inspected counts/empty stderr and initial active-gate clock reproduction; no target execution."},
+    {"tool":"cb8e5e","actualStatus":0,"script":"verify_source.py","checks":530,"pinRecords":150,"stdout":"static.stdout","stderr":"static.stderr","subjectFunctionsExecuted":0}
+  ],
+  "reviewerFailedAttempts":0,
+  "authorCurrent74Static20Reused":true,
+  "authorTwoCandidates73Plus74":"147 actual assertions,74 current unique controls",
+  "source01FailedAttempt2InnerCause":"UNKNOWN_PRESERVED",
+  "furtherTargetExpansionAfterCompleteBatch":false,
+  "actualRuntimeActions":0
+}

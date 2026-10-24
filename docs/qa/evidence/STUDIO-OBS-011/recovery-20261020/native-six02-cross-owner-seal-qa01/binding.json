@@ -1,0 +1,644 @@
+{
+  "verdict": "PASS",
+  "scope": "EXACT_SINGLETON_CROSS_OWNER_METADATA_SUCCESSOR_ONLY",
+  "atUtc": "2026-10-21T02:55:58.929405+00:00",
+  "producerManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution02/manifest.json",
+    "sha256": "0825e201b68a2770f61e5948007a6e2c8d36cd18fed0b8435298eb34ad8b4c91",
+    "bytes": 7386,
+    "regular": true,
+    "stable": true
+  },
+  "finalQaManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution02/execution-qa/manifest.json",
+    "sha256": "a5fbe073244958c7c8a14491b7ea293f9f5306c1d2364a8d1c80c90e6b59b333",
+    "bytes": 1031,
+    "regular": true,
+    "stable": true
+  },
+  "rootCompositionAdoption": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/native-six02-root-qualified-composition-adoption.json",
+    "sha256": "0ae96f8ae3e47a9a7590fedb4c14d7caa7eb0bfbe1b2e807c8263cfce73a30ab",
+    "bytes": 1696,
+    "regular": true,
+    "stable": true
+  },
+  "originalStopManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/preflight-stop-manifest.json",
+    "sha256": "8cf236f9cc9c524705cf3e805220de1fec262d7096bf12e5d99d7e76e16c7a93",
+    "bytes": 799,
+    "regular": true,
+    "stable": true
+  },
+  "producerArtifactCount": 36,
+  "producerUniquePaths": true,
+  "producerEntryChecks": [
+    {
+      "path": "actual-after-fixtures-full-selected.json",
+      "expectedSha256": "b8589ca4c13c8276afd6eb374c6aae2106cb8484ceb4237d0a498881d5b42025",
+      "expectedBytes": 5739445,
+      "current": {
+        "sha256": "b8589ca4c13c8276afd6eb374c6aae2106cb8484ceb4237d0a498881d5b42025",
+        "bytes": 5739445,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "actual-before-fixtures-full-selected.json",
+      "expectedSha256": "b8589ca4c13c8276afd6eb374c6aae2106cb8484ceb4237d0a498881d5b42025",
+      "expectedBytes": 5739445,
+      "current": {
+        "sha256": "b8589ca4c13c8276afd6eb374c6aae2106cb8484ceb4237d0a498881d5b42025",
+        "bytes": 5739445,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "cache-cumulative-binding.json",
+      "expectedSha256": "45e536770fc736575b831e0660ab036875527ea6bcdc8b0169c47fda30ab52e8",
+      "expectedBytes": 1080,
+      "current": {
+        "sha256": "45e536770fc736575b831e0660ab036875527ea6bcdc8b0169c47fda30ab52e8",
+        "bytes": 1080,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "cache-key-reconciliation.json",
+      "expectedSha256": "ca18b93c42b8c507834d0cd7b861a5cb891accab1bb5c3445bf2371c0e9468f5",
+      "expectedBytes": 182,
+      "current": {
+        "sha256": "ca18b93c42b8c507834d0cd7b861a5cb891accab1bb5c3445bf2371c0e9468f5",
+        "bytes": 182,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "canonical-cli-pins.json",
+      "expectedSha256": "d03c0551a032e321fdbd9dc99bb6a2d27c4ee0ded6512656b1a868b9a9e1de1d",
+      "expectedBytes": 3521,
+      "current": {
+        "sha256": "d03c0551a032e321fdbd9dc99bb6a2d27c4ee0ded6512656b1a868b9a9e1de1d",
+        "bytes": 3521,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "closed-native-inventory-projection.json",
+      "expectedSha256": "2c9a519587fd1644107b5992db2bbdbf6e2cdb901abef8e914aece8d2fc09fca",
+      "expectedBytes": 11058,
+      "current": {
+        "sha256": "2c9a519587fd1644107b5992db2bbdbf6e2cdb901abef8e914aece8d2fc09fca",
+        "bytes": 11058,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "execution-qa/binding-checks.json",
+      "expectedSha256": "405c03cbefc56cb5747a883ad0eae515a0baa546ee949aaa8704e3af551f5dfd",
+      "expectedBytes": 4118,
+      "current": {
+        "sha256": "5d111f5f538c16271a02abef61f8e47829b00ac5aab1f160bfbe0f9ae519e089",
+        "bytes": 4916,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": false,
+      "sizeMatchesProducer": false
+    },
+    {
+      "path": "finish-persisted-metadata.py",
+      "expectedSha256": "a59de397f7f95da8d3990b4e940cd067a7f1c29c446594988b647a05ddd8aea4",
+      "expectedBytes": 5701,
+      "current": {
+        "sha256": "a59de397f7f95da8d3990b4e940cd067a7f1c29c446594988b647a05ddd8aea4",
+        "bytes": 5701,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fixture-host-and-environment.json",
+      "expectedSha256": "f89ff33284ef44dccc97a27c9277854ac27c01c3bfdeaa6229477441f27626a9",
+      "expectedBytes": 2084,
+      "current": {
+        "sha256": "f89ff33284ef44dccc97a27c9277854ac27c01c3bfdeaa6229477441f27626a9",
+        "bytes": 2084,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fixtures-actual-after-capture.log",
+      "expectedSha256": "c2e66a73a64cc11d972fcc16207b5f60ff5c917b7cd30e9caeb38cf9fce87c2b",
+      "expectedBytes": 182,
+      "current": {
+        "sha256": "c2e66a73a64cc11d972fcc16207b5f60ff5c917b7cd30e9caeb38cf9fce87c2b",
+        "bytes": 182,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fixtures-actual-after.json",
+      "expectedSha256": "4a1c446dc02c0e77278840238ada0cbc64d4f91dde6032ad7bb6fb5d54703edd",
+      "expectedBytes": 359699,
+      "current": {
+        "sha256": "4a1c446dc02c0e77278840238ada0cbc64d4f91dde6032ad7bb6fb5d54703edd",
+        "bytes": 359699,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fixtures-actual-before-capture.log",
+      "expectedSha256": "c2e66a73a64cc11d972fcc16207b5f60ff5c917b7cd30e9caeb38cf9fce87c2b",
+      "expectedBytes": 182,
+      "current": {
+        "sha256": "c2e66a73a64cc11d972fcc16207b5f60ff5c917b7cd30e9caeb38cf9fce87c2b",
+        "bytes": 182,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fixtures-actual-before.json",
+      "expectedSha256": "33593b5913b37b9eafb235ef892215c325cc486c8920e579ed695b4c5982515f",
+      "expectedBytes": 359699,
+      "current": {
+        "sha256": "33593b5913b37b9eafb235ef892215c325cc486c8920e579ed695b4c5982515f",
+        "bytes": 359699,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fixtures-generated-cache-delta.json",
+      "expectedSha256": "5a64606a5b9b98490e8acf8cf632c4a112e58b68b09a8494fa96dee5fff125a8",
+      "expectedBytes": 1082,
+      "current": {
+        "sha256": "5a64606a5b9b98490e8acf8cf632c4a112e58b68b09a8494fa96dee5fff125a8",
+        "bytes": 1082,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fixtures-raw-output-pins.json",
+      "expectedSha256": "60969f5121bb08781d3c5ccbbf87ba31cfea8212cda81d57ce387d58dd4e4503",
+      "expectedBytes": 671,
+      "current": {
+        "sha256": "60969f5121bb08781d3c5ccbbf87ba31cfea8212cda81d57ce387d58dd4e4503",
+        "bytes": 671,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fixtures-start.json",
+      "expectedSha256": "246ee48314ccbbfdad609ec651e9b97b501653c687f8d49349ace389fc38b5ba",
+      "expectedBytes": 1657,
+      "current": {
+        "sha256": "246ee48314ccbbfdad609ec651e9b97b501653c687f8d49349ace389fc38b5ba",
+        "bytes": 1657,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fixtures-terminal.json",
+      "expectedSha256": "80f97966d60dfe7d6dbb7cb2ec5176a77bb50bf622efd7028c150a8ddab24516",
+      "expectedBytes": 1990,
+      "current": {
+        "sha256": "80f97966d60dfe7d6dbb7cb2ec5176a77bb50bf622efd7028c150a8ddab24516",
+        "bytes": 1990,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fixtures02-admission-and-command.json",
+      "expectedSha256": "0e0a28498d41e7c405d40bd369e401283c96aae445ade476da099f70f2087cd6",
+      "expectedBytes": 1489,
+      "current": {
+        "sha256": "0e0a28498d41e7c405d40bd369e401283c96aae445ade476da099f70f2087cd6",
+        "bytes": 1489,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "fresh-generated-opaque-hash-inventory.json",
+      "expectedSha256": "b5fa60b0d116f7f6ce32a582825ccdaee142b44de6314226807057c8baf49aa2",
+      "expectedBytes": 5103,
+      "current": {
+        "sha256": "b5fa60b0d116f7f6ce32a582825ccdaee142b44de6314226807057c8baf49aa2",
+        "bytes": 5103,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "generated-cache/fixtures-after.json",
+      "expectedSha256": "8f55bb1517fd178d610f26e196416ab8e24bf727993308f94503131b1f2efc77",
+      "expectedBytes": 16208,
+      "current": {
+        "sha256": "8f55bb1517fd178d610f26e196416ab8e24bf727993308f94503131b1f2efc77",
+        "bytes": 16208,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "generated-cache/fixtures-before.json",
+      "expectedSha256": "0346365b832790ed5b89cecf242ac1724afbaadb88b5d68c74e3e296533edb4f",
+      "expectedBytes": 16213,
+      "current": {
+        "sha256": "0346365b832790ed5b89cecf242ac1724afbaadb88b5d68c74e3e296533edb4f",
+        "bytes": 16213,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "native-six-case-reconciliation.json",
+      "expectedSha256": "24a006cfcd15da2209544ed576af834b923cb0829f16ef432718cecde968b5f6",
+      "expectedBytes": 4099,
+      "current": {
+        "sha256": "24a006cfcd15da2209544ed576af834b923cb0829f16ef432718cecde968b5f6",
+        "bytes": 4099,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "persisted-closed-leaf-custody-qualification.json",
+      "expectedSha256": "871a5eedd4bc24214a50b6de71a1e89e5b4d3b0a2d4d9a50b4ae6f67414e7d7e",
+      "expectedBytes": 6602,
+      "current": {
+        "sha256": "871a5eedd4bc24214a50b6de71a1e89e5b4d3b0a2d4d9a50b4ae6f67414e7d7e",
+        "bytes": 6602,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "private-after-fixtures-full-snapshots.json",
+      "expectedSha256": "495ec392bf2f5c32197de480104d191524447d5cd42ee39b37e44b2b47296a3d",
+      "expectedBytes": 12038566,
+      "current": {
+        "sha256": "495ec392bf2f5c32197de480104d191524447d5cd42ee39b37e44b2b47296a3d",
+        "bytes": 12038566,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "private-before-fixtures-full-snapshots.json",
+      "expectedSha256": "5fed3403d96e6d3b454803a2b254703c73e42d89fd2bff80070b4a1402d26374",
+      "expectedBytes": 12038566,
+      "current": {
+        "sha256": "5fed3403d96e6d3b454803a2b254703c73e42d89fd2bff80070b4a1402d26374",
+        "bytes": 12038566,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "project-terminal.py",
+      "expectedSha256": "f830af469663e4af910d369fb9ee707da366d2ac020c52d2b7f8803d44007d6e",
+      "expectedBytes": 10836,
+      "current": {
+        "sha256": "f830af469663e4af910d369fb9ee707da366d2ac020c52d2b7f8803d44007d6e",
+        "bytes": 10836,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "projection-reader-failure-and-completion.json",
+      "expectedSha256": "4555aadd1926b505632f2fa18f515f00af10a86d2c591b23e5291addbf6256ac",
+      "expectedBytes": 1040,
+      "current": {
+        "sha256": "4555aadd1926b505632f2fa18f515f00af10a86d2c591b23e5291addbf6256ac",
+        "bytes": 1040,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "projector-reference.diff",
+      "expectedSha256": "68595dbc3985c9c77137c9d5d1af52e6209aa3061b20119527f350b016353f46",
+      "expectedBytes": 8659,
+      "current": {
+        "sha256": "68595dbc3985c9c77137c9d5d1af52e6209aa3061b20119527f350b016353f46",
+        "bytes": 8659,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "receipt.md",
+      "expectedSha256": "8322d6f5d1ee884b30bd695f455747c0e2d455ca0bea0df15083b6f3296781c8",
+      "expectedBytes": 4515,
+      "current": {
+        "sha256": "8322d6f5d1ee884b30bd695f455747c0e2d455ca0bea0df15083b6f3296781c8",
+        "bytes": 4515,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "saved-task-and-admission-bindings.json",
+      "expectedSha256": "c2ea27e6f5b95c1f04c75130a109497d4cea7dda8077149760231a26855af127",
+      "expectedBytes": 656,
+      "current": {
+        "sha256": "c2ea27e6f5b95c1f04c75130a109497d4cea7dda8077149760231a26855af127",
+        "bytes": 656,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "source-and-product-preservation.json",
+      "expectedSha256": "3101870ef919aaa5fc280b5a443a9605455d34d51920a34a26a2441606d25f7b",
+      "expectedBytes": 2144,
+      "current": {
+        "sha256": "3101870ef919aaa5fc280b5a443a9605455d34d51920a34a26a2441606d25f7b",
+        "bytes": 2144,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "terminal-assessment.json",
+      "expectedSha256": "aeba60331db763b998378a2bdab8e819071addd649f842b27a0baee0fee1b965",
+      "expectedBytes": 1743,
+      "current": {
+        "sha256": "aeba60331db763b998378a2bdab8e819071addd649f842b27a0baee0fee1b965",
+        "bytes": 1743,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "terminal-host-metadata.json",
+      "expectedSha256": "df13b508caf76d857cac36ee4a2bdae8aa3d5ddfc73b31b0fff744984c5acc28",
+      "expectedBytes": 404,
+      "current": {
+        "sha256": "df13b508caf76d857cac36ee4a2bdae8aa3d5ddfc73b31b0fff744984c5acc28",
+        "bytes": 404,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "terminal-host-owned-closure.json",
+      "expectedSha256": "1202fae80bee8281a098c89507fa26ec920fa0ca5ac97431e519a693c1d1de18",
+      "expectedBytes": 1534,
+      "current": {
+        "sha256": "1202fae80bee8281a098c89507fa26ec920fa0ca5ac97431e519a693c1d1de18",
+        "bytes": 1534,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "tool-terminal-record.json",
+      "expectedSha256": "2027696e62ad69ebb795e1a594b7675cc63b89fc354b99ad2884124292f74736",
+      "expectedBytes": 840,
+      "current": {
+        "sha256": "2027696e62ad69ebb795e1a594b7675cc63b89fc354b99ad2884124292f74736",
+        "bytes": 840,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    },
+    {
+      "path": "verified-prerequisites.json",
+      "expectedSha256": "33b4aaedb45c169c67ff348fabd6eed1e026218ad14f2e8258069692456104da",
+      "expectedBytes": 3542,
+      "current": {
+        "sha256": "33b4aaedb45c169c67ff348fabd6eed1e026218ad14f2e8258069692456104da",
+        "bytes": 3542,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesProducer": true,
+      "sizeMatchesProducer": true
+    }
+  ],
+  "finalQa3Checks": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution02/execution-qa/binding-checks.json",
+      "expectedSha256": "5d111f5f538c16271a02abef61f8e47829b00ac5aab1f160bfbe0f9ae519e089",
+      "current": {
+        "sha256": "5d111f5f538c16271a02abef61f8e47829b00ac5aab1f160bfbe0f9ae519e089",
+        "bytes": 4916,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesFinalQa": true,
+      "qaManifestSizeField": "NOT_PRESENT; stable measured bytes are explicitly pinned by this acknowledgement"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution02/execution-qa/review.md",
+      "expectedSha256": "be581a9dc7dbc491b9dee7fa87bde045dfe06bebe666dc7dcff9bafa7029b08a",
+      "current": {
+        "sha256": "be581a9dc7dbc491b9dee7fa87bde045dfe06bebe666dc7dcff9bafa7029b08a",
+        "bytes": 8687,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesFinalQa": true,
+      "qaManifestSizeField": "NOT_PRESENT; stable measured bytes are explicitly pinned by this acknowledgement"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution02/execution-qa/readiness.json",
+      "expectedSha256": "d7b264aa018b0169ccb00a01f38978842719b1eaa35e5870d3cc1fd0a2a9f6fc",
+      "current": {
+        "sha256": "d7b264aa018b0169ccb00a01f38978842719b1eaa35e5870d3cc1fd0a2a9f6fc",
+        "bytes": 1717,
+        "regular": true,
+        "stable": true
+      },
+      "hashMatchesFinalQa": true,
+      "qaManifestSizeField": "NOT_PRESENT; stable measured bytes are explicitly pinned by this acknowledgement"
+    }
+  ],
+  "originalStop3Checks": [
+    {
+      "path": "preflight.py",
+      "expectedSha256": "c8a917915746d0a32f90dcf1cfe5d831e4ace647ea1f46c501f034fbcbd8bc36",
+      "expectedBytes": 6172,
+      "current": {
+        "sha256": "c8a917915746d0a32f90dcf1cfe5d831e4ace647ea1f46c501f034fbcbd8bc36",
+        "bytes": 6172,
+        "regular": true,
+        "stable": true
+      },
+      "hashAndSizeMatch": true
+    },
+    {
+      "path": "preflight-artifact-guard-failure.json",
+      "expectedSha256": "835df6b1ddca3c986c9f74e118bf70c3d15472b569d095dc49e8cbf1c1431304",
+      "expectedBytes": 1623,
+      "current": {
+        "sha256": "835df6b1ddca3c986c9f74e118bf70c3d15472b569d095dc49e8cbf1c1431304",
+        "bytes": 1623,
+        "regular": true,
+        "stable": true
+      },
+      "hashAndSizeMatch": true
+    },
+    {
+      "path": "preflight-stop-receipt.md",
+      "expectedSha256": "fcbce5c0af8bec7c1ccd95e4895e08980da936de30bf0be4dfd3a3cfefa20517",
+      "expectedBytes": 1236,
+      "current": {
+        "sha256": "fcbce5c0af8bec7c1ccd95e4895e08980da936de30bf0be4dfd3a3cfefa20517",
+        "bytes": 1236,
+        "regular": true,
+        "stable": true
+      },
+      "hashAndSizeMatch": true
+    }
+  ],
+  "historicalProducerCurrentMismatchPreserved": {
+    "count": 1,
+    "path": "execution-qa/binding-checks.json",
+    "expectedSha256": "405c03cbefc56cb5747a883ad0eae515a0baa546ee949aaa8704e3af551f5dfd",
+    "expectedBytes": 4118,
+    "currentSha256": "5d111f5f538c16271a02abef61f8e47829b00ac5aab1f160bfbe0f9ae519e089",
+    "currentBytes": 4916,
+    "producerAll36CurrentExact": false,
+    "other35HashAndSizeExact": true,
+    "old405BytesRestoredOrRecreated": false
+  },
+  "allowedSuccessorTuple": {
+    "producerManifestPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution02/manifest.json",
+    "producerManifestSha256": "0825e201b68a2770f61e5948007a6e2c8d36cd18fed0b8435298eb34ad8b4c91",
+    "producerManifestBytes": 7386,
+    "relativeArtifactPath": "execution-qa/binding-checks.json",
+    "producerExpectedSha256": "405c03cbefc56cb5747a883ad0eae515a0baa546ee949aaa8704e3af551f5dfd",
+    "producerExpectedBytes": 4118,
+    "successorSha256": "5d111f5f538c16271a02abef61f8e47829b00ac5aab1f160bfbe0f9ae519e089",
+    "successorBytes": 4916,
+    "authorityManifestPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution02/execution-qa/manifest.json",
+    "authorityManifestSha256": "a5fbe073244958c7c8a14491b7ea293f9f5306c1d2364a8d1c80c90e6b59b333",
+    "authorityManifestBytes": 1031,
+    "authorityEntryRepositoryRelativePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution02/execution-qa/binding-checks.json",
+    "rootCompositionAdoptionPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/native-six02-root-qualified-composition-adoption.json",
+    "rootCompositionAdoptionSha256": "0ae96f8ae3e47a9a7590fedb4c14d7caa7eb0bfbe1b2e807c8263cfce73a30ab",
+    "rootCompositionAdoptionBytes": 1696
+  },
+  "prospectiveConsumerMustRequire": [
+    "unchanged exact producer manifest0825/7386 and exactly36 unique entries",
+    "all35 nonoverlap producer entries exact hash/declared size and regular stable files",
+    "sole overlap path and producer expected405/4118 equal the exact tuple",
+    "unchanged finalQA manifesta5/1031 plus every one of its three exact hash-bound artifacts and these stable measured sizes",
+    "current overlap exactly5d111/4916; same root-relative file named in finalQA seal",
+    "unchanged accepted root composition adoption0ae96/1696 binding0825/a5/readinessd7",
+    "reject any other mismatch/size/path/authority drift; no directory prefix, wildcard, fallback or general stale-seal allowance",
+    "separate root release and all fresh actual source/preimage/tool/resource/build-label guards still required before mutation/runtime"
+  ],
+  "guardInspection": {
+    "source": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/preflight.py",
+    "artifactHashLoopLine": 9,
+    "loopPrecedesActualPreimagesCaptureWritesAndConfiguredBuild": true,
+    "originalStopRawExit": 1,
+    "originalStopWritesAndBuild": 0,
+    "originalStopRemainsValid": true,
+    "consumerCodeChangedByQa": false
+  },
+  "preservedLimits": [
+    "qualified private301 plus fresh6 across two commands, not fresh307 or actual-cwd pass",
+    "old full307FAIL and old native01FAIL remain",
+    "historical failed causeUNKNOWN and complete cleanupNOT_ESTABLISHED",
+    "postdriver three signal0 resultsUNRETAINED_NO_CREDIT",
+    "projector NameError retained; persisted-metadata completion is not repeated native/read/probe",
+    "inhibitor covers native and original driver capture, not postdriver bookkeeping",
+    "matching actual build/final source-product equivalence/full coverage/image/backend/Replay/lifecycle remain owed"
+  ],
+  "newNativeOrSourceReviewPerformed": false,
+  "historicalFilesOrManifestsChanged": false,
+  "currentActualOrPrivateSourceWalk": false,
+  "runtimeOrProbeOrNetworkPerformed": false,
+  "actualApplicationAuthorization": false,
+  "runtimeReleaseAuthority": "root/Gateway only; this acknowledgement is not release",
+  "allStoriesRemainInProgress": true
+}

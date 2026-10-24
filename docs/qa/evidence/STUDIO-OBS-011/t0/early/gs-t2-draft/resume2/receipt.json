@@ -1,0 +1,56 @@
+{
+  "status": "complete corrected off-tree preparation, independent re-review and ALL runtime gates pending",
+  "sourceApplied": false,
+  "compileVerified": false,
+  "runtimeVerified": false,
+  "conformanceExecuted": false,
+  "independentReviewSha256": "3b5eaa17edcd2d30b708989b1a0b60592f0ef064e3e44a2f4975e949942e3f0d",
+  "artifactManifestSha256": "59213292afeb9407e6b9dabd8591c683c95716bec4f5362ada6a3449a28bf70e",
+  "receiptMarkdownSha256": "0605ee3ce49c6a54c9a9a9d934836d3b3a4186742c44434d08f492432a7e2551",
+  "orderedAssertionDrops": 0,
+  "bridgeCases": 26,
+  "itsMethods": 112,
+  "itsInvocations": 149,
+  "itsOrderedAssertions": 1171,
+  "terminalLatchedDirectSites": 26,
+  "literalFinalMetadataBlocks": 26,
+  "scratchComparisonsUnexecuted": 234,
+  "originalSourcesPackagesGsTAndReviewUnchanged": true,
+  "findingsImplementedAwaitingReReview": [
+    "BRIDGE-WAIT-01",
+    "BRIDGE-WAIT-02",
+    "ITS-WAIT-01",
+    "ITS-META-01"
+  ],
+  "patches": {
+    "candidate.patch": "fe9568cfdcc9e1c6f4401447a86efb6f2b2d9a2294e5b480778ced20a2cad11f",
+    "incremental-from-reviewed.patch": "e7c4ebf8576321b7cce1324a04603fd26c4a04e4e927e37b7c6abca8a1f6ea02"
+  },
+  "owned": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "operation": "edit",
+      "preimageSha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+      "reviewedPreimageSha256": "19865c95c75381241cd4bc5d6ec8b2814892171374297ff8b439528e14891ac5",
+      "candidateSha256": "4bafbc3c281a4d7f87312a11840facf8538819de76d0938e28498721352eff07",
+      "actualS011Sha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "operation": "edit",
+      "preimageSha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+      "reviewedPreimageSha256": "3e13a1ef5e76040eb7353789bae04eb979c8d869438968f1ab7b6ff13ce96128",
+      "candidateSha256": "1c5091bf059b4098960f50ce4b244f35b7866ca99c6c086392c36b7f11a2d51f",
+      "actualS011Sha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java",
+      "operation": "new",
+      "preimageSha256": null,
+      "reviewedPreimageSha256": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463",
+      "candidateSha256": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463",
+      "actualS011Sha256": null
+    }
+  ],
+  "orphanUnreachableAssertionStarts": 3
+}

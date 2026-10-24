@@ -1,0 +1,102 @@
+{
+  "kind": "SOURCE_ONLY_G9_F2_TWO_BUFFER_PROOF_PREPARATION",
+  "preparedAt": "2026-10-20T22:15:53.309338+00:00",
+  "executed": false,
+  "actualSourceEdited": false,
+  "story": "STUDIO-OBS-009",
+  "originalOwedComparison": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/g9-failures/diagnosis.md section 4A",
+  "sourceBase": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "75c55104ff24acf9352b1e140cf442c52b8170ea9e738a64c539f1eec8b2abe2",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java": "803ad93b30973014d63f048ba3b57e83ff83015694cf2d5d88bdb70385604db2"
+  },
+  "variants": {
+    "old-existence-consumer": {
+      "patch": "old-existence-consumer.patch",
+      "patchSha256": "6abe8b39ca7f8c8081e139a256ce85cab1fba43f6d0b4a1a0d0233e38e9bce24",
+      "restorationPatch": "old-existence-consumer.restore.patch",
+      "restorationPatchSha256": "457d1dae276d83cefb0404bf46c11b2e12d27262eb124236c4fd877ef95b95ed",
+      "candidateSha256": {
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "d4c1aa225fb6dfbe9a224ca6a3d59ab62bd735466b8cb6c1548c90b6874efeb3",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java": "928aa7550e2308f68a0a454e235d438b42a35a9a4007deec7426a43780fed670"
+      }
+    },
+    "fixed-content-consumer": {
+      "patch": "fixed-content-consumer.patch",
+      "patchSha256": "1548e1a6f12173d53563fe4fb64b9c4d1dbff91960cd29e997e38e964e890a98",
+      "restorationPatch": "fixed-content-consumer.restore.patch",
+      "restorationPatchSha256": "6717af0df6c7dfc9176e8570cf2801b783fc933b9f099167bb7ef776b8291ae3",
+      "candidateSha256": {
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "75c55104ff24acf9352b1e140cf442c52b8170ea9e738a64c539f1eec8b2abe2",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java": "928aa7550e2308f68a0a454e235d438b42a35a9a4007deec7426a43780fed670"
+      }
+    }
+  },
+  "existingCase": {
+    "task": "test",
+    "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+    "name": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost()"
+  },
+  "existingMethodSelector": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost",
+  "expectedOld": {
+    "counts": {
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "exactFailureCase": {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost()"
+    },
+    "originalExpectedValue": "READ_BEFORE_DECISION",
+    "originalActualValue": "",
+    "failureLocation": "unchanged assertThat(stageContent).isEqualTo(expectedStage) in runGuidedControllerCut",
+    "cleanupMustRemainConfirmed": true
+  },
+  "expectedFixed": {
+    "counts": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "allOriginalAssertionsExecuted": true
+  },
+  "controlledWriterGapMillis": 300,
+  "sameGapBothVariants": true,
+  "changesOutsideExactReplacements": false,
+  "testCountDelta": 0,
+  "fullReplaySlotsConsumed": 0,
+  "sourceReviewChecks": {
+    "writerChangedOnlyByExactSleepInsertion": true,
+    "oldConsumerChangedOnlyByGuardReplacement": true,
+    "fixedConsumerByteIdentical": true,
+    "noAssertionChanged": true,
+    "nativeOwnershipAndCleanupByteIdentical": true
+  },
+  "reusedCollector": {
+    "source": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/qa/pre-g9-review/c10.sh",
+    "sha256": "0f8212cf58cc085190c0efd7b96886584330b6f8164eed62dcdf19c7a5d09d7b",
+    "heredocSha256": "f95aee6a3a656796daf4b72cce8d4fc6e16efea4f72eb5c895d0f53d82cddf35",
+    "functionSha256": {
+      "collect": "4a70fe0f0fce840856b6e2ba5a44046420e34eb23f6cb510917b2ac63ffb529b",
+      "gradle": "c46335de37bd33afe95e1b1f591fad6586d669d540cfea72b9eab573951b6522"
+    },
+    "use": "Load the exact existing C10 heredoc definitions in memory with __name__ != __main__; call gradle once per fresh buffer. Do not invoke C10 run(), its unrelated mutation list or old frozen_check().",
+    "historicalTemporaryC10PythonNotUsed": true
+  },
+  "lock": {
+    "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+    "sha256": "2846314e3ab12926bff6eb458d7058c406b983092fb40b1fb5c2fa087c2366df"
+  },
+  "releaseBindingsStillRequired": [
+    "root and independent QA patch review",
+    "matching actual configured runner build (current D698 is stale after accepted009 source apply)",
+    "fresh final composed source/dist catalog, copied-source equality, actual-source stability",
+    "exclusive heavy lane and host awake/on power",
+    "fresh scratch destination availability"
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "kind": "G9_REGULAR_SOURCE_COPY_AND_PRIVATE_PATCHES03_ONLY",
+  "atUtc": "2026-10-21T03:32:17.937312+00:00",
+  "outcome": "COPY_AND_EXACT_STAGING_PASS_NATIVE_UNEXECUTED",
+  "originalCopyToolSession": 30592,
+  "copyInitialToolChunk": "71b437",
+  "copyTerminalToolChunk": "bd2afb",
+  "copyOuterExit": 0,
+  "privatePatchToolSession": 78566,
+  "privatePatchTerminalToolChunk": "c50cbc",
+  "privatePatchOuterExit": 0,
+  "copySourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+  "copySourceMembers": 1814,
+  "copyDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "copyDistMembers": 238,
+  "selectedRegularCopyMembersEach": 14213,
+  "allSelectedDependencySymlinksMeasured": 23,
+  "exactAcceptedSdkBinSymlinks": 21,
+  "sdkBinBaselineSha256": "284ae82a7b4f2c0b0b002d16fdef8cac63ff83d9c9588432772e975df5544ca1",
+  "regularCopiesIndependentNoActualHardlinks": true,
+  "exactCopiedMembershipHashModesAndProductEach": true,
+  "actualSourceProductDependenciesStableThroughCopy": true,
+  "explicitActualInputReadReleaseUtc": "2026-10-21T03:30:34.495827+00:00",
+  "noActualSourceDependencyCacheReadAfterRelease": true,
+  "afterReleaseScope": "private copies and immutable captured metadata only",
+  "copiedCacheFresh191": [
+    {
+      "variant": "old-existence-consumer",
+      "relativePath": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+      "sha256": "809420dc05344c9ecba867d44795ff0c88da17decc008ec5121a2bc2ce7186f2",
+      "orderedResultEntries": 191,
+      "projection": "count only; complete cache bytehash equal COPYbefore, no historicalcacheforce",
+      "futureOutputDirectoryAbsent": true
+    },
+    {
+      "variant": "fixed-content-consumer",
+      "relativePath": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+      "sha256": "809420dc05344c9ecba867d44795ff0c88da17decc008ec5121a2bc2ce7186f2",
+      "orderedResultEntries": 191,
+      "projection": "count only; complete cache bytehash equal COPYbefore, no historicalcacheforce",
+      "futureOutputDirectoryAbsent": true
+    }
+  ],
+  "patchCommands": [
+    {
+      "variant": "old-existence-consumer",
+      "phase": "dry-run",
+      "argv": [
+        "patch",
+        "--dry-run",
+        "-p1",
+        "--forward",
+        "--batch",
+        "-i",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/old-existence-consumer.patch"
+      ],
+      "cwd": "/private/tmp/obs009-g9-f2-current-20261020-root01/old-existence-consumer",
+      "rawExit": 0,
+      "stdoutSha256": "de31bdde03b99e4d8abac3c5d8d972e3a4c0c69f7b43ad66048fe4b97c20cef0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "offsetFuzzFailedOrRejectMention": false
+    },
+    {
+      "variant": "old-existence-consumer",
+      "phase": "apply",
+      "argv": [
+        "patch",
+        "-p1",
+        "--forward",
+        "--batch",
+        "-i",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/old-existence-consumer.patch"
+      ],
+      "cwd": "/private/tmp/obs009-g9-f2-current-20261020-root01/old-existence-consumer",
+      "rawExit": 0,
+      "stdoutSha256": "de31bdde03b99e4d8abac3c5d8d972e3a4c0c69f7b43ad66048fe4b97c20cef0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "offsetFuzzFailedOrRejectMention": false
+    },
+    {
+      "variant": "fixed-content-consumer",
+      "phase": "dry-run",
+      "argv": [
+        "patch",
+        "--dry-run",
+        "-p1",
+        "--forward",
+        "--batch",
+        "-i",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/fixed-content-consumer.patch"
+      ],
+      "cwd": "/private/tmp/obs009-g9-f2-current-20261020-root01/fixed-content-consumer",
+      "rawExit": 0,
+      "stdoutSha256": "ed2bcb86884d6546903407ca5f971a7f17bb23366cd6f8dadec4a9827047fe64",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "offsetFuzzFailedOrRejectMention": false
+    },
+    {
+      "variant": "fixed-content-consumer",
+      "phase": "apply",
+      "argv": [
+        "patch",
+        "-p1",
+        "--forward",
+        "--batch",
+        "-i",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/fixed-content-consumer.patch"
+      ],
+      "cwd": "/private/tmp/obs009-g9-f2-current-20261020-root01/fixed-content-consumer",
+      "rawExit": 0,
+      "stdoutSha256": "ed2bcb86884d6546903407ca5f971a7f17bb23366cd6f8dadec4a9827047fe64",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "offsetFuzzFailedOrRejectMention": false
+    }
+  ],
+  "variants": [
+    {
+      "variant": "old-existence-consumer",
+      "scratch": "/private/tmp/obs009-g9-f2-current-20261020-root01/old-existence-consumer",
+      "actualChangedPaths": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java"
+      ],
+      "delta": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java",
+          "beforeSha256": "803ad93b30973014d63f048ba3b57e83ff83015694cf2d5d88bdb70385604db2",
+          "afterSha256": "928aa7550e2308f68a0a454e235d438b42a35a9a4007deec7426a43780fed670",
+          "beforeMode": 420,
+          "afterMode": 420,
+          "beforeBytes": 15891,
+          "afterBytes": 15918
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+          "beforeSha256": "75c55104ff24acf9352b1e140cf442c52b8170ea9e738a64c539f1eec8b2abe2",
+          "afterSha256": "d4c1aa225fb6dfbe9a224ca6a3d59ab62bd735466b8cb6c1548c90b6874efeb3",
+          "beforeMode": 420,
+          "afterMode": 420,
+          "beforeBytes": 289129,
+          "afterBytes": 289118
+        }
+      ],
+      "allOtherSelectedRowsAndModesAndDistExact": true,
+      "beforeCatalogSha256": "3c6d5f9b7f0f0c544fbd49dad63cfacf703c414b411ba2501a2ed7b8d83af198",
+      "stagedCatalogSha256": "9ef517e4783ee957abd26019e9dab18f93f424e0ff4a2d53ac43186f7f37ed89"
+    },
+    {
+      "variant": "fixed-content-consumer",
+      "scratch": "/private/tmp/obs009-g9-f2-current-20261020-root01/fixed-content-consumer",
+      "actualChangedPaths": [
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java"
+      ],
+      "delta": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedResolverProcessCrashIT.java",
+          "beforeSha256": "803ad93b30973014d63f048ba3b57e83ff83015694cf2d5d88bdb70385604db2",
+          "afterSha256": "928aa7550e2308f68a0a454e235d438b42a35a9a4007deec7426a43780fed670",
+          "beforeMode": 420,
+          "afterMode": 420,
+          "beforeBytes": 15891,
+          "afterBytes": 15918
+        }
+      ],
+      "allOtherSelectedRowsAndModesAndDistExact": true,
+      "beforeCatalogSha256": "3c6d5f9b7f0f0c544fbd49dad63cfacf703c414b411ba2501a2ed7b8d83af198",
+      "stagedCatalogSha256": "27ffa2da48b155f092951cbb0625880a7004926a591a85389f87e6efba207370"
+    }
+  ],
+  "original300msBothVariantsAnd25s10msOracles": "exact reviewed patch/candidate hashes; no source/asserter/testcase changes beyond declared staged deltas",
+  "restoration": "not run; staged old/fixed buffers frozen for separately admitted native; restore only after owned native completion/cleanup",
+  "nativeCompilerGradleBrowserTestsExecuted": false,
+  "extraReplayCalls": 0,
+  "originalFailuresAndSource03SealsPreserved": true,
+  "sourceReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-source-preparation03/copy-selected-actual-before.json",
+      "sha256": "84f84c41fc871f60d6fdcf8add3b03e73c07346a4e53fe1411a262113120474a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-source-preparation03/copy-selected-actual-after.json",
+      "sha256": "5a4169506ba7f5c79cd86ce9e331b160c5ba444aa3ebb52eecbb4ea357707adc"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-source-preparation03/copy-command-results.json",
+      "sha256": "b212ab91490557cb24800f252c755175316f19a0b599f61f746d155519b6a98f"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-source-preparation03/copy-read-window-release.json",
+      "sha256": "27cb96e7a05a749f153dc00114a38870da0049665e77668735c5900f15b86867"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-source-preparation03/old-existence-consumer-copied-catalog.json",
+      "sha256": "3c6d5f9b7f0f0c544fbd49dad63cfacf703c414b411ba2501a2ed7b8d83af198"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-source-preparation03/fixed-content-consumer-copied-catalog.json",
+      "sha256": "3c6d5f9b7f0f0c544fbd49dad63cfacf703c414b411ba2501a2ed7b8d83af198"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-source-preparation03/manifest.json",
+      "sha256": "ea1ae6073a22dabb06338d2795efe26908b1973a1204800300647ee0b32e3763"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-source-preparation03/seed-and-bind.py",
+      "sha256": "7420a7eca88fe7a0220d2258c2dd4e5aa2f25b22c967d7b02da8f2970d44bd38"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/manifest.json",
+      "sha256": "bb0c8c33c8ccd867b29b2e2d4324947ec87a509365c4801a101f341374ad4217"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/root-source-review.json",
+      "sha256": "8b307d32fbb4375dfa311aa6ccf309f7613b19e9b54fc8999e1fcc739e216b29"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/future-commands.json",
+      "sha256": "d178f46395c4e74d084319c443d84e95c84550fe551c37d8e20104b5e2d5e389"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/old-existence-consumer.patch",
+      "sha256": "6abe8b39ca7f8c8081e139a256ce85cab1fba43f6d0b4a1a0d0233e38e9bce24"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/old-existence-consumer.restore.patch",
+      "sha256": "457d1dae276d83cefb0404bf46c11b2e12d27262eb124236c4fd877ef95b95ed"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/fixed-content-consumer.patch",
+      "sha256": "1548e1a6f12173d53563fe4fb64b9c4d1dbff91960cd29e997e38e964e890a98"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/fixed-content-consumer.restore.patch",
+      "sha256": "6717af0df6c7dfc9176e8570cf2801b783fc933b9f099167bb7ef776b8291ae3"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/expected-case-counter.json",
+      "sha256": "4b244f3cdce25e79ea408a05a8c947374ed70bc7bda2662d5528d4a479aad34f"
+    }
+  ],
+  "fullReplayCap": 6,
+  "chargedReplayCallsRemain": 3,
+  "sharedUsdCeiling": 500,
+  "headroom": "UNKNOWN",
+  "runtimeAuthority": "none; root must separately release existingC10 oldRED/fixedGREEN after other heavy work",
+  "storyAndSourceLifecycle": "All remain InProgress; no actualsource or story edits/Done/external proof",
+  "betweenVariantSharedFileInodes": 0,
+  "betweenVariantInodePairsMeasured": 14213
+}

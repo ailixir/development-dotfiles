@@ -1,0 +1,37 @@
+{
+  "rootAdoptionSha256": "a4b1642e42cb49049ff23b0e398ada2463acc4582007d77926a322c0d8f1419e",
+  "completeFindingCount": 3,
+  "findings": [
+    {
+      "id": "FR03-PRIMARY-PUBLISH",
+      "functions": [
+        "Unit.capture",
+        "FailureSink.primary",
+        "FailureSink.cleanup"
+      ],
+      "cases": "PRIMARY_PUBLISH_*"
+    },
+    {
+      "id": "FR03-OUTER-CLEANUP",
+      "functions": [
+        "FailureSink.claim_finalizer",
+        "FailureSink.finalize",
+        "run",
+        "entry.execute",
+        "install-cli.execute",
+        "installer.install",
+        "guard/install-loader finally"
+      ],
+      "cases": "GUARD_*, INSTALL_LOADER_*, DIRECT_*"
+    },
+    {
+      "id": "FR03-PARTIAL-NAMESPACE",
+      "functions": [
+        "Custody.mkdir",
+        "installer.install"
+      ],
+      "cases": "PARTIAL_NAMESPACE_*"
+    }
+  ],
+  "otherScopeAdded": false
+}

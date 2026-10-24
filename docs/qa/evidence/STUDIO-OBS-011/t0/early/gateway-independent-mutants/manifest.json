@@ -1,0 +1,296 @@
+{
+  "schemaVersion": 1,
+  "status": "PREPARED_NATIVE_UNEXECUTED_INDEPENDENT_REVIEW_OWED",
+  "createdAtUtc": "2026-10-19T05:14:23.544322+00:00",
+  "sourceOrRuntimeAuthorized": false,
+  "artifacts": [
+    {
+      "path": "DESIGN.md",
+      "sha256": "1209d6067424f79a22087fc24abd118415b3b02b5afbf879a7cb115673ceddc2",
+      "bytes": 2876,
+      "mode": "0644"
+    },
+    {
+      "path": "FUTURE-EXECUTION.md",
+      "sha256": "b2b0f4310f4d747735ee4126e498bf83091d1cf907a9bf0cd899510daa8a1805",
+      "bytes": 7659,
+      "mode": "0644"
+    },
+    {
+      "path": "chart-bindings.json",
+      "sha256": "2322004623836ba0e3e0c15165b5c296c68cb1b8049cf4b58a608c7f3f8b1ee9",
+      "bytes": 6967,
+      "mode": "0644"
+    },
+    {
+      "path": "future-commands.json",
+      "sha256": "122931dd44996167bf9aea06e44aba584c50816ed273f47e00a110cad86dfa29",
+      "bytes": 2150,
+      "mode": "0644"
+    },
+    {
+      "path": "historical-source-proof-reconciliation.json",
+      "sha256": "18bf4da42e082a2958d245004b70fb8e9a10f34c4110898b0edeead28af1ebce",
+      "bytes": 6593,
+      "mode": "0644"
+    },
+    {
+      "path": "mutants/M-NORMALIZED-COMPARISON/forward.patch",
+      "sha256": "fc2aa4328e6b815c1e19a3dd1c730a995d3857ab15525e35e6aef33c622f26ba",
+      "bytes": 749,
+      "mode": "0644"
+    },
+    {
+      "path": "mutants/M-NORMALIZED-COMPARISON/repo/helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "2aefb17257b11a1e1ce0a29c355e0cced5c8a69ef33099d5fbb567bc20c62115",
+      "bytes": 44383,
+      "mode": "0644"
+    },
+    {
+      "path": "mutants/M-NORMALIZED-COMPARISON/restore.patch",
+      "sha256": "940290ece699c9d29cccbdbe2e95eab2060a6e448bc232ca4726cfb0ec3a876a",
+      "bytes": 749,
+      "mode": "0644"
+    },
+    {
+      "path": "mutants/M-RECURSION/forward.patch",
+      "sha256": "6fbdecd1608f66899d7036e99da98612aaa69ed4d24e7d2d8a71d743e79871f9",
+      "bytes": 434,
+      "mode": "0644"
+    },
+    {
+      "path": "mutants/M-RECURSION/repo/helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "aaf4c73fb38eb2d391ab38b79e2f17df0c8a389f681d990e605d221c7f174d74",
+      "bytes": 44256,
+      "mode": "0644"
+    },
+    {
+      "path": "mutants/M-RECURSION/restore.patch",
+      "sha256": "3bc2bf3ffc539f8d0e3a03a2b30f8b9dbd011fc8a4d1ee30e225c0587e50d76b",
+      "bytes": 434,
+      "mode": "0644"
+    },
+    {
+      "path": "mutations.json",
+      "sha256": "5da5d122609c251171adb9fb1a637fcfaca8698da20c00acf55aabfb0ce90278",
+      "bytes": 2463,
+      "mode": "0644"
+    },
+    {
+      "path": "original-80-case-map.json",
+      "sha256": "be92568bbe3edf46f64d649ea52329638de37a864778f7398a2b3c396abb02cb",
+      "bytes": 11425,
+      "mode": "0644"
+    },
+    {
+      "path": "prepare.py",
+      "sha256": "c524e7b7cd34c92cf3cd9d238103db2ed6dbb8fe27880e561445533e166c107f",
+      "bytes": 6112,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/.helmignore",
+      "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+      "bytes": 86,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/Chart.yaml",
+      "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+      "bytes": 263,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/NOTES.txt",
+      "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+      "bytes": 989,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "bytes": 44353,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+      "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+      "bytes": 2789,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/configmap.yaml",
+      "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+      "bytes": 6068,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/deployment.yaml",
+      "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+      "bytes": 39697,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/hpa.yaml",
+      "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+      "bytes": 778,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/ingress.yaml",
+      "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+      "bytes": 2276,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/pdb.yaml",
+      "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+      "bytes": 1566,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/service.yaml",
+      "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+      "bytes": 1544,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/serviceaccount.yaml",
+      "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+      "bytes": 1440,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+      "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+      "bytes": 1189,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+      "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+      "bytes": 26332,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+      "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+      "bytes": 4483,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+      "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+      "bytes": 2732,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/studio-runner-service.yaml",
+      "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+      "bytes": 2524,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+      "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+      "bytes": 5470,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/values-dev.yaml",
+      "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+      "bytes": 5488,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/values-prod.yaml",
+      "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+      "bytes": 9186,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/values-uat.yaml",
+      "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+      "bytes": 9462,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/helm-chart/put-checks/values.yaml",
+      "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+      "bytes": 50683,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/studio-runner/eslint.config.js",
+      "sha256": "9a90981a969856f3190f82b4bcebf1a04a0fa38abe0a5fc5571f83f01d8e68eb",
+      "bytes": 4410,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/studio-runner/package-lock.json",
+      "sha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613",
+      "bytes": 213424,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/studio-runner/package.json",
+      "sha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e",
+      "bytes": 1481,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/studio-runner/test/deployment/gateway-independent-mutants.test.ts",
+      "sha256": "d09fa30c03791ac59450b64cba55137ea05485fd861415d2d2fb6c863a74506f",
+      "bytes": 9619,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/studio-runner/test/deployment/helm.ts",
+      "sha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0",
+      "bytes": 23388,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/studio-runner/test/helpers/corpus.ts",
+      "sha256": "63c091d87319035db1673bfbca75d31a02206697ed454f52b3e8f21093dfab79",
+      "bytes": 438,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/studio-runner/tsconfig.json",
+      "sha256": "723196d470e796a3638c23d794004b30053e0e334a0bb3f1fa270a0a75075046",
+      "bytes": 767,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/studio-runner/vitest.deployment.config.ts",
+      "sha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b",
+      "bytes": 3063,
+      "mode": "0644"
+    },
+    {
+      "path": "private-repo/studio-runner/vitest.gateway-independent.config.ts",
+      "sha256": "73051c9b69ddfcfa1e5bbc2e7df5f2d974cd97edd18c5510b70910f19bede6ac",
+      "bytes": 399,
+      "mode": "0644"
+    },
+    {
+      "path": "review-inputs.json",
+      "sha256": "ab7d0cd03750a2a1ee42ef806c8fc392aba4578e5678a894a7b878b58f86768e",
+      "bytes": 2574,
+      "mode": "0644"
+    },
+    {
+      "path": "static-checks.json",
+      "sha256": "5fb95cc51098eb7b1eb9a2d7a8db17035ee0b3b74e1653e9ba990359ab5a4983",
+      "bytes": 9975,
+      "mode": "0644"
+    },
+    {
+      "path": "verify-static.py",
+      "sha256": "e73cdd25bab1c8f4d52c50a5d0e3bdac15a745caf310b3a5d2066d172141e620",
+      "bytes": 6902,
+      "mode": "0644"
+    }
+  ]
+}

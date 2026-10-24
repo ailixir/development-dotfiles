@@ -1,0 +1,83 @@
+{
+  "byteAndModePreservation": {
+    "final-candidates": 61,
+    "virtual-pre-final": 64,
+    "patches": 41,
+    "mutants": 15
+  },
+  "independentFactoryBodyBindings": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+      "provider": "deployedProfiles",
+      "sha256": "4b8a33cffe889876c64f0d4ba8d30658dcb44c2a92725e7225af375e3b52872c"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+      "provider": "plaintextProfiles",
+      "sha256": "17766cbd4e1b3c2fb390c1b07a371935772464e3d6cb1b1fb962574805c467a1"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+      "provider": "apiChainParts",
+      "sha256": "54b1b3c5c30cc15ad3d96e0d42135a39c2a70ef5f06458ec533cd08d1b7d7ce2"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedScheduledBeansProfileTest.java",
+      "provider": "roles",
+      "sha256": "0909e1ac8bda2f3bf31cc22d7fb97f103ed74ddc3e4d5ed2ed891f1a18044d22"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "provider": "credentials",
+      "sha256": "d85100c9e95cf4989a92277fd55dbf5b8f867a82cde9bd3251c24d410f6e7e31"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "provider": "malformedIdentity",
+      "sha256": "54e471229e3213973c2f296530c3a16ece89e70e33119ad0011515af1b8b2496"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "provider": "pairedChoiceMutations",
+      "sha256": "d6fa0ea89680494e9c700a78cf6d647c1baea4435c6657e8607bc092660493b4"
+    }
+  ],
+  "methodDeclarationBindings": 610,
+  "independentRootMethodCount": 2156,
+  "acceptedBaseline": {
+    "plain": 2055,
+    "parameterizedMethods": 101,
+    "parameterizedInvocations": 719,
+    "identities": 2774,
+    "tasks": {
+      "test": 2710,
+      "guidedIncrementalTest": 62,
+      "crossReplicaTest": 2
+    }
+  },
+  "scopedCounts": {
+    "GuidedPublicationReplayIT.java": [
+      74,
+      108
+    ],
+    "GuidedPlanningIntegrationTest.java": [
+      35,
+      57
+    ],
+    "GuidedSecretByteBodyTest.java": [
+      4,
+      5
+    ]
+  },
+  "scopedIdentities": 637,
+  "origins": {
+    "retained": 623,
+    "relocated": 7,
+    "new": 7
+  },
+  "nativeFailIdentityRetained": true,
+  "originalSourceAndRuntimeBatonsUnreleased": true,
+  "checks": 314355,
+  "sourceWrites": 0,
+  "nativeCalls": 0
+}

@@ -1,0 +1,421 @@
+{
+  "scope": "all backend/src Java/YAML/SQL, candidate non-data overlay only; no CLN-F2 overlay",
+  "exactWordProofRegex": "\\b(isCanonical|updateAuthoring|allocationIds|isApiAssigned|providerName|getSecretName|pollIntervalOrDefault|readIntervalOrDefault)\\b",
+  "positiveControl": "isTerminal remains present before and after; each removed symbol itself present in its original declaring file",
+  "results": {
+    "isCanonical": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+          "line": 26,
+          "text": "public static boolean isCanonical(String status) {"
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "updateAuthoring": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+          "line": 391,
+          "text": "public AuthoringV2Response updateAuthoring("
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "allocationIds": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+          "line": 69,
+          "text": "public Map<Integer, String> allocationIds(JsonNode references, JsonNode context) {"
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "isApiAssigned": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+          "line": 95,
+          "text": "public static boolean isApiAssigned(String runnerErrorCode) {"
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "providerName": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+          "line": 249,
+          "text": "public Optional<String> providerName() {"
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "getSecretName": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAlreadyExistsException.java",
+          "line": 20,
+          "text": "public String getSecretName() {"
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "pollIntervalOrDefault": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+          "line": 160,
+          "text": "public Duration pollIntervalOrDefault() {"
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "readIntervalOrDefault": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+          "line": 212,
+          "text": "public Duration readIntervalOrDefault() {"
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "CANONICAL": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+          "line": 20,
+          "text": "private static final Set<String> CANONICAL = Set.of(PENDING, RUNNING, PASSED, FAILED, ERROR);"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+          "line": 27,
+          "text": "return status != null && CANONICAL.contains(status);"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+          "line": 264,
+          "text": "new CurrentCase(\"CANONICAL-IMMUTABLE/bare-session\", \"session\", fixtureSession(), true));"
+        }
+      ],
+      "candidateOverlay": [
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedWireContractTest.java",
+          "line": 264,
+          "text": "new CurrentCase(\"CANONICAL-IMMUTABLE/bare-session\", \"session\", fixtureSession(), true));"
+        }
+      ]
+    },
+    "API_ASSIGNED": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+          "line": 39,
+          "text": "private static final Set<String> API_ASSIGNED = ExecutionErrorCode.values();"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+          "line": 97,
+          "text": "&& API_ASSIGNED.contains(runnerErrorCode.toUpperCase(Locale.ROOT));"
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "pollInterval": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/CronDispatcher.java",
+          "line": 92,
+          "text": "public Duration pollInterval() {"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/ScheduledTarget.java",
+          "line": 14,
+          "text": "Duration pollInterval();"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingHeartbeat.java",
+          "line": 27,
+          "text": "return targets.stream().mapToLong(t -> Math.max(1, t.pollInterval().toMillis())).min().stream()"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingTargetWorker.java",
+          "line": 42,
+          "text": "Duration interval = target.pollInterval();"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+          "line": 142,
+          "text": "Boolean enabled, Integer threads, Integer batchSize, Duration lease, Duration pollInterval) {"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+          "line": 161,
+          "text": "return pollInterval == null ? Duration.ofSeconds(2) : pollInterval;"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledTarget.java",
+          "line": 48,
+          "text": "public Duration pollInterval() {"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/scheduling/SchedulingCoordinatorTest.java",
+          "line": 47,
+          "text": "public Duration pollInterval() {"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+          "line": 262,
+          "text": "assertThat(ordinary.pollInterval()).isEqualTo(Duration.ofMillis(250));"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+          "line": 264,
+          "text": "assertThat(studioTarget.pollInterval()).isEqualTo(Duration.ofSeconds(5));"
+        }
+      ],
+      "candidateOverlay": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/CronDispatcher.java",
+          "line": 92,
+          "text": "public Duration pollInterval() {"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/ScheduledTarget.java",
+          "line": 14,
+          "text": "Duration pollInterval();"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingHeartbeat.java",
+          "line": 27,
+          "text": "return targets.stream().mapToLong(t -> Math.max(1, t.pollInterval().toMillis())).min().stream()"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingTargetWorker.java",
+          "line": 42,
+          "text": "Duration interval = target.pollInterval();"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledTarget.java",
+          "line": 48,
+          "text": "public Duration pollInterval() {"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/scheduling/SchedulingCoordinatorTest.java",
+          "line": 47,
+          "text": "public Duration pollInterval() {"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+          "line": 262,
+          "text": "assertThat(ordinary.pollInterval()).isEqualTo(Duration.ofMillis(250));"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+          "line": 264,
+          "text": "assertThat(studioTarget.pollInterval()).isEqualTo(Duration.ofSeconds(5));"
+        }
+      ]
+    },
+    "readInterval": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+          "line": 197,
+          "text": "Duration readInterval,"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+          "line": 213,
+          "text": "return readInterval == null ? Duration.ofMillis(750) : readInterval;"
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "OBSERVED_SCHEDULE_AUTH_REQUIRED": {
+      "before": [
+        {
+          "path": "backend/src/main/resources/db/migration/V16__scheduling.sql",
+          "line": 128,
+          "text": "'SCHEDULE_UPDATED', 'SCHEDULE_REMOVED', 'OBSERVED_SCHEDULE_AUTH_REQUIRED')"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V16__scheduling.sql",
+          "line": 130,
+          "text": "AND (code <> 'OBSERVED_SCHEDULE_AUTH_REQUIRED' OR decision = 'REFUSED')"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+          "line": 1242,
+          "text": "+ \" ('REFUSED','OBSERVED_SCHEDULE_AUTH_REQUIRED')\"))"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+          "line": 1249,
+          "text": "+ \" (?,'OBSERVED_SCHEDULE_AUTH_REQUIRED')\","
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+          "line": 315,
+          "text": ".contains(\"OBSERVED_SCHEDULE_AUTH_REQUIRED\", \"LEARN_REQUIRED\")"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/ObservedScheduleAuthorityIT.java",
+          "line": 268,
+          "text": "+ \" 'OBSERVED_SCHEDULE_AUTH_REQUIRED'\","
+        }
+      ],
+      "candidateOverlay": [
+        {
+          "path": "backend/src/main/resources/db/migration/V16__scheduling.sql",
+          "line": 128,
+          "text": "'SCHEDULE_UPDATED', 'SCHEDULE_REMOVED', 'OBSERVED_SCHEDULE_AUTH_REQUIRED')"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V16__scheduling.sql",
+          "line": 130,
+          "text": "AND (code <> 'OBSERVED_SCHEDULE_AUTH_REQUIRED' OR decision = 'REFUSED')"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+          "line": 1242,
+          "text": "+ \" ('REFUSED','OBSERVED_SCHEDULE_AUTH_REQUIRED')\"))"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+          "line": 1249,
+          "text": "+ \" (?,'OBSERVED_SCHEDULE_AUTH_REQUIRED')\","
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedSecretLoginMigrationTest.java",
+          "line": 315,
+          "text": ".contains(\"OBSERVED_SCHEDULE_AUTH_REQUIRED\", \"LEARN_REQUIRED\")"
+        },
+        {
+          "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/ObservedScheduleAuthorityIT.java",
+          "line": 268,
+          "text": "+ \" 'OBSERVED_SCHEDULE_AUTH_REQUIRED'\","
+        }
+      ]
+    },
+    "read-interval:": {
+      "before": [
+        {
+          "path": "backend/src/main/resources/application.yml",
+          "line": 376,
+          "text": "read-interval: ${STUDIO_SSE_READ_INTERVAL:750ms}"
+        }
+      ],
+      "candidateOverlay": []
+    },
+    "read-interval-ms:": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/sse/SnapshotBroadcaster.java",
+          "line": 79,
+          "text": "@Scheduled(fixedDelayString = \"${studio.execution.sse.read-interval-ms:750}\")"
+        },
+        {
+          "path": "backend/src/main/resources/application.yml",
+          "line": 378,
+          "text": "read-interval-ms: ${STUDIO_SSE_READ_INTERVAL_MS:750}"
+        }
+      ],
+      "candidateOverlay": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/sse/SnapshotBroadcaster.java",
+          "line": 79,
+          "text": "@Scheduled(fixedDelayString = \"${studio.execution.sse.read-interval-ms:750}\")"
+        },
+        {
+          "path": "backend/src/main/resources/application.yml",
+          "line": 377,
+          "text": "read-interval-ms: ${STUDIO_SSE_READ_INTERVAL_MS:750}"
+        }
+      ]
+    },
+    "isTerminal": {
+      "before": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+          "line": 154,
+          "text": "ExecutionStatus.isTerminal(status) ? VideoEvidence.UNAVAILABLE : VideoEvidence.PROCESSING;"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+          "line": 181,
+          "text": "return ExecutionStatus.isTerminal(status) && !VideoEvidence.PROCESSING.equals(video.status());"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+          "line": 818,
+          "text": "ExecutionStatus.isTerminal(status)"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+          "line": 942,
+          "text": "if (!ExecutionStatus.isTerminal(status)) {"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchState.java",
+          "line": 83,
+          "text": "public boolean isTerminal() {"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+          "line": 30,
+          "text": "public static boolean isTerminal(String status) {"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/FinalizationReconciler.java",
+          "line": 168,
+          "text": "if (ExecutionStatus.isTerminal(outcome)) {"
+        }
+      ],
+      "candidateOverlay": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+          "line": 154,
+          "text": "ExecutionStatus.isTerminal(status) ? VideoEvidence.UNAVAILABLE : VideoEvidence.PROCESSING;"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+          "line": 181,
+          "text": "return ExecutionStatus.isTerminal(status) && !VideoEvidence.PROCESSING.equals(video.status());"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+          "line": 807,
+          "text": "ExecutionStatus.isTerminal(status)"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+          "line": 931,
+          "text": "if (!ExecutionStatus.isTerminal(status)) {"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchState.java",
+          "line": 83,
+          "text": "public boolean isTerminal() {"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+          "line": 24,
+          "text": "public static boolean isTerminal(String status) {"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/FinalizationReconciler.java",
+          "line": 168,
+          "text": "if (ExecutionStatus.isTerminal(outcome)) {"
+        }
+      ]
+    },
+    "readIntervalMs": {
+      "before": [],
+      "candidateOverlay": []
+    }
+  }
+}

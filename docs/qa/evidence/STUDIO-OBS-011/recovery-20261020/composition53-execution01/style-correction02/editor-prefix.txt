@@ -1,0 +1,36 @@
+import com.sun.source.tree.*;
+import com.sun.source.util.*;
+import java.nio.file.*;
+import java.util.*;
+import javax.lang.model.element.Modifier;
+import javax.tools.*;
+
+/** One-use successor for the exact diagnosed wait scopes; parse only, no application loading. */
+public class DiagnosedStyleEditor {
+  record Edit(int start, int end, String replacement, String kind) {}
+  static final class Model extends TreeScanner<Void, Void> {
+    final CompilationUnitTree unit;
+    final SourcePositions positions;
+    final IdentityHashMap<Tree, Tree> parent = new IdentityHashMap<>();
+    final Deque<Tree> stack = new ArrayDeque<>();
+    final List<Tree> nodes = new ArrayList<>();
+    Model(CompilationUnitTree unit, SourcePositions positions) {
+      this.unit = unit; this.positions = positions; scan(unit, null);
+    }
+    @Override public Void scan(Tree node, Void unused) {
+      if (node == null) return null;
+      if (!stack.isEmpty()) parent.put(node, stack.peek());
+      nodes.add(node); stack.push(node); super.scan(node, unused); stack.pop(); return null;
+    }
+    int start(Tree t) { return Math.toIntExact(positions.getStartPosition(unit, t)); }
+    int end(Tree t) { return Math.toIntExact(positions.getEndPosition(unit, t)); }
+    String name(Tree t) {
+      if (t instanceof VariableTree v) return v.getName().toString();
+      if (t instanceof ClassTree v) return v.getSimpleName().toString();
+      if (t instanceof MethodTree v) return v.getName().toString();
+      if (t instanceof IdentifierTree v) return v.getName().toString();
+      if (t instanceof MemberSelectTree v) return v.getIdentifier().toString();
+      return "";
+    }
+  }
+  static void require(boolean ok, String why) { if (!ok) throw new IllegalStateException(why); }

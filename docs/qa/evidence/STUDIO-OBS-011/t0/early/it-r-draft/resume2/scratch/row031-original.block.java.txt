@@ -1,0 +1,4 @@
+while (jdbc.queryForObject(sql, Integer.class, id) == 0) {
+      assertThat(Clock.nanoTime()).as(sql).isLessThan(end);
+      Clock.startElapsed(); probeIntervalEntered.countDown(); Thread.sleep(20); if (noAwaitGap) Clock.advance(1_000_000_000L);
+    }

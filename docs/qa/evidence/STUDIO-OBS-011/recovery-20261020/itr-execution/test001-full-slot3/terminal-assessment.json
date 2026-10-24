@@ -1,0 +1,1089 @@
+{
+  "kind": "FULL_CLASS_SLOT3_TEST001_TERMINAL_FAILURE",
+  "atUtc": "2026-10-20T17:46:48.775618+00:00",
+  "status": "FAIL_NO_TEST001_FULL_GREEN_BATON",
+  "slot": 3,
+  "label": "obs011-lean-ir-test001-01",
+  "toolSessionTerminal": 9778,
+  "rawResultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-test001-01-results.json",
+  "rawResultSha256": "54a3bd681a1312bb73f1a5e3dd15775d9b27b898cf2f0ce8145498fd828fff9b",
+  "exit": 1,
+  "gradleExit": 1,
+  "elapsedSeconds": 3576.97,
+  "counts": {
+    "total": 108,
+    "passed": 93,
+    "failed": 15,
+    "errors": 0,
+    "skipped": 0
+  },
+  "taskResults": {
+    "test": {
+      "counts": {
+        "total": 46,
+        "passed": 31,
+        "failed": 15,
+        "errors": 0,
+        "skipped": 0
+      },
+      "freshXmlFiles": 1,
+      "freshHtmlIndex": true,
+      "freshExec": true,
+      "execRequired": true,
+      "joinCasesPresent": true,
+      "freshJoinCohorts": 1
+    },
+    "guidedIncrementalTest": {
+      "counts": {
+        "total": 62,
+        "passed": 62,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "freshXmlFiles": 1,
+      "freshHtmlIndex": true,
+      "freshExec": true,
+      "execRequired": true,
+      "joinCasesPresent": true,
+      "freshJoinCohorts": 1
+    }
+  },
+  "taskCollectionComplete": true,
+  "taskCollectionErrors": [],
+  "exactXmlRootExpectedCaseUnion": true,
+  "expectedCaseCounts": {
+    "test": 46,
+    "guidedIncrementalTest": 62
+  },
+  "xml": [
+    {
+      "task": "test",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-test001-01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+      "sha256": "212358b566a82314538c6fffa307cf37c7df7c229e5285e11f23690c7270be88",
+      "fresh": true,
+      "suiteAttributes": {
+        "tests": "46",
+        "failures": "15",
+        "errors": "0",
+        "skipped": "0",
+        "time": "959.216"
+      }
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-test001-01-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+      "sha256": "7293addf55f1e5e7515b20345dccd1575db4ca090bc37ce6336d9ae67167c54d",
+      "fresh": true,
+      "suiteAttributes": {
+        "tests": "62",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "2084.428"
+      }
+    }
+  ],
+  "freshExecs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-test001-01-task-outputs/test/jacoco/test.exec",
+      "sha256": "b5a1214d100e3f3f691d2e77ff5e24c0b097268b4b97e0ef7e48f14510024007",
+      "bytes": 1010627,
+      "mtimeNs": 1792515797397664776,
+      "mode": "0o644",
+      "task": "test",
+      "nonempty": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-test001-01-task-outputs/guidedIncrementalTest/jacoco/guidedIncrementalTest.exec",
+      "sha256": "fadc489f8f8946f00601bd6acb4d85652a1bb3ee85a588c21e88ba2c6215f3e8",
+      "bytes": 995808,
+      "mtimeNs": 1792518370393816451,
+      "mode": "0o644",
+      "task": "guidedIncrementalTest",
+      "nonempty": true
+    }
+  ],
+  "cohorts": [
+    {
+      "task": "test",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-test001-01-task-outputs/test/cohorts/bcd57d20-f54b-4131-a7c8-f33f1ee91b56/4635ac72-458b-4b5e-a118-441755553b23/cohort.json",
+      "sha256": "62b82999bcd65d6d11268904be674dadf62db4933facd3cbc883b653b09bb793",
+      "numericBooleanFlags": {
+        "auditComplete": true,
+        "auditEvents": 228,
+        "budgetEvidenceComplete": true,
+        "declaredOutputCeiling": 4000,
+        "finalScansAttempted": true,
+        "modelEvidenceComplete": true,
+        "privacyComplete": true,
+        "producersDrained": true,
+        "responseEvidenceComplete": true,
+        "retentionFailures": 0
+      },
+      "exactExpectedInvocationMultiset": true,
+      "invocations": [
+        {
+          "method": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 1,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "queuedAndPreReadyRefusals",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 2,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 3,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 4,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 5,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 6,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 7,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 8,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 9,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 10,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualCoreMayUseDenialStartsNoSessionAndNoBrowser",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 11,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 12,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 13,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 14,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 15,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualGuidedRegistrationPassingAssertRemainsPassed",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 16,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 17,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 18,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualPublishedRegistrationPassingAssertRemainsPassed",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 19,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 20,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 21,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 22,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 23,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 24,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 25,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 26,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 27,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 28,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 29,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 30,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualPublishedPublicCancelWhileNativePasswordWorldPending",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 31,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 32,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 33,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 34,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 35,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 36,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 37,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 38,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualSecretControlWindowLossBeforeReadyReachesTerminalError",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 39,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 40,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 41,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 42,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 43,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 44,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 45,
+          "passed": false,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalSecretPrefixPreservesEveryVaultFaultOracle",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 46,
+          "passed": false,
+          "afterEachComplete": true
+        }
+      ],
+      "passedInvocations": 31,
+      "afterEachCompleteInvocations": 46,
+      "actualOrder39Invocations": [
+        {
+          "method": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 40,
+          "passed": false,
+          "afterEachComplete": true
+        }
+      ]
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-test001-01-task-outputs/guidedIncrementalTest/cohorts/afbf0e64-430f-4be8-b109-3a681a1b3223/683884a3-13a8-4e97-a56f-ac252a4decf8/cohort.json",
+      "sha256": "d10e3e055758a00708629c8f7c0481358ea96efa4169661e8dca0015f047f7eb",
+      "numericBooleanFlags": {
+        "auditComplete": true,
+        "auditEvents": 1626,
+        "budgetEvidenceComplete": true,
+        "declaredOutputCeiling": 2048,
+        "finalScansAttempted": true,
+        "modelEvidenceComplete": true,
+        "privacyComplete": true,
+        "producersDrained": true,
+        "responseEvidenceComplete": true,
+        "retentionFailures": 0
+      },
+      "exactExpectedInvocationMultiset": true,
+      "invocations": [
+        {
+          "method": "prefixProducerContextDefiniteRefusalsStopBeforePreparation",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 1,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 2,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalDriftAuthorityRejectsEveryExactJoin",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 3,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 4,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 5,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalPrefixCallbacksKeepStateAndFenceBothReservations",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 6,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalPrefixContinuationMatrixDoneAndRefreshRows",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 7,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 8,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStartCannotWidenTrustedOriginCeiling",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 9,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 10,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalFreshPostConsentGuardsDenyDangerousProposals",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 11,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 12,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 13,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 14,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 15,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "insert4",
+          "variantOrdinal": 1,
+          "invocationOrdinal": 16,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "delete4",
+          "variantOrdinal": 2,
+          "invocationOrdinal": 17,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "reorder4",
+          "variantOrdinal": 3,
+          "invocationOrdinal": 18,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "config",
+          "variantOrdinal": 4,
+          "invocationOrdinal": 19,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "tail1",
+          "variantOrdinal": 5,
+          "invocationOrdinal": 20,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "tail7",
+          "variantOrdinal": 6,
+          "invocationOrdinal": 21,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "append11",
+          "variantOrdinal": 7,
+          "invocationOrdinal": 22,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "ready6",
+          "variantOrdinal": 8,
+          "invocationOrdinal": 23,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "confirm-prefix",
+          "variantOrdinal": 9,
+          "invocationOrdinal": 24,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "empty",
+          "variantOrdinal": 10,
+          "invocationOrdinal": 25,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "drift2",
+          "variantOrdinal": 11,
+          "invocationOrdinal": 26,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "admitted-drift2",
+          "variantOrdinal": 12,
+          "invocationOrdinal": 27,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "unknown2",
+          "variantOrdinal": 13,
+          "invocationOrdinal": 28,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "assert-fail",
+          "variantOrdinal": 14,
+          "invocationOrdinal": 29,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "policy-prefix",
+          "variantOrdinal": 15,
+          "invocationOrdinal": 30,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "confirm-long-wait",
+          "variantOrdinal": 16,
+          "invocationOrdinal": 31,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "confirm-cancel",
+          "variantOrdinal": 17,
+          "invocationOrdinal": 32,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "confirm-expire",
+          "variantOrdinal": 18,
+          "invocationOrdinal": 33,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "confirm-source-change",
+          "variantOrdinal": 19,
+          "invocationOrdinal": 34,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "confirm-recover",
+          "variantOrdinal": 20,
+          "invocationOrdinal": 35,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "confirm-owner-loss",
+          "variantOrdinal": 21,
+          "invocationOrdinal": 36,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "append-input",
+          "variantOrdinal": 22,
+          "invocationOrdinal": 37,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "deleted-consumers",
+          "variantOrdinal": 23,
+          "invocationOrdinal": 38,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "admitted-literal2",
+          "variantOrdinal": 24,
+          "invocationOrdinal": 39,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "pre-literal2",
+          "variantOrdinal": 25,
+          "invocationOrdinal": 40,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "same-pair-literal",
+          "variantOrdinal": 26,
+          "invocationOrdinal": 41,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "unused-declaration",
+          "variantOrdinal": 27,
+          "invocationOrdinal": 42,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "drift-plan-fail",
+          "variantOrdinal": 28,
+          "invocationOrdinal": 43,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "drift-first",
+          "variantOrdinal": 29,
+          "invocationOrdinal": 44,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "confirm-edit4",
+          "variantOrdinal": 30,
+          "invocationOrdinal": 45,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "confirm-race",
+          "variantOrdinal": 31,
+          "invocationOrdinal": 46,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "drift-auth",
+          "variantOrdinal": 32,
+          "invocationOrdinal": 47,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "drift-auth-pre",
+          "variantOrdinal": 33,
+          "invocationOrdinal": 48,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "before4at2",
+          "variantOrdinal": 34,
+          "invocationOrdinal": 49,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
+          "variant": "equal4",
+          "variantOrdinal": 35,
+          "invocationOrdinal": 50,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 51,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalPartialDriftStepReadPublishesAndReplaysTwice",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 52,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 53,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 54,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalExcludedAttemptCannotHideOtherUnsettledActions",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 55,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 56,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalPrefixPolicyRefusalsNeverBecomeDrift",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 57,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 58,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 59,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 60,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 61,
+          "passed": true,
+          "afterEachComplete": true
+        },
+        {
+          "method": "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution",
+          "variant": "singleton",
+          "variantOrdinal": 0,
+          "invocationOrdinal": 62,
+          "passed": true,
+          "afterEachComplete": true
+        }
+      ],
+      "passedInvocations": 62,
+      "afterEachCompleteInvocations": 62,
+      "actualOrder39Invocations": []
+    }
+  ],
+  "audits": [
+    {
+      "task": "test",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-test001-01-task-outputs/test/cohorts/bcd57d20-f54b-4131-a7c8-f33f1ee91b56/4635ac72-458b-4b5e-a118-441755553b23/audit-final.json",
+      "sha256": "9be69aaba4ec1b2e10aa5da7c98b3d827aa7e82d0dbcf4ddd6d9a503a8d58ad5",
+      "numericBooleanFlags": {
+        "auditCanaryCount": 13,
+        "auditComplete": true,
+        "auditEvents": 228,
+        "contentScans": 7,
+        "contextClosed": true,
+        "corpusControlChecks": 2,
+        "exactLaneObserved": true,
+        "expectedInvocations": 46,
+        "finalCorpusControlChecks": 2,
+        "observedInvocations": 46,
+        "producersDrained": true
+      }
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-test001-01-task-outputs/guidedIncrementalTest/cohorts/afbf0e64-430f-4be8-b109-3a681a1b3223/683884a3-13a8-4e97-a56f-ac252a4decf8/audit-final.json",
+      "sha256": "7879cadfbb1661ce5b39c515b4186f57dd08e456ab237c0052422f68eff004b5",
+      "numericBooleanFlags": {
+        "auditCanaryCount": 244,
+        "auditComplete": true,
+        "auditEvents": 1626,
+        "contentScans": 2,
+        "contextClosed": true,
+        "corpusControlChecks": 2,
+        "exactLaneObserved": true,
+        "expectedInvocations": 62,
+        "finalCorpusControlChecks": 2,
+        "observedInvocations": 62,
+        "producersDrained": true
+      }
+    }
+  ],
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true,
+  "canonicalReplaySha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+  "sourceDigest": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+  "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "canonicalReaderExit": 2,
+  "canonicalReaderOutputPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-full-slot3/canonical-reader.json",
+  "canonicalReaderOutputSha256": "f3e5cb480426e530e8325c5e79d2219e571c423538a0938774b08ab713f095aa",
+  "failureSitesPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/test001-full-slot3/default-task-failure-sites.json",
+  "failureSitesSha256": "bab410985df28a653e03c25fa7353748f6b3bda8007cc9ea501f0d567b1b016c",
+  "failureDisposition": "Default primary C6 captured browser descendant release unconfirmed; observed suppressed NoSuchElementException in owned command verification, followed by14 sticky cleanup-unconfirmed BeforeEach failures. Cause/race/TEST001 attribution not established. Incremental62PASS.",
+  "equalWorkPerformanceClaim": false,
+  "fullClassSlotsConsumedTotal": 3,
+  "remainingPlannedSlots": [
+    4,
+    5,
+    6
+  ],
+  "noRetryLaunched": true,
+  "originalApplyClockUnchanged": true,
+  "rawPrivateFailureTextExported": false,
+  "allStoriesComplete": false
+}

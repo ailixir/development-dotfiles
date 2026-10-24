@@ -1,0 +1,156 @@
+{
+  "status": "READ_ONLY_CURRENT_FILE_CHECK",
+  "capturePath": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-after-baselines-capture.json",
+  "captureSha256": "2c9915016c2164208dbfa68af7307e62eb03c8f4fbd330f58cb11117166b95ca",
+  "migrations": [
+    {
+      "path": "backend/src/main/resources/db/migration/V10__uppercase_status_standardization.sql",
+      "sha256": "714ea331197e4b30000b5f5706262172ee1b17ba0f7b13f6c7c33cb44abdba26",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V11__check_acknowledge_assign.sql",
+      "sha256": "13a95eb5154cc4f3bc037bbfcd1c498faf5b0ecd62473857fab0a2a181179732",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V12__tests_revisions.sql",
+      "sha256": "274c26c4d41fbd991e157ec6372d08ca5c53ebe0a9e2d7a7252838228057d0d7",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V13__executions_ledger.sql",
+      "sha256": "f258e01be9963e58b47d6dfef7171e4cd36043e82e4c0f2ea78ec439f47abeb7",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V14__guided_sessions.sql",
+      "sha256": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V15__publication.sql",
+      "sha256": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V16__scheduling.sql",
+      "sha256": "6d7f4888aabf4a7206bfff9bd242ee15037121e74ed2c3fa32156a4ed862ab72",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V17__secret_use_audit.sql",
+      "sha256": "a5b6a89525f3b53769678361c204ba3a78564f9f108aeb0979c184a702bc3ba7",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V18__drop_plaintext_secrets.sql",
+      "sha256": "febfd5eb1624240e58d87bd92bdb2d4b82c762a7cf6fd94de8077eb6f2fc7c9f",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V19__guided_governance.sql",
+      "sha256": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V1__init.sql",
+      "sha256": "2e010e6e1e6f01706acb0f644ad37a3ba0340363979a994de34a4b33ba750e29",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V20__guided_session_recording.sql",
+      "sha256": "e26da3077ca90fc0f3c6d7f4fc7156d416c39b66482330acb24d62d61514acc2",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+      "sha256": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V22__execution_replay_failure.sql",
+      "sha256": "29437d3bda6479fafdbdad0fc3d53e0a1bcbd8c4ed3bf23fe144e18cc0259cef",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V2__schedule_next_execution.sql",
+      "sha256": "7a36462fcceb86d2ccb533c0743c20bcfedadb819f9674c0d1e8eb847830ca7f",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V3__check_templates_seed.sql",
+      "sha256": "8c356f1081df490cbc213f31330883f8be477de722fc737d588f52e2ef8b48ee",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V4__secrets_encrypted_value.sql",
+      "sha256": "91662e9f2c8f07e24d85d15d5ce7e5508d4f20ddfc78fdfd1dbfa083f30b24a7",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V5__story_3_schema_additions.sql",
+      "sha256": "b930941c1b7ba06b8e34b67021425cffedd3264b225607ff3f170ba4545f0477",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V6__report_next_delivery.sql",
+      "sha256": "d4669fed42d82824f278364845540ee4318ee9ab243bc0780a68c5092695d913",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V7__partition_remaining_tables_and_defaults.sql",
+      "sha256": "ee6f50fe699f70af713a7c739acb4eb358a562837e8c43ffb130a6604fb62174",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V8__failed_dispatches_and_report_failures.sql",
+      "sha256": "78ad49e718124c78f6e7a3a5a64b203f175c73642f2754a01647166c89ec89be",
+      "matchesS011Capture": true
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V9__schedules_check_type_column.sql",
+      "sha256": "9c91a6b11df2f9b012a638cbf1e0ae921d4dd09c0710a22db9d3c5a18c412f0d",
+      "matchesS011Capture": true
+    }
+  ],
+  "ownedActualSources": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "sha256": "72cdc69c1471eb37f388946619fb5770226ed5512e8a8f5caf5ec8606d560835",
+      "matchesS011": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "sha256": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+      "matchesS011": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5",
+      "matchesS011": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedAdmissionWithoutTranslationIT.java",
+      "sha256": null,
+      "matchesS011": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "sha256": null,
+      "matchesS011": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "sha256": "4d47ad6f8d67bfd3278b0d3f3930085e90f190d0ea500875272082eb97a7754e",
+      "matchesS011": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "sha256": null,
+      "matchesS011": true
+    }
+  ],
+  "globalS011Claim": false,
+  "reason": "Actual Replay remains temporary diagnostic candidate outside all draft writes"
+}

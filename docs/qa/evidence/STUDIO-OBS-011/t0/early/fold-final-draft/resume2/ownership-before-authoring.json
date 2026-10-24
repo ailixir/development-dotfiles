@@ -1,0 +1,134 @@
+{
+  "plan": "v7",
+  "main17": [
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md"
+  ],
+  "original21TestOperations": [
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+    },
+    {
+      "operation": "delete",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSuffixMaterializationTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextRefusalTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java"
+    },
+    {
+      "operation": "edit",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java"
+    }
+  ],
+  "clockCleanupAdditional": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+  "projectorBaton": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+  "delete3Main": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java"
+  ],
+  "newTestObserver": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchTestAccess.java",
+  "LEFTPassthroughNoOverlap": [
+    "backend/build.gradle.kts",
+    "backend/src/main/resources/application.yml",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAlreadyExistsException.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java"
+  ],
+  "runtimeBatonsReleased": false
+}

@@ -1,0 +1,46 @@
+{
+  "name": "@put/studio-runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Checks UI Studio runner: default-deny artifact validation and trusted Playwright execution.",
+  "license": "UNLICENSED",
+  "packageManager": "npm@11.3.0",
+  "engines": {
+    "node": ">=24.11.0 <25.0.0"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node scripts/write-runtime-versions.mjs",
+    "clean": "node -e \"import('node:fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
+    "start": "node dist/main.js",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "check:pins": "node scripts/check-pins.mjs",
+    "typecheck": "npm run type-check",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:fixtures": "vitest run --config vitest.fixtures.config.ts",
+    "test:deployment": "vitest run --config vitest.deployment.config.ts",
+    "evaluate": "node evaluation/cli.mjs",
+    "browsers:install": "playwright install chromium"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1136.0",
+    "playwright": "1.63.0",
+    "typescript": "5.9.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@types/node": "22.20.2",
+    "@vitest/coverage-v8": "3.2.7",
+    "eslint": "9.39.5",
+    "eslint-plugin-import": "2.32.0",
+    "typescript-eslint": "8.50.0",
+    "vitest": "3.2.7",
+    "yaml": "2.9.0"
+  }
+}

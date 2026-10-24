@@ -1,0 +1,124 @@
+{
+  "kind": "UNEXECUTED_C6_QA_01_SUCCESSOR_ONE_EXISTING_SELECTOR",
+  "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+  "JAVA_HOME": "Existing collector cached Eclipse Adoptium Java21, no install/change",
+  "jobs": [
+    {
+      "id": "r2-red-compile01",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py",
+        "obs011-recovery-20261020-c6-observation-r2-red-compile01",
+        "compileTestJava",
+        "--no-daemon"
+      ],
+      "requires": [
+        "original9778 terminal/lock handback",
+        "root and independent exact source QA",
+        "root explicitly opens one-file source window and verifies exact red source hash",
+        "new independent exact resume2 QA",
+        "original9778 terminal and root source/runtime release; none inferred from this source packet"
+      ],
+      "expected": "Semantic compile succeeds before any assertion-red/green credit; no case count claimed.",
+      "expectedSourceSha256": "cd1c81f9c5ace7b107a314c0f4baf9c6cb5dadacf9576a1213ee8e9455eb95e3"
+    },
+    {
+      "id": "r2-red-support01",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-recovery-20261020-c6-observation-r2-red-support01",
+        "--test-tasks",
+        "test",
+        "--require-exec-tasks",
+        "test",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "expected": {
+        "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+        "task": "test",
+        "totalSelectedBodyCases": 1,
+        "skip": 0,
+        "redExpectedPrimary": "AssertionError at ReplayIT red line20888, description C6 successful nonterminal snapshot followed by death needs no signal, expected true/actual false",
+        "credit": "Only the controlled existing support body; no native closure/full-class/historical-cause credit."
+      },
+      "stop": "Compiler/setup/unknown predicate/discovery mismatch, extra AfterAll/cleanup failures, timeout or infrastructure failure is not genuine assertion-red; preserve and stop without green delta/retry.",
+      "requires": [
+        "new independent exact resume2 QA",
+        "original9778 terminal and root source/runtime release; none inferred from this source packet"
+      ],
+      "expectedSourceSha256": "cd1c81f9c5ace7b107a314c0f4baf9c6cb5dadacf9576a1213ee8e9455eb95e3"
+    },
+    {
+      "id": "r2-green-compile01",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py",
+        "obs011-recovery-20261020-c6-observation-r2-green-compile01",
+        "compileTestJava",
+        "--no-daemon"
+      ],
+      "requires": [
+        "original9778 terminal/lock handback",
+        "root and independent exact source QA",
+        "root explicitly opens one-file source window and verifies exact green source hash",
+        "new independent exact resume2 QA",
+        "original9778 terminal and root source/runtime release; none inferred from this source packet"
+      ],
+      "expected": "Semantic compile succeeds before any assertion-red/green credit; no case count claimed.",
+      "expectedSourceSha256": "ab429398f750bb493982be321bea550f16823d5b5a58111a1a3d180bff2ece1c"
+    },
+    {
+      "id": "r2-green-support01",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-recovery-20261020-c6-observation-r2-green-support01",
+        "--test-tasks",
+        "test",
+        "--require-exec-tasks",
+        "test",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "expected": {
+        "selector": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
+        "task": "test",
+        "totalSelectedBodyCases": 1,
+        "skip": 0,
+        "redExpectedPrimary": null,
+        "credit": "Only the controlled existing support body; no native closure/full-class/historical-cause credit."
+      },
+      "stop": "Any failure stops this candidate; no change to force green, no retry/full-class run.",
+      "requires": [
+        "new independent exact resume2 QA",
+        "original9778 terminal and root source/runtime release; none inferred from this source packet"
+      ],
+      "expectedSourceSha256": "ab429398f750bb493982be321bea550f16823d5b5a58111a1a3d180bff2ece1c"
+    }
+  ],
+  "newJUnitCases": 0,
+  "fullClassRunsAuthorizedByThisPacket": 0,
+  "nativeProcessQueriesOrSignalsInAddedControls": 0,
+  "noReaderSourcePinSkipOrProfileWaiver": true,
+  "realFixturePrerequisite": "itrEnsureClassFixtures() at method entry, existing owned-worker logs and teardown; no learning/canary registration"
+}

@@ -1,0 +1,145 @@
+--- a/studio-runner/test/run/bootstrapProcessTreeObservation.test.ts
++++ b/studio-runner/test/run/bootstrapProcessTreeObservation.test.ts
+@@ -1,5 +1,4 @@
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+-import type { MockInstance } from 'vitest';
+ import { bootstrapTreeGone, captureBootstrapTree, confirmBootstrapTreeSuspended, probeBootstrapPid } from '../helpers/bootstrapProcessTreeObservation.js';
+ import type { BootstrapProcessTree } from '../helpers/bootstrapProcessTreeObservation.js';
+ 
+@@ -11,7 +10,6 @@
+ const CHILD = process.pid + 10_000, CHROME = CHILD + 1, ENCODER = CHILD + 2, TRANSIENT = CHILD + 3;
+ interface FakeRow { pid: number; ppid: number; state: string; command: string }
+ let rows: FakeRow[];
+-let killSpy: MockInstance<typeof process.kill>;
+ function errno(code: string): NodeJS.ErrnoException { return Object.assign(new Error('FAKE_PROCESS_EDGE'), { code }); }
+ function baseRows(): FakeRow[] {
+   return [
+@@ -22,7 +20,7 @@
+     { pid: TRANSIENT, ppid: CHROME, state: 'R', command: '/fixed/transient utility' },
+   ];
+ }
+-function table(): string { return rows.map(row => `${String(row.pid)} ${String(row.ppid)} ${row.state} ${row.command}`).join('\n') + '\n'; }
++function table(): string { return rows.map(row => `${row.pid} ${row.ppid} ${row.state} ${row.command}`).join('\n') + '\n'; }
+ function stoppedRows(): void { rows = rows.map(row => ({ ...row, state: row.pid === process.pid ? 'S' : 'T' })); }
+ function expectedTree(): BootstrapProcessTree {
+   return { childPid: CHILD, observedPids: [CHROME, ENCODER, TRANSIENT], labels: [
+@@ -33,7 +31,7 @@
+ }
+ beforeEach(() => {
+   rows = baseRows(); edges.execFileSync.mockReset(); edges.spawnSync.mockReset();
+-  killSpy = vi.spyOn(process, 'kill').mockImplementation(() => true);
++  vi.spyOn(process, 'kill').mockImplementation(() => true);
+   edges.execFileSync.mockImplementation((_command, args) => {
+     if (args.includes('-A')) return table();
+     const pid = Number(args[args.indexOf('-p') + 1]);
+@@ -41,7 +39,7 @@
+     return rows.find(row => row.pid === pid)?.command ?? '';
+   });
+   // The old comparison buffer's unchanged descendantsOf default reader sees the same initial population.
+-  edges.spawnSync.mockImplementation(() => ({ status: 0, stdout: rows.map(row => `${String(row.pid)} ${String(row.ppid)}`).join('\n') + '\n' }));
++  edges.spawnSync.mockImplementation(() => ({ status: 0, stdout: rows.map(row => `${row.pid} ${row.ppid}`).join('\n') + '\n' }));
+ });
+ afterEach(() => { vi.restoreAllMocks(); });
+ 
+@@ -154,14 +152,14 @@
+   });
+ 
+   it("rejects a child root denied by signal zero", () => {
+-    killSpy.mockImplementation(pid => { if (pid === CHILD) throw errno('EPERM'); return true; });
+-    expect(() => captureBootstrapTree(CHILD)).toThrow('BOOTSTRAP_PROCESS_ROOT_NOT_LIVE');
+-    killSpy.mockImplementation(pid => { if (pid === CHILD) throw errno('ESRCH'); return true; });
++    vi.mocked(process.kill).mockImplementation(pid => { if (pid === CHILD) throw errno('EPERM'); return true; });
++    expect(() => captureBootstrapTree(CHILD)).toThrow('BOOTSTRAP_PROCESS_ROOT_NOT_LIVE');
++    vi.mocked(process.kill).mockImplementation(pid => { if (pid === CHILD) throw errno('ESRCH'); return true; });
+     expect(() => captureBootstrapTree(CHILD)).toThrow('BOOTSTRAP_PROCESS_ROOT_NOT_LIVE');
+   });
+ 
+   it("rejects a child root with unknown signal-zero outcome", () => {
+-    killSpy.mockImplementation(pid => { if (pid === CHILD) throw errno('EIO'); return true; });
++    vi.mocked(process.kill).mockImplementation(pid => { if (pid === CHILD) throw errno('EIO'); return true; });
+     expect(() => captureBootstrapTree(CHILD)).toThrow('BOOTSTRAP_PROCESS_PROBE_UNKNOWN');
+   });
+ 
+@@ -186,7 +184,7 @@
+     const capture = captureBootstrapTree(CHILD); stoppedRows(); edges.execFileSync.mockClear();
+     expect(confirmBootstrapTreeSuspended(capture)).toEqual([CHROME, ENCODER, TRANSIENT]);
+     expect(edges.execFileSync).toHaveBeenCalledTimes(1);
+-    expect(killSpy.mock.calls.every(call => call[1] === 0)).toBe(true);
++    expect(vi.mocked(process.kill).mock.calls.every(call => call[1] === 0)).toBe(true);
+   });
+ 
+   it("rejects accepted fake suspension when a member is still running", () => {
+@@ -205,13 +203,13 @@
+ 
+   it("rejects accepted fake suspension when a stopped member is denied", () => {
+     const capture = captureBootstrapTree(CHILD); stoppedRows();
+-    killSpy.mockImplementation(pid => { if (pid === ENCODER) throw errno('EPERM'); return true; });
++    vi.mocked(process.kill).mockImplementation(pid => { if (pid === ENCODER) throw errno('EPERM'); return true; });
+     expect(() => confirmBootstrapTreeSuspended(capture)).toThrow('BOOTSTRAP_PROCESS_NOT_CONFIRMED_STOPPED');
+   });
+ 
+   it("rejects accepted fake suspension when a stopped member has unknown liveness", () => {
+     const capture = captureBootstrapTree(CHILD); stoppedRows();
+-    killSpy.mockImplementation(pid => { if (pid === ENCODER) throw errno('EIO'); return true; });
++    vi.mocked(process.kill).mockImplementation(pid => { if (pid === ENCODER) throw errno('EIO'); return true; });
+     expect(() => confirmBootstrapTreeSuspended(capture)).toThrow('BOOTSTRAP_PROCESS_PROBE_UNKNOWN');
+   });
+ 
+@@ -252,46 +250,46 @@
+     const capture = captureBootstrapTree(CHILD);
+     for (const code of ['ESRCH', 'EPERM', 'EIO']) {
+       const suspended: number[] = [];
+-      killSpy.mockImplementation((_pid, signal) => { if (signal === 'SIGSTOP') throw errno(code); return true; });
++      vi.mocked(process.kill).mockImplementation((_pid, signal) => { if (signal === 'SIGSTOP') throw errno(code); return true; });
+       expect(() => { for (const p of capture.observedPids) { try { process.kill(p, 'SIGSTOP'); suspended.push(p); } catch { throw Error('LIVE_TREE_CHANGED'); } } }).toThrow('LIVE_TREE_CHANGED');
+       expect(suspended).toEqual([]);
+     }
+   });
+ 
+   it("classifies only exact ESRCH as gone and EPERM as present but denied", () => {
+-    killSpy.mockImplementation(() => { throw errno('ESRCH'); });
++    vi.mocked(process.kill).mockImplementation(() => { throw errno('ESRCH'); });
+     expect(probeBootstrapPid(CHILD)).toBe('GONE');
+-    killSpy.mockImplementation(() => { throw errno('EPERM'); });
++    vi.mocked(process.kill).mockImplementation(() => { throw errno('EPERM'); });
+     expect(probeBootstrapPid(CHILD)).toBe('PRESENT_BUT_DENIED');
+-    killSpy.mockImplementation(() => true);
++    vi.mocked(process.kill).mockImplementation(() => true);
+     expect(probeBootstrapPid(CHILD)).toBe('ALIVE');
+   });
+ 
+   it("rejects an unknown signal-zero error instead of treating it as gone", () => {
+-    killSpy.mockImplementation(() => { throw errno('EIO'); });
++    vi.mocked(process.kill).mockImplementation(() => { throw errno('EIO'); });
+     expect(() => probeBootstrapPid(CHILD)).toThrow('BOOTSTRAP_PROCESS_PROBE_UNKNOWN');
+   });
+ 
+   it("checks child plus every captured descendant for all-gone without re-enumeration", () => {
+     const capture = captureBootstrapTree(CHILD); rows = rows.filter(row => row.pid !== TRANSIENT);
+-    edges.execFileSync.mockClear(); killSpy.mockClear();
+-    killSpy.mockImplementation(() => { throw errno('ESRCH'); });
++    edges.execFileSync.mockClear(); vi.mocked(process.kill).mockClear();
++    vi.mocked(process.kill).mockImplementation(() => { throw errno('ESRCH'); });
+     expect(bootstrapTreeGone(capture)).toBe(true);
+-    expect(killSpy.mock.calls.map(call => call[0])).toEqual([CHILD, CHROME, ENCODER, TRANSIENT]);
++    expect(vi.mocked(process.kill).mock.calls.map(call => call[0])).toEqual([CHILD, CHROME, ENCODER, TRANSIENT]);
+     expect(edges.execFileSync).not.toHaveBeenCalled();
+   });
+ 
+   it("keeps live and denied captured members out of all-gone success", () => {
+     const capture = captureBootstrapTree(CHILD);
+-    killSpy.mockImplementation(pid => { if (pid === ENCODER) return true; throw errno('ESRCH'); });
++    vi.mocked(process.kill).mockImplementation(pid => { if (pid === ENCODER) return true; throw errno('ESRCH'); });
+     expect(bootstrapTreeGone(capture)).toBe(false);
+-    killSpy.mockImplementation(pid => { throw errno(pid === ENCODER ? 'EPERM' : 'ESRCH'); });
++    vi.mocked(process.kill).mockImplementation(pid => { throw errno(pid === ENCODER ? 'EPERM' : 'ESRCH'); });
+     expect(bootstrapTreeGone(capture)).toBe(false);
+   });
+ 
+   it("fails all-gone on unknown liveness while retaining the original inventory", () => {
+     const capture = captureBootstrapTree(CHILD);
+-    killSpy.mockImplementation(pid => { throw errno(pid === TRANSIENT ? 'EIO' : 'ESRCH'); });
++    vi.mocked(process.kill).mockImplementation(pid => { throw errno(pid === TRANSIENT ? 'EIO' : 'ESRCH'); });
+     expect(() => bootstrapTreeGone(capture)).toThrow('BOOTSTRAP_PROCESS_PROBE_UNKNOWN');
+     expect(capture.observedPids).toEqual([CHROME, ENCODER, TRANSIENT]);
+   });

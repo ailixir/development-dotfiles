@@ -1,0 +1,32 @@
+{
+  "kind": "QUINN_SOURCE08B_COMPLETE_FINDINGS",
+  "reviewer": "Quinn",
+  "subject": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume8b/manifest.json",
+    "sha256": "7fec05dfe1ea4d59447b10f2b79ed9516c0a56fce51236581381edc001f7e8e6",
+    "bytes": 6592,
+    "mode": 420
+  },
+  "verdict": "PASS_BOUNDED_SOURCE_ONLY_ALL_ACTUAL_AUTHORITY_HOLD",
+  "mandatoryFindingCount": 0,
+  "mandatoryFindings": [],
+  "advisories": [],
+  "allMandatoryFindingsTogether": true,
+  "disposition": [
+    {
+      "id": "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS",
+      "status": "CORRECTED_IN_EXACT_SOURCE08B",
+      "oldSource08HoldRetained": true,
+      "explanation": "Approved self.s.path constructor precedes membership and same normalized object flows to bound/fallback. Independent real System/Custody four-callback synthetic alias replay verifies accepted, wrongmode before body, wronghash before use and unchanged unregistered policy."
+    }
+  ],
+  "findingsConditionsReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/conditions.json",
+    "sha256": "0b23127c05837b063ed5c5f03636c7698267d34c9d33ff91d3f87c92a00fd194",
+    "bytes": 29201,
+    "mode": 420
+  },
+  "sourceOnly": true,
+  "ownerDecisionIssued": false,
+  "actualRuntimeAuthority": false
+}

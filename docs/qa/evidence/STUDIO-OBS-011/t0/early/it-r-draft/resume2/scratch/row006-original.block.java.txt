@@ -1,0 +1,9 @@
+do {
+            teardown =
+                sessions.transaction(
+                    () -> sessions.lock(owned.getKey()).progress().path("teardownStatus").asText());
+            if (teardown.equals("CONFIRMED")) {
+              break;
+            }
+            Clock.startElapsed(); probeIntervalEntered.countDown(); Thread.sleep(30); if (noAwaitGap) Clock.advance(1_000_000_000L);
+          } while (Clock.nanoTime() < deadline);

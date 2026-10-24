@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-public-observer-java-qualification-source02-exact-review/static_review.py", line 29, in <module>
+    check('UNCHANGED_NON_INVOCATION_'+str(identity(n)),ast.dump(n,include_attributes=False)==ast.dump(newmap[identity(n)],include_attributes=False))
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-public-observer-java-qualification-source02-exact-review/static_review.py", line 7, in check
+    if not ok:raise ValueError(n)
+              ^^^^^^^^^^^^^^^^^^^
+ValueError: UNCHANGED_NON_INVOCATION_('Import', None, None)

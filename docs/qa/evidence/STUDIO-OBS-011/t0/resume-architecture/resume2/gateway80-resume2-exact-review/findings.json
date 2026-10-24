@@ -1,0 +1,42 @@
+{
+  "status": "CHANGES_REQUIRED_BEFORE_EXECUTION_SUPPORT",
+  "subjectManifestSha256": "ed5057fa38bbeeda3982503382f65fe8fbb2b637167094846fdf8e6969f3f4e3",
+  "findings": [
+    {
+      "id": "G80-LINK-06",
+      "severity": "HIGH",
+      "mandatory": true,
+      "title": "Chart-root/ancestor symlinks can redirect copied helper replacement into product source",
+      "locations": [
+        "run-private.py:42",
+        "run-private.py:52",
+        "run-private.py:129",
+        "run-private.py:274",
+        "run-private.py:286",
+        "run-private.py:463",
+        "final-controls.py:archive inventory roots"
+      ],
+      "counterexample": "link-root-counterexample.json",
+      "pureActualFunctionReproduction": true,
+      "requiredCorrection": "Bounded root/parent no-follow identities before traversal and every controlled write; reject chart/archive root and ancestor links and broken write destinations; allow only declared dependency link as recorded entry; extend actual-function controls."
+    },
+    {
+      "id": "G80-RESOURCE-07",
+      "severity": "MEDIUM",
+      "mandatory": true,
+      "title": "Reused numeric child PID/new start incorrectly becomes unit-owned",
+      "locations": [
+        "run-private.py:329",
+        "run-private.py:331",
+        "run-private.py:338",
+        "run-private.py:348",
+        "run-private.py:worker_candidates native_ids"
+      ],
+      "counterexample": "pid-reuse-counterexample.json",
+      "pureActualFunctionReproduction": true,
+      "requiredCorrection": "Direct-child/start proof for initial child, matching original/known PID-start roots only for subsequent ownership/descendant closure; preserve known reparented roots and independent unjoined-role UNKNOWN checks; no ownership transfer on PID reuse."
+    }
+  ],
+  "otherMandatoryFindingsIdentified": [],
+  "sourceNativeOrCreditReleased": false
+}

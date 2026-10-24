@@ -1,0 +1,384 @@
+{
+  "atUtc": "2026-10-19T08:48:13.435882+00:00",
+  "toolLogSha256": "b33c05b4464128f8ffdb71dbf52e9df8e7a1bf1eb8484a08d1720a2a3c77cb1a",
+  "notCompletedXmlTestcaseProof": true,
+  "full99Proof": false,
+  "records": [
+    {
+      "class": "GuidedCommittedRefreshStateTest",
+      "caseLabel": "aPendingPrefixReadsItsCommittedRefreshInReplayingPrefix()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedCommittedRefreshStateTest",
+      "caseLabel": "withoutAPendingPrefixTheRefreshIsReadInProposing()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedCommittedRefreshStateTest",
+      "caseLabel": "aStateThatDisagreesWithThePrefixIsStaleGeneration()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedEvidencePendingAppendIT",
+      "caseLabel": "aSecondRecordingAtTheOtherAcceptedRevisionIsStillAConflict()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedEvidencePendingAppendIT",
+      "caseLabel": "aRevisionAheadOfTheHeadIsRefusedWhileAnAppendIsPending()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedEvidencePendingAppendIT",
+      "caseLabel": "aForeignContextIdAtThePreviousRevisionIsRefusedWhileAnAppendIsPending()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedEvidencePendingAppendIT",
+      "caseLabel": "aForeignFenceAtThePreviousRevisionIsRefusedWhileAnAppendIsPending()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedEvidencePendingAppendIT",
+      "caseLabel": "recordingAtTheHeadRevisionIsAcceptedWhileAnAppendIsPending()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedEvidencePendingAppendIT",
+      "caseLabel": "recordingAtThePreviousRevisionIsAcceptedWhileAnAppendIsPending()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedEvidencePendingAppendIT",
+      "caseLabel": "twoRevisionsBehindTheHeadIsRefusedWhileAnAppendIsPending()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedEvidencePendingAppendIT",
+      "caseLabel": "withNoPendingDeliveryThePreviousRevisionIsStillRefusedAndTheHeadAccepted()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedLifecycleReasonIT",
+      "caseLabel": "everyOtherReasonStillEndsFailed()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedLifecycleReasonIT",
+      "caseLabel": "aDispatchingActionStillEndsUnknownOutcomeWhateverTheReason()",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedLifecycleReasonIT.java",
+      "sourceLine": 402
+    },
+    {
+      "class": "GuidedLifecycleReasonIT",
+      "caseLabel": "anExpiredReportAcceptedBeforeTheBackendExpiryEndsExpired()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedLifecycleReasonIT",
+      "caseLabel": "theContextIdentityIsStillCheckedWhateverTheReason()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedLifecycleReasonIT",
+      "caseLabel": "aCallbackPastTheLeaseIsStillRefusedStaleFenceAndNothingIsStopped()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [1] mode=COMPLETE_200_NO_CALLBACK",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 504
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [2] mode=COMPLETE_200_OWNER_OK",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 504
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [3] mode=COMPLETE_200_OWNER_FAILED",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 504
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [4] mode=COMPLETE_503_NO_CALLBACK",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 504
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [5] mode=COMPLETE_503_OWNER_OK",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 504
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [6] mode=PARTIAL_200_NO_EOF",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 504
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [7] mode=PARTIAL_503_NO_EOF",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 504
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [8] mode=CALLER_EXPIRY_AFTER_CONSUME",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 504
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [9] mode=INTERRUPT_AFTER_HEADERS",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 504
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop()",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 3081
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "publicationConflictTeardownIsRedrivenAfterResendsExhausted()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "publicationConflictTeardownTargetsTheAssignmentAndConfirms()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "pendingAppendDeliveryTeardownTargetsTheAssignment()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback()",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 3081
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "noPendingDeliveryKeepsIdentityTarget()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "consumingVerificationStaysRefusedWhilePending()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "pendingAppendPublicationConflictTargetsTheAssignment()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "lifecycleWithoutPendingDeliveryIsExactlyVerify()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "legacyPendingWithoutRequestIsNotRedriven()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "lifecycleAtAnyOtherIdentityIsRefusedWhilePending()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit()",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 789
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "stopWithoutAStopTargetRecordsNoPendingTeardown()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased()",
+      "status": "FAILED",
+      "exceptionClass": "com.citi.put.checks.studio.guided.session.GuidedSessionException",
+      "sourceFile": "GuidedServiceTransportFaultIT.java",
+      "sourceLine": 2141
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "concurrentAfterCompletionAndSweepSendOneStopAtATime()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "abandonedTeardownReportQueriesOncePerIntervalAndIsSilentWhenNone()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "lifecycleAtLastAcknowledgedIdentityEndsSession()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "caseLabel": "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout()",
+      "status": "PASSED",
+      "exceptionClass": null,
+      "sourceFile": null,
+      "sourceLine": null
+    }
+  ],
+  "counts": {
+    "PASS": 32,
+    "FAIL": 14
+  },
+  "finiteObserverRecords": [
+    "GST_DIAG|site=CUT_PRIMARY|route=NONE|status=409|family=GUIDED_SESSION|code=UNKNOWN_OUTCOME|frame=CLIENT_SEND|line=296"
+  ],
+  "finiteRecordAbsenceIsUnproven": true
+}

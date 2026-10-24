@@ -1,0 +1,44 @@
+{
+  "kind": "QUINN_SOURCE03_TRUTHFUL_EXECUTION_HISTORY",
+  "targetBatches": [
+    {
+      "attempt": 1,
+      "launchTool": "df8ef8",
+      "completionTool": "76d668",
+      "inspectionTool": "158c3c",
+      "actualExitStatus": 0,
+      "checks": 49,
+      "cases": 10,
+      "stdoutSha256": "db930b34cc5bdb33a58d691477a250ac5cc4af0a3a72ac48f26d4e18de40d8bd",
+      "stderrBytes": 0,
+      "targetEffects": "ALL_FAKE_SAME_COMPILED_NAMESPACE",
+      "safetyEdits": false,
+      "persistentDenyAuditUnchanged": true,
+      "realEffects": 0
+    }
+  ],
+  "metadataOnlyAttempts": [
+    {
+      "attempt": 1,
+      "launchTool": "386ea6",
+      "inspectionTool": "bdb698",
+      "actualExitStatus": 1,
+      "cause": "Reviewer checker used nonexistent textual field permit_binding; actual Controller field is gate_permit. No subject execution; prior successful critical batch unaffected. Original checker and both outputs retained.",
+      "originalChecker": "static-attempt01-checker.py.txt"
+    },
+    {
+      "attempt": 2,
+      "launchTool": "1ce5b7",
+      "inspectionTool": "35dbb0",
+      "actualExitStatus": 0,
+      "checks": 337,
+      "stderrBytes": 0,
+      "change": "Corrected checker identifier only; no subject source/safety edit."
+    }
+  ],
+  "sourceAuthorCurrent": "one passing84 fake batch and one passing27 static batch, no failed current source03 attempt",
+  "retainedHistoricalFailures": "Preserved original source01 history and source02 candidate73/final74=147 historical executions. Old prior failed attempt2 inner cause remains UNKNOWN.",
+  "noExtraTargetExpansion": true,
+  "noPycache": true,
+  "python": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/bin/python3.13 -B"
+}

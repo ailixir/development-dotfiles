@@ -1,0 +1,40 @@
+{
+  "task": "gst-style-ordinary-port-integration-design-qa-task.txt",
+  "rootSafe": "19cb79",
+  "rootInspection": "9e4643",
+  "rootAttestedExit": 0,
+  "rootAttestedSafe": true,
+  "rootAttestedThreats": [],
+  "verificationAttempts": [
+    {
+      "tool": "0b3501",
+      "actualExit": 1,
+      "kind": "READ_ONLY_CHECKER_SCHEMA_KEYERROR",
+      "error": "completePayloads",
+      "exactFailedScript": "verify-attempt01.py.txt",
+      "subjectOrTargetExecution": false
+    },
+    {
+      "tool": "80fa88",
+      "actualExit": 0,
+      "correction": "Use exact schema payloads key only",
+      "checks": 356,
+      "pinRecords": 277
+    }
+  ],
+  "inputPublicPayloads": 241,
+  "methodCount": 25,
+  "portCalls": 33,
+  "selectedAdapterPortCalls": 0,
+  "author402And12DeclarativeAttributed": true,
+  "old84And27OrHugeSuitesReplayed": false,
+  "retainedActualInvariantBlockers": 4,
+  "mandatoryDesignFindings": 0,
+  "targetExecutions": 0,
+  "actualRuntimeActions": 0,
+  "policyAdoption": false,
+  "implementationSelected": false,
+  "allInheritedConditionBindingsComplete": true,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

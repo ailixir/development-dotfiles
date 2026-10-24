@@ -1,0 +1,78 @@
+{
+  "subjectManifestSha256": "c0dc0bc2646537b4ae466a7d715ed31103cc27d1d72eaf5683ecf8222279523c",
+  "requiredControls": {
+    "passed": 159,
+    "failed": 0,
+    "replayed": 159,
+    "sourceInstrumented": false,
+    "launchTool": "adbd88",
+    "completionTool": "d4ccdb",
+    "actualExit": 0,
+    "stdoutSha256": "b833c34f95dbbe585cc013b79a809e44c4e6059f401bcf7721ca5696fa2ff58e",
+    "boundaryAttempts": []
+  },
+  "independentFiniteStaticChecks": {
+    "passed": 480,
+    "actualExit": 0,
+    "tool": "f48f7f",
+    "evidence": "static.stdout"
+  },
+  "author73StructuralChecks": "Hash-bound attribution; independent finite480 checks are separate, not73 replayed tests.",
+  "prior333ControlsReplayed": 0,
+  "prior333AttributionOnly": true,
+  "independentInventoryPair": {
+    "cases": 2,
+    "tool": "b34961",
+    "actualExit": 0,
+    "evidence": "targeted.stdout"
+  },
+  "independentNativePhaseSinkPair": {
+    "cases": 2,
+    "launchTool": "393106",
+    "completionTool": "336a74",
+    "actualExit": 0,
+    "evidence": "native-sink.stdout"
+  },
+  "architectureReusedEvidence": {
+    "sha256": "98d83e873480cca66316759b0d672d16184bccee813a0227435b86ba5a2848a0",
+    "readTool": "a32e0a",
+    "sourceReadTool": "1a3f97",
+    "reportedRunTool": "4c4bf5",
+    "actualExit": 0,
+    "checks": 40,
+    "wholeFlowChecks": 25,
+    "targetedChecks": 15,
+    "targetedCases": 10,
+    "replayedByQuinn": false,
+    "copiedExactEvidence": "architecture-targeted-evidence.json"
+  },
+  "sourceVerification": {
+    "tool": "021897",
+    "payloads": 60,
+    "staticInputs": 39,
+    "allMatched": true
+  },
+  "reviewerAttemptHistory": [
+    {
+      "tool": "12c2bf",
+      "actualExit": 1,
+      "cause": "Reviewer finite checker assumed all37 sites were Python rows; four rows are shell eval documents. No subject/test failure.",
+      "preserved": [
+        "attempt01-static_checks.py",
+        "attempt01-static.stdout",
+        "attempt01-static.stderr"
+      ],
+      "correction": "Filter Python rows for AST matching and account documented shell/file interface references; f48f7f passed480."
+    }
+  ],
+  "authorHistoryPreserved": "All six exact sealed author runs remain unchanged, including run02 missing fixture parent and packaging SyntaxError; current passing counts do not erase earlier failures.",
+  "rootDispatchHistory": "Earlier8526e0 was never dispatched; savedattempt01 stray-site-marker correction, currentSAFEa917a8 actual0 inspecteda94809 supplied by root.",
+  "actualActions": 0,
+  "currentResourcesObserved": false,
+  "protectedBaselineBodyReadStatHash": false,
+  "providerOrApiResearch": false,
+  "noFurtherTestExpansionRequired": true,
+  "mandatoryFindingCount": 6,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

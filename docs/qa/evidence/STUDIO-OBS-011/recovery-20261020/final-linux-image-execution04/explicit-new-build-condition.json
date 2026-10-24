@@ -1,0 +1,36 @@
+{
+  "originalBuildArgv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-final-runner-image-build01",
+    "docker",
+    "build",
+    "--pull=false",
+    "--network=none",
+    "--build-arg",
+    "IMAGE_TAG=put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "-t",
+    "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "-"
+  ],
+  "newBuildArgv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-final-runner-image-build02",
+    "docker",
+    "build",
+    "--pull=false",
+    "--network=default",
+    "--build-arg",
+    "IMAGE_TAG=put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "-t",
+    "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "-"
+  ],
+  "onlyChanges": [
+    "collector label01\u219202",
+    "Docker BUILD RUN network none\u2192default"
+  ],
+  "runtimeContainerNetworkRemainsNone": true,
+  "old03FailurePreserved": true
+}

@@ -1,0 +1,23 @@
+{{- if and (eq .Values.objectStore.provider "local") (not .Values.objectStore.local.createClaim) (not .Values.objectStore.local.existingClaim) }}
+{{- fail "objectStore.local.existingClaim is required when provider=local and createClaim=false" }}
+{{- end }}
+{{- if and (eq .Values.objectStore.provider "local") .Values.objectStore.local.createClaim (not .Values.objectStore.local.accessModes) }}
+{{- fail "objectStore.local.accessModes is required when creating the local claim" }}
+{{- end }}
+{{- if and (eq .Values.objectStore.provider "local") .Values.objectStore.local.createClaim (not .Values.objectStore.local.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "put-checks.fullname" . }}-studio-object-store-local
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.objectStore.local.accessModes | nindent 4 }}
+  {{- with .Values.objectStore.local.storageClassName }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ required "objectStore.local.size is required when creating the local claim" .Values.objectStore.local.size | quote }}
+{{- end }}

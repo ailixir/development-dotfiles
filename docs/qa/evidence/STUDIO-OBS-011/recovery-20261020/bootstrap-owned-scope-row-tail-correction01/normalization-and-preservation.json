@@ -1,0 +1,33 @@
+{
+  "method": "Exact source text reversal only; no code parser/compiler or regex execution.",
+  "helperOnlyDifference": {
+    "before": "(?:[ \\t]+(.*))?$",
+    "after": "(?:[ \\t]+([\\s\\S]*))?$",
+    "replacementReversalEqualsCompleteCandidate01Helper": true
+  },
+  "numericColumnsAndAllMembershipRangeUniquenessPredicatesExact": true,
+  "metadataRegexStateCommandC0AndRequiredUnionExact": true,
+  "metadataSuffixMeaning": "[\\s\\S] retains every suffix code point, including CR/U2028; it cannot consume PID/PPID because it begins only after the unchanged two-column identity framing and horizontal boundary.",
+  "knownUnknownClassifier": "Unchanged non-dotAll metadata regex rejects CR/U2028 as UNKNOWN; all required metadata remains fail-closed. Unknown numeric identity still ROW_IDENTITY.",
+  "unitOnlyDelta": {
+    "threeExistingMetadataVectorsAddTwoVariantsEach": true,
+    "fourthExistingCaseAppendsTwoVariantsForReparentedAndNewReachableObligations": true,
+    "stripExactlyDeclaredNewLinesAndBlockEqualsCompleteCandidate01Unit": true,
+    "fourthBlockSha256": "6717f8fea8d40bef92b1b0e775b75457f137013ac552d33e32731e4acabc16e0",
+    "existingFourCaseNamesCount": 4,
+    "newCaseIdentities": 0
+  },
+  "fullOld37UnitBytePrefixExact": true,
+  "oldUnitSha256": "775ee841b73fa4a3a78fc0bd27a419d1ec97b7cec6b8e7bf38863c4eb24fc181",
+  "oldUnitBytes": 17091,
+  "fixtureAll15Expects6NamesTimesFinallySignalsWholeFileExact": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba",
+  "fourFailureReasonLiteralsUnchanged": true,
+  "publicAPIProbePopulationImportScopeAndLegacyPrimaryUnchanged": true,
+  "inherited23LintFixesNoNewSuppressionsNoAny": "exact helper except numeric suffix; unit prefix intact; fixture intact",
+  "redUnitFixtureIdenticalGreen": true,
+  "oldV2HelperRedExact": true,
+  "newPrimaryForecastLine": 315,
+  "candidate01Line313": "UNCHANGED_HISTORICAL_FORECAST_ONLY_NOT_EXECUTED",
+  "expected41ForecastOnly": true,
+  "runtime": "UNEXECUTED"
+}

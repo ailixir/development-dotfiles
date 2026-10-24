@@ -1,0 +1,4 @@
+while (!report.path("streamComplete").asBoolean() && Clock.nanoTime() < deadline) {
+      Clock.startElapsed(); probeIntervalEntered.countDown(); Thread.sleep(30); if (noAwaitGap) Clock.advance(1_000_000_000L);
+      report = p3Call(p3Cookie, "/api/v1/studio/executions/" + execution, null, 200);
+    }

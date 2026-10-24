@@ -1,0 +1,146 @@
+class ExactIO:
+ """Bounded exact-locator IO; retained descriptor identity, no enumeration or retry."""
+ PUBLIC_FILES={'authorization':'root-authorization.json','root_approval':'root-approval.json','quinn_approval':'quinn-approval.json','terminal':'terminal-proof.json','assessment':'public-assessment.json'}
+ def __init__(self):self.output_chain=None
+ def _identity(self,st):return (st.st_dev,st.st_ino,st.st_uid,st.st_gid,st.st_mode)
+ def _close_chain(self,chain):
+  failed=False
+  for item in reversed(chain):
+   if 'fd' in item:
+    try:os.close(item['fd'])
+    except OSError:failed=True
+  if failed:raise Refused('DIRECTORY_CLOSE_FAILURE')
+ def _check_chain(self,chain):
+  for item in chain:
+   if 'alias' in item:
+    parent,before,target=item['alias'];after=os.stat('var',dir_fd=parent,follow_symlinks=False)
+    require(stable_stat(after)==stable_stat(before) and os.readlink('var',dir_fd=parent)==target,'MACOS_ALIAS_CHANGED')
+   else:
+    current=os.fstat(item['fd']);require(self._identity(current)==self._identity(item['stat']),'OPEN_DIRECTORY_CHANGED')
+    named=os.stat(item['name'],dir_fd=item['parent'],follow_symlinks=False) if item['parent'] is not None else os.stat('/',follow_symlinks=False)
+    require(self._identity(named)==self._identity(current),'DIRECTORY_ENTRY_SUBSTITUTED')
+ def _extend(self,chain,parts):
+  for name in parts:
+   require(name not in {'','..','.'} and '/' not in name and '\x00' not in name,'DIRECTORY_COMPONENT')
+   parent=next(item['fd'] for item in reversed(chain) if 'fd' in item)
+   before=os.stat(name,dir_fd=parent,follow_symlinks=False)
+   require(stat.S_ISDIR(before.st_mode),'DIRECTORY_SYMLINK_OR_TYPE')
+   fd=os.open(name,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=parent)
+   chain.append({'fd':fd,'stat':before,'parent':parent,'name':name})
+   require(self._identity(os.fstat(fd))==self._identity(before),'DIRECTORY_OPEN_IDENTITY_MISMATCH')
+  self._check_chain(chain);return chain
+ def _dirs(self,path):
+  text=str(path);parts=PurePosixPath(text).parts
+  require(parts and parts[0]=='/' and '..' not in parts and '\x00' not in text,'ABSOLUTE_ANCHORED_LOCATOR')
+  chain=[]
+  try:
+   before=os.stat('/',follow_symlinks=False);fd=os.open('/',os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
+   chain.append({'fd':fd,'stat':before,'parent':None,'name':'/'})
+   require(stat.S_ISDIR(before.st_mode) and self._identity(os.fstat(fd))==self._identity(before),'ANCHOR_OPEN_IDENTITY')
+   tail=list(parts[1:])
+   if tail and tail[0]=='var':
+    alias=os.stat('var',dir_fd=fd,follow_symlinks=False)
+    if stat.S_ISLNK(alias.st_mode):
+     target=os.readlink('var',dir_fd=fd)
+     require(target in {'/private/var','private/var'},'UNAPPROVED_MACOS_ALIAS')
+     chain.append({'alias':(fd,alias,target)});tail=['private','var',*tail[1:]]
+   return self._extend(chain,tail)
+  except BaseException:
+   self._close_chain(chain);raise
+ def _read_at(self,chain,name,cap,expected=None,owner=None,mode=None):
+  parent=next(item['fd'] for item in reversed(chain) if 'fd' in item)
+  before=os.stat(name,dir_fd=parent,follow_symlinks=False)
+  require(stat.S_ISREG(before.st_mode),'INPUT_LEAF_SYMLINK_OR_TYPE')
+  fd=os.open(name,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=parent)
+  try:
+   opened=os.fstat(fd)
+   require(stat.S_ISREG(opened.st_mode) and stable_stat(opened)==stable_stat(before),'INPUT_OPENED_IDENTITY_MISMATCH')
+   require(opened.st_size<=cap and (owner is None or opened.st_uid==owner) and (mode is None or stat.S_IMODE(opened.st_mode)==mode),'INPUT_OPENED_OWNER_MODE_SIZE')
+   if expected is not None:
+    require((opened.st_dev,opened.st_ino,opened.st_uid,stat.S_IMODE(opened.st_mode),opened.st_size)==(expected['dev'],expected['ino'],expected['uid'],expected['mode'],expected['bytes']),'INPUT_APPROVED_FD_BINDING')
+   self._check_chain(chain)
+   require(stable_stat(os.stat(name,dir_fd=parent,follow_symlinks=False))==stable_stat(opened),'INPUT_LEAF_SUBSTITUTED')
+   raw=b''
+   while len(raw)<=cap:
+    chunk=os.read(fd,min(65536,cap+1-len(raw)))
+    if not chunk:break
+    raw+=chunk
+   require(len(raw)==opened.st_size and len(raw)<=cap and stable_stat(os.fstat(fd))==stable_stat(opened),'INPUT_READ_CHANGED')
+   require(stable_stat(os.stat(name,dir_fd=parent,follow_symlinks=False))==stable_stat(opened),'INPUT_LEAF_SUBSTITUTED')
+   self._check_chain(chain);return raw
+  finally:
+   try:os.close(fd)
+   except OSError:raise Refused('INPUT_CLOSE_FAILURE') from None
+ def _regular(self,path,cap,expected=None,owner=None,mode=None,private_parent=False):
+  path=PurePosixPath(str(path));chain=self._dirs(path.parent)
+  try:
+   if private_parent:
+    st=os.fstat(next(item['fd'] for item in reversed(chain) if 'fd' in item));require(st.st_uid==os.getuid() and stat.S_IMODE(st.st_mode)==448,'RELEASE_DIRECTORY_NOT_PRIVATE')
+   return self._read_at(chain,path.name,cap,expected,owner,mode)
+  finally:self._close_chain(chain)
+ def read_public(self,alias):
+  if alias in self.PUBLIC_FILES:
+   return self._regular(HERE/'release'/self.PUBLIC_FILES[alias],33554432,owner=os.getuid(),mode=384,private_parent=True)
+  suffix={'receipt':'results','before':'before','after':'after'}[alias]
+  return self._regular(ROOT/'docs/qa/evidence/STUDIO-OBS-011/execution'/f"{C['executionLabel']}-{suffix}.json",33554432)
+ def claim_output(self,permit):
+  require(permit.get('scope',{}).get('purpose')==C['purpose'] and self.output_chain is None,'NO_OUTPUT_PERMISSION')
+  chain=self._dirs(HERE)
+  try:
+   parent=next(item['fd'] for item in reversed(chain) if 'fd' in item)
+   os.mkdir('released-projection-01',0o700,dir_fd=parent)
+   self._extend(chain,['released-projection-01']);st=os.fstat(chain[-1]['fd'])
+   require(st.st_uid==os.getuid() and stat.S_IMODE(st.st_mode)==448,'OUTPUT_DIRECTORY_OWNER_MODE')
+   self.output_chain=chain
+  except BaseException:
+   self._close_chain(chain);raise
+ def read_manifest(self,permit):
+  require(permit.get('scope',{}).get('purpose')==C['purpose'],'NO_PRIVATE_PERMISSION')
+  return self._regular(HERE/'release/private-input-manifest.json',65536,owner=os.getuid(),mode=384,private_parent=True)
+ def read_default_xml(self,permit,row):
+  require(permit.get('scope',{}).get('purpose')==C['purpose'] and row['role']=='default_xml','NO_XML_PERMISSION')
+  raw=self._regular(ROOT/row['path'],2097152,expected=row)
+  require(digest(raw)==row['sha256'],'XML_BYTES_CHANGED');return raw
+ def read_inputs(self,permit,m,xml_raw):
+  require(permit.get('scope',{}).get('purpose')==C['purpose'],'NO_PRIVATE_PERMISSION')
+  chain=self._dirs(m['root']['path'])
+  try:
+   st=os.fstat(next(item['fd'] for item in reversed(chain) if 'fd' in item));r=m['root']
+   require((st.st_dev,st.st_ino,st.st_uid,stat.S_IMODE(st.st_mode))==(r['dev'],r['ino'],r['uid'],r['mode']) and st.st_uid==os.getuid(),'PRIVATE_ROOT_IDENTITY_OR_MODE')
+   data={}
+   for row in m['files']:
+    role=row['role']
+    if role=='default_xml':raw=xml_raw
+    else:
+     path=PurePosixPath(row['path']);require(path.parts and '..' not in path.parts and not path.is_absolute(),'PRIVATE_PATH_ESCAPE')
+     child_chain=list(chain)
+     try:
+      self._extend(child_chain,path.parts[:-1])
+      raw=self._read_at(child_chain,path.name,{'snapshot_initial18':1048576,'guided_log':16777216,'owned_events':8388608}[role],expected=row,owner=os.getuid())
+     finally:self._close_chain(child_chain[len(chain):])
+    require(len(raw)==row['bytes'] and digest(raw)==row['sha256'],'PRIVATE_INPUT_CHANGED');data[role]=raw
+   self._check_chain(chain);return data
+  finally:self._close_chain(chain)
+ def write_output(self,output):
+  chain=self.output_chain;require(chain is not None,'NO_CLAIMED_OUTPUT');validate_output(output)
+  payload=canonical(output)+b'\n';require(len(payload)<=16384,'OUTPUT_SIZE_BOUND');self._check_chain(chain)
+  parent=next(item['fd'] for item in reversed(chain) if 'fd' in item)
+  fd=os.open('projection.json',os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600,dir_fd=parent)
+  try:
+   opened=os.fstat(fd);require(stat.S_ISREG(opened.st_mode) and opened.st_uid==os.getuid() and stat.S_IMODE(opened.st_mode)==384,'OUTPUT_FILE_OWNER_MODE')
+   require(self._identity(os.stat('projection.json',dir_fd=parent,follow_symlinks=False))==self._identity(opened),'OUTPUT_LEAF_SUBSTITUTED')
+   self._check_chain(chain);offset=0
+   while offset<len(payload):
+    written=os.write(fd,payload[offset:]);require(type(written) is int and 0<written<=len(payload)-offset,'OUTPUT_WRITE_FAILURE');offset+=written
+   os.fsync(fd);after=os.fstat(fd)
+   require(self._identity(after)==self._identity(opened) and after.st_size==len(payload) and self._identity(os.stat('projection.json',dir_fd=parent,follow_symlinks=False))==self._identity(opened),'OUTPUT_FILE_CHANGED')
+   self._check_chain(chain)
+  except OSError:raise Refused('OUTPUT_WRITE_OR_SYNC_FAILED') from None
+  finally:
+   try:os.close(fd)
+   except OSError:raise Refused('OUTPUT_CLOSE_FAILURE') from None
+ def close(self):
+  chain=self.output_chain;self.output_chain=None
+  if chain is not None:
+   try:self._check_chain(chain)
+   finally:self._close_chain(chain)

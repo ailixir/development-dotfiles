@@ -1,0 +1,35 @@
+{
+  "authorized": false,
+  "authorizedBy": "UNBOUND",
+  "decision": "UNRELEASED",
+  "packetManifestSha256": null,
+  "existingHoldSha256": "fd58e6a6d34cb9f3c9c0a100a7bb38109a6913322232691d2528701d5825a073",
+  "priorFailureSha256": "78435452fb79a10ba5bbc580f65e405a01a0bd71271854d70039d951f44179cf",
+  "priorFailurePath": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-actual-admission-failure01-root-scope.json",
+  "c8ClosureAdoptionSha256": "14db07064b927666a75f403a2f808b07c90e19cb32a8ee4289ef570969389459",
+  "c8ClosureAdoptionPath": null,
+  "label": "obs009-gateway80-offtree03-20261019",
+  "maximumCaptures": 1,
+  "sameWrapperPid": 3720,
+  "sameShellPid": 3749,
+  "reviews": {
+    "architecture": {
+      "path": null,
+      "sha256": null
+    },
+    "qa": {
+      "path": null,
+      "sha256": null
+    }
+  },
+  "nativeOrPhaseAuthorized": false,
+  "workspaceCreationAuthorized": false,
+  "automaticRetry": false,
+  "historicalRepairClaim": false,
+  "outputScope": "Only admission attempt/version receipts and fresh candidate/facts; proposedAuthorization remains false, no phase or root release",
+  "readonlySameShellOneShotRequired": true,
+  "captureFunction": "gateway80_capture_once",
+  "captureGuard": "capture-once.bash",
+  "preparationGeneration": "resume6",
+  "actualGuardBindingOrLaunchAuthorized": false
+}

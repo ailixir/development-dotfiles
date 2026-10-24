@@ -1,0 +1,196 @@
+{
+  "kind": "INDEPENDENT_ARIA04_CRITICAL_ACTUAL_FUNCTION_PAIRS",
+  "passed": 29,
+  "failed": 0,
+  "checks": [
+    {
+      "id": "original_timeout_raised_False",
+      "passed": true
+    },
+    {
+      "id": "borrower_never_emits_False",
+      "passed": true
+    },
+    {
+      "id": "primary_and_pending_retained_False",
+      "passed": true
+    },
+    {
+      "id": "publication_separate_exact_once_False",
+      "passed": true
+    },
+    {
+      "id": "finalized_rejects_mutation_False",
+      "passed": true
+    },
+    {
+      "id": "original_timeout_raised_True",
+      "passed": true
+    },
+    {
+      "id": "borrower_never_emits_True",
+      "passed": true
+    },
+    {
+      "id": "primary_and_pending_retained_True",
+      "passed": true
+    },
+    {
+      "id": "publication_separate_exact_once_True",
+      "passed": true
+    },
+    {
+      "id": "finalized_rejects_mutation_True",
+      "passed": true
+    },
+    {
+      "id": "full_guard_final_trace_False",
+      "passed": true
+    },
+    {
+      "id": "full_guard_late_cleanup_complete_False",
+      "passed": true
+    },
+    {
+      "id": "full_guard_primary_stays_original_False",
+      "passed": true
+    },
+    {
+      "id": "full_guard_final_trace_True",
+      "passed": true
+    },
+    {
+      "id": "full_guard_late_cleanup_complete_True",
+      "passed": true
+    },
+    {
+      "id": "full_guard_primary_stays_original_True",
+      "passed": true
+    },
+    {
+      "id": "full_installer_owner_status_False",
+      "passed": true
+    },
+    {
+      "id": "installer_created_known_identity_False",
+      "passed": true
+    },
+    {
+      "id": "full_installer_owner_status_True",
+      "passed": true
+    },
+    {
+      "id": "installer_created_known_identity_True",
+      "passed": true
+    },
+    {
+      "id": "installer_late_close_preserved",
+      "passed": true
+    },
+    {
+      "id": "created_before_constructor_return",
+      "passed": true
+    },
+    {
+      "id": "unknown_open_identity_never_invented",
+      "passed": true
+    },
+    {
+      "id": "owner_required_before_entry",
+      "passed": true
+    },
+    {
+      "id": "opaque_token_identity",
+      "passed": true
+    },
+    {
+      "id": "wrong_token_never_finalizes",
+      "passed": true
+    },
+    {
+      "id": "clean_success_has_no_failure_trace",
+      "passed": true
+    },
+    {
+      "id": "exact_once_finalization",
+      "passed": true
+    },
+    {
+      "id": "zero_reached_real_boundaries",
+      "passed": true
+    }
+  ],
+  "details": [
+    {
+      "case": "capture_False",
+      "primary": {
+        "stage": "UTILITY_PRELAUNCH",
+        "namespace": "UNMAPPED_FAILURE",
+        "reason": "UNMAPPED_FAILURE"
+      },
+      "cleanup": [],
+      "childrenPending": 1
+    },
+    {
+      "case": "capture_True",
+      "primary": {
+        "stage": "UTILITY_PRELAUNCH",
+        "namespace": "UNMAPPED_FAILURE",
+        "reason": "UNMAPPED_FAILURE"
+      },
+      "cleanup": [
+        {
+          "stage": "CLOSE_ACCOUNTING",
+          "namespace": "CUSTODY_HOLD",
+          "reason": "WRITE_PARTIAL"
+        }
+      ],
+      "childrenPending": 1
+    },
+    {
+      "case": "guard_False",
+      "primary": {
+        "namespace": "UNMAPPED_FAILURE",
+        "reason": "UNMAPPED_FAILURE",
+        "stage": "UTILITY_PRELAUNCH"
+      },
+      "cleanup": [],
+      "retainedOuterFd": false
+    },
+    {
+      "case": "guard_True",
+      "primary": {
+        "namespace": "UNMAPPED_FAILURE",
+        "reason": "UNMAPPED_FAILURE",
+        "stage": "UTILITY_PRELAUNCH"
+      },
+      "cleanup": [
+        {
+          "namespace": "OS_ERROR",
+          "reason": "OS_ERROR",
+          "stage": "CLOSE_ACCOUNTING"
+        }
+      ],
+      "retainedOuterFd": true
+    },
+    {
+      "case": "new_namespace_constructor_failure",
+      "failure": {
+        "NFact": false,
+        "attemptConsumed": true,
+        "namespaceCreated": true,
+        "openedIdentity": null,
+        "partialNamespace": true,
+        "qualified": false,
+        "status": "HOLD"
+      },
+      "creation": {
+        "created": true,
+        "openedIdentity": null
+      }
+    }
+  ],
+  "forbiddenBoundaryCalls": [],
+  "subjectManifestSha256": "cac4f5a1d4e770ae9d2ee65354b9ce7d93c48a41d49ccbb7c39ebbaa95d47b2e",
+  "actualTargetOperations": 0
+}

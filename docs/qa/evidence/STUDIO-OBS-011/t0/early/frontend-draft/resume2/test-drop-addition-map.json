@@ -1,0 +1,32 @@
+{
+  "status": "STATIC_ONLY_baseline_B7_and_named_runtime_reconciliation_owed",
+  "drops": [
+    {
+      "file": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+      "name": "surface 4 — ChecksStudioPage, compile-review state",
+      "reason": "duplicate pair, unlearned state no longer scanned, accepted under ADR-SC-006"
+    },
+    {
+      "file": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+      "name": "surface 5 — ChecksStudioPage, confirm state",
+      "reason": "duplicate pair, unlearned state no longer scanned, accepted under ADR-SC-006"
+    }
+  ],
+  "additions": [
+    {
+      "file": "frontend/src/components/studio/guided/guided.test.tsx",
+      "name": "citation registry has exactly the runtime copy keys"
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioHandlers.test.ts",
+      "name": "validate-variables reports a secretRef matched only by name as undeclared when secretId is absent"
+    },
+    {
+      "file": "frontend/src/services/mocks/studio/studioHandlers.test.ts",
+      "name": "validate-variables matches a secretRef by its actual secretId when its name differs"
+    }
+  ],
+  "copyTableGeneratedRowsPreserved": 182,
+  "expectedAggregateDelta": 1,
+  "schedulingTestNames": "unchanged; one approved assertion literal only"
+}

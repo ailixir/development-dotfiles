@@ -1,0 +1,12 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -1419,7 +1419,8 @@
+                 jdbc.queryForList(
+                     "SELECT e.id,e.status,e.error_code,e.video_status,l.state AS"
+                         + " ledger_state,l.attempt_id,l.admission_id FROM ui_test_executions e LEFT JOIN"
+-                        + " studio_dispatch_ledger l ON l.execution_id=e.id AND l.execution_accepted_at=e.started_at")) {
++                        + " studio_dispatch_ledger l ON l.execution_id=e.id"
++                        + " AND l.execution_accepted_at=e.started_at")) {
+               UUID id = (UUID) row.get("id");
+               if (generationExecutionBaseline.contains(id)) {
+                 continue;

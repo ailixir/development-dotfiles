@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-19T02:46:04.595161+00:00",
+  "ruling": "LEFT-V20-1",
+  "authority": "independent fold-left review, adopted by root",
+  "sourceSha256": "0f60fabce9dab238203682de49a031a8ec103e4ac18b1694375059f20ab312df",
+  "matches": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+      "line": 1296,
+      "text": "    verifyHistoricalVerdict(a, a.verdict());",
+      "lineSha256": "fb2095de259e7078b7fcb902969bba4c47f6151575863d20f795f60797de210d"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+      "line": 1309,
+      "text": "    verifyHistoricalCandidate(commit.snapshot(), candidate, a.verdict());",
+      "lineSha256": "6287fb3eec6304323753051b691a3cabf2cc960306d697c74a79ed120b491e48"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+      "line": 1489,
+      "text": "  private static void verifyHistoricalCandidate(",
+      "lineSha256": "8d150de6f755e5381001bddf5c8cc97751ab4918d68ea72ce4b6e3032ab0f061"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+      "line": 1561,
+      "text": "  private static void verifyHistoricalVerdict(PublicationContracts.Attempt a, JsonNode v) {",
+      "lineSha256": "83b94dec814beaffec146407ff9d27d74bfecc9d97dd58b7416ab6663b4d8262"
+    }
+  ],
+  "expectedAfterV18Retirement": 4,
+  "unexpectedMatchPolicy": "Reject every other broad match and any path/hash/text drift; global V18-specific matcher must return zero",
+  "positiveControl": "78 broad and70 V18-specific at S011",
+  "noFixtureEditAuthorized": true,
+  "notLaneExitOrRuntimeProof": true
+}

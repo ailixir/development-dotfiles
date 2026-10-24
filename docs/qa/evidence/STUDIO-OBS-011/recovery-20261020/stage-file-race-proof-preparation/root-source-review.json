@@ -1,0 +1,22 @@
+{
+  "kind": "INDEPENDENT_ROOT_SOURCE_REVIEW_ONLY",
+  "atUtc": "2026-10-20T22:18:40.522756+00:00",
+  "verdict": "SOURCE_CLEAN_FOR_BOUNDED_TWO_VARIANT_PROOF_AFTER_ACTUAL_BUILD",
+  "exactCandidateReconstruction": true,
+  "patchAndRestoreHashesVerified": true,
+  "same300msActualWriterGapBoth": true,
+  "onlyOldConsumerPredicateChanges": true,
+  "assertionsDeadlinesCleanupUnchanged": true,
+  "exactInlinePythonArgParsed": true,
+  "literalHeredocMarkerMatchesBoundSource": true,
+  "boundCollectorCodeHashVerified": true,
+  "existingCollectorScopeReviewed": "Only gradle/collect called; no run/frozen_check/mutation list execution. Existing top-level process handlers/atexit restore affect only this owned process and empty applied map.",
+  "runtimeExecuted": false,
+  "actualSourceChanged": false,
+  "remainingPrerequisites": [
+    "Matching actual configured runner build",
+    "Exclusive runtime lane and awake host",
+    "Independent runtime-result assessment and intended original assertion failure",
+    "Fresh source/dist seed binding and exact restoration/owned cleanup"
+  ]
+}

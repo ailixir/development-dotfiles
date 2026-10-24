@@ -1,0 +1,59 @@
+{
+  "kind": "SOURCE_ONLY_REMAINING_UNREAD_COHORT_BLOCK09",
+  "sourceReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation08/manifest.json",
+      "sha256": "90fa43230797c26ba83e9598ab4c13cb7d0beac6211710187464b7ce4b0b511e"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation08/projection.py.txt",
+      "sha256": "7bda465791290ebec526e048ee6ec95ea96fe1a21e4a0b49c621f1fd9542e00d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation08/input-read-plan.json",
+      "sha256": "632432a736dbe1559da487418296e333de28c5528e91ca7b8ca94e375e379713"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation07/source-reuse.json",
+      "sha256": "68e9260965ec37b4ca101c18d53496f2d11fc39f8176c163c4b30fd2543c2bea"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-replay-reader-preparation/bound-reader/verify_future_run.py",
+      "sha256": "825f91516352ac1877a254990e6cdf5ab2e37460c2c778dd9723f9949ec50f40"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/final-whole-cohort09-preparation-task.txt",
+      "sha256": "09ed8731bb14731229a87842f8b36fe7ceb76c5db1453d47b46024f9ef4a27fd"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/final-whole-cohort09-preparation-context.txt",
+      "sha256": "977a1364846727de7d74437f916b1df495ff09842e21d8c90ddfe927014932e9"
+    }
+  ],
+  "priorProjection08ManifestSha256FromRootTask": "032d39a860b9d8c4f5867b78c4cd367b3be194c31fff1572fd84ac699ebafd56",
+  "priorProjection08RawExitFromRootTask": 2,
+  "priorProjectionNotRerunRewrittenOrRead": true,
+  "safeReadAdapterByteExact": true,
+  "safeReadAdapterSha256": "166faaeb9cd2921d8af82d98709c0877fd1ca812612445ef994dbc9c19e529bd",
+  "entire7bdaCohortBlockByteExact": true,
+  "cohortBlockSha256": "d80d42eab33601cb9a1c4a23dfd070e8a8f682f068133e70abb5525d2ab0585a",
+  "all825fPredicateFragmentsVerbatim": true,
+  "predicateFragmentHashes": [
+    {
+      "name": "cohort",
+      "sha256": "d5a14782db7c39dfdd1c276d664a7884c894310aa24985edec6a0f6acddd0efa"
+    },
+    {
+      "name": "audit",
+      "sha256": "4e00289069435efb9abfd9067ad85cb4e357dfb3eaf4c889fcdf748dab039394"
+    }
+  ],
+  "sourceChangesOnly": "Isolate unchanged safeadapter/cohortblock. Remove XML/timing/log/Counter processing; bind original full2792 receipt/sourceBefore/wanted/four records. No new acceptance predicates or test.",
+  "removedExtraExactlyOneHeaderPreconditionOnlyByExcludingAlreadyReadLogStage": true,
+  "doesNotAdjudicateTaskMarkerOrXmlTimingResults": true,
+  "all4OriginalReferencesExact": true,
+  "allBodiesUnReadDuringPreparation": true,
+  "sourceParsedImportedProjectionExecuted": false,
+  "currentProductSdkNativeLedgerLifecycleWork": false,
+  "independentReviewAndRootExecutionGoStillRequired": true
+}

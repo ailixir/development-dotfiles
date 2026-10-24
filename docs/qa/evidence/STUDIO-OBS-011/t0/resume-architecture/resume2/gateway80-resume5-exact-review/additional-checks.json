@@ -1,0 +1,57 @@
+{
+  "count": 8,
+  "cases": [
+    {
+      "case": "actual-held-correct-pid",
+      "actual": "ACCEPT",
+      "fakeOnly": true,
+      "defect": false
+    },
+    {
+      "case": "actual-held-wrong-pid",
+      "actual": "ACCEPT",
+      "fakeOnly": true,
+      "defect": true
+    },
+    {
+      "case": "actual-held-missing-pid",
+      "actual": "ACCEPT",
+      "fakeOnly": true,
+      "defect": true
+    },
+    {
+      "case": "actual-observe-capture-installed-stdlib-timeout",
+      "actual": [
+        "communicate-timeout",
+        "kill-called-on-fake-only",
+        "wait-fake-only"
+      ],
+      "realProcessOrSignal": false,
+      "defect": true
+    },
+    {
+      "case": "separate-verified-consumed-buffers-core",
+      "kind": "SOURCE_AST_PATH_CHECK",
+      "defect": true
+    },
+    {
+      "case": "separate-verified-consumed-buffers-boundary",
+      "kind": "SOURCE_AST_PATH_CHECK",
+      "defect": true
+    },
+    {
+      "case": "separate-verified-consumed-buffers-worker_candidates",
+      "kind": "SOURCE_AST_PATH_CHECK",
+      "defect": true
+    },
+    {
+      "case": "current-scope-generation-and-E-state-contradiction",
+      "kind": "SOURCE_JSON_CHECK",
+      "defect": true
+    }
+  ],
+  "realProcessSignalLockRuntimeSourceCapturePrivateActions": 0,
+  "stdlibRunSourceSha256": "5917d92a3df46dfda963d39444c771b95e64a49e477656f1e67f2c6a3cbfb1d5",
+  "packetSha256": "607859e3f5e43ab4dad52afdcf1f1842801f2abacc197527b819e11668ccf1ab",
+  "scope": "Exact reached source/AST + actual held/adapter and installed stdlib run with wholly fake IO/Popen only"
+}

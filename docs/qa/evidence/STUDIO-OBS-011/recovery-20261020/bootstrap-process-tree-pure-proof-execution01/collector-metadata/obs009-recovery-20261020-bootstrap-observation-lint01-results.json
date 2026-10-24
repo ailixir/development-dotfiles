@@ -1,0 +1,22 @@
+{
+  "command": [
+    "pnpm",
+    "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+    "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+    "test/helpers/bootstrapProcessTreeObservation.ts",
+    "test/run/bootstrapProcessTreeObservation.test.ts"
+  ],
+  "cwd": "studio-runner",
+  "started": "2026-10-21T00:51:23.733377+00:00",
+  "elapsedSeconds": 3.27,
+  "exit": 1,
+  "sourceStable": true,
+  "distStable": true,
+  "logSha256": "40b1aa8768db96c47f7a3eb6f85226d9d88ffdc470477962cbfed08d6c1e6b2d",
+  "testInputStable": true,
+  "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+  "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f"
+}

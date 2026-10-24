@@ -1,0 +1,964 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -1325,19 +1325,81 @@
+   private static Map<String, Object> awaitOwnRowBlocker(int holderPid, int waiterPid)
+       throws InterruptedException {
+     long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+-    while (System.nanoTime() < until) {
+-      var rows =
+-          actualJdbc.queryForList(
+-              "SELECT pid,wait_event_type,wait_event,?=ANY(pg_blocking_pids(pid)) AS owned_blocker "
+-                  + "FROM pg_stat_activity WHERE pid=? AND wait_event_type='Lock' "
+-                  + "AND ?=ANY(pg_blocking_pids(pid))",
+-              holderPid,
+-              waiterPid,
+-              holderPid);
+-      if (rows.size() == 1) {
+-        return rows.getFirst();
+-      }
+-      Thread.sleep(20);
++    {
++      class ItsPollTransportownedrowlock {
++        Throwable failure;
++        boolean slept;
++        boolean initialAwaitTick = true;
++        Map<String, Object> result;
++
++        boolean step() {
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++
++            if (!(System.nanoTime() < until)) {
++              return true;
++            }
++            var rows =
++                actualJdbc.queryForList(
++                    "SELECT pid,wait_event_type,wait_event,?=ANY(pg_blocking_pids(pid)) AS owned_blocker "
++                        + "FROM pg_stat_activity WHERE pid=? AND wait_event_type='Lock' "
++                        + "AND ?=ANY(pg_blocking_pids(pid))",
++                    holderPid,
++                    waiterPid,
++                    holderPid);
++            if (rows.size() == 1) {
++              result = rows.getFirst();
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++
++          } catch (Throwable caught) {
++            failure = caught;
++            return true;
++          }
++        }
++      }
++      var itsPoll = new ItsPollTransportownedrowlock();
++      if (!itsPoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("IT-S Transport-owned-row-lock")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(java.time.Duration.ZERO)
++              .pollInterval(java.time.Duration.ofMillis(20))
++              .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (itsPoll.initialAwaitTick) {
++                      itsPoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return itsPoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++          // Preserve the original last guard/observation and its assertion/error mapping.
++          itsPoll.step();
++        }
++      }
++      if (itsPoll.failure instanceof InterruptedException interrupted) {
++        throw interrupted;
++      }
++      if (itsPoll.failure instanceof RuntimeException exception) {
++        throw exception;
++      }
++      if (itsPoll.failure instanceof Error error) {
++        throw error;
++      }
++      if (itsPoll.result != null) {
++        return itsPoll.result;
++      }
+     }
+     throw new AssertionError("FAIL_TO_REACH_OWN_ROW_LOCK: no actual owned blocker edge observed");
+   }
+@@ -1651,8 +1713,63 @@
+                 + route.countOnlyDiagnostic(++diagnosticOrdinal, stage, "BEFORE"));
+         long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+         // The final routed query has finished. Observe actual bridge finalizers without new SQL.
+-        while (!route.idle() && System.nanoTime() < until) {
+-          Thread.sleep(20);
++        {
++          class ItsPollTransportrouteidleobserve {
++            Throwable failure;
++            boolean slept;
++            boolean initialAwaitTick = true;
++
++
++            boolean step() {
++              try {
++                if (slept && Thread.interrupted()) {
++                  throw new InterruptedException();
++                }
++
++                if (!(!route.idle() && System.nanoTime() < until)) {
++                  return true;
++                }
++                if (Thread.interrupted()) {
++                  throw new InterruptedException();
++                }
++                slept = true;
++                return false;
++
++              } catch (Throwable caught) {
++                failure = caught;
++                return true;
++              }
++            }
++          }
++          var itsPoll = new ItsPollTransportrouteidleobserve();
++          if (!itsPoll.step()) {
++            try {
++              org.awaitility.Awaitility.await()
++                  .alias("IT-S Transport-route-idle-observe")
++                  .pollInSameThread()
++                  .dontCatchUncaughtExceptions()
++                  .pollDelay(java.time.Duration.ZERO)
++                  .pollInterval(java.time.Duration.ofMillis(20))
++                  .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
++                  .until(
++                      () -> {
++                        if (itsPoll.initialAwaitTick) {
++                          itsPoll.initialAwaitTick = false;
++                          return false;
++                        }
++                        return itsPoll.step();
++                      });
++            } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++              // Preserve the original last guard/observation and its assertion/error mapping.
++              itsPoll.step();
++            }
++          }
++          if (itsPoll.failure instanceof Exception exception) {
++            throw exception;
++          }
++          if (itsPoll.failure instanceof Error error) {
++            throw error;
++          }
+         }
+         System.out.println(
+             "SETUP_ROUTE_IDLE_DIAGNOSTIC "
+@@ -1989,8 +2106,63 @@
+     }
+     try {
+       long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+-      while (!route.idle() && System.nanoTime() < until) {
+-        Thread.sleep(20);
++      {
++        class ItsPollTransportrouteidlecleanup {
++          Throwable failure;
++          boolean slept;
++          boolean initialAwaitTick = true;
++
++
++          boolean step() {
++            try {
++              if (slept && Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++
++              if (!(!route.idle() && System.nanoTime() < until)) {
++                return true;
++              }
++              if (Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              slept = true;
++              return false;
++
++            } catch (Throwable caught) {
++              failure = caught;
++              return true;
++            }
++          }
++        }
++        var itsPoll = new ItsPollTransportrouteidlecleanup();
++        if (!itsPoll.step()) {
++          try {
++            org.awaitility.Awaitility.await()
++                .alias("IT-S Transport-route-idle-cleanup")
++                .pollInSameThread()
++                .dontCatchUncaughtExceptions()
++                .pollDelay(java.time.Duration.ZERO)
++                .pollInterval(java.time.Duration.ofMillis(20))
++                .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
++                .until(
++                    () -> {
++                      if (itsPoll.initialAwaitTick) {
++                        itsPoll.initialAwaitTick = false;
++                        return false;
++                      }
++                      return itsPoll.step();
++                    });
++          } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++            // Preserve the original last guard/observation and its assertion/error mapping.
++            itsPoll.step();
++          }
++        }
++        if (itsPoll.failure instanceof Exception exception) {
++          throw exception;
++        }
++        if (itsPoll.failure instanceof Error error) {
++          throw error;
++        }
+       }
+       assertThat(route.idle()).as("actual setup I/O is idle after real ownership drain").isTrue();
+     } catch (Exception | Error cleanup) {
+@@ -2702,12 +2874,71 @@
+       Path stageFile = scratch.resolve("stage");
+       long stageDeadline = System.nanoTime() + Duration.ofSeconds(25).toNanos();
+       // The child creates the marker and then writes its label, so existence is not readiness.
+-      String stageContent = readStageOrEmpty(stageFile);
+-      while (!stageContent.equals(expectedStage)
+-          && System.nanoTime() < stageDeadline
+-          && child.isAlive()) {
+-        Thread.sleep(10);
+-        stageContent = readStageOrEmpty(stageFile);
++      String initialStageContent = readStageOrEmpty(stageFile);
++      Process itsStageChild = child;
++      String stageContent;
++      {
++        class ItsPollTransportcontrollerstage {
++          Throwable failure;
++          boolean slept;
++          boolean initialAwaitTick = true;
++          String stageContent = initialStageContent;
++
++          boolean step() {
++            try {
++              if (slept && Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              if (slept) {
++                stageContent = readStageOrEmpty(stageFile);
++              }
++              if (!(!stageContent.equals(expectedStage)
++                  && System.nanoTime() < stageDeadline
++                  && itsStageChild.isAlive())) {
++                return true;
++              }
++              if (Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              slept = true;
++              return false;
++
++            } catch (Throwable caught) {
++              failure = caught;
++              return true;
++            }
++          }
++        }
++        var itsPoll = new ItsPollTransportcontrollerstage();
++        if (!itsPoll.step()) {
++          try {
++            org.awaitility.Awaitility.await()
++                .alias("IT-S Transport-controller-stage")
++                .pollInSameThread()
++                .dontCatchUncaughtExceptions()
++                .pollDelay(java.time.Duration.ZERO)
++                .pollInterval(java.time.Duration.ofMillis(10))
++                .atMost(java.time.Duration.ofNanos(Math.max(1L, stageDeadline - System.nanoTime())))
++                .until(
++                    () -> {
++                      if (itsPoll.initialAwaitTick) {
++                        itsPoll.initialAwaitTick = false;
++                        return false;
++                      }
++                      return itsPoll.step();
++                    });
++          } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++            // Preserve the original last guard/observation and its assertion/error mapping.
++            itsPoll.step();
++          }
++        }
++        if (itsPoll.failure instanceof Exception exception) {
++          throw exception;
++        }
++        if (itsPoll.failure instanceof Error error) {
++          throw error;
++        }
++        stageContent = itsPoll.stageContent;
+       }
+       assertThat(stageContent)
+           .as("controller-cut stage marker (childAlive=%s)", child.isAlive())
+@@ -4627,11 +4858,69 @@
+   private static void awaitTeardown(java.util.function.BooleanSupplier condition)
+       throws InterruptedException {
+     long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(20);
+-    while (!condition.getAsBoolean()) {
+-      if (System.nanoTime() > until) {
+-        throw new AssertionError("Teardown condition not reached");
+-      }
+-      Thread.sleep(20);
++    {
++      class ItsPollTransportteardown {
++        Throwable failure;
++        boolean slept;
++        boolean initialAwaitTick = true;
++
++
++        boolean step() {
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++
++            if (!(!condition.getAsBoolean())) {
++              return true;
++            }
++            if (System.nanoTime() > until) {
++              throw new AssertionError("Teardown condition not reached");
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++
++          } catch (Throwable caught) {
++            failure = caught;
++            return true;
++          }
++        }
++      }
++      var itsPoll = new ItsPollTransportteardown();
++      if (!itsPoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("IT-S Transport-teardown")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(java.time.Duration.ZERO)
++              .pollInterval(java.time.Duration.ofMillis(20))
++              .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (itsPoll.initialAwaitTick) {
++                      itsPoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return itsPoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++          // Preserve the original last guard/observation and its assertion/error mapping.
++          itsPoll.step();
++        }
++      }
++      if (itsPoll.failure instanceof InterruptedException interrupted) {
++        throw interrupted;
++      }
++      if (itsPoll.failure instanceof RuntimeException exception) {
++        throw exception;
++      }
++      if (itsPoll.failure instanceof Error error) {
++        throw error;
++      }
+     }
+   }
+ 
+@@ -4752,40 +5041,99 @@
+   private static void awaitActualStop(PrivatePgRoute route, Scenario scenario, SourceStopOwner work)
+       throws Exception {
+     long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(20);
+-    while (System.nanoTime() < until) {
+-      assertThat(work.failure.get()).as("actual fixture stop delivery must succeed").isNull();
+-      var status =
+-          actualJdbc.queryForMap(
+-              "SELECT document->>'state' AS state,"
+-                  + "progress->>'teardownStatus' AS teardown FROM studio_guided_sessions WHERE session_id=?",
+-              scenario.sessionId);
+-      int materializations =
+-          actualJdbc.queryForObject(
+-              "SELECT count(*) FROM studio_guided_materializations " + "WHERE session_id=?",
+-              Integer.class,
+-              scenario.sessionId);
+-      int live =
+-          actualJdbc.queryForObject(
+-              "SELECT count(*) FROM studio_guided_materializations "
+-                  + "WHERE session_id=? AND live",
+-              Integer.class,
+-              scenario.sessionId);
+-      boolean senderFinished = work.operationsComplete();
+-      boolean confirmed = "CONFIRMED".equals(status.get("teardown"));
+-      boolean noContext = materializations == 0 && status.get("teardown") == null;
+-      if (live == 0
+-          && senderFinished
+-          && route.idle()
+-          && (confirmed || noContext)
+-          && java.util.Set.of("CANCELLED", "UNKNOWN_OUTCOME", "FAILED", "EXPIRED")
+-              .contains(status.get("state"))) {
+-        if (materializations > 0) {
+-          assertThat(work.initiated.get()).isGreaterThan(0);
+-          assertThat(status.get("teardown")).isEqualTo("CONFIRMED");
+-        }
++    {
++      class ItsPollTransportactualstop {
++        Throwable failure;
++        boolean slept;
++        boolean initialAwaitTick = true;
++        boolean completed;
++
++        boolean step() {
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++
++            if (!(System.nanoTime() < until)) {
++              return true;
++            }
++            assertThat(work.failure.get()).as("actual fixture stop delivery must succeed").isNull();
++            var status =
++                actualJdbc.queryForMap(
++                    "SELECT document->>'state' AS state,"
++                        + "progress->>'teardownStatus' AS teardown FROM studio_guided_sessions WHERE session_id=?",
++                    scenario.sessionId);
++            int materializations =
++                actualJdbc.queryForObject(
++                    "SELECT count(*) FROM studio_guided_materializations " + "WHERE session_id=?",
++                    Integer.class,
++                    scenario.sessionId);
++            int live =
++                actualJdbc.queryForObject(
++                    "SELECT count(*) FROM studio_guided_materializations "
++                        + "WHERE session_id=? AND live",
++                    Integer.class,
++                    scenario.sessionId);
++            boolean senderFinished = work.operationsComplete();
++            boolean confirmed = "CONFIRMED".equals(status.get("teardown"));
++            boolean noContext = materializations == 0 && status.get("teardown") == null;
++            if (live == 0
++                && senderFinished
++                && route.idle()
++                && (confirmed || noContext)
++                && java.util.Set.of("CANCELLED", "UNKNOWN_OUTCOME", "FAILED", "EXPIRED")
++                    .contains(status.get("state"))) {
++              if (materializations > 0) {
++                assertThat(work.initiated.get()).isGreaterThan(0);
++                assertThat(status.get("teardown")).isEqualTo("CONFIRMED");
++              }
++              completed = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++
++          } catch (Throwable caught) {
++            failure = caught;
++            return true;
++          }
++        }
++      }
++      var itsPoll = new ItsPollTransportactualstop();
++      if (!itsPoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("IT-S Transport-actual-stop")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(java.time.Duration.ZERO)
++              .pollInterval(java.time.Duration.ofMillis(20))
++              .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (itsPoll.initialAwaitTick) {
++                      itsPoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return itsPoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++          // Preserve the original last guard/observation and its assertion/error mapping.
++          itsPoll.step();
++        }
++      }
++      if (itsPoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (itsPoll.failure instanceof Error error) {
++        throw error;
++      }
++      if (itsPoll.completed) {
+         return;
+       }
+-      Thread.sleep(20);
+     }
+     throw new AssertionError("Actual stop/confirmation/materialization closure did not complete");
+   }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java
+@@ -3898,8 +3898,63 @@
+ 
+     static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+       long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-      while (!condition.getAsBoolean() && System.nanoTime() < end) {
+-        Thread.sleep(25);
++      {
++        class ItsPollGuidedPlanningIntegrationTestcondition {
++          Throwable failure;
++          boolean slept;
++          boolean initialAwaitTick = true;
++
++
++          boolean step() {
++            try {
++              if (slept && Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++
++              if (!(!condition.getAsBoolean() && System.nanoTime() < end)) {
++                return true;
++              }
++              if (Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              slept = true;
++              return false;
++
++            } catch (Throwable caught) {
++              failure = caught;
++              return true;
++            }
++          }
++        }
++        var itsPoll = new ItsPollGuidedPlanningIntegrationTestcondition();
++        if (!itsPoll.step()) {
++          try {
++            org.awaitility.Awaitility.await()
++                .alias("IT-S GuidedPlanningIntegrationTest-condition")
++                .pollInSameThread()
++                .dontCatchUncaughtExceptions()
++                .pollDelay(java.time.Duration.ZERO)
++                .pollInterval(java.time.Duration.ofMillis(25))
++                .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
++                .until(
++                    () -> {
++                      if (itsPoll.initialAwaitTick) {
++                        itsPoll.initialAwaitTick = false;
++                        return false;
++                      }
++                      return itsPoll.step();
++                    });
++          } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++            // Preserve the original last guard/observation and its assertion/error mapping.
++            itsPoll.step();
++          }
++        }
++        if (itsPoll.failure instanceof Exception exception) {
++          throw exception;
++        }
++        if (itsPoll.failure instanceof Error error) {
++          throw error;
++        }
+       }
+       assertThat(condition.getAsBoolean()).isTrue();
+     }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java
+@@ -1843,21 +1843,75 @@
+                         });
+               });
+       assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+-      boolean waited = false;
+       long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+-      while (System.nanoTime() < until) {
+-        if (f.jdbc()
+-                .queryForObject(
+-                    ("SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() "
+-                        + "AND pid<>pg_backend_pid() AND wait_event_type='Lock'"),
+-                    Integer.class)
+-            > 0) {
+-          waited = true;
+-          break;
++      {
++        class ItsPollSecretterminalrowlock {
++          Throwable failure;
++          boolean slept;
++          boolean initialAwaitTick = true;
++          boolean waited;
++
++          boolean step() {
++            try {
++              if (slept && Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++
++              if (!(System.nanoTime() < until)) {
++                return true;
++              }
++              if (f.jdbc()
++                      .queryForObject(
++                          ("SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() "
++                              + "AND pid<>pg_backend_pid() AND wait_event_type='Lock'"),
++                          Integer.class)
++                  > 0) {
++                waited = true;
++                return true;
++              }
++              if (Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              slept = true;
++              return false;
++
++            } catch (Throwable caught) {
++              failure = caught;
++              return true;
++            }
++          }
+         }
+-        Thread.sleep(20);
++        var itsPoll = new ItsPollSecretterminalrowlock();
++        if (!itsPoll.step()) {
++          try {
++            org.awaitility.Awaitility.await()
++                .alias("IT-S Secret-terminal-row-lock")
++                .pollInSameThread()
++                .dontCatchUncaughtExceptions()
++                .pollDelay(java.time.Duration.ZERO)
++                .pollInterval(java.time.Duration.ofMillis(20))
++                .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
++                .until(
++                    () -> {
++                      if (itsPoll.initialAwaitTick) {
++                        itsPoll.initialAwaitTick = false;
++                        return false;
++                      }
++                      return itsPoll.step();
++                    });
++          } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++            // Preserve the original last guard/observation and its assertion/error mapping.
++            itsPoll.step();
++          }
++        }
++        if (itsPoll.failure instanceof Exception exception) {
++          throw exception;
++        }
++        if (itsPoll.failure instanceof Error error) {
++          throw error;
++        }
++        assertThat(itsPoll.waited).isTrue();
+       }
+-      assertThat(waited).isTrue();
+       releaseWriter.countDown();
+       assertThat(writer.get(10, TimeUnit.SECONDS)).isTrue();
+       assertThat(terminal.get(10, TimeUnit.SECONDS)).isEqualTo(1);
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java
+@@ -440,20 +440,75 @@
+                                   }))
+                       .isInstanceOf(GuidedSessionException.class));
+       assertThat(attempting.await(2, TimeUnit.SECONDS)).isTrue();
+-      boolean waiting = false;
+       long until = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(500);
+-      while (System.nanoTime() < until && !waiting) {
+-        waiting =
+-            Boolean.TRUE.equals(
+-                db.jdbc.queryForObject(
+-                    "SELECT wait_event_type='Lock' FROM pg_stat_activity WHERE pid=?",
+-                    Boolean.class,
+-                    backendPid.get()));
+-        if (!waiting) {
+-          Thread.sleep(10);
+-        }
++      {
++        class ItsPollRacepublisherrowlock {
++          Throwable failure;
++          boolean slept;
++          boolean initialAwaitTick = true;
++          boolean waiting;
++
++          boolean step() {
++            try {
++              if (slept && Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++
++              if (!(System.nanoTime() < until && !waiting)) {
++                return true;
++              }
++              waiting =
++                  Boolean.TRUE.equals(
++                      db.jdbc.queryForObject(
++                          "SELECT wait_event_type='Lock' FROM pg_stat_activity WHERE pid=?",
++                          Boolean.class,
++                          backendPid.get()));
++              if (waiting) {
++                return true;
++              }
++              if (Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              slept = true;
++              return false;
++
++            } catch (Throwable caught) {
++              failure = caught;
++              return true;
++            }
++          }
++        }
++        var itsPoll = new ItsPollRacepublisherrowlock();
++        if (!itsPoll.step()) {
++          try {
++            org.awaitility.Awaitility.await()
++                .alias("IT-S Race-publisher-row-lock")
++                .pollInSameThread()
++                .dontCatchUncaughtExceptions()
++                .pollDelay(java.time.Duration.ZERO)
++                .pollInterval(java.time.Duration.ofMillis(10))
++                .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
++                .until(
++                    () -> {
++                      if (itsPoll.initialAwaitTick) {
++                        itsPoll.initialAwaitTick = false;
++                        return false;
++                      }
++                      return itsPoll.step();
++                    });
++          } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++            // Preserve the original last guard/observation and its assertion/error mapping.
++            itsPoll.step();
++          }
++        }
++        if (itsPoll.failure instanceof Exception exception) {
++          throw exception;
++        }
++        if (itsPoll.failure instanceof Error error) {
++          throw error;
++        }
++        assertThat(itsPoll.waiting).as("actual publisher waits on PostgreSQL source row lock").isTrue();
+       }
+-      assertThat(waiting).as("actual publisher waits on PostgreSQL source row lock").isTrue();
+       Thread.sleep(1100);
+       release.countDown();
+       blocker.get(3, TimeUnit.SECONDS);
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java
+@@ -1605,8 +1605,63 @@
+ 
+   static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-    while (!condition.getAsBoolean() && System.nanoTime() < end) {
+-      Thread.sleep(25);
++    {
++      class ItsPollGuidedFocusMutationJoinedITcondition {
++        Throwable failure;
++        boolean slept;
++        boolean initialAwaitTick = true;
++
++
++        boolean step() {
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++
++            if (!(!condition.getAsBoolean() && System.nanoTime() < end)) {
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++
++          } catch (Throwable caught) {
++            failure = caught;
++            return true;
++          }
++        }
++      }
++      var itsPoll = new ItsPollGuidedFocusMutationJoinedITcondition();
++      if (!itsPoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("IT-S GuidedFocusMutationJoinedIT-condition")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(java.time.Duration.ZERO)
++              .pollInterval(java.time.Duration.ofMillis(25))
++              .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (itsPoll.initialAwaitTick) {
++                      itsPoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return itsPoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++          // Preserve the original last guard/observation and its assertion/error mapping.
++          itsPoll.step();
++        }
++      }
++      if (itsPoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (itsPoll.failure instanceof Error error) {
++        throw error;
++      }
+     }
+     assertThat(condition.getAsBoolean()).isTrue();
+   }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
+@@ -1030,8 +1030,63 @@
+   /** Waits for the V20 fact; the failure names what the runner did (its log is value-free). */
+   void awaitRecording(String id) throws Exception {
+     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(90_000);
+-    while (recordingRows(id) != 1 && System.nanoTime() < end) {
+-      Thread.sleep(50);
++    {
++      class ItsPollEvidencerecording {
++        Throwable failure;
++        boolean slept;
++        boolean initialAwaitTick = true;
++
++
++        boolean step() {
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++
++            if (!(recordingRows(id) != 1 && System.nanoTime() < end)) {
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++
++          } catch (Throwable caught) {
++            failure = caught;
++            return true;
++          }
++        }
++      }
++      var itsPoll = new ItsPollEvidencerecording();
++      if (!itsPoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("IT-S Evidence-recording")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(java.time.Duration.ZERO)
++              .pollInterval(java.time.Duration.ofMillis(50))
++              .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (itsPoll.initialAwaitTick) {
++                      itsPoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return itsPoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++          // Preserve the original last guard/observation and its assertion/error mapping.
++          itsPoll.step();
++        }
++      }
++      if (itsPoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (itsPoll.failure instanceof Error error) {
++        throw error;
++      }
+     }
+     assertThat(recordingRows(id))
+         .as(
+@@ -1436,8 +1491,63 @@
+ 
+   static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-    while (!condition.getAsBoolean() && System.nanoTime() < end) {
+-      Thread.sleep(25);
++    {
++      class ItsPollGuidedEvidencePendingAppendJoinedITcondition {
++        Throwable failure;
++        boolean slept;
++        boolean initialAwaitTick = true;
++
++
++        boolean step() {
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++
++            if (!(!condition.getAsBoolean() && System.nanoTime() < end)) {
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++
++          } catch (Throwable caught) {
++            failure = caught;
++            return true;
++          }
++        }
++      }
++      var itsPoll = new ItsPollGuidedEvidencePendingAppendJoinedITcondition();
++      if (!itsPoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("IT-S GuidedEvidencePendingAppendJoinedIT-condition")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(java.time.Duration.ZERO)
++              .pollInterval(java.time.Duration.ofMillis(25))
++              .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (itsPoll.initialAwaitTick) {
++                      itsPoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return itsPoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
++          // Preserve the original last guard/observation and its assertion/error mapping.
++          itsPoll.step();
++        }
++      }
++      if (itsPoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (itsPoll.failure instanceof Error error) {
++        throw error;
++      }
+     }
+     assertThat(condition.getAsBoolean()).isTrue();
+   }

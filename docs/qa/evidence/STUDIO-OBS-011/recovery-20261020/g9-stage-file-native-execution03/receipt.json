@@ -1,0 +1,277 @@
+{
+  "kind": "G9_SAME_STAGE_FILE_RACE_OLD_SEMANTIC_RED_FIXED_GREEN_NATIVE03",
+  "atUtc": "2026-10-21T03:51:46.951197+00:00",
+  "outcome": "QUALIFIED_TWO_VARIANT_COMPARISON_SOURCE_RESTORED_PENDING_INDEPENDENT_QA",
+  "soleExistingCase": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost",
+  "old": {
+    "toolSession": 86244,
+    "nativeCollectorExit": 1,
+    "driverExit": 0,
+    "rawCounts": {
+      "total": 1,
+      "failed": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "passedFromObservedCaseStatus": 0,
+    "elapsedSeconds": 39,
+    "semanticFailureType": "org.opentest4j.AssertionFailedError",
+    "expectedReadBeforeDecisionActualEmptyPair": true,
+    "publicFrame": {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "method": "runGuidedControllerCut",
+      "line": 2998
+    },
+    "suppressedTextPresent": false,
+    "cleanupSentinelPresent": false,
+    "completeOriginalCleanupLifecycleQualified": true,
+    "laterBusinessAssertionsCredit": false,
+    "xmlSha256": "be0945b4c6c9c843003fa2f5fedab1bfc440dcbe73a87d4c733ea946401cf24c",
+    "nativeResultSha256": "0b56c93053f2d4feef847f2f3d17df1ff7dfa4c5b426c8f8fa5597b1e03336e0",
+    "rawNativeLogSha256": "e36bf722240b2184f3b631bd7287f6724d3669288aa94d7e2ce818f361e380f0"
+  },
+  "fixed": {
+    "toolSession": 69458,
+    "nativeCollectorExit": 0,
+    "driverExit": 0,
+    "rawCounts": {
+      "total": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "passedFromObservedCaseStatus": 1,
+    "elapsedSeconds": 37,
+    "completeOriginalBusinessAndCleanupLifecyclePassed": true,
+    "xmlSha256": "3a65b116a7a5e5f38de078bffb7e30da6b9ab688ba3cc833838dafd2a7b127ff",
+    "nativeResultSha256": "85d9e77cb44c7bc47b9a253bc91e8730a47aeddce773afc9a7d10f5a0c150fec",
+    "rawNativeLogSha256": "8c62f8bbc07569be1c27204fc3aa3cb5ca65eabaff62856b098a07e39639ca21"
+  },
+  "originalC10RawPassedCountField": "NOT_EMITTED; explicit pass counts derived only from actual case status Counter, no default0",
+  "privacyInspection": {
+    "knownOldFailureLeafTextAccesses": 1,
+    "secondFailureLeafReadOrRepairProbe": false,
+    "rawXmlLogFailureBodyExportedToModelOrQa": false,
+    "authorizedFiniteByteScan": "Single old XML failure text only for fixed READ_BEFORE_DECISION/empty-string pair, known public method/file/line, suppressed-element/text and fixed cleanup sentinel predicates. XML structurally parsed to select sole known testcase; hashes retained. No arbitrary failure message/canary/body/log/media inspection.",
+    "nativeLogHandling": "byte hash only; no log text reader or unhandled-banner scan added"
+  },
+  "cleanupQualification": {
+    "basis": "Unchanged original method finally drains/kills/waits/cancels owned work/provider/executor and latches cleanup failure; unchanged class termination guards precede database close. Exact1 expected old failure, no extra/error/skipped case or suppressed cleanup, and fixed complete casePASS establish original JUnit lifecycle qualification.",
+    "numericPidAbsenceOrEsrchClaim": false,
+    "noExternalPidObserver": true,
+    "gradleAndJvmPids": "NOT_RETAINED_BY_EXISTING_C10; no new observation gate",
+    "originalOuterPopenWaitExits": {
+      "old": 1,
+      "fixed": 0
+    },
+    "retainedLaunchPids": {
+      "old": {
+        "driver": 22248,
+        "outerCollector": 22416
+      },
+      "fixed": {
+        "driver": 24949,
+        "outerCollector": 25101
+      }
+    }
+  },
+  "supplementalOriginalHtmlAndJacocoExec": {
+    "old": [
+      {
+        "path": "/private/tmp/obs009-g9-f2-current-20261020-root01/old-existence-consumer/backend/build/reports/tests/test/index.html",
+        "sha256": "1be3fb79a7902ca2d340adc628fab747589ea89548ffbe455d4a6d716ec67dec",
+        "bytes": 3051,
+        "mtime": 1792554512.520621,
+        "freshNonempty": true,
+        "collectorCredit": "Original output supplementary hash; not a C10 collection claim"
+      },
+      {
+        "path": "/private/tmp/obs009-g9-f2-current-20261020-root01/old-existence-consumer/backend/build/jacoco/test.exec",
+        "sha256": "2c9cae90f5aa6825b2f068ca4d2fd7b6139e81c801c6f3315594381b0116502c",
+        "bytes": 743246,
+        "mtime": 1792554512.107505,
+        "freshNonempty": true,
+        "collectorCredit": "Original output supplementary hash; not a C10 collection claim"
+      }
+    ],
+    "fixed": [
+      {
+        "path": "/private/tmp/obs009-g9-f2-current-20261020-root01/fixed-content-consumer/backend/build/reports/tests/test/index.html",
+        "sha256": "d8f212068d588c410d69a4a9d76003449faad84ba1d064d51cc07e5a1fd7609a",
+        "bytes": 2503,
+        "mtime": 1792554590.0413141,
+        "freshNonempty": true,
+        "collectorCredit": "Original output supplementary hash; not a C10 collection claim"
+      },
+      {
+        "path": "/private/tmp/obs009-g9-f2-current-20261020-root01/fixed-content-consumer/backend/build/jacoco/test.exec",
+        "sha256": "dd0b26c9a5d0394160434c94808035f224cf993cd2dedbd314883d7f10e494f6",
+        "bytes": 741582,
+        "mtime": 1792554589.6216738,
+        "freshNonempty": true,
+        "collectorCredit": "Original output supplementary hash; not a C10 collection claim"
+      }
+    ]
+  },
+  "awakeScopes": {
+    "old": {
+      "heldThroughNativeAndPostguards": true,
+      "reaped": {
+        "pid": 22415,
+        "waitExit": -15,
+        "ownedOnly": true,
+        "nativeGroupSignalsAdded": false,
+        "coverageClaim": "Held through the original native and driver postcapture scope when qualification says true; no all-postprocessing or numeric PID absence claim"
+      }
+    },
+    "fixed": {
+      "heldThroughNativeAndPostguards": true,
+      "reaped": {
+        "pid": 25100,
+        "waitExit": -15,
+        "ownedOnly": true,
+        "nativeGroupSignalsAdded": false,
+        "coverageClaim": "Held through the original native and driver postcapture scope when qualification says true; no all-postprocessing or numeric PID absence claim"
+      }
+    },
+    "restoration": {
+      "heldThroughRestorationAndPostguards": true,
+      "reaped": {
+        "pid": 26729,
+        "waitExit": -15,
+        "ownedOnly": true
+      }
+    },
+    "continuousAllPostprocessingAwakeClaim": false
+  },
+  "sourceRuntimeCustody": {
+    "actual1814SourceA1ExactBeforeAfterEachPhaseAndRestoration": true,
+    "actualSourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "actualAndPrivate238ProductE19Exact": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "actualSelected14213RowsHashModesExact": true,
+    "actualCache191And23LinksDirectBin21Exact": true,
+    "canonicalClisProtectedBrowserEnvironmentExact": true,
+    "allOriginal14213RowsRestoredEach": true,
+    "originalJavaTransportSha256": "75c55104ff24acf9352b1e140cf442c52b8170ea9e738a64c539f1eec8b2abe2",
+    "originalJavaSharedHelperSha256": "803ad93b30973014d63f048ba3b57e83ff83015694cf2d5d88bdb70385604db2",
+    "newPrivateOutputsOnly": "explicit backend/build,backend/.gradle,backend/buildSrc/build,backend/buildSrc/.gradle and g9-f2-output scopes",
+    "otherPrivateProofsReadOrChanged": false
+  },
+  "restoration": {
+    "toolSession": 52130,
+    "driverExit": 0,
+    "commands": [
+      {
+        "variant": "old-existence-consumer",
+        "phase": "restore-dry-run",
+        "argv": [
+          "patch",
+          "--dry-run",
+          "-p1",
+          "--forward",
+          "--batch",
+          "-i",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/old-existence-consumer.restore.patch"
+        ],
+        "cwd": "/private/tmp/obs009-g9-f2-current-20261020-root01/old-existence-consumer",
+        "rawExit": 0,
+        "offsetFuzzFailedRejectMention": false,
+        "stdoutSha256": "de31bdde03b99e4d8abac3c5d8d972e3a4c0c69f7b43ad66048fe4b97c20cef0",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "variant": "old-existence-consumer",
+        "phase": "restore-apply",
+        "argv": [
+          "patch",
+          "-p1",
+          "--forward",
+          "--batch",
+          "-i",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/old-existence-consumer.restore.patch"
+        ],
+        "cwd": "/private/tmp/obs009-g9-f2-current-20261020-root01/old-existence-consumer",
+        "rawExit": 0,
+        "offsetFuzzFailedRejectMention": false,
+        "stdoutSha256": "de31bdde03b99e4d8abac3c5d8d972e3a4c0c69f7b43ad66048fe4b97c20cef0",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "variant": "fixed-content-consumer",
+        "phase": "restore-dry-run",
+        "argv": [
+          "patch",
+          "--dry-run",
+          "-p1",
+          "--forward",
+          "--batch",
+          "-i",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/fixed-content-consumer.restore.patch"
+        ],
+        "cwd": "/private/tmp/obs009-g9-f2-current-20261020-root01/fixed-content-consumer",
+        "rawExit": 0,
+        "offsetFuzzFailedRejectMention": false,
+        "stdoutSha256": "ed2bcb86884d6546903407ca5f971a7f17bb23366cd6f8dadec4a9827047fe64",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "variant": "fixed-content-consumer",
+        "phase": "restore-apply",
+        "argv": [
+          "patch",
+          "-p1",
+          "--forward",
+          "--batch",
+          "-i",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/stage-file-race-proof-preparation/fixed-content-consumer.restore.patch"
+        ],
+        "cwd": "/private/tmp/obs009-g9-f2-current-20261020-root01/fixed-content-consumer",
+        "rawExit": 0,
+        "offsetFuzzFailedRejectMention": false,
+        "stdoutSha256": "ed2bcb86884d6546903407ca5f971a7f17bb23366cd6f8dadec4a9827047fe64",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "restored": [
+      {
+        "variant": "old-existence-consumer",
+        "allOriginalSelectedRowsRestored": 14213,
+        "baselineCatalogSha256": "3c6d5f9b7f0f0c544fbd49dad63cfacf703c414b411ba2501a2ed7b8d83af198",
+        "newGeneratedFiles": 1726,
+        "newGeneratedScopeOnly": true,
+        "originalTransportSha256": "75c55104ff24acf9352b1e140cf442c52b8170ea9e738a64c539f1eec8b2abe2",
+        "originalHelperSha256": "803ad93b30973014d63f048ba3b57e83ff83015694cf2d5d88bdb70385604db2",
+        "full238DistE19Unchanged": true
+      },
+      {
+        "variant": "fixed-content-consumer",
+        "allOriginalSelectedRowsRestored": 14213,
+        "baselineCatalogSha256": "3c6d5f9b7f0f0c544fbd49dad63cfacf703c414b411ba2501a2ed7b8d83af198",
+        "newGeneratedFiles": 1726,
+        "newGeneratedScopeOnly": true,
+        "originalTransportSha256": "75c55104ff24acf9352b1e140cf442c52b8170ea9e738a64c539f1eec8b2abe2",
+        "originalHelperSha256": "803ad93b30973014d63f048ba3b57e83ff83015694cf2d5d88bdb70385604db2",
+        "full238DistE19Unchanged": true
+      }
+    ],
+    "afterBothQualified": true
+  },
+  "evidenceSequenceQualification": "Staging/root native release verified original preparation and immutable references; this seal independently rehashes all staging own7/COPYrefs/source03/originalbb again from immutable evidence after runtime. No late actual source read after explicit final read release.",
+  "heavyAndCurrentActualInputReadsReleased": true,
+  "releaseRecordedAtUtc": "2026-10-21T03:50:08.516938+00:00",
+  "postReleaseSealingCapturedMetadataOnly": true,
+  "extraNativeCalls": 0,
+  "extraReplayCalls": 0,
+  "newCollectorOrFramework": false,
+  "existingInlineSourceHash": "06fed2090a729694a499276c2138949f63cfbf2bd401e3effb7075aab14443da",
+  "gapMillisBoth": 300,
+  "originalAbsoluteWaitMillis": 25000,
+  "originalPollIntervalMillis": 10,
+  "timersAssertionsFixturePrivacyOraclesUnchanged": true,
+  "historicalFailedEvidencePreserved": true,
+  "historicalFailureCauseProvedByThisComparison": false,
+  "sharedUsdCeiling": 500,
+  "headroom": "UNKNOWN",
+  "storyStatus": "AllInProgress; noDone/productrelease/deployedprovider/security/pilotcredit",
+  "furtherRuntimeAuthority": "none; independentQA/root acceptance before deployment/D2/finalbackendpair/whole"
+}

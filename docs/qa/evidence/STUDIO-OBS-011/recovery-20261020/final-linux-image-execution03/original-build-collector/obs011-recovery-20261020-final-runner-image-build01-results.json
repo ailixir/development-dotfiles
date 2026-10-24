@@ -1,0 +1,23 @@
+{
+  "command": [
+    "docker",
+    "build",
+    "--pull=false",
+    "--network=none",
+    "--build-arg",
+    "IMAGE_TAG=put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "-t",
+    "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "-"
+  ],
+  "cwd": "studio-runner",
+  "started": "2026-10-21T03:32:49.579492+00:00",
+  "elapsedSeconds": 72.23,
+  "exit": 1,
+  "sourceStable": true,
+  "distStable": true,
+  "logSha256": "3ae2fa7e83f816f07b6d24326131f17670853b36c4d94185aa8ecfb5db30f734",
+  "testInputStable": true,
+  "testInputDigestBefore": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+  "testInputDigestAfter": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc"
+}

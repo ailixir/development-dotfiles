@@ -1,0 +1,81 @@
+{
+  "atUtc": "2026-10-19T10:28:42.504455+00:00",
+  "taskPins": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-gst05-rebase-prep/manifest.json",
+      "sha256": "7bf3041c7abc523704701758313b4216d949db997d3ab1e84a20c64faab443fb",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-gst05-rebase-prep/REPORT.md",
+      "sha256": "abcc26d82787980ca3d359bdeb4a074e7e0c557e74ef1b67a5a96011f734f881",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-gst05-rebase-prep/UNRESOLVED-Lifecycle-type-port.patch",
+      "sha256": "8b7ea849814c387abadcaea519523e16d9dab487e5895ea59770746a30eaf5c1",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/atomic-manifest.json",
+      "sha256": "d857284d9cf38d78572cd43f40914db1997edf6edcfad196305b068094508593",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-fold-three-rulings-root-adoption.json",
+      "sha256": "e6a663906970b1ad1cffcb30b4cdf3c5d0c49ee107b45b5af24144d3039d541e",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/lanes.v7.json",
+      "sha256": "68f69cc8652d695f920f2f28ec178205c84cb70bd9b80b5d27f38585e0a2165c",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-05/formatted-candidate-archive/GuidedLifecycleReasonIT.java",
+      "sha256": "353bc8ebcf75d373203c58b016ead65648661cfdf47fa950d6230ac238ac7aa5",
+      "matches": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-05/root-unit-closed.json",
+      "sha256": "ddbf393be29f1b62912fe081676573b55d76c75fcf44f3da266a40c40887ae0d",
+      "matches": true
+    }
+  ],
+  "originalAtomicOperations": 37,
+  "originalOperationKinds": {
+    "edit": 32,
+    "delete": 4,
+    "add": 1
+  },
+  "LifecycleAbsentFromOriginal37": true,
+  "proposedFutureOperations": 38,
+  "proposedFutureKinds": {
+    "edit": 33,
+    "delete": 4,
+    "add": 1
+  },
+  "onlyNewOperation": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+  "proposedPatchSha256": "8b7ea849814c387abadcaea519523e16d9dab487e5895ea59770746a30eaf5c1",
+  "currentInterimPreimageSha256": "353bc8ebcf75d373203c58b016ead65648661cfdf47fa950d6230ac238ac7aa5",
+  "mechanicalProposedPostimageSha256": "a2ebfa6a3a785798f8fe96efb471be98b0b6fa20df70a8d0f4914ffc09d2ccdb",
+  "exactPatchEqualsOnlyOneFQNameSubstitution": true,
+  "fiveLifecycleMethodsRetained": true,
+  "allOtherBytesIncludingAssertionsTimersOraclesExact": true,
+  "plannedMainCandidates": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/final-candidates/backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "sha256": "abea933dbeb42d41403629a293007f952064621751ee1ade98389a8460c36f60"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fold-final-draft/resume2/final-candidates/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "18e55d0bf7123e1178bec58d145ce7099bc3506a5ad139c3dbca1dd484e7a4a7"
+    }
+  ],
+  "publicSendTwoAndFourArgShapeAndJsonNodeReturnsCompatible": true,
+  "plannedDispatchConstructorAcceptsNewType": true,
+  "noExplicitClientConstructorInvokedByLifecycleMock": true,
+  "compileOrRuntimeVerified": false,
+  "futureAcceptedPreimageNeedsNewBinding": true,
+  "noActualSourcePlanOrNativeAction": true
+}

@@ -1,0 +1,41 @@
+{
+  "actual": [
+    {
+      "slot": 1,
+      "label": "obs011-recovery-20261020-check01",
+      "status": "FAILED_CHECKSTYLE; functionalcases0fail; no11credit"
+    },
+    {
+      "slot": 2,
+      "label": "obs011-lean-ir-before01",
+      "status": "PASS",
+      "soleContingency": true,
+      "terminalToolSession": 9520,
+      "assessment": "recovery-20261020/baseline-retry-assessment.json"
+    },
+    {
+      "slot": 3,
+      "label": "obs011-lean-ir-test001-01",
+      "status": "ATTEMPT_CHARGED_BEFORE_LAUNCH",
+      "chargedAtUtc": "2026-10-20T16:46:35.478399+00:00",
+      "canonicalReplaySha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+      "sourceDigest": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+      "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "profile": "test original4000 + guidedIncrementalTest incremental2048",
+      "expectedCaseCounts": {
+        "test": 46,
+        "guidedIncrementalTest": 62
+      },
+      "skipAllowance": 0,
+      "noRetryAuthorized": true,
+      "originalApplyClockUnchanged": true
+    }
+  ],
+  "remainingPlanned": [
+    "slots4/5 fully composed consecutive identical B4 pair, also FOLD class-alone proof",
+    "slot6 final integrated whole check"
+  ],
+  "maximum": 6,
+  "timeboxNotReset": true,
+  "noUncountedFoldf04": true
+}

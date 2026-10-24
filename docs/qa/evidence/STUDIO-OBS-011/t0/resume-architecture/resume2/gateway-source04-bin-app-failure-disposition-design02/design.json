@@ -1,0 +1,255 @@
+{
+  "kind": "SOURCE04_BIN_APP_FAILURE_MINIMAL_DISPOSITION_DESIGN02",
+  "sourceOnly": true,
+  "actualRuntimeAuthorized": false,
+  "subjectManifestSha256": "cac4f5a1d4e770ae9d2ee65354b9ce7d93c48a41d49ccbb7c39ebbaa95d47b2e",
+  "actualFailureRecordSha256": "38f14013be9722b539aa443f73d6c56b8697b233cf7aa5e2acc74a1d698b4711",
+  "actualSetupRecordSha256": "baa19d1c0db93ccb13a3f6033807ed770b247f9e406d25187baed321996c92b3",
+  "actualFailure": {
+    "namespace": "PROTOCOL_HOLD",
+    "reason": "BIN_APP_ROLE_MISMATCH",
+    "stage": "UTILITY_PRELAUNCH",
+    "qualified": false,
+    "negativeCapConsumed": true,
+    "actualOuterStatus": 1
+  },
+  "actualPythonRoleValues": null,
+  "roleValuesEstablished": false,
+  "proposedRoleEnums": [
+    "BIN",
+    "APP",
+    "OTHER",
+    "UNAVAILABLE"
+  ],
+  "threeEvidenceSources": {
+    "requestedLauncher": "PARENT_READONLY_OPERATOR_ATTESTATION",
+    "selfReportedRoles": "ONLY_HELPER_SYS_EXECUTABLE_AND_ORIG_ARGV0",
+    "observedImage": "SEPARATE_LATER_QUALIFIED_PROCESS_OBSERVATION_NOT_SELECTED"
+  },
+  "proposedHelper": {
+    "payload": "python-self-roles.py.txt",
+    "payloadSha256": "da92b42f22c17742e6a14e3b57ade9f9a486d0edab6ba49953e75b02c5cc69a5",
+    "bootstrap": "self-role-bootstrap.py.txt",
+    "bootstrapSha256": "38f7c66be84353edbad5bced183feb7236d975ee372af4b2cc5519915050feba",
+    "invocation": "proposed-invocation.bash.txt",
+    "invocationSha256": "af9605cfcf5361dde17130b4e429adc8dd700cc540a69fff3b60ab3dfd9cd92b",
+    "metadataInvocations": 1,
+    "additionalVerifierChildRequired": false,
+    "payloadByteCap": 4096,
+    "outputByteCap": 1024,
+    "expectedParentPid": 3749,
+    "expectedWrapperActorPid": 3720,
+    "syntaxCompileOnly": false,
+    "actuallyExecuted": false,
+    "createsQualifiedObservation": false,
+    "unknownFields": [
+      "start",
+      "argvHash",
+      "fullFingerprint",
+      "observedProcessImage",
+      "timestamp"
+    ],
+    "actualExecutionMeaning": "No literal executed against real self/effects; bounded fake model only.",
+    "fakeLiteralExecutions": {
+      "body": 8,
+      "bootstrap": 5
+    },
+    "directFunctionLiteral": "direct-function-literal.bash.txt",
+    "directFunctionSha256": "624400020612bb827a752ccde9dcd326ed8289758f08c3ce1a5e772de2ad927f",
+    "directFunctionBytes": 2447,
+    "directFunctionLines": 51,
+    "maximumDirectLineBytes": 195,
+    "delivery": "Segmented exact directfunction literal only; genuine primary prompt and full named readonly function/buffer/status/cap inspection; no wholefile paste.",
+    "independentImmediateKnownIdRetention": true
+  },
+  "futureFreeze": {
+    "kind": "PROPOSED_ONLY_N02_CODE_CONTROL_FREEZE_READSET",
+    "actualExecutionAuthorized": false,
+    "existingNamespaceLabel": "failed-red-resource-disposition02",
+    "postFailureMembershipObserved": false,
+    "expectedMemberCountToVerify": 8,
+    "knownInstalledDirectoryAncestry": {
+      "dev": 16777229,
+      "ino": 219229306,
+      "uid": 501,
+      "mode": "0700"
+    },
+    "directoryAncestryIsFreshEvidence": false,
+    "expectedMembers": [
+      {
+        "name": "failed_gateway.py",
+        "sha256": "acf923c8d401c377540e1de190bfc5b5dd5c1e96e9e40033ce0ae8c2889e6e25",
+        "expectedBytes": 52635,
+        "expectedMode": 384,
+        "expectedUid": 501,
+        "expectedNlink": 1
+      },
+      {
+        "name": "custody.py",
+        "sha256": "e81ae1a019c78161863700bfe34f9abb71d9fb9040e464a7b3eaa5c73c8bddda",
+        "expectedBytes": 10839,
+        "expectedMode": 384,
+        "expectedUid": 501,
+        "expectedNlink": 1
+      },
+      {
+        "name": "protocol.py",
+        "sha256": "faa72ca1b55fccca78394a796cdf468af06b3393bb4d94d2510865983a8d055e",
+        "expectedBytes": 27005,
+        "expectedMode": 384,
+        "expectedUid": 501,
+        "expectedNlink": 1
+      },
+      {
+        "name": "guard-failed-red.bash",
+        "sha256": "24dbc6c27564afc6c8194db70140e3a8100f22b712f56d34beeadfa11ccd29ad",
+        "expectedBytes": 25523,
+        "expectedMode": 384,
+        "expectedUid": 501,
+        "expectedNlink": 1
+      },
+      {
+        "name": "contract.json",
+        "sha256": "f049cc0ada8ed8ac67a450ee7a058f20ef4888e5303e5232b02976d52051b528",
+        "expectedBytes": 528359,
+        "expectedMode": 384,
+        "expectedUid": 501,
+        "expectedNlink": 1
+      },
+      {
+        "name": "entry.py",
+        "sha256": "202279536f18b61ae8a3b32471e90d15c371872234498ce47dbec181b4e1cc19",
+        "expectedBytes": 4695,
+        "expectedMode": 384,
+        "expectedUid": 501,
+        "expectedNlink": 1
+      },
+      {
+        "name": "root-authorization.json",
+        "sha256": "d81ab9688986609f3d3ab9c323743da11a3f1fb7b248b26cc1750aaf9b1781dd",
+        "expectedBytes": 16089,
+        "expectedMode": 384,
+        "expectedUid": 501,
+        "expectedNlink": 1
+      },
+      {
+        "name": "root-setup-ownership.json",
+        "sha256": "7cc83a4de79cc29d67cd49dab0d2ab427c2f4fc33ce2204cfecc9892ba11243d",
+        "expectedBytes": null,
+        "expectedMode": 384,
+        "expectedUid": 501,
+        "expectedNlink": 1
+      }
+    ],
+    "limits": {
+      "directNameCensusMaximum": 9,
+      "perMemberBytes": 1048576,
+      "aggregateAcquiredBytes": 8388608
+    },
+    "checksBeforeBody": [
+      "Retain approved ancestors and exact N02 existing directory via nofollow openedFD; freshly match declared dev/inode/current owner/mode.",
+      "Bounded direct-name-only census must equal precisely the eight expected names. Extra/missing/link/unsupported type is HOLD before any extra body.",
+      "On each actual opened regular leaf check UID501/mode0600/nlink1/expected known bytes or explicitcap before body; bounded actual remaining acquisition; final named/FD identity and same-byte hash.",
+      "Close outcomes are actual per-acquisition records; UNKNOWN is retained/no bareFDretry. Final trace follows complete outer cleanup."
+    ],
+    "output": "Only outside-E independently scoped code/control index with hashes/bytes/modes/UID/dev/inode and closed read/close outcome; no raw control body.",
+    "forbidden": [
+      "oldE membership enumeration",
+      "N01 body acquisition",
+      "unknown member body",
+      "recursive discovery",
+      "raw/private/business reports",
+      "helper journals",
+      "source or namespace mutation",
+      "runtime qualification or cap reset",
+      "cleanup/signals"
+    ],
+    "actualHelperRoster": "All actual reader/setup/verifier/current client/utility IDs and separate statuses must join future finite history; missing starts/fullFP stay null.",
+    "newRuntimeNamespaceOrInstallerSelected": false
+  },
+  "typedKnownRecords": {
+    "successfulSetupHelpers": [
+      {
+        "pid": 83174,
+        "ppid": 3749,
+        "start": null,
+        "fullFingerprint": null,
+        "actualSeparateWait": 0
+      },
+      {
+        "pid": 87046,
+        "ppid": 3749,
+        "start": null,
+        "fullFingerprint": null,
+        "actualSeparateWait": 0
+      },
+      {
+        "pid": 92696,
+        "ppid": 3749,
+        "start": null,
+        "fullFingerprint": null,
+        "actualSeparateWait": 0
+      },
+      {
+        "pid": 98057,
+        "ppid": 3749,
+        "start": null,
+        "fullFingerprint": null,
+        "actualSeparateWait": 0
+      }
+    ],
+    "failedProvisionalClient": {
+      "pid": 25986,
+      "ppid": 3749,
+      "start": "Mon Oct 19 18:01:01 2026",
+      "argvHash": "2ae25a44b8c8c82ca88f091e86866f5e66d9dc279fe44b88690b036260b40ad8",
+      "fullFingerprint": null,
+      "actualOuterStatus": 1,
+      "qualificationReached": false,
+      "kind": "FAILED_PROVISIONAL_CLIENT"
+    },
+    "provisionalUtility": {
+      "pid": 26057,
+      "start": "Mon Oct 19 18:01:01 2026",
+      "status": 0,
+      "waited": true,
+      "stdoutComplete": true,
+      "stderrComplete": true,
+      "fullFingerprint": null,
+      "kind": "PROVISIONAL_WAITED_UTILITY",
+      "ppid": null,
+      "parentProvenance": "NOT_EXPORTED_NOT_OBSERVED"
+    }
+  },
+  "finiteJoin": "Immutable2255 base union exact actual typed setup/provisional diagnostic/freeze/current observer/utility IDs. Incomplete/startless provisional/helper numbers require numeric absence in every qualifying table and both finite boundaries; no guessed futurecount/PIDreuse exemption.",
+  "oldCapsPreserved": "Rootbuiltin attestationc3c5f9 says existingFR03 and earlierFAILED negativecapsreadonly1/setupSHA7cc unchanged; not a new observation by this design.",
+  "timestampCorrection": "Progress02 and negative-only decision atUtc22:05:00Z were manually entered inaccurately and are not actual wall-clock readings. Preserve bytes; actual command start reported18:01:01 local and explicit clock22:01:05UTC after separate status. No future timestamp is proof of phase timing.",
+  "timestamp": null,
+  "newRuntimeNamesSelected": false,
+  "runtimeInstallerImplemented": false,
+  "roleEquivalenceSelected": false,
+  "failurePredicatesWeakened": false,
+  "source09ProfileBorrowed": false,
+  "laterAuthority": "Independent exact design/QA/root and new helper/freeze scopes; then any separately selected exact successor code/factory/installer/source reviews/newnamespace/negativeheldadmission/archiveQA/final60spermit/wrapper1/postclose0actualQAroot. No present authority.",
+  "limits": {
+    "noRuntimeOrDiagnosticExecution": true,
+    "noRoleInference": true,
+    "noSourceMutation": true,
+    "noCurrentResourceRead": true,
+    "noPrivateOrProtectedBaselineAccess": true,
+    "noCleanupSignalsCredit": true,
+    "budgetCeilingUsd": 500,
+    "aggregateSpend": "UNKNOWN",
+    "noRealTargetTests": true,
+    "fakeCases": 12,
+    "fakeChecks": 85,
+    "fakeBoundaryAttempts": 0,
+    "actualDiagnostics": 0
+  },
+  "originalDesignManifestSha256": "77c2f47d3448d216c5ea36a29b24927093b98ea35f4c5e9fd5c0a817f9a6414c",
+  "originalQaManifestSha256": "55d89580c8de66c1b1e6664c88d389332d8cb7f075d8b33bfa6e492450b1c6ba",
+  "correctedCategory": "BINAPP-QA-KNOWNPID-01",
+  "correctionDesignSha256": "3a7e3520a6e1eb800e71aa6fd778c48ba7a385b201f47aa2431b89bc8be47ef5",
+  "rootCompleteFindingAdoptionSha256": "65bf06c5fafd170067b3d0b5a854feef79332d5b1d254a3785e11f9aa0ade7ef",
+  "prospectiveNamesUnusedRootAttestation": "Root140816/e8bf8f1/764a25: same self-role04 variables/function absent; actor attestation only, not newly observed here. No names changed or installed."
+}

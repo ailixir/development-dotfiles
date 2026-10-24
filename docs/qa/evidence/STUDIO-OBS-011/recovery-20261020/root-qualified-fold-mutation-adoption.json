@@ -1,0 +1,47 @@
+{
+  "kind": "ROOT_ADOPTS_QUALIFIED_EXISTING_FIVE_MUTATION_PROOFS",
+  "atUtc": "2026-10-20T18:17:19.355571+00:00",
+  "qaCarryPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-case-reconciliation-preparation/fold-mutation-carry.json",
+  "qaCarrySha256": "f14bfea61d4ab6026adf658e6dd31dd3dbeb3488590fabe0875c780e0a511a7f",
+  "acceptedActualPrepReceiptSha256": "6de8cc161bee1e087128d1c69a6c262c9a17ecf925612a281c5ed7dbb20a632b",
+  "decision": "Retain all five executed intended kills/exact restores/greens as historical scoped proofs with QA qualifications. Do not repeat the mutation programme. Require ordinary final composed ClockIT/client/worker/wiring tests in existing FOLD01-03 and final full affected gates. No mutant run on final bytes is claimed.",
+  "qualifications": [
+    {
+      "id": "m1-mint",
+      "sameLiteralProspectiveMainTarget": true,
+      "qualification": "Exact main target retained; active oracle logic retained, but final class/source composition still needs ordinary final validation."
+    },
+    {
+      "id": "m2-judge",
+      "sameLiteralProspectiveMainTarget": true,
+      "qualification": "Exact main target retained; active oracle logic retained, but final class/source composition still needs ordinary final validation."
+    },
+    {
+      "id": "m3-claim",
+      "sameLiteralProspectiveMainTarget": false,
+      "qualification": "Publisher final type/constructor/client plumbing differs; original claim clock and validation-budget clock logic retained. Carry historical kill only with this source-isomorphism qualification, never claim a mutant run on final bytes."
+    },
+    {
+      "id": "m4-budget",
+      "sameLiteralProspectiveMainTarget": false,
+      "qualification": "Publisher final type/constructor/client plumbing differs; original claim clock and validation-budget clock logic retained. Carry historical kill only with this source-isomorphism qualification, never claim a mutant run on final bytes."
+    },
+    {
+      "id": "m5-worker",
+      "sameLiteralProspectiveMainTarget": true,
+      "qualification": "Exact main target retained; active oracle logic retained, but final class/source composition still needs ordinary final validation."
+    }
+  ],
+  "clockOracle": {
+    "beforeSha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+    "finalSha256": "1bce395fb2204ac1f5ea11175d96288b2e72a4b72dc9030c1a739c324a361af4",
+    "exactDelta": "Remove legacyAuthority injected field and replace inactive legacy-bean fallback with direct existing publicationGrantAuthority bean lookup. All3 test methods/assertion bodies unchanged.",
+    "alreadyActivePath": "Accepted prep configuration/clock mutants used the publicationGrantAuthority bean; no changed clock assertion or new oracle."
+  },
+  "postFormatBindingStillOwed": true,
+  "condition": "Verify accepted composed logic and unchanged assertion bodies after formatting; exact pre-format hashes are not asserted for later changed bytes. Any concrete semantic mismatch/failed final gate must be routed rather than credited under this adoption.",
+  "newRuntimeExecuted": false,
+  "finalRuntimeGateCredit": false,
+  "fullClassBudgetChanged": false,
+  "acceptanceCriteriaChanged": false
+}

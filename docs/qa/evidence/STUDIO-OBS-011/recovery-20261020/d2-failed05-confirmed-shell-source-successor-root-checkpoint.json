@@ -1,0 +1,82 @@
+{
+  "kind": "ORIGINAL_D2_FAILURE_PRESERVED_CONFIRMED_HOST_SHELL_SOURCE_SUCCESSOR_IN_REVIEW",
+  "atUtc": "2026-10-21T04:25:28.895608+00:00",
+  "allStoriesComplete": false,
+  "stories": {
+    "009": "InProgress",
+    "010": "InProgress",
+    "011": "InProgress"
+  },
+  "d2Original05": {
+    "toolSession": 56688,
+    "driverExit": 1,
+    "collectorPid": 89437,
+    "collectorAndChildExit": 0,
+    "nativeElapsedSeconds": 3.1098542080726475,
+    "missingRequiredFacts": 9,
+    "d2Gate": "NOT_READY_FOR_BACKEND_ADMISSION",
+    "producer": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/manifest.json",
+      "sha256": "8a1607502869f9f041b56fe62b437e9b496672f0065ca2f5fe825d0ea7864420"
+    },
+    "qa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/execution-qa/manifest.json",
+      "sha256": "35aa5807cc3694b560d949217687f57d6b876cd875ce759e0c113232520a54b4"
+    },
+    "rootRehashedProducerArtifacts": 36,
+    "rootRehashedQaArtifacts": 3,
+    "sourceA1HostE19FullInputCache191ImageChartQuotesStable": true,
+    "namedCleanupRecorded0DoesNotProveDrain": true,
+    "ownedInhibitorPid": 89436,
+    "originalWaitExit": -15,
+    "heavyAndCurrentInputReadWindowReleased": true,
+    "causePreciseHistoricalError": "UNKNOWN"
+  },
+  "finiteKnownBannerScan": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-failure-source-diagnosis01/finite-known-banner-projection.json",
+    "sha256": "5d66d85d411cbe9d0ce934a25871ae74aabca516e23c485a1e1ffb7a528162b1"
+  },
+  "sourceCorrection": {
+    "rootReview": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-source01-root-review.json",
+      "sha256": "1402c47c08691a721b6f28a997525b4713de78e59578c71f5ec48b1cbac9bc7f"
+    },
+    "manifest": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-correction01/manifest.json",
+      "sha256": "1b6ac6c046dd173aede93a492491533b4d9156996083698f832ff54ee9a5c315"
+    },
+    "twoIsolatedShellChecksConfirmedDefect": true,
+    "sourceQaOwner": "benchmark_report_candidate_qa",
+    "sourceQaStatus": "PENDING",
+    "prep06Owner": "gateway_implementation",
+    "prep06Status": "SOURCE_ONLY",
+    "newBindingAndRuntime": "NOT_RELEASED"
+  },
+  "heavyLaneOwner": null,
+  "sourceWriters": [],
+  "backend": {
+    "sourcePreparation": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-admission-preparation04/manifest.json",
+      "sha256": "986d9ed6eeb628d57af08650639194083421d3e02c1b3f59516b802e5a8bf20c"
+    },
+    "executionEnvelopePreparation": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-execution-preparation05/manifest.json",
+      "sha256": "c1bd95f1f8802af769877cae4c4775037932ed1e720d639596c50546c7343930"
+    },
+    "pairSlots4and5": "UNRUN_NOT_ADMITTED",
+    "wholeSlot6": "UNRUN_RESERVED",
+    "consumedSlots": [
+      1,
+      2,
+      3
+    ],
+    "cutoffUtc": "2026-10-22T04:35:27.361777Z",
+    "duringPairDoNotWriteMutableLedgerFile": "resumed-implementation-record.json owned by driver CAS; other3pointers can update"
+  },
+  "t5Preparation": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-t5-readiness-preparation05/manifest.json",
+    "sha256": "ba96fed586249fe33601241d5ea5d71d4b07a9e1255034a699de76bd048a3b9e"
+  },
+  "external009010": "MISSING_REFERENCES_PENDING_EXISTING_QUESTION",
+  "checkpointRuntimeAuthority": false
+}

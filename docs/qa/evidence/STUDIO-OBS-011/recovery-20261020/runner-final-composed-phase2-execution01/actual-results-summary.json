@@ -1,0 +1,52 @@
+{
+  "runs": [
+    {
+      "tier": "unit",
+      "exit": 0,
+      "elapsedSeconds": 34.4,
+      "counts": {
+        "success": true,
+        "numPassedTests": 2645,
+        "numFailedTests": 0,
+        "numPendingTests": 25,
+        "numTotalTests": 2670,
+        "numPassedTestSuites": 415,
+        "numFailedTestSuites": 0
+      },
+      "actualTestFiles": 117,
+      "reportFresh": true,
+      "unhandledReporterBanners": 0,
+      "uncaughtReporterBanners": 0,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true
+    },
+    {
+      "tier": "fixtures",
+      "exit": 1,
+      "elapsedSeconds": 304.31,
+      "counts": {
+        "success": false,
+        "numPassedTests": 297,
+        "numFailedTests": 1,
+        "numPendingTests": 9,
+        "numTotalTests": 307,
+        "numPassedTestSuites": 50,
+        "numFailedTestSuites": 1
+      },
+      "actualTestFiles": 27,
+      "reportFresh": true,
+      "unhandledReporterBanners": 0,
+      "uncaughtReporterBanners": 0,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true
+    }
+  ],
+  "browserExecutableAfterFixturesSha256": "8319963f6625accf51c0dd4f55091ceaf9f09ed39e7a52fed4fae12b2a6b668a",
+  "sameAsAcceptedStamp": true,
+  "noRuntimeRetry": true,
+  "ownedCleanupQualification": "Unit controls passed. Failed fixture retained primary assertion; unchanged finally awaits completed without replacing it, but later PID/scratch/business assertions were not reached and mixed oracle was not inspected.",
+  "fixtureGatePass": false,
+  "wholeGateOrLifecycleCredit": false
+}

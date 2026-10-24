@@ -1,0 +1,65 @@
+{
+  "createdAtUtc": "2026-10-21T01:50:56.056301+00:00",
+  "findingInventorySha256": "90eae018707218287645e4db3cb46c380807dc0812c55989dc9b8af406c25fde",
+  "beforeDirectoryMeaning": "exact candidate01GREEN; v2-before is exact originalv2",
+  "files": [
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "v2BeforeSha256": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba",
+      "candidate01Sha256": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba",
+      "redSha256": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba",
+      "greenSha256": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba"
+    },
+    {
+      "path": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "v2BeforeSha256": "b15b569f43c40f2461d8f5c1604a3243f4ea837a40e04fc0e2e576abecc8a5a1",
+      "candidate01Sha256": "1dd3fccbcbb0e9146d549c319c6c3b3c5efd43744b901f594dd6a5fcd5745479",
+      "redSha256": "b15b569f43c40f2461d8f5c1604a3243f4ea837a40e04fc0e2e576abecc8a5a1",
+      "greenSha256": "4737be3497203ed973ee9bcb3d6978903d3a7f4b1ba1b63af214a9167cc9701a"
+    },
+    {
+      "path": "studio-runner/test/run/bootstrapProcessTreeObservation.test.ts",
+      "v2BeforeSha256": "775ee841b73fa4a3a78fc0bd27a419d1ec97b7cec6b8e7bf38863c4eb24fc181",
+      "candidate01Sha256": "f51301eabd827364cb3e6a977d4de0d0f2a65a3ba92ba9d0a6d4bae7144fcfac",
+      "redSha256": "e22cfa670de9996381663b29f60d23a6590aa72a5cccd4dcfd76b77c865ee7bd",
+      "greenSha256": "e22cfa670de9996381663b29f60d23a6590aa72a5cccd4dcfd76b77c865ee7bd"
+    }
+  ],
+  "patches": [
+    {
+      "path": "candidate01-to-corrected.patch",
+      "sha256": "902e7fcc620fa01d6e3b1bbd0d040fc3ab0eadeee2e2cb86691de6bbc9629d73"
+    },
+    {
+      "path": "candidate01-to-corrected.inverse.patch",
+      "sha256": "0af5bdfce2391f37448699bda2a0a771608fc8acc5da9a6de4452139372c27d7"
+    },
+    {
+      "path": "test-only-red.patch",
+      "sha256": "0239b8d9359436527019443b26496bb3d4a507f68622e7ce091e00a28e73b915"
+    },
+    {
+      "path": "test-only-red.inverse.patch",
+      "sha256": "0958da5abdd0f5e0100cf66c751e261782823fce3433d43409c92e08109cd3c0"
+    },
+    {
+      "path": "helper-only-green.patch",
+      "sha256": "860ec6ed3ccb4a6da2171630182e462deba71cb1e4ca534df202112fcf76067a"
+    },
+    {
+      "path": "helper-only-green.inverse.patch",
+      "sha256": "bad1afb704dc1753e773945f68b8bcc7789878573fe4619985f380c3791359a3"
+    },
+    {
+      "path": "v2-to-successor.patch",
+      "sha256": "42fb3e3e8f720ce3cfee44366249874dac6de9bee57683ea2f4be36232176f1d"
+    },
+    {
+      "path": "v2-to-successor.inverse.patch",
+      "sha256": "71c4da27dd362ab1ab41bd57979ed76470d7e9cb35d525e64e0e493c9085b30a"
+    }
+  ],
+  "sameFixtureUnitRedGreen": true,
+  "oldV2RedHelperExact": true,
+  "runtime": "UNEXECUTED"
+}

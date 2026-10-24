@@ -1,0 +1,37 @@
+{
+  "kind": "BEFORE_EXECUTION_FINITE_FAKE_PLAN",
+  "modes": [
+    "parser",
+    "tls-good",
+    "tls-oversize",
+    "tls-stall-handshake",
+    "tls-stall-write",
+    "tls-stall-body",
+    "tls-stall-trailers",
+    "tls-dribble",
+    "relay"
+  ],
+  "fullFlow": "capture2 + separately inspected negative2 + held + archive + archiveQAroot + final0 + separate readiness inspection + distinct60s PRE/POST permit + expected wrapper external + postclose0; fake only",
+  "criticalCases": [
+    "total-native-projection",
+    "cross-profile-and-strong-claims",
+    "poll-wait-owner-serialization",
+    "bool-poll",
+    "returned-invalid-wait-no-retry",
+    "constructor-retained-foreground",
+    "peer-mismatch-consumed",
+    "early-enrollment",
+    "source-drift",
+    "permit-POST-expiry",
+    "remaining-budget-before-read",
+    "unknown-close-retains-no-retry",
+    "write-stall-completed-request",
+    "entry-once-before-parse",
+    "exact-guard-status-delivery"
+  ],
+  "declaredCases": 24,
+  "targetEffects": "same compiled module globals faked after stdlib preload; permanent deny audit; -B",
+  "foregroundObservation": "test-only StopForeground bounds observation of nonreturning retained loop; never claims runtime returned or actual unknown resource drained",
+  "actualJavaModesExecuted": 0,
+  "suiteExpansion": false
+}

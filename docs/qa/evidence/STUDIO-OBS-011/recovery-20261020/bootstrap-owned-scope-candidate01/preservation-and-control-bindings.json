@@ -1,0 +1,128 @@
+{
+  "method": "exact byte/text spans + real prior JSON identities; no parser/compiler/test",
+  "old37MeasuredReportSha256": "a96ab72d19b51f4dc9cb95b1cdb6d1a18dc60d2cd5038cf30eeab4005ead5d0e",
+  "old37ReconciliationSha256": "69f7c78cdf5c1285b912b93842d45cd367eb636367396fc9e0e083b457253168",
+  "oldEntireUnitByteExactPrefix": true,
+  "oldUnitPrefixBytes": 17091,
+  "nativeFixtureWholeFileByteExact": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba",
+  "allOriginal15NativeExpectSpansTimingsFinallySignalsAnd6Names": "EXACT_BY_WHOLE_FIXTURE_BYTES",
+  "exactHelperSpans": [
+    {
+      "name": "validPid",
+      "sha256": "18558fe7226c3a49122e858b1f3747682da7391c526e70f77e1080a0a926958f",
+      "exact": true
+    },
+    {
+      "name": "liveState",
+      "sha256": "54b2bb0f6772648b42fef41b9b9c833c80ca60f08739c626da40e1d295e8d82f",
+      "exact": true
+    },
+    {
+      "name": "probeBootstrapPid",
+      "sha256": "804f6da49eb718744fd8cad5716b426128dca0a7c411008199ca7dbc6d0e19e5",
+      "exact": true
+    },
+    {
+      "name": "freezeObservation",
+      "sha256": "0689af21591e0744b9840a1bc7cb4c5bf9f49d17e00fe7b6bbc4ffd6afbb6465",
+      "exact": true
+    },
+    {
+      "name": "bootstrapTreeGone",
+      "sha256": "6bab88232f7de76cad7ff462870b41e242710221260328175e6e13e76e0ef2d8",
+      "exact": true
+    }
+  ],
+  "importsUnchanged": true,
+  "actualPrivateImportersMeasuredByReadOnlyRg": [
+    "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+    "studio-runner/test/run/bootstrapProcessTreeObservation.test.ts"
+  ],
+  "newPublicApi": false,
+  "publicFunctions": [
+    "probeBootstrapPid",
+    "captureBootstrapTree",
+    "confirmBootstrapTreeSuspended",
+    "bootstrapTreeGone"
+  ],
+  "metadataStateRegexUnchanged": "^[RSDITtUWZX][+<>AELNSlsVWX]*$",
+  "metadataCommandPredicatesUnchanged": "nonempty trim and no C0/DEL; full trailing command preserved",
+  "numericConstraintsUnchanged": "integer/range0..MAX_PID/PID0=>PPID0/no positive selfparent/uniquePID",
+  "declaredFramingQualification": "Only horizontal-space/tab column separators; metadata is separate from complete two-column graph membership. Unknown nonblank numeric membership never accepted.",
+  "completeNumericRowsRetained": "one rows.push per accepted nonblank numeric row; no metadata filter",
+  "captureRequiredPopulation": "self + child + completeNumericDescendants",
+  "confirmationRequiredPopulation": "self + child + completeNumericDescendants + every original PID including reparented",
+  "missingOriginalConfirmation": "original NOT_CONFIRMED_STOPPED branch remains",
+  "captureSignal0Boundary": "one child ALIVE probe; no descendant capture probes",
+  "onePsReadPerSnapshot": true,
+  "samePsArgsTimeout1000MaxBuffer1MiB": true,
+  "graphTraversal": "required-set traversal and capture traversal use same immutable in-memory table; no second ps/re-enumeration",
+  "confirmationAndGonePopulation": "unchanged immutable original IDs; unchanged live/T/samecommand/ALIVE checks; only ESRCH GONE",
+  "oldTypedMutableAsyncGuardStringInterpolationTypedSpyC0Fixes": "preserved by fixture exact bytes, old unit exact prefix, unchanged C0 predicate",
+  "newSuppressions": false,
+  "newTimersOrWaits": false,
+  "newControlTitles": [
+    {
+      "title": "captures the complete owned inventory despite explicitly unknown unrelated process metadata",
+      "definingOldV2Red": true,
+      "sameInputBothSides": true,
+      "input": "Unchanged observer/root/Chrome/ffmpeg/transient graph and commands plus one valid unique unrelated PID with PPID1. In the same bounded test, supply unrelated unknown state, empty command, and C0-bearing command suffix as three explicit metadata variants.",
+      "postcondition": "Exact successful expected owned tree with every original descendant and genuine binary label; no error. The unrelated numeric row remains in the supplied graph, never skipped.",
+      "oldExpectedFailure": "Existing global metadata validation prevents the successful coherent-owned-capture postcondition.",
+      "newExpected": "Successful postcondition under required-population metadata validation.",
+      "redMustNotBe": [
+        "MISSING_EXPORT",
+        "SETUP_FAILURE",
+        "FILTER_OMISSION",
+        "ALTERNATE_INPUT",
+        "REAL_PROCESS_EDGE"
+      ]
+    },
+    {
+      "title": "rejects unknown metadata on observer root and every owned descendant",
+      "input": "Place the same explicit UNKNOWN metadata payload in turn on observer self, actual child root and a reachable transient descendant; numeric graph remains valid and complete.",
+      "postcondition": "Each required-population corruption fails closed. No metadata placeholder or row filtering returns a tree. Existing graph/read/root/liveness tests remain unchanged."
+    },
+    {
+      "title": "confirms the exact original stopped inventory despite unrelated unknown metadata",
+      "input": "Capture the valid original tree, then present the same full graph with all original descendants known stopped/live, strict fake signal0 ALIVE, and one unrelated valid-identity UNKNOWN-metadata row.",
+      "postcondition": "One fresh confirmation returns exactly the original observed set, preserving order; no PID substitution, omitted probe, per-PID command query or extra ps read."
+    },
+    {
+      "title": "requires strict metadata for original members after reparenting during confirmation",
+      "input": "Capture valid original tree; reparent the original transient PID to PID1 in the next coherent snapshot. With its original known binary and stopped/live state, strict signal0 ALIVE confirms the full original set. Change only that original member metadata to UNKNOWN, then separately add a new currently reachable descendant with UNKNOWN metadata.",
+      "postcondition": "Valid reparenting retains and confirms the original member. Unknown metadata of either the reparented original member or a currently reachable descendant fails closed; original inventory remains frozen and unchanged."
+    }
+  ],
+  "expectedNewDiscovery": 41,
+  "discoveryAuthoritative": "FUTURE_RUNTIME_ONLY",
+  "newDefiningRed": {
+    "fullName": "bootstrap process-tree observation captures the complete owned inventory despite explicitly unknown unrelated process metadata",
+    "marker": "OWNED_SCOPE_CAPTURE_INVENTORY_POSTCONDITION",
+    "line": 313,
+    "expectColumn": 7,
+    "oldV2HelperSha256": "b15b569f43c40f2461d8f5c1604a3243f4ea837a40e04fc0e2e576abecc8a5a1",
+    "expectedClosedReceived": {
+      "capture": "undefined",
+      "failureCode": "TABLE_INVALID"
+    },
+    "requiredAssertionErrorOnly": true,
+    "oldV2RawHelperErrorIsCaughtOnlyToEvaluateSuccessfulInventoryPostcondition": true,
+    "expectedSuccessfulCapture": {
+      "observedMembers": 3,
+      "genuineLabelsComplete": true,
+      "failureCode": "undefined"
+    }
+  },
+  "originalLegacyPrimaryQualification": {
+    "oldControlExactPrefix": true,
+    "oldMockWholeGraphAndPerPidTransientESRCHEdgesExact": true,
+    "legacyAdapterSha256": "7058cc1a9640eac6d10cab3989159fd905394a72645c583bb99a05b819679faa",
+    "probeFreezeAndGoneExact": true,
+    "newBaseRowsAllKnownUsesSameBreadthFirstCommandsWithoutPerPidQueries": true,
+    "priorOldRedAnd37GreenRetained": true,
+    "carry": "REQUIRES_INDEPENDENT_QA_EXACT_SOURCE_API_SEMANTICS_CONCURRENCE",
+    "ifAffected": "Root may separately route only the original primary legacy selector; no automatic replay/matrix."
+  },
+  "runtimeValidation": "UNEXECUTED"
+}

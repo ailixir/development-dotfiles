@@ -1,0 +1,67 @@
+{
+  "status": "PLANNED_UNEXECUTED_REQUIRES_ROOT_RELEASE_AND_INDEPENDENT_REVIEW",
+  "labelProposal": "obs009-gateway-independent01_USE_NEW_LABEL_IF_ALREADY_USED",
+  "cwd": "${TASK_REPO}/studio-runner",
+  "environment": {
+    "PATH": "${NODE24_BIN}:${EXISTING_PATH_WITH_LOCAL_HELM}",
+    "GATEWAY_QA_PACKAGE_DIR": "${ABSOLUTE_SEALED_PACKAGE}",
+    "GATEWAY_QA_EVIDENCE_DIR": "${TASK_REPO}/render-evidence_MUST_NOT_EXIST"
+  },
+  "nodeVersionRequired": "24.20.0",
+  "privateWorkspaceRequired": true,
+  "actualRepositoryWritesAuthorized": false,
+  "primaryArgv": [
+    "node",
+    "./node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.gateway-independent.config.ts",
+    "test/deployment/gateway-independent-mutants.test.ts",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=../vitest.json"
+  ],
+  "expectedTestCount": 2,
+  "expectedHelmTemplateOutcomes": 40,
+  "expectedSkipCount": 0,
+  "individualWitnesses": [
+    {
+      "id": "M-RECURSION",
+      "argv": [
+        "node",
+        "./node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.gateway-independent.config.ts",
+        "test/deployment/gateway-independent-mutants.test.ts",
+        "--testNamePattern=M-RECURSION:",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=../vitest-recursion.json"
+      ],
+      "expectedTestCount": 1,
+      "expectedHelmTemplateOutcomes": 20,
+      "requiresFreshPrivateWorkspaceAndEvidenceDirectory": true
+    },
+    {
+      "id": "M-NORMALIZED-COMPARISON",
+      "argv": [
+        "node",
+        "./node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.gateway-independent.config.ts",
+        "test/deployment/gateway-independent-mutants.test.ts",
+        "--testNamePattern=M-NORMALIZED-COMPARISON:",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=../vitest-normalization.json"
+      ],
+      "expectedTestCount": 1,
+      "expectedHelmTemplateOutcomes": 20,
+      "requiresFreshPrivateWorkspaceAndEvidenceDirectory": true
+    }
+  ],
+  "noAutomaticRetry": true,
+  "noFullTierSubstitution": true
+}

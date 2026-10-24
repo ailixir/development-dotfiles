@@ -1,0 +1,34 @@
+{
+  "status": "NOT_READY_FOR_RETAINED_METADATA_EXTRACTION_SOURCE_ONLY",
+  "ownerManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-diagnostic-owner-metadata-preparation07/manifest.json",
+    "sha256": "ed28061fcb4368befba936d70ea049503084a49ad9271e56042d30e1f6bbf070",
+    "bytes": 1629
+  },
+  "inlineSha256": "95b3530def75aaa4d49132a3eb2d0fedc8e5cc194e9507d061595a7e4fdc0c98",
+  "findings": [
+    {
+      "id": "OWNER07-QA-01",
+      "sourceLines": [
+        109,
+        124,
+        130
+      ],
+      "issue": "Missing either mandatory log raises FileNotFoundError; broad OSError handler sets global uncertain, defeating every lane even if each has one unique exact full-log match.",
+      "sourceCounterexample": "One old direct candidate missing ordinary.log plus four otherwise stable unique candidates matching all target byte/hash pairs yields bindingComplete false on every lane. Source-only counterexample; no private candidate existence asserted.",
+      "minimalCorrection": "A stable candidate proven to lack a mandatory leaf may be excluded from BOTH-log equality. Preserve unresolved for permission, race, unsafe, changed or otherwise inconclusive metadata. Wait whole terminal and separate root release before extraction."
+    }
+  ],
+  "withdrawnInitialObservation": {
+    "id": "OWNER07-QA-02",
+    "status": "WITHDRAWN_ESCAPED_RENDERING_MISTAKE",
+    "correction": "Direct source literal has one backslash-n escape (source codepoints39,92,110,39), producing a genuine newline. Root AST-only assessment agrees. No JSON output defect retained."
+  },
+  "sourceBindingsVerified": true,
+  "sourceParsedOrExecutedByQa": false,
+  "tempOrPrivateReads": 0,
+  "projectionPayloadsChangedOrExecuted": false,
+  "wholeCheckImpact": "NONE; separate source-only preparation, whole runtime remains original",
+  "extractionAuthority": false,
+  "minimumNextGate": "Separate immutable minimal-correction successor, bounded root/non-author source delta review, then root release after whole terminal. No native rerun or changed diagnostic payload."
+}

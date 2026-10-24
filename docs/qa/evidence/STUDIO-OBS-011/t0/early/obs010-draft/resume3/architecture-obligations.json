@@ -1,0 +1,267 @@
+{
+  "source": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/review.json",
+  "sourceSha256": "32c4cf0e53368eedfcbff4237af00c252f6662a16911cd4a1474d3b825c24e7f",
+  "scope": "all 21 story-010 obligations, verbatim",
+  "count": 21,
+  "isVerdict": false,
+  "obligations": [
+    {
+      "story": "010",
+      "id": "T0 OBS009 Done/D-C",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Wait 009 Done and actual >=90%/zero-false-pass/zero-leak D-C pass. Local validation MET only opens T2/011.",
+      "owner": "009 QA + analyst",
+      "missingInput": "009 independent Done and benchmark gate, both absent.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:8",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:120"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T0 participants/access/script",
+      "classification": "externally_blocked",
+      "remainingWork": "Prepare consented >=5 nontechnical users on login+ambiguity+middle-step incremental relearn; freeze script against shipped008 copy. Draft can be prepared now, contact cannot.",
+      "owner": "user/analyst",
+      "missingInput": "U9 >=5 real participants and explicit contact permission; U3 approved app/access/test secrets/origins.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:24",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:120",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T0 FOCUS-MUTATION-01 per-app probe",
+      "classification": "externally_blocked",
+      "remainingWork": "Probe every authored fill target on actual app using pinned runner dist/isolated collector and non-secret placeholder, record mutation types/dist; repeat after app or dist changes; failures block that application.",
+      "owner": "analyst/dev/QA",
+      "missingInput": "Named approved pilot apps/targets/test accounts and intended deployment dist; depends also on009 Done and landed FM evidence.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:26",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:121"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T1 AC2 real pilot",
+      "classification": "externally_blocked",
+      "remainingWork": "Run real consented users through author/login/ambiguity/relearn without developer syntax; record completed/help/abandoned, first-Run time, clarification/edit-copy understanding and unaided login recovery denominators.",
+      "owner": "analyst",
+      "missingInput": "External real participants/access/consent/contact authorization plus T0/D-C gates.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:56",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:122"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T1 AC3 remediation",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Route actual usability failures into scoped stories and rerun affected tasks, preserving failed evidence and promised experience.",
+      "owner": "analyst/PM/dev/QA",
+      "missingInput": "Actual pilot observations; no simulated substitute.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:58",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:122"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T2 OI-25 full runbook",
+      "classification": "locally_executable",
+      "remainingWork": "Prepare all RBR01..19 single-path rows, link dated Live surface list. Actual runbook remains owed despite shorthand T2 complete. Write only after tree opens because runbook is quoted baseline input.",
+      "owner": "analyst/docs owner",
+      "missingInput": "None for draft under t0; final edit after baseline freeze. Include secret provisioning/whole-origin trust, rotation, revocation, retention4096, password limits, dumps, Vault/KVv2, TLS/cert rotation, DB recreation, policy interim, relearn and G1/2/3.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:100",
+        "docs/qa/evidence/STUDIO-OBS-010/live-surface-20261018/finalize-record.md:49"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T2 clock row",
+      "classification": "locally_executable",
+      "remainingWork": "Write runner/API/DB NTP row and symptom AUTHORIZATION_EXPIRED; state bound owed ownerPlatform/SRE until supplied; no invented tolerance.",
+      "owner": "analyst",
+      "missingInput": "No input needed to write honest owed row; actual NTP skew bound remains U11 external.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:111",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:125"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T2 first-learn row",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Prepare exact e1 disclosure now as pendingT4; fill p95 only from actual T4 in same pass as AC4e1; triggerT6 (<15steps) needs re-ruling/PM decision.",
+      "owner": "analyst + T4/PM",
+      "missingInput": "Measured T4 p95 and recalibration outcomes, not available.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:115",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:126"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T2 post009 re-date",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "After009 Done remeasure list, correct g9Record/storyStatusChange, CON25/33 deltas, CHN12 and CHT07/08 anchors, dark vocabulary AX5..8; obtain separate PM acceptance before T3/T4.",
+      "owner": "analyst/architect/PO/PM",
+      "missingInput": "009 Done/final measured tree.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-010/live-surface-20261018/finalize-record.md:30",
+        "docs/qa/evidence/STUDIO-OBS-010/live-surface-20261018/finalize-record.md:102"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 release-readiness artifact/10.34",
+      "classification": "locally_executable",
+      "remainingWork": "Draft fixed rows gate/owner/state/evidence/date and re-cut each 10.34 group as applicable/external/legacy-only with reason; preserve pending states. Full finalization waits009Done.",
+      "owner": "analyst/QA",
+      "missingInput": "None to prepare draft; no release-ready claim authorized.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:60",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:128"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 implementation/deployed/secret/usability/ops evidence",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Link gates007/012A/012B/013/014/015/008,009 deployment/D-C/secret login, this pilot,006 compatibility/drain/rollback and evidence retention.",
+      "owner": "analyst/QA",
+      "missingInput": "Remaining009 gates, actual pilot and current runbook evidence.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:60"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 G1/G2/G3/C2/C3",
+      "classification": "externally_blocked",
+      "remainingWork": "Record guided shared mTLS chain and every secret-bearingTLS hop, production background/secret-use auth sources and Vault provider enablement.",
+      "owner": "Platform-SRE/ED-02/devops",
+      "missingInput": "U4/U5 shared stack and production authorization/Vault inputs, actual hop proofs; cannot activate schedules.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:60",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 OBS014 compliance/retention/R1/R2",
+      "classification": "externally_blocked",
+      "remainingWork": "Record export/retention/gateway retention approvals, indefinite unpruned stores/followup and interim governed-vs-TrustedPolicy decision. Prepare rows locally.",
+      "owner": "Security & Compliance/ED-01/PM/architect",
+      "missingInput": "U10 external approval incl AUDIT-LABEL-PRIVACY/CACHE-REAUTH dispositions; named gateway owner/retention answer; classify policy followup.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:64",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 F04/E1-E8",
+      "classification": "externally_blocked",
+      "remainingWork": "Require artifact HMAC landed before deployed pilot OR external security acceptance of absence as named residual+owner; list all E1-E8 states.",
+      "owner": "Platform-SRE/Security & Compliance/PM",
+      "missingInput": "E1-E8 unconfirmed and no residual acceptance; no silent omission.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:68",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 D-B/devDB/NTP",
+      "classification": "externally_blocked",
+      "remainingWork": "Record no-internal-remote-deployment confirmation; actual devDB recreation evidence; supplied host clock skew bound. Honest owed row is locally writable.",
+      "owner": "user/Platform-SRE",
+      "missingInput": "U11 D-B confirmation, recreation record and NTP skew bound.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:60",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:111",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 KL015R1 and KL015D5",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Use009 R1 a-d and D5 a-e QA credit to close known-limit rows; otherwise retain exact named limits and D4 launch-only timing qualification.",
+      "owner": "analyst +009 QA",
+      "missingInput": "Independent current evidence credit; architecture mapping below is not a QA verdict.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:73",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:79",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:96"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 AE01/RS1/FM01/TF5 rows",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Carry authoredEchoUnobservableTargets/U13, rs1NonScalarReadGaps/F03, per-appFM checks and U14 role/live audit row.",
+      "owner": "analyst +009 T4/Platform owners",
+      "missingInput": "Actual benchmark and application checks; U13 acknowledgement; U14 role evidence. Prepare honest pending rows now.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:74",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:75",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:76",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:78"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 ED05 remainder",
+      "classification": "externally_blocked",
+      "remainingWork": "Prove deployed internal image, non-root user, seccomp and CA bundle separately. Local Node pin closure does not prove them.",
+      "owner": "Platform-SRE",
+      "missingInput": "Actual deployed image and four evidence paths.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:80"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 model-sizing/SEC-AUDIT/RUN-ORPHAN",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Fill e1actualT4 p95/capacity-as-arithmetic; retain e2exact audit disclosure/security state; e3 conditional orphan row or linked runner-hardening story, surviving pod process is GA blocker.",
+      "owner": "analyst/PM/architect/devops",
+      "missingInput": "T4measurements and in-pod result or named current open status; no estimation.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:84",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:90",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:92",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:94"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T3 U24/policy owner + GA tracked items",
+      "classification": "externally_blocked",
+      "remainingWork": "Name per-environment policy content owner and approvals; preserve path-independent GA CSRF/schedule activation/evidence store/operability/repoCI as tracked states, not closed by010.",
+      "owner": "user/Platform-SRE/PM",
+      "missingInput": "U24 named owner/content/approval; current GA owner evidence.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:129",
+        "docs/qa/evidence/STUDIO-OBS-009/prep-20261016/prerequisite-register.json"
+      ]
+    },
+    {
+      "story": "010",
+      "id": "T4 handoff/quality gates/Done",
+      "classification": "dependent_on_another_lane",
+      "remainingWork": "Produce exact-path devops handoff with risks/external states; PM product gate, independent QA traceability, devops release-checklist, configured CodeRabbit or honest fallback; only QA Done, no push/deploy/schedule activation.",
+      "owner": "analyst/PM/QA/devops",
+      "missingInput": "009Done + postDone list/PMacceptance + actual pilot/remediation + required release inputs; PR/push additionally need explicit user authorization.",
+      "evidence": [
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:118",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:130",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md:154"
+      ]
+    }
+  ]
+}

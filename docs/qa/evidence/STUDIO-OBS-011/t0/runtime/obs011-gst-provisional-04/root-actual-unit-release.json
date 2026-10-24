@@ -1,0 +1,742 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-19T09:36:47.643354+00:00",
+  "decisionId": "ROOT-GST-UNIT04-ONE-HOLD-CONDITIONAL-ADMISSION",
+  "signedBy": "root",
+  "label": "obs011-gst-provisional-04",
+  "sourceWriterReleased": true,
+  "nativeCommandReleased": true,
+  "admissionCondition": "These prospective one-unit flags become usable ONLY after fresh actual held-lock/source checks AND separately inspected successful guard setup/negative exit admission/SAME held identities and kernel proof/root acceptance. Before that only lock/control admission actions are allowed. Failed/inconclusive admission stops source/native; needs exact closing disposition.",
+  "scope": "ONLY complete3 GS-T test files, exact-three formatter, fullfiveclass99 development/diagnostic once, ownership-safe original3 rollback and original compile if failed. No C8/lane credit.",
+  "orderingAdoptionSha256": "857a1466dbcb5c224e586657f4809cadf1e35f2eaf5c16e06fe0b43e48721f37",
+  "independentOrderingSha256": "12c062e01a91a37b5f71e6be904c0da4a9e80c5f72976846f27aa20e3ceed311",
+  "independentArchitectureSha256": "a630f5b03f552f9fe27fa3a3169fb0459bda6e2d6b0b649bd6b13f7893d87d17",
+  "independentGuardReviewSha256": "4d167f186261993d7314225d66e8938c61f771173814265d37994b0232c643c0",
+  "candidateManifestSha256": "9b0339e075f55afc0b3acfbc73cda0e9c5c16b8cf6d163bd2b606c12d92a1ca8",
+  "proposalSha256": "0f4eaf555950b74f848fd7fbd4ec6ac17bbbe4869c1ca4495e74a61e29850e26",
+  "recipeManifestSha256": "7e45e165e057a88bf6104f07417c3c3d6a647ede4b7dffec755706a914a28409",
+  "phaseCheckerSha256": "e68dcfbc2d434f9f20bb8ca4f28baa62a3a7d6d22297feb7917ebd7e2253eefd",
+  "initSha256": "6db51b2342e5f4058f006101085c4e53321eff05ff95d18a29c6df7d4684cec0",
+  "observerInitSha256": "5f85c7e5da10ce67730bd33ca4bcb4c0c22bcf0edb91a42b65457f550e0e0311",
+  "phaseKeeperSha256": "f5b988ccc7f10b2b057866d1cc7f1a1139550477b9f5c46240c1dc3d9b5d0301",
+  "preparedBackupRecordSha256": "efa059a0ec2cf39475f8b4e4230007e68f81b8ea0e17c47323283fff62cd334c",
+  "preparationBoundarySha256": "b38b7633e2b7edb627e178800414c2caeeebb789eda46a4715ef654ce82ded96",
+  "preparationToolingSha256": "adba99dd985ebe5fe2abb1e45da1c948e474c768f8f2d966d8f7352530f1c73f",
+  "sourcePreparationCheckSha256": "995c5aca364677053fced9ecb624d02f1a028b97cf855e73daa51287d0fa662d",
+  "writers": [
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "beforeSha256": "4d47ad6f8d67bfd3278b0d3f3930085e90f190d0ea500875272082eb97a7754e",
+      "afterSha256": "372310ef566be885eef60b6129974827d754e35aee37ce8925b38fceb2427558",
+      "compileVerified": false,
+      "runtimeVerified": false,
+      "currentMode": "0644"
+    },
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "beforeSha256": "8e5e4473c54e3884008ca63a3c87888ba6dcca514b5165f9dc40f8f20991613b",
+      "afterSha256": "353bc8ebcf75d373203c58b016ead65648661cfdf47fa950d6230ac238ac7aa5",
+      "compileVerified": false,
+      "runtimeVerified": false,
+      "currentMode": "0644"
+    },
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "beforeSha256": "97162010003856cdc7f55f411e286a70f381a664c78c2e5b5cde7d5415784db9",
+      "afterSha256": "322164060758b36eba7b33a768617032508aa4a533ea6e042d197966eaf64be0",
+      "compileVerified": false,
+      "runtimeVerified": false,
+      "currentMode": "0644"
+    }
+  ],
+  "expectedCases": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedCommittedRefreshStateTest",
+      "name": "aPendingPrefixReadsItsCommittedRefreshInReplayingPrefix()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedCommittedRefreshStateTest",
+      "name": "withoutAPendingPrefixTheRefreshIsReadInProposing()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedCommittedRefreshStateTest",
+      "name": "aStateThatDisagreesWithThePrefixIsStaleGeneration()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT",
+      "name": "aSecondRecordingAtTheOtherAcceptedRevisionIsStillAConflict()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT",
+      "name": "aRevisionAheadOfTheHeadIsRefusedWhileAnAppendIsPending()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT",
+      "name": "aForeignContextIdAtThePreviousRevisionIsRefusedWhileAnAppendIsPending()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT",
+      "name": "aForeignFenceAtThePreviousRevisionIsRefusedWhileAnAppendIsPending()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT",
+      "name": "recordingAtTheHeadRevisionIsAcceptedWhileAnAppendIsPending()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT",
+      "name": "recordingAtThePreviousRevisionIsAcceptedWhileAnAppendIsPending()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT",
+      "name": "twoRevisionsBehindTheHeadIsRefusedWhileAnAppendIsPending()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT",
+      "name": "withNoPendingDeliveryThePreviousRevisionIsStillRefusedAndTheHeadAccepted()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT",
+      "name": "everyOtherReasonStillEndsFailed()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT",
+      "name": "aDispatchingActionStillEndsUnknownOutcomeWhateverTheReason()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT",
+      "name": "anExpiredReportAcceptedBeforeTheBackendExpiryEndsExpired()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT",
+      "name": "theContextIdentityIsStillCheckedWhateverTheReason()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT",
+      "name": "aCallbackPastTheLeaseIsStillRefusedStaleFenceAndNothingIsStopped()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[1] mode=COMPLETE_200_NO_CALLBACK",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[2] mode=COMPLETE_200_OWNER_OK",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[3] mode=COMPLETE_200_OWNER_FAILED",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[4] mode=COMPLETE_503_NO_CALLBACK",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[5] mode=COMPLETE_503_OWNER_OK",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[6] mode=PARTIAL_200_NO_EOF",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[7] mode=PARTIAL_503_NO_EOF",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[8] mode=CALLER_EXPIRY_AFTER_CONSUME",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[9] mode=INTERRUPT_AFTER_HEADERS",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "publicationConflictTeardownIsRedrivenAfterResendsExhausted()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "publicationConflictTeardownTargetsTheAssignmentAndConfirms()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "pendingAppendDeliveryTeardownTargetsTheAssignment()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "noPendingDeliveryKeepsIdentityTarget()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "consumingVerificationStaysRefusedWhilePending()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "pendingAppendPublicationConflictTargetsTheAssignment()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleWithoutPendingDeliveryIsExactlyVerify()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "legacyPendingWithoutRequestIsNotRedriven()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleAtAnyOtherIdentityIsRefusedWhilePending()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "stopWithoutAStopTargetRecordsNoPendingTeardown()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "concurrentAfterCompletionAndSweepSendOneStopAtATime()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "abandonedTeardownReportQueriesOncePerIntervalAndIsSilentWhenNone()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleAtLastAcknowledgedIdentityEndsSession()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "teardownWithoutAckNeverConfirmsAndStopsAfterWindow()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "publicationConflictedIsIdempotentAndFailsClosed()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "expiredTeardownConfirmsOnSweepAfterResendsExhausted()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "accessIsolationRechecksPrincipalCsiAccountAndScope()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "canonicalUnicodeParityAndClosedSchema()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "clarificationSelectionAndPauseChangeRollBackTogether()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "gatewayOverrunIsDurablyChargedAndStopsFurtherWork()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "expiryCannotBeExtendedAndTrustedReaperRevokes()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "clarificationIsBoundToGenerationChoiceAndOriginalDeadline()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "unsupportedObservationEnvelopeUsesOriginalLockedValidation()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "conflictingAdmissionAndUniqueCoordinatesFail()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "observationBudgetAndGenerationAreSharedAcrossActions()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "unavailableObservationPreparationFallsBackAndFatalRemainsEarly()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "migrationPreservesExistingDataAndFreshInstallWorks()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "workerSubjectFenceAndLeaseAreIndependent()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "entireSessionBudgetsAreReservedAndMissingUsageIsConservative()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "concurrentConflictingStartsHaveOneWinner()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "noStateCanPublishWithoutExactVerifier()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "successfulLedgerStillCannotPublishWithoutExactPlanVerifier()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "lostAckNeverRetriesAndDelayedCallbackCannotRevive()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "evidenceReferencesAreScopedAndDoNotClaimReplay()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "liveOwnerRenewalPreservesAdmittedAndDispatchedActions()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "actionBudgetAndFalseAssertionReportsFailClosed()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "concurrentIdenticalStartsAndChangedDigestAreDurable()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation()",
+      "expectedStatus": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "takeoverCannotReopenFinalizingAfterExecutedEffects()",
+      "expectedStatus": "PASS"
+    }
+  ],
+  "expandedCaseCount": 99,
+  "expectedSkips": 0,
+  "originalSourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+  "mainMustRemainLiteral": 506,
+  "originalReplaySha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "java21Home": "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home",
+  "node24Bin": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+  "lockWrapperSha256": "2846314e3ab12926bff6eb458d7058c406b983092fb40b1fb5c2fa087c2366df",
+  "leasePolicy": "Root exclusive complete-three test writer within SAME interactive immutable hold; no source outside3, no other heavy backend job. Every dependent tool result inspected separately; immutable flags remain sticky.",
+  "nativePhases": {
+    "format": {
+      "argv": [
+        "./gradlew",
+        "--offline",
+        "--no-configuration-cache",
+        "--no-build-cache",
+        "--init-script",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-restricted-unit-prep/resume4/gst-three-only.init.gradle",
+        "spotlessJavaApply",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "cwd": "backend",
+      "logName": "format.log"
+    },
+    "native": {
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-gst-provisional-04",
+        "--test-tasks",
+        "test",
+        "--require-exec-tasks",
+        "test",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedCommittedRefreshStateTest",
+        "--rerun-tasks",
+        "--no-daemon",
+        "--init-script",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/resume5-wording-peer/filtered-output.init.gradle"
+      ],
+      "cwd": ".",
+      "logName": "native-collector.stdout.log"
+    },
+    "restore-compile": {
+      "argv": [
+        "./gradlew",
+        "--offline",
+        "compileTestJava",
+        "--no-daemon"
+      ],
+      "cwd": "backend",
+      "logName": "restore-compile.log"
+    }
+  },
+  "freshChecksRequiredInsideHeldLock": true,
+  "nativeOwnership": "Exactsealedcore childcensus/JavaUNKNOWNdrain, kernelparentlockproof, preserveanyobservationgap; allrecordedownedresources/listeners resolvedbeforeunlock, sixinheritedunchangedbaselineonly/nosignals.",
+  "stdinPolicy": "Entire keeper/children stdin devnull; one foreground command, actual prompt, separate status and receipt/flags inspection before next decision.",
+  "unlockGuard": {
+    "enabled": true,
+    "protocol": "GST_UNLOCK_V1",
+    "hashes": {
+      "unlock_gate.py": "55e5d935a0a38bd2b7477cde55f11b39df7c842ce5efc01494dbc7a1c32513a6",
+      "guard-exit.bash": "bf5782294e00ac1509e6145233fa7c97a5085a14663ec475df8e0698d7135f0c",
+      "policy.json": "727776bd3dccf400f1012c6994a36c5e180e92c7a50ba217fe10bffeb83fcd73"
+    },
+    "historicalGapCodes": [
+      "GST03_FORMAT_IDENTITY_GAP",
+      "GST03_PREMATURE_UNLOCK_INTERVAL"
+    ]
+  },
+  "finalVerificationPolicy": "Separate actual successful current source/build/resource/lock verification with inspected build execution/source checkpoint provenance. Then any exact independent QA/root gap qualification, separate root permit decision, separate guarded explicit exit, separate controller-absence/kernel-free check. Failed/missing/stale proof HOLD; no bypass/automatic refresh.",
+  "recoveryPolicy": "No carried PID. Only after actual failed/stalled owned worker blocks safe rollback, new exact root actual04 full worker identity/executable/argv/ancestry/kernel-lock binding per f376/e47 policy. Optional one cachedJava21 jcmd10s2MiB protected raw/fixed frames; separate worker-only TERM15s then conditional KILL10s if identical survivor. No other/inherited/controller/group signal or semantic completion/99/cause claim. No automatic operation.",
+  "previousFailedUnitClosedSha256": "de64caf041f622113a70ba8a742fa3999dc3ea388aaffc3125fa275799ae496f",
+  "previousQualifiedIncidentAdoptionSha256": "2b08cbf249626c6bd41fbbfd10d17ee24558dc20cac4dfaab6f8eac9862b926c",
+  "protectedCustody": "Original archives/failed outputs/TEMP/consumed scopes retained without further raw reads/locators/cleanup. Preserve unit03 two historical gaps permanently.",
+  "C8OrLaneCredit": false,
+  "generalW1OrMainOrReplayRelease": false,
+  "IRApplyClockStarted": false,
+  "completeCauseBackedRemedyClaim": false,
+  "GST03ControlFindingStatus": "HIGH_OPEN; source-supported guard only until actual ordered-control evidence independently reviewed",
+  "automaticRetry": false,
+  "postUnitIndependentReviewOwed": true,
+  "C8StillHardBeforeAnyCredit": true
+}

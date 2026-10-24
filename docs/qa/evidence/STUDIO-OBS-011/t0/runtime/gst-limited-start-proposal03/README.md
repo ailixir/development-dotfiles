@@ -1,0 +1,5 @@
+# Unit03 proposal — UNRELEASED
+
+Exact complete five-class99 command/case catalog with fresh label03 and only the reviewed finite-output init added. Source/native/retry release flags remain false. Candidates compose supported FK/duplicate-install corrections with exact observer hooks, not a complete cause remedy. Exact architecture/independent Quinn/root scope amendment and fresh immutable-lock/source/ownership/resource/formatter/terminal/restoration binding remain owed; unit02 authorization is consumed. No subset, automatic retry, main/Replay/W1/C8/lane/AC/lifecycle credit. Preserve failed unit01, aborted/incomplete unit02/root110b, original03/B1/gaps, consumed qualified private scopes and all old/new protected outputs/original TEMP without private reads or cleanup.
+
+The exact argv/99-case catalog and preimages/candidates are in proposal.json. Restricted manual recipe3 retains exact-three formatter guards and pointer-only phase changes. Root must separately bind its existing keeper/archive procedure; no unit was launched during preparation.

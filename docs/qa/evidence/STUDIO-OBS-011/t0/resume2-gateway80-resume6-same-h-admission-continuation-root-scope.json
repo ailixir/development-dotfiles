@@ -1,0 +1,62 @@
+{
+  "authorized": true,
+  "authorizedBy": "root",
+  "decision": "CONTINUE_SAME_UNCONSUMED_GATEWAY_ADMISSION_ONCE",
+  "packetManifestSha256": "e2e3340b48628c76884d6b243dd69134052e8e2ff3d25f5ab09d94f4e9150585",
+  "existingHoldSha256": "fd58e6a6d34cb9f3c9c0a100a7bb38109a6913322232691d2528701d5825a073",
+  "priorFailureSha256": "78435452fb79a10ba5bbc580f65e405a01a0bd71271854d70039d951f44179cf",
+  "priorFailurePath": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-actual-admission-failure01-root-scope.json",
+  "c8ClosureAdoptionSha256": "14db07064b927666a75f403a2f808b07c90e19cb32a8ee4289ef570969389459",
+  "c8ClosureAdoptionPath": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-c8-check01-qualified-failed-resource-root-adoption.json",
+  "label": "obs009-gateway80-offtree03-20261019",
+  "maximumCaptures": 1,
+  "sameWrapperPid": 3720,
+  "sameShellPid": 3749,
+  "reviews": {
+    "architecture": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-resume6-exact-review/manifest.json",
+      "sha256": "dd6456fc01575c1eb0afe82cf2793903eccac27a388c5dec4da10d55d7248f92",
+      "reviewSha256": "ce91ae0ed6ec8048fb3a3d8960fbeb081b5da4f0f381f7e9eb5d389a261de069",
+      "mandatoryFindings": 0
+    },
+    "qa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-resume6-exact-review/manifest.json",
+      "sha256": "ec64b9b5fb243c9c6bf2a29828e03784cbba720b0b77a4ed3d03c3896db3658a",
+      "reviewSha256": "b32aefcf99dd832cae083a41b5157527168d7c7754f9a0670baaf816279a99b2",
+      "mandatoryFindings": 0
+    }
+  },
+  "nativeOrPhaseAuthorized": false,
+  "workspaceCreationAuthorized": false,
+  "automaticRetry": false,
+  "historicalRepairClaim": false,
+  "outputScope": "Only admission attempt/version receipts and fresh candidate/facts; proposedAuthorization remains false, no phase or root release",
+  "readonlySameShellOneShotRequired": true,
+  "captureFunction": "gateway80_capture_once",
+  "captureGuard": "capture-once.bash",
+  "preparationGeneration": "resume6",
+  "actualGuardBindingOrLaunchAuthorized": true,
+  "createdAt": "2026-10-19T18:08:57.297444+00:00",
+  "rootPreparationScopeSha256": "448b1896730f77740e52561c12065ec315e85d336089be1097be72fe1e89fd4d",
+  "conditionalSameHoldDesignManifestSha256": "00423dfa59896d469905899a5faff9520fcf30c8aa1df1bf9adb374d06b762ed",
+  "oldRootCaptureSha256": "49294775837827d66614b1253214db16f8206770a6affbda63929f3d97095d3c",
+  "explicitQualification": "Qualify solely the original fresh-unused-E/no-old-hold recipe wording for this SAME fresh Gateway offTree03 pre-native hold3720/3749 and its single distinct source06 admission continuation. Hfd58/failure7843 remain unchanged. Original admission failed1; old unsaved facts are not freshness. This is neither a native retry nor reuse of oldC8 or a consumed/closed unit. No oldroot01 rerun/rebind/reset permitted.",
+  "conditions": {
+    "C1": "Exactsource06+sealedAriaQA verified, no mandatory source findings; not actual proof",
+    "C2": "Distinct sealed source06 capture-once/capture-admission, never oldroot01",
+    "C3": "Only explicit SAME unusedGateway admission wording qualification above; originalfailure preserved",
+    "C4": "Fresh SAME PID/start/argv/directparent/currentobserver/census/Hmode/custody/077/FDdevino/kernel before ANY Ewrite; failUNKNOWN stops",
+    "C5": "Exact H-only E/nonlinked absentW/allnativephaseguardreleasebaselinefinalstates absent freshly required",
+    "C6": "Allsource1808/main506/Replay/dist238/Helm22/aux/toolsversions/deps/modes fresh; sourcef9 fixed",
+    "C7": "Freshcandidate/inherited6/sourcebeforeafter/holder repeated; oldH ancestry not snapshot",
+    "C8": "Only exclusive finite admissionrecords/candidate/facts with authorizedfalse; stops for separate actualstatus/rootinspection/newrelease",
+    "C9": "Newcloseguardsetupinspection/negativeexit0denial1/separatestatus/SAMEholder beforeprepare; all5phases/actualQA/final0/separatepermit/gated0/postclose owed"
+  },
+  "capConsumption": "One readonly SAMEoriginalshell memoryflag before Python launch. ANY outcome including noEwrite/preC4failure consumes1. No directCLI/resourcing/retry/delete/reset/backfill.",
+  "captureGuardSha256": "cecbc62a013bfb2fd492b6be88a907cfb05d430845bc07abe05c2c935f62bd1d",
+  "captureSourceSha256": "bacc80a959b99f75a4ade4ad910d02dede73d14546da3dc37e3701c39506cedd",
+  "actualSuccessGuardOrRootReleaseAuthorized": false,
+  "sourceWrites": false,
+  "cleanupAuthorized": false,
+  "C8MainSourceIRLaneLifecycleCredit": false
+}

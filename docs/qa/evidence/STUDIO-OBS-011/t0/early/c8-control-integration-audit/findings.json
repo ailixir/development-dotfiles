@@ -1,0 +1,31 @@
+{
+  "atUtc": "2026-10-19T12:17:04.686161+00:00",
+  "status": "SOURCE_ONLY_CONTROL_INTEGRATION_FINDINGS",
+  "controlManifestSha256": "b270b96cd4bd62c0331d83e9d683300d349210626c8710532de3c852e23f14cd",
+  "executionResume2ManifestSha256": "9546e79aba13f175c8dd3c5595a193491518343bcf73a6890e7c53015e3212d7",
+  "findings": [
+    {
+      "id": "C8-INTEGRATION-01",
+      "fact": "b270greenrequires exactlyoneplainmarker; actualpublicfull03 has41plain testcontextheaders",
+      "observedHeaders": 41,
+      "sourceProjectionManifestSha256": "1c34346ede93888cc3aeb2c0f11e25b3c5168769cf8564907c15d92722a3651f",
+      "required": "Reuse exactcorrectedpinnedpuretaskEventProof; preserveoverall0/buildsuccess/freshoutputgates, no headercount=invocationcount."
+    },
+    {
+      "id": "C8-INTEGRATION-02",
+      "fact": "Newcoverage_errors imports sibling report_inventory; oldcontrol execs checkerwithout explicitpinned siblingloader",
+      "pureLookupReproduced": [
+        "report_inventory"
+      ],
+      "required": "Load/hashbind exactinstalledpure dependency; no arbitraryPYTHONPATH/globalcache trust; cleanmodule integration control."
+    },
+    {
+      "id": "C8-INTEGRATION-03",
+      "fact": "Newreport-manifest-before-archive metadatafile required byupdated interface is notloaded/pinnedbyoldcontrol",
+      "required": "Safe-loadcurrentmanifest/crosslinkcoverageSHA/inventory/preservedproof; includeevidence/readiness/permit/loadedhash/currentgaterechecks; no fakefreshness onfailedbranch."
+    }
+  ],
+  "actualGateNativePrivateScope": false,
+  "priorPartialReviewScopePreserved": true,
+  "sourceOrNativeReleased": false
+}

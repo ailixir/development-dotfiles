@@ -1,0 +1,647 @@
+{
+  "kind": "SOURCE_ONLY_FAILURE_ONLY_D2_DIAGNOSTIC_ENVELOPE07",
+  "createdUtc": "2026-10-21T04:41:41.765918+00:00",
+  "original33Binding": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-preparation/bindings.json",
+    "sha256": "0facec4397830fb73cefddcef312cce76730ad3a95e555f169141b3969d69a83"
+  },
+  "sourceDependencies": [
+    {
+      "path": ".codex/skills/aiox-devops/SKILL.md",
+      "historicalSha256": "aebb30f558db1e446e6dcfe5e64f87ec7b79eb3246b37cd60fcb828230fece06",
+      "historicalBytes": 1469,
+      "sha256": "aebb30f558db1e446e6dcfe5e64f87ec7b79eb3246b37cd60fcb828230fece06",
+      "bytes": 1469,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": ".aiox-core/development/agents/devops.md",
+      "historicalSha256": "fb4555b484be4b93e11ed1e974b3e904ba7cddecb01ce44ac26828c7e8a8e382",
+      "historicalBytes": 27902,
+      "sha256": "fb4555b484be4b93e11ed1e974b3e904ba7cddecb01ce44ac26828c7e8a8e382",
+      "bytes": 27902,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/Dockerfile",
+      "historicalSha256": "70881264ddda3a7f71da1f1da74794cfea7c19287fa05ddd1bff9bb8ef4489eb",
+      "historicalBytes": 4599,
+      "sha256": "70881264ddda3a7f71da1f1da74794cfea7c19287fa05ddd1bff9bb8ef4489eb",
+      "bytes": 4599,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/src/main.ts",
+      "historicalSha256": "2a3e92f7401c19e1117903a01bac58f9e3bb0c2e37dc817dfd6b309e2490f322",
+      "historicalBytes": 18289,
+      "sha256": "2a3e92f7401c19e1117903a01bac58f9e3bb0c2e37dc817dfd6b309e2490f322",
+      "bytes": 18289,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/src/server/config.ts",
+      "historicalSha256": "95299924714c357c63874e75f610bea0250cddb598ff4e22e0596b05137c05ad",
+      "historicalBytes": 36840,
+      "sha256": "95299924714c357c63874e75f610bea0250cddb598ff4e22e0596b05137c05ad",
+      "bytes": 36840,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/src/server/application.ts",
+      "historicalSha256": "275524a2080225132a8a091d2417fd62f4cae9641305a4eb32286ab3f369d725",
+      "historicalBytes": 17163,
+      "sha256": "275524a2080225132a8a091d2417fd62f4cae9641305a4eb32286ab3f369d725",
+      "bytes": 17163,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/src/probe.ts",
+      "historicalSha256": "c243ba6e2d5446fabca6790d311ee10ef5acfb14016b0779f272acce1674468f",
+      "historicalBytes": 3745,
+      "sha256": "c243ba6e2d5446fabca6790d311ee10ef5acfb14016b0779f272acce1674468f",
+      "bytes": 3745,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/src/guided/transport.ts",
+      "historicalSha256": "527471dfbe446c3fc2396c71158bd339d9bb33f73f5139994d7e58e7d84190ed",
+      "historicalBytes": 17735,
+      "sha256": "c02401d3f99bdf317220634250f54ad8b7ff0eb3a69ab70c68c18925c5585b1c",
+      "bytes": 18319,
+      "mode": "0o644",
+      "exactHistorical": false,
+      "classification": "reviewed RT neutral token/comment proof"
+    },
+    {
+      "path": "studio-runner/src/guided/ownership.ts",
+      "historicalSha256": "c76696f0c74359ee5dab8b57f9feb843b743ff24af2884b2642744f8ead3a32d",
+      "historicalBytes": 15873,
+      "sha256": "87b661946b0819aac38e130f3b4a8467222f70789416b188236b9345d4a96387",
+      "bytes": 16654,
+      "mode": "0o644",
+      "exactHistorical": false,
+      "classification": "renewal phase business fix with separate controlled proof"
+    },
+    {
+      "path": "studio-runner/src/guided/runtime.ts",
+      "historicalSha256": "8ce999d78ff0fe7500e9c7aece20beaf31c4e6ce2c74c0c256de7d71713da3f8",
+      "historicalBytes": 57387,
+      "sha256": "8ce999d78ff0fe7500e9c7aece20beaf31c4e6ce2c74c0c256de7d71713da3f8",
+      "bytes": 57387,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/src/guided/journal.ts",
+      "historicalSha256": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+      "historicalBytes": 4303,
+      "sha256": "15da758e2e287926a7d404926323791ab3e1f72931bc3c4cb1741de8de9d86dd",
+      "bytes": 4303,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/src/guided/evidence.ts",
+      "historicalSha256": "b3f34f14d71a0668e63e90fd1415c3d3134ae521bd1d0e82c517496d33c15b50",
+      "historicalBytes": 15290,
+      "sha256": "de432f3a64d6557d4813c646228388efbb67fb7419c83efc2c57215cae53d503",
+      "bytes": 15484,
+      "mode": "0o644",
+      "exactHistorical": false,
+      "classification": "reviewed RT neutral token/comment proof"
+    },
+    {
+      "path": "studio-runner/src/run/recordingScratch.ts",
+      "historicalSha256": "e83f9a26e862579112c423df4ddd687e068155fd953d7f9404c04c83c898c821",
+      "historicalBytes": 12297,
+      "sha256": "e83f9a26e862579112c423df4ddd687e068155fd953d7f9404c04c83c898c821",
+      "bytes": 12297,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/src/run/guidedBrowser.ts",
+      "historicalSha256": "63f899ef688df31f3608c4a0b10f86ea5e63b710410bb32eb7f4d374cd2d63ae",
+      "historicalBytes": 9864,
+      "sha256": "59b4d23a2b06e9ffdf3371221970371c5fd8d4e4fe2df4b9acaf51dd2a0a72f0",
+      "bytes": 9874,
+      "mode": "0o644",
+      "exactHistorical": false,
+      "classification": "reviewed RT neutral token/comment proof"
+    },
+    {
+      "path": "studio-runner/test/helpers/guided.ts",
+      "historicalSha256": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d",
+      "historicalBytes": 6845,
+      "sha256": "af3c5687dcf62682253a58a2564177b507cfc0f61e57ee600cd81fda5255dc4d",
+      "bytes": 6845,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/helpers/guidedTls.ts",
+      "historicalSha256": "413a40b168a979af6d857cf62448800d286211b9dd71bfa29e1c9b69421bf9cf",
+      "historicalBytes": 2949,
+      "sha256": "413a40b168a979af6d857cf62448800d286211b9dd71bfa29e1c9b69421bf9cf",
+      "bytes": 2949,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/fixtures/guided-tls/README.md",
+      "historicalSha256": "ccb8b52d5d86ac2715eaf597e8e85ae8167c0fcadcbadc1cb4b64f6c06c8c60c",
+      "historicalBytes": 380,
+      "sha256": "ccb8b52d5d86ac2715eaf597e8e85ae8167c0fcadcbadc1cb4b64f6c06c8c60c",
+      "bytes": 380,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/fixtures/guided-tls/key.fixture",
+      "historicalSha256": "8b7c922ba84a3ba0ba66c71e15adc53224957f19998e950149e0633bfca9ab3c",
+      "historicalBytes": 1704,
+      "sha256": "8b7c922ba84a3ba0ba66c71e15adc53224957f19998e950149e0633bfca9ab3c",
+      "bytes": 1704,
+      "mode": "0o600",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/fixtures/guided-tls/cert.fixture",
+      "historicalSha256": "b9fbf97bc9cd8f71fd8019a6531d7974db8830ab7ec953582d153597003053e4",
+      "historicalBytes": 1151,
+      "sha256": "b9fbf97bc9cd8f71fd8019a6531d7974db8830ab7ec953582d153597003053e4",
+      "bytes": 1151,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-wire.test.ts",
+      "historicalSha256": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+      "historicalBytes": 9858,
+      "sha256": "082e00e6de1af226c2d20a907cf28da0d9a70c49844c483ed06f1e75641b3a8f",
+      "bytes": 9858,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/deployment/image.ts",
+      "historicalSha256": "de2af79ab1a72016d51a510ede5b71d6d949df9902b944a42158159ba86bcf53",
+      "historicalBytes": 4967,
+      "sha256": "de2af79ab1a72016d51a510ede5b71d6d949df9902b944a42158159ba86bcf53",
+      "bytes": 4967,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/deployment/sec2.test.ts",
+      "historicalSha256": "fc8bdeefc0c4038e767c41acc2b7b5dbe6fd0265ed3d4c90b16cf468ea446577",
+      "historicalBytes": 9593,
+      "sha256": "fc8bdeefc0c4038e767c41acc2b7b5dbe6fd0265ed3d4c90b16cf468ea446577",
+      "bytes": 9593,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/deployment/sec2-shim-attack.sh",
+      "historicalSha256": "6d46bb63720f63c8d590b0af6eaceb7b26bfd504e93d144d3605f4a365ed5442",
+      "historicalBytes": 8060,
+      "sha256": "6d46bb63720f63c8d590b0af6eaceb7b26bfd504e93d144d3605f4a365ed5442",
+      "bytes": 8060,
+      "mode": "0o755",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/deployment/chart.test.ts",
+      "historicalSha256": "df34bc91f2e4b86335c5fbec5f58e7a40eeaa03d037561729a2bf46c5a5efd2c",
+      "historicalBytes": 118515,
+      "sha256": "df34bc91f2e4b86335c5fbec5f58e7a40eeaa03d037561729a2bf46c5a5efd2c",
+      "bytes": 118515,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/deployment/dump-settings.test.ts",
+      "historicalSha256": "89b040b5c2dab1317bce041ea0b4ac59805bb45d555710a41ea3bf9203eef690",
+      "historicalBytes": 9695,
+      "sha256": "89b040b5c2dab1317bce041ea0b4ac59805bb45d555710a41ea3bf9203eef690",
+      "bytes": 9695,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "studio-runner/test/deployment/tls-client-cert.test.ts",
+      "historicalSha256": "ec1a25c4d2ced07e43d75fa4c2e4d8351debeebbeb83258d3378fcc8cca015fd",
+      "historicalBytes": 27854,
+      "sha256": "ec1a25c4d2ced07e43d75fa4c2e4d8351debeebbeb83258d3378fcc8cca015fd",
+      "bytes": 27854,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/d2/pid1-launch-paths.md",
+      "historicalSha256": "5f59a439ff465e6ba47218631cca6cb255798cb6be79952900bce69e08badffe",
+      "historicalBytes": 5041,
+      "sha256": "5f59a439ff465e6ba47218631cca6cb255798cb6be79952900bce69e08badffe",
+      "bytes": 5041,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/image/g9-image.sh",
+      "historicalSha256": "941e1c1be1689ad743c0baf3c631ee32fd8c666abdad1feee7f3cd22af8b2fd5",
+      "historicalBytes": 20953,
+      "sha256": "941e1c1be1689ad743c0baf3c631ee32fd8c666abdad1feee7f3cd22af8b2fd5",
+      "bytes": 20953,
+      "mode": "0o755",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md",
+      "historicalSha256": "bca21f5393d4c80df49842f805ddd3b3928fff559b09919720b349962f65633a",
+      "historicalBytes": 46979,
+      "sha256": "bca21f5393d4c80df49842f805ddd3b3928fff559b09919720b349962f65633a",
+      "bytes": 46979,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-baselines/receipt.md",
+      "historicalSha256": "27c5e6bb67245546f071aca203eadb2926c8ed995ea07e03f01bb3a7d55774ac",
+      "historicalBytes": 6392,
+      "sha256": "27c5e6bb67245546f071aca203eadb2926c8ed995ea07e03f01bb3a7d55774ac",
+      "bytes": 6392,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-baselines/b4-image-before.json",
+      "historicalSha256": "bca34ce684098ae4888f24bf06a5c24045b8faa19c8fdd771b5c3d53ddb326fe",
+      "historicalBytes": 347,
+      "sha256": "bca34ce684098ae4888f24bf06a5c24045b8faa19c8fdd771b5c3d53ddb326fe",
+      "bytes": 347,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-current-plan/commands.json",
+      "historicalSha256": "c8fe254a8de221f0e265096bf0406ccfa4b6ea67c90b3e6a61d7b453a0c1292b",
+      "historicalBytes": 27664,
+      "sha256": "c8fe254a8de221f0e265096bf0406ccfa4b6ea67c90b3e6a61d7b453a0c1292b",
+      "bytes": 27664,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+      "historicalSha256": "edeaa3592eb85b60097c79a7577d2025027b53ebc3eba470c092e9c9cf2a009f",
+      "historicalBytes": 4458,
+      "sha256": "edeaa3592eb85b60097c79a7577d2025027b53ebc3eba470c092e9c9cf2a009f",
+      "bytes": 4458,
+      "mode": "0o644",
+      "exactHistorical": true,
+      "classification": "byte-exact historical dependency"
+    }
+  ],
+  "exactHistoricalCount": 29,
+  "exactChangedCount": 4,
+  "noOtherDependencyChangeAccepted": true,
+  "oldHashesAreHistoricalOnlyNotHashUnion": true,
+  "successionProofReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/code-application.json",
+      "sha256": "176e78392a8d346fcbc914917ead5a55604e7a7fef4f0c3f48f6e1979919591f",
+      "bytes": 2410
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/business-and-status-integration01/application.json",
+      "sha256": "0e8625940ed1ca5ca9cc2a16a807fc24ff61530bf69b658eb93b049b6179c2b4",
+      "bytes": 3634
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-execution01/independent-qa/review.md",
+      "sha256": "e90d95d56fbb2f2aff30a3511628f78ecd38da6a4238b214c1abf72f07f67496",
+      "bytes": 9624
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-execution01/independent-qa/accepted-application-binding.json",
+      "sha256": "88dc647a0df62e44a77c2ea6ec19caa03ccc16a5596d83006474ff2d6e17d806",
+      "bytes": 2439
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-execution01/ast01-terminal.json",
+      "sha256": "1b699bb165e1dc7d87d9c13f2a4bf4e31241c6e753814d16c62e1b4fed6ed29e",
+      "bytes": 2280
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-execution01/receipt.md",
+      "sha256": "b45e6920c1eb2fa66890158727c7fdeb01f9b783bd9aaf5aa5c640eba2e6227d",
+      "bytes": 6035
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application02/execution-qa/readiness.json",
+      "sha256": "8c98814f28baaa12458d03f39165e5fca43802ba6a5352cc195b0f01db50c91e",
+      "bytes": 1826
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/execution-qa/readiness.json",
+      "sha256": "d1c8dd3c1c4d5342b1e24c844216d156250f5b94abe7f8c41e9e76feaf1c6257",
+      "bytes": 2679
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-linux-image-execution04/execution-qa/readiness.json",
+      "sha256": "28227adf4732fc859a18aabb713441ee186fcc6b9e6a04c2ee93de5c2685fbbe",
+      "bytes": 2769
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/execution-qa/readiness.json",
+      "sha256": "1fb800622d2c8be5cf23f4bdc3bb3c80c4cfbc3e2f89514884b9b9082def2e28",
+      "bytes": 1674
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/astra-three-story-plan-review-current04/root-adoption.json",
+      "sha256": "a05d39967735aba1816d8d11b2dccb9dde3207ef4b9591d3afacbb29cd0ea14a",
+      "bytes": 3022
+    }
+  ],
+  "acceptedProducerQaSeals": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-d2-preparation04/manifest.json",
+      "sha256": "edf04998f3d9e8bffdeab2dff35c391a5b20437c46d5a30095263b3c92eb2734"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-linux-image-execution04/manifest.json",
+      "sha256": "e4d7b082ea8b21ce3b2f4d7223ed6fa609e5722817455246f18ee50fe7d07183"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-linux-image-execution04/execution-qa/manifest.json",
+      "sha256": "cfb01d05a730ea24667445a37041e33e09454f73e7bad77909e1cc98aacf7c6c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/manifest.json",
+      "sha256": "1dff326d220c3aadebb1d43e7bec7c8159cebb576c1a484c78bd4912d4b065fd"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/execution-qa/manifest.json",
+      "sha256": "6fcb72a51b17ccab34989ac8a7541940234ba2c9b9831872259426808a213de3"
+    }
+  ],
+  "correctedD2SourcePins": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/future-smoke.sh",
+      "sha256": "2b46b5e901df833ce11f570284516515dac8ca48df0119f6a3c97723fbdbc0ad",
+      "bytes": 9717
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/fixture.mjs",
+      "sha256": "4a6c8474c7c609c25b3c40ea3116094eb9e504d5b3da35f66fe730fdf9f89f91",
+      "bytes": 13444
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/bindings.json",
+      "sha256": "4087035f5f77c76c53780a44c183f041b55b13ff7a513cc8dee2ddcf6d47736a",
+      "bytes": 3106
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/future-command-and-bindings.json",
+      "sha256": "11d52b49ba3d1f95fbe907f5f6ca4344f6588d471236d7a11b777d76432cbf1e",
+      "bytes": 5074
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/manifest.json",
+      "sha256": "2fc3781af101507d1a6cd8a90cda463762e75ee756de3e49699eb2e32b0bad03",
+      "bytes": 3456
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01/independent-qa/review.md",
+      "sha256": "2e9e61112a92423ac3e999eb89e7d151b3b88370e006b777d1e27ddf2b4f71f0",
+      "bytes": 4424
+    }
+  ],
+  "genuineNineFinalBindings": {
+    "acceptedSourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "acceptedTestInputDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "acceptedDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "buildContextSha256": "8457b7413e543ff88eea95e7fec554d380e5903e839e0f814c46739833bdb886",
+    "finalBuildReceiptSha256": "2d46c813bc32bcd8f56eecc48e65c30ba0871328ecac54a26bc554fe66a3ce3d",
+    "configuredImageReference": "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "measuredImmutableImageId": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "finalImagePinsReceiptSha256": "effa2ebb317234691de3de9c09e5a5b7cd194b59e0ed23df0f00ae1fe0ac3ab1",
+    "finalDeployment722ReceiptSha256": "3ba83d0f0af820cbe836714a2142fba380cd6d8b3c3f71bb32a4aa181e9c9329"
+  },
+  "nineFieldPreview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/nine-field-D2-preview.json",
+    "sha256": "dd8fccd92e310d4d72cfd940e141f921fe9c3aca07988a05bcd3f0673a3d38d6"
+  },
+  "freshFullInputBaseline": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/after-full-catalog.json",
+    "sha256": "1c032f45fa57f754083a5c4793c641d1b9df499f34d87a0c1e51eedbbae8cc85"
+  },
+  "freshCacheBaseline": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/after-cache.json",
+    "sha256": "b33cf9173617951143210f8ca6773d9239a4be128cd6d6e33cea07d0e450ea12",
+    "version": "3.2.7",
+    "uniqueOrderedKeys": 191,
+    "allValuesMustRemainExact": true
+  },
+  "chartQuotesBaseline": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/after-chart-quotes.json",
+    "sha256": "fe57f369a515f7cdfa894a861fce6241c02eaedb2c8f23d148c480e3dc7b6c62"
+  },
+  "runtimeInputPins": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/runtime-input-binding.json",
+    "sha256": "c72b9a8983664bc09d8fdb11c082f00c1d4a78f5d5f191d552902799bdb271ea"
+  },
+  "original21Links": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/initial21-bin-links.json",
+    "sha256": "284ae82a7b4f2c0b0b002d16fdef8cac63ff83d9c9588432772e975df5544ca1"
+  },
+  "rootAdmissionTemplate": {
+    "kind": "ROOT_EXACT_D2_RUNTIME_ADMISSION",
+    "authorized": false,
+    "soleHeavyLaneOwner": "gateway_implementation",
+    "sourceWriterAllowed": false,
+    "runtimeInvocationCount": 1,
+    "preparationManifestSha256": null,
+    "dependencyReview": {
+      "path": null,
+      "sha256": null,
+      "reference": null
+    },
+    "acceptedFactsSha256": null,
+    "boundPacketManifestSha256": null,
+    "expectedSourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "expectedDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "expectedImageId": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "collectorLabel": "obs011-recovery-20261020-final-linux-d2-smoke03",
+    "resourcePrefix": "obs011-d2-final-03",
+    "outputDirectory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution07/d2-execution01",
+    "rootRuntimeGoSeparateFromBinding": true,
+    "sourceCorrectionManifestSha256": "1b6ac6c046dd173aede93a492491533b4d9156996083698f832ff54ee9a5c315",
+    "sourceCorrectionQa": {
+      "path": null,
+      "sha256": null
+    },
+    "sourceCorrectionQaAccepted": false,
+    "rootDependencyIncludesWrapperCorrectionAndShell": false,
+    "canonicalShell": {
+      "path": "/bin/bash",
+      "sha256": "41e7f937a0d2e7e0bc03884595f54f7a892e468087519de1fc53e177b2503308",
+      "mode": "0o555",
+      "versionFirstLine": "GNU bash, version 3.2.57(1)-release (arm64-apple-darwin23)"
+    },
+    "inspectionDiagnosticOwnerSha256": "dc3c2724fbf0e7f79abba0aa2ce31a60058fa86757e42b02fc1e9ccfd0455803",
+    "inspectionDiagnosticFixtureSha256": "b1d881b1d1a0669c83b1e630dbebd87b31bfa02b921b7a68dfeeb2d066dfb9a1",
+    "inspectionDiagnosticSchemaSha256": "9015f9683d7765e4dd207d07a9eaa6f32426de698491256024d2a395d49688bb",
+    "inspectionDiagnosticQa": {
+      "path": null,
+      "sha256": null
+    },
+    "inspectionDiagnosticQaAccepted": false,
+    "rootDependencyIncludesInspectionDiagnostic": false
+  },
+  "rootDependencyAcceptance": "PENDING_NEW_ROOT_REVIEW_OF_FAILURE_ONLY_DIAGNOSTIC_V2_SOURCE_QA_SCHEMA_ENVELOPE",
+  "acceptedFinalDependencyReviewReference": null,
+  "binderRun": false,
+  "boundPacketCreated": false,
+  "runtimeRun": false,
+  "driverParsedOrExecuted": false,
+  "actualGlobalOrPrivateSnapshotRunDuringPreparation": false,
+  "onlyNarrowSelectedPublic33HashesAndFourSourceDeltasRead": true,
+  "originalPreparation05": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-preparation05/manifest.json",
+    "sha256": "99a8748dc4a63a7f07edbf27177b2085b107c6030d227cc10ac83214d6a33d02"
+  },
+  "sourceCorrection": {
+    "ownerManifest": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-correction01/manifest.json",
+      "sha256": "1b6ac6c046dd173aede93a492491533b4d9156996083698f832ff54ee9a5c315"
+    },
+    "candidate": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-correction01/future-smoke.sh",
+      "sha256": "ea56c0ef2c45b4107a726b3c26cfd5cb35a96e51d18820da5d28463f6a414455",
+      "bytes": 9729
+    },
+    "closedDiagnostic": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-correction01/closed-diagnostic.json",
+      "sha256": "8aa6669f92f789e8626e37675365c12a30e0c06f102e1db4674a0c85623a2f8e"
+    },
+    "canonicalShell": {
+      "path": "/bin/bash",
+      "sha256": "41e7f937a0d2e7e0bc03884595f54f7a892e468087519de1fc53e177b2503308",
+      "mode": "0o555",
+      "versionFirstLine": "GNU bash, version 3.2.57(1)-release (arm64-apple-darwin23)"
+    },
+    "sourceQaReference": "UNBOUND_ROOT_ADMISSION_MUST_PIN_FINAL_ACCEPTED_QA",
+    "sourceQaAccepted": false
+  },
+  "historicalFailed05": {
+    "producerManifest": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/manifest.json",
+      "sha256": "8a1607502869f9f041b56fe62b437e9b496672f0065ca2f5fe825d0ea7864420"
+    },
+    "receipt": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/receipt.json",
+      "sha256": "2686015998d7f42ca812f5e2a6a0b5fe41972aaa25fd2e28fbbfa1c3fd4924f8"
+    },
+    "rawChildExit": 0,
+    "driverExit": 1,
+    "missingFacts": 9,
+    "D2Credit": false,
+    "preciseHistoricalCause": "UNKNOWN",
+    "rawLogOrLeafRereadAllowed": false
+  },
+  "same33ProductDependenciesAndNineMeasuredReceipts": true,
+  "driverDeltaProof": {
+    "old06DriverSha256": "523d167e03dce51b204370ffb8cd47f1fef4ea3c54591270adf77296b756605b",
+    "new07DriverSha256": "1a4da0ce1dc6f35eea454e5536262026a8232205ea6abe00256b4586b6c5bb73",
+    "nativeInvocationWaitAcceptanceFinallyTailByteExact": true,
+    "guardAndOriginalSourceSchemaPredicates": "unchanged except inspection provenance admission and strict failure-only projector branch",
+    "normalActiveAndAfterKeysAndPredicatesPreserved": true,
+    "strictFailureValidator": "exact top5 keys; exact enum mode/stage/reason; exact12 nullable fact keys; integer0..2^53-1 excludingbool; bool|null preserved; no defaults",
+    "diagnosticDoesNotSatisfyActiveOrAfter": true,
+    "partialTypedProjectionPersistedBeforeLaterChecks": true,
+    "driverParsedOrExecuted": false,
+    "originalUidProjectionLineByteExact": true
+  },
+  "originalPreparation06": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-preparation06/manifest.json",
+    "sha256": "e8f7762a1d4dac16079e07c4f5f52c4899b20701faf0adb56e5a3aa445b915f6"
+  },
+  "inspectionDiagnostic": {
+    "ownerManifest": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation02/manifest.json",
+      "sha256": "dc3c2724fbf0e7f79abba0aa2ce31a60058fa86757e42b02fc1e9ccfd0455803"
+    },
+    "fixture": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation02/fixture.mjs",
+      "sha256": "b1d881b1d1a0669c83b1e630dbebd87b31bfa02b921b7a68dfeeb2d066dfb9a1",
+      "bytes": 15522
+    },
+    "schema": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation02/diagnostic-schema.json",
+      "sha256": "9015f9683d7765e4dd207d07a9eaa6f32426de698491256024d2a395d49688bb",
+      "bytes": 3516
+    },
+    "sourceQaReference": "UNBOUND_ROOT_ADMISSION_MUST_PIN_FINAL_ACCEPTED_V2_AND_ENVELOPE_QA",
+    "sourceQaAccepted": false,
+    "failureEvent": "D2_INSPECTION_FAILED",
+    "successOraclesUnchanged": true,
+    "diagnosticNeverCountsAsActiveOrAfterSuccess": true,
+    "nullNeverCoercedToZeroOrFalse": true
+  },
+  "historicalFailed06": {
+    "manifest": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution06/manifest.json",
+      "sha256": "106a5ff0c5f179fcce2442d61a696a2fdba5befa177c896770490827a3566e0e"
+    },
+    "receipt": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution06/receipt.json",
+      "sha256": "4bc7e4c74fcdfa61fa47a65e662d5ce4a9fbfe0fc6fca8441bf9caf9e4bdc237"
+    },
+    "hashOnlyAssessment": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-six06-public-summary-hash-assessment02.json",
+      "sha256": "52caba16c09a87e5e553dc1e6302276fa643348c782e2d2caf216f3230fa30d7"
+    },
+    "driverExit": 1,
+    "nativeExit": 1,
+    "originalProjection": "ABSENT_UNCHANGED",
+    "originalPredicate": "UNKNOWN",
+    "D2Credit": false,
+    "wholeKnownPublicSummaryHashFacts": "both original expected114byte negative summaries match source78/missfalse/90/refusaltrue/startedfalse; cleanup46byte commandExit1/resources0; root assessment only, no leaf/log reads"
+  }
+}

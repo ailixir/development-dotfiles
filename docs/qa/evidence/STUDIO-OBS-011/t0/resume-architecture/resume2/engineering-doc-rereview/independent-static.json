@@ -1,0 +1,453 @@
+{
+  "recordedAt": "2026-10-19T03:05:51.551980+00:00",
+  "isQaVerdict": false,
+  "compileVerified": false,
+  "runtimeVerified": false,
+  "execution": "read-only independent Python text/digest reconstruction; no authored helpers executed",
+  "checks": {
+    "replacementCount": 19,
+    "replacementChecks": [
+      {
+        "ordinal": 1,
+        "target": "CLAUDE.md",
+        "ruling": "EDOC-R1",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 2,
+        "target": "AGENTS.md",
+        "ruling": "EDOC-R1",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 3,
+        "target": "ARCH.md",
+        "ruling": "EDOC-R1",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 4,
+        "target": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md",
+        "ruling": "EDOC-R1 addendum only",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 5,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 opening",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 6,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 modules",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 7,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 modules",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 8,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 modules",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 9,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 evidence",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 10,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 responsiveness",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 11,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 routes",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 12,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 route authorization",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 13,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 capacity",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 14,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 drain",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 15,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 secrets",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 16,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 upgrade corpus",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 17,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 upgrade replacement",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 18,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 active Node sentence only",
+        "uniquePriorMatch": true
+      },
+      {
+        "ordinal": 19,
+        "target": "studio-runner/README.md",
+        "ruling": "EDOC-R2 retired separate claim",
+        "uniquePriorMatch": true
+      }
+    ],
+    "onlyDeclaredAdditionalReplacements": true,
+    "actualTargetsStillOriginal": true,
+    "manifestOutputHashesMatch": true,
+    "allSevenIndividualPatches": true,
+    "combinedReconstructsAllSeven": true,
+    "splitReconstructsAllSeven": true,
+    "ordinaryTargets": [
+      "CLAUDE.md",
+      "ARCH.md",
+      "docs/runbooks/studio-inference-rollout.md",
+      "docs/runbooks/studio-runner.md",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md"
+    ],
+    "rootOnlyTargets": [
+      "AGENTS.md",
+      "studio-runner/README.md"
+    ],
+    "rootOnlyExactlyAgentsAndRunnerReadme": true,
+    "priorPackageImmutable": true,
+    "priorOriginalSnapshotsExact": true,
+    "inventoryOriginalIsExactPrefix": true,
+    "runbookAndRolloutEqualPriorReviewed": true,
+    "protectedSections": [
+      {
+        "section": 4,
+        "unchanged": true,
+        "bytes": 4265,
+        "sha256": "0ec43db021800e114517d66899f827a8cf5e45ebdd23356785e4380a497af259"
+      },
+      {
+        "section": 14,
+        "unchanged": true,
+        "bytes": 12392,
+        "sha256": "4d83b3594c7cab2daa4a4505df1088dbc43c74e55ee4e6f1e9c552ff07880e66"
+      }
+    ],
+    "matchingMockFirst": true,
+    "accessibilityUnchanged": true,
+    "allDatedOriginalLinesRetained": true,
+    "datedNode22HistoryExact": true,
+    "activeNode24Sentence": true,
+    "retainedOracleExact": true,
+    "hashes": {
+      "combinedPatch": "120e163be9601899f32395c532fd0164d525c78f74e02ce4258e2cab1c16740c",
+      "manifest": "f4e5d28e4b045e2db146d93b888d8a1a1af60505470d6aa13b7aa978d425808c"
+    },
+    "requestedHashBindingsMatch": true,
+    "ordinaryAuthBeforeHealthHandlers": true,
+    "guideBranchesBeforeOrdinaryAuth": true
+  },
+  "inputs": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/receipt.md",
+      "sha256": "9bfe3b4a5818431d86be6b2b13c1b51a6f6dd0cb513a07461a8d911268fca697",
+      "bytes": 4876
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/verify-package.py",
+      "sha256": "be299373787e4f1ea3b25f67c6441dbf914fb36904bfabea19049e916dc83a73",
+      "bytes": 16039
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/build-package.py",
+      "sha256": "43c5a011ab177db6f97d0a379d6cfe5afeec8876792b9018185aa29ba448a19a",
+      "bytes": 17113
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/README.md.patched",
+      "sha256": "baed1c803df1545e972794647ab3538ba0322f13eb543aa2709e487d159b82e4",
+      "bytes": 54742
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/current-input-hashes.json",
+      "sha256": "3a33cb7e12b11c6ff1a174154473755b3e499dfbee7f2222f6196f0f1713b36b",
+      "bytes": 4140
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/cln44-key-census.json",
+      "sha256": "23bcc750d9e790fa62bb5d3bbe4e49f74db02d3fb31aaaf7868a9c3fbde9f44d",
+      "bytes": 7660
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/delta-from-reviewed-package.json",
+      "sha256": "919b736b99304dd3b3952e2e93ef61e1ed2ea1d41779ddecd8c6ada3446e9b46",
+      "bytes": 4811
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/AGENTS.md.patched",
+      "sha256": "50124ecf2062b0115d7813263f5b570c1f1557e169497e04644e82978bf05ac7",
+      "bytes": 8447
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/static-checks.json",
+      "sha256": "3515d37c43ade6c97a89d0064f97ab917f3d4635f370e3b54c6bdab9ce99cd05",
+      "bytes": 18029
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/manifest.json",
+      "sha256": "f4e5d28e4b045e2db146d93b888d8a1a1af60505470d6aa13b7aa978d425808c",
+      "bytes": 6120
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/preservation-map.json",
+      "sha256": "eda544e291361339a5911bf339d907839ad2c8f342894350d32586cbca47acf7",
+      "bytes": 10266
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/unresolved-facts.json",
+      "sha256": "98af1504e6a7ab8f3ed83a0dc5c981e71b0824c29c0b13a8c7bfc51f747edaab",
+      "bytes": 4184
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/runbook-static-audit.json",
+      "sha256": "7b8ce64211b7ff2bb2762fbf20c3df7efa1537954d07e29c8d7d306ffd2bf953",
+      "bytes": 5086
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/prior-package-manifest.json",
+      "sha256": "62120f916cd3a2f96ece5ae12b498d2a73b284b9080b232a0c47da720c4b2009",
+      "bytes": 4364
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/SHA256SUMS",
+      "sha256": "4eac7e47635e865d73c1d52fe712ca2b9a5a63780adea60036cd6d64e31d9dde",
+      "bytes": 4057
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/future-verification.md",
+      "sha256": "176e7cabc689fdf5bd48c0b99d5ca950f4f25c348a15e822d0fe7e30a5916f76",
+      "bytes": 1619
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/retired-flag-static-scan.json",
+      "sha256": "d7b26d57f921922f5bce254d624b169ea49604788a6413530c3462692e7ba070",
+      "bytes": 661
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/exact-approved-replacements.json",
+      "sha256": "772711750f92e2d60b193ec6b2df2352cc438809726bb76d1c3b42902e6eddde",
+      "bytes": 11228
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/receipt.json",
+      "sha256": "27da084fbb0faa2cb11b363eafb98ff090ce3e92dbe15a3d7c9c78dcf26de1a6",
+      "bytes": 1333
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/patches/docs__runbooks__studio-runner.md.patch",
+      "sha256": "845c51a8d271c5890e792b241117fe48ac3f666366a99a3d2ea60cf4efc0a2da",
+      "bytes": 12896
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/patches/docs__runbooks__studio-inference-rollout.md.patch",
+      "sha256": "5cb9e79850860025a6b79a01223da465ed0c7dac3fb82ee85741b62e86dcd67e",
+      "bytes": 2948
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/patches/all-documentation.patch",
+      "sha256": "120e163be9601899f32395c532fd0164d525c78f74e02ce4258e2cab1c16740c",
+      "bytes": 50308
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/patches/root-merge-only.patch",
+      "sha256": "672f157337f1efbc2d1c9f175f113bafdd2983eb15326afb9bca68b935df456d",
+      "bytes": 25089
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/patches/ARCH.md.patch",
+      "sha256": "9b0c6574aa69e2db5dbbf9de31d155e1eb798801db1c81c3032167a753a063c9",
+      "bytes": 2317
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/patches/authored-docs.patch",
+      "sha256": "c69bc3443772e324b9480782965fa3b06746c6372504d1fe5abdc39d60598e17",
+      "bytes": 25219
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/patches/AGENTS.md.patch",
+      "sha256": "a52916426d0b95f4dc48d7790198d8d94da360a2298fef7bb0b75bd9ae22caeb",
+      "bytes": 1744
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/patches/studio-runner__README.md.patch",
+      "sha256": "2a440a1d62edd263f45b3a3aa4ebe80aada7349cba92719e2aa29a43453a10c4",
+      "bytes": 23345
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/patches/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-011-cleanup-inventory.md.patch",
+      "sha256": "45ef37c413bb96ae29932ae679d27b28690b5f7e1f5977d8adf804340fc5d23b",
+      "bytes": 5314
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/patches/CLAUDE.md.patch",
+      "sha256": "56013f0271eb2eb17985c453918087b389a795e8432b4ddb95af8dc6b0bef6b4",
+      "bytes": 1744
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/originals/ARCH.md",
+      "sha256": "79a053edfc4dd9167baeea01358fda2ecde85c1abb042e366e3d2576f30d5c44",
+      "bytes": 43255
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/originals/AGENTS.md",
+      "sha256": "848e102c199e0497ce006528b25c71396c34ed7490f0b822569b000b9bf17d43",
+      "bytes": 8185
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/originals/CLAUDE.md",
+      "sha256": "2c2bd08ad1b9ee4833b440a92d7479991069708870e90ab9e5a54a33258c23d1",
+      "bytes": 8192
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/preview/ARCH.md",
+      "sha256": "2467d584281d9524c64691c6ce76f09b6e75721aaee62f9360d601962cda320e",
+      "bytes": 43921
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/preview/AGENTS.md",
+      "sha256": "50124ecf2062b0115d7813263f5b570c1f1557e169497e04644e82978bf05ac7",
+      "bytes": 8447
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/preview/CLAUDE.md",
+      "sha256": "546f37bc98ccc0d8bc318ee7b596749035c06ba2bb3ceb388986db51105f9f1c",
+      "bytes": 8454
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/preview/studio-runner/README.md",
+      "sha256": "baed1c803df1545e972794647ab3538ba0322f13eb543aa2709e487d159b82e4",
+      "bytes": 54742
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/preview/docs/runbooks/studio-runner.md",
+      "sha256": "7465f8d012ab38ce43541fb12cbceda2c1dd91943da84058bd588afe89a657fe",
+      "bytes": 85277
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/preview/docs/runbooks/studio-inference-rollout.md",
+      "sha256": "10ab0f1361689a2737c8dff3c339a6e58a2f55b57c327daf2ac445e7f6c891f9",
+      "bytes": 21434
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/preview/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md",
+      "sha256": "1cad72000f58e26be586ca85399a0e2587f5d06ba99e31ac0cd816ec878c08de",
+      "bytes": 67582
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/originals/studio-runner/README.md",
+      "sha256": "1b8891f988234b4f8e875df644332e69ac2f57efe720a86af63878ef5ada92d2",
+      "bytes": 61445
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/originals/docs/runbooks/studio-runner.md",
+      "sha256": "8971ca6b0f5f08b3b35041abe960065d1b6f4fdf4e5fa3b9557a30dd9c16223b",
+      "bytes": 76808
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/originals/docs/runbooks/studio-inference-rollout.md",
+      "sha256": "28f789258453fcfdec2af56f4580046d8cd4f8350cb5b5ef1e1586f61c3d6e4f",
+      "bytes": 20794
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/resume2/originals/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md",
+      "sha256": "3f0d3a53f113d5bb17855cb60e38d1081d2f1dbccd824e1cec0d56702e91221d",
+      "bytes": 64359
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-edoc-r1r2-ruling.json",
+      "sha256": "65eb33c010397fbd444f95077ab8c0e4c986660fd5e25605297ad0e2dc970667",
+      "bytes": 600
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/engineering-doc/review.md",
+      "sha256": "524f32ad2aaa9c4d45bdcd689ae68337eeea12d57b8f5437d657b4754ee81063",
+      "bytes": 14661
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-root-state.json",
+      "sha256": "0513a73ac90ae2ff109e9de4cb39cc342646cb6380ae03c4ff52dd18f9f1d81f",
+      "bytes": 17925
+    },
+    {
+      "path": "studio-runner/src/server/routes.ts",
+      "sha256": "c0c432d43f08b4560fbef879b1ffcadc83e78bbbb4b637982493e5257fe1e9fc",
+      "bytes": 10791
+    },
+    {
+      "path": "studio-runner/src/server/identity.ts",
+      "sha256": "472c00d4a2923d73713a6fe5d6cae241f5488efeba4ec57e4eb0a5046b49b53b",
+      "bytes": 5116
+    },
+    {
+      "path": "studio-runner/src/run/evidenceUpload.ts",
+      "sha256": "bceae3f6c40331005bff7bc5b9eed561b322983ad4a78aa2c654782c34e3f3b9",
+      "bytes": 9848
+    },
+    {
+      "path": "studio-runner/src/validator/observedReplay.ts",
+      "sha256": "7c8a3b8d65160357e22878e8b0705cc704b135d42a561fb983950f6fb1e00c19",
+      "bytes": 44673
+    },
+    {
+      "path": "studio-runner/src/executor/observedReplay.ts",
+      "sha256": "9a6ad562b0d78f3cece947d0c921af53295a81cd6e9197e9110f565346e1a9ad",
+      "bytes": 30652
+    },
+    {
+      "path": "frontend/webpack.config.js",
+      "sha256": "12519daae503e4e80a0706c345df388247fca7fe90a5b28382c78d92cede517c",
+      "bytes": 5591
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "sha256": "edbe5f18d8c104b57d88424a074afbdd36450fb2f6589f6203186ee334241212",
+      "bytes": 1735
+    },
+    {
+      "path": "studio-runner/package.json",
+      "sha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e",
+      "bytes": 1481
+    },
+    {
+      "path": "studio-runner/.nvmrc",
+      "sha256": "68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53",
+      "bytes": 3
+    }
+  ],
+  "mandatoryFindings": []
+}

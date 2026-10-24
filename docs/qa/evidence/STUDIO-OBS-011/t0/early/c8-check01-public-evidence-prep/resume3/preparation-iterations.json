@@ -1,0 +1,154 @@
+{
+  "kind": "HONEST_SOURCE03_AUTHOR_ITERATIONS",
+  "attempts": [
+    {
+      "stem": "author-pure-attempt01",
+      "actualStatus": 1,
+      "reason": "Author reference incorrectly reset network fixture after producer result; removed erroneous reset, no production Java execution",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "2cacfc9794f2b0c76046f5c3df74b8ec1772b13f2fb1e6dc0d6d19ccc62eefe8"
+    },
+    {
+      "stem": "author-pure-attempt02",
+      "actualStatus": 0,
+      "reason": "311 semantic cases pass; two historical bytecount-derived names still changed",
+      "stdoutSha256": "24e3ace5ec36a0a0bb701dd11aa4787644e046922d491be0753d1b7de8d42bea",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-pure-attempt03",
+      "actualStatus": 0,
+      "reason": "311 original names preserved with explicit v2 fixture byte-count mapping",
+      "stdoutSha256": "24e3ace5ec36a0a0bb701dd11aa4787644e046922d491be0753d1b7de8d42bea",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-adapter-attempt01",
+      "actualStatus": 1,
+      "reason": "Fixture omitted new relay actual-evidence members; added exact15 member fixture",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3d18e16e02bf76656e34805b88e19d6f13907074503e7bdf4b49b81fd8b0d1b"
+    },
+    {
+      "stem": "author-adapter-attempt02",
+      "actualStatus": 0,
+      "reason": "121 retained adapter identities pass",
+      "stdoutSha256": "95fa19171fb1556c0b5da8be53cdac06ad5b43f4fe3ea322938c7731f9823918",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-boundary-attempt01",
+      "actualStatus": 1,
+      "reason": "New identity test caught changed STRICT_RAW names; fixed honest historical-ID fixture mapping",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "3b989a7becee259e434f1f8744017dde718007123a541d05726c07c9ae030df3"
+    },
+    {
+      "stem": "author-boundary-attempt02",
+      "actualStatus": 1,
+      "reason": "Adverse custody test expected start to return instead of catching correct custody refusal; corrected harness catch",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "ddde8d89cfce604d389ab48ed88ef0020749fdab404a39ef30688778aa04d958"
+    },
+    {
+      "stem": "author-boundary-attempt03",
+      "actualStatus": 0,
+      "reason": "88 initial actual relay/contract/source checks pass",
+      "stdoutSha256": "642de4ceb088ed32266a004fb93840102052187e5fe44322b192b6fbff54699d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-boundary-attempt04",
+      "actualStatus": 1,
+      "reason": "New adapter fake Directory.read lacked production default cap; fixed fake interface",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "4fee8ae2301b0e3d9c6baed4a7f1add73792df932fb1750b931b5d9c787ef4e2"
+    },
+    {
+      "stem": "author-boundary-attempt05",
+      "actualStatus": 1,
+      "reason": "New adapter fake Directory.write lacked production default mode; fixed fake interface",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "1b06f43e94185c9e7fbca687f64a0746db304d8d9aaaa98f57fbaf7812f395c2"
+    },
+    {
+      "stem": "author-boundary-attempt06",
+      "actualStatus": 0,
+      "reason": "97 actual relay/contract/adapter/source checks pass",
+      "stdoutSha256": "bfe3d111c96b58393e0ca65ea0c78ff15b668737191c5fa864dd8b8f1fd87674",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-final-1",
+      "actualStatus": 0,
+      "reason": "311 checks pass before final consumed-pin additions",
+      "stdoutSha256": "24e3ace5ec36a0a0bb701dd11aa4787644e046922d491be0753d1b7de8d42bea",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-final-2",
+      "actualStatus": 0,
+      "reason": "121 checks pass before final consumed-pin additions",
+      "stdoutSha256": "95fa19171fb1556c0b5da8be53cdac06ad5b43f4fe3ea322938c7731f9823918",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-final-3",
+      "actualStatus": 0,
+      "reason": "104 checks pass before final consumed-pin additions",
+      "stdoutSha256": "67baed8c449efd5ab9376a175d68c4ba243d35b3161b8464f7fa27ac8cf3ec29",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-seal-suite-1",
+      "actualStatus": 0,
+      "reason": "Final311 semantic case identities and exact consumed buffers pass",
+      "stdoutSha256": "6141da1a857eb21f3174e5ee29e4fb4b720e4c64e0fcac5f6cf07a889ce93ad6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-seal-suite-2",
+      "actualStatus": 0,
+      "reason": "Final121 adapter case identities and exact consumed buffers pass",
+      "stdoutSha256": "7af94554f1755de3a8d1509ae4db5b15028359dc55293b35ed1955ebc002f9be",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-seal-suite-3",
+      "actualStatus": 0,
+      "reason": "Final104 actual relay/contract/adapter and Java source checks pass",
+      "stdoutSha256": "00e9bed90f203b3e53475ff6a7a7a472b51b94f7234ae9c08d8379b5d29df834",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author-seal-attempt01",
+      "actualStatus": 0,
+      "reason": "Rejected provisional seal: redirecting seal stdout into an enumerated payload changed that member after hashing. Preserved initial manifest/output. Final seal emits stdout only to the tool, then exact membership/hash verification is separate.",
+      "stdoutSha256": "2b23c73c8ff3afd7b5f05b11c27882d6d3659dcdd51e334f0b1acdcb42ab1bba",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "earlierFailuresRetained": true,
+  "denyAuditNeverDisabled": true,
+  "nativeJavaOrRuntimeAttempts": 0,
+  "finalProofInputs": [
+    {
+      "path": "pure-check-results.json",
+      "sha256": "a7e5ed838703072be8977c441c8474c407ebf08ed2b9cd8b5b06dd5e3d1440eb",
+      "bytes": 25313,
+      "mode": 420
+    },
+    {
+      "path": "runtime-adapter-check-results.json",
+      "sha256": "efda4704115847e2861ca11757f040e8a4576d9cc4d18191dbede569f1873575",
+      "bytes": 12629,
+      "mode": 420
+    },
+    {
+      "path": "boundary03-check-results.json",
+      "sha256": "7254292a4e4f43a89e91d48834b671f100e0142ba39459b49fab0a4bf4f8c6e5",
+      "bytes": 10448,
+      "mode": 420
+    }
+  ]
+}

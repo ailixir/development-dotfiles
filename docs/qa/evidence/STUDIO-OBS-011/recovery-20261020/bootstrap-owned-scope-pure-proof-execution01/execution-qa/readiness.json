@@ -1,0 +1,27 @@
+{
+  "verdict": "NOT_READY_STATIC_LINT",
+  "producerManifestSha256": "d4be1991a0f61232e02c056f883ecac18fd0f2d6abc45d8a297191146dc7a6a5",
+  "validMeasuredResult": "INITIAL_GREEN_TYPES_0",
+  "blockingFindings": [
+    {
+      "file": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "line": 82,
+      "column": 7,
+      "rule": "@typescript-eslint/prefer-optional-chain"
+    },
+    {
+      "file": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "line": 99,
+      "column": 9,
+      "rule": "@typescript-eslint/prefer-optional-chain"
+    }
+  ],
+  "red": "UNRUN_NO_CREDIT",
+  "green41": "UNRUN_NO_CREDIT",
+  "candidateDiscovery": "UNEXECUTED",
+  "finalTypesLint": "UNRUN_NO_CREDIT",
+  "needs": "Independent cause-supported two-guard source review and separately dispatched pure/static reproof",
+  "nativeGo": false,
+  "actualApplicationGo": false,
+  "lifecycleApproval": false
+}

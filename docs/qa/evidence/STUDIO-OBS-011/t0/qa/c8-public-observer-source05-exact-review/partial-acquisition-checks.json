@@ -1,0 +1,112 @@
+{
+  "checks": [
+    {
+      "name": "actual fake acquisition matches failure class clean-parent-acquisition",
+      "pass": true
+    },
+    {
+      "name": "actual main source behavior clean-parent-acquisition",
+      "pass": true
+    },
+    {
+      "name": "canonical and published closure claim clean-parent-acquisition",
+      "pass": true
+    },
+    {
+      "name": "actual fake acquisition matches failure class post-open-identity-failure",
+      "pass": true
+    },
+    {
+      "name": "actual main source behavior post-open-identity-failure",
+      "pass": true
+    },
+    {
+      "name": "canonical and published closure claim post-open-identity-failure",
+      "pass": true
+    },
+    {
+      "name": "failed actual constructor not assigned into relay post-open-identity-failure",
+      "pass": true
+    },
+    {
+      "name": "actual fake acquisition matches failure class constructor-close-failure",
+      "pass": true
+    },
+    {
+      "name": "actual main source behavior constructor-close-failure",
+      "pass": true
+    },
+    {
+      "name": "canonical and published closure claim constructor-close-failure",
+      "pass": true
+    },
+    {
+      "name": "failed actual constructor not assigned into relay constructor-close-failure",
+      "pass": true
+    },
+    {
+      "name": "zero real boundary calls",
+      "pass": true
+    }
+  ],
+  "count": 12,
+  "cases": [
+    {
+      "case": "clean-parent-acquisition",
+      "actualMainStatus": 1,
+      "startRejected": false,
+      "relayParentAssigned": true,
+      "fakeOpenedFdsRemaining": [],
+      "fakeCloseAttempts": [
+        103,
+        102,
+        101
+      ],
+      "canonicalDescriptorsClosed": true,
+      "publishedDescriptorsClosed": true,
+      "mainControlClosed": true,
+      "mainOutputClosed": true,
+      "effectsRetained": false,
+      "actualRuntimeActions": 0
+    },
+    {
+      "case": "post-open-identity-failure",
+      "actualMainStatus": 1,
+      "startRejected": true,
+      "relayParentAssigned": false,
+      "fakeOpenedFdsRemaining": [
+        101
+      ],
+      "fakeCloseAttempts": [],
+      "canonicalDescriptorsClosed": true,
+      "publishedDescriptorsClosed": true,
+      "mainControlClosed": true,
+      "mainOutputClosed": true,
+      "effectsRetained": false,
+      "actualRuntimeActions": 0
+    },
+    {
+      "case": "constructor-close-failure",
+      "actualMainStatus": 1,
+      "startRejected": true,
+      "relayParentAssigned": false,
+      "fakeOpenedFdsRemaining": [
+        101,
+        102,
+        103
+      ],
+      "fakeCloseAttempts": [
+        103
+      ],
+      "canonicalDescriptorsClosed": true,
+      "publishedDescriptorsClosed": true,
+      "mainControlClosed": true,
+      "mainOutputClosed": true,
+      "effectsRetained": false,
+      "actualRuntimeActions": 0
+    }
+  ],
+  "mandatoryCustodyCounterexample": true,
+  "actualActions": 0,
+  "blockedRealCalls": []
+}

@@ -1,0 +1,43 @@
+{
+  "id": "stamp-after01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-rt-functional-base-stamp-after01",
+    "pnpm",
+    "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "node",
+    "scripts/write-runtime-versions.mjs"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-20T23:47:58.976572+00:00",
+  "collectorPid": 56525,
+  "outerExit": 0,
+  "endedAtUtc": "2026-10-20T23:47:59.999786+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "node",
+      "scripts/write-runtime-versions.mjs"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-20T23:47:59.454669+00:00",
+    "elapsedSeconds": 0.54,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "b13a6efc4b1893b799e2ff83b91df32f31b7e202b2b1c458953d5806aee5aff3",
+    "testInputStable": true,
+    "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f"
+  },
+  "collectorResultSha256": "ded03bc0cad8f94dfe34f5d28c984c3b56509d8d0857462d03544e395832bf33",
+  "collectorLogSha256": "b13a6efc4b1893b799e2ff83b91df32f31b7e202b2b1c458953d5806aee5aff3",
+  "privateSourceAndDependencyInputsStable": true,
+  "expectedRawComparisonDifferenceAllowedOnlyForRootDisposition": false
+}

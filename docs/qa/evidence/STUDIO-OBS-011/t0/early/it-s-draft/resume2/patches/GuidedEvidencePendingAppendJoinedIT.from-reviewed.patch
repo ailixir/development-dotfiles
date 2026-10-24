@@ -1,0 +1,86 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java
+@@ -1033,17 +1033,22 @@
+     {
+       class ItsPollEvidencerecording {
+         Throwable failure;
++        boolean terminal;
+         boolean slept;
+         boolean initialAwaitTick = true;
+ 
+ 
+         boolean step() {
++          if (terminal) {
++            return true;
++          }
+           try {
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+ 
+             if (!(recordingRows(id) != 1 && System.nanoTime() < end)) {
++              terminal = true;
+               return true;
+             }
+             if (Thread.interrupted()) {
+@@ -1054,6 +1059,7 @@
+ 
+           } catch (Throwable caught) {
+             failure = caught;
++            terminal = true;
+             return true;
+           }
+         }
+@@ -1078,7 +1084,9 @@
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+           // Preserve the original last guard/observation and its assertion/error mapping.
+-          itsPoll.step();
++          if (!itsPoll.terminal) {
++            itsPoll.step();
++          }
+         }
+       }
+       if (itsPoll.failure instanceof Exception exception) {
+@@ -1494,17 +1502,22 @@
+     {
+       class ItsPollGuidedEvidencePendingAppendJoinedITcondition {
+         Throwable failure;
++        boolean terminal;
+         boolean slept;
+         boolean initialAwaitTick = true;
+ 
+ 
+         boolean step() {
++          if (terminal) {
++            return true;
++          }
+           try {
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+ 
+             if (!(!condition.getAsBoolean() && System.nanoTime() < end)) {
++              terminal = true;
+               return true;
+             }
+             if (Thread.interrupted()) {
+@@ -1515,6 +1528,7 @@
+ 
+           } catch (Throwable caught) {
+             failure = caught;
++            terminal = true;
+             return true;
+           }
+         }
+@@ -1539,7 +1553,9 @@
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+           // Preserve the original last guard/observation and its assertion/error mapping.
+-          itsPoll.step();
++          if (!itsPoll.terminal) {
++            itsPoll.step();
++          }
+         }
+       }
+       if (itsPoll.failure instanceof Exception exception) {

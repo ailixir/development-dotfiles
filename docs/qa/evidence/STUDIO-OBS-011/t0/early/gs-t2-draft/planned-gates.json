@@ -1,0 +1,65 @@
+{
+  "status": "ALL UNEXECUTED",
+  "commands": [
+    {
+      "lane": "11-GS-T",
+      "source": "lanes.v7.json verify, macro expanded only",
+      "command": "export PATH=\"$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH\"\npython3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-gst-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedSessionIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedCommittedRefreshStateTest' --no-daemon   # last two: still green, not edited"
+    },
+    {
+      "lane": "11-GS-M",
+      "source": "lanes.v7.json verify, macro expanded only",
+      "command": "part a: export PATH=\"$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH\"\npython3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-gsm-a01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedTeardownShedTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedResultPublicationDisabledIT' --tests 'com.citi.put.checks.studio.guided.retention.GuidedObservationPrunerIT' --no-daemon   # GuidedSessionIT removed from a01 (Dex N-2)"
+    },
+    {
+      "lane": "11-GS-M",
+      "source": "lanes.v7.json verify, macro expanded only",
+      "command": "part b: export PATH=\"$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH\"\npython3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-gsm-b01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedSessionIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedLifecycleReasonIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedAdmissionWithoutTranslationIT' --no-daemon"
+    },
+    {
+      "lane": "11-GS-M",
+      "source": "lanes.v7.json verify, macro expanded only",
+      "command": "part b: export PATH=\"$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH\"\npython3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-gsm-b02 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest' --no-daemon"
+    },
+    {
+      "lane": "11-GS-M",
+      "source": "lanes.v7.json verify, macro expanded only",
+      "command": "part b: export PATH=\"$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH\"\npython3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-gsm-b03 --test-tasks test,guidedIncrementalTest -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' guidedIncrementalTest --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' --no-daemon   # alone, full class"
+    },
+    {
+      "lane": "11-GS-T2",
+      "source": "lanes.v7.json verify, macro expanded only",
+      "command": "export PATH=\"$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH\"\npython3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-gst2-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT' --no-daemon"
+    },
+    {
+      "lane": "11-FOLD-final",
+      "source": "lanes.v7.json verify, macro expanded only",
+      "command": "export PATH=\"$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH\"\npython3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-foldf-01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest' --tests 'com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT' --tests 'com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT' --tests 'com.citi.put.checks.studio.guided.publication.ObservedGrantClockIT' --tests 'com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT' --tests 'com.citi.put.checks.studio.dispatch.JobBodyLeakTest' --tests 'com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest' --no-daemon"
+    },
+    {
+      "lane": "11-FOLD-final",
+      "source": "lanes.v7.json verify, repo-root marker removed only",
+      "command": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-foldf-02 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest' --tests 'com.citi.put.checks.studio.guided.bridge.GuidedRunnerContextRefusalTest' --tests 'com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextDeadlineTest' --tests 'com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest' --tests 'com.citi.put.checks.studio.guided.bridge.GuidedDispatchStopKeyTest' --tests 'com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextRefusalTest' --tests 'com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest' --tests 'com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT' --tests 'com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest' --tests 'com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest' --no-daemon"
+    },
+    {
+      "lane": "11-FOLD-final",
+      "source": "lanes.v7.json verify, repo-root marker removed only",
+      "command": "export PATH=$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH; python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-foldf-03 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.session.GuidedSessionIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest' --tests 'com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT' --tests 'com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest' --tests 'com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT' --no-daemon"
+    },
+    {
+      "lane": "11-FOLD-final",
+      "source": "lanes.v7.json verify, macro expanded only",
+      "command": "export PATH=\"$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH\"\npython3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-foldf-04 --test-tasks test,guidedIncrementalTest -- test --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' guidedIncrementalTest --tests 'com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT' --no-daemon   # full class alone; includes the worker assertion in ReplayIT assertObservedWorker (:32466-32483 at S_011; pre-start :32463)"
+    },
+    {
+      "lane": "11-FOLD-final",
+      "source": "lanes.v7.json verify, macro expanded only",
+      "command": "ONLY if T0-JC failed: export PATH=\"$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH\"\npython3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-foldf-cov01 --test-tasks test,guidedIncrementalTest,crossReplicaTest -- test guidedIncrementalTest crossReplicaTest jacocoTestReport jacocoTestCoverageVerification --no-daemon   # non-credited headroom check (RC-10)"
+    },
+    {
+      "lane": "11-FOLD-final",
+      "source": "lanes.v7.json verify, macro expanded only",
+      "command": "export PATH=\"$HOME/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH\"\npython3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py python3 .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py obs011-foldf-clock-cleanup01 --test-tasks test -- test --tests 'com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT' --no-daemon # after final legacy fallback cleanup"
+    }
+  ]
+}

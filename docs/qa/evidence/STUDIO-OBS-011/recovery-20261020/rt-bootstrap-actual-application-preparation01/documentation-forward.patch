@@ -1,0 +1,60 @@
+--- a/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md
++++ b/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md
+@@ -631,6 +631,10 @@
+ 
+ Not owned here: runbook text and release record (OBS-010), `docs/specs/**` contracts (exception: the `RuntimeVersions` entry in `openapi.yaml` for AC-1 P2, through the contract owner), frontend guided components (OBS-008), emitter removal and refactors (OBS-011). Narrow exceptions for AUTHORED-ECHO-01 (2026-10-16): the dated boundary notes in the three named `docs/specs` documents (through the contract owner), and removal of the OBS-008 KL-015-Q4 copy (through the frontend owner) only if it shipped. Narrow exception for C-OBS008-4 (2026-10-17, @po): the `startGuidedSession` responses in `openapi.yaml` and the two pins (through the contract owner, lane C9), and the start mirror in `frontend/src/services/mocks/studio/guidedHandlers.ts` with its test (through the frontend owner).
+ 
++### Runner fixture source integration supplement — 2026-10-21 UTC
++
++The bootstrap observation repair adds `studio-runner/test/helpers/bootstrapProcessTreeObservation.ts` and `studio-runner/test/run/bootstrapProcessTreeObservation.test.ts`, and updates `studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts`. Exact ten-code-path application provenance, including this separate three-path repair, is in `docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/code-application.json`. This supplement records source application only, with matching actual build/final gates separately owed.
++
+ ## PO Validation (2026-10-10) — single path (0.3.x)
+ 
+ **Verdict: GO (8/10, conditional) — Status: Draft → Ready.** Report `.ai/STUDIO-OBS-009-po-validation-sp.json`. Validated by Pax (@po) against ADR-SC-005 D-C, defaults "Runner topology", "Operations", placement map rows OBS-009 ×2, Verification "D-C" and the 10.50 re-cut. The 0.2.1 verdict stays superseded history.
+@@ -1084,6 +1088,15 @@
+ The renewal-phase proof has one intended old-authority assertion FAIL with 27 name-filter omissions, followed by 54 PASS / 0 FAIL / 0 SKIP with the same test buffer, then all four unchanged native modes PASS once. Proof: `docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/renewal-phase-budget-execution01/receipt.md` (SHA256 `496fa7f70d37a618edc718eb070970cdabbcb116f3b8d5c7b456db27914676f7`). Independent execution QA `renewal-phase-budget-execution01/independent-qa/review.md` (SHA256 `e90d95d56fbb2f2aff30a3511628f78ecd38da6a4238b214c1abf72f07f67496`) is READY for the exact two-file integration; its `accepted-application-binding.json` (SHA256 `88dc647a0df62e44a77c2ea6ec19caa03ccc16a5596d83006474ff2d6e17d806`) supplies the accepted candidate bindings. The author's original application binding remains unchanged historical evidence. These relative references share the same recovery evidence directory. The original native timers, strict 2000 ms assertion and cleanup controls remain unchanged.
+ 
+ The historical full-fixture result 297 PASS / 1 FAIL / 9 SKIP remains FAIL, with no historical cause assigned. Targeted proofs do not replace a complete composed fixture successor. Fresh composed RT source/emit proof and independent QA, full unit coverage, full fixtures, the matching source-configured actual runner build, final FE, fresh image/deployment, backend/Replay final gates and all external model/staging/security/human obligations remain owed. A matching actual configured runner build must precede any backend native work after this source integration. STUDIO-OBS-009, STUDIO-OBS-010 and STUDIO-OBS-011 remain InProgress. This entry changes no lifecycle status, acceptance criterion, task checkbox or QA verdict, and claims no release, pilot or Done outcome.
++
++
++### 2026-10-21 UTC — bootstrap observation fixture repair integrated
++
++Under root's exclusive quiet source window, the separate fixture/helper/unit repair was integrated from the accepted ab10/e22c/f4cc buffers after exact actual preimage/mode checks. The same source unit measured one genuine old-v2 assertion RED at315:87, then41 PASS/0 FAIL/0 SKIP and both types/lints0 in `docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-owned-scope-pure-proof-execution02/`; Native02 measured all six original real cases PASS with all12 closed inventory joins in `bootstrap-process-tree-native-six-execution02/` under that same recovery directory.
++
++Root adopted qualified unchanged301 (292 PASS +9 genuine skips) plus fresh Native02 six PASS as307 covered/298 PASS+9 SKIP across two invocations in `docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/native-six02-root-qualified-composition-adoption.json` (SHA256 `0ae96f8ae3e47a9a7590fedb4c14d7caa7eb0bfbe1b2e807c8263cfce73a30ab`). This is not one fresh passing307 command. Original raw307 and first native-six failures, historical failed-phase cleanup NOT_ESTABLISHED and the disclosed Native02 metadata writer failure/lost signal0 observations remain preserved.
++
++The actual source application record is `rt-bootstrap-actual-application01/code-application.json` under that recovery directory. No private compiled output was copied. This entry precedes the matching actual configured runner build and records no build/coverage/image/backend/Replay or external completion. Full actual unit coverage, final source/product equivalence and all remaining local/external gates stay owed; all three stories remain InProgress. No acceptance criterion, checkbox, lifecycle status or QA result changes here.
+ 
+ ## QA Results
+ 
+--- a/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md
++++ b/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md
+@@ -233,6 +233,10 @@
+ 
+ Not owned here: CLN-30/31 security paths (ED-02), `frontend/package.json` dependencies (CLN-13), JPA accessors (CLN-25), runner over-exports (CLN-42), everything on OBS-010's "Live surface" list, migrations (immutable after OBS-012A).
+ 
++### Runner source integration supplement — 2026-10-21 UTC
++
++The seven actual neutral RT paths are `studio-runner/src/guided/contracts.ts`, `diagnostics.ts`, `evidence.ts`, `json.ts`, `transport.ts` (the latter four share that guided directory), `studio-runner/src/run/guidedBrowser.ts` and `studio-runner/test/deferred.test.ts`. Exact application provenance is `docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/code-application.json`. The separate three-path bootstrap fixture/helper/unit repair is recorded with STUDIO-OBS-009. No guarded evaluation files, runtime/ownership/collector source, dependencies, generated files or private dist are part of this copyback.
++
+ ## PO Validation (2026-10-10) — single path (0.2.x)
+ 
+ **Verdict: GO (8/10) — Status: Draft → Ready.** Report `.ai/STUDIO-OBS-011-po-validation-sp.json`. Validated by Pax (@po) against ADR-SC-005 (placement map row OBS-011, "Order and parallelism", Panel evidence 2 and 5) and the cleanup inventory. Thin by design; the big deletions are OBS-012A/012B's.
+@@ -562,6 +566,17 @@
+ Developer status update at `2026-10-19T02:12:34.023845+00:00`: **Ready → InProgress** reflects the current T0 baseline collection, failure investigation and off-tree draft preparation. The preceding “Not started” sentence records the earlier preparation checkpoint. This update records ongoing work; it claims no implementation completion, review readiness or QA verdict. Root explicitly authorized this status-only unit in `docs/qa/evidence/STUDIO-OBS-011/t0/resume2-root-state.json` after both baseline collections were terminal and their inputs were verified stable.
+ 
+ The original B1 `obs011-t0-baseline-check01` finished with exit 1 (2775 total, 2751 passed, 15 failed, 9 skipped); its startup-failure cause and missing fresh coverage/report obligations remain unresolved. B7's five commands are terminal: Vitest, type-check, lint and build exited 0, while the unused-code check exited 2. Native diagnostic and implementation packages remain off-tree and unvalidated. This lifecycle bookkeeping does not authorize W1, production/main source writes or any diagnostic run, and does not clear B1 failures, coverage debt, story gates or external requirements. Evidence and exact status/header delta: `docs/qa/evidence/STUDIO-OBS-011/t0/status-progress/receipt.json`.
++
++
++### 2026-10-21 UTC — reviewed runner RT sources integrated
++
++Under root's exclusive quiet source window, exactly the seven RT after-buffers were integrated together with the separately validated three-path bootstrap fixture repair; hashes/modes and actual eight-existing/two-absent preimages are recorded in `docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/code-application.json`. The six production TypeScript candidates retain their accepted AST/token/comment qualification, including only the approved client-name JSDoc correction. The deferred file retains all15 genuine criteria and original suite paths; only the four previously approved pointer placeholders and their empty wrappers are retired, with historical comments preserved.
++
++The accepted fresh functional-base private source/emit/unit proof is retained in `runner-functional-base-execution01/` and `runner-functional-base-phase2-execution01/` under the same recovery directory. The later source-defined helper repair measured41 pure PASS and six original native PASS; its exact producer records and qualifications remain separate.
++
++Root adopted qualified unchanged301 (292 PASS +9 genuine skips) plus fresh Native02 six PASS as307 covered/298 PASS+9 SKIP across two invocations in `docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/native-six02-root-qualified-composition-adoption.json` (SHA256 `0ae96f8ae3e47a9a7590fedb4c14d7caa7eb0bfbe1b2e807c8263cfce73a30ab`). This is not one fresh passing307 command. Original raw307 and first native-six failures, historical failed-phase cleanup NOT_ESTABLISHED and the disclosed Native02 metadata writer failure/lost signal0 observations remain preserved.
++
++No private compiled output was copied. Matching actual configured build/output equivalence is still required before any backend/native work; final actual types/lint/full-unit coverage/contracts/pins/image/deployment and backend final pair/wholecheck remain owed. This dated source-application entry changes no lifecycle status, acceptance criterion, task checkbox, QA result or external fact and supplies no Done/release/pilot approval.
+ 
+ ## QA Results
+ 

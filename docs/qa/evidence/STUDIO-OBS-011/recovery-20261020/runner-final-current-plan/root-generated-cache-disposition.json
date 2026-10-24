@@ -1,0 +1,34 @@
+{
+  "kind": "ROOT_BOUNDED_GENERATED_VITEST_RESULT_CACHE_DISPOSITION",
+  "atUtc": "2026-10-20T22:15:49.736720+00:00",
+  "decision": "ACCEPT_MEASURED_GENERATED_CACHE_OUTPUT_AND_CONTINUE_ORIGINAL_FIXTURE_COMMAND",
+  "path": "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+  "observed": [
+    {
+      "tree": "before-repo",
+      "sha256": "a292ad1c7e8a6508d7cae1ed586afeda7f2500718dca88df223d72701d9be8c7",
+      "bytes": 16107,
+      "resultRows": 190
+    },
+    {
+      "tree": "repo",
+      "sha256": "a88cd6976909b7b8db3f27600a27f97e725d05d42f3f85df806d83fd05f40955",
+      "bytes": 16101,
+      "resultRows": 190
+    }
+  ],
+  "sourceVerifiedWriter": {
+    "path": "studio-runner/node_modules/vitest/dist/chunks/cli-api.DVe0nWUx.js",
+    "sha256": "4c2fecfeb976ee9cdf00cf4a03daef462cefd08e0e502b2ce7c1daf3ac540135",
+    "lines": "5309-5375",
+    "mechanism": "ResultsCache stores relative file key with duration/failed fields and writes version/results JSON after test run."
+  },
+  "same190CaseFileKeysAndVersion": true,
+  "libraryExecutableOrProductChange": false,
+  "fullCatalogUnchangedClaimed": false,
+  "rawDeltaAndFullCatalogRetained": true,
+  "deleteOrRewriteCacheAuthorized": false,
+  "prospectiveScope": "Existing exact cache path may be updated by the original fixture collector as its generated result output. Capture before/after hashes/shape and full catalog delta honestly. Any other dependency/source/new-member change must stop for review; no broad node_modules/cache exemption.",
+  "originalUnitNotRerun": true,
+  "next": "Continue saved phase2 fixtures01 exactly once; no source/CLI/dist change, no copyback or actual build."
+}

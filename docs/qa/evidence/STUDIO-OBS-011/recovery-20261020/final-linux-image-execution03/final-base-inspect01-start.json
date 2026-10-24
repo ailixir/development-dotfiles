@@ -1,0 +1,15 @@
+{
+  "id": "final-base-inspect01",
+  "argv": [
+    "docker",
+    "image",
+    "inspect",
+    "mcr.microsoft.com/playwright:v1.63.0-noble",
+    "--format",
+    "{\"Id\":{{json .Id}},\"User\":{{json .Config.User}},\"Cmd\":{{json .Config.Cmd}},\"Os\":{{json .Os}},\"Architecture\":{{json .Architecture}}}"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T03:32:23.348372+00:00",
+  "pid": 96005,
+  "accepted": false
+}

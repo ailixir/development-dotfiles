@@ -1,0 +1,2059 @@
+[
+  {
+    "start": 35742,
+    "end": 36613,
+    "kind": "while",
+    "bodyStart": 35802,
+    "bodyEnd": 36612,
+    "condition": "root.handle.isAlive() && System.nanoTime() < until",
+    "ids": [
+      1,
+      2
+    ],
+    "rows": [
+      {
+        "id": "1",
+        "line": "749",
+        "class": "POLL",
+        "enclosing_method": "registerOwnedProcess",
+        "reason": "retry of ProcessHandle.info() after a RuntimeException inside the 500 ms identity window (same loop as #2)",
+        "proposed_replacement": "one await().alias(\"owned root identity readable\").atMost(500ms).pollInterval(5ms).pollDelay(0).pollInSameThread().ignoreExceptions().until(info has startInstant and commandLine); catch ConditionTimeoutException and fall through to the existing fail-closed checks",
+        "batch": "B4",
+        "on_timeout": "FALL_THROUGH",
+        "exercised_in_green_run": "rare (macOS info() exception path)",
+        "source_text": "Thread.sleep(5);"
+      },
+      {
+        "id": "2",
+        "line": "758",
+        "class": "POLL",
+        "enclosing_method": "registerOwnedProcess",
+        "reason": "poll until ProcessHandle.info() shows start instant and command line; 500 ms window, 5 ms (same loop as #1)",
+        "proposed_replacement": "merged with #1 (one Awaitility call removes both sleeps)",
+        "batch": "B4",
+        "on_timeout": "FALL_THROUGH",
+        "exercised_in_green_run": "rare (only when info() is incomplete on first read)",
+        "source_text": "Thread.sleep(5);"
+      }
+    ],
+    "source": "while (root.handle.isAlive() && System.nanoTime() < until) {\n      // crash-reaper-diagnosis01: ProcessHandle.info() is a fresh OS snapshot on every call and\n      // may throw on macOS under load; a short-lived /bin/ps or /bin/kill can also exit between\n      // two snapshots. Read identity from ONE snapshot and retry inside the same 500 ms window;\n      // still fail-closed below.\n      ProcessHandle.Info info;\n      try {\n        info = root.handle.info();\n      } catch (RuntimeException unavailable) {\n        Thread.sleep(5);\n        continue;\n      }\n      var observedCommand = info.commandLine();\n      if (info.startInstant().isPresent() && observedCommand.isPresent()) {\n        root.started = info.startInstant().orElseThrow();\n        root.commandHash = ownedCommandHash(observedCommand.orElseThrow());\n        break;\n      }\n      Thread.sleep(5);\n    }",
+    "body": "\n      // crash-reaper-diagnosis01: ProcessHandle.info() is a fresh OS snapshot on every call and\n      // may throw on macOS under load; a short-lived /bin/ps or /bin/kill can also exit between\n      // two snapshots. Read identity from ONE snapshot and retry inside the same 500 ms window;\n      // still fail-closed below.\n      ProcessHandle.Info info;\n      try {\n        info = root.handle.info();\n      } catch (RuntimeException unavailable) {\n        Thread.sleep(5);\n        continue;\n      }\n      var observedCommand = info.commandLine();\n      if (info.startInstant().isPresent() && observedCommand.isPresent()) {\n        root.started = info.startInstant().orElseThrow();\n        root.commandHash = ownedCommandHash(observedCommand.orElseThrow());\n        break;\n      }\n      Thread.sleep(5);\n    ",
+    "line": 740
+  },
+  {
+    "start": 44869,
+    "end": 44993,
+    "kind": "while",
+    "bodyStart": 44928,
+    "bodyEnd": 44992,
+    "condition": "!Files.exists(ready) && System.nanoTime() < until",
+    "ids": [
+      3
+    ],
+    "rows": [
+      {
+        "id": "3",
+        "line": "959",
+        "class": "POLL",
+        "enclosing_method": "startOwnedWorker",
+        "reason": "waits for the candidate-owned post-listen marker file; 20 s (10 s for role secret) from process start, 20 ms; verifyOwnedRoot each pass",
+        "proposed_replacement": "await().alias(\"owned worker ready marker <role>\").atMost(remaining of the 20/10 s window).pollInterval(20ms).pollDelay(0).pollInSameThread().until(() -> { verifyOwnedRoot(root); return Files.exists(ready); }); keep the two assertions that follow",
+        "batch": "B4",
+        "on_timeout": "FAIL_AT_WAIT",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (!Files.exists(ready) && System.nanoTime() < until) {\n        verifyOwnedRoot(root);\n        Thread.sleep(20);\n      }",
+    "body": "\n        verifyOwnedRoot(root);\n        Thread.sleep(20);\n      ",
+    "line": 957
+  },
+  {
+    "start": 47562,
+    "end": 50882,
+    "kind": "do",
+    "bodyStart": 47566,
+    "bodyEnd": 50846,
+    "condition": "System.nanoTime() < until",
+    "ids": [
+      4
+    ],
+    "rows": [
+      {
+        "id": "4",
+        "line": "1085",
+        "class": "POLL",
+        "enclosing_method": "verifyPreviousWorkerGenerationClosed",
+        "reason": "do-while until the prior worker generation shows all sessions/recordings settled and descendants gone; 30 ms; on timeout writeOpenGenerationDiagnostic() then throws",
+        "proposed_replacement": "extract the closed-check into generationClosed(); await().alias(\"prior worker generation closed\").atMost(until).pollInterval(30ms).pollDelay(0).pollInSameThread().until(this::generationClosed); catch ConditionTimeoutException -> writeOpenGenerationDiagnostic(); throw the same IllegalStateException",
+        "batch": "B4",
+        "on_timeout": "MAP_EXCEPTION",
+        "exercised_in_green_run": "rare (only if the first check is not closed)",
+        "source_text": "Thread.sleep(30); // No database transaction/session lock is held across this wait."
+      }
+    ],
+    "source": "do {\n      closed = true;\n      for (var row :\n          jdbc.queryForList(\n              \"SELECT session_id,state,progress::text AS progress FROM studio_guided_sessions\")) {\n        String id = String.valueOf(row.get(\"session_id\"));\n        if (generationSessionBaseline.contains(id)) {\n          continue;\n        }\n        JsonNode progress = C.parse(String.valueOf(row.get(\"progress\")));\n        boolean assigned =\n            jdbc.queryForObject(\n                    \"SELECT count(*) FROM studio_guided_assignments WHERE session_id=?\",\n                    Integer.class,\n                    id)\n                > 0;\n        boolean terminal =\n            List.of(\n                    \"SUCCEEDED\",\n                    \"PUBLICATION_CONFLICT\",\n                    \"FAILED\",\n                    \"UNKNOWN_OUTCOME\",\n                    \"CANCELLED\",\n                    \"EXPIRED\")\n                .contains(String.valueOf(row.get(\"state\")));\n        boolean recording =\n            !progress.has(\"executionEvidence\")\n                || jdbc.queryForObject(\n                        \"SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=? AND\"\n                            + \" state IN ('AVAILABLE','FAILED','UNAVAILABLE')\",\n                        Integer.class,\n                        id)\n                    == 1;\n        closed &=\n            terminal\n                && (!assigned || progress.path(\"teardownStatus\").asText().equals(\"CONFIRMED\"))\n                && recording;\n      }\n      for (var row :\n          jdbc.queryForList(\n              \"SELECT e.id,e.status,e.error_code,e.video_status,l.state AS\"\n                  + \" ledger_state,l.attempt_id,l.admission_id FROM ui_test_executions e LEFT JOIN\"\n                  + \" studio_dispatch_ledger l ON l.execution_id=e.id AND l.execution_accepted_at=e.started_at\")) {\n        UUID id = (UUID) row.get(\"id\");\n        if (generationExecutionBaseline.contains(id)) {\n          continue;\n        }\n        boolean noSend = row.get(\"attempt_id\") == null && row.get(\"admission_id\") == null;\n        // A RunningReaper ERROR/STALE close (P6 owner crash) is final with no video: closeByReaper\n        // never settles evidence and findEvidenceUnsettled selects FINALIZING rows only. Live\n        // processes are still checked below.\n        boolean reaperStale =\n            \"ERROR\".equals(row.get(\"status\"))\n                && \"STALE\".equals(row.get(\"error_code\"))\n                && row.get(\"video_status\") == null;\n        closed &=\n            List.of(\"PASSED\", \"FAILED\", \"ERROR\").contains(String.valueOf(row.get(\"status\")))\n                && \"DONE\".equals(row.get(\"ledger_state\"))\n                && (noSend\n                    || reaperStale\n                    || row.get(\"video_status\") != null\n                        && !\"PROCESSING\".equals(row.get(\"video_status\")));\n      }\n      for (OwnedFixtureProcess root : OWNED_FIXTURE_PROCESSES) {\n        if (root.generation == ownedGeneration && root.wrapper != null) {\n          recordOwnedDescendants(root);\n          closed &= root.descendants.stream().noneMatch(child -> child.handle().isAlive());\n        }\n      }\n      if (closed) {\n        return;\n      }\n      Thread.sleep(30); // No database transaction/session lock is held across this wait.\n    } while (System.nanoTime() < until);",
+    "body": "\n      closed = true;\n      for (var row :\n          jdbc.queryForList(\n              \"SELECT session_id,state,progress::text AS progress FROM studio_guided_sessions\")) {\n        String id = String.valueOf(row.get(\"session_id\"));\n        if (generationSessionBaseline.contains(id)) {\n          continue;\n        }\n        JsonNode progress = C.parse(String.valueOf(row.get(\"progress\")));\n        boolean assigned =\n            jdbc.queryForObject(\n                    \"SELECT count(*) FROM studio_guided_assignments WHERE session_id=?\",\n                    Integer.class,\n                    id)\n                > 0;\n        boolean terminal =\n            List.of(\n                    \"SUCCEEDED\",\n                    \"PUBLICATION_CONFLICT\",\n                    \"FAILED\",\n                    \"UNKNOWN_OUTCOME\",\n                    \"CANCELLED\",\n                    \"EXPIRED\")\n                .contains(String.valueOf(row.get(\"state\")));\n        boolean recording =\n            !progress.has(\"executionEvidence\")\n                || jdbc.queryForObject(\n                        \"SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=? AND\"\n                            + \" state IN ('AVAILABLE','FAILED','UNAVAILABLE')\",\n                        Integer.class,\n                        id)\n                    == 1;\n        closed &=\n            terminal\n                && (!assigned || progress.path(\"teardownStatus\").asText().equals(\"CONFIRMED\"))\n                && recording;\n      }\n      for (var row :\n          jdbc.queryForList(\n              \"SELECT e.id,e.status,e.error_code,e.video_status,l.state AS\"\n                  + \" ledger_state,l.attempt_id,l.admission_id FROM ui_test_executions e LEFT JOIN\"\n                  + \" studio_dispatch_ledger l ON l.execution_id=e.id AND l.execution_accepted_at=e.started_at\")) {\n        UUID id = (UUID) row.get(\"id\");\n        if (generationExecutionBaseline.contains(id)) {\n          continue;\n        }\n        boolean noSend = row.get(\"attempt_id\") == null && row.get(\"admission_id\") == null;\n        // A RunningReaper ERROR/STALE close (P6 owner crash) is final with no video: closeByReaper\n        // never settles evidence and findEvidenceUnsettled selects FINALIZING rows only. Live\n        // processes are still checked below.\n        boolean reaperStale =\n            \"ERROR\".equals(row.get(\"status\"))\n                && \"STALE\".equals(row.get(\"error_code\"))\n                && row.get(\"video_status\") == null;\n        closed &=\n            List.of(\"PASSED\", \"FAILED\", \"ERROR\").contains(String.valueOf(row.get(\"status\")))\n                && \"DONE\".equals(row.get(\"ledger_state\"))\n                && (noSend\n                    || reaperStale\n                    || row.get(\"video_status\") != null\n                        && !\"PROCESSING\".equals(row.get(\"video_status\")));\n      }\n      for (OwnedFixtureProcess root : OWNED_FIXTURE_PROCESSES) {\n        if (root.generation == ownedGeneration && root.wrapper != null) {\n          recordOwnedDescendants(root);\n          closed &= root.descendants.stream().noneMatch(child -> child.handle().isAlive());\n        }\n      }\n      if (closed) {\n        return;\n      }\n      Thread.sleep(30); // No database transaction/session lock is held across this wait.\n    ",
+    "line": 1013
+  },
+  {
+    "start": 103446,
+    "end": 103851,
+    "kind": "while",
+    "bodyStart": 103524,
+    "bodyEnd": 103850,
+    "condition": "fixtureAnnouncement.isBlank() && System.nanoTime() < fixtureDeadline",
+    "ids": [
+      5
+    ],
+    "rows": [
+      {
+        "id": "5",
+        "line": "2313",
+        "class": "POLL",
+        "enclosing_method": "<static initializer> (secret fixture bootstrap)",
+        "reason": "waits for the secret fixture to write its origin announcement; 10 s, 20 ms; fails fast if the fixture process died",
+        "proposed_replacement": "await().alias(\"secret fixture announcement\").atMost(10s).pollInterval(20ms).pollDelay(0).pollInSameThread().until(() -> { if (!SECRET_FIXTURE.isAlive()) throw new IllegalStateException(\"Secret fixture exited before readiness\"); return !Files.readString(...).isBlank(); }); keep the readiness-deadline ISE via catch",
+        "batch": "B4",
+        "on_timeout": "MAP_EXCEPTION",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (fixtureAnnouncement.isBlank() && System.nanoTime() < fixtureDeadline) {\n        if (!SECRET_FIXTURE.isAlive()) {\n          throw new IllegalStateException(\"Secret fixture exited before readiness\");\n        }\n        fixtureAnnouncement = Files.readString(TEMP.resolve(\"secret-fixture-origin.json\")).strip();\n        if (fixtureAnnouncement.isBlank()) {\n          Thread.sleep(20);\n        }\n      }",
+    "body": "\n        if (!SECRET_FIXTURE.isAlive()) {\n          throw new IllegalStateException(\"Secret fixture exited before readiness\");\n        }\n        fixtureAnnouncement = Files.readString(TEMP.resolve(\"secret-fixture-origin.json\")).strip();\n        if (fixtureAnnouncement.isBlank()) {\n          Thread.sleep(20);\n        }\n      ",
+    "line": 2307
+  },
+  {
+    "start": 179328,
+    "end": 179657,
+    "kind": "do",
+    "bodyStart": 179332,
+    "bodyEnd": 179618,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      6
+    ],
+    "rows": [
+      {
+        "id": "6",
+        "line": "3942",
+        "class": "POLL",
+        "enclosing_method": "cancelFailedTestOwnedSessions (@AfterEach, failed-test path)",
+        "reason": "waits for teardownStatus CONFIRMED of a failed test's owned session; 20 s, 30 ms; last value goes into the cleanup evidence",
+        "proposed_replacement": "awaitLast(\"session <id> teardownStatus CONFIRMED\", 20s, 30ms, () -> ...teardownStatus, \"CONFIRMED\"::equals); keep cleanup.put and the CONFIRMED assertion",
+        "batch": "B4",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "failure path only; a green run cannot prove it",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n            teardown =\n                sessions.transaction(\n                    () -> sessions.lock(owned.getKey()).progress().path(\"teardownStatus\").asText());\n            if (teardown.equals(\"CONFIRMED\")) {\n              break;\n            }\n            Thread.sleep(30);\n          } while (System.nanoTime() < deadline);",
+    "body": "\n            teardown =\n                sessions.transaction(\n                    () -> sessions.lock(owned.getKey()).progress().path(\"teardownStatus\").asText());\n            if (teardown.equals(\"CONFIRMED\")) {\n              break;\n            }\n            Thread.sleep(30);\n          ",
+    "line": 3935
+  },
+  {
+    "start": 330553,
+    "end": 330786,
+    "kind": "do",
+    "bodyStart": 330557,
+    "bodyEnd": 330747,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      7
+    ],
+    "rows": [
+      {
+        "id": "7",
+        "line": "7294",
+        "class": "POLL",
+        "enclosing_method": "b3PublishedPartialDriftStepAndSecondReplay",
+        "reason": "polls the execution until streamComplete; 45 s, 30 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 45s, 30ms, () -> publicCall(\"/api/v1/studio/executions/\" + <id>, null, 200, null), r -> r.path(\"streamComplete\").asBoolean())",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n      replay = publicCall(\"/api/v1/studio/executions/\" + second, null, 200, null);\n      if (replay.path(\"streamComplete\").asBoolean()) {\n        break;\n      }\n      Thread.sleep(30);\n    } while (System.nanoTime() < deadline);",
+    "body": "\n      replay = publicCall(\"/api/v1/studio/executions/\" + second, null, 200, null);\n      if (replay.path(\"streamComplete\").asBoolean()) {\n        break;\n      }\n      Thread.sleep(30);\n    ",
+    "line": 7289
+  },
+  {
+    "start": 343266,
+    "end": 343630,
+    "kind": "do",
+    "bodyStart": 343270,
+    "bodyEnd": 343596,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      8
+    ],
+    "rows": [
+      {
+        "id": "8",
+        "line": "7606",
+        "class": "POLL",
+        "enclosing_method": "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
+        "reason": "polls (re-sending prefixSyncNoTarget each pass) until the same-owner lease renewal is later than the original lease; 12 s, 20 ms; side effect in the loop",
+        "proposed_replacement": "awaitLast(\"owner lease renewed\", 12s, 20ms, () -> { prefixSyncNoTarget(parent, before); return sessions.transaction(...owner...); }, o -> Instant.parse(o.path(\"leaseExpiresAt\").asText()).isAfter(lease)); keep the assertion",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "do {\n        prefixSyncNoTarget(parent, before);\n        renewed =\n            sessions.transaction(\n                () -> sessions.lock(parent.id).document().path(\"owner\").deepCopy());\n        if (Instant.parse(renewed.path(\"leaseExpiresAt\").asText()).isAfter(lease)) {\n          break;\n        }\n        Thread.sleep(20);\n      } while (System.nanoTime() < end);",
+    "body": "\n        prefixSyncNoTarget(parent, before);\n        renewed =\n            sessions.transaction(\n                () -> sessions.lock(parent.id).document().path(\"owner\").deepCopy());\n        if (Instant.parse(renewed.path(\"leaseExpiresAt\").asText()).isAfter(lease)) {\n          break;\n        }\n        Thread.sleep(20);\n      ",
+    "line": 7598
+  },
+  {
+    "start": 378939,
+    "end": 379064,
+    "kind": "while",
+    "bodyStart": 379018,
+    "bodyEnd": 379063,
+    "condition": "!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline",
+    "ids": [
+      9
+    ],
+    "rows": [
+      {
+        "id": "9",
+        "line": "8328",
+        "class": "POLL",
+        "enclosing_method": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
+        "reason": "polls INCREMENTAL_ACK_ENTERED for the session id; 45 s, 10 ms",
+        "proposed_replacement": "awaitLast(\"v2 ACK entered <id>\", 45s, 10ms, () -> INCREMENTAL_ACK_ENTERED.contains(id), Boolean::booleanValue); keep the assertion",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline) {\n              Thread.sleep(10);\n            }",
+    "body": "\n              Thread.sleep(10);\n            ",
+    "line": 8327
+  },
+  {
+    "start": 382585,
+    "end": 382997,
+    "kind": "while",
+    "bodyStart": 382951,
+    "bodyEnd": 382996,
+    "condition": "!\"ACKNOWLEDGED\"\n                    .equals(\n                        jdbc.queryForObject(\n                            \"SELECT status FROM studio_guided_materialization_deliveries\"\n                                + \" WHERE session_id=?\",\n                            String.class,\n                            id))\n                && System.nanoTime() < acked",
+    "ids": [
+      10
+    ],
+    "rows": [
+      {
+        "id": "10",
+        "line": "8401",
+        "class": "POLL",
+        "enclosing_method": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
+        "reason": "polls materialization delivery status until ACKNOWLEDGED; 20 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"delivery ACKNOWLEDGED <id>\", 20s, 20ms, () -> jdbc.queryForObject(\"SELECT status ...\", String.class, id), \"ACKNOWLEDGED\"::equals)",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (!\"ACKNOWLEDGED\"\n                    .equals(\n                        jdbc.queryForObject(\n                            \"SELECT status FROM studio_guided_materialization_deliveries\"\n                                + \" WHERE session_id=?\",\n                            String.class,\n                            id))\n                && System.nanoTime() < acked) {\n              Thread.sleep(20);\n            }",
+    "body": "\n              Thread.sleep(20);\n            ",
+    "line": 8393
+  },
+  {
+    "start": 422619,
+    "end": 422826,
+    "kind": "while",
+    "bodyStart": 422796,
+    "bodyEnd": 422825,
+    "condition": "!sessions\n            .transaction(() -> plans.state(session).path(\"continuation\").asText())\n            .equals(\"MATERIALIZE\")\n        && System.nanoTime() < accepted",
+    "ids": [
+      11
+    ],
+    "rows": [
+      {
+        "id": "11",
+        "line": "9285",
+        "class": "POLL",
+        "enclosing_method": "b2bAppendAuthority",
+        "reason": "polls plans.state continuation until MATERIALIZE (needs a transaction); 20 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"continuation MATERIALIZE <session>\", 20s, 20ms, () -> sessions.transaction(() -> plans.state(session).path(\"continuation\").asText()), \"MATERIALIZE\"::equals); keep the assertion",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (!sessions\n            .transaction(() -> plans.state(session).path(\"continuation\").asText())\n            .equals(\"MATERIALIZE\")\n        && System.nanoTime() < accepted) {\n      Thread.sleep(20);\n    }",
+    "body": "\n      Thread.sleep(20);\n    ",
+    "line": 9281
+  },
+  {
+    "start": 424460,
+    "end": 424570,
+    "kind": "while",
+    "bodyStart": 424540,
+    "bodyEnd": 424569,
+    "condition": "!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held",
+    "ids": [
+      14
+    ],
+    "rows": [
+      {
+        "id": "14",
+        "line": "9316",
+        "class": "POLL",
+        "enclosing_method": "b2bAppendAuthority",
+        "reason": "polls INCREMENTAL_ACK_ENTERED after natural expiry (append retried); 30 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"v2 ACK entered after expiry <session>\", 30s, 20ms, () -> INCREMENTAL_ACK_ENTERED.contains(session), Boolean::booleanValue); keep the assertion",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {\n      Thread.sleep(20);\n    }",
+    "body": "\n      Thread.sleep(20);\n    ",
+    "line": 9315
+  },
+  {
+    "start": 428724,
+    "end": 429069,
+    "kind": "while",
+    "bodyStart": 429039,
+    "bodyEnd": 429068,
+    "condition": "!\"ACKNOWLEDGED\"\n            .equals(\n                jdbc.queryForObject(\n                    \"SELECT status FROM studio_guided_materialization_deliveries\"\n                        + \" WHERE session_id=?\",\n                    String.class,\n                    session))\n        && System.nanoTime() < acked",
+    "ids": [
+      15
+    ],
+    "rows": [
+      {
+        "id": "15",
+        "line": "9401",
+        "class": "POLL",
+        "enclosing_method": "b2bAppendAuthority",
+        "reason": "polls delivery status until ACKNOWLEDGED after the ACK release; 30 s, 25 ms",
+        "proposed_replacement": "awaitLast(\"delivery ACKNOWLEDGED <session>\", 30s, 25ms, () -> jdbc.queryForObject(...), \"ACKNOWLEDGED\"::equals)",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(25);"
+      }
+    ],
+    "source": "while (!\"ACKNOWLEDGED\"\n            .equals(\n                jdbc.queryForObject(\n                    \"SELECT status FROM studio_guided_materialization_deliveries\"\n                        + \" WHERE session_id=?\",\n                    String.class,\n                    session))\n        && System.nanoTime() < acked) {\n      Thread.sleep(25);\n    }",
+    "body": "\n      Thread.sleep(25);\n    ",
+    "line": 9393
+  },
+  {
+    "start": 434778,
+    "end": 435009,
+    "kind": "do",
+    "bodyStart": 434782,
+    "bodyEnd": 434975,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      16
+    ],
+    "rows": [
+      {
+        "id": "16",
+        "line": "9529",
+        "class": "POLL",
+        "enclosing_method": "b2bAppendAuthority",
+        "reason": "polls the execution until streamComplete; 45 s, 30 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 45s, 30ms, () -> publicCall(\"/api/v1/studio/executions/\" + <id>, null, 200, null), r -> r.path(\"streamComplete\").asBoolean())",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n      replay = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n      if (replay.path(\"streamComplete\").asBoolean()) {\n        break;\n      }\n      Thread.sleep(30);\n    } while (System.nanoTime() < end);",
+    "body": "\n      replay = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n      if (replay.path(\"streamComplete\").asBoolean()) {\n        break;\n      }\n      Thread.sleep(30);\n    ",
+    "line": 9524
+  },
+  {
+    "start": 435568,
+    "end": 435678,
+    "kind": "while",
+    "bodyStart": 435648,
+    "bodyEnd": 435677,
+    "condition": "!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held",
+    "ids": [
+      17
+    ],
+    "rows": [
+      {
+        "id": "17",
+        "line": "9544",
+        "class": "POLL",
+        "enclosing_method": "b2bOwnerLoss",
+        "reason": "polls INCREMENTAL_ACK_ENTERED; 90 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"v2 ACK pending <session>\", 90s, 20ms, () -> INCREMENTAL_ACK_ENTERED.contains(session), Boolean::booleanValue); keep the assertion",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {\n      Thread.sleep(20);\n    }",
+    "body": "\n      Thread.sleep(20);\n    ",
+    "line": 9543
+  },
+  {
+    "start": 461015,
+    "end": 461328,
+    "kind": "do",
+    "bodyStart": 461019,
+    "bodyEnd": 461294,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      18
+    ],
+    "rows": [
+      {
+        "id": "18",
+        "line": "10071",
+        "class": "POLL",
+        "enclosing_method": "b2AwaitSettled",
+        "reason": "polls the session state until one of FAILED/UNKNOWN_OUTCOME/CANCELLED/EXPIRED/SUCCEEDED/FINALIZING; <seconds> param, 25 ms; returns the last state",
+        "proposed_replacement": "awaitLast(\"session <id> state\", Duration.ofSeconds(seconds), 25ms, () -> sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText()), Set.of(\"FAILED\",\"UNKNOWN_OUTCOME\",\"CANCELLED\",\"EXPIRED\",\"SUCCEEDED\",\"FINALIZING\")::contains)",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(25);"
+      }
+    ],
+    "source": "do {\n      state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (List.of(\"FAILED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\", \"EXPIRED\", \"SUCCEEDED\", \"FINALIZING\")\n          .contains(state)) {\n        break;\n      }\n      Thread.sleep(25);\n    } while (System.nanoTime() < end);",
+    "body": "\n      state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (List.of(\"FAILED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\", \"EXPIRED\", \"SUCCEEDED\", \"FINALIZING\")\n          .contains(state)) {\n        break;\n      }\n      Thread.sleep(25);\n    ",
+    "line": 10065
+  },
+  {
+    "start": 461533,
+    "end": 461751,
+    "kind": "do",
+    "bodyStart": 461537,
+    "bodyEnd": 461717,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      19
+    ],
+    "rows": [
+      {
+        "id": "19",
+        "line": "10084",
+        "class": "POLL",
+        "enclosing_method": "b2AwaitLeft",
+        "reason": "polls the session state until it differs from <from>; <seconds> param, 25 ms; returns the last state",
+        "proposed_replacement": "awaitLast(\"session <id> state\", Duration.ofSeconds(seconds), 25ms, () -> sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText()), s -> !s.equals(from))",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(25);"
+      }
+    ],
+    "source": "do {\n      state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (!state.equals(from)) {\n        break;\n      }\n      Thread.sleep(25);\n    } while (System.nanoTime() < end);",
+    "body": "\n      state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (!state.equals(from)) {\n        break;\n      }\n      Thread.sleep(25);\n    ",
+    "line": 10079
+  },
+  {
+    "start": 462100,
+    "end": 463909,
+    "kind": "do",
+    "bodyStart": 462104,
+    "bodyEnd": 463875,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      20
+    ],
+    "rows": [
+      {
+        "id": "20",
+        "line": "10137",
+        "class": "POLL",
+        "enclosing_method": "b2AwaitCheckCurrentGate",
+        "reason": "do-while over the finalize-exception-N.json diagnostics until one exact post-ACK checkCurrent SECRET_USE_REVOKED row matches; 20 s, 10 ms; throws AssertionError \"...not observed\" on timeout",
+        "proposed_replacement": "move the loop body into a Callable returning the matches list; await().alias(\"post-ACK checkCurrent SECRET_USE_REVOKED\").atMost(20s).pollInterval(10ms).pollDelay(0).pollInSameThread().until(...); catch ConditionTimeoutException -> throw the same AssertionError text",
+        "batch": "B2",
+        "on_timeout": "MAP_EXCEPTION",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "do {\n      var matches = new ArrayList<JsonNode>();\n      for (int n = after + 1; n <= FINALIZE_DIAGNOSTICS.get(); n++) {\n        Path file = TEMP.resolve(\"finalize-exception-\" + n + \".json\");\n        if (!Files.isRegularFile(file)) {\n          continue; // the counter increment precedes the completed write\n        }\n        JsonNode row;\n        try {\n          row = C.parse(Files.readString(file));\n        } catch (RuntimeException incomplete) {\n          continue;\n        }\n        if (!row.path(\"exceptionCode\").asText().equals(\"SECRET_USE_REVOKED\")) {\n          continue;\n        }\n        boolean access = false;\n        boolean transaction = false;\n        boolean gate = false;\n        for (JsonNode frame : row.path(\"stackFrames\")) {\n          String type = frame.path(\"class\").asText();\n          String method = frame.path(\"method\").asText();\n          access |=\n              type.equals(\n                      \"com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess\")\n                  && method.equals(\"checkCurrent\");\n          transaction |=\n              type.equals(\"com.citi.put.checks.studio.guided.session.GuidedSessionService\")\n                  && method.startsWith(\"lambda$translationTransaction\");\n          gate |=\n              type.equals(\"com.citi.put.checks.studio.guided.translation.GuidedTranslationService\")\n                  && method.equals(\"advancePrefix\")\n                  && frame.path(\"line\").asInt() == prefixSites().postAck();\n        }\n        if (access && transaction && gate) {\n          matches.add(row);\n        }\n      }\n      if (!matches.isEmpty()) {\n        assertThat(matches.size()).as(\"one exact post-ACK checkCurrent refusal\").isEqualTo(1);\n        return;\n      }\n      Thread.sleep(10);\n    } while (System.nanoTime() < end);",
+    "body": "\n      var matches = new ArrayList<JsonNode>();\n      for (int n = after + 1; n <= FINALIZE_DIAGNOSTICS.get(); n++) {\n        Path file = TEMP.resolve(\"finalize-exception-\" + n + \".json\");\n        if (!Files.isRegularFile(file)) {\n          continue; // the counter increment precedes the completed write\n        }\n        JsonNode row;\n        try {\n          row = C.parse(Files.readString(file));\n        } catch (RuntimeException incomplete) {\n          continue;\n        }\n        if (!row.path(\"exceptionCode\").asText().equals(\"SECRET_USE_REVOKED\")) {\n          continue;\n        }\n        boolean access = false;\n        boolean transaction = false;\n        boolean gate = false;\n        for (JsonNode frame : row.path(\"stackFrames\")) {\n          String type = frame.path(\"class\").asText();\n          String method = frame.path(\"method\").asText();\n          access |=\n              type.equals(\n                      \"com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess\")\n                  && method.equals(\"checkCurrent\");\n          transaction |=\n              type.equals(\"com.citi.put.checks.studio.guided.session.GuidedSessionService\")\n                  && method.startsWith(\"lambda$translationTransaction\");\n          gate |=\n              type.equals(\"com.citi.put.checks.studio.guided.translation.GuidedTranslationService\")\n                  && method.equals(\"advancePrefix\")\n                  && frame.path(\"line\").asInt() == prefixSites().postAck();\n        }\n        if (access && transaction && gate) {\n          matches.add(row);\n        }\n      }\n      if (!matches.isEmpty()) {\n        assertThat(matches.size()).as(\"one exact post-ACK checkCurrent refusal\").isEqualTo(1);\n        return;\n      }\n      Thread.sleep(10);\n    ",
+    "line": 10095
+  },
+  {
+    "start": 510277,
+    "end": 513587,
+    "kind": "do",
+    "bodyStart": 510281,
+    "bodyEnd": 513553,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      21
+    ],
+    "rows": [
+      {
+        "id": "21",
+        "line": "11322",
+        "class": "POLL",
+        "enclosing_method": "prefixSyncAwaitDiagnostic",
+        "reason": "same shape as #20 for the PFXSYNC intended Java stage; 20 s, 10 ms; throws AssertionError \"PFXSYNC intended Java context/gate stage not observed\"",
+        "proposed_replacement": "same as #20, keeping the exact AssertionError text",
+        "batch": "B2",
+        "on_timeout": "MAP_EXCEPTION",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "do {\n      int current = FINALIZE_DIAGNOSTICS.get();\n      var matches = new ArrayList<JsonNode>();\n      for (int n = after + 1; n <= current; n++) {\n        Path file = TEMP.resolve(\"finalize-exception-\" + n + \".json\");\n        if (!Files.isRegularFile(file)) {\n          continue;\n        } // Counter increment precedes completed write.\n        JsonNode row;\n        try {\n          row = C.parse(Files.readString(file));\n        } catch (RuntimeException incomplete) {\n          continue;\n        }\n        if (code != null && !row.path(\"exceptionCode\").asText().equals(code)) {\n          continue;\n        }\n        PrefixSites sites = prefixSites();\n        boolean stage = false;\n        for (JsonNode frame : row.path(\"stackFrames\")) {\n          if (frame\n                  .path(\"class\")\n                  .asText()\n                  .equals(\"com.citi.put.checks.studio.guided.translation.GuidedTranslationService\")\n              && frame.path(\"method\").asText().equals(\"advancePrefix\")\n              && frame.path(\"line\").asInt() == (gate ? sites.postAck() : sites.pushContext())) {\n            stage = true;\n          }\n        }\n        if (gate && \"STALE_GENERATION\".equals(code)) {\n          int predicateLine =\n              parent.cut.mode.equals(\"CONCURRENT\")\n                  ? sites.nextActionRequire()\n                  : sites.evidenceRequire();\n          boolean predicate = false;\n          for (JsonNode frame : row.path(\"stackFrames\")) {\n            if (frame\n                    .path(\"class\")\n                    .asText()\n                    .equals(\n                        \"com.citi.put.checks.studio.guided.translation.GuidedTranslationService\")\n                && frame.path(\"method\").asText().startsWith(\"lambda$advancePrefix$\")\n                && frame.path(\"line\").asInt() == predicateLine) {\n              predicate = true;\n            }\n          }\n          stage &= predicate;\n        }\n        if (stage) {\n          matches.add(row);\n        }\n      }\n      if (!matches.isEmpty()) {\n        if (gate) {\n          assertThat(matches)\n              .as(\n                  \"one isolated fresh case must identify its exact post-ACK gate, not an ambiguous interval\")\n              .hasSize(1);\n        }\n        // Uncertain responses may be revisited by the real coordinator; no single-call claim\n        // applies.\n        assertThat(PREFIX_SYNC_CUTS.keySet()).containsExactly(parent.cut.key);\n        assertThat(\n                testOwnedSessions.keySet().stream()\n                    .filter(id -> !id.equals(parent.id))\n                    .allMatch(\n                        id ->\n                            sessions.transaction(\n                                () ->\n                                    List.of(\n                                            \"SUCCEEDED\",\n                                            \"FAILED\",\n                                            \"CANCELLED\",\n                                            \"EXPIRED\",\n                                            \"PUBLICATION_CONFLICT\")\n                                        .contains(\n                                            sessions.lock(id).document().path(\"state\").asText()))))\n            .isTrue();\n        return;\n      }\n      Thread.sleep(10);\n    } while (System.nanoTime() < end);",
+    "body": "\n      int current = FINALIZE_DIAGNOSTICS.get();\n      var matches = new ArrayList<JsonNode>();\n      for (int n = after + 1; n <= current; n++) {\n        Path file = TEMP.resolve(\"finalize-exception-\" + n + \".json\");\n        if (!Files.isRegularFile(file)) {\n          continue;\n        } // Counter increment precedes completed write.\n        JsonNode row;\n        try {\n          row = C.parse(Files.readString(file));\n        } catch (RuntimeException incomplete) {\n          continue;\n        }\n        if (code != null && !row.path(\"exceptionCode\").asText().equals(code)) {\n          continue;\n        }\n        PrefixSites sites = prefixSites();\n        boolean stage = false;\n        for (JsonNode frame : row.path(\"stackFrames\")) {\n          if (frame\n                  .path(\"class\")\n                  .asText()\n                  .equals(\"com.citi.put.checks.studio.guided.translation.GuidedTranslationService\")\n              && frame.path(\"method\").asText().equals(\"advancePrefix\")\n              && frame.path(\"line\").asInt() == (gate ? sites.postAck() : sites.pushContext())) {\n            stage = true;\n          }\n        }\n        if (gate && \"STALE_GENERATION\".equals(code)) {\n          int predicateLine =\n              parent.cut.mode.equals(\"CONCURRENT\")\n                  ? sites.nextActionRequire()\n                  : sites.evidenceRequire();\n          boolean predicate = false;\n          for (JsonNode frame : row.path(\"stackFrames\")) {\n            if (frame\n                    .path(\"class\")\n                    .asText()\n                    .equals(\n                        \"com.citi.put.checks.studio.guided.translation.GuidedTranslationService\")\n                && frame.path(\"method\").asText().startsWith(\"lambda$advancePrefix$\")\n                && frame.path(\"line\").asInt() == predicateLine) {\n              predicate = true;\n            }\n          }\n          stage &= predicate;\n        }\n        if (stage) {\n          matches.add(row);\n        }\n      }\n      if (!matches.isEmpty()) {\n        if (gate) {\n          assertThat(matches)\n              .as(\n                  \"one isolated fresh case must identify its exact post-ACK gate, not an ambiguous interval\")\n              .hasSize(1);\n        }\n        // Uncertain responses may be revisited by the real coordinator; no single-call claim\n        // applies.\n        assertThat(PREFIX_SYNC_CUTS.keySet()).containsExactly(parent.cut.key);\n        assertThat(\n                testOwnedSessions.keySet().stream()\n                    .filter(id -> !id.equals(parent.id))\n                    .allMatch(\n                        id ->\n                            sessions.transaction(\n                                () ->\n                                    List.of(\n                                            \"SUCCEEDED\",\n                                            \"FAILED\",\n                                            \"CANCELLED\",\n                                            \"EXPIRED\",\n                                            \"PUBLICATION_CONFLICT\")\n                                        .contains(\n                                            sessions.lock(id).document().path(\"state\").asText()))))\n            .isTrue();\n        return;\n      }\n      Thread.sleep(10);\n    ",
+    "line": 11242
+  },
+  {
+    "start": 520738,
+    "end": 520969,
+    "kind": "do",
+    "bodyStart": 520742,
+    "bodyEnd": 520935,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      22
+    ],
+    "rows": [
+      {
+        "id": "22",
+        "line": "11486",
+        "class": "POLL",
+        "enclosing_method": "prefixSyncFinishAndReplay",
+        "reason": "polls the execution until streamComplete; 45 s, 30 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 45s, 30ms, () -> publicCall(\"/api/v1/studio/executions/\" + <id>, null, 200, null), r -> r.path(\"streamComplete\").asBoolean())",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n      replay = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n      if (replay.path(\"streamComplete\").asBoolean()) {\n        break;\n      }\n      Thread.sleep(30);\n    } while (System.nanoTime() < end);",
+    "body": "\n      replay = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n      if (replay.path(\"streamComplete\").asBoolean()) {\n        break;\n      }\n      Thread.sleep(30);\n    ",
+    "line": 11481
+  },
+  {
+    "start": 540738,
+    "end": 540866,
+    "kind": "while",
+    "bodyStart": 540832,
+    "bodyEnd": 540865,
+    "condition": "b1Count(\"studio_guided_relearn_switches\", parent.id) == 0 && System.nanoTime() < end",
+    "ids": [
+      23
+    ],
+    "rows": [
+      {
+        "id": "23",
+        "line": "11850",
+        "class": "POLL",
+        "enclosing_method": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+        "reason": "polls studio_guided_relearn_switches count until non-zero; 20 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"relearn switch committed <parent>\", 20s, 20ms, () -> b1Count(\"studio_guided_relearn_switches\", parent.id), c -> c > 0)",
+        "batch": "B2",
+        "on_timeout": "FALL_THROUGH",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (b1Count(\"studio_guided_relearn_switches\", parent.id) == 0 && System.nanoTime() < end) {\n        Thread.sleep(20);\n      }",
+    "body": "\n        Thread.sleep(20);\n      ",
+    "line": 11849
+  },
+  {
+    "start": 649678,
+    "end": 649815,
+    "kind": "while",
+    "bodyStart": 649730,
+    "bodyEnd": 649814,
+    "condition": "!INCREMENTAL_DRIFT_CAPTURE.containsKey(id)",
+    "ids": [
+      29
+    ],
+    "rows": [
+      {
+        "id": "29",
+        "line": "14283",
+        "class": "POLL",
+        "enclosing_method": "b1AwaitDriftCapture",
+        "reason": "polls INCREMENTAL_DRIFT_CAPTURE for the session id; 30 s, 10 ms; asserts the deadline inside the loop",
+        "proposed_replacement": "await().alias(\"drift capture <id>\").atMost(30s).pollInterval(10ms).pollDelay(0).pollInSameThread().until(() -> INCREMENTAL_DRIFT_CAPTURE.containsKey(id)); return the map entry",
+        "batch": "B2",
+        "on_timeout": "FAIL_AT_WAIT",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (!INCREMENTAL_DRIFT_CAPTURE.containsKey(id)) {\n      assertThat(System.nanoTime()).isLessThan(until);\n      Thread.sleep(10);\n    }",
+    "body": "\n      assertThat(System.nanoTime()).isLessThan(until);\n      Thread.sleep(10);\n    ",
+    "line": 14281
+  },
+  {
+    "start": 658014,
+    "end": 658289,
+    "kind": "do",
+    "bodyStart": 658018,
+    "bodyEnd": 658255,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      30
+    ],
+    "rows": [
+      {
+        "id": "30",
+        "line": "14508",
+        "class": "POLL",
+        "enclosing_method": "b1AwaitTerminal",
+        "reason": "polls the session state until FAILED/UNKNOWN_OUTCOME/CANCELLED/EXPIRED; <limit> param, 25 ms; then GETs the result",
+        "proposed_replacement": "awaitLast(\"session <id> state\", limit, 25ms, () -> sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText()), Set.of(\"FAILED\",\"UNKNOWN_OUTCOME\",\"CANCELLED\",\"EXPIRED\")::contains)",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(25);"
+      }
+    ],
+    "source": "do {\n      state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (List.of(\"FAILED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\", \"EXPIRED\").contains(state)) {\n        break;\n      }\n      Thread.sleep(25);\n    } while (System.nanoTime() < end);",
+    "body": "\n      state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (List.of(\"FAILED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\", \"EXPIRED\").contains(state)) {\n        break;\n      }\n      Thread.sleep(25);\n    ",
+    "line": 14503
+  },
+  {
+    "start": 659645,
+    "end": 659794,
+    "kind": "while",
+    "bodyStart": 659703,
+    "bodyEnd": 659793,
+    "condition": "jdbc.queryForObject(sql, Integer.class, id) == 0",
+    "ids": [
+      31
+    ],
+    "rows": [
+      {
+        "id": "31",
+        "line": "14543",
+        "class": "POLL",
+        "enclosing_method": "b1AwaitRow",
+        "reason": "polls a count SQL until non-zero; <limit> param, 20 ms; assertion inside the loop carries the SQL as message",
+        "proposed_replacement": "await().alias(sql).atMost(limit).pollInterval(20ms).pollDelay(0).pollInSameThread().until(() -> jdbc.queryForObject(sql, Integer.class, id) > 0)",
+        "batch": "B2",
+        "on_timeout": "FAIL_AT_WAIT",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (jdbc.queryForObject(sql, Integer.class, id) == 0) {\n      assertThat(System.nanoTime()).as(sql).isLessThan(end);\n      Thread.sleep(20);\n    }",
+    "body": "\n      assertThat(System.nanoTime()).as(sql).isLessThan(end);\n      Thread.sleep(20);\n    ",
+    "line": 14541
+  },
+  {
+    "start": 659949,
+    "end": 660345,
+    "kind": "while",
+    "bodyStart": 660227,
+    "bodyEnd": 660344,
+    "condition": "jdbc.queryForObject(\n            \"SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?\"\n                + \" AND ordinal=0 AND document->>'state'='SUCCEEDED'\",\n            Integer.class,\n            id,\n            b1Step(stepIndex))\n        == 0",
+    "ids": [
+      32
+    ],
+    "rows": [
+      {
+        "id": "32",
+        "line": "14557",
+        "class": "POLL",
+        "enclosing_method": "b1AwaitSucceeded",
+        "reason": "polls studio_guided_actions for ordinal 0 SUCCEEDED on step <n>; <limit> param, 20 ms",
+        "proposed_replacement": "await().alias(\"S(<n>)#0 SUCCEEDED\").atMost(limit).pollInterval(20ms).pollDelay(0).pollInSameThread().until(() -> count > 0)",
+        "batch": "B2",
+        "on_timeout": "FAIL_AT_WAIT",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (jdbc.queryForObject(\n            \"SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?\"\n                + \" AND ordinal=0 AND document->>'state'='SUCCEEDED'\",\n            Integer.class,\n            id,\n            b1Step(stepIndex))\n        == 0) {\n      assertThat(System.nanoTime()).as(\"S(%s)#0 SUCCEEDED\", stepIndex).isLessThan(end);\n      Thread.sleep(20);\n    }",
+    "body": "\n      assertThat(System.nanoTime()).as(\"S(%s)#0 SUCCEEDED\", stepIndex).isLessThan(end);\n      Thread.sleep(20);\n    ",
+    "line": 14549
+  },
+  {
+    "start": 660489,
+    "end": 660713,
+    "kind": "while",
+    "bodyStart": 660630,
+    "bodyEnd": 660712,
+    "condition": "!sessions\n        .transaction(() -> sessions.lock(id).document().path(\"state\").asText())\n        .equals(\"AWAITING_CLARIFICATION\")",
+    "ids": [
+      33
+    ],
+    "rows": [
+      {
+        "id": "33",
+        "line": "14567",
+        "class": "POLL",
+        "enclosing_method": "b1AwaitQuestion",
+        "reason": "polls the session state until AWAITING_CLARIFICATION; 45 s, 25 ms; assertion inside the loop",
+        "proposed_replacement": "awaitLast(\"session <id> state\", Duration.ofSeconds(45), 25ms, () -> sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText()), \"AWAITING_CLARIFICATION\"::equals); keep an assertion on the result",
+        "batch": "B2",
+        "on_timeout": "FAIL_AT_WAIT",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(25);"
+      }
+    ],
+    "source": "while (!sessions\n        .transaction(() -> sessions.lock(id).document().path(\"state\").asText())\n        .equals(\"AWAITING_CLARIFICATION\")) {\n      assertThat(System.nanoTime()).isLessThan(end);\n      Thread.sleep(25);\n    }",
+    "body": "\n      assertThat(System.nanoTime()).isLessThan(end);\n      Thread.sleep(25);\n    ",
+    "line": 14563
+  },
+  {
+    "start": 705508,
+    "end": 705763,
+    "kind": "do",
+    "bodyStart": 705512,
+    "bodyEnd": 705729,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      34
+    ],
+    "rows": [
+      {
+        "id": "34",
+        "line": "15590",
+        "class": "POLL",
+        "enclosing_method": "incrementalJoinedCase",
+        "reason": "polls the first ordinary replay until streamComplete; 45 s, 30 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 45s, 30ms, () -> publicCall(\"/api/v1/studio/executions/\" + <id>, null, 200, null), r -> r.path(\"streamComplete\").asBoolean())",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n          replay = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n          if (replay.path(\"streamComplete\").asBoolean()) {\n            break;\n          }\n          Thread.sleep(30);\n        } while (System.nanoTime() < end);",
+    "body": "\n          replay = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n          if (replay.path(\"streamComplete\").asBoolean()) {\n            break;\n          }\n          Thread.sleep(30);\n        ",
+    "line": 15585
+  },
+  {
+    "start": 726379,
+    "end": 726631,
+    "kind": "do",
+    "bodyStart": 726383,
+    "bodyEnd": 726592,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      35
+    ],
+    "rows": [
+      {
+        "id": "35",
+        "line": "16027",
+        "class": "POLL",
+        "enclosing_method": "incrementalJoinedCase",
+        "reason": "polls the ordinary replay until streamComplete; 45 s, 30 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 45s, 30ms, () -> publicCall(\"/api/v1/studio/executions/\" + <id>, null, 200, null), r -> r.path(\"streamComplete\").asBoolean())",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n        snapshot = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n        if (snapshot.path(\"streamComplete\").asBoolean()) {\n          break;\n        }\n        Thread.sleep(30);\n      } while (System.nanoTime() < deadline);",
+    "body": "\n        snapshot = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n        if (snapshot.path(\"streamComplete\").asBoolean()) {\n          break;\n        }\n        Thread.sleep(30);\n      ",
+    "line": 16022
+  },
+  {
+    "start": 728285,
+    "end": 728560,
+    "kind": "do",
+    "bodyStart": 728289,
+    "bodyEnd": 728515,
+    "condition": "System.nanoTime() < secondDeadline",
+    "ids": [
+      36
+    ],
+    "rows": [
+      {
+        "id": "36",
+        "line": "16066",
+        "class": "POLL",
+        "enclosing_method": "incrementalJoinedCase",
+        "reason": "polls the second ordinary replay until streamComplete; 45 s, 30 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 45s, 30ms, () -> publicCall(\"/api/v1/studio/executions/\" + <id>, null, 200, null), r -> r.path(\"streamComplete\").asBoolean())",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n            replay = publicCall(\"/api/v1/studio/executions/\" + second, null, 200, null);\n            if (replay.path(\"streamComplete\").asBoolean()) {\n              break;\n            }\n            Thread.sleep(30);\n          } while (System.nanoTime() < secondDeadline);",
+    "body": "\n            replay = publicCall(\"/api/v1/studio/executions/\" + second, null, 200, null);\n            if (replay.path(\"streamComplete\").asBoolean()) {\n              break;\n            }\n            Thread.sleep(30);\n          ",
+    "line": 16061
+  },
+  {
+    "start": 731583,
+    "end": 731888,
+    "kind": "do",
+    "bodyStart": 731587,
+    "bodyEnd": 731849,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      37
+    ],
+    "rows": [
+      {
+        "id": "37",
+        "line": "16139",
+        "class": "POLL",
+        "enclosing_method": "assertIncrementalTerminalRefusal",
+        "reason": "polls the session state until FAILED/UNKNOWN_OUTCOME/CANCELLED/EXPIRED/FINALIZING; 45 s, 25 ms",
+        "proposed_replacement": "awaitLast(\"session <id> state\", Duration.ofSeconds(45), 25ms, () -> sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText()), Set.of(\"FAILED\",\"UNKNOWN_OUTCOME\",\"CANCELLED\",\"EXPIRED\",\"FINALIZING\")::contains)",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(25);"
+      }
+    ],
+    "source": "do {\n      state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (List.of(\"FAILED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\", \"EXPIRED\", \"FINALIZING\")\n          .contains(state)) {\n        break;\n      }\n      Thread.sleep(25);\n    } while (System.nanoTime() < deadline);",
+    "body": "\n      state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (List.of(\"FAILED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\", \"EXPIRED\", \"FINALIZING\")\n          .contains(state)) {\n        break;\n      }\n      Thread.sleep(25);\n    ",
+    "line": 16133
+  },
+  {
+    "start": 743902,
+    "end": 744284,
+    "kind": "while",
+    "bodyStart": 743940,
+    "bodyEnd": 744283,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      38
+    ],
+    "rows": [
+      {
+        "id": "38",
+        "line": "16430",
+        "class": "POLL",
+        "enclosing_method": "confirmIncrementalPrefix",
+        "reason": "polls the session state until AWAITING_CLARIFICATION, failing at once if it is terminal; 45 s, 25 ms",
+        "proposed_replacement": "awaitLast(\"session <id> state\", Duration.ofSeconds(45), 25ms, () -> sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText()), s -> { assertThat(TERMINAL).doesNotContain(s); return s.equals(\"AWAITING_CLARIFICATION\"); }) (assertion inside the predicate keeps the fail-fast)",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(25);"
+      }
+    ],
+    "source": "while (System.nanoTime() < deadline) {\n      String state =\n          sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (state.equals(\"AWAITING_CLARIFICATION\")) {\n        break;\n      }\n      assertThat(List.of(\"FAILED\", \"UNKNOWN_OUTCOME\", \"EXPIRED\", \"CANCELLED\", \"FINALIZING\"))\n          .doesNotContain(state);\n      Thread.sleep(25);\n    }",
+    "body": "\n      String state =\n          sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (state.equals(\"AWAITING_CLARIFICATION\")) {\n        break;\n      }\n      assertThat(List.of(\"FAILED\", \"UNKNOWN_OUTCOME\", \"EXPIRED\", \"CANCELLED\", \"FINALIZING\"))\n          .doesNotContain(state);\n      Thread.sleep(25);\n    ",
+    "line": 16422
+  },
+  {
+    "start": 760066,
+    "end": 760348,
+    "kind": "do",
+    "bodyStart": 760070,
+    "bodyEnd": 760312,
+    "condition": "System.nanoTime() < until",
+    "ids": [
+      41
+    ],
+    "rows": [
+      {
+        "id": "41",
+        "line": "16775",
+        "class": "POLL",
+        "enclosing_method": "confirmIncrementalPrefix",
+        "reason": "polls the session state until CANCELLED/UNKNOWN_OUTCOME/FAILED after the yes/no race; 30 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"session <id> state\", Duration.ofSeconds(30), 20ms, () -> sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText()), Set.of(\"CANCELLED\",\"UNKNOWN_OUTCOME\",\"FAILED\")::contains)",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "do {\n        outcome = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n        if (List.of(\"CANCELLED\", \"UNKNOWN_OUTCOME\", \"FAILED\").contains(outcome)) {\n          break;\n        }\n        Thread.sleep(20);\n      } while (System.nanoTime() < until);",
+    "body": "\n        outcome = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n        if (List.of(\"CANCELLED\", \"UNKNOWN_OUTCOME\", \"FAILED\").contains(outcome)) {\n          break;\n        }\n        Thread.sleep(20);\n      ",
+    "line": 16770
+  },
+  {
+    "start": 762561,
+    "end": 762672,
+    "kind": "while",
+    "bodyStart": 762642,
+    "bodyEnd": 762671,
+    "condition": "!INCREMENTAL_DRIFT_CAPTURE.containsKey(id) && System.nanoTime() < until",
+    "ids": [
+      42
+    ],
+    "rows": [
+      {
+        "id": "42",
+        "line": "16825",
+        "class": "POLL",
+        "enclosing_method": "assertActualDriftCallbackAuthorityThenRelease",
+        "reason": "polls INCREMENTAL_DRIFT_CAPTURE; 20 s, 10 ms",
+        "proposed_replacement": "awaitLast(\"drift capture <id>\", 20s, 10ms, () -> INCREMENTAL_DRIFT_CAPTURE.containsKey(id), Boolean::booleanValue); keep the assertion",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (!INCREMENTAL_DRIFT_CAPTURE.containsKey(id) && System.nanoTime() < until) {\n      Thread.sleep(10);\n    }",
+    "body": "\n      Thread.sleep(10);\n    ",
+    "line": 16824
+  },
+  {
+    "start": 767966,
+    "end": 768075,
+    "kind": "while",
+    "bodyStart": 768045,
+    "bodyEnd": 768074,
+    "condition": "!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline",
+    "ids": [
+      43
+    ],
+    "rows": [
+      {
+        "id": "43",
+        "line": "16948",
+        "class": "POLL",
+        "enclosing_method": "assertPendingContextGuardsThenRelease",
+        "reason": "polls INCREMENTAL_ACK_ENTERED; 20 s, 10 ms",
+        "proposed_replacement": "awaitLast(\"v2 ACK entered <id>\", 20s, 10ms, () -> INCREMENTAL_ACK_ENTERED.contains(id), Boolean::booleanValue); keep the assertion",
+        "batch": "B2",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline) {\n      Thread.sleep(10);\n    }",
+    "body": "\n      Thread.sleep(10);\n    ",
+    "line": 16947
+  },
+  {
+    "start": 803663,
+    "end": 804065,
+    "kind": "while",
+    "bodyStart": 803704,
+    "bodyEnd": 804064,
+    "condition": "System.nanoTime() < learningEnd",
+    "ids": [
+      44
+    ],
+    "rows": [
+      {
+        "id": "44",
+        "line": "17716",
+        "class": "POLL",
+        "enclosing_method": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues (Order 1)",
+        "reason": "polls the learning session until FINALIZING or a terminal state; 90 s, 50 ms; the diagnostic file is written before the assertion, so a timeout must fall through",
+        "proposed_replacement": "awaitLast(\"session <id> state\", Duration.ofSeconds(90), 50ms, () -> sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText()), Set.of(\"FINALIZING\",\"FAILED\",\"EXPIRED\",\"UNKNOWN_OUTCOME\",\"CANCELLED\")::contains)",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(50);"
+      }
+    ],
+    "source": "while (System.nanoTime() < learningEnd) {\n      JsonNode current = sessions.transaction(() -> sessions.lock(id).document().deepCopy());\n      if (current.path(\"state\").asText().equals(\"FINALIZING\")) {\n        break;\n      }\n      if (List.of(\"FAILED\", \"EXPIRED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\")\n          .contains(current.path(\"state\").asText())) {\n        break;\n      }\n      Thread.sleep(50);\n    }",
+    "body": "\n      JsonNode current = sessions.transaction(() -> sessions.lock(id).document().deepCopy());\n      if (current.path(\"state\").asText().equals(\"FINALIZING\")) {\n        break;\n      }\n      if (List.of(\"FAILED\", \"EXPIRED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\")\n          .contains(current.path(\"state\").asText())) {\n        break;\n      }\n      Thread.sleep(50);\n    ",
+    "line": 17707
+  },
+  {
+    "start": 811783,
+    "end": 812110,
+    "kind": "do",
+    "bodyStart": 811787,
+    "bodyEnd": 812076,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      45
+    ],
+    "rows": [
+      {
+        "id": "45",
+        "line": "17896",
+        "class": "POLL",
+        "enclosing_method": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues (Order 1)",
+        "reason": "polls ui_test_executions.status until PASSED/FAILED/ERROR; 45 s, 50 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> terminal\", 45s, 50ms, () -> jdbc.queryForObject(\"SELECT status ...\", String.class, executionId), Set.of(\"PASSED\",\"FAILED\",\"ERROR\")::contains); keep the PASSED assertion",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(50);"
+      }
+    ],
+    "source": "do {\n          state =\n              jdbc.queryForObject(\n                  \"SELECT status FROM ui_test_executions WHERE id=?\", String.class, executionId);\n          if (List.of(\"PASSED\", \"FAILED\", \"ERROR\").contains(state)) {\n            break;\n          }\n          Thread.sleep(50);\n        } while (System.nanoTime() < end);",
+    "body": "\n          state =\n              jdbc.queryForObject(\n                  \"SELECT status FROM ui_test_executions WHERE id=?\", String.class, executionId);\n          if (List.of(\"PASSED\", \"FAILED\", \"ERROR\").contains(state)) {\n            break;\n          }\n          Thread.sleep(50);\n        ",
+    "line": 17889
+  },
+  {
+    "start": 818881,
+    "end": 819028,
+    "kind": "while",
+    "bodyStart": 818998,
+    "bodyEnd": 819027,
+    "condition": "!Files.exists(TEMP.resolve(\"initial-context-check-entered\"))\n        && System.nanoTime() < enteredDeadline",
+    "ids": [
+      47
+    ],
+    "rows": [
+      {
+        "id": "47",
+        "line": "18056",
+        "class": "POLL",
+        "enclosing_method": "queuedAndPreReadyRefusals (Order 2)",
+        "reason": "polls for the file initial-context-check-entered; 15 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"initial-context-check-entered\", 15s, 20ms, () -> Files.exists(TEMP.resolve(\"initial-context-check-entered\")), Boolean::booleanValue); keep the assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (!Files.exists(TEMP.resolve(\"initial-context-check-entered\"))\n        && System.nanoTime() < enteredDeadline) {\n      Thread.sleep(20);\n    }",
+    "body": "\n      Thread.sleep(20);\n    ",
+    "line": 18054
+  },
+  {
+    "start": 819762,
+    "end": 819988,
+    "kind": "while",
+    "bodyStart": 819797,
+    "bodyEnd": 819987,
+    "condition": "System.nanoTime() < until",
+    "ids": [
+      48
+    ],
+    "rows": [
+      {
+        "id": "48",
+        "line": "18079",
+        "class": "POLL",
+        "enclosing_method": "queuedAndPreReadyRefusals (Order 2)",
+        "reason": "polls the failed execution until streamComplete; 30 s, 50 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 30s, 50ms, () -> publicCall(\"/api/v1/studio/executions/\" + <id>, null, 200, null), r -> r.path(\"streamComplete\").asBoolean())",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(50);"
+      }
+    ],
+    "source": "while (System.nanoTime() < until) {\n      snapshot = publicCall(\"/api/v1/studio/executions/\" + id, null, 200, null);\n      if (snapshot.path(\"streamComplete\").asBoolean()) {\n        break;\n      }\n      Thread.sleep(50);\n    }",
+    "body": "\n      snapshot = publicCall(\"/api/v1/studio/executions/\" + id, null, 200, null);\n      if (snapshot.path(\"streamComplete\").asBoolean()) {\n        break;\n      }\n      Thread.sleep(50);\n    ",
+    "line": 18074
+  },
+  {
+    "start": 822199,
+    "end": 822313,
+    "kind": "while",
+    "bodyStart": 822283,
+    "bodyEnd": 822312,
+    "condition": "RECEIVED_FAILURE_REPORTS.size() < 2 && System.nanoTime() < captureDeadline",
+    "ids": [
+      49
+    ],
+    "rows": [
+      {
+        "id": "49",
+        "line": "18126",
+        "class": "POLL",
+        "enclosing_method": "queuedAndPreReadyRefusals (Order 2)",
+        "reason": "polls RECEIVED_FAILURE_REPORTS until it holds two reports; 2 s, 10 ms",
+        "proposed_replacement": "awaitLast(\"two FINAL failure reports\", 2s, 10ms, RECEIVED_FAILURE_REPORTS::size, n -> n >= 2); keep the assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (RECEIVED_FAILURE_REPORTS.size() < 2 && System.nanoTime() < captureDeadline) {\n      Thread.sleep(10);\n    }",
+    "body": "\n      Thread.sleep(10);\n    ",
+    "line": 18125
+  },
+  {
+    "start": 843348,
+    "end": 845402,
+    "kind": "while",
+    "bodyStart": 843386,
+    "bodyEnd": 845401,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      50
+    ],
+    "rows": [
+      {
+        "id": "50",
+        "line": "18636",
+        "class": "POLL",
+        "enclosing_method": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays (Order 4)",
+        "reason": "polls the committed missing-target checkpoint and, when seen, releases the async receipt (side effect inside the condition); 60 s, 10 ms",
+        "proposed_replacement": "await().alias(\"missing-target checkpoint + async receipt latch\").atMost(60s).pollInterval(10ms).pollDelay(0).pollInSameThread().until(() -> { ...; if (checkpoint != null && receiptRelease != null) { assert size; missingCheckpoint = checkpoint; receiptRelease.countDown(); return true; } return false; }); keep the isNotNull assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (System.nanoTime() < deadline) {\n        JsonNode checkpoint =\n            sessions.transaction(\n                () -> {\n                  var session = sessions.lock(id);\n                  JsonNode progress = session.progress();\n                  JsonNode marker = progress.path(\"translationAcquisition\");\n                  JsonNode active = marker.path(\"active\");\n                  boolean missing = true;\n                  for (JsonNode node : progress.path(\"observation\").path(\"nodes\")) {\n                    if (node.path(\"name\").asText().equals(\"Confirmation\")) {\n                      missing = false;\n                    }\n                  }\n                  for (JsonNode action : sessions.actions(id)) {\n                    if (action.path(\"coordinate\").path(\"stepId\").asText().equals(THREE)\n                        && action.path(\"coordinate\").path(\"ordinal\").asInt() == 0\n                        && action.path(\"state\").asText().equals(\"SUCCEEDED\")\n                        && marker.path(\"totalExtraPolls\").asInt() > 0\n                        && active.path(\"pending\").isNull()\n                        && active.path(\"lastGeneration\").equals(progress.path(\"generation\"))\n                        && progress.path(\"generation\").asInt() > action.path(\"generation\").asInt()\n                        && missing) {\n                      return C.object()\n                          .put(\"generation\", progress.path(\"generation\").asInt())\n                          .put(\"extraPolls\", marker.path(\"totalExtraPolls\").asInt())\n                          .put(\"observationHash\", progress.path(\"observationHash\").asText());\n                    }\n                  }\n                  return null;\n                });\n        var receiptRelease = ASYNC_RECEIPTS.get(beforeNavigations + 1);\n        if (checkpoint != null && receiptRelease != null) {\n          assertThat(RECEIPTS).hasSize(beforeReceipts + 1);\n          missingCheckpoint = checkpoint;\n          receiptRelease.countDown();\n          break;\n        }\n        Thread.sleep(10);\n      }",
+    "body": "\n        JsonNode checkpoint =\n            sessions.transaction(\n                () -> {\n                  var session = sessions.lock(id);\n                  JsonNode progress = session.progress();\n                  JsonNode marker = progress.path(\"translationAcquisition\");\n                  JsonNode active = marker.path(\"active\");\n                  boolean missing = true;\n                  for (JsonNode node : progress.path(\"observation\").path(\"nodes\")) {\n                    if (node.path(\"name\").asText().equals(\"Confirmation\")) {\n                      missing = false;\n                    }\n                  }\n                  for (JsonNode action : sessions.actions(id)) {\n                    if (action.path(\"coordinate\").path(\"stepId\").asText().equals(THREE)\n                        && action.path(\"coordinate\").path(\"ordinal\").asInt() == 0\n                        && action.path(\"state\").asText().equals(\"SUCCEEDED\")\n                        && marker.path(\"totalExtraPolls\").asInt() > 0\n                        && active.path(\"pending\").isNull()\n                        && active.path(\"lastGeneration\").equals(progress.path(\"generation\"))\n                        && progress.path(\"generation\").asInt() > action.path(\"generation\").asInt()\n                        && missing) {\n                      return C.object()\n                          .put(\"generation\", progress.path(\"generation\").asInt())\n                          .put(\"extraPolls\", marker.path(\"totalExtraPolls\").asInt())\n                          .put(\"observationHash\", progress.path(\"observationHash\").asText());\n                    }\n                  }\n                  return null;\n                });\n        var receiptRelease = ASYNC_RECEIPTS.get(beforeNavigations + 1);\n        if (checkpoint != null && receiptRelease != null) {\n          assertThat(RECEIPTS).hasSize(beforeReceipts + 1);\n          missingCheckpoint = checkpoint;\n          receiptRelease.countDown();\n          break;\n        }\n        Thread.sleep(10);\n      ",
+    "line": 18598
+  },
+  {
+    "start": 847754,
+    "end": 848013,
+    "kind": "do",
+    "bodyStart": 847758,
+    "bodyEnd": 847979,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      51
+    ],
+    "rows": [
+      {
+        "id": "51",
+        "line": "18693",
+        "class": "POLL",
+        "enclosing_method": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays (Order 4)",
+        "reason": "polls the replay until streamComplete; 45 s, 30 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 45s, 30ms, () -> publicCall(\"/api/v1/studio/executions/\" + <id>, null, 200, null), r -> r.path(\"streamComplete\").asBoolean())",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n          snapshot = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n          if (snapshot.path(\"streamComplete\").asBoolean()) {\n            break;\n          }\n          Thread.sleep(30);\n        } while (System.nanoTime() < end);",
+    "body": "\n          snapshot = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n          if (snapshot.path(\"streamComplete\").asBoolean()) {\n            break;\n          }\n          Thread.sleep(30);\n        ",
+    "line": 18688
+  },
+  {
+    "start": 850999,
+    "end": 851249,
+    "kind": "while",
+    "bodyStart": 851037,
+    "bodyEnd": 851248,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      52
+    ],
+    "rows": [
+      {
+        "id": "52",
+        "line": "18762",
+        "class": "POLL",
+        "enclosing_method": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance (Order 5)",
+        "reason": "polls the session state until AWAITING_CLARIFICATION; 20 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"session <id> state\", Duration.ofSeconds(20), 20ms, () -> sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText()), \"AWAITING_CLARIFICATION\"::equals)",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (System.nanoTime() < deadline) {\n        state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n        if (state.equals(\"AWAITING_CLARIFICATION\")) {\n          break;\n        }\n        Thread.sleep(20);\n      }",
+    "body": "\n        state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n        if (state.equals(\"AWAITING_CLARIFICATION\")) {\n          break;\n        }\n        Thread.sleep(20);\n      ",
+    "line": 18757
+  },
+  {
+    "start": 855198,
+    "end": 855617,
+    "kind": "while",
+    "bodyStart": 855233,
+    "bodyEnd": 855616,
+    "condition": "System.nanoTime() < until",
+    "ids": [
+      54
+    ],
+    "rows": [
+      {
+        "id": "54",
+        "line": "18864",
+        "class": "POLL",
+        "enclosing_method": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork (Order 6)",
+        "reason": "polls the acquisition marker until totalExtraPolls > 0 and the async receipt latch exists; 30 s, 10 ms",
+        "proposed_replacement": "awaitLast(\"real passive wait\", 30s, 10ms, () -> sessions.transaction(() -> sessions.lock(id)...marker), m -> m.path(\"totalExtraPolls\").asInt() > 0 && ASYNC_RECEIPTS.containsKey(navigations + 1)); keep the isNotNull assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (System.nanoTime() < until) {\n          var current = sessions.transaction(() -> sessions.lock(id));\n          JsonNode marker = current.progress().path(\"translationAcquisition\");\n          if (marker.path(\"totalExtraPolls\").asInt() > 0\n              && ASYNC_RECEIPTS.containsKey(navigations + 1)) {\n            checkpoint = marker.deepCopy();\n            break;\n          }\n          Thread.sleep(10);\n        }",
+    "body": "\n          var current = sessions.transaction(() -> sessions.lock(id));\n          JsonNode marker = current.progress().path(\"translationAcquisition\");\n          if (marker.path(\"totalExtraPolls\").asInt() > 0\n              && ASYNC_RECEIPTS.containsKey(navigations + 1)) {\n            checkpoint = marker.deepCopy();\n            break;\n          }\n          Thread.sleep(10);\n        ",
+    "line": 18856
+  },
+  {
+    "start": 856146,
+    "end": 856389,
+    "kind": "while",
+    "bodyStart": 856181,
+    "bodyEnd": 856388,
+    "condition": "System.nanoTime() < until",
+    "ids": [
+      55
+    ],
+    "rows": [
+      {
+        "id": "55",
+        "line": "18882",
+        "class": "POLL",
+        "enclosing_method": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork (Order 6)",
+        "reason": "polls the session state until it equals the expected terminal; 10 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"session <id> state\", Duration.ofSeconds(10), 20ms, () -> sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText()), expected::equals)",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (System.nanoTime() < until) {\n          state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n          if (state.equals(expected)) {\n            break;\n          }\n          Thread.sleep(20);\n        }",
+    "body": "\n          state = sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n          if (state.equals(expected)) {\n            break;\n          }\n          Thread.sleep(20);\n        ",
+    "line": 18877
+  },
+  {
+    "start": 864900,
+    "end": 865159,
+    "kind": "do",
+    "bodyStart": 864904,
+    "bodyEnd": 865125,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      58
+    ],
+    "rows": [
+      {
+        "id": "58",
+        "line": "19062",
+        "class": "POLL",
+        "enclosing_method": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays (Order 7)",
+        "reason": "polls the replay until streamComplete; 45 s, 30 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 45s, 30ms, () -> publicCall(\"/api/v1/studio/executions/\" + <id>, null, 200, null), r -> r.path(\"streamComplete\").asBoolean())",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n          snapshot = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n          if (snapshot.path(\"streamComplete\").asBoolean()) {\n            break;\n          }\n          Thread.sleep(30);\n        } while (System.nanoTime() < end);",
+    "body": "\n          snapshot = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n          if (snapshot.path(\"streamComplete\").asBoolean()) {\n            break;\n          }\n          Thread.sleep(30);\n        ",
+    "line": 19057
+  },
+  {
+    "start": 873500,
+    "end": 873932,
+    "kind": "while",
+    "bodyStart": 873533,
+    "bodyEnd": 873931,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      60
+    ],
+    "rows": [
+      {
+        "id": "60",
+        "line": "19251",
+        "class": "POLL",
+        "enclosing_method": "awaitState",
+        "reason": "polls the session state until it equals <expected>; throws AssertionError at once on a terminal state or after 30 s; 20 ms",
+        "proposed_replacement": "await().alias(\"session state <expected>\").atMost(30s).pollInterval(20ms).pollDelay(0).pollInSameThread().until(() -> { s = state; if TERMINAL.contains(s) throw new AssertionError(\"Expected ... but got ...\"); return s.equals(expected); }); catch ConditionTimeoutException -> the same AssertionError(\"Expected ...; logs ...\")",
+        "batch": "B3",
+        "on_timeout": "MAP_EXCEPTION",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (System.nanoTime() < end) {\n      String state =\n          sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (state.equals(expected)) {\n        return;\n      }\n      if (List.of(\"FAILED\", \"EXPIRED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\").contains(state)) {\n        throw new AssertionError(\"Expected \" + expected + \" but got \" + state + \"; logs \" + TEMP);\n      }\n      Thread.sleep(20);\n    }",
+    "body": "\n      String state =\n          sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (state.equals(expected)) {\n        return;\n      }\n      if (List.of(\"FAILED\", \"EXPIRED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\").contains(state)) {\n        throw new AssertionError(\"Expected \" + expected + \" but got \" + state + \"; logs \" + TEMP);\n      }\n      Thread.sleep(20);\n    ",
+    "line": 19242
+  },
+  {
+    "start": 889511,
+    "end": 889839,
+    "kind": "while",
+    "bodyStart": 889549,
+    "bodyEnd": 889838,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      61
+    ],
+    "rows": [
+      {
+        "id": "61",
+        "line": "19589",
+        "class": "POLL",
+        "enclosing_method": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel (Order 9)",
+        "reason": "polls ui_test_executions.status until PASSED/FAILED/ERROR; 45 s, 50 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> terminal\", 45s, 50ms, () -> jdbc.queryForObject(\"SELECT status ...\", String.class, execution), Set.of(\"PASSED\",\"FAILED\",\"ERROR\")::contains); keep the PASSED assertion",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(50);"
+      }
+    ],
+    "source": "while (System.nanoTime() < deadline) {\n          status =\n              jdbc.queryForObject(\n                  \"SELECT status FROM ui_test_executions WHERE id=?\", String.class, execution);\n          if (List.of(\"PASSED\", \"FAILED\", \"ERROR\").contains(status)) {\n            break;\n          }\n          Thread.sleep(50);\n        }",
+    "body": "\n          status =\n              jdbc.queryForObject(\n                  \"SELECT status FROM ui_test_executions WHERE id=?\", String.class, execution);\n          if (List.of(\"PASSED\", \"FAILED\", \"ERROR\").contains(status)) {\n            break;\n          }\n          Thread.sleep(50);\n        ",
+    "line": 19582
+  },
+  {
+    "start": 901236,
+    "end": 901542,
+    "kind": "do",
+    "bodyStart": 901240,
+    "bodyEnd": 901503,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      62
+    ],
+    "rows": [
+      {
+        "id": "62",
+        "line": "19835",
+        "class": "POLL",
+        "enclosing_method": "awaitGuidedVideoSettled",
+        "reason": "polls GET /result until evidence.video.status is no longer PROCESSING; 45 s, 100 ms; validates the schema on the last result",
+        "proposed_replacement": "awaitLast(\"guided video settled <session>\", 45s, 100ms, () -> publicCall(\".../result\", null, 200, null), r -> !\"PROCESSING\".equals(r.path(\"evidence\").path(\"video\").path(\"status\").asText())); then C.validate as today",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(100);"
+      }
+    ],
+    "source": "do {\n      result =\n          publicCall(\"/api/v1/studio/guided-sessions/\" + sessionId + \"/result\", null, 200, null);\n      if (!result.path(\"evidence\").path(\"video\").path(\"status\").asText().equals(\"PROCESSING\")) {\n        break;\n      }\n      Thread.sleep(100);\n    } while (System.nanoTime() < deadline);",
+    "body": "\n      result =\n          publicCall(\"/api/v1/studio/guided-sessions/\" + sessionId + \"/result\", null, 200, null);\n      if (!result.path(\"evidence\").path(\"video\").path(\"status\").asText().equals(\"PROCESSING\")) {\n        break;\n      }\n      Thread.sleep(100);\n    ",
+    "line": 19829
+  },
+  {
+    "start": 917046,
+    "end": 918857,
+    "kind": "while",
+    "bodyStart": 917084,
+    "bodyEnd": 918856,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      63
+    ],
+    "rows": [
+      {
+        "id": "63",
+        "line": "20207",
+        "class": "POLL",
+        "enclosing_method": "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes (Order 9)",
+        "reason": "polls (assertion inside) until a live .webm exists in the recorder directory after the first dispatch, deletes it and stops; 90 s, 20 ms",
+        "proposed_replacement": "await().alias(\"live recorder .webm after first dispatch\").atMost(90s).pollInterval(20ms).pollDelay(0).pollInSameThread().until(() -> { ...unchanged body; return injected; }); the terminal-state assertion stays inside the condition; keep the isNotNull assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (System.nanoTime() < deadline) {\n      JsonNode launches = p3LaunchCounter();\n      Integer dispatched =\n          jdbc.queryForObject(\n              \"SELECT count(*) FROM studio_guided_actions WHERE session_id=?\"\n                  + \" AND (document->>'dispatchCount')::integer = 1\",\n              Integer.class,\n              sessionId);\n      String state =\n          jdbc.queryForObject(\n              \"SELECT state FROM studio_guided_sessions WHERE session_id=?\",\n              String.class,\n              sessionId);\n      assertThat(state)\n          .as(\"the recorder produced a live file before the recording was closed; logs %s\", TEMP)\n          .isNotIn(\n              \"FINALIZING\",\n              \"SUCCEEDED\",\n              \"PUBLICATION_CONFLICT\",\n              \"FAILED\",\n              \"UNKNOWN_OUTCOME\",\n              \"CANCELLED\",\n              \"EXPIRED\");\n      if (launches.path(\"count\").asLong() > launchesBefore\n          && launches.path(\"lastRecordVideoDir\").isTextual()\n          && dispatched != null\n          && dispatched > 0) {\n        Path directory = Path.of(launches.path(\"lastRecordVideoDir\").asText());\n        java.util.List<Path> live;\n        try (var files = Files.list(directory)) {\n          live =\n              files\n                  .filter(\n                      file ->\n                          file.getFileName().toString().endsWith(\".webm\")\n                              && Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS))\n                  .toList();\n        }\n        if (!live.isEmpty()) {\n          stateAtInjection = state;\n          recorderDirectory = directory;\n          for (Path recorded : live) {\n            Files.delete(recorded);\n            removed++;\n          }\n          break;\n        }\n      }\n      Thread.sleep(20);\n    }",
+    "body": "\n      JsonNode launches = p3LaunchCounter();\n      Integer dispatched =\n          jdbc.queryForObject(\n              \"SELECT count(*) FROM studio_guided_actions WHERE session_id=?\"\n                  + \" AND (document->>'dispatchCount')::integer = 1\",\n              Integer.class,\n              sessionId);\n      String state =\n          jdbc.queryForObject(\n              \"SELECT state FROM studio_guided_sessions WHERE session_id=?\",\n              String.class,\n              sessionId);\n      assertThat(state)\n          .as(\"the recorder produced a live file before the recording was closed; logs %s\", TEMP)\n          .isNotIn(\n              \"FINALIZING\",\n              \"SUCCEEDED\",\n              \"PUBLICATION_CONFLICT\",\n              \"FAILED\",\n              \"UNKNOWN_OUTCOME\",\n              \"CANCELLED\",\n              \"EXPIRED\");\n      if (launches.path(\"count\").asLong() > launchesBefore\n          && launches.path(\"lastRecordVideoDir\").isTextual()\n          && dispatched != null\n          && dispatched > 0) {\n        Path directory = Path.of(launches.path(\"lastRecordVideoDir\").asText());\n        java.util.List<Path> live;\n        try (var files = Files.list(directory)) {\n          live =\n              files\n                  .filter(\n                      file ->\n                          file.getFileName().toString().endsWith(\".webm\")\n                              && Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS))\n                  .toList();\n        }\n        if (!live.isEmpty()) {\n          stateAtInjection = state;\n          recorderDirectory = directory;\n          for (Path recorded : live) {\n            Files.delete(recorded);\n            removed++;\n          }\n          break;\n        }\n      }\n      Thread.sleep(20);\n    ",
+    "line": 20159
+  },
+  {
+    "start": 975568,
+    "end": 975711,
+    "kind": "while",
+    "bodyStart": 975677,
+    "bodyEnd": 975710,
+    "condition": "System.nanoTime() < stoppedBy\n          && !p6Status(cut.parent.toHandle()).state().startsWith(\"T\")",
+    "ids": [
+      64
+    ],
+    "rows": [
+      {
+        "id": "64",
+        "line": "21459",
+        "class": "POLL",
+        "enclosing_method": "p6CommittedChildCut (Order 26, through p3Case)",
+        "reason": "polls until the owned parent process shows state T after SIGSTOP; 5 s, 10 ms; the assertion follows",
+        "proposed_replacement": "awaitLast(\"owned parent STOPPED\", 5s, 10ms, () -> p6Status(cut.parent.toHandle()).state(), s -> s.startsWith(\"T\")); keep p6SameProcess and the assertion",
+        "batch": "B4",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (System.nanoTime() < stoppedBy\n          && !p6Status(cut.parent.toHandle()).state().startsWith(\"T\")) {\n        Thread.sleep(10);\n      }",
+    "body": "\n        Thread.sleep(10);\n      ",
+    "line": 21457
+  },
+  {
+    "start": 993185,
+    "end": 993895,
+    "kind": "do",
+    "bodyStart": 993189,
+    "bodyEnd": 993856,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      66
+    ],
+    "rows": [
+      {
+        "id": "66",
+        "line": "21899",
+        "class": "POLL",
+        "enclosing_method": "p6AwaitProcesses",
+        "reason": "polls until owned processes are reaped (gone) or execution-terminated; caller-supplied deadline, 20 ms; throws IllegalStateException on timeout",
+        "proposed_replacement": "await().alias(\"owned processes gone|terminated\").atMost(remaining).pollInterval(20ms).pollDelay(0).pollInSameThread().until(() -> complete(...)); catch ConditionTimeoutException -> the same IllegalStateException text",
+        "batch": "B4",
+        "on_timeout": "MAP_EXCEPTION",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "do {\n      boolean complete = true;\n      for (P6OwnedPid pid : owned) {\n        if (pid.handle().isAlive()) {\n          var started = pid.handle().info().startInstant();\n          if (!pid.handle().isAlive()) {\n            continue;\n          }\n          assertThat(started.map(pid.started()::equals).orElse(false)).isTrue();\n          if (gone) {\n            complete = false;\n          } else {\n            String state = p6Status(pid.handle()).state();\n            if (!state.startsWith(\"Z\") && !\"X\".equals(state)) {\n              complete = false;\n            }\n          }\n        }\n      }\n      if (complete) {\n        return;\n      }\n      Thread.sleep(20);\n    } while (System.nanoTime() < deadline);",
+    "body": "\n      boolean complete = true;\n      for (P6OwnedPid pid : owned) {\n        if (pid.handle().isAlive()) {\n          var started = pid.handle().info().startInstant();\n          if (!pid.handle().isAlive()) {\n            continue;\n          }\n          assertThat(started.map(pid.started()::equals).orElse(false)).isTrue();\n          if (gone) {\n            complete = false;\n          } else {\n            String state = p6Status(pid.handle()).state();\n            if (!state.startsWith(\"Z\") && !\"X\".equals(state)) {\n              complete = false;\n            }\n          }\n        }\n      }\n      if (complete) {\n        return;\n      }\n      Thread.sleep(20);\n    ",
+    "line": 21877
+  },
+  {
+    "start": 999957,
+    "end": 1000106,
+    "kind": "while",
+    "bodyStart": 1000068,
+    "bodyEnd": 1000105,
+    "condition": "!Files.exists(TEMP.resolve(\"initial-context-check-entered\"))\n            && System.nanoTime() < until",
+    "ids": [
+      67
+    ],
+    "rows": [
+      {
+        "id": "67",
+        "line": "22043",
+        "class": "POLL",
+        "enclosing_method": "p7FaultAndRetry (Order 27)",
+        "reason": "polls for the file initial-context-check-entered; 15 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"initial-context-check-entered\", 15s, 20ms, () -> Files.exists(TEMP.resolve(\"initial-context-check-entered\")), Boolean::booleanValue); keep the assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (!Files.exists(TEMP.resolve(\"initial-context-check-entered\"))\n            && System.nanoTime() < until) {\n          Thread.sleep(20);\n        }",
+    "body": "\n          Thread.sleep(20);\n        ",
+    "line": 22041
+  },
+  {
+    "start": 1013052,
+    "end": 1013197,
+    "kind": "while",
+    "bodyStart": 1013163,
+    "bodyEnd": 1013196,
+    "condition": "!Files.exists(TEMP.resolve(\"initial-context-check-entered\"))\n          && System.nanoTime() < entered",
+    "ids": [
+      69
+    ],
+    "rows": [
+      {
+        "id": "69",
+        "line": "22322",
+        "class": "POLL",
+        "enclosing_method": "p8PreReadySelfStop (Order 38)",
+        "reason": "polls for the file initial-context-check-entered; 15 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"initial-context-check-entered\", 15s, 20ms, () -> Files.exists(...), Boolean::booleanValue); keep the assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (!Files.exists(TEMP.resolve(\"initial-context-check-entered\"))\n          && System.nanoTime() < entered) {\n        Thread.sleep(20);\n      }",
+    "body": "\n        Thread.sleep(20);\n      ",
+    "line": 22320
+  },
+  {
+    "start": 1014030,
+    "end": 1014169,
+    "kind": "while",
+    "bodyStart": 1014135,
+    "bodyEnd": 1014168,
+    "condition": "System.nanoTime() < stoppedBy\n          && !p6Status(parent.toHandle()).state().startsWith(\"T\")",
+    "ids": [
+      70
+    ],
+    "rows": [
+      {
+        "id": "70",
+        "line": "22342",
+        "class": "POLL",
+        "enclosing_method": "p8PreReadySelfStop (Order 38)",
+        "reason": "polls until the owned ordinary parent shows state T after SIGSTOP; 5 s, 10 ms; the assertion follows",
+        "proposed_replacement": "awaitLast(\"owned ordinary parent STOPPED\", 5s, 10ms, () -> p6Status(parent.toHandle()).state(), s -> s.startsWith(\"T\")); keep the assertion",
+        "batch": "B4",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (System.nanoTime() < stoppedBy\n          && !p6Status(parent.toHandle()).state().startsWith(\"T\")) {\n        Thread.sleep(10);\n      }",
+    "body": "\n        Thread.sleep(10);\n      ",
+    "line": 22340
+  },
+  {
+    "start": 1014605,
+    "end": 1014890,
+    "kind": "while",
+    "bodyStart": 1014645,
+    "bodyEnd": 1014889,
+    "condition": "System.nanoTime() < selfStopBy",
+    "ids": [
+      72
+    ],
+    "rows": [
+      {
+        "id": "72",
+        "line": "22360",
+        "class": "POLL",
+        "enclosing_method": "p8PreReadySelfStop (Order 38)",
+        "reason": "polls runner log lines for run.cancel_requested; 15 s, 20 ms; no assertion on timeout in the original (the terminal assertions follow)",
+        "proposed_replacement": "awaitLast(\"run.cancel_requested log line\", 15s, 20ms, () -> p8RunnerLines(logStart, execution), lines -> lines.stream().anyMatch(...)); do not add an assertion",
+        "batch": "B3",
+        "on_timeout": "FALL_THROUGH",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (System.nanoTime() < selfStopBy) {\n        runnerLines = p8RunnerLines(logStart, execution);\n        if (runnerLines.stream()\n            .anyMatch(line -> \"run.cancel_requested\".equals(line.path(\"event\").asText()))) {\n          break;\n        }\n        Thread.sleep(20);\n      }",
+    "body": "\n        runnerLines = p8RunnerLines(logStart, execution);\n        if (runnerLines.stream()\n            .anyMatch(line -> \"run.cancel_requested\".equals(line.path(\"event\").asText()))) {\n          break;\n        }\n        Thread.sleep(20);\n      ",
+    "line": 22354
+  },
+  {
+    "start": 1059447,
+    "end": 1060414,
+    "kind": "while",
+    "bodyStart": 1059485,
+    "bodyEnd": 1060413,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      73
+    ],
+    "rows": [
+      {
+        "id": "73",
+        "line": "23338",
+        "class": "POLL",
+        "enclosing_method": "p14AwaitAcquisitionWindow (Orders 33-36 through p14Captured)",
+        "reason": "polls the acquisition snapshot for a live window with extraPolls > 0 and no pending request; 30 s, 20 ms; assertions inside the loop; throws AssertionError \"...not observed\"",
+        "proposed_replacement": "await().alias(\"C14 acquisition window\").atMost(30s).pollInterval(20ms).pollDelay(0).pollInSameThread().until(() -> { snapshot; terminal-state assertion; return window live }); catch ConditionTimeoutException -> the same AssertionError text",
+        "batch": "B3",
+        "on_timeout": "MAP_EXCEPTION",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (System.nanoTime() < deadline) {\n      ObjectNode current = p14AcquisitionSnapshot(session);\n      String state = current.path(\"document\").path(\"state\").asText();\n      assertThat(List.of(\"FAILED\", \"EXPIRED\", \"CANCELLED\", \"UNKNOWN_OUTCOME\").contains(state))\n          .as(\"genuine Field acquisition prerequisite before any terminal substitute\")\n          .isFalse();\n      JsonNode active = current.path(\"progress\").path(\"translationAcquisition\").path(\"active\");\n      if (active.path(\"window\").isObject()\n          && active.path(\"extraPolls\").asInt() > 0\n          && active.path(\"pending\").isNull()) {\n        p14AssertAcquisitionIdentity(current, recipe);\n        assertThat(\n                Instant.parse(active.path(\"window\").path(\"deadline\").asText())\n                    .isAfter(Instant.now()))\n            .as(\"real acquisition window is still live at phase anchor\")\n            .isTrue();\n        return current;\n      }\n      Thread.sleep(20);\n    }",
+    "body": "\n      ObjectNode current = p14AcquisitionSnapshot(session);\n      String state = current.path(\"document\").path(\"state\").asText();\n      assertThat(List.of(\"FAILED\", \"EXPIRED\", \"CANCELLED\", \"UNKNOWN_OUTCOME\").contains(state))\n          .as(\"genuine Field acquisition prerequisite before any terminal substitute\")\n          .isFalse();\n      JsonNode active = current.path(\"progress\").path(\"translationAcquisition\").path(\"active\");\n      if (active.path(\"window\").isObject()\n          && active.path(\"extraPolls\").asInt() > 0\n          && active.path(\"pending\").isNull()) {\n        p14AssertAcquisitionIdentity(current, recipe);\n        assertThat(\n                Instant.parse(active.path(\"window\").path(\"deadline\").asText())\n                    .isAfter(Instant.now()))\n            .as(\"real acquisition window is still live at phase anchor\")\n            .isTrue();\n        return current;\n      }\n      Thread.sleep(20);\n    ",
+    "line": 23320
+  },
+  {
+    "start": 1077156,
+    "end": 1077298,
+    "kind": "while",
+    "bodyStart": 1077264,
+    "bodyEnd": 1077297,
+    "condition": "p3ParentEvents(logStart, receipts, true)[1] == 0\n          && System.nanoTime() < drainingDeadline",
+    "ids": [
+      74
+    ],
+    "rows": [
+      {
+        "id": "74",
+        "line": "23723",
+        "class": "POLL",
+        "enclosing_method": "p3ConcurrentScopeReplays (Order 12)",
+        "reason": "polls the parent log for the draining event after SIGTERM; 2 s, 10 ms; the assertion follows",
+        "proposed_replacement": "awaitLast(\"parent draining event\", 2s, 10ms, () -> p3ParentEvents(logStart, receipts, true)[1], n -> n != 0); keep the assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (p3ParentEvents(logStart, receipts, true)[1] == 0\n          && System.nanoTime() < drainingDeadline) {\n        Thread.sleep(10);\n      }",
+    "body": "\n        Thread.sleep(10);\n      ",
+    "line": 23721
+  },
+  {
+    "start": 1084077,
+    "end": 1084261,
+    "kind": "do",
+    "bodyStart": 1084081,
+    "bodyEnd": 1084222,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      75
+    ],
+    "rows": [
+      {
+        "id": "75",
+        "line": "23891",
+        "class": "POLL",
+        "enclosing_method": "p3AwaitParentStarted",
+        "reason": "polls the parent log until the startup event is seen; caller deadline, 10 ms; assertions follow",
+        "proposed_replacement": "awaitLast(\"parent startup event\", remaining, 10ms, () -> p3ParentEvents(offset, List.of(), false)[0], n -> n != 0); keep both assertions (including the deadline assertion)",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "do {\n      observed = p3ParentEvents(offset, List.of(), false)[0];\n      if (observed != 0) {\n        break;\n      }\n      Thread.sleep(10);\n    } while (System.nanoTime() < deadline);",
+    "body": "\n      observed = p3ParentEvents(offset, List.of(), false)[0];\n      if (observed != 0) {\n        break;\n      }\n      Thread.sleep(10);\n    ",
+    "line": 23886
+  },
+  {
+    "start": 1129333,
+    "end": 1129814,
+    "kind": "do",
+    "bodyStart": 1129337,
+    "bodyEnd": 1129775,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      77
+    ],
+    "rows": [
+      {
+        "id": "77",
+        "line": "24957",
+        "class": "POLL",
+        "enclosing_method": "p4AwaitRevocationObserverCompletion",
+        "reason": "polls the revocation observer state until all witnesses settled; caller deadline, 20 ms; assertion follows",
+        "proposed_replacement": "awaitLast(\"revocation observer settled\", remaining, 20ms, () -> { synchronized (state) { return settled(state); } }, Boolean::booleanValue); keep the assertions",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "do {\n      synchronized (state) {\n        complete =\n            state.active.isEmpty()\n                && state.reasonProved\n                && state.restored\n                && state.residualSettlements == 1\n                && state.residualFulfilled != null\n                && state.ackBracketMicros > 0\n                && (state.path == 2 || state.closed);\n      }\n      if (complete) {\n        break;\n      }\n      Thread.sleep(20);\n    } while (System.nanoTime() < deadline);",
+    "body": "\n      synchronized (state) {\n        complete =\n            state.active.isEmpty()\n                && state.reasonProved\n                && state.restored\n                && state.residualSettlements == 1\n                && state.residualFulfilled != null\n                && state.ackBracketMicros > 0\n                && (state.path == 2 || state.closed);\n      }\n      if (complete) {\n        break;\n      }\n      Thread.sleep(20);\n    ",
+    "line": 24943
+  },
+  {
+    "start": 1131946,
+    "end": 1134807,
+    "kind": "do",
+    "bodyStart": 1131950,
+    "bodyEnd": 1134768,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      78
+    ],
+    "rows": [
+      {
+        "id": "78",
+        "line": "25056",
+        "class": "POLL",
+        "enclosing_method": "p4SealPrivateProducersAfterOwnerCleanup",
+        "reason": "polls producer sample files until the final ACK/failure sample matches; caller deadline, 20 ms; assertion follows",
+        "proposed_replacement": "awaitLast(\"producer final sample\", remaining, 20ms, () -> sampleOrNull(...), Objects::nonNull); keep the assertions",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "do {\n        p4RequirePrivateProducerRoot(root);\n        if (Files.exists(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {\n          if (Files.isSymbolicLink(file)\n              || !Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)\n              || Files.size(file) > 1024\n              || !file.toRealPath().getParent().equals(root.toRealPath())\n              || !Files.getPosixFilePermissions(file)\n                  .equals(java.nio.file.attribute.PosixFilePermissions.fromString(\"rw-------\"))) {\n            throw new IOException(\"Private producer sample confinement failed\");\n          }\n          p4RequirePrivateProducerRoot(root);\n          JsonNode sample = C.parse(Files.readString(file, StandardCharsets.UTF_8));\n          if (!sample.isObject()\n              || sample.size()\n                  != (state.c6Kind == 3 && producer == 1 ? 19 : state.c6Kind == 0 ? 10 : 13)\n                      // R10-rev2 I2: producer 2 also carries the control-read numbers.\n                      + (producer == 2 ? P10_PRODUCER2_READ_KEYS.size() : 0)\n              || sample.path(\"case\").asInt(-1) != state.ordinal\n              || sample.path(\"producer\").asInt(-1) != producer\n              || sample.path(\"epoch\").asInt(-1) != state.ordinal\n              || sample.path(\"role\").asInt(-1) != producer\n              || !sample.path(\"failed\").isBoolean()\n              || !sample.path(\"sealed\").isBoolean()) {\n            throw new IOException(\"Private producer sample identity failed\");\n          }\n          if (state.c6Kind == 3 && producer == 1) {\n            for (String field :\n                List.of(\"highPending\", \"cdpCreationPending\", \"nativeActive\", \"restoreAttempt\")) {\n              assertThat(p4Number(sample, field)).isLessThanOrEqualTo(1000000);\n            }\n            assertThat(p4Number(sample, \"busy\")).isBetween(0, 2);\n            assertThat(p4Number(sample, \"restoreRefusal\")).isBetween(0, 5);\n          }\n          boolean managedLoss = state.c6Kind == 3 && producer == 1;\n          if (managedLoss\n              ? state.c6NativeClose\n                  && state.restored\n                  && state.closed\n                  && !sample.path(\"sealed\").booleanValue()\n                  && p4Number(sample, \"busy\") == 0\n                  && p4Number(sample, \"restoreAttempt\") > 0\n                  && p4Number(sample, \"restoreRefusal\") == 0\n                  && p4Number(sample, \"cdpCreationPending\") == 0\n                  && p4Number(sample, \"originalPending\") == 0\n                  && p4Number(sample, \"pending\") == p4Number(sample, \"highPending\")\n                  && p4Number(sample, \"sent\") == p4Number(sample, \"acked\")\n              : sample.path(\"sealed\").booleanValue()) {\n            finalSample = sample;\n            break;\n          }\n        }\n        Thread.sleep(20);\n      } while (System.nanoTime() < deadline);",
+    "body": "\n        p4RequirePrivateProducerRoot(root);\n        if (Files.exists(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {\n          if (Files.isSymbolicLink(file)\n              || !Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)\n              || Files.size(file) > 1024\n              || !file.toRealPath().getParent().equals(root.toRealPath())\n              || !Files.getPosixFilePermissions(file)\n                  .equals(java.nio.file.attribute.PosixFilePermissions.fromString(\"rw-------\"))) {\n            throw new IOException(\"Private producer sample confinement failed\");\n          }\n          p4RequirePrivateProducerRoot(root);\n          JsonNode sample = C.parse(Files.readString(file, StandardCharsets.UTF_8));\n          if (!sample.isObject()\n              || sample.size()\n                  != (state.c6Kind == 3 && producer == 1 ? 19 : state.c6Kind == 0 ? 10 : 13)\n                      // R10-rev2 I2: producer 2 also carries the control-read numbers.\n                      + (producer == 2 ? P10_PRODUCER2_READ_KEYS.size() : 0)\n              || sample.path(\"case\").asInt(-1) != state.ordinal\n              || sample.path(\"producer\").asInt(-1) != producer\n              || sample.path(\"epoch\").asInt(-1) != state.ordinal\n              || sample.path(\"role\").asInt(-1) != producer\n              || !sample.path(\"failed\").isBoolean()\n              || !sample.path(\"sealed\").isBoolean()) {\n            throw new IOException(\"Private producer sample identity failed\");\n          }\n          if (state.c6Kind == 3 && producer == 1) {\n            for (String field :\n                List.of(\"highPending\", \"cdpCreationPending\", \"nativeActive\", \"restoreAttempt\")) {\n              assertThat(p4Number(sample, field)).isLessThanOrEqualTo(1000000);\n            }\n            assertThat(p4Number(sample, \"busy\")).isBetween(0, 2);\n            assertThat(p4Number(sample, \"restoreRefusal\")).isBetween(0, 5);\n          }\n          boolean managedLoss = state.c6Kind == 3 && producer == 1;\n          if (managedLoss\n              ? state.c6NativeClose\n                  && state.restored\n                  && state.closed\n                  && !sample.path(\"sealed\").booleanValue()\n                  && p4Number(sample, \"busy\") == 0\n                  && p4Number(sample, \"restoreAttempt\") > 0\n                  && p4Number(sample, \"restoreRefusal\") == 0\n                  && p4Number(sample, \"cdpCreationPending\") == 0\n                  && p4Number(sample, \"originalPending\") == 0\n                  && p4Number(sample, \"pending\") == p4Number(sample, \"highPending\")\n                  && p4Number(sample, \"sent\") == p4Number(sample, \"acked\")\n              : sample.path(\"sealed\").booleanValue()) {\n            finalSample = sample;\n            break;\n          }\n        }\n        Thread.sleep(20);\n      ",
+    "line": 25004
+  },
+  {
+    "start": 1145869,
+    "end": 1145988,
+    "kind": "while",
+    "bodyStart": 1145958,
+    "bodyEnd": 1145987,
+    "condition": "!p4OriginalCloseSettled(P4_PHASE_ORDINAL.get()) && System.nanoTime() < deadline",
+    "ids": [
+      79
+    ],
+    "rows": [
+      {
+        "id": "79",
+        "line": "25309",
+        "class": "POLL",
+        "enclosing_method": "p4AssertRegisteredAndNoPasswordEffects",
+        "reason": "polls p4OriginalCloseSettled(phase); 10 s, 20 ms; p4AssertObserverPhaseCompleted follows",
+        "proposed_replacement": "awaitLast(\"original close settled\", 10s, 20ms, () -> p4OriginalCloseSettled(P4_PHASE_ORDINAL.get()), Boolean::booleanValue)",
+        "batch": "B3",
+        "on_timeout": "FALL_THROUGH",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (!p4OriginalCloseSettled(P4_PHASE_ORDINAL.get()) && System.nanoTime() < deadline) {\n      Thread.sleep(20);\n    }",
+    "body": "\n      Thread.sleep(20);\n    ",
+    "line": 25308
+  },
+  {
+    "start": 1184829,
+    "end": 1185136,
+    "kind": "while",
+    "bodyStart": 1184867,
+    "bodyEnd": 1185135,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      80
+    ],
+    "rows": [
+      {
+        "id": "80",
+        "line": "26237",
+        "class": "POLL",
+        "enclosing_method": "p8AwaitC6Closed",
+        "reason": "polls the C6 state until native close, restore and quiesce; 15 s, 20 ms; assertions follow",
+        "proposed_replacement": "awaitLast(\"C6 closed\", 15s, 20ms, () -> { synchronized (state) { return closed(state); } }, Boolean::booleanValue); keep the assertions",
+        "batch": "B3",
+        "on_timeout": "FALL_THROUGH",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (System.nanoTime() < deadline) {\n      synchronized (state) {\n        if (state.c6NativeClose\n            && state.restored\n            && (state.c6Kind == 3 || state.active.isEmpty())\n            && (state.path == 2 || state.closed)) {\n          break;\n        }\n      }\n      Thread.sleep(20);\n    }",
+    "body": "\n      synchronized (state) {\n        if (state.c6NativeClose\n            && state.restored\n            && (state.c6Kind == 3 || state.active.isEmpty())\n            && (state.path == 2 || state.closed)) {\n          break;\n        }\n      }\n      Thread.sleep(20);\n    ",
+    "line": 26228
+  },
+  {
+    "start": 1187866,
+    "end": 1188565,
+    "kind": "while",
+    "bodyStart": 1187904,
+    "bodyEnd": 1188564,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      81
+    ],
+    "rows": [
+      {
+        "id": "81",
+        "line": "26313",
+        "class": "POLL",
+        "enclosing_method": "p8OwnedPrimaryBrowser",
+        "reason": "polls the runtime identity sample file until contextBound; 2 s, 10 ms (symlink, size and mode assertions inside)",
+        "proposed_replacement": "awaitLast(\"runtime identity sample contextBound\", 2s, 10ms, () -> readSampleWithChecks(samplePath), s -> s != null && s.path(\"contextBound\").asBoolean()); keep the isNotNull assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(10);"
+      }
+    ],
+    "source": "while (System.nanoTime() < deadline) {\n      if (Files.exists(samplePath, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {\n        assertThat(Files.isSymbolicLink(samplePath)).isFalse();\n        assertThat(Files.isRegularFile(samplePath, java.nio.file.LinkOption.NOFOLLOW_LINKS))\n            .isTrue();\n        assertThat(Files.size(samplePath)).isLessThanOrEqualTo(1024);\n        assertThat(Files.getPosixFilePermissions(samplePath))\n            .isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString(\"rw-------\"));\n        sample = C.parse(Files.readString(samplePath));\n        if (sample.path(\"contextBound\").asBoolean()) {\n          break;\n        }\n      }\n      Thread.sleep(10);\n    }",
+    "body": "\n      if (Files.exists(samplePath, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {\n        assertThat(Files.isSymbolicLink(samplePath)).isFalse();\n        assertThat(Files.isRegularFile(samplePath, java.nio.file.LinkOption.NOFOLLOW_LINKS))\n            .isTrue();\n        assertThat(Files.size(samplePath)).isLessThanOrEqualTo(1024);\n        assertThat(Files.getPosixFilePermissions(samplePath))\n            .isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString(\"rw-------\"));\n        sample = C.parse(Files.readString(samplePath));\n        if (sample.path(\"contextBound\").asBoolean()) {\n          break;\n        }\n      }\n      Thread.sleep(10);\n    ",
+    "line": 26300
+  },
+  {
+    "start": 1227914,
+    "end": 1228214,
+    "kind": "do",
+    "bodyStart": 1227918,
+    "bodyEnd": 1228175,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      82
+    ],
+    "rows": [
+      {
+        "id": "82",
+        "line": "27169",
+        "class": "POLL",
+        "enclosing_method": "p3AwaitExecution",
+        "reason": "polls ui_test_executions.status until PASSED/FAILED/ERROR; caller deadline, 30 ms",
+        "proposed_replacement": "awaitLast(\"P3 execution terminal\", remaining, 30ms, () -> jdbc.queryForObject(...), Set.of(\"PASSED\",\"FAILED\",\"ERROR\")::contains); keep the assertion",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n      actual =\n          jdbc.queryForObject(\n              \"SELECT status FROM ui_test_executions WHERE id=?\", String.class, execution);\n      if (List.of(\"PASSED\", \"FAILED\", \"ERROR\").contains(actual)) {\n        break;\n      }\n      Thread.sleep(30);\n    } while (System.nanoTime() < deadline);",
+    "body": "\n      actual =\n          jdbc.queryForObject(\n              \"SELECT status FROM ui_test_executions WHERE id=?\", String.class, execution);\n      if (List.of(\"PASSED\", \"FAILED\", \"ERROR\").contains(actual)) {\n        break;\n      }\n      Thread.sleep(30);\n    ",
+    "line": 27162
+  },
+  {
+    "start": 1228588,
+    "end": 1228722,
+    "kind": "while",
+    "bodyStart": 1228644,
+    "bodyEnd": 1228721,
+    "condition": "report == null && System.nanoTime() < deadline",
+    "ids": [
+      83
+    ],
+    "rows": [
+      {
+        "id": "83",
+        "line": "27179",
+        "class": "POLL",
+        "enclosing_method": "p3RunnerReport",
+        "reason": "polls P3_FINAL_REPORTS for the execution id; 5 s, 20 ms",
+        "proposed_replacement": "awaitLast(\"authenticated P3 FINAL for <execution>\", 5s, 20ms, () -> P3_FINAL_REPORTS.get(execution), Objects::nonNull); keep the assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (report == null && System.nanoTime() < deadline) {\n      Thread.sleep(20);\n      report = P3_FINAL_REPORTS.get(execution);\n    }",
+    "body": "\n      Thread.sleep(20);\n      report = P3_FINAL_REPORTS.get(execution);\n    ",
+    "line": 27178
+  },
+  {
+    "start": 1232832,
+    "end": 1234826,
+    "kind": "while",
+    "bodyStart": 1232846,
+    "bodyEnd": 1234825,
+    "condition": "true",
+    "ids": [
+      84
+    ],
+    "rows": [
+      {
+        "id": "84",
+        "line": "27312",
+        "class": "POLL",
+        "enclosing_method": "incrementalAwaitExpiredTeardownConfirmed",
+        "reason": "polls the expired session until teardown CONFIRMED; 120 s, 30 ms; refreshes credentials every 10 s inside the loop; writes the H8 evidence on both outcomes and fails on timeout",
+        "proposed_replacement": "await().atMost(120s)... with the credential refresh inside the condition; catch ConditionTimeoutException to write the TIMEOUT evidence and throw the same AssertionError(\"H8: ...\"); restructure, not a one-line swap",
+        "batch": "B2",
+        "on_timeout": "MAP_EXCEPTION",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30); // No transaction or row lock is held across this wait."
+      }
+    ],
+    "source": "while (true) {\n      var row =\n          jdbc.queryForMap(\n              \"SELECT state, progress->>'teardownStatus' AS teardown,\"\n                  + \" (progress->'teardownRequest') IS NOT NULL AS requested\"\n                  + \" FROM studio_guided_sessions WHERE session_id=?\",\n              id);\n      boolean confirmed = \"CONFIRMED\".equals(row.get(\"teardown\"));\n      long now = System.nanoTime();\n      if (confirmed || now >= deadline) {\n        long fromExpiryMs = Duration.between(expires, Instant.now()).toMillis();\n        ObjectNode evidence =\n            C.object()\n                .put(\"story\", \"STUDIO-OBS-015\")\n                .put(\"item\", \"H8 confirm-expire teardown\")\n                .put(\"lane\", FIXTURE_PROFILE.lane)\n                .put(\"sessionOrdinal\", budgetSessionOrdinal(jdbc, id))\n                .put(\"outcome\", confirmed ? \"CONFIRMED\" : \"TIMEOUT\")\n                .put(\"state\", String.valueOf(row.get(\"state\")))\n                .put(\"teardownStatus\", String.valueOf(row.get(\"teardown\")))\n                .put(\"teardownRequestPresent\", Boolean.TRUE.equals(row.get(\"requested\")))\n                .put(\"expiryToObservationMs\", fromExpiryMs)\n                .put(\"waitElapsedMs\", Duration.ofNanos(now - started).toMillis());\n        privateImmutableJson(COHORT_DIRECTORY.resolve(\"h8-confirm-expire-teardown.json\"), evidence);\n        if (!confirmed) {\n          throw new AssertionError(\"H8: expired teardown not CONFIRMED within 120 s\");\n        }\n        assertThat(row.get(\"state\"))\n            .as(\"H8: CONFIRMED keeps the session EXPIRED\")\n            .isEqualTo(\"EXPIRED\");\n        assertThat(row.get(\"requested\"))\n            .as(\"H8: CONFIRMED removes teardownRequest\")\n            .isEqualTo(false);\n        return;\n      }\n      if (now >= renewCredentialsAt) {\n        refreshFixtureCredentials();\n        renewCredentialsAt = now + Duration.ofSeconds(10).toNanos();\n      }\n      Thread.sleep(30); // No transaction or row lock is held across this wait.\n    }",
+    "body": "\n      var row =\n          jdbc.queryForMap(\n              \"SELECT state, progress->>'teardownStatus' AS teardown,\"\n                  + \" (progress->'teardownRequest') IS NOT NULL AS requested\"\n                  + \" FROM studio_guided_sessions WHERE session_id=?\",\n              id);\n      boolean confirmed = \"CONFIRMED\".equals(row.get(\"teardown\"));\n      long now = System.nanoTime();\n      if (confirmed || now >= deadline) {\n        long fromExpiryMs = Duration.between(expires, Instant.now()).toMillis();\n        ObjectNode evidence =\n            C.object()\n                .put(\"story\", \"STUDIO-OBS-015\")\n                .put(\"item\", \"H8 confirm-expire teardown\")\n                .put(\"lane\", FIXTURE_PROFILE.lane)\n                .put(\"sessionOrdinal\", budgetSessionOrdinal(jdbc, id))\n                .put(\"outcome\", confirmed ? \"CONFIRMED\" : \"TIMEOUT\")\n                .put(\"state\", String.valueOf(row.get(\"state\")))\n                .put(\"teardownStatus\", String.valueOf(row.get(\"teardown\")))\n                .put(\"teardownRequestPresent\", Boolean.TRUE.equals(row.get(\"requested\")))\n                .put(\"expiryToObservationMs\", fromExpiryMs)\n                .put(\"waitElapsedMs\", Duration.ofNanos(now - started).toMillis());\n        privateImmutableJson(COHORT_DIRECTORY.resolve(\"h8-confirm-expire-teardown.json\"), evidence);\n        if (!confirmed) {\n          throw new AssertionError(\"H8: expired teardown not CONFIRMED within 120 s\");\n        }\n        assertThat(row.get(\"state\"))\n            .as(\"H8: CONFIRMED keeps the session EXPIRED\")\n            .isEqualTo(\"EXPIRED\");\n        assertThat(row.get(\"requested\"))\n            .as(\"H8: CONFIRMED removes teardownRequest\")\n            .isEqualTo(false);\n        return;\n      }\n      if (now >= renewCredentialsAt) {\n        refreshFixtureCredentials();\n        renewCredentialsAt = now + Duration.ofSeconds(10).toNanos();\n      }\n      Thread.sleep(30); // No transaction or row lock is held across this wait.\n    ",
+    "line": 27273
+  },
+  {
+    "start": 1237351,
+    "end": 1237591,
+    "kind": "do",
+    "bodyStart": 1237355,
+    "bodyEnd": 1237552,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      85
+    ],
+    "rows": [
+      {
+        "id": "85",
+        "line": "27376",
+        "class": "POLL",
+        "enclosing_method": "p3AwaitTeardown",
+        "reason": "polls teardownStatus until CONFIRMED; 20 s, 30 ms; throws AssertionError on timeout",
+        "proposed_replacement": "await().alias(\"P3 owner teardown CONFIRMED\").atMost(20s).pollInterval(30ms).pollDelay(0).pollInSameThread().until(...); catch ConditionTimeoutException -> the same AssertionError text",
+        "batch": "B3",
+        "on_timeout": "MAP_EXCEPTION",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n      if (sessions\n          .transaction(() -> sessions.lock(id).progress().path(\"teardownStatus\").asText())\n          .equals(\"CONFIRMED\")) {\n        return;\n      }\n      Thread.sleep(30);\n    } while (System.nanoTime() < deadline);",
+    "body": "\n      if (sessions\n          .transaction(() -> sessions.lock(id).progress().path(\"teardownStatus\").asText())\n          .equals(\"CONFIRMED\")) {\n        return;\n      }\n      Thread.sleep(30);\n    ",
+    "line": 27370
+  },
+  {
+    "start": 1237870,
+    "end": 1238070,
+    "kind": "while",
+    "bodyStart": 1237954,
+    "bodyEnd": 1238069,
+    "condition": "!report.path(\"streamComplete\").asBoolean() && System.nanoTime() < deadline",
+    "ids": [
+      86
+    ],
+    "rows": [
+      {
+        "id": "86",
+        "line": "27385",
+        "class": "POLL",
+        "enclosing_method": "p3DecodeVideo",
+        "reason": "polls the execution until streamComplete; 45 s, 30 ms (sleeps before each fetch; the first fetch is the caller's snapshot)",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 45s, 30ms, () -> p3Call(p3Cookie, \".../executions/\" + execution, null, 200), ...); start from `current` as today (pollDelay = 30 ms, not zero, to keep the first sleep)",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "while (!report.path(\"streamComplete\").asBoolean() && System.nanoTime() < deadline) {\n      Thread.sleep(30);\n      report = p3Call(p3Cookie, \"/api/v1/studio/executions/\" + execution, null, 200);\n    }",
+    "body": "\n      Thread.sleep(30);\n      report = p3Call(p3Cookie, \"/api/v1/studio/executions/\" + execution, null, 200);\n    ",
+    "line": 27384
+  },
+  {
+    "start": 1348316,
+    "end": 1348556,
+    "kind": "do",
+    "bodyStart": 1348320,
+    "bodyEnd": 1348517,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      87
+    ],
+    "rows": [
+      {
+        "id": "87",
+        "line": "29545",
+        "class": "POLL",
+        "enclosing_method": "awaitJoinedVideo",
+        "reason": "polls the execution until streamComplete; 45 s, 30 ms",
+        "proposed_replacement": "awaitLast(\"execution <id> streamComplete\", 45s, 30ms, () -> publicCall(\"/api/v1/studio/executions/\" + <id>, null, 200, null), r -> r.path(\"streamComplete\").asBoolean())",
+        "batch": "B1",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "do {\n      snapshot = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n      if (snapshot.path(\"streamComplete\").asBoolean()) {\n        break;\n      }\n      Thread.sleep(30);\n    } while (System.nanoTime() < deadline);",
+    "body": "\n      snapshot = publicCall(\"/api/v1/studio/executions/\" + execution, null, 200, null);\n      if (snapshot.path(\"streamComplete\").asBoolean()) {\n        break;\n      }\n      Thread.sleep(30);\n    ",
+    "line": 29540
+  },
+  {
+    "start": 1408800,
+    "end": 1410353,
+    "kind": "do",
+    "bodyStart": 1408804,
+    "bodyEnd": 1410314,
+    "condition": "System.nanoTime() < deadline",
+    "ids": [
+      89
+    ],
+    "rows": [
+      {
+        "id": "89",
+        "line": "31110",
+        "class": "POLL",
+        "enclosing_method": "C5Capture.awaitS2Completion",
+        "reason": "polls the S2 sample file until closed; caller deadline, 20 ms; shape assertions inside the loop",
+        "proposed_replacement": "awaitLast(\"S2 operation/callback completion\", remaining, 20ms, () -> readS2SampleWithShapeAssertions(), s -> s != null && s.path(\"closed\").booleanValue()); keep the isNotNull assertion",
+        "batch": "B3",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "do {\n        p4RequirePrivateProducerRoot(directory);\n        if (Files.exists(receipt, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {\n          assertThat(\n                  !Files.isSymbolicLink(receipt)\n                      && Files.isRegularFile(receipt, java.nio.file.LinkOption.NOFOLLOW_LINKS)\n                      && Files.size(receipt) <= 1024\n                      && receipt.toRealPath().getParent().equals(directory.toRealPath())\n                      && Files.getPosixFilePermissions(receipt)\n                          .equals(\n                              java.nio.file.attribute.PosixFilePermissions.fromString(\"rw-------\")))\n              .isTrue();\n          JsonNode current = C.parse(Files.readString(receipt, StandardCharsets.UTF_8));\n          assertThat(\n                  current.isObject()\n                      && current.size() == 13\n                      && current.path(\"case\").asInt(-1) == s2Epoch\n                      && current.path(\"producer\").asInt(-1) == 1\n                      && current.path(\"epoch\").asInt(-1) == s2Epoch)\n              .isTrue();\n          for (String field :\n              List.of(\"failed\", \"closed\", \"restored\", \"stopFulfilled\", \"active\", \"busy\")) {\n            assertThat(current.path(field).isBoolean()).isTrue();\n          }\n          assertThat(current.path(\"failed\").booleanValue()).isFalse();\n          if (current.path(\"closed\").booleanValue()) {\n            sample = current;\n            break;\n          }\n        }\n        Thread.sleep(20);\n      } while (System.nanoTime() < deadline);",
+    "body": "\n        p4RequirePrivateProducerRoot(directory);\n        if (Files.exists(receipt, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {\n          assertThat(\n                  !Files.isSymbolicLink(receipt)\n                      && Files.isRegularFile(receipt, java.nio.file.LinkOption.NOFOLLOW_LINKS)\n                      && Files.size(receipt) <= 1024\n                      && receipt.toRealPath().getParent().equals(directory.toRealPath())\n                      && Files.getPosixFilePermissions(receipt)\n                          .equals(\n                              java.nio.file.attribute.PosixFilePermissions.fromString(\"rw-------\")))\n              .isTrue();\n          JsonNode current = C.parse(Files.readString(receipt, StandardCharsets.UTF_8));\n          assertThat(\n                  current.isObject()\n                      && current.size() == 13\n                      && current.path(\"case\").asInt(-1) == s2Epoch\n                      && current.path(\"producer\").asInt(-1) == 1\n                      && current.path(\"epoch\").asInt(-1) == s2Epoch)\n              .isTrue();\n          for (String field :\n              List.of(\"failed\", \"closed\", \"restored\", \"stopFulfilled\", \"active\", \"busy\")) {\n            assertThat(current.path(field).isBoolean()).isTrue();\n          }\n          assertThat(current.path(\"failed\").booleanValue()).isFalse();\n          if (current.path(\"closed\").booleanValue()) {\n            sample = current;\n            break;\n          }\n        }\n        Thread.sleep(20);\n      ",
+    "line": 31080
+  },
+  {
+    "start": 1461093,
+    "end": 1461674,
+    "kind": "while",
+    "bodyStart": 1461126,
+    "bodyEnd": 1461673,
+    "condition": "System.nanoTime() < end",
+    "ids": [
+      90
+    ],
+    "rows": [
+      {
+        "id": "90",
+        "line": "32325",
+        "class": "POLL",
+        "enclosing_method": "awaitFinalizing",
+        "reason": "polls the session state (JDBC when c5Capture is active, lock otherwise) until FINALIZING or terminal; 90 s, 50 ms; asserts FINALIZING; throws AssertionError on timeout",
+        "proposed_replacement": "awaitLast(\"session <id> FINALIZING\", 90s, 50ms, () -> (c5Capture != null ? jdbc...: sessions.transaction(...)), Set.of(\"FINALIZING\",\"FAILED\",\"EXPIRED\",\"UNKNOWN_OUTCOME\",\"CANCELLED\")::contains); then the existing FINALIZING assertion; on null/timeout throw the same AssertionError text",
+        "batch": "B3",
+        "on_timeout": "MAP_EXCEPTION",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(50);"
+      }
+    ],
+    "source": "while (System.nanoTime() < end) {\n      String state =\n          c5Capture != null\n              ? jdbc.queryForObject(\n                  \"SELECT state FROM studio_guided_sessions WHERE session_id=?\", String.class, id)\n              : sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (List.of(\"FINALIZING\", \"FAILED\", \"EXPIRED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\")\n          .contains(state)) {\n        assertThat(state).as(\"second explicit learning; logs %s\", TEMP).isEqualTo(\"FINALIZING\");\n        return;\n      }\n      Thread.sleep(50);\n    }",
+    "body": "\n      String state =\n          c5Capture != null\n              ? jdbc.queryForObject(\n                  \"SELECT state FROM studio_guided_sessions WHERE session_id=?\", String.class, id)\n              : sessions.transaction(() -> sessions.lock(id).document().path(\"state\").asText());\n      if (List.of(\"FINALIZING\", \"FAILED\", \"EXPIRED\", \"UNKNOWN_OUTCOME\", \"CANCELLED\")\n          .contains(state)) {\n        assertThat(state).as(\"second explicit learning; logs %s\", TEMP).isEqualTo(\"FINALIZING\");\n        return;\n      }\n      Thread.sleep(50);\n    ",
+    "line": 32314
+  },
+  {
+    "start": 1551379,
+    "end": 1551506,
+    "kind": "while",
+    "bodyStart": 1551460,
+    "bodyEnd": 1551505,
+    "condition": "!((java.util.Set<?>) tracked).isEmpty() && System.nanoTime() < deadline",
+    "ids": [
+      93
+    ],
+    "rows": [
+      {
+        "id": "93",
+        "line": "34143",
+        "class": "POLL",
+        "enclosing_method": "stopOwnedApplicationJobs",
+        "reason": "polls a SimpleAsyncTaskScheduler's activeThreads until empty; shared deadline, 20 ms; assertion follows",
+        "proposed_replacement": "awaitLast(\"scheduler activeThreads empty\", remaining, 20ms, () -> ((Set<?>) tracked).isEmpty(), Boolean::booleanValue); keep the assertion",
+        "batch": "B4",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "rare (only when a scheduler body is still active)",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while (!((java.util.Set<?>) tracked).isEmpty() && System.nanoTime() < deadline) {\n              Thread.sleep(20);\n            }",
+    "body": "\n              Thread.sleep(20);\n            ",
+    "line": 34142
+  },
+  {
+    "start": 1558416,
+    "end": 1558600,
+    "kind": "while",
+    "bodyStart": 1558570,
+    "bodyEnd": 1558599,
+    "condition": "(process.isAlive()\n            || root.descendants.stream().anyMatch(child -> child.handle().isAlive()))\n        && System.nanoTime() < deadline",
+    "ids": [
+      94
+    ],
+    "rows": [
+      {
+        "id": "94",
+        "line": "34308",
+        "class": "POLL",
+        "enclosing_method": "stopOwnedProcessTree",
+        "reason": "polls until the root process and its recorded descendants exit after destroy(); guided grace (63 s class) or 30 s, 30 ms; the forced-kill branch follows on timeout",
+        "proposed_replacement": "awaitLast(\"owned process tree exited\", grace, 30ms, () -> !process.isAlive() && descendants none alive, Boolean::booleanValue); the existing if-alive forced-kill branch stays",
+        "batch": "B4",
+        "on_timeout": "FALL_THROUGH",
+        "exercised_in_green_run": "yes",
+        "source_text": "Thread.sleep(30);"
+      }
+    ],
+    "source": "while ((process.isAlive()\n            || root.descendants.stream().anyMatch(child -> child.handle().isAlive()))\n        && System.nanoTime() < deadline) {\n      Thread.sleep(30);\n    }",
+    "body": "\n      Thread.sleep(30);\n    ",
+    "line": 34305
+  },
+  {
+    "start": 1559326,
+    "end": 1559518,
+    "kind": "while",
+    "bodyStart": 1559484,
+    "bodyEnd": 1559517,
+    "condition": "(process.isAlive()\n              || root.descendants.stream().anyMatch(child -> child.handle().isAlive()))\n          && System.nanoTime() < deadline",
+    "ids": [
+      95
+    ],
+    "rows": [
+      {
+        "id": "95",
+        "line": "34329",
+        "class": "POLL",
+        "enclosing_method": "stopOwnedProcessTree",
+        "reason": "polls up to 5 s, 20 ms after destroyForcibly() until the root and descendants are gone; assertions follow",
+        "proposed_replacement": "awaitLast(\"owned process tree gone after force\", 5s, 20ms, () -> gone, Boolean::booleanValue)",
+        "batch": "B4",
+        "on_timeout": "RETURN_LAST",
+        "exercised_in_green_run": "rare (only after a forced kill)",
+        "source_text": "Thread.sleep(20);"
+      }
+    ],
+    "source": "while ((process.isAlive()\n              || root.descendants.stream().anyMatch(child -> child.handle().isAlive()))\n          && System.nanoTime() < deadline) {\n        Thread.sleep(20);\n      }",
+    "body": "\n        Thread.sleep(20);\n      ",
+    "line": 34326
+  }
+]

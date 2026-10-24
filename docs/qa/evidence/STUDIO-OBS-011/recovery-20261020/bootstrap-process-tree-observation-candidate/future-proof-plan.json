@@ -1,0 +1,174 @@
+{
+  "state": "UNEXECUTED_NO_GO",
+  "sourceTask": "OFF_TREE_ONLY",
+  "nodePathPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+  "pnpmVersion": "10.33.0",
+  "freshDerivativeProposal": "/private/tmp/obs009-bootstrap-observation-20261020-proof01",
+  "derivativeExists": false,
+  "seedAdmission": "UNBOUND_ROOT_MUST_USE_EXISTING_REVIEWED_FULL_COPY_PROFILE_FRESH_CATALOG_AND_REGULAR_COPIES; NO_OLD_PRIVATE_PROOF_MUTATION",
+  "redSourceOverlay": "red-overlay.patch",
+  "greenOnlyDelta": "product-helper-green.patch",
+  "sameUnitAndFixtureBuffers": true,
+  "sequence": [
+    {
+      "id": "types-red01",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-observation-types-red01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ]
+    },
+    {
+      "id": "red01",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-observation-red01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/run/bootstrapProcessTreeObservation.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--testNamePattern",
+        "^bootstrap process-tree observation captures one coherent complete inventory when a transient member leaves before a later legacy label query$"
+      ]
+    },
+    {
+      "id": "green01",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-observation-green01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "test/run/bootstrapProcessTreeObservation.test.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=1"
+      ]
+    },
+    {
+      "id": "types-green01",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-observation-types-green01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ]
+    },
+    {
+      "id": "lint01",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs009-recovery-20261020-bootstrap-observation-lint01",
+        "pnpm",
+        "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+        "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+        "test/helpers/bootstrapProcessTreeObservation.ts",
+        "test/run/bootstrapProcessTreeObservation.test.ts"
+      ]
+    }
+  ],
+  "primaryRedCreditOnly": {
+    "actualExecutedCases": 1,
+    "expectedFailed": 1,
+    "expectedFilterOmissions": 36,
+    "expectedPostconditionLine": 52,
+    "expectedFailureCodeField": "ESRCH",
+    "expectedActualCapture": "undefined",
+    "noSetupParserCompilerTimeoutOrAbsentApiSubstitution": true,
+    "executed": false
+  },
+  "pureGreenRequirement": {
+    "literalExpectedNames": 37,
+    "requiredExecutedStatus": "ALL_PASS_ZERO_SKIP",
+    "actualRuntimeDiscovery": "UNMEASURED"
+  },
+  "configuredProductOutput": "Production/build files unchanged by3test-tier files; carry only with exact source/dependency/browser/current238E19 measurement and root successor binding. No old whole-catalog/hash forcing, private dist transplantation to actual or redundant RT matrix.",
+  "nativeDirectFutureOnly": {
+    "requires": [
+      "independent exact candidate SOURCE_CLEAN",
+      "genuine intended pure RED",
+      "all pure GREEN/types/lint",
+      "independent resource READY_WITH_LIMITATION plus explicit root prospective admission",
+      "fresh complete source/dependency/browser/env/product238 bindings and root dispatch"
+    ],
+    "executed": false,
+    "cwd": "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+    "argv": [
+      "pnpm",
+      "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.fixtures.config.ts",
+      "test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/bootstrap-six-raw/vitest.json"
+    ],
+    "freshRawDirectory": "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/bootstrap-six-raw",
+    "defaultLog": "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/bootstrap-six-raw/vitest.log",
+    "actualBeforeAfterCapturesEvenFailure": "Existing capture-manifest.py, actual root cwd, separately fresh labels",
+    "ownedIdleInhibitor": [
+      "/usr/bin/caffeinate",
+      "-i"
+    ],
+    "fullFileExactlySixOriginalModes": true,
+    "fixtureRunRunnerBackupBranch": false,
+    "globalSetupAndAllOriginalNativeControlsUnchanged": true,
+    "onAnyFailure": "STOP_RETAIN_NO_RETRY_NO_FIX",
+    "testNamePatternFilter": false,
+    "fileTarget": "test/fixtures-tier/observed-bootstrap-process-tree.test.ts"
+  },
+  "finalActualFullUnitCoverage": "OWED_LATER_WITH_ALL_OLD2676_AND_NEW_MEASURED_IDENTITIES",
+  "conditionalFixtureAccounting": "Only after independent execution QA/root: current ordered301(292PASS9SKIP)+fresh6PASS=qualified307coverage; not one new307-case passing invocation",
+  "actualSourceApplication": "NO_GO",
+  "lifecycleCredit": false
+}

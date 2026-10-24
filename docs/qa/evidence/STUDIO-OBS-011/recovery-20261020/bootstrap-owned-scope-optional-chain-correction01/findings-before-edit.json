@@ -1,0 +1,26 @@
+{
+  "atUtc": "2026-10-21T02:01:30.330724+00:00",
+  "producerManifestSha256": "d4be1991a0f61232e02c056f883ecac18fd0f2d6abc45d8a297191146dc7a6a5",
+  "actualLintLogSha256": "d702f31d6a93d8c8ccda42b77ffa744a11cecd167bd2965ccf4ee29cafac8562",
+  "findings": [
+    {
+      "file": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "line": 82,
+      "column": 7,
+      "severity": "error",
+      "rule": "@typescript-eslint/prefer-optional-chain",
+      "message": "Prefer using an optional chain expression instead, as it is more concise and easier to read."
+    },
+    {
+      "file": "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts",
+      "line": 99,
+      "column": 9,
+      "severity": "error",
+      "rule": "@typescript-eslint/prefer-optional-chain",
+      "message": "Prefer using an optional chain expression instead, as it is more concise and easier to read."
+    }
+  ],
+  "scope": "Only the two optional-chain guard equivalents. All tests and other helper bytes exact.",
+  "resolutionStateBeforeEdit": "INVENTORIED_SOURCE_ONLY_CORRECTION_PENDING",
+  "runtime": "UNEXECUTED"
+}

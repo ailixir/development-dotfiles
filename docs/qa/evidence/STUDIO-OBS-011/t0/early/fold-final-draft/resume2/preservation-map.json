@@ -1,0 +1,160 @@
+{
+  "status": "DRAFT_NO_RUNTIME_PROOF",
+  "readOnlySourceBindings": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/DatabaseClock.java": "7cffcd144671e2c82cb9645818905fb17688997b8893687b1afa6ad7ec4d505c",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretValue.java": "d1663040d620f4998ae205e7a61c3c22756b66a9367946cbff486453978ec601",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretWireWriter.java": "14dfb2bee9f4c1fcff936a5e89a392b0c33c0f48dab3eb51fca4c71baed1c954",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/live-surface-judgments.json": "c4b1f0bb7ae5dc41f3f45a609fe5d92fa067f2121e8a248f586061f68ed70adf",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/T0-DEV/check.json": "c5f237937f4f8e523a4c79e3db8e87654084ab7f6a6c41d52ecdb4cf108234a1"
+  },
+  "transportBeforeEqualsDraft": [
+    {
+      "operation": "dispatch,cancel",
+      "endpoint": "base-url /v2/runs[/id]",
+      "credential": "runner.serviceIdentityToken",
+      "connectTimeout": "execution.admissionTimeoutOrDefault",
+      "httpVersion": "JDK default HTTP_2 preference",
+      "tls": "StudioRunnerTls.configure",
+      "requestTimeout": "execution.admissionTimeoutOrDefault",
+      "redirects": "NEVER"
+    },
+    {
+      "operation": "validation",
+      "endpoint": "base-url /v2/validate-observed",
+      "credential": "runner.serviceIdentityToken",
+      "connectTimeout": "runner.connectTimeout or 2s",
+      "httpVersion": "HTTP_1_1",
+      "tls": "StudioRunnerTls.configure",
+      "requestTimeout": "min(PublicationBudget.remaining, per-call validationTimeoutMs)",
+      "redirects": "NEVER"
+    },
+    {
+      "operation": "guided assign,context,prepare,dispatch,stop,observe",
+      "endpoint": "runner-origin /internal/v2/studio/guided-sessions/{id}/{operation}",
+      "credential": "fresh controller-token-file supplier",
+      "connectTimeout": "5s",
+      "httpVersion": "HTTP_1_1",
+      "tls": "StudioRunnerTls.sslContext, exact old guided constructor behavior",
+      "requestTimeout": "monotonic 15s narrowed by caller deadline",
+      "redirects": "NEVER"
+    }
+  ],
+  "constructorsPreserved": [
+    "public3arg ObjectMapper/StudioExecutionProperties/StudioRunnerProperties",
+    "public4arg plus StudioRunnerTls"
+  ],
+  "visibilityPreserved": [
+    "observeRequestBytes package-private",
+    "CONTEXT_REFUSED public",
+    "CONTEXT_CLOSED_REFUSAL public",
+    "definiteContextRefusal public static",
+    "closedContextRefusal public static"
+  ],
+  "serializer": {
+    "implementation": "SecretValue.Writer",
+    "registration": "SecretWireWriter.bytes",
+    "count": 1,
+    "modified": false
+  },
+  "profiles": {
+    "publicationGrantAuthority": "!worker",
+    "provisionalDispatchAuthorization": "unconditional",
+    "absentCollaborator": "409 RUNTIME_INCOMPATIBLE at all3 operations",
+    "workerPublicationPropertiesInjectedByFoldedClient": false,
+    "newConfigKeys": []
+  },
+  "clockSites": [
+    "PublicationGrantAuthority mint",
+    "PublicationGrantAuthority judge",
+    "GuidedPlanPublisher claim argument",
+    "GuidedPlanPublisher PublicationBudget clock"
+  ],
+  "protectedLive": [
+    "CFK18 TLS inputs",
+    "CFC01 worker/main bean/profile semantics",
+    "RTP16..21 routes/results",
+    "runner-origin independent of base-url",
+    "all existing configuration keys"
+  ],
+  "alternateSet": {
+    "path": "proposed-final-wiring",
+    "mainFiles": 17,
+    "testFiles": 3,
+    "difference": "Only3 final-only consumer switches; same corrected20 paths; no FOLD_TESTS edits/deletions"
+  },
+  "adapterOverloads": {
+    "sender2": "Exact original two-argument runner.send(operation, body) in both constructors",
+    "sender3": "Exact original three-argument runner.send(operation, body, key) in both constructors",
+    "sender4": "Exact original four-argument runner.send(operation, body, key, callerDeadline) in both constructors",
+    "secretSender": "Exact original four-argument sendSecret(body, metadata, secret, callerDeadline)",
+    "keyGenerationOrNullInferenceInAdapter": false,
+    "downstreamAlgorithm": "Byte-identical after type and method receiver normalization; static only"
+  },
+  "clockTestScope": {
+    "applications": "ObservedPublicationFixture.APPLICATION = studio-fixture",
+    "environments": "ObservedPublicationFixture.ENVIRONMENTS.getFirst() = Production",
+    "mechanism": "DynamicPropertyRegistry in this owned test only",
+    "productionDefaultsChanged": false,
+    "policyStubbedOrRelaxed": false,
+    "all3TestMethodsChanged": false
+  },
+  "orderRuling": {
+    "id": "FOLD-ORDER-1",
+    "prep": "All3 old active consumer bindings preserved; new implementations/seam plus DB clock composition installed/tested side-by-side",
+    "final": "All3 switches atomic with complete final ports/projector/compatibility/beans/classes retirement and exact ClockIT cleanup; not merely config patch"
+  },
+  "nativeUntouchedTests": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416"
+  },
+  "phase": "COMPLETE_FINAL_PROSPECTIVE_PROPOSAL_NOT_APPLIED",
+  "sourceBindings": {
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/fold-final-complete-intent.txt": "79965c894bb88a8eea68171dfcdb70e41a336a5db0885966a76f80df578e3fa7",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/fold-final-complete-context.txt": "10b111fc64709dd5b5bea19e24260499517614a848ba534e7a3f70a5bf7e396b",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/fold-final-complete-preflight.json": "489c67d94306a03e343cde54b73d6930579fe363deeaafc90c6f36e312418bc4",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/lanes.v7.json": "68f69cc8652d695f920f2f28ec178205c84cb70bd9b80b5d27f38585e0a2165c",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/w-brief.v7.md": "e072ef39921eb082733c266fd9a8ecb24d8c47a48c699dd1f805fde1a20737a8",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py": "fa90d844d6443285ada1ae1856fdef4bd23ddf607ab97ec21ccd52f2fc30cc3a",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py": "799ead7c9c622b7a8b1500d1e89762a689b11e472a8d2bf16101cb9b54f29cd4",
+    ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py": "2846314e3ab12926bff6eb458d7058c406b983092fb40b1fb5c2fa087c2366df",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gsmb-wrapper-root-adoption.json": "8090ef335a03b661260598dd51c322fa9b903e06a52926bc316534aa20c8ddc2",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretValue.java": "d1663040d620f4998ae205e7a61c3c22756b66a9367946cbff486453978ec601",
+    "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretWireWriter.java": "14dfb2bee9f4c1fcff936a5e89a392b0c33c0f48dab3eb51fca4c71baed1c954",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/DatabaseClock.java": "7cffcd144671e2c82cb9645818905fb17688997b8893687b1afa6ad7ec4d505c"
+  },
+  "setupSeamsProposed": [
+    {
+      "signature": "public HttpRunnerDispatchClient(URI, SSLContext, Supplier<String>, GuidedContracts)",
+      "purpose": "Raw guided operation test configuration preserves exact supplied SSLContext and live controller token supplier",
+      "settings": "same initializeGuided/private send implementation; connect5s, HTTP_1_1, NEVER, original15s monotonic/narrowed caller deadline",
+      "status": "PROPOSED_REQUIRES_ARIA_QA_ROOT_ADOPTION",
+      "deployedSpringChange": false
+    },
+    {
+      "signature": "public HttpRunnerDispatchClient(URI, HttpClient, Supplier<String>, GuidedContracts)",
+      "purpose": "Exact explicit validation HTTP double/native-client and token supplier; payload cap/timeout percall",
+      "settings": "same validate method; original closed origin + NEVER/no retry guards, validation client supplied unchanged, live token supplier called at same position",
+      "status": "PROPOSED_REQUIRES_ARIA_QA_ROOT_ADOPTION",
+      "deployedSpringChange": false
+    }
+  ],
+  "publicOriginalDispatchConstructors": "Exact3arg and4arg StudioRunnerTls signatures/bodies retained; no eager URI parse added to legacy public3arg behavior",
+  "deployedTls": "Only existing @Autowired4arg ObjectMapper/execution/runner/StudioRunnerTls constructor and existing initialization read configuration; same StudioRunnerTls identity per operation; proposed constructors unannotated explicit setup only",
+  "finalConsumerBinding": {
+    "publisher": "HttpRunnerDispatchClient + DispatchAuthorization",
+    "manualReplayAuthorizer": "DispatchAuthorization",
+    "guidedDispatch": "HttpRunnerDispatchClient",
+    "projector": "DispatchAuthorization over accepted GSMb5ce495e5\u2026 implementation",
+    "oldBeans": "old authority/validation/guided conditional+fallback factories removed atomically with class retirement"
+  },
+  "observer": {
+    "production": "observeRequestBytes remains package-private dispatch; no production observer SPI added",
+    "testSide": "dispatch.DispatchTestAccess.observeRequestBytes(HttpRunnerDispatchClient, Consumer<byte[]>)",
+    "ports": "Only existing bridge-owned byteobserver calls rerouted; OwnedRequestBody/BoundedResponse reflection retains exact nested shapes/bounds/owned byte semantics",
+    "tlsReflection": "old bridge.client -> folded guidedClient; old validation.client -> folded validationClient; dispatch.httpClient and coordinator.http unchanged"
+  },
+  "finalNativeOverloadBehavior": "Temporary Send2/3/4 slots removed together with old runner constructor. Existing single downstream algorithm invokes real folded runner.send2/send3/send4 and secret4 directly at identical original call sites; no null-deadline inference or adapter UUID creation",
+  "diagnostics": "Replay R-C5 old validator class/file -> dispatch.HttpRunnerDispatchClient/.java; old authority class -> guided.publication.PublicationGrantAuthority. Exact stale line pins/wrapper-only diagnosis/wait/TEST001/D5 logic unchanged",
+  "clockFinal": "New PublicationGrantAuthority DB clock mint/judge; publisher claim and actual PublicationBudget DB clock; DatabaseClock/migrations/windows/tolerances/SQL unchanged; exact ClockIT3methods/scope preserved with only final fallback cleanup",
+  "tsOwnership": "Two metadata-only TS additions plus pendingRTsourcecomment exit disposition are PROPOSED requiring root/Aria/QA plan adoption; original fullgrep rerun afterMERGE beforeDone must0"
+}

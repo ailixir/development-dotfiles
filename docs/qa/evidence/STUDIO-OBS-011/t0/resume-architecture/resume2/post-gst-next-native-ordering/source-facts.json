@@ -1,0 +1,245 @@
+{
+  "sourceOnly": true,
+  "runtimeFailureSetNotInspected": true,
+  "finding": "duplicate translation installation on translationTeardownService path",
+  "facts": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-02/formatted-candidate-archive/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "sha256": "9e9aef4355a151d6a6d9959af129ef2e8267b4b0d6596fecd296e4669da01878",
+      "originalS011MainHash": null,
+      "lines": [
+        {
+          "line": 405,
+          "text": "  private static GuidedSessionService service("
+        },
+        {
+          "line": 406,
+          "text": "      JdbcTemplate jdbc,"
+        },
+        {
+          "line": 407,
+          "text": "      GuidedSessionRepository repository,"
+        },
+        {
+          "line": 408,
+          "text": "      GuidedMaterializationService materialization,"
+        },
+        {
+          "line": 409,
+          "text": "      FixtureAccess access,"
+        },
+        {
+          "line": 410,
+          "text": "      int seconds,"
+        },
+        {
+          "line": 411,
+          "text": "      Clock clock) {"
+        },
+        {
+          "line": 412,
+          "text": "    var service ="
+        },
+        {
+          "line": 413,
+          "text": "        new GuidedSessionService("
+        },
+        {
+          "line": 414,
+          "text": "            repository,"
+        },
+        {
+          "line": 415,
+          "text": "            C,"
+        },
+        {
+          "line": 416,
+          "text": "            productionAccess(jdbc, C, access, ORIGIN),"
+        },
+        {
+          "line": 417,
+          "text": "            new GuidedSessionProperties(true, Map.of(\"maxSessionSeconds\", seconds)),"
+        },
+        {
+          "line": 418,
+          "text": "            clock);"
+        },
+        {
+          "line": 419,
+          "text": "    installTranslation(service, jdbc, C);"
+        },
+        {
+          "line": 420,
+          "text": "    service.installBridge("
+        },
+        {
+          "line": 421,
+          "text": "        materialization,"
+        },
+        {
+          "line": 422,
+          "text": "        new GuidedPreparationStore(jdbc, C),"
+        },
+        {
+          "line": 423,
+          "text": "        new GuidedBindingStore(jdbc, C, materialization),"
+        },
+        {
+          "line": 424,
+          "text": "        new GuidedAssignmentStore(jdbc, C));"
+        },
+        {
+          "line": 4454,
+          "text": "  /** The H8 teardown service with production translation state installed (failTranslation). */"
+        },
+        {
+          "line": 4455,
+          "text": "  private GuidedSessionService translationTeardownService(OffsetClock clock, TeardownStub stub) {"
+        },
+        {
+          "line": 4456,
+          "text": "    var sessions = teardownService(clock, stub);"
+        },
+        {
+          "line": 4457,
+          "text": "    sessions.installTranslation("
+        },
+        {
+          "line": 4458,
+          "text": "        new GuidedTranslationStore(actualJdbc, C),"
+        },
+        {
+          "line": 4459,
+          "text": "        new com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore("
+        },
+        {
+          "line": 4460,
+          "text": "            actualJdbc, C));"
+        },
+        {
+          "line": 4461,
+          "text": "    return sessions;"
+        },
+        {
+          "line": 4462,
+          "text": "  }"
+        },
+        {
+          "line": 4463,
+          "text": ""
+        },
+        {
+          "line": 4568,
+          "text": ""
+        },
+        {
+          "line": 4569,
+          "text": "  private GuidedSessionService teardownService(OffsetClock clock, TeardownStub stub) {"
+        },
+        {
+          "line": 4570,
+          "text": "    var sessions = service(actualJdbc, repository, materialization, access, 30, clock);"
+        },
+        {
+          "line": 4571,
+          "text": "    sessions.installStopSender(stub);"
+        },
+        {
+          "line": 4572,
+          "text": "    return sessions;"
+        },
+        {
+          "line": 4573,
+          "text": "  }"
+        },
+        {
+          "line": 4574,
+          "text": ""
+        },
+        {
+          "line": 5944,
+          "text": "   */"
+        },
+        {
+          "line": 5945,
+          "text": "  private static void installTranslation("
+        },
+        {
+          "line": 5946,
+          "text": "      GuidedSessionService sessions, JdbcTemplate jdbc, GuidedContracts contracts) {"
+        },
+        {
+          "line": 5947,
+          "text": "    sessions.installTranslation("
+        },
+        {
+          "line": 5948,
+          "text": "        new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, contracts),"
+        },
+        {
+          "line": 5949,
+          "text": "        new com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore("
+        },
+        {
+          "line": 5950,
+          "text": "            jdbc, contracts));"
+        },
+        {
+          "line": 5951,
+          "text": "  }"
+        },
+        {
+          "line": 5952,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5",
+      "originalS011MainHash": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5",
+      "lines": [
+        {
+          "line": 152,
+          "text": "  private com.citi.put.checks.studio.guided.translation.GuidedTranslationStore translation;"
+        },
+        {
+          "line": 153,
+          "text": "  private com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore questions;"
+        },
+        {
+          "line": 154,
+          "text": ""
+        },
+        {
+          "line": 155,
+          "text": "  public void installTranslation("
+        },
+        {
+          "line": 156,
+          "text": "      com.citi.put.checks.studio.guided.translation.GuidedTranslationStore store,"
+        },
+        {
+          "line": 157,
+          "text": "      com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore contexts) {"
+        },
+        {
+          "line": 158,
+          "text": "    require(translation == null, \"RUNTIME_INCOMPATIBLE\", 409);"
+        },
+        {
+          "line": 159,
+          "text": "    translation = store;"
+        },
+        {
+          "line": 160,
+          "text": "    questions = contexts;"
+        },
+        {
+          "line": 161,
+          "text": "  }"
+        }
+      ]
+    }
+  ]
+}

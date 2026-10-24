@@ -1,0 +1,933 @@
+{
+  "sourceChecks": [
+    {
+      "check": "member bytes/mode GuidedLifecycleReasonIT.java.forward.patch",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode GuidedLifecycleReasonIT.java.reverse.patch",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode GuidedServiceTransportFaultIT.java.forward.patch",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode GuidedServiceTransportFaultIT.java.reverse.patch",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode GuidedSessionIT.java.forward.patch",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode GuidedSessionIT.java.reverse.patch",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode README.md",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode RECIPE.md",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode execution-record.json",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode input-pins.json",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode postimages/GuidedLifecycleReasonIT.java",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode postimages/GuidedServiceTransportFaultIT.java",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode postimages/GuidedSessionIT.java",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode preimages/GuidedLifecycleReasonIT.java",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode preimages/GuidedServiceTransportFaultIT.java",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode preimages/GuidedSessionIT.java",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode pure-source-checks.json",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode read-only-verification.json",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode source-location-map.json",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode source-records.json",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode source_tools.py",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode switch-equivalence.md",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode verification-attempts.json",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode verify_source-attempt1.py",
+      "passed": true
+    },
+    {
+      "check": "member bytes/mode verify_source.py",
+      "passed": true
+    },
+    {
+      "check": "bound input rootScope",
+      "passed": true
+    },
+    {
+      "check": "bound input frozenProjection",
+      "passed": true
+    },
+    {
+      "check": "bound input rootSourceFactsAdoption",
+      "passed": true
+    },
+    {
+      "check": "closed facts exactly43+7",
+      "passed": true
+    },
+    {
+      "check": "corrected author verifier all50",
+      "passed": true
+    },
+    {
+      "check": "accepted preimage exact/mode GuidedSessionIT.java",
+      "passed": true
+    },
+    {
+      "check": "postimage bound GuidedSessionIT.java",
+      "passed": true
+    },
+    {
+      "check": "strict GuidedSessionIT.java forward",
+      "passed": true
+    },
+    {
+      "check": "strict GuidedSessionIT.java reverse",
+      "passed": true
+    },
+    {
+      "check": "exact diagnostic row map GuidedSessionIT.java",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1550",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1550",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1550",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1637",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1637",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1637",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1656",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1656",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1656",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1661",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1661",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1661",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1669",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1669",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1669",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1673",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1673",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1673",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1686",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1686",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1686",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1689",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1689",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1689",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1773",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1773",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1773",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1774",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1774",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1774",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:1823",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:1823",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:1823",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:2183",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:2183",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:2183",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:2441",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:2441",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:2441",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:2453",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:2453",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:2453",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:2462",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:2462",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:2462",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:2463",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:2463",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:2463",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:2472",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:2472",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:2472",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:2488",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:2488",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:2488",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedSessionIT.java:2574",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedSessionIT.java:2574",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedSessionIT.java:2574",
+      "passed": true
+    },
+    {
+      "check": "all nonbrace tokens GuidedSessionIT.java",
+      "passed": true
+    },
+    {
+      "check": "all literals/comments GuidedSessionIT.java",
+      "passed": true
+    },
+    {
+      "check": "exact added brace count GuidedSessionIT.java",
+      "passed": true
+    },
+    {
+      "check": "accepted preimage exact/mode GuidedLifecycleReasonIT.java",
+      "passed": true
+    },
+    {
+      "check": "postimage bound GuidedLifecycleReasonIT.java",
+      "passed": true
+    },
+    {
+      "check": "strict GuidedLifecycleReasonIT.java forward",
+      "passed": true
+    },
+    {
+      "check": "strict GuidedLifecycleReasonIT.java reverse",
+      "passed": true
+    },
+    {
+      "check": "exact diagnostic row map GuidedLifecycleReasonIT.java",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedLifecycleReasonIT.java:338",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedLifecycleReasonIT.java:338",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedLifecycleReasonIT.java:338",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedLifecycleReasonIT.java:339",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedLifecycleReasonIT.java:339",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedLifecycleReasonIT.java:339",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedLifecycleReasonIT.java:623",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedLifecycleReasonIT.java:623",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedLifecycleReasonIT.java:623",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedLifecycleReasonIT.java:881",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedLifecycleReasonIT.java:881",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedLifecycleReasonIT.java:881",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedLifecycleReasonIT.java:893",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedLifecycleReasonIT.java:893",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedLifecycleReasonIT.java:893",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedLifecycleReasonIT.java:902",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedLifecycleReasonIT.java:902",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedLifecycleReasonIT.java:902",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedLifecycleReasonIT.java:903",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedLifecycleReasonIT.java:903",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedLifecycleReasonIT.java:903",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedLifecycleReasonIT.java:912",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedLifecycleReasonIT.java:912",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedLifecycleReasonIT.java:912",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedLifecycleReasonIT.java:928",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedLifecycleReasonIT.java:928",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedLifecycleReasonIT.java:928",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedLifecycleReasonIT.java:1014",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedLifecycleReasonIT.java:1014",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedLifecycleReasonIT.java:1014",
+      "passed": true
+    },
+    {
+      "check": "all nonbrace tokens GuidedLifecycleReasonIT.java",
+      "passed": true
+    },
+    {
+      "check": "all literals/comments GuidedLifecycleReasonIT.java",
+      "passed": true
+    },
+    {
+      "check": "exact added brace count GuidedLifecycleReasonIT.java",
+      "passed": true
+    },
+    {
+      "check": "accepted preimage exact/mode GuidedServiceTransportFaultIT.java",
+      "passed": true
+    },
+    {
+      "check": "postimage bound GuidedServiceTransportFaultIT.java",
+      "passed": true
+    },
+    {
+      "check": "strict GuidedServiceTransportFaultIT.java forward",
+      "passed": true
+    },
+    {
+      "check": "strict GuidedServiceTransportFaultIT.java reverse",
+      "passed": true
+    },
+    {
+      "check": "exact diagnostic row map GuidedServiceTransportFaultIT.java",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:5274",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:5274",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:5274",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:5407",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:5407",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:5407",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:5410",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:5410",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:5410",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:5411",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:5411",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:5411",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:5412",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:5412",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:5412",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:5568",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:5568",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:5568",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:6030",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:6030",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:6030",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:6288",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:6288",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:6288",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:6300",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:6300",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:6300",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:6309",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:6309",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:6309",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:6310",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:6310",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:6310",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:6319",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:6319",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:6319",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:6335",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:6335",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:6335",
+      "passed": true
+    },
+    {
+      "check": "exact old body GuidedServiceTransportFaultIT.java:6421",
+      "passed": true
+    },
+    {
+      "check": "single statement/scope GuidedServiceTransportFaultIT.java:6421",
+      "passed": true
+    },
+    {
+      "check": "diagnostic keyword GuidedServiceTransportFaultIT.java:6421",
+      "passed": true
+    },
+    {
+      "check": "all nonbrace tokens GuidedServiceTransportFaultIT.java",
+      "passed": true
+    },
+    {
+      "check": "all literals/comments GuidedServiceTransportFaultIT.java",
+      "passed": true
+    },
+    {
+      "check": "exact added brace count GuidedServiceTransportFaultIT.java",
+      "passed": true
+    },
+    {
+      "check": "80 methods/813 assertions/43 wrappers",
+      "passed": true
+    },
+    {
+      "check": "switch inside same original method",
+      "passed": true
+    },
+    {
+      "check": "closed switch rows exact",
+      "passed": true
+    },
+    {
+      "check": "fourcases/default/selector once",
+      "passed": true
+    },
+    {
+      "check": "three-file88 not inferred99",
+      "passed": true
+    },
+    {
+      "check": "initial ambiguity and focused correction retained",
+      "passed": true
+    }
+  ],
+  "stats": [
+    {
+      "file": "GuidedSessionIT.java",
+      "methods": 44,
+      "assertions": 234,
+      "bracedBodies": 19
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "methods": 5,
+      "assertions": 38,
+      "bracedBodies": 10
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "methods": 31,
+      "assertions": 541,
+      "bracedBodies": 14
+    }
+  ],
+  "adversarialCases": [
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "condition",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "literal",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "dropped-body",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "extra-operation",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "extra-scope",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "else-binding",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "patch-context",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "condition",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "literal",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "dropped-body",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "extra-operation",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "extra-scope",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "else-binding",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "patch-context",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "condition",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "literal",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "dropped-body",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "extra-operation",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "extra-scope",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "else-binding",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "switch-arm",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "switch-default",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "switch-null",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "switch-selector",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "patch-context",
+      "rejected": true
+    }
+  ],
+  "correctedAuthorVerifier50": true,
+  "allowedSourceReads": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/GuidedLifecycleReasonIT.java.forward.patch",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/GuidedLifecycleReasonIT.java.reverse.patch",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/GuidedServiceTransportFaultIT.java.forward.patch",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/GuidedServiceTransportFaultIT.java.reverse.patch",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/GuidedSessionIT.java.forward.patch",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/GuidedSessionIT.java.reverse.patch",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/postimages/GuidedLifecycleReasonIT.java",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/postimages/GuidedServiceTransportFaultIT.java",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/postimages/GuidedSessionIT.java",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/preimages/GuidedLifecycleReasonIT.java",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/preimages/GuidedServiceTransportFaultIT.java",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/preimages/GuidedSessionIT.java",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/source-location-map.json",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/source_tools.py",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-checkstyle-remediation-prep/resume1/verify_source.py",
+    "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01/public-checkstyle-projection01/projection.json"
+  ],
+  "nativeOrJavaFormatterCompilerOsRuntimePrivateActions": 0,
+  "actualLogReportBaselinePrivateReadStatHash": false,
+  "lexicalNotJavaCompilation": true,
+  "savedCorrectedVerifierResultExact": true
+}

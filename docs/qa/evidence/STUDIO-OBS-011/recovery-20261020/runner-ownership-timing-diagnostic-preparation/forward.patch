@@ -1,0 +1,141 @@
+--- a/studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts
++++ b/studio-runner/test/fixtures-tier/guided-secret-ownership.test.ts
+@@ -10,10 +10,11 @@
+ import {expect,it,vi} from 'vitest';
+ import {createGuidedServer,guidedCallback,guidedClaimClient,verifyGuidedJwt} from '../../src/guided/transport.js';
+ import {GuidedRuntime} from '../../src/guided/runtime.js';
++import {GuidedOwnership} from '../../src/guided/ownership.js';
+ import {launchGuidedBrowser} from '../../src/run/browser.js';
+ import {descendantsOf,isAlive} from '../../src/run/tree.js';
+ import {hash,identity,validate} from '../../src/guided/contracts.js';
+-import type {BridgeBootstrap,BridgeObservation,BridgePreparation,BridgeOrdinaryOutcome as BridgeOutcome,BridgeLifecycle,CommandsClaim} from '../../src/guided/types.js';
++import type {BridgeBootstrap,BridgeObservation,BridgePreparation,BridgeOrdinaryOutcome as BridgeOutcome,BridgeLifecycle,CommandsClaim,BridgeStop} from '../../src/guided/types.js';
+ import {guidedContext,ownershipSession,assignmentFor,proposal,dispatch} from '../helpers/guided.js';
+ import {testTls,testFingerprint,jwtPolicy,jwt,post} from '../helpers/guidedTls.js';
+ import {startSecretLoginFixture} from '../fixtures/secret-login/server.js';
+@@ -30,6 +31,47 @@
+   return body.code;
+ }
+ it.each(modes)('uses actual mTLS and native focus for guided secret ownership: %s',async mode=>{
++  // Disposable observation only: no timer, budget, policy, assertion or product-source change.
++  type TimingScalar=number|boolean|BridgeStop['reason']|null;
++  const timingFields={
++    'schedule-enter':['nextRenewalWallMs','secretContext'],
++    'schedule-return':['nextRenewalWallMs','secretContext'],
++    'request-claim-enter':['initial','nextRenewalWallMs','secretContext'],
++    'request-claim-sync-return':['initial'],
++    'grant-validated':['initial','stopped'],
++    'invalidate-enter':['stopped'],
++    'invalidate-return':['stopped'],
++    'stop-entry':['reason','alreadyStopped'],
++    'runtime-stop-enter':['reason','stopped'],
++    'runtime-post-stop-observer':['reason','stopped','observedMonoMs','observedWallMs'],
++    'claim-port-enter':['timeoutMs','aborted'],
++    'claim-abort-event':['timeoutMs','aborted'],
++    'complete-ack':['lastAckT0MonoMs','focusSeen'],
++    'claim-rejected':['timeoutMs'],
++  } as const;
++  type TimingEvent=keyof typeof timingFields;
++  const timingRows:{event:TimingEvent;monoMs:number;wallMs:number;observerEndMonoMs:number;fields:Readonly<Record<string,TimingScalar>>}[]=[];
++  const timingReasons=new Set<string>(['CANCELLED','EXPIRED','UNKNOWN_OUTCOME','LEASE_LOST','CONTEXT_LOST','REVOKED']);
++  const timingAbortListeners:{signal:AbortSignal;listener:()=>void}[]=[];
++  let timingOverflow=false,timingIncomplete=false,timingCleanupComplete=false,timingMocksRestored=false;
++  const observeTiming=(event:TimingEvent,fields:Readonly<Record<string,TimingScalar>>):void=>{
++    try{
++      const monoMs=performance.now(),wallMs=Date.now();
++      if(timingRows.length>=64){timingOverflow=true;return;}
++      const allowed:readonly string[]=timingFields[event];
++      if(Object.keys(fields).length!==allowed.length||Object.entries(fields).some(([key,value])=>!allowed.includes(key)||!(value===null||typeof value==='boolean'||typeof value==='number'&&Number.isFinite(value)||typeof value==='string'&&key==='reason'&&timingReasons.has(value)))){timingIncomplete=true;return;}
++      const row={event,monoMs,wallMs,observerEndMonoMs:0,fields};timingRows.push(row);row.observerEndMonoMs=performance.now();
++    }catch{timingIncomplete=true;}
++  };
++  type TimingEntry={readonly stopped:boolean;readonly nextRenewal?:number;readonly runtime:GuidedRuntime|null};
++  type TimingOwnership={
++    schedule(entry:TimingEntry):void;
++    requestClaim(entry:TimingEntry,initial:boolean):Promise<unknown>;
++    checkGrant(entry:TimingEntry,value:unknown,initial:boolean):unknown;
++    invalidate(entry:TimingEntry):void;
++    stopEntry(entry:TimingEntry,reason:BridgeStop['reason']):Promise<void>;
++  };
++  const timingPrototype=GuidedOwnership.prototype as unknown as TimingOwnership;
+   const fixture=await startSecretLoginFixture(CANARY),directory=await mkdtemp(join(tmpdir(),'guided-secret-ownership-'));
+   const context=guidedContext(fixture.origin),destination=context.authoredInputs.inputs[0];
+   if(!destination||!('value' in destination))throw Error('DESTINATION');destination.value=fixture.origin+'/slow';
+@@ -45,8 +87,9 @@
+   const actualStop=Object.getOwnPropertyDescriptor(GuidedRuntime.prototype,'stop')?.value as GuidedRuntime['stop'];
+   if(typeof actualStop!=='function')throw Error('STOP_METHOD');
+   vi.spyOn(GuidedRuntime.prototype,'stop').mockImplementation(function(this:GuidedRuntime,reason){
++    observeTiming('runtime-stop-enter',{reason,stopped:(this as unknown as {readonly stopped:boolean}).stopped});
+     const pending=actualStop.call(this,reason);
+-    if(this.currentIdentity.sessionId===context.sessionId&&!this.accepting){authorityStoppedAt??=performance.now();authorityStoppedWallMs??=Date.now();stopReason??=reason;}
++    if(this.currentIdentity.sessionId===context.sessionId&&!this.accepting){authorityStoppedAt??=performance.now();authorityStoppedWallMs??=Date.now();stopReason??=reason;observeTiming('runtime-post-stop-observer',{reason,stopped:(this as unknown as {readonly stopped:boolean}).stopped,observedMonoMs:authorityStoppedAt,observedWallMs:authorityStoppedWallMs});}
+     return pending;
+   });
+   const actualLaunch=chromium.launchPersistentContext.bind(chromium);
+@@ -99,13 +142,46 @@
+   const actualClaim=guidedClaimClient(client);
+   const app=createGuidedServer({workerId:context.workerId,capacity:1,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,claim:async(command,key,timeout,signal)=>{
+     const fact={started:performance.now(),timeoutMs:timeout,key};claimFacts.push(fact);
+-    try{const acknowledged=await actualClaim(command,key,timeout,signal);Object.assign(fact,{completed:performance.now()});if(focusAt!==undefined&&t0===undefined&&(mode==='revoked'||mode==='lost-body-late-grant'))t0=performance.now();return acknowledged;}
+-    catch(error){Object.assign(fact,{failed:performance.now()});throw error;}
++    observeTiming('claim-port-enter',{timeoutMs:timeout,aborted:signal.aborted});
++    try{const listener=():void=>{observeTiming('claim-abort-event',{timeoutMs:timeout,aborted:signal.aborted});};signal.addEventListener('abort',listener,{once:true});timingAbortListeners.push({signal,listener});}catch{timingIncomplete=true;}
++    try{const acknowledged=await actualClaim(command,key,timeout,signal);Object.assign(fact,{completed:performance.now()});if(focusAt!==undefined&&t0===undefined&&(mode==='revoked'||mode==='lost-body-late-grant'))t0=performance.now();observeTiming('complete-ack',{lastAckT0MonoMs:t0??null,focusSeen:focusAt!==undefined});return acknowledged;}
++    catch(error){Object.assign(fact,{failed:performance.now()});observeTiming('claim-rejected',{timeoutMs:timeout});throw error;}
+   },callback:guidedCallback(client),launch:async(...args)=>{const browser=await launchGuidedBrowser(...args);scratchPath=browser.scratchDirectory;return {...browser,close:async()=>{closeRequestedAt??=performance.now();await browser.close();closeFinishedAt=performance.now();}};}});
+   await new Promise<void>(r=>app.server.listen(0,'127.0.0.1',r));const address=app.server.address();if(!address||typeof address==='string')throw Error('PORT');const path='/internal/v2/studio/guided-sessions/'+context.sessionId;
+   let pendingFill:Promise<Awaited<ReturnType<typeof post>>>|undefined;
+   const facts:Record<string,unknown>={mode,sourceGuidedWorker:true,compiledWorker:false,realMtlsJwt:true,backendRevocationAuditProved:false,scopeHash:context.scopeHash,sessionId:context.sessionId,absoluteExpiresAt:context.expiresAt};
+   try{
++    // Each descriptor wrapper calls the original once, with the same receiver/arguments and exact return value/promise.
++    try{
++      const original=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'schedule')?.value as TimingOwnership['schedule']|undefined;
++      if(typeof original!=='function')timingIncomplete=true;
++      else vi.spyOn(timingPrototype,'schedule').mockImplementation(function(this:GuidedOwnership,entry){
++        observeTiming('schedule-enter',{nextRenewalWallMs:entry.nextRenewal??null,secretContext:entry.runtime?.hasSecretInputs===true});
++        const returned=original.call(this,entry);
++        observeTiming('schedule-return',{nextRenewalWallMs:entry.nextRenewal??null,secretContext:entry.runtime?.hasSecretInputs===true});return returned;
++      });
++      const request=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'requestClaim')?.value as TimingOwnership['requestClaim']|undefined;
++      if(typeof request!=='function')timingIncomplete=true;
++      else vi.spyOn(timingPrototype,'requestClaim').mockImplementation(function(this:GuidedOwnership,entry,initial){
++        observeTiming('request-claim-enter',{initial,nextRenewalWallMs:entry.nextRenewal??null,secretContext:entry.runtime?.hasSecretInputs===true});
++        const returned=request.call(this,entry,initial);observeTiming('request-claim-sync-return',{initial});return returned;
++      });
++      const checked=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'checkGrant')?.value as TimingOwnership['checkGrant']|undefined;
++      if(typeof checked!=='function')timingIncomplete=true;
++      else vi.spyOn(timingPrototype,'checkGrant').mockImplementation(function(this:GuidedOwnership,entry,value,initial){
++        const returned=checked.call(this,entry,value,initial);observeTiming('grant-validated',{initial,stopped:entry.stopped});return returned;
++      });
++      const invalidated=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'invalidate')?.value as TimingOwnership['invalidate']|undefined;
++      if(typeof invalidated!=='function')timingIncomplete=true;
++      else vi.spyOn(timingPrototype,'invalidate').mockImplementation(function(this:GuidedOwnership,entry){
++        observeTiming('invalidate-enter',{stopped:entry.stopped});const returned=invalidated.call(this,entry);observeTiming('invalidate-return',{stopped:entry.stopped});return returned;
++      });
++      const stopped=Object.getOwnPropertyDescriptor(GuidedOwnership.prototype,'stopEntry')?.value as TimingOwnership['stopEntry']|undefined;
++      if(typeof stopped!=='function')timingIncomplete=true;
++      else vi.spyOn(timingPrototype,'stopEntry').mockImplementation(function(this:GuidedOwnership,entry,reason){
++        observeTiming('stop-entry',{reason,alreadyStopped:entry.stopped});return stopped.call(this,entry,reason);
++      });
++    }catch{timingIncomplete=true;}
+     expect((await post(address.port,path+'/assign',assignment,{fence:null})).status).toBe(200);
+     expect((await post(address.port,path+'/context',context)).status).toBe(200);
+     const bootstrap=messages.find(m=>m.route==='bootstrap-evidence')?.body as BridgeBootstrap|undefined;if(!bootstrap)throw Error('BOOTSTRAP');
+@@ -145,8 +221,16 @@
+     }
+     const outcome=messages.filter(m=>m.route==='outcomes').at(-1)?.body as BridgeOutcome|undefined;expect(outcome?.ledger.dispatchCount).toBe(1);expect(outcome?.ledger.state).toBe('UNKNOWN_OUTCOME');
+   }finally{
++    try{
+     await app.close();if(pendingFill)await pendingFill.catch(()=>undefined);for(const timer of timers)clearTimeout(timer);heldLate?.destroy();callbacks.closeAllConnections();await new Promise<void>(r=>callbacks.close(()=>{r();}));
+     Object.assign(facts,{commandResponses,claimFacts,requestFacts,focusAt,nativePendingAtFocus,t0,authorityStoppedAt,stopReason,closeRequestedAt,closeFinishedAt,lateGrantWriteAt,lateGrantResponseClosed,launches,nativeEntries,nativeEnds,inputEvents,pids:[...pids],allObservedPidsGone:[...pids].every(pid=>!isAlive(pid)),scratchPath,scratchAbsent:scratchPath!==undefined&&!existsSync(scratchPath),messages});
+-    await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution-2/oracle-'+mode+'.json'),JSON.stringify(facts,null,2)+'\n');vi.restoreAllMocks();await fixture.close();await rm(directory,{recursive:true,force:true});
++    await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution-2/oracle-'+mode+'.json'),JSON.stringify(facts,null,2)+'\n');vi.restoreAllMocks();timingMocksRestored=true;await fixture.close();await rm(directory,{recursive:true,force:true});
++    timingCleanupComplete=true;
++    }finally{
++      for(const {signal,listener} of timingAbortListeners){try{signal.removeEventListener('abort',listener);}catch{timingIncomplete=true;}}
++      if(!timingMocksRestored){try{vi.restoreAllMocks();timingMocksRestored=true;}catch{timingIncomplete=true;}}
++      // A missing/failed flush is incomplete diagnostic evidence, never a replacement test error.
++      try{await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution-2/ownership-timing-diagnostic.json'),JSON.stringify({schemaVersion:1,selectedCaseWasLostBodyLateGrant:mode==='lost-body-late-grant',capacity:64,overflow:timingOverflow,instrumentationFailed:timingIncomplete,originalCleanupComplete:timingCleanupComplete,mocksRestored:timingMocksRestored,records:timingRows},null,2)+'\n');}catch{/* Missing closed output invalidates the diagnostic; preserve the original test result. */}
++    }
+   }
+ },45000);

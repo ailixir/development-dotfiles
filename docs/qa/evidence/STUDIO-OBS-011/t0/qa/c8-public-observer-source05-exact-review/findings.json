@@ -1,0 +1,59 @@
+{
+  "reviewer": "Quinn",
+  "verdict": "HOLD_NEW_EXACT_SOURCE_SUCCESSOR_REQUIRED",
+  "subjectManifestSha256": "4ee4fabed829952e235d1c2ff820c4a7f37e43970aab03d3b47d446a0436267f",
+  "mandatoryCount": 1,
+  "mandatoryFindings": [
+    {
+      "id": "OBS05-QA-CUSTODY-01",
+      "category": "Existing mandatory actual-acquired-resource custody/retention category",
+      "priorFindingPartiallyUnresolved": "OBS04-ARCH-CUSTODY-02 / original OBS03-QA-02",
+      "severity": "HIGH",
+      "title": "Failed custody acquisition loses descriptors before Relay owns its canonical resource reference",
+      "source": [
+        "public_observation_unit.py:155-176 Custody.__init__",
+        "public_observation_unit.py:274-277 Custody.close",
+        "public_relay.py:117 Relay.start parent factory assignment",
+        "public_relay.py:254-271 Relay.refresh_closure",
+        "public_observation_unit.py:591-626 Effects.release_custody",
+        "public_observation_unit.py:1388-1410 main-finally"
+      ],
+      "evidence": "Actual Custody constructor/close plus actual Relay.start/check/stop/refresh, Effects.stop/release and main-finally under fake boundaries: clean3-FD constructor closes all; fstat after successful first open leaves1 FD outside chain; constructor validation+close failure leaves3 FDs. Adverse factory never returns, Relay.parent staysNone, actual canonical/published descriptorsClosed=true, control/output discharged, Effects not retained; main remains1. No actual descriptors, threads, OS or source changes.",
+      "requiredCorrection": "New immutable successor: retain every descriptor immediately after open before validation; ensure failed/unreturned custody constructors transfer or retain actual partial ownership/ledger in relay/Effects. Unconfirmed close must deny complete canonical closure and retain failed-acquisition/control/output/authority references. Preserve clean closed failed-protocol/native teardown and no force-close. Add exact actual-constructor/main positive/adverse cases; no Java/business/privacy/runtime scope change.",
+      "pairedActualFunctionFakeCases": 3,
+      "expectedOutcomeChecks": 12,
+      "actualRuntimeActions": 0
+    }
+  ],
+  "loaderFindingDisposition": "CORRECTED_AT_SOURCE_LEVEL; no Assert precompile checks; exact common literal/API;22author+36independent normal/optimized fake cases",
+  "assignedFiveResourceClosureDisposition": "CORRECTED_AT_SOURCE_LEVEL; failed/unreturned custody acquisition remains uncovered",
+  "guardedReplayedControls": 374,
+  "reusedPriorUnchangedControls": 432,
+  "totalSourceControlCoverage": 806,
+  "retainedSemanticIds": 727,
+  "newControls": 79,
+  "independentSourceChecks": 2290,
+  "independentAllModeLoaderCases": 36,
+  "independentFiveResourceClosureCases": 9,
+  "additionalConstructorChecks": 12,
+  "constructorCases": 3,
+  "distinctPublicPreparedPins": 351,
+  "preparedInputPinsVerified": 173,
+  "reachedInterpretationSites": 99,
+  "inputClasses": 15,
+  "requiredCallbacks": 18,
+  "cliModes": 9,
+  "testLimitations": {
+    "wholeIntegration": "One registered fake client plus one exact READY yield; no original statements removed; cooperative model only.",
+    "directRelayChecks": 104,
+    "JavaHarness": "Literal03/04, uncompiled and unexecuted.",
+    "reviewerMetadataFailures": "Two assumptions corrected only in review script; all attempt outputs retained, subject/audits unchanged."
+  },
+  "actualJavaPlatformOsProcessThreadSocketKernelLockNativePrivateBaselineActions": 0,
+  "sourceApproval": false,
+  "operationalAuthorityIssued": false,
+  "sourceWindowOrLeaseIssued": false,
+  "readiness": false,
+  "permit": false,
+  "C8GatewayMainSourceIrLaneLifecycleCredit": false
+}

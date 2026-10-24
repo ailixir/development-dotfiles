@@ -1,0 +1,829 @@
+{
+  "inactive": true,
+  "allNullsRequireActualIndependentRootInputs": true,
+  "rootProposal": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "authorized": false,
+    "label": "obs009-gateway80-offtree04-20261019",
+    "maximumCaptures": 1,
+    "nativeOrPhaseAuthorized": false,
+    "packetManifestSha256": null,
+    "previousFailedUnitProperlyClosedAndAdopted": false,
+    "previousFailedUnitClosure": {
+      "path": null,
+      "sha256": null
+    },
+    "wrapper": {
+      "pid": null,
+      "uid": null,
+      "start": null,
+      "argvHash": null
+    },
+    "shell": {
+      "pid": null,
+      "uid": null,
+      "start": null,
+      "argvHash": null
+    },
+    "lock": {
+      "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/gradle.lock",
+      "dev": null,
+      "ino": null
+    },
+    "baselinePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/diag-start1-harness/resume2/preexisting-baseline.json",
+    "baselineSha256": "fd39b45fd27689034742d5a3205461e9aa4a316baa810f8488216f8f49b7101a",
+    "existingAncestorBindings": {},
+    "proposedAuthorization": {
+      "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+      "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+      "guarantees": {
+        "strongExecutableObjectIdentityProved": false,
+        "kernelMainMappedVnodeEqualityProved": false,
+        "highResolutionProcessIdentityProved": false,
+        "launchTimeExecutableObjectBound": false,
+        "completeIntervalHistoryProved": false,
+        "exhaustiveDescendantDiscoveryProved": false,
+        "adversarialReplacementRaceExcluded": false,
+        "globalQuietProved": false,
+        "legacyOrdinaryGateSatisfied": false,
+        "intervalCaptureClaimed": false
+      },
+      "historicalIdentityUncertainty": true,
+      "unsupportedEvidence": {
+        "kernelStartSeconds": {
+          "value": null,
+          "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+        },
+        "kernelStartMicroseconds": {
+          "value": null,
+          "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+        },
+        "kernelMainExecutableObject": {
+          "value": null,
+          "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+        },
+        "mainMappedObjectEquality": {
+          "value": null,
+          "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+        },
+        "launchTimeObjectBinding": {
+          "value": null,
+          "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+        },
+        "strongPlatformCertificateSha256": {
+          "value": null,
+          "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+        }
+      },
+      "credit": false,
+      "C8": false,
+      "cleanupAuthorized": false,
+      "sourceWrites": [],
+      "authorized": false,
+      "authorizedBy": "root",
+      "label": "obs009-gateway80-offtree04-20261019",
+      "packetManifestSha256": null,
+      "holdFileSha256": null,
+      "candidateBaselineSha256": null,
+      "ownerRulingPins": {
+        "Aria": {
+          "name": null,
+          "sha256": null
+        },
+        "Quinn": {
+          "name": null,
+          "sha256": null
+        },
+        "root": {
+          "name": null,
+          "sha256": null
+        }
+      },
+      "independentCodeReviewPins": {
+        "Aria": {
+          "path": null,
+          "sha256": null
+        },
+        "Quinn": {
+          "path": null,
+          "sha256": null
+        }
+      },
+      "previousFailedUnitProperlyClosedAndAdopted": false,
+      "previousFailedUnitClosure": {
+        "path": null,
+        "sha256": null
+      },
+      "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+      "directoryRoots": {},
+      "dependencyInventory": null,
+      "distModes": null,
+      "auxModes": null,
+      "nodeCanonicalPath": null,
+      "nodeSha256": null,
+      "helmCanonicalPath": null,
+      "helmSha256": null,
+      "dependenciesRealpath": null,
+      "safeEnvironment": {
+        "HOME": null,
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US.UTF-8"
+      },
+      "boundBasePath": "/usr/bin:/bin:/usr/sbin:/sbin"
+    }
+  },
+  "captureExteriorEntry": {
+    "operation": "capture",
+    "packetManifestSha256": null,
+    "proposalPath": null,
+    "proposalSha256": null,
+    "sameShellToken": "--same-shell-once-consumed"
+  },
+  "rootAuthorExteriorEntry": {
+    "operation": "author-control",
+    "packetManifestSha256": null,
+    "authorizedBy": "root",
+    "role": "ROOT_ATTESTATION_AUTHOR_ONLY",
+    "runtimeIdentity": {
+      "dev": null,
+      "ino": null
+    },
+    "outputName": null,
+    "document": null
+  },
+  "operationalEntryDocument": {
+    "operation": null
+  },
+  "rootRelease": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "authorized": false,
+    "authorizedBy": "root",
+    "label": "obs009-gateway80-offtree04-20261019",
+    "packetManifestSha256": null,
+    "holdFileSha256": null,
+    "candidateBaselineSha256": null,
+    "ownerRulingPins": {
+      "Aria": {
+        "name": null,
+        "sha256": null
+      },
+      "Quinn": {
+        "name": null,
+        "sha256": null
+      },
+      "root": {
+        "name": null,
+        "sha256": null
+      }
+    },
+    "independentCodeReviewPins": {
+      "Aria": {
+        "path": null,
+        "sha256": null
+      },
+      "Quinn": {
+        "path": null,
+        "sha256": null
+      }
+    },
+    "previousFailedUnitProperlyClosedAndAdopted": false,
+    "previousFailedUnitClosure": {
+      "path": null,
+      "sha256": null
+    },
+    "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+    "directoryRoots": {},
+    "dependencyInventory": null,
+    "distModes": null,
+    "auxModes": null,
+    "nodeCanonicalPath": null,
+    "nodeSha256": null,
+    "helmCanonicalPath": null,
+    "helmSha256": null,
+    "dependenciesRealpath": null,
+    "safeEnvironment": {
+      "HOME": null,
+      "LANG": "en_US.UTF-8",
+      "LC_ALL": "en_US.UTF-8"
+    },
+    "boundBasePath": "/usr/bin:/bin:/usr/sbin:/sbin"
+  },
+  "codeReviewRequiredShape": {
+    "reviewer": null,
+    "subjectManifestSha256": null,
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "mandatoryFindings": null
+  },
+  "ownerRuling": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "owner": null,
+    "profileAuthorized": false,
+    "packetManifestSha256": null,
+    "independentCodeReviewPins": {
+      "Aria": {
+        "path": null,
+        "sha256": null
+      },
+      "Quinn": {
+        "path": null,
+        "sha256": null
+      }
+    },
+    "strongInitialSubjectReplacedOnlyForThisLocalProfile": false
+  },
+  "phaseDecision": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "phase": null,
+    "authorized": false,
+    "releaseSha256": null,
+    "precedingReceipts": {},
+    "redNativeStatusSeparatelyInspected": null,
+    "redReceiptAndExactAssertionsInspected": false
+  },
+  "clientActualCompletion": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "authorizedBy": "root",
+    "actualToolCompleted": false,
+    "actualCollectorExit": null,
+    "separatelyCaptured": false,
+    "journalSha256": null,
+    "actualToolReference": null
+  },
+  "negativeStatus": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "authorizedBy": "root",
+    "actualNegativeStatus": null,
+    "separatelyCaptured": false,
+    "sameOriginalHeldShell": false,
+    "denialSha256": null,
+    "actualToolReference": null
+  },
+  "guardAdmission": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "authorizedBy": "root",
+    "negativeExitActualStatus": null,
+    "heldProofActualStatus": null,
+    "readonlyParentGuardInspected": false,
+    "heldProofSha256": null,
+    "negativeStatusSha256": null
+  },
+  "actualQa": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "reviewer": "Quinn",
+    "actualPhaseAndArchiveReviewed": false,
+    "mandatoryFindings": null,
+    "immutableTuple": null,
+    "ownerRulingPins": {
+      "Aria": {
+        "name": null,
+        "sha256": null
+      },
+      "Quinn": {
+        "name": null,
+        "sha256": null
+      },
+      "root": {
+        "name": null,
+        "sha256": null
+      }
+    }
+  },
+  "actualReviewAdoption": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "authorizedBy": "root",
+    "actualPhaseAndArchiveQaAdopted": false,
+    "actualQaReviewName": null,
+    "actualQaReviewSha256": null,
+    "ownerRulingPins": {
+      "Aria": {
+        "name": null,
+        "sha256": null
+      },
+      "Quinn": {
+        "name": null,
+        "sha256": null
+      },
+      "root": {
+        "name": null,
+        "sha256": null
+      }
+    }
+  },
+  "closePermit": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "authorizedBy": "root",
+    "issuedAtEpoch": null,
+    "actualFinalStatus": null,
+    "finalResultAndReadinessSeparatelyInspected": false,
+    "expectedWrapperExit": null,
+    "readinessSha256": null,
+    "finalResultSha256": null,
+    "ownerRulingPins": {
+      "Aria": {
+        "name": null,
+        "sha256": null
+      },
+      "Quinn": {
+        "name": null,
+        "sha256": null
+      },
+      "root": {
+        "name": null,
+        "sha256": null
+      }
+    },
+    "actualToolReference": null
+  },
+  "actualWrapperResult": {
+    "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+    "claimSet": "LOCAL_TEST_RESULT_WITH_SAMPLED_OBSERVATIONS",
+    "guarantees": {
+      "strongExecutableObjectIdentityProved": false,
+      "kernelMainMappedVnodeEqualityProved": false,
+      "highResolutionProcessIdentityProved": false,
+      "launchTimeExecutableObjectBound": false,
+      "completeIntervalHistoryProved": false,
+      "exhaustiveDescendantDiscoveryProved": false,
+      "adversarialReplacementRaceExcluded": false,
+      "globalQuietProved": false,
+      "legacyOrdinaryGateSatisfied": false,
+      "intervalCaptureClaimed": false
+    },
+    "historicalIdentityUncertainty": true,
+    "unsupportedEvidence": {
+      "kernelStartSeconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelStartMicroseconds": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "kernelMainExecutableObject": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "mainMappedObjectEquality": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "launchTimeObjectBinding": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      },
+      "strongPlatformCertificateSha256": {
+        "value": null,
+        "reason": "NOT_PROVED_BY_LOCAL_RUNNER_PROFILE"
+      }
+    },
+    "credit": false,
+    "C8": false,
+    "cleanupAuthorized": false,
+    "sourceWrites": [],
+    "authorizedBy": "root",
+    "actualWrapperExit": null,
+    "separatelyCaptured": false,
+    "allowCloseSha256": null,
+    "actualToolReference": null
+  }
+}

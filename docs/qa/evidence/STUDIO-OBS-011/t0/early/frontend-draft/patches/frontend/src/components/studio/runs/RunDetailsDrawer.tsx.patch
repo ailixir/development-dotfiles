@@ -1,0 +1,11 @@
+--- a/frontend/src/components/studio/runs/RunDetailsDrawer.tsx
++++ b/frontend/src/components/studio/runs/RunDetailsDrawer.tsx
+@@ -354,7 +354,7 @@
+               <Typography variant="subtitle2" component="h3">Scheduled execution</Typography>
+               <Typography variant="body2">Scheduled due: {formatAbsoluteTime(snapshot.scheduledAt ?? null)}</Typography>
+               <Typography variant="body2">Schedule {snapshot.scheduleId} · version {snapshot.scheduleVersion} · occurrence {snapshot.occurrenceId}</Typography>
+-              <Typography variant="body2">Confirmed revision: {snapshot.revisionId ?? 'Unavailable'}</Typography>
++              <Typography variant="body2">Learned revision: {snapshot.revisionId ?? 'Unavailable'}</Typography>
+               <Typography variant="body2">Activated by {snapshot.activatedBy ?? 'Unknown'} at {formatAbsoluteTime(snapshot.activatedAt ?? null)}</Typography>
+               <Typography variant="caption">Activation {snapshot.activationId ?? 'Unknown'}. Scheduled due, request acceptance and browser start are separate instants.</Typography>
+             </Box>}

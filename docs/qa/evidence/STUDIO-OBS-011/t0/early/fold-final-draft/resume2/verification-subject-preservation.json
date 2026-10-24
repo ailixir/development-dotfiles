@@ -1,0 +1,1578 @@
+{
+  "runtimeVerified": false,
+  "subjects": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/scheduling/SharedSchedulingIT.java",
+      "sourceBeforeSha256": "e45d33c2168883689633f147daeaeddc221340961d3879f7e63e7e9f46dec3c1",
+      "sourceAfterSha256": "e45d33c2168883689633f147daeaeddc221340961d3879f7e63e7e9f46dec3c1",
+      "methodCount": 4,
+      "methods": [
+        {
+          "class": "com.citi.put.checks.scheduling.SharedSchedulingIT",
+          "method": "actualSpringBootstrapHonorsIsoAndSpelWithoutCircularReferencesAndHasOneDueTimer",
+          "kind": "Test",
+          "beforeBodySha256": "8882407fb7c9428215d9ebc7a568fdb0f8efd1006d89cf4fcaea1a6cd79608de",
+          "afterBodySha256": "8882407fb7c9428215d9ebc7a568fdb0f8efd1006d89cf4fcaea1a6cd79608de",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.scheduling.SharedSchedulingIT",
+          "method": "sameCoordinatorRunsHttpTcpSplunkAndStudioThroughTheirExistingPipelines",
+          "kind": "Test",
+          "beforeBodySha256": "f8b5e8f3a48de7a206b32aa760b12e103ef43c20a971f4d8ab14d68efdfab156",
+          "afterBodySha256": "f8b5e8f3a48de7a206b32aa760b12e103ef43c20a971f4d8ab14d68efdfab156",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.scheduling.SharedSchedulingIT",
+          "method": "ordinaryLeadershipLockCannotSuppressStudioAndStudioFlagCannotSuppressChecks",
+          "kind": "Test",
+          "beforeBodySha256": "dd1b6fbfd9dc1e19fdb91f1f29af57a9bb49f6ea30ba36f9172c51f6ab050076",
+          "afterBodySha256": "dd1b6fbfd9dc1e19fdb91f1f29af57a9bb49f6ea30ba36f9172c51f6ab050076",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.scheduling.SharedSchedulingIT",
+          "method": "studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesAgainstAnotherCoordinator",
+          "kind": "Test",
+          "beforeBodySha256": "44023febde7be2f858fd0128ccd3eb2bd45b3cf929ad6bdeea1c6bf674d69d98",
+          "afterBodySha256": "44023febde7be2f858fd0128ccd3eb2bd45b3cf929ad6bdeea1c6bf674d69d98",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        }
+      ],
+      "scope": "named read-only/prepared verification subject; ClockIT whole-file legacy fallback cleanup separately exact-bound; no method changes"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java",
+      "sourceBeforeSha256": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1",
+      "sourceAfterSha256": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1",
+      "methodCount": 8,
+      "methods": [
+        {
+          "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+          "method": "historicalReceiptNeedsFreshReadButNoExecuteSessionOrAccountAuthority",
+          "kind": "Test",
+          "beforeBodySha256": "0dbfb4403e8202cec5fc79c260a4f7085a92fa16cf4166c6373bed2723e644cf",
+          "afterBodySha256": "0dbfb4403e8202cec5fc79c260a4f7085a92fa16cf4166c6373bed2723e644cf",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+          "method": "changedPrincipalCannotUseCachedOriginalOwner",
+          "kind": "Test",
+          "beforeBodySha256": "b0cab0cf1d0236e1345d0caa5582d83af77971c4eaa8a8840e4ae32201ecb7c5",
+          "afterBodySha256": "b0cab0cf1d0236e1345d0caa5582d83af77971c4eaa8a8840e4ae32201ecb7c5",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+          "method": "revokedReadAndMissingCookieRefuseWithoutCookiePersistence",
+          "kind": "Test",
+          "beforeBodySha256": "aa74a35f165a80962a2c33758023fd303f2ed72974942608cedfb18a617795c1",
+          "afterBodySha256": "aa74a35f165a80962a2c33758023fd303f2ed72974942608cedfb18a617795c1",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+          "method": "expiredCookieAndUnavailableCoreNeverFallBackToCachedIdentity",
+          "kind": "Test",
+          "beforeBodySha256": "7800eceff0f989cee31d3212549c57281236007990c83456c6a5a7024971371a",
+          "afterBodySha256": "7800eceff0f989cee31d3212549c57281236007990c83456c6a5a7024971371a",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+          "method": "publishGrantIsBoundToOriginalCapturedDeadlineAndNeverExtendedByRenewal",
+          "kind": "Test",
+          "beforeBodySha256": "9cd302a5ebaa0b6a02f9b5238f6e4499d5050ab13466a26bcb5e64735d5ee98f",
+          "afterBodySha256": "9cd302a5ebaa0b6a02f9b5238f6e4499d5050ab13466a26bcb5e64735d5ee98f",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+          "method": "observedTimeUsesExactMillisecondsAndFloorsAuthorityDeadlines",
+          "kind": "Test",
+          "beforeBodySha256": "5ba84f92f430c5ada50d8877abff893bb120a17db081df645f11948ec06763c2",
+          "afterBodySha256": "5ba84f92f430c5ada50d8877abff893bb120a17db081df645f11948ec06763c2",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+          "method": "packagedObservedArtifactsResolveDefinitionsWithoutRecursingOrRelaxingClosure",
+          "kind": "Test",
+          "beforeBodySha256": "f9e0f2248e27707c567c94283ef35261cbd269162474e54d62b4048908ea6078",
+          "afterBodySha256": "f9e0f2248e27707c567c94283ef35261cbd269162474e54d62b4048908ea6078",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+          "method": "workerWithoutPublicationCollaboratorRefusesEveryPublicationOperation",
+          "kind": "Test",
+          "beforeBodySha256": "247156a9cc5c252b63514acadac9fb9e2a67ebc854e8368fd3be5c934d64eda2",
+          "afterBodySha256": "247156a9cc5c252b63514acadac9fb9e2a67ebc854e8368fd3be5c934d64eda2",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        }
+      ],
+      "scope": "named read-only/prepared verification subject; ClockIT whole-file legacy fallback cleanup separately exact-bound; no method changes"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "sourceBeforeSha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad",
+      "sourceAfterSha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad",
+      "methodCount": 19,
+      "methods": [
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "ownedBytePublisherAndSecretArraysAreErasedAcrossAcceptedRefusedAndAmbiguousResponses",
+          "kind": "Test",
+          "beforeBodySha256": "04231248b9832d79f7bff02f83ae78b352a301f3f14da5445e62a8e0929fcca4",
+          "afterBodySha256": "04231248b9832d79f7bff02f83ae78b352a301f3f14da5445e62a8e0929fcca4",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "dispatchCarriesTheRunnerIdentityAndMissingIdentitySendsNothing",
+          "kind": "Test",
+          "beforeBodySha256": "ed3b82409c522c9ec020208f8aea8be822fa79b3349deb7353cd9a361d2dd6f5",
+          "afterBodySha256": "ed3b82409c522c9ec020208f8aea8be822fa79b3349deb7353cd9a361d2dd6f5",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "redirectsAreNotFollowed",
+          "kind": "Test",
+          "beforeBodySha256": "983c2fef2c7132f8f08b6935ec3a0e8018380fc6467879ed2559ec2b2307f157",
+          "afterBodySha256": "983c2fef2c7132f8f08b6935ec3a0e8018380fc6467879ed2559ec2b2307f157",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "exactlyOneRequestLeavesTheProcessForEachOfTheFourAmbiguousCases",
+          "kind": "Test",
+          "beforeBodySha256": "904d1a81c7c69506acb4eabc7183f40bf140a7ff5bbfe50ce2091ef2361e2f39",
+          "afterBodySha256": "904d1a81c7c69506acb4eabc7183f40bf140a7ff5bbfe50ce2091ef2361e2f39",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "a202IsTheAdmittedPathAnd429IsDefiniteNonAcceptance",
+          "kind": "Test",
+          "beforeBodySha256": "5a5458df865bf97717ea9cf522ebd935c470c7ad57448b4dd1b3cfcb11d9fe5d",
+          "afterBodySha256": "5a5458df865bf97717ea9cf522ebd935c470c7ad57448b4dd1b3cfcb11d9fe5d",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "theDispatchPresentsTheRunnerServiceIdentityAsABearer",
+          "kind": "Test",
+          "beforeBodySha256": "e48b1288c4cff5c176abd0f53a3a92589d905721173ce7e637b776aace8a8e5b",
+          "afterBodySha256": "e48b1288c4cff5c176abd0f53a3a92589d905721173ce7e637b776aace8a8e5b",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "theCancelRelayIsOneDeleteCarryingTheSameBearer",
+          "kind": "Test",
+          "beforeBodySha256": "96335ddec174ee9918262979c0b46485547d1c76528c873316ab7a7975f5be36",
+          "afterBodySha256": "96335ddec174ee9918262979c0b46485547d1c76528c873316ab7a7975f5be36",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "theCancelClassificationSettlesOnlyOn202And409",
+          "kind": "Test",
+          "beforeBodySha256": "1bd1fc5b87d8446e10c580a7c7bdeba55a2400ec2797d35d4314d6ad78649b38",
+          "afterBodySha256": "1bd1fc5b87d8446e10c580a7c7bdeba55a2400ec2797d35d4314d6ad78649b38",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "aCancelWithoutAServiceIdentitySendsNothing",
+          "kind": "Test",
+          "beforeBodySha256": "07ce116b5da194d49794c26792c6ae1070c751b0d8cc2dd7ebf2791d408c509a",
+          "afterBodySha256": "07ce116b5da194d49794c26792c6ae1070c751b0d8cc2dd7ebf2791d408c509a",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "anUnconfiguredRunnerIsATerminalNamedRefusalAndSendsNothing",
+          "kind": "Test",
+          "beforeBodySha256": "6d450b168570ea369c6846f415574f52f364e492e711db0f99fdaadf2c0beb19",
+          "afterBodySha256": "6d450b168570ea369c6846f415574f52f364e492e711db0f99fdaadf2c0beb19",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "aMissingServiceIdentityIsATerminalNamedRefusalAndSendsNothing",
+          "kind": "Test",
+          "beforeBodySha256": "b18ffc5b1ea4c33b360153a348e9a0a7810d51d040c3b99f5c6dd950e204c1e2",
+          "afterBodySha256": "b18ffc5b1ea4c33b360153a348e9a0a7810d51d040c3b99f5c6dd950e204c1e2",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "immutableReferencePolicyIsSentWithoutAnyResolvedValueInIt",
+          "kind": "Test",
+          "beforeBodySha256": "1e8babb2b80b785ef69b5f0975f08e2019fe566aeb639eb1d276d09cba5bd8ba",
+          "afterBodySha256": "1e8babb2b80b785ef69b5f0975f08e2019fe566aeb639eb1d276d09cba5bd8ba",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "eachSecretsAllowedOriginsAreSentBesideButApartFromItsValue",
+          "kind": "Test",
+          "beforeBodySha256": "931c7d98a6c5528458e31a76bdd40dc5672287ba8b9b25a449fdd444fd01aeef",
+          "afterBodySha256": "931c7d98a6c5528458e31a76bdd40dc5672287ba8b9b25a449fdd444fd01aeef",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "aJobWithoutOriginsSendsAnEmptyMapWhichTheRunnerReadsAsBoundToNone",
+          "kind": "Test",
+          "beforeBodySha256": "43da30f2740c79b88ef17d7dad39ba233818b8b858955eb39dd85c23cefe3190",
+          "afterBodySha256": "43da30f2740c79b88ef17d7dad39ba233818b8b858955eb39dd85c23cefe3190",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "aJobWithoutAnObservedBindingIsATerminalNamedRefusalAndSendsNothing",
+          "kind": "Test",
+          "beforeBodySha256": "0a243ca9526b3ce63787d995c07357cf139621a700f82f1468809f43103551f5",
+          "afterBodySha256": "0a243ca9526b3ce63787d995c07357cf139621a700f82f1468809f43103551f5",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "theClassificationTableHasNoFourthOutcome",
+          "kind": "Test",
+          "beforeBodySha256": "51e4c4702a4b71fd80448c49389e9dfcd66cd284578d4173c42fb6b5a4604a04",
+          "afterBodySha256": "51e4c4702a4b71fd80448c49389e9dfcd66cd284578d4173c42fb6b5a4604a04",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "foldedValidationUsesItsOwnEndpointCredentialAndPerCallByteLimit",
+          "kind": "Test",
+          "beforeBodySha256": "0662b7bd02850b6d207a0b7b30e5e5e54cb1df8deb42512987ccf667f4094141",
+          "afterBodySha256": "0662b7bd02850b6d207a0b7b30e5e5e54cb1df8deb42512987ccf667f4094141",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "absentRunnerOriginDoesNotBorrowDispatchBaseUrlForGuidedOperations",
+          "kind": "Test",
+          "beforeBodySha256": "1af2efd578f8ec1eb74bfeec1b68324db56900f70e80d0152b348e482e9fe67a",
+          "afterBodySha256": "1af2efd578f8ec1eb74bfeec1b68324db56900f70e80d0152b348e482e9fe67a",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+          "method": "foldedClientPreservesEachTransportConnectTimeoutAndHttpVersion",
+          "kind": "Test",
+          "beforeBodySha256": "06cbbc45e925743c1ca7c72dc955c49f86ae5a9ec8947264f034e5806864cf9f",
+          "afterBodySha256": "06cbbc45e925743c1ca7c72dc955c49f86ae5a9ec8947264f034e5806864cf9f",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        }
+      ],
+      "scope": "named read-only/prepared verification subject; ClockIT whole-file legacy fallback cleanup separately exact-bound; no method changes"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/JobBodyLeakTest.java",
+      "sourceBeforeSha256": "c85a5234debc4fc2b476a0f24a1b8aa0bee7cba89d4c141444e8974b1b85553d",
+      "sourceAfterSha256": "c85a5234debc4fc2b476a0f24a1b8aa0bee7cba89d4c141444e8974b1b85553d",
+      "methodCount": 5,
+      "methods": [
+        {
+          "class": "com.citi.put.checks.studio.dispatch.JobBodyLeakTest",
+          "method": "theAppenderIsLiveBeforeAnyDoesNotContainIsTrusted",
+          "kind": "Test",
+          "beforeBodySha256": "2dba510a0c2a29f53c33b38350342ad496d8c9741bee78349734628ff75ab188",
+          "afterBodySha256": "2dba510a0c2a29f53c33b38350342ad496d8c9741bee78349734628ff75ab188",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.JobBodyLeakTest",
+          "method": "theValuesTravelOnTheWireAndAppearInNoLogLineAtAnyLevel",
+          "kind": "Test",
+          "beforeBodySha256": "9483ada02878e36c3d0f70094062a6804bbb503e3a8c585e45a2ee74a7fbcb73",
+          "afterBodySha256": "9483ada02878e36c3d0f70094062a6804bbb503e3a8c585e45a2ee74a7fbcb73",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.JobBodyLeakTest",
+          "method": "noAmbiguousOrRefusedPathPutsAValueInALogLineAnExceptionOrAnOutcome",
+          "kind": "Test",
+          "beforeBodySha256": "8719e259980dee5d4b939f3833c955781e9c2661a23852eb5c1d5643e62d25de",
+          "afterBodySha256": "8719e259980dee5d4b939f3833c955781e9c2661a23852eb5c1d5643e62d25de",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.JobBodyLeakTest",
+          "method": "closeZeroesBothMapsArraysAndNotMerelyTheMapsThatHeldThem",
+          "kind": "Test",
+          "beforeBodySha256": "26e396b9e4e7ec82e096a54acc382e60d016cb73147d3c452614924a5e8031f1",
+          "afterBodySha256": "26e396b9e4e7ec82e096a54acc382e60d016cb73147d3c452614924a5e8031f1",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.JobBodyLeakTest",
+          "method": "closeRunsOnTheRefusalPathTooAndEmptiesTheVersionIdentifiers",
+          "kind": "Test",
+          "beforeBodySha256": "2c81715f6333642dc19e5132d84c2462f18ac84d9a7cad01cef8dc69505a2c23",
+          "afterBodySha256": "2c81715f6333642dc19e5132d84c2462f18ac84d9a7cad01cef8dc69505a2c23",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        }
+      ],
+      "scope": "named read-only/prepared verification subject; ClockIT whole-file legacy fallback cleanup separately exact-bound; no method changes"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerPropertiesProfileTest.java",
+      "sourceBeforeSha256": "e622272720f45a127f24f32d8b6c5a0c5d65d26a974737879ccdf8c632d0c065",
+      "sourceAfterSha256": "e622272720f45a127f24f32d8b6c5a0c5d65d26a974737879ccdf8c632d0c065",
+      "methodCount": 18,
+      "methods": [
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "aPlaintextRunnerUrlIsRefusedOutsideLocalAndTest",
+          "kind": "ParameterizedTest",
+          "beforeBodySha256": "0f5d631b503bb3de1244be7ba18312e2581901644d8e665d4b02bf337e92cce8",
+          "afterBodySha256": "0f5d631b503bb3de1244be7ba18312e2581901644d8e665d4b02bf337e92cce8",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "aPlaintextRunnerUrlIsAcceptedInLocalAndTest",
+          "kind": "ParameterizedTest",
+          "beforeBodySha256": "e3ac80b18fda247bd43449187505428cf2d0e3557ba7b61b1d6386caedae2ba0",
+          "afterBodySha256": "e3ac80b18fda247bd43449187505428cf2d0e3557ba7b61b1d6386caedae2ba0",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "theSchemeCheckIsNotFooledByALookAlikeScheme",
+          "kind": "Test",
+          "beforeBodySha256": "8610f530fdec74d60e57b11feb21dd84e9bd1f27c7b7b5dc64635b2352c02d9c",
+          "afterBodySha256": "8610f530fdec74d60e57b11feb21dd84e9bd1f27c7b7b5dc64635b2352c02d9c",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "aRunnerThatIsNotConfiguredHasNoUrlToRefuseInAnyProfile",
+          "kind": "Test",
+          "beforeBodySha256": "c1d9fc746ad50f759017d1f6b5c82c3357ad079666ef0c72b7dc9645777a5678",
+          "afterBodySha256": "c1d9fc746ad50f759017d1f6b5c82c3357ad079666ef0c72b7dc9645777a5678",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "theShapeChecksStillApplyBesideTheProfileRule",
+          "kind": "Test",
+          "beforeBodySha256": "ba865a1481b127e64eab8b47267fa5618c423016aa7d4d56fe47cb6357a5fa7b",
+          "afterBodySha256": "ba865a1481b127e64eab8b47267fa5618c423016aa7d4d56fe47cb6357a5fa7b",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "startupFailsOutsideLocalAndTestForAPlaintextRunnerUrl",
+          "kind": "ParameterizedTest",
+          "beforeBodySha256": "fb2b5b828dcaf98835b517b40cf154e1a336a06034d2bbac9956e435725aa890",
+          "afterBodySha256": "fb2b5b828dcaf98835b517b40cf154e1a336a06034d2bbac9956e435725aa890",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "startupSucceedsInLocalAndTestForAPlaintextRunnerUrlWithNoTlsAtAll",
+          "kind": "ParameterizedTest",
+          "beforeBodySha256": "0c7970c34485b52c8368a07d9a5ced4406a4d426b730b316b508991c5062db21",
+          "afterBodySha256": "0c7970c34485b52c8368a07d9a5ced4406a4d426b730b316b508991c5062db21",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "aConfiguredRunnerHopOutsideLocalAndTestDoesNotStartWithoutTlsSettings",
+          "kind": "Test",
+          "beforeBodySha256": "628d71961796175eb5ead47b72b73acb2502f5469d5f23e10ebe8f0ed0a7075a",
+          "afterBodySha256": "628d71961796175eb5ead47b72b73acb2502f5469d5f23e10ebe8f0ed0a7075a",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "aDeploymentWithNoRunnerHopNeedsNoTlsSettings",
+          "kind": "Test",
+          "beforeBodySha256": "5fc36c00d528b21b780339af9432b5aa147d91fc8d373d9ad65db9f705d4be55",
+          "afterBodySha256": "5fc36c00d528b21b780339af9432b5aa147d91fc8d373d9ad65db9f705d4be55",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "aPartialTlsConfigurationFailsInEveryProfileNamingTheMissingPart",
+          "kind": "ParameterizedTest",
+          "beforeBodySha256": "83e6d20764e906290dd75d46bc8b4dfd6fac27571590e30c4ad6646861f4b050",
+          "afterBodySha256": "83e6d20764e906290dd75d46bc8b4dfd6fac27571590e30c4ad6646861f4b050",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "aDeploymentDescriptorThatRendersEmptyValuesIsTheSameAsNothingConfigured",
+          "kind": "Test",
+          "beforeBodySha256": "fdc36591249d666570b4fb447e9389a11d5372e80c25361482c3df8c3b4d7724",
+          "afterBodySha256": "fdc36591249d666570b4fb447e9389a11d5372e80c25361482c3df8c3b4d7724",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "theBoundSettingsBuildTheBackendIdentityFromFilesOnly",
+          "kind": "Test",
+          "beforeBodySha256": "e2695edd06658d44d1252a64c290c38675831f694d8bb4433b64cbc8d7acd871",
+          "afterBodySha256": "e2695edd06658d44d1252a64c290c38675831f694d8bb4433b64cbc8d7acd871",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "theDeployedDispatchClientAcceptsTheIdentityAndTheTestConstructorStillExists",
+          "kind": "Test",
+          "beforeBodySha256": "03a48b5c8a20265eeafcf443c521a69da639f74179f8840be17b5c6fb28968dc",
+          "afterBodySha256": "03a48b5c8a20265eeafcf443c521a69da639f74179f8840be17b5c6fb28968dc",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "aCompleteChainHasNoProblemOutsideLocalAndTest",
+          "kind": "Test",
+          "beforeBodySha256": "2ffab86474d5ac01beb84604abb2f60e7e835892378b3d7c85c31dc55eca19ab",
+          "afterBodySha256": "2ffab86474d5ac01beb84604abb2f60e7e835892378b3d7c85c31dc55eca19ab",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "theApiRoleDoesNotStartWithoutAnyOnePartOfTheChain",
+          "kind": "ParameterizedTest",
+          "beforeBodySha256": "6ea042135468bf1708ccf99d66788b012e48b54d16312bb6334eab1c4a5b8aca",
+          "afterBodySha256": "6ea042135468bf1708ccf99d66788b012e48b54d16312bb6334eab1c4a5b8aca",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "aWorkerNeedsTheTokenFilesButNotTheReceivingHalfOfTheChain",
+          "kind": "Test",
+          "beforeBodySha256": "64f1dedabcf3adec6c33f648afe64e787a1169123618629893e1911753de36ee",
+          "afterBodySha256": "64f1dedabcf3adec6c33f648afe64e787a1169123618629893e1911753de36ee",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "localTestAndADeploymentWithNoGuidedHopNeedNoChain",
+          "kind": "Test",
+          "beforeBodySha256": "45067cfd4ddcf007d088d026e873bda464d2a3c42643b3214e610f1377bb596d",
+          "afterBodySha256": "45067cfd4ddcf007d088d026e873bda464d2a3c42643b3214e610f1377bb596d",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerPropertiesProfileTest",
+          "method": "theGuidedConnectorIsAddedOnlyWhenAPortIsSetAndNeverOnAWorker",
+          "kind": "Test",
+          "beforeBodySha256": "856e357248bbe4be85e9aaeb2bc8f07c9e3d2b46112cc4382a0a653c2791a1f9",
+          "afterBodySha256": "856e357248bbe4be85e9aaeb2bc8f07c9e3d2b46112cc4382a0a653c2791a1f9",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        }
+      ],
+      "scope": "named read-only/prepared verification subject; ClockIT whole-file legacy fallback cleanup separately exact-bound; no method changes"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioRunnerTlsTest.java",
+      "sourceBeforeSha256": "298e7a372eb5055c75bbf3203b318233d6a7c169f5c1458a63ad75aa89db7c33",
+      "sourceAfterSha256": "298e7a372eb5055c75bbf3203b318233d6a7c169f5c1458a63ad75aa89db7c33",
+      "methodCount": 19,
+      "methods": [
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "mutualTlsSucceedsAndTheServerSeesTheBackendCertificate",
+          "kind": "Test",
+          "beforeBodySha256": "c4f6989921b7c3b46150631a970ffa2d116827b2a6125ae6d0cf72caee621a83",
+          "afterBodySha256": "c4f6989921b7c3b46150631a970ffa2d116827b2a6125ae6d0cf72caee621a83",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "theServerRefusesAClientCertificateThatTheCaDidNotIssue",
+          "kind": "Test",
+          "beforeBodySha256": "c437bdc552a7b5ead4875a4e23fa17ea48a577666d6503b378f2659cbeb7a816",
+          "afterBodySha256": "c437bdc552a7b5ead4875a4e23fa17ea48a577666d6503b378f2659cbeb7a816",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "theClientRefusesAServerThatTheCaDidNotIssue",
+          "kind": "Test",
+          "beforeBodySha256": "19a9fad30bf00d8d4a283359acd8e4524db6281c4ad5d2b2ed1e06bdd6ec9eef",
+          "afterBodySha256": "19a9fad30bf00d8d4a283359acd8e4524db6281c4ad5d2b2ed1e06bdd6ec9eef",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "trustComesOnlyFromTheConfiguredTrustStoreNeverFromJvmDefaults",
+          "kind": "Test",
+          "beforeBodySha256": "6e87d9d2f188399a477e84bfbacf03ee1c5dab49a1a608b739f02c83e7054752",
+          "afterBodySha256": "6e87d9d2f188399a477e84bfbacf03ee1c5dab49a1a608b739f02c83e7054752",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "parametersOfferOnlyModernTlsAndCheckTheHostName",
+          "kind": "Test",
+          "beforeBodySha256": "c28a9c49bbd76132d2a27dcc1af28c11dd62296538a2e5bae2254e18ec428249",
+          "afterBodySha256": "c28a9c49bbd76132d2a27dcc1af28c11dd62296538a2e5bae2254e18ec428249",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "parametersAreACopyThatCallersCannotUseToWeakenTheInstance",
+          "kind": "Test",
+          "beforeBodySha256": "15f93268bf1c4ea9c37dcd5ac7633e497c5550af98661605dd784500f6ec520b",
+          "afterBodySha256": "15f93268bf1c4ea9c37dcd5ac7633e497c5550af98661605dd784500f6ec520b",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "configureGivesAClientBuilderTheContextAndTheHostNameCheck",
+          "kind": "Test",
+          "beforeBodySha256": "c829e637d4d4ceaa1a68814e0c47e1785cc56cbb01770798f5bd42bd14ffc3ff",
+          "afterBodySha256": "c829e637d4d4ceaa1a68814e0c47e1785cc56cbb01770798f5bd42bd14ffc3ff",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "toStringAndAccessorsExposeNoSecret",
+          "kind": "Test",
+          "beforeBodySha256": "6cbbfbaf374e56c6c14ccc3d09e76bdbd0eef9036cd8e189c8073e5c5793414b",
+          "afterBodySha256": "6cbbfbaf374e56c6c14ccc3d09e76bdbd0eef9036cd8e189c8073e5c5793414b",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "nothingConfiguredFailsInsteadOfFallingBackToJvmDefaults",
+          "kind": "Test",
+          "beforeBodySha256": "e858e3ce8edfff1bb156745fd7851bc5d13931195b347e3e6475768d94993057",
+          "afterBodySha256": "e858e3ce8edfff1bb156745fd7851bc5d13931195b347e3e6475768d94993057",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "aMissingOrEmptyPasswordFileIsRefusedByName",
+          "kind": "Test",
+          "beforeBodySha256": "a04b3ecd31394958f13a016ec94af413886bd36ed1344f5ae8e4f585d844e799",
+          "afterBodySha256": "a04b3ecd31394958f13a016ec94af413886bd36ed1344f5ae8e4f585d844e799",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "aWrongPasswordIsRefusedWithoutEchoingIt",
+          "kind": "Test",
+          "beforeBodySha256": "bcdae6ccc19388e0d53e6d07a9f6148bf3b91eb06f27995ef262c9be4e28b289",
+          "afterBodySha256": "bcdae6ccc19388e0d53e6d07a9f6148bf3b91eb06f27995ef262c9be4e28b289",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "aMissingStoreFileIsRefusedByName",
+          "kind": "Test",
+          "beforeBodySha256": "63649b0ab221d90738990d02fc73eac44ea8af358bb5a7d91a59bda933193577",
+          "afterBodySha256": "63649b0ab221d90738990d02fc73eac44ea8af358bb5a7d91a59bda933193577",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "aKeyStoreWithoutAPrivateKeyIsRefused",
+          "kind": "Test",
+          "beforeBodySha256": "d6341143f4ebbe33dbd1384b5581e56a9ec6344ea1579d6e972b928b9599b285",
+          "afterBodySha256": "d6341143f4ebbe33dbd1384b5581e56a9ec6344ea1579d6e972b928b9599b285",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "aTrustStoreThatHoldsAPrivateKeyIsRefused",
+          "kind": "Test",
+          "beforeBodySha256": "8a31c13e9d934a3a5a58d5967b10ea4bb2764ce391e80b191c8fd0ee30bc8ba4",
+          "afterBodySha256": "8a31c13e9d934a3a5a58d5967b10ea4bb2764ce391e80b191c8fd0ee30bc8ba4",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "anEmptyTrustStoreIsRefused",
+          "kind": "Test",
+          "beforeBodySha256": "3ed1f6c0d7983e4bc0b5d598809d30dce85f3a7e37d0c062b664dbeb0cac72e3",
+          "afterBodySha256": "3ed1f6c0d7983e4bc0b5d598809d30dce85f3a7e37d0c062b664dbeb0cac72e3",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "aKeyStoreWithTwoPrivateKeysIsRefused",
+          "kind": "Test",
+          "beforeBodySha256": "668727a21a913d714291e22956d637fe7d5a7a2dd190864f2596530f0fbf2606",
+          "afterBodySha256": "668727a21a913d714291e22956d637fe7d5a7a2dd190864f2596530f0fbf2606",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "aClientCertificateThatDoesNotAllowClientAuthIsRefused",
+          "kind": "Test",
+          "beforeBodySha256": "657eb8bdcdcde70f50a0a8a55cce4f78296c01f8d04eb54515b40bd5d42e823e",
+          "afterBodySha256": "657eb8bdcdcde70f50a0a8a55cce4f78296c01f8d04eb54515b40bd5d42e823e",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "anExpiredClientCertificateIsRefused",
+          "kind": "Test",
+          "beforeBodySha256": "50dc555a74ddfcda0d1a8ef2e835389a402af926af017f5011b67c16998d9a66",
+          "afterBodySha256": "50dc555a74ddfcda0d1a8ef2e835389a402af926af017f5011b67c16998d9a66",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.dispatch.StudioRunnerTlsTest",
+          "method": "theApiSourceNeverReachesForJvmTlsDefaults",
+          "kind": "Test",
+          "beforeBodySha256": "5d573527929d4589f3f3a535e87d92bca47eca3d3cc1a3eb48998c96559c5a5e",
+          "afterBodySha256": "5d573527929d4589f3f3a535e87d92bca47eca3d3cc1a3eb48998c96559c5a5e",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        }
+      ],
+      "scope": "named read-only/prepared verification subject; ClockIT whole-file legacy fallback cleanup separately exact-bound; no method changes"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/GuidedScheduledBeansProfileTest.java",
+      "sourceBeforeSha256": "07bfefc019745e8a69c833920fcdbe415950efc409e061d3ccf4f12060dbe620",
+      "sourceAfterSha256": "07bfefc019745e8a69c833920fcdbe415950efc409e061d3ccf4f12060dbe620",
+      "methodCount": 8,
+      "methods": [
+        {
+          "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+          "method": "bothGatesUseTheExpressionOfTheSchedulingCoordinator",
+          "kind": "Test",
+          "beforeBodySha256": "46539c429037cfcb6da29df738eb9bc8998227ef82d219c0b352a03066cdf1e5",
+          "afterBodySha256": "46539c429037cfcb6da29df738eb9bc8998227ef82d219c0b352a03066cdf1e5",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+          "method": "theCoordinatorGateIsOnTheBeanMethodBecauseTheClassIsNotScanned",
+          "kind": "Test",
+          "beforeBodySha256": "f4f3982f6a4859c72412f0982cf1f005a9ce3d49db277f585fc50717fa0a586f",
+          "afterBodySha256": "f4f3982f6a4859c72412f0982cf1f005a9ce3d49db277f585fc50717fa0a586f",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+          "method": "noNotWorkerBeanWasWidened",
+          "kind": "Test",
+          "beforeBodySha256": "3c1adeb19f6b682f62ba5fa6406050e233af1d611d8c08953683256ce227a37d",
+          "afterBodySha256": "3c1adeb19f6b682f62ba5fa6406050e233af1d611d8c08953683256ce227a37d",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+          "method": "theReaperFollowsTheRoleMatrix",
+          "kind": "ParameterizedTest",
+          "beforeBodySha256": "ae3fe217f3aaf6f77c1d70722306f3d032660cab8ca187d871456366149c1a77",
+          "afterBodySha256": "ae3fe217f3aaf6f77c1d70722306f3d032660cab8ca187d871456366149c1a77",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+          "method": "theCoordinatorFollowsTheRoleMatrix",
+          "kind": "ParameterizedTest",
+          "beforeBodySha256": "8cb878d4dcb9ae56000335fb4c97472a095549359d5c142b56e19fb9df232df0",
+          "afterBodySha256": "8cb878d4dcb9ae56000335fb4c97472a095549359d5c142b56e19fb9df232df0",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+          "method": "theMatrixIsNotVacuous",
+          "kind": "Test",
+          "beforeBodySha256": "46090c495fe158c65cefbd6078c00e148e05fbb166618c43a62ac58c6ac31f8e",
+          "afterBodySha256": "46090c495fe158c65cefbd6078c00e148e05fbb166618c43a62ac58c6ac31f8e",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest$WorkerRole",
+          "method": "theWorkerContextBuildsTheReaperAndCoordinatorGraphAndRunsAReaperPass",
+          "kind": "Test",
+          "beforeBodySha256": "e6d13081a0c404022f4c58631c69040a697b397b2dea0a6de714cdecd0388586",
+          "afterBodySha256": "e6d13081a0c404022f4c58631c69040a697b397b2dea0a6de714cdecd0388586",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest$ApiRole",
+          "method": "theApiContextHasNeitherScheduledGuidedBean",
+          "kind": "Test",
+          "beforeBodySha256": "9993b1ac1071c989e44bf240009861fe2c6be0d337723cd5d19fbfa4fa976d65",
+          "afterBodySha256": "9993b1ac1071c989e44bf240009861fe2c6be0d337723cd5d19fbfa4fa976d65",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        }
+      ],
+      "scope": "named read-only/prepared verification subject; ClockIT whole-file legacy fallback cleanup separately exact-bound; no method changes"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "sourceBeforeSha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+      "sourceAfterSha256": "1bce395fb2204ac1f5ea11175d96288b2e72a4b72dc9030c1a739c324a361af4",
+      "methodCount": 3,
+      "methods": [
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+          "method": "publicationMintAndJudgeReadDatabaseClockWithJvmAheadAndBehind",
+          "kind": "Test",
+          "beforeBodySha256": "f7ed477b19f805bc485f86d606c6b72a6210df173243dd226cfbdecd5c8fdb59",
+          "afterBodySha256": "f7ed477b19f805bc485f86d606c6b72a6210df173243dd226cfbdecd5c8fdb59",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+          "method": "databaseExpiredPublicationGrantRefusesDespiteJvmBehind",
+          "kind": "Test",
+          "beforeBodySha256": "ebe62860a83eeedc3d731819301d4d5c8501d476a59449397fc3b7259381f69a",
+          "afterBodySha256": "ebe62860a83eeedc3d731819301d4d5c8501d476a59449397fc3b7259381f69a",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+          "method": "publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget",
+          "kind": "Test",
+          "beforeBodySha256": "2f94f8f0ccc68d5b548ed133bfc007b2d68cc2d7c0c828b7f4ab3a7e0f19f668",
+          "afterBodySha256": "2f94f8f0ccc68d5b548ed133bfc007b2d68cc2d7c0c828b7f4ab3a7e0f19f668",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        }
+      ],
+      "scope": "named read-only/prepared verification subject; ClockIT whole-file legacy fallback cleanup separately exact-bound; no method changes"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/ObservedScheduleAuthorityIT.java",
+      "sourceBeforeSha256": "17c1816d984a9c3decdfe4a06e66e010e55c5a961ba07dc2fdc9395ca94a7585",
+      "sourceAfterSha256": "17c1816d984a9c3decdfe4a06e66e010e55c5a961ba07dc2fdc9395ca94a7585",
+      "methodCount": 8,
+      "methods": [
+        {
+          "class": "com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT",
+          "method": "anObservedScheduleIsAcceptedUnderBackgroundAuthorityForTheSchedulePrincipal",
+          "kind": "Test",
+          "beforeBodySha256": "97dbcad1482e43915707cc7b30723b00f7e980ca003e15856900caf66c3fe0fe",
+          "afterBodySha256": "97dbcad1482e43915707cc7b30723b00f7e980ca003e15856900caf66c3fe0fe",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT",
+          "method": "theRefusalNoLongerExistsAndAWithdrawnGrantStillFailsClosed",
+          "kind": "Test",
+          "beforeBodySha256": "58334a467b386861b0cf804ee3cf457fbb2a074d40e1fdab5aa77b692d56f285",
+          "afterBodySha256": "58334a467b386861b0cf804ee3cf457fbb2a074d40e1fdab5aa77b692d56f285",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT",
+          "method": "activationSemanticsArePreservedWhenTheConfirmedRevisionMovesOn",
+          "kind": "Test",
+          "beforeBodySha256": "f950538acfcb59defbb38ee14740a1f9374e896f7f307550a4842df080e916f2",
+          "afterBodySha256": "f950538acfcb59defbb38ee14740a1f9374e896f7f307550a4842df080e916f2",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT",
+          "method": "g3RefusesAScheduledSecretReferencingRunOutsideLocalAndTestEvenWhenTheGrantStands",
+          "kind": "Test",
+          "beforeBodySha256": "39f238c1f90f472e16bfd823036cd3a65375c201d06fa23c731f6130a3862c38",
+          "afterBodySha256": "39f238c1f90f472e16bfd823036cd3a65375c201d06fa23c731f6130a3862c38",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT",
+          "method": "g3AcceptsTheSameSecretReferencingRunUnderTheLocalFixturePolicy",
+          "kind": "Test",
+          "beforeBodySha256": "5b19e62e797465eb7c040bf866e595dac59c1b665064585ba6420b1a1aa5fe5a",
+          "afterBodySha256": "5b19e62e797465eb7c040bf866e595dac59c1b665064585ba6420b1a1aa5fe5a",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT",
+          "method": "g3DoesNotRefuseASecretFreeObservedScheduleOnAProductionBackgroundSource",
+          "kind": "Test",
+          "beforeBodySha256": "369298261e814cacdf8bd114da49da97f1aa9413f76f741c66f4e3873e4cf237",
+          "afterBodySha256": "369298261e814cacdf8bd114da49da97f1aa9413f76f741c66f4e3873e4cf237",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT",
+          "method": "g3HoldsAgainAtDispatchRecheckForARunThatWasAcceptedUnderTheFixturePolicy",
+          "kind": "Test",
+          "beforeBodySha256": "356d97bc44244fb633040eae113bb68c6bfbffe0370b67ae6574bc9ae1594a3f",
+          "afterBodySha256": "356d97bc44244fb633040eae113bb68c6bfbffe0370b67ae6574bc9ae1594a3f",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.ObservedScheduleAuthorityIT",
+          "method": "declarationsAreReadFromTheImmutableRevisionAndAnUnknownRevisionFailsClosed",
+          "kind": "Test",
+          "beforeBodySha256": "d543bc1779f4fed3ca9a9c081fc14e53498ac3a359b79a5e7b9f6b7df61e68c5",
+          "afterBodySha256": "d543bc1779f4fed3ca9a9c081fc14e53498ac3a359b79a5e7b9f6b7df61e68c5",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        }
+      ],
+      "scope": "named read-only/prepared verification subject; ClockIT whole-file legacy fallback cleanup separately exact-bound; no method changes"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/scheduling/StudioScheduleApiIT.java",
+      "sourceBeforeSha256": "67c26122f9d60f63f23229736ca36620428c29f2b7e5f9f28a2158ef693bc319",
+      "sourceAfterSha256": "67c26122f9d60f63f23229736ca36620428c29f2b7e5f9f28a2158ef693bc319",
+      "methodCount": 22,
+      "methods": [
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "apiCreateConflictPreviewAndDisabledReadsRemainTruthful",
+          "kind": "Test",
+          "beforeBodySha256": "352aef5abb36baa7f7dab0af2bd581f14475beae9914613be9973a581160bdf0",
+          "afterBodySha256": "352aef5abb36baa7f7dab0af2bd581f14475beae9914613be9973a581160bdf0",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "acceptedOccurrenceHasOneImmutableRunAndActivationAcrossResumeAndRecreation",
+          "kind": "Test",
+          "beforeBodySha256": "1d49dbe278c9d69478d0e82f09193b6c4c78a7bba169423a5d382388c675ab3e",
+          "afterBodySha256": "1d49dbe278c9d69478d0e82f09193b6c4c78a7bba169423a5d382388c675ab3e",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "replicasRacingAndRollbackCannotCreateDuplicateOrPartialAcceptedWork",
+          "kind": "Test",
+          "beforeBodySha256": "c8ccd59fbcbeedaf73425f867c00a8c60d1843b73e07c6652b4290bb44b845cb",
+          "afterBodySha256": "c8ccd59fbcbeedaf73425f867c00a8c60d1843b73e07c6652b4290bb44b845cb",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "aViewerOrAContributorMayNotCreateOrEnableASchedule",
+          "kind": "Test",
+          "beforeBodySha256": "525b4445b59f5aa2969b208d2a580f37ee455cf8cdee3c32b0246a9f889258c0",
+          "afterBodySha256": "525b4445b59f5aa2969b208d2a580f37ee455cf8cdee3c32b0246a9f889258c0",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "aScheduledOccurrenceIsAcceptedWithNoRequestAuthentication",
+          "kind": "Test",
+          "beforeBodySha256": "bf1d2654aaa0864c76ce847a11c1ebb0f762ab4e6aef53ac024978a436107317",
+          "afterBodySha256": "bf1d2654aaa0864c76ce847a11c1ebb0f762ab4e6aef53ac024978a436107317",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "activeManualWorkSkipsOverlapWithoutChangingManualPermission",
+          "kind": "Test",
+          "beforeBodySha256": "e33c277b2bebc55e7c33783b742492b006e020f1ea35acc99e4b395f354d8292",
+          "afterBodySha256": "e33c277b2bebc55e7c33783b742492b006e020f1ea35acc99e4b395f354d8292",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "durableUncertaintyRequiresExactAcknowledgmentAndNeverReplaysOldSlot",
+          "kind": "Test",
+          "beforeBodySha256": "157b2b6f76fd4f31487eda64e12c9b20e1ad39b4502685adf29cd307dd6452a2",
+          "afterBodySha256": "157b2b6f76fd4f31487eda64e12c9b20e1ad39b4502685adf29cd307dd6452a2",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "sourceMutationBlocksTheScheduleWithLearnRequired",
+          "kind": "Test",
+          "beforeBodySha256": "ae3fa7b8dbee13332a2fbe9979df2ef119094e2e29f218b2dbaa581a0192020a",
+          "afterBodySha256": "ae3fa7b8dbee13332a2fbe9979df2ef119094e2e29f218b2dbaa581a0192020a",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "authorizationWithdrawalBeforeAdmissionAndBeforeSendFailsClosed",
+          "kind": "Test",
+          "beforeBodySha256": "5ab127e4197ca3938253aaecf5855b07e162c96a1c187f1e22b7f11e371168d8",
+          "afterBodySha256": "5ab127e4197ca3938253aaecf5855b07e162c96a1c187f1e22b7f11e371168d8",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "deletionStopsFutureWorkButKeepsAuthorizedOccurrenceAudit",
+          "kind": "Test",
+          "beforeBodySha256": "16e82828efe6b4470c613eb7e17a8e78de49679892fbe3a5c8bcfe160496e603",
+          "afterBodySha256": "16e82828efe6b4470c613eb7e17a8e78de49679892fbe3a5c8bcfe160496e603",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "capabilityOffDeferralExpiresBeforeAnyCatchupAndLifecycleSettlesPendingAudit",
+          "kind": "Test",
+          "beforeBodySha256": "723090dfcbc62f483efa4980f3f3c9f2aad281784a3eabd0379e8d0c8370068e",
+          "afterBodySha256": "723090dfcbc62f483efa4980f3f3c9f2aad281784a3eabd0379e8d0c8370068e",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "graceAndGrantAreRecheckedAfterPreflightBeforeAnyAcceptedWrite",
+          "kind": "Test",
+          "beforeBodySha256": "4b1215168fdf457304c8cbbf8358e913654d9439c5a2628219d222be31ea1640",
+          "afterBodySha256": "4b1215168fdf457304c8cbbf8358e913654d9439c5a2628219d222be31ea1640",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "updateRemovalAndInputInvalidationSettleDeferredWithoutOrphans",
+          "kind": "Test",
+          "beforeBodySha256": "7f2a72c3cf8eb17b74bd68a605d15a78fb6d96d7b5c28d44ffa0c212b5b6d0e7",
+          "afterBodySha256": "7f2a72c3cf8eb17b74bd68a605d15a78fb6d96d7b5c28d44ffa0c212b5b6d0e7",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "callbackLedgerLockDoesNotBlockOverlapAndUncertaintyAfterResumeBlocksNextTick",
+          "kind": "Test",
+          "beforeBodySha256": "f8580e74a0f078d8949b111ae9c5bf7915cdfdaf9739f121b553841516b734fa",
+          "afterBodySha256": "f8580e74a0f078d8949b111ae9c5bf7915cdfdaf9739f121b553841516b734fa",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "failedCsiRotatesAwayRatherThanStarvingOtherEligibleWork",
+          "kind": "Test",
+          "beforeBodySha256": "ccb32e72bd9b5d655c999d03502cbb023cbec2c51fd80ea035c0a34bafe81e69",
+          "afterBodySha256": "ccb32e72bd9b5d655c999d03502cbb023cbec2c51fd80ea035c0a34bafe81e69",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "omittedEnabledIsRejectedAndOmittedTimezoneDefaultsToUtc",
+          "kind": "Test",
+          "beforeBodySha256": "8f83b0ce8d50badfd45232782597ac813eec5437044fc20b8c4b260aabb9111b",
+          "afterBodySha256": "8f83b0ce8d50badfd45232782597ac813eec5437044fc20b8c4b260aabb9111b",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "deadlineOverrunAdvancesCursorOnlyPastAttemptedCsi",
+          "kind": "Test",
+          "beforeBodySha256": "e9583a543962e3db9118a409a009a6cab031cc4a6c51eddd248d3ca66aab63b6",
+          "afterBodySha256": "e9583a543962e3db9118a409a009a6cab031cc4a6c51eddd248d3ca66aab63b6",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "quotaWaitCrossingGraceOrGrantWithdrawalNeverWritesAcceptedWork",
+          "kind": "Test",
+          "beforeBodySha256": "9fa102ec49b1e91dc8d0a3e0a7feb0ada9b9c05bd9829003acb5005e4ee08b50",
+          "afterBodySha256": "9fa102ec49b1e91dc8d0a3e0a7feb0ada9b9c05bd9829003acb5005e4ee08b50",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "writeFailuresAtHistoryLedgerAndCursorBoundariesRollbackTheWholeOccurrenceUnit",
+          "kind": "Test",
+          "beforeBodySha256": "6bbb6117df90a6e276c3805e01521a4c7ec82f1b1ae7e10cc63456c594eb91f5",
+          "afterBodySha256": "6bbb6117df90a6e276c3805e01521a4c7ec82f1b1ae7e10cc63456c594eb91f5",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "editedWriterRaceSerializesWithAcceptanceAndKeepsTheAcceptedRevision",
+          "kind": "Test",
+          "beforeBodySha256": "82aebe66d8316b302687cf6d135c2953a2ef6f699a5015838325d1c86b5f1f94",
+          "afterBodySha256": "82aebe66d8316b302687cf6d135c2953a2ef6f699a5015838325d1c86b5f1f94",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "editedWriterQueuedBehindAnAcceptanceKeepsExactlyTheAcceptedRevision",
+          "kind": "Test",
+          "beforeBodySha256": "2c7098bb95fde57c5c781d96e01e5168ef2b0c5f299c8ff290d540d147186e8a",
+          "afterBodySha256": "2c7098bb95fde57c5c781d96e01e5168ef2b0c5f299c8ff290d540d147186e8a",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        },
+        {
+          "class": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+          "method": "rawReadinessChangesRefuseExplicitlyAndAnotherActivatorDoesNotRewriteAcceptedProvenance",
+          "kind": "Test",
+          "beforeBodySha256": "e69be86423892167d545516f105c2d6f3b6bc55ec7252533db1af85fbf997f13",
+          "afterBodySha256": "e69be86423892167d545516f105c2d6f3b6bc55ec7252533db1af85fbf997f13",
+          "proof": {
+            "bodyEqual": true,
+            "annotationsExact": true,
+            "parametersExact": true,
+            "factoryReferencesExact": true
+          }
+        }
+      ],
+      "scope": "named read-only/prepared verification subject; ClockIT whole-file legacy fallback cleanup separately exact-bound; no method changes"
+    }
+  ],
+  "newSourceDerivedCases": "Three folded-client +threeClock +oneworker refusal independently projected from current source, never borrowed old catalog IDs"
+}

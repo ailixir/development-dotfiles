@@ -1,0 +1,116 @@
+{
+  "kind": "COMPLETE_PREREQUISITE_AND_PER_PHASE_OWNERSHIP_DAG",
+  "nodes": [
+    {
+      "id": "prior_gateway_failed_close",
+      "requires": []
+    },
+    {
+      "id": "exact_design_QA_root",
+      "requires": []
+    },
+    {
+      "id": "new_code_caller_and_named_owner_reviews",
+      "requires": [
+        "exact_design_QA_root"
+      ]
+    },
+    {
+      "id": "new_unit_actual_scope_H_negative_held",
+      "requires": [
+        "prior_gateway_failed_close",
+        "new_code_caller_and_named_owner_reviews"
+      ]
+    },
+    {
+      "id": "certificates_lease_source_modes_tool_cache_fixture",
+      "requires": [
+        "new_unit_actual_scope_H_negative_held"
+      ]
+    },
+    {
+      "id": "prepare",
+      "requires": [
+        "certificates_lease_source_modes_tool_cache_fixture"
+      ]
+    },
+    {
+      "id": "format_once",
+      "requires": [
+        "prepare"
+      ]
+    },
+    {
+      "id": "changed_candidate_reviews_same_expiry",
+      "requires": [
+        "format_once"
+      ]
+    },
+    {
+      "id": "verify_once",
+      "requires": [
+        "changed_candidate_reviews_same_expiry"
+      ]
+    },
+    {
+      "id": "regression_once",
+      "requires": [
+        "verify_once"
+      ]
+    },
+    {
+      "id": "archive_actual_QA_root",
+      "requires": [
+        "regression_once"
+      ]
+    },
+    {
+      "id": "standalone_final0_status_inspection",
+      "requires": [
+        "archive_actual_QA_root"
+      ]
+    },
+    {
+      "id": "original60s_permit_gate",
+      "requires": [
+        "standalone_final0_status_inspection"
+      ]
+    },
+    {
+      "id": "actual_gate_delivery_status_afterallow_guard",
+      "requires": [
+        "original60s_permit_gate"
+      ]
+    },
+    {
+      "id": "actual_wrapper0",
+      "requires": [
+        "actual_gate_delivery_status_afterallow_guard"
+      ]
+    },
+    {
+      "id": "outside_postclose0_completion_actual_QA_root",
+      "requires": [
+        "actual_wrapper0"
+      ]
+    }
+  ],
+  "eachPhaseSubgraph": [
+    "capbeforefallible",
+    "externalcontrol/approval",
+    "alladmission/freshlease/source/ownerchecks",
+    "phasebody",
+    "knownbodyowneddrain",
+    "stagecandidateallIOclosed",
+    "oneownedfinalsourceallrefsclosed",
+    "purevalidationandstagedstate",
+    "originalpermitguardwhenactive",
+    "logicaleligibilityonly",
+    "fallibledelivery",
+    "actualoutercompletion",
+    "rootoutcomeadoptionbeforelaterphase"
+  ],
+  "noFormatChangeBranch": "changed_candidate_reviews_same_expiry verifiesliteralunchangedinventory;changedhashesrequirefreshAriaQuinnrootandsameoriginalexpiry; neitherbranchrerunsformat.",
+  "actualExecutionAuthorized": false,
+  "cyclePolicy": "Noentrypinsitself/no rootoutcomeauthorpinsfutureownbytes;previousadoptiononly; checkgraphacyclic."
+}

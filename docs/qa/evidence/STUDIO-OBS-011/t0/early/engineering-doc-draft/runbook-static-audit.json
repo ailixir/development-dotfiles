@@ -1,0 +1,94 @@
+{
+  "kind": "source-reference re-audit, not runtime gate",
+  "sections": [
+    {
+      "section": 1,
+      "subject": "Pod/browser integrity",
+      "primarySource": "helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+      "verifiedStaticFinding": "Current guided /tmp and journal mounts qualify historical two-mount sentence; preserve sandbox/nonroot/read-only-root restrictions.",
+      "limitOrUnresolved": "Cluster sandbox start remains external."
+    },
+    {
+      "section": 2,
+      "subject": "Ingress/egress and connector",
+      "primarySource": "helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+      "verifiedStaticFinding": "Current ingress has API+worker selectors; callback-api has backend service port plus guided tlsConnector.port.",
+      "limitOrUnresolved": "CNI/approved targets/Security acceptance remain external."
+    },
+    {
+      "section": 3,
+      "subject": "Evidence lifetime and principals",
+      "primarySource": "backend/src/main/java/com/citi/put/checks/studio/evidence/ExecutionVideoService.java",
+      "verifiedStaticFinding": "Execution video follows authorized snapshot and ManifestKeys; guided recording uses separate service.",
+      "limitOrUnresolved": "Real-cloud permissions, physical deletion and store denial tests unproved here."
+    },
+    {
+      "section": 5,
+      "subject": "Dispatch states and recovery",
+      "primarySource": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchState.java",
+      "verifiedStaticFinding": "Exact seven-state vocabulary replaces historical DISPATCHED shorthand in a dated correction.",
+      "limitOrUnresolved": "No manual ledger write or uncertain browser retry authorized."
+    },
+    {
+      "section": 6,
+      "subject": "Kill switch",
+      "primarySource": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+      "verifiedStaticFinding": "Replay acceptance checks enabled before lookup; separate queued closure in StudioDispatcher.",
+      "limitOrUnresolved": "Guided session drain/stop remains its own flow."
+    },
+    {
+      "section": 7,
+      "subject": "SSE/media authorization",
+      "primarySource": "backend/src/main/java/com/citi/put/checks/studio/evidence/ExecutionVideoService.java",
+      "verifiedStaticFinding": "Snapshot authorizes before object lookup; current section retains proxy/cookie limitations.",
+      "limitOrUnresolved": "Real-proxy/HAR/cross-replica evidence remains external."
+    },
+    {
+      "section": 8,
+      "subject": "Manifest recovery",
+      "primarySource": "backend/src/main/java/com/citi/put/checks/studio/recovery/ManifestKeys.java",
+      "verifiedStaticFinding": "Exact attempt-bound .result.json/.webm keys; no recovery browser retry.",
+      "limitOrUnresolved": "Real-store consistency remains external."
+    },
+    {
+      "section": 9,
+      "subject": "Identity/Vault",
+      "primarySource": "backend/src/main/java/com/citi/put/checks/studio/secrets/ConfiguredSecretUseAuthorization.java",
+      "verifiedStaticFinding": "Development entitlement policy remains; V18 rebased migration corrects former V25 citation by dated note.",
+      "limitOrUnresolved": "ED02 delivery, real identity and policy proof not supplied."
+    },
+    {
+      "section": 10,
+      "subject": "CSRF",
+      "primarySource": "backend/src/main/java/com/citi/put/checks/config/SecurityConfig.java",
+      "verifiedStaticFinding": "Credentialed CORS plus disabled CSRF preserved as open; put_session read confirmed separately.",
+      "limitOrUnresolved": "Platform accepting route/cookie control remains external."
+    },
+    {
+      "section": 11,
+      "subject": "Config delivery",
+      "primarySource": "helm-chart/put-checks/templates/_helpers.tpl",
+      "verifiedStaticFinding": "Mounted properties and dedicated trust inputs retained; actual studio.gateway versus legacy override-guard spelling discrepancy disclosed.",
+      "limitOrUnresolved": "Architect/DevOps must disposition generic override guard discrepancy; no security fix inferred."
+    },
+    {
+      "section": 12,
+      "subject": "Rollback and schema",
+      "primarySource": "backend/src/main/resources/db/migration/V19__guided_governance.sql",
+      "verifiedStaticFinding": "Current V12\u2013V22 lineage and ordinary V19 migration distinguish old cutover history; forward-only/evidence constraints remain.",
+      "limitOrUnresolved": "No deployed rollback rehearsal or backward schema compatibility claimed."
+    },
+    {
+      "section": 13,
+      "subject": "Guided model transport",
+      "primarySource": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewayProperties.java",
+      "verifiedStaticFinding": "Current studio.gateway prefix and chart model/provider configuration; saved observed replay does not invoke model.",
+      "limitOrUnresolved": "No real provider, shared-stack or pilot acceptance supplied."
+    }
+  ],
+  "preservedSections": [
+    4,
+    14
+  ],
+  "uatDeployNote": "present in unchanged14.4; actual external deployment inputs are separate"
+}

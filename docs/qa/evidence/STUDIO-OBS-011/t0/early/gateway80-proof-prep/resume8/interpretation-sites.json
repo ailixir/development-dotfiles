@@ -1,0 +1,1253 @@
+{
+  "sites": [
+    {
+      "source": "runtime.py",
+      "consumer": "materialized_holder",
+      "line": 428,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "materialized_holder"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 596,
+      "call": "ast.parse",
+      "inputExpression": "source",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 599,
+      "call": "exec",
+      "inputExpression": "compile(ast.Module(body=nodes, type_ignores=[]), '<verified-selected06-definitions>', 'exec')",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "create_workspace",
+      "line": 669,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['input-manifest.json']",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "create_workspace"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "install_fixed",
+      "line": 695,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['input-manifest.json']",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "install_fixed"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_core",
+      "line": 759,
+      "call": "exec",
+      "inputExpression": "compile(ast.Module(body=nodes, type_ignores=[]), '<verified-existing-observation-definitions>', 'exec')",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "load_core"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "previous_closure",
+      "line": 979,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "previous_closure"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "capture",
+      "line": 1251,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['source-guards.json']",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "capture"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "control",
+      "line": 559,
+      "call": "json.loads",
+      "inputExpression": "self.control_raw[name]",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "Context.control"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 591,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['scope.json']",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 599,
+      "call": "compile",
+      "inputExpression": "ast.Module(body=nodes, type_ignores=[])",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_core",
+      "line": 759,
+      "call": "compile",
+      "inputExpression": "ast.Module(body=nodes, type_ignores=[])",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "load_core"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "owner_ruling",
+      "line": 958,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "owner_ruling"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "inherited_samples",
+      "line": 1023,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "inherited_samples"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "journals",
+      "line": 1038,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "journals"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "transition",
+      "line": 1073,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "transition"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "run_native",
+      "line": 1145,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "run_native"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "run_native",
+      "line": 1145,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['case-map.json']",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "run_native"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "capture",
+      "line": 1270,
+      "call": "json.loads",
+      "inputExpression": "old_raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "capture"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "read_static_or_control",
+      "line": 604,
+      "call": "json.loads",
+      "inputExpression": "static_map[str(path)]",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "load_legacy.read_static_or_control"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "dispatch",
+      "line": 1465,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "dispatch"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_core",
+      "line": 756,
+      "call": "ast.parse",
+      "inputExpression": "source",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "load_core"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "immutable_tuple",
+      "line": 1321,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "immutable_tuple"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "immutable_tuple",
+      "line": 1321,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['case-map.json']",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "immutable_tuple"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "get",
+      "line": 367,
+      "call": "json.loads",
+      "inputExpression": "self.raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "PendingHolder.get"
+    },
+    {
+      "source": "entry.py",
+      "consumer": "launch",
+      "line": 87,
+      "call": "json.loads",
+      "inputExpression": "manifest_raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "launch"
+    },
+    {
+      "source": "entry.py",
+      "consumer": "launch",
+      "line": 97,
+      "call": "json.loads",
+      "inputExpression": "own['external-inputs.json']",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "launch"
+    },
+    {
+      "source": "entry.py",
+      "consumer": "launch",
+      "line": 99,
+      "call": "json.loads",
+      "inputExpression": "source_raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "launch"
+    },
+    {
+      "source": "entry.py",
+      "consumer": "launch",
+      "line": 111,
+      "call": "json.loads",
+      "inputExpression": "entry_raw",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "launch"
+    },
+    {
+      "source": "entry.py",
+      "consumer": "launch",
+      "line": 126,
+      "call": "exec",
+      "inputExpression": "compile(own['runtime.py'], '<verified-source8-runtime>', 'exec')",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "launch"
+    },
+    {
+      "source": "entry.py",
+      "consumer": "launch",
+      "line": 128,
+      "call": "exec",
+      "inputExpression": "compile(buffers['contracts.py'], '<verified-unchanged-report-assessor>', 'exec')",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "launch"
+    },
+    {
+      "source": "entry.py",
+      "consumer": "launch",
+      "line": 126,
+      "call": "compile",
+      "inputExpression": "own['runtime.py']",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "launch"
+    },
+    {
+      "source": "entry.py",
+      "consumer": "launch",
+      "line": 128,
+      "call": "compile",
+      "inputExpression": "buffers['contracts.py']",
+      "barrier": "Externally pinned bootstrap/source/control buffer, exact owned-current-write buffer, or exact PendingHolder construction. Every own/external code buffer is hash-verified before AST/compile/exec; no self-pin or import fallback.",
+      "qualifiedOwner": "launch"
+    },
+    {
+      "source": "SHELL-BINDING.md",
+      "consumer": "capture-once.bash",
+      "call": "eval immutable readonly buffer",
+      "inputExpression": "G8_CAPTURE_SOURCE_BUFFER",
+      "barrier": "Builtin read once, readonly retained buffer, foreground actual-variable SHA verification/status0 before same-buffer evaluation; separately captured setup status and named readonly function inspections; root/operator attestations, actual compatibility owed."
+    },
+    {
+      "source": "SHELL-BINDING.md",
+      "consumer": "guard-exit.bash",
+      "call": "eval immutable readonly buffer",
+      "inputExpression": "G8_GUARD_SOURCE_BUFFER",
+      "barrier": "Builtin read once, readonly retained buffer, foreground actual-variable SHA verification/status0 before same-buffer evaluation; separately captured setup status and named readonly function inspections; root/operator attestations, actual compatibility owed."
+    },
+    {
+      "source": "SHELL-BINDING.md",
+      "consumer": "author-control.template.bash",
+      "call": "eval immutable readonly buffer",
+      "inputExpression": "G8_AUTHOR_SOURCE_BUFFER",
+      "barrier": "Builtin read once, readonly retained buffer, foreground actual-variable SHA verification/status0 before same-buffer evaluation; separately captured setup status and named readonly function inspections; root/operator attestations, actual compatibility owed."
+    },
+    {
+      "source": "SHELL-BINDING.md",
+      "consumer": "postclose.template.bash",
+      "call": "eval immutable readonly buffer",
+      "inputExpression": "G8_POSTCLOSE_SOURCE_BUFFER",
+      "barrier": "Builtin read once, readonly retained buffer, foreground actual-variable SHA verification/status0 before same-buffer evaluation; separately captured setup status and named readonly function inspections; root/operator attestations, actual compatibility owed."
+    }
+  ],
+  "siteCount": 37,
+  "functionSpans": [
+    {
+      "source": "runtime.py",
+      "name": "require",
+      "startLine": 47,
+      "endLine": 49,
+      "owner": "<module>",
+      "qualifiedName": "require"
+    },
+    {
+      "source": "runtime.py",
+      "name": "digest",
+      "startLine": 52,
+      "endLine": 54,
+      "owner": "<module>",
+      "qualifiedName": "digest"
+    },
+    {
+      "source": "runtime.py",
+      "name": "encoded",
+      "startLine": 57,
+      "endLine": 58,
+      "owner": "<module>",
+      "qualifiedName": "encoded"
+    },
+    {
+      "source": "runtime.py",
+      "name": "claim",
+      "startLine": 61,
+      "endLine": 67,
+      "owner": "<module>",
+      "qualifiedName": "claim"
+    },
+    {
+      "source": "runtime.py",
+      "name": "validate_claim",
+      "startLine": 70,
+      "endLine": 82,
+      "owner": "<module>",
+      "qualifiedName": "validate_claim"
+    },
+    {
+      "source": "runtime.py",
+      "name": "sha_pin",
+      "startLine": 85,
+      "endLine": 87,
+      "owner": "<module>",
+      "qualifiedName": "sha_pin"
+    },
+    {
+      "source": "runtime.py",
+      "name": "safe_relative",
+      "startLine": 90,
+      "endLine": 94,
+      "owner": "<module>",
+      "qualifiedName": "safe_relative"
+    },
+    {
+      "source": "runtime.py",
+      "name": "Ownership",
+      "startLine": 97,
+      "endLine": 140,
+      "owner": "<module>",
+      "qualifiedName": "Ownership"
+    },
+    {
+      "source": "runtime.py",
+      "name": "file_key",
+      "startLine": 143,
+      "endLine": 144,
+      "owner": "<module>",
+      "qualifiedName": "file_key"
+    },
+    {
+      "source": "runtime.py",
+      "name": "Files",
+      "startLine": 147,
+      "endLine": 295,
+      "owner": "<module>",
+      "qualifiedName": "Files"
+    },
+    {
+      "source": "runtime.py",
+      "name": "Budget",
+      "startLine": 298,
+      "endLine": 314,
+      "owner": "<module>",
+      "qualifiedName": "Budget"
+    },
+    {
+      "source": "runtime.py",
+      "name": "Ledger",
+      "startLine": 317,
+      "endLine": 349,
+      "owner": "<module>",
+      "qualifiedName": "Ledger"
+    },
+    {
+      "source": "runtime.py",
+      "name": "PendingHolder",
+      "startLine": 352,
+      "endLine": 368,
+      "owner": "<module>",
+      "qualifiedName": "PendingHolder"
+    },
+    {
+      "source": "runtime.py",
+      "name": "scoped_text",
+      "startLine": 371,
+      "endLine": 375,
+      "owner": "<module>",
+      "qualifiedName": "scoped_text"
+    },
+    {
+      "source": "runtime.py",
+      "name": "qualify_controller_lock",
+      "startLine": 378,
+      "endLine": 421,
+      "owner": "<module>",
+      "qualifiedName": "qualify_controller_lock"
+    },
+    {
+      "source": "runtime.py",
+      "name": "materialized_holder",
+      "startLine": 424,
+      "endLine": 432,
+      "owner": "<module>",
+      "qualifiedName": "materialized_holder"
+    },
+    {
+      "source": "runtime.py",
+      "name": "holder_fields",
+      "startLine": 435,
+      "endLine": 445,
+      "owner": "<module>",
+      "qualifiedName": "holder_fields"
+    },
+    {
+      "source": "runtime.py",
+      "name": "no_signal_process",
+      "startLine": 448,
+      "endLine": 498,
+      "owner": "<module>",
+      "qualifiedName": "no_signal_process"
+    },
+    {
+      "source": "runtime.py",
+      "name": "Context",
+      "startLine": 501,
+      "endLine": 582,
+      "owner": "<module>",
+      "qualifiedName": "Context"
+    },
+    {
+      "source": "runtime.py",
+      "name": "load_legacy",
+      "startLine": 585,
+      "endLine": 625,
+      "owner": "<module>",
+      "qualifiedName": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "name": "inventory",
+      "startLine": 628,
+      "endLine": 653,
+      "owner": "<module>",
+      "qualifiedName": "inventory"
+    },
+    {
+      "source": "runtime.py",
+      "name": "stage_buffer",
+      "startLine": 656,
+      "endLine": 661,
+      "owner": "<module>",
+      "qualifiedName": "stage_buffer"
+    },
+    {
+      "source": "runtime.py",
+      "name": "create_workspace",
+      "startLine": 664,
+      "endLine": 690,
+      "owner": "<module>",
+      "qualifiedName": "create_workspace"
+    },
+    {
+      "source": "runtime.py",
+      "name": "install_fixed",
+      "startLine": 693,
+      "endLine": 720,
+      "owner": "<module>",
+      "qualifiedName": "install_fixed"
+    },
+    {
+      "source": "runtime.py",
+      "name": "archive_tree",
+      "startLine": 723,
+      "endLine": 749,
+      "owner": "<module>",
+      "qualifiedName": "archive_tree"
+    },
+    {
+      "source": "runtime.py",
+      "name": "load_core",
+      "startLine": 752,
+      "endLine": 771,
+      "owner": "<module>",
+      "qualifiedName": "load_core"
+    },
+    {
+      "source": "runtime.py",
+      "name": "legacy_identity",
+      "startLine": 774,
+      "endLine": 794,
+      "owner": "<module>",
+      "qualifiedName": "legacy_identity"
+    },
+    {
+      "source": "runtime.py",
+      "name": "sample",
+      "startLine": 797,
+      "endLine": 908,
+      "owner": "<module>",
+      "qualifiedName": "sample"
+    },
+    {
+      "source": "runtime.py",
+      "name": "episode",
+      "startLine": 911,
+      "endLine": 925,
+      "owner": "<module>",
+      "qualifiedName": "episode"
+    },
+    {
+      "source": "runtime.py",
+      "name": "boundaries",
+      "startLine": 928,
+      "endLine": 945,
+      "owner": "<module>",
+      "qualifiedName": "boundaries"
+    },
+    {
+      "source": "runtime.py",
+      "name": "owner_ruling",
+      "startLine": 948,
+      "endLine": 974,
+      "owner": "<module>",
+      "qualifiedName": "owner_ruling"
+    },
+    {
+      "source": "runtime.py",
+      "name": "previous_closure",
+      "startLine": 977,
+      "endLine": 982,
+      "owner": "<module>",
+      "qualifiedName": "previous_closure"
+    },
+    {
+      "source": "runtime.py",
+      "name": "bind_entry",
+      "startLine": 985,
+      "endLine": 1008,
+      "owner": "<module>",
+      "qualifiedName": "bind_entry"
+    },
+    {
+      "source": "runtime.py",
+      "name": "fresh_source",
+      "startLine": 1011,
+      "endLine": 1013,
+      "owner": "<module>",
+      "qualifiedName": "fresh_source"
+    },
+    {
+      "source": "runtime.py",
+      "name": "source_tuple",
+      "startLine": 1016,
+      "endLine": 1017,
+      "owner": "<module>",
+      "qualifiedName": "source_tuple"
+    },
+    {
+      "source": "runtime.py",
+      "name": "inherited_samples",
+      "startLine": 1020,
+      "endLine": 1030,
+      "owner": "<module>",
+      "qualifiedName": "inherited_samples"
+    },
+    {
+      "source": "runtime.py",
+      "name": "journals",
+      "startLine": 1033,
+      "endLine": 1056,
+      "owner": "<module>",
+      "qualifiedName": "journals"
+    },
+    {
+      "source": "runtime.py",
+      "name": "publish_journal",
+      "startLine": 1059,
+      "endLine": 1062,
+      "owner": "<module>",
+      "qualifiedName": "publish_journal"
+    },
+    {
+      "source": "runtime.py",
+      "name": "transition",
+      "startLine": 1065,
+      "endLine": 1080,
+      "owner": "<module>",
+      "qualifiedName": "transition"
+    },
+    {
+      "source": "runtime.py",
+      "name": "run_native",
+      "startLine": 1083,
+      "endLine": 1155,
+      "owner": "<module>",
+      "qualifiedName": "run_native"
+    },
+    {
+      "source": "runtime.py",
+      "name": "phase_operation",
+      "startLine": 1158,
+      "endLine": 1207,
+      "owner": "<module>",
+      "qualifiedName": "phase_operation"
+    },
+    {
+      "source": "runtime.py",
+      "name": "ancestor_custody",
+      "startLine": 1210,
+      "endLine": 1219,
+      "owner": "<module>",
+      "qualifiedName": "ancestor_custody"
+    },
+    {
+      "source": "runtime.py",
+      "name": "capture",
+      "startLine": 1222,
+      "endLine": 1297,
+      "owner": "<module>",
+      "qualifiedName": "capture"
+    },
+    {
+      "source": "runtime.py",
+      "name": "immutable_tuple",
+      "startLine": 1300,
+      "endLine": 1338,
+      "owner": "<module>",
+      "qualifiedName": "immutable_tuple"
+    },
+    {
+      "source": "runtime.py",
+      "name": "checked_actual_adoption",
+      "startLine": 1341,
+      "endLine": 1351,
+      "owner": "<module>",
+      "qualifiedName": "checked_actual_adoption"
+    },
+    {
+      "source": "runtime.py",
+      "name": "fresh_current",
+      "startLine": 1354,
+      "endLine": 1370,
+      "owner": "<module>",
+      "qualifiedName": "fresh_current"
+    },
+    {
+      "source": "runtime.py",
+      "name": "final_operation",
+      "startLine": 1373,
+      "endLine": 1385,
+      "owner": "<module>",
+      "qualifiedName": "final_operation"
+    },
+    {
+      "source": "runtime.py",
+      "name": "freshness",
+      "startLine": 1388,
+      "endLine": 1389,
+      "owner": "<module>",
+      "qualifiedName": "freshness"
+    },
+    {
+      "source": "runtime.py",
+      "name": "gate_operation",
+      "startLine": 1392,
+      "endLine": 1417,
+      "owner": "<module>",
+      "qualifiedName": "gate_operation"
+    },
+    {
+      "source": "runtime.py",
+      "name": "held_operation",
+      "startLine": 1420,
+      "endLine": 1440,
+      "owner": "<module>",
+      "qualifiedName": "held_operation"
+    },
+    {
+      "source": "runtime.py",
+      "name": "postclose_operation",
+      "startLine": 1443,
+      "endLine": 1455,
+      "owner": "<module>",
+      "qualifiedName": "postclose_operation"
+    },
+    {
+      "source": "runtime.py",
+      "name": "dispatch",
+      "startLine": 1458,
+      "endLine": 1470,
+      "owner": "<module>",
+      "qualifiedName": "dispatch"
+    },
+    {
+      "source": "runtime.py",
+      "name": "negative_operation",
+      "startLine": 1473,
+      "endLine": 1480,
+      "owner": "<module>",
+      "qualifiedName": "negative_operation"
+    },
+    {
+      "source": "runtime.py",
+      "name": "guard_admission",
+      "startLine": 1483,
+      "endLine": 1502,
+      "owner": "<module>",
+      "qualifiedName": "guard_admission"
+    },
+    {
+      "source": "runtime.py",
+      "name": "author_control",
+      "startLine": 1505,
+      "endLine": 1534,
+      "owner": "<module>",
+      "qualifiedName": "author_control"
+    },
+    {
+      "source": "runtime.py",
+      "name": "__init__",
+      "startLine": 102,
+      "endLine": 106,
+      "owner": "Ownership",
+      "qualifiedName": "Ownership.__init__"
+    },
+    {
+      "source": "runtime.py",
+      "name": "acquire",
+      "startLine": 108,
+      "endLine": 112,
+      "owner": "Ownership",
+      "qualifiedName": "Ownership.acquire"
+    },
+    {
+      "source": "runtime.py",
+      "name": "close",
+      "startLine": 114,
+      "endLine": 124,
+      "owner": "Ownership",
+      "qualifiedName": "Ownership.close"
+    },
+    {
+      "source": "runtime.py",
+      "name": "finish",
+      "startLine": 126,
+      "endLine": 134,
+      "owner": "Ownership",
+      "qualifiedName": "Ownership.finish"
+    },
+    {
+      "source": "runtime.py",
+      "name": "metadata",
+      "startLine": 136,
+      "endLine": 140,
+      "owner": "Ownership",
+      "qualifiedName": "Ownership.metadata"
+    },
+    {
+      "source": "runtime.py",
+      "name": "__init__",
+      "startLine": 149,
+      "endLine": 151,
+      "owner": "Files",
+      "qualifiedName": "Files.__init__"
+    },
+    {
+      "source": "runtime.py",
+      "name": "open",
+      "startLine": 153,
+      "endLine": 155,
+      "owner": "Files",
+      "qualifiedName": "Files.open"
+    },
+    {
+      "source": "runtime.py",
+      "name": "parent",
+      "startLine": 157,
+      "endLine": 173,
+      "owner": "Files",
+      "qualifiedName": "Files.parent"
+    },
+    {
+      "source": "runtime.py",
+      "name": "info",
+      "startLine": 175,
+      "endLine": 180,
+      "owner": "Files",
+      "qualifiedName": "Files.info"
+    },
+    {
+      "source": "runtime.py",
+      "name": "absent",
+      "startLine": 182,
+      "endLine": 187,
+      "owner": "Files",
+      "qualifiedName": "Files.absent"
+    },
+    {
+      "source": "runtime.py",
+      "name": "read",
+      "startLine": 189,
+      "endLine": 208,
+      "owner": "Files",
+      "qualifiedName": "Files.read"
+    },
+    {
+      "source": "runtime.py",
+      "name": "verified",
+      "startLine": 210,
+      "endLine": 214,
+      "owner": "Files",
+      "qualifiedName": "Files.verified"
+    },
+    {
+      "source": "runtime.py",
+      "name": "mkdir",
+      "startLine": 216,
+      "endLine": 227,
+      "owner": "Files",
+      "qualifiedName": "Files.mkdir"
+    },
+    {
+      "source": "runtime.py",
+      "name": "create",
+      "startLine": 229,
+      "endLine": 238,
+      "owner": "Files",
+      "qualifiedName": "Files.create"
+    },
+    {
+      "source": "runtime.py",
+      "name": "write_fd",
+      "startLine": 240,
+      "endLine": 246,
+      "owner": "Files",
+      "qualifiedName": "Files.write_fd"
+    },
+    {
+      "source": "runtime.py",
+      "name": "write",
+      "startLine": 248,
+      "endLine": 255,
+      "owner": "Files",
+      "qualifiedName": "Files.write"
+    },
+    {
+      "source": "runtime.py",
+      "name": "copy",
+      "startLine": 257,
+      "endLine": 295,
+      "owner": "Files",
+      "qualifiedName": "Files.copy"
+    },
+    {
+      "source": "runtime.py",
+      "name": "__init__",
+      "startLine": 299,
+      "endLine": 302,
+      "owner": "Budget",
+      "qualifiedName": "Budget.__init__"
+    },
+    {
+      "source": "runtime.py",
+      "name": "reserve_entry",
+      "startLine": 304,
+      "endLine": 306,
+      "owner": "Budget",
+      "qualifiedName": "Budget.reserve_entry"
+    },
+    {
+      "source": "runtime.py",
+      "name": "check_file",
+      "startLine": 308,
+      "endLine": 310,
+      "owner": "Budget",
+      "qualifiedName": "Budget.check_file"
+    },
+    {
+      "source": "runtime.py",
+      "name": "consume",
+      "startLine": 312,
+      "endLine": 314,
+      "owner": "Budget",
+      "qualifiedName": "Budget.consume"
+    },
+    {
+      "source": "runtime.py",
+      "name": "__init__",
+      "startLine": 318,
+      "endLine": 327,
+      "owner": "Ledger",
+      "qualifiedName": "Ledger.__init__"
+    },
+    {
+      "source": "runtime.py",
+      "name": "append",
+      "startLine": 329,
+      "endLine": 340,
+      "owner": "Ledger",
+      "qualifiedName": "Ledger.append"
+    },
+    {
+      "source": "runtime.py",
+      "name": "freeze",
+      "startLine": 342,
+      "endLine": 349,
+      "owner": "Ledger",
+      "qualifiedName": "Ledger.freeze"
+    },
+    {
+      "source": "runtime.py",
+      "name": "__init__",
+      "startLine": 353,
+      "endLine": 364,
+      "owner": "PendingHolder",
+      "qualifiedName": "PendingHolder.__init__"
+    },
+    {
+      "source": "runtime.py",
+      "name": "get",
+      "startLine": 366,
+      "endLine": 368,
+      "owner": "PendingHolder",
+      "qualifiedName": "PendingHolder.get"
+    },
+    {
+      "source": "runtime.py",
+      "name": "__init__",
+      "startLine": 502,
+      "endLine": 518,
+      "owner": "Context",
+      "qualifiedName": "Context.__init__"
+    },
+    {
+      "source": "runtime.py",
+      "name": "observe",
+      "startLine": 520,
+      "endLine": 546,
+      "owner": "Context",
+      "qualifiedName": "Context.observe"
+    },
+    {
+      "source": "runtime.py",
+      "name": "output",
+      "startLine": 548,
+      "endLine": 555,
+      "owner": "Context",
+      "qualifiedName": "Context.output"
+    },
+    {
+      "source": "runtime.py",
+      "name": "control",
+      "startLine": 557,
+      "endLine": 559,
+      "owner": "Context",
+      "qualifiedName": "Context.control"
+    },
+    {
+      "source": "runtime.py",
+      "name": "start_segment",
+      "startLine": 561,
+      "endLine": 565,
+      "owner": "Context",
+      "qualifiedName": "Context.start_segment"
+    },
+    {
+      "source": "runtime.py",
+      "name": "event",
+      "startLine": 567,
+      "endLine": 571,
+      "owner": "Context",
+      "qualifiedName": "Context.event"
+    },
+    {
+      "source": "runtime.py",
+      "name": "finish_segment",
+      "startLine": 573,
+      "endLine": 575,
+      "owner": "Context",
+      "qualifiedName": "Context.finish_segment"
+    },
+    {
+      "source": "runtime.py",
+      "name": "failure",
+      "startLine": 577,
+      "endLine": 582,
+      "owner": "Context",
+      "qualifiedName": "Context.failure"
+    },
+    {
+      "source": "runtime.py",
+      "name": "read_static_or_control",
+      "startLine": 602,
+      "endLine": 606,
+      "owner": "load_legacy",
+      "qualifiedName": "load_legacy.read_static_or_control"
+    },
+    {
+      "source": "runtime.py",
+      "name": "get_raw",
+      "startLine": 607,
+      "endLine": 614,
+      "owner": "load_legacy",
+      "qualifiedName": "load_legacy.get_raw"
+    },
+    {
+      "source": "runtime.py",
+      "name": "table_with_current_markers",
+      "startLine": 761,
+      "endLine": 767,
+      "owner": "load_core",
+      "qualifiedName": "load_core.table_with_current_markers"
+    },
+    {
+      "source": "entry.py",
+      "name": "need",
+      "startLine": 26,
+      "endLine": 28,
+      "owner": "<module>",
+      "qualifiedName": "need"
+    },
+    {
+      "source": "entry.py",
+      "name": "open_owned",
+      "startLine": 31,
+      "endLine": 36,
+      "owner": "<module>",
+      "qualifiedName": "open_owned"
+    },
+    {
+      "source": "entry.py",
+      "name": "close_owned",
+      "startLine": 39,
+      "endLine": 43,
+      "owner": "<module>",
+      "qualifiedName": "close_owned"
+    },
+    {
+      "source": "entry.py",
+      "name": "bootstrap_read",
+      "startLine": 46,
+      "endLine": 72,
+      "owner": "<module>",
+      "qualifiedName": "bootstrap_read"
+    },
+    {
+      "source": "entry.py",
+      "name": "launch",
+      "startLine": 75,
+      "endLine": 145,
+      "owner": "<module>",
+      "qualifiedName": "launch"
+    }
+  ],
+  "callbackSites": [
+    {
+      "source": "runtime.py",
+      "consumer": "load_core",
+      "line": 770,
+      "expression": "lambda row: legacy_identity(ctx, row)",
+      "qualifiedOwner": "load_core"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "immutable_tuple",
+      "line": 1328,
+      "expression": "lambda rows: [{k: v for k, v in r.items() if k not in ('dev', 'ino')} for r in rows]",
+      "qualifiedOwner": "immutable_tuple"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "no_signal_process",
+      "line": 457,
+      "expression": "lambda _: None",
+      "qualifiedOwner": "no_signal_process"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 593,
+      "expression": "lambda: datetime.datetime.now(datetime.timezone.utc).isoformat()",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_core",
+      "line": 758,
+      "expression": "lambda command, allowed=(0,): ctx.observe(command, absence=1 in allowed)",
+      "qualifiedOwner": "load_core"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "run_native",
+      "line": 1100,
+      "expression": "lambda _: None",
+      "qualifiedOwner": "run_native"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "no_signal_process",
+      "line": 466,
+      "expression": "lambda h: require(ctx.owner.waited.get(id(h)) is True, 'CHILD_COMPLETION_UNCONFIRMED')",
+      "qualifiedOwner": "no_signal_process"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 615,
+      "expression": "lambda p: digest(get_raw(p))",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 616,
+      "expression": "lambda p: inventory(ctx, p)",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 617,
+      "expression": "lambda p, mode=448: ctx.fs.mkdir(p, mode)",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 618,
+      "expression": "lambda src, dst, mode=420: stage_buffer(ctx, src, dst, mode)",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 619,
+      "expression": "lambda src, dst: archive_tree(ctx, src, dst)",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 620,
+      "expression": "lambda p: ctx.fs.parent(p)['handle']",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "load_legacy",
+      "line": 621,
+      "expression": "lambda p, h: ctx.fs.verified(p, h)",
+      "qualifiedOwner": "load_legacy"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "inventory",
+      "line": 653,
+      "expression": "lambda r: r['path']",
+      "qualifiedOwner": "inventory"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "archive_tree",
+      "line": 729,
+      "expression": "lambda r: (len(Path(r['path']).parts), r['path'])",
+      "qualifiedOwner": "archive_tree"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "run_native",
+      "line": 1109,
+      "expression": "lambda h: require(ctx.owner.waited.get(id(h)) is True, 'NATIVE_NOT_WAITED')",
+      "qualifiedOwner": "run_native"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "no_signal_process",
+      "line": 471,
+      "expression": "lambda h: h.close()",
+      "qualifiedOwner": "no_signal_process"
+    },
+    {
+      "source": "runtime.py",
+      "consumer": "sample",
+      "line": 857,
+      "expression": "lambda: C['identity'](row)",
+      "qualifiedOwner": "sample"
+    },
+    {
+      "source": "entry.py",
+      "consumer": "bootstrap_read",
+      "line": 65,
+      "expression": "lambda s: (s.st_dev, s.st_ino, s.st_mode, s.st_uid, s.st_size, s.st_mtime_ns)",
+      "qualifiedOwner": "bootstrap_read"
+    }
+  ],
+  "callbackCount": 20,
+  "selectedLegacyConsumers": "Selected definitions and original report assessor from39 exact static source/bank buffers are verified before AST/code/JSON. No old main/bootstrap/observer is selected.",
+  "testFixtureAuthority": "Synthetic source/tool/baseline/controller byte/hash authority; literal native banks/profile/case-map/assessor; persistent same-namespace fakes, no AST safety-statement edits."
+}

@@ -1,0 +1,33 @@
+{
+  "id": "final-image-build01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-final-runner-image-build01",
+    "docker",
+    "build",
+    "--pull=false",
+    "--network=none",
+    "--build-arg",
+    "IMAGE_TAG=put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "-t",
+    "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "-"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T03:32:49.421422+00:00",
+  "pid": 97173,
+  "accepted": false,
+  "caffeinatePid": 97172,
+  "caffeinateArgv": [
+    "/usr/bin/caffeinate",
+    "-i"
+  ],
+  "continuousAwakeClaim": false,
+  "rawExit": 1,
+  "terminalAtUtc": "2026-10-21T03:34:01.817655+00:00",
+  "caffeinateHeldThroughPostguards": false,
+  "caffeinateExit": -15,
+  "caffeinateReleased": true,
+  "caffeinateReleasedAtUtc": "2026-10-21T03:34:04.235117+00:00"
+}

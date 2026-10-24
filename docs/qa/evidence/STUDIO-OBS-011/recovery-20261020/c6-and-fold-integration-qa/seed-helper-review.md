@@ -1,0 +1,13 @@
+# Fresh composed sandbox seed helper — source review
+
+Quinn / aiox-qa, 2026-10-20. **Source CLEAN for future capture/seed after final composition. No mandatory defect found.** Reviewed only `prepare-current-sandbox.py` (`4b0d186af5b427fcc250cedfa3b02ec91a7857921c5bafdb2b2245313d1573ac`), its preparation metadata and relevant predecessor/profile/binding source. The helper was not imported, parsed, executed or exercised; no catalog was measured and no sandbox was created.
+
+The fixed approved COPY/MKDIR profile is hash-bound. Its path parsing, extra backend YAML, dependency dereference (`symlinks=False`/`follow_symlinks=True`) and approved top-level runner omissions (coverage, .claude, short.webm) remain as specified. Evidence directories are empty MKDIR targets; private evidence payload trees are not COPY targets. Only the exact seven reviewed code candidates are overlaid from their explicit paths.
+
+Seven literal before/candidate hashes and all18 protected pins remain enforced through the corrected binding. Accepted009's exact four green hashes and both final FOLD runner-port hashes are required. The changed composition is admitted through one fresh selected-profile catalog, not a historical493 identity, old-hash union or exemption. Its root/profile/pins and measured catalog SHA are bound.
+
+Seed source requires a fresh external destination, compares actual membership/content before copying and again after both copies, verifies each complete copied catalog, then checks the final after-tree equals only the seven declared candidate changes. Actual product source/dist is only read; planned writes are the requested fresh catalog metadata and new external sandbox. Place the catalog in the existing review/evidence area outside the selected COPY profile, so capture does not add its own input. The environment declaration remains root's assertion that predecessors are composed and the lane is idle; this source review does not establish that future state.
+
+The historical helper still hashes to `ea698725a437e7b8453e72c0f0d52f0217893aa3f2b3d57adf73252546528f29`. Existing seed proofs and failures remain unchanged. No seed/capture/runtime/test/compiler/source-language-parser/build/Git/network/process operation, private payload inspection or actual source/dist write occurred. Only this review evidence was written.
+
+Exact metadata/binding checks are in `seed-helper-review.json`. Actual composed source, measured catalog, copied inventories/dist and subsequent AST/emit/runtime/final QA proof remain future work. No result, fixture-gate, historical-cause, release or lifecycle credit is supplied.

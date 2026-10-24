@@ -1,0 +1,53 @@
+{
+  "historicInputCount": 167,
+  "currentMatches": 165,
+  "currentDifferencesAdopted": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md",
+      "historicalSha256": "0766e7d21023198cef275f05f5696c599d4b421a4ed1f4408439133d7d4b89d8",
+      "currentSha256": "870046f592b620d3645e7857b26ae568482464646d9baeea3709713e88ace90c"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "historicalSha256": "395ed4f676fc3a97e1e4c17d085dcc45394365a20dc57fc0d595c5b98a3b4edf",
+      "currentSha256": "9d5dca2df3262dad4a2b411a712c3ccf2844923d53cf0e0297b61020337c6e4c"
+    }
+  ],
+  "futureAfterAllThreeRegistrationAppends": {
+    "unchangedHistoricBindings": 162,
+    "historicDifferences": 5,
+    "threeAdditionalMetadataDifferences": [
+      {
+        "path": "docs/stories/10.34.story.md",
+        "currentSha256": "14c69d86bf81ebac22411d93961aa61164577110b13772fd3c30759921c9af33",
+        "proposedSha256": "18a0a558f8c3d6b25662d5e49ab0e45d63a3570b2297c56a474d594d823ecad4"
+      },
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+        "currentSha256": "d2fc7566a72616eab27a146de4e119dfb8a199bfda2c047cd90406a7b5c4f607",
+        "proposedSha256": "0a5df869e6dde803eabf7cfed8fabc18cbc48df8a711ab1d7f8e4b3c86cead97"
+      },
+      {
+        "path": "docs/qa/staging-acceptance-register.md",
+        "currentSha256": "fb5911b0a92561a8e203a0202f5f7bbbb892a936f3fba22a858d694bd4204b6b",
+        "proposedSha256": "a369bcae2b10d4becce77fc5fb0a0ac7063829cb7ab2f720ae3961c910053666"
+      }
+    ],
+    "required": "Recheck all167 actual inputs and5targetbases; adopt exact metadata/registration impact separately from old two-context adoption; never overwrite old manifests"
+  },
+  "quoted008": {
+    "currentSha256": "d2fc7566a72616eab27a146de4e119dfb8a199bfda2c047cd90406a7b5c4f607",
+    "proposedSha256": "0a5df869e6dde803eabf7cfed8fabc18cbc48df8a711ab1d7f8e4b3c86cead97",
+    "old20QuoteListPreserved": true,
+    "futureInputBindingAmendmentRequired": true
+  },
+  "008AdminClose": {
+    "status": "HARD_FAIL_PRESERVED",
+    "changedSource": 119,
+    "missingSource": 9,
+    "addedSource": 112,
+    "changedDist": 57,
+    "futureCurrentRevisionQaEvidenceRequired": true,
+    "carrierInverseIsNotQaVerdict": true
+  }
+}

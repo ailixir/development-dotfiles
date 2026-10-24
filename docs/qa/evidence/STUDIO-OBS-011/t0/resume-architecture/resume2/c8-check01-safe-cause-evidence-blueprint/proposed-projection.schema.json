@@ -1,0 +1,361 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:studio:design-only:current-case-safe-capture:v1",
+  "title": "DESIGN ONLY, not a captured result or projection authorization",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "subject",
+    "publicBindings",
+    "qualification",
+    "capture",
+    "credit"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit",
+        "class",
+        "sourceMethod",
+        "assertionLine"
+      ],
+      "properties": {
+        "unit": {
+          "const": "obs011-t0-c8-check01"
+        },
+        "class": {
+          "const": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT"
+        },
+        "sourceMethod": {
+          "const": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill"
+        },
+        "assertionLine": {
+          "const": 32322
+        }
+      }
+    },
+    "publicBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "publicFailureProjectionSha256",
+        "terminalIndexSha256",
+        "sourceSha256",
+        "producerSourceSha256",
+        "closureProofSha256",
+        "projectionAuthorizationSha256",
+        "reviewedProjectorCodeSha256"
+      ],
+      "properties": {
+        "publicFailureProjectionSha256": {
+          "const": "f64c6c1e7a5bf2920ad9add54da0d02198d10555bc457996bddeda53fd22c506"
+        },
+        "terminalIndexSha256": {
+          "const": "f3d5b283f86fe0196d570f0a04002c758a292689203ddb93a6fe1a4c8d62ebcb"
+        },
+        "sourceSha256": {
+          "const": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475"
+        },
+        "producerSourceSha256": {
+          "const": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475"
+        },
+        "closureProofSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "projectionAuthorizationSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "reviewedProjectorCodeSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "qualification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "recordCardinality",
+        "subjectScopeVerified",
+        "currentUnitFreshnessVerified",
+        "sourceProducerVerified",
+        "captureRoleVerified",
+        "temporalMeaning",
+        "authorizedInputKind"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "QUALIFIED_CAPTURE",
+            "UNAVAILABLE",
+            "AMBIGUOUS",
+            "UNVERIFIED",
+            "SCOPE_MISMATCH",
+            "UNMODELED",
+            "CHANGED_INPUT"
+          ]
+        },
+        "recordCardinality": {
+          "enum": [
+            "ZERO",
+            "ONE",
+            "MANY",
+            "UNKNOWN"
+          ]
+        },
+        "subjectScopeVerified": {
+          "enum": [
+            "TRUE",
+            "FALSE",
+            "UNKNOWN"
+          ]
+        },
+        "currentUnitFreshnessVerified": {
+          "enum": [
+            "TRUE",
+            "FALSE",
+            "UNKNOWN"
+          ]
+        },
+        "sourceProducerVerified": {
+          "enum": [
+            "TRUE",
+            "FALSE",
+            "UNKNOWN"
+          ]
+        },
+        "captureRoleVerified": {
+          "enum": [
+            "TRUE",
+            "FALSE",
+            "UNKNOWN"
+          ]
+        },
+        "temporalMeaning": {
+          "enum": [
+            "POST_CASE_CLEANUP_ATTEMPT_CAPTURE",
+            "UNKNOWN"
+          ]
+        },
+        "authorizedInputKind": {
+          "enum": [
+            "PUBLIC_RETAINED_RESULT",
+            "LOGICAL_CURRENT_CASE_METADATA"
+          ]
+        }
+      }
+    },
+    "capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stateAtCapture",
+        "bootstrapPhaseAtCapture",
+        "continuationAtCapture",
+        "failureCodeAtCapture",
+        "actionAdmission"
+      ],
+      "properties": {
+        "stateAtCapture": {
+          "enum": [
+            "PREPARING",
+            "OBSERVING",
+            "PROPOSING",
+            "ACTING",
+            "AWAITING_CLARIFICATION",
+            "FINALIZING",
+            "SUCCEEDED",
+            "PUBLICATION_CONFLICT",
+            "FAILED",
+            "UNKNOWN_OUTCOME",
+            "CANCELLED",
+            "EXPIRED",
+            "UNKNOWN"
+          ]
+        },
+        "bootstrapPhaseAtCapture": {
+          "enum": [
+            "SOURCE_PLAN",
+            "PLAN_ACCEPTED",
+            "MATERIALIZED",
+            "ALLOCATED",
+            "CONTEXT_PENDING",
+            "READY",
+            "UNKNOWN"
+          ]
+        },
+        "continuationAtCapture": {
+          "enum": [
+            "SOURCE_PLAN",
+            "MATERIALIZE",
+            "DEPENDENCIES",
+            "NEXT",
+            "REFRESH",
+            "AWAITING_CLARIFICATION",
+            "FINALIZING",
+            "STOPPED",
+            "UNKNOWN"
+          ]
+        },
+        "failureCodeAtCapture": {
+          "enum": [
+            "OK",
+            "PENDING",
+            "INVALID_CONTRACT",
+            "UNAUTHENTICATED",
+            "FORBIDDEN_SCOPE",
+            "REVISION_CONFLICT",
+            "STALE_GENERATION",
+            "TARGET_MISMATCH",
+            "AMBIGUOUS_TARGET",
+            "MISSING_SOURCE",
+            "BINDING_ORDER",
+            "SENSITIVE_SOURCE",
+            "ORIGIN_NOT_ALLOWED",
+            "UNSUPPORTED_SURFACE",
+            "BUDGET_EXCEEDED",
+            "STALE_FENCE",
+            "IDEMPOTENCY_CONFLICT",
+            "UNKNOWN_OUTCOME",
+            "PUBLICATION_CONFLICT",
+            "RUNTIME_INCOMPATIBLE",
+            "ASSERTION_FAILED",
+            "CANCELLED",
+            "EXPIRED",
+            "SECRET_UNAVAILABLE",
+            "SECRET_USE_NOT_AUTHORIZED",
+            "SECRET_USE_REVOKED",
+            "VAULT_UNAVAILABLE",
+            "LOGIN_REQUIRED",
+            "SECRET_TOO_LONG",
+            "ACK_LOST",
+            "TIMEOUT",
+            "TARGET_CHANGED",
+            "POLICY_DENIED",
+            "REFERENCE_MISMATCH",
+            "UNKNOWN"
+          ]
+        },
+        "actionAdmission": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "associatedFailingActionCardinality",
+            "associationVerified",
+            "operationKind",
+            "state",
+            "outcomeCode",
+            "dispatchCount"
+          ],
+          "properties": {
+            "associatedFailingActionCardinality": {
+              "enum": [
+                "ZERO",
+                "ONE",
+                "MANY",
+                "UNKNOWN"
+              ]
+            },
+            "associationVerified": {
+              "enum": [
+                "TRUE",
+                "FALSE",
+                "UNKNOWN"
+              ]
+            },
+            "operationKind": {
+              "enum": [
+                "navigate",
+                "fill",
+                "click",
+                "read",
+                "assert",
+                "press",
+                "hover",
+                "check",
+                "uncheck",
+                "selectOption",
+                "UNKNOWN"
+              ]
+            },
+            "state": {
+              "enum": [
+                "ADMITTED",
+                "DISPATCHING",
+                "SUCCEEDED",
+                "FAILED",
+                "UNKNOWN_OUTCOME",
+                "REVOKED",
+                "UNKNOWN"
+              ]
+            },
+            "outcomeCode": {
+              "enum": [
+                "OK",
+                "PENDING",
+                "INVALID_CONTRACT",
+                "UNAUTHENTICATED",
+                "FORBIDDEN_SCOPE",
+                "REVISION_CONFLICT",
+                "STALE_GENERATION",
+                "TARGET_MISMATCH",
+                "AMBIGUOUS_TARGET",
+                "MISSING_SOURCE",
+                "BINDING_ORDER",
+                "SENSITIVE_SOURCE",
+                "ORIGIN_NOT_ALLOWED",
+                "UNSUPPORTED_SURFACE",
+                "BUDGET_EXCEEDED",
+                "STALE_FENCE",
+                "IDEMPOTENCY_CONFLICT",
+                "UNKNOWN_OUTCOME",
+                "PUBLICATION_CONFLICT",
+                "RUNTIME_INCOMPATIBLE",
+                "ASSERTION_FAILED",
+                "CANCELLED",
+                "EXPIRED",
+                "SECRET_UNAVAILABLE",
+                "SECRET_USE_NOT_AUTHORIZED",
+                "SECRET_USE_REVOKED",
+                "VAULT_UNAVAILABLE",
+                "LOGIN_REQUIRED",
+                "SECRET_TOO_LONG",
+                "ACK_LOST",
+                "TIMEOUT",
+                "TARGET_CHANGED",
+                "POLICY_DENIED",
+                "REFERENCE_MISMATCH",
+                "UNKNOWN"
+              ]
+            },
+            "dispatchCount": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                {
+                  "const": "UNKNOWN"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "credit": {
+      "const": false
+    }
+  },
+  "$comment": "No implementation or captured payload exists here. qualification!=QUALIFIED_CAPTURE requires every capture fact UNKNOWN. action tuple facts require cardinality ONE plus independently verified internal association; otherwise UNKNOWN. Cross-field semantic obligations are normative in projection-contract.md. Public hashes only; never export a private artifact/body/key/identifier hash."
+}

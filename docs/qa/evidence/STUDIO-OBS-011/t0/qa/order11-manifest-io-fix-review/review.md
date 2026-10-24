@@ -1,0 +1,39 @@
+# Snapshot manifest IO classification — narrow independent correction review
+
+Quinn, 2026-10-19. **SNAP-MANIFEST-IO-01 CLOSED STATICALLY and by independent pure fake-IO controls. No mandatory finding remains in this narrow revision.** The snapshot-only and optional-manifest code capabilities are conditionally static-ready. Actual optional scope/packet/private reads remain separately held; this review approves no actual packet, manifest preparation, capture, retry, source writer or lifecycle/native/lane action.
+
+I followed the exact saved task/context, fully read QA role/skill/AGENTS.md, original helper review11e65ff4… and prior retained-FD review39883106…. Only this new review directory was written. Read inputs were exact source/static package/approved PUBLIC binding files. No actual private enumeration/stat/open/read/glob/copy/export, source TEMP derivation, original release/consumed-output inspection, helper import/main/CLI/local_bindings/loader call, author control loop, native/compiler/Node/Gradle/process signal/provider/network/source/story/plan operation or delegation occurred. Shared USD500 declared; aggregate spend unavailable.
+
+## Exact correction and completeness
+
+The helper adds only one finite16-label constant and changes the optional P.Refused catch from the two close labels to membership in that constant. Independently removing that constant/comment and undoing that single expression reproduces the original a619c446… helper **byte-for-byte**. The other12named source definitions, retained loader/FD core, schema/enums/paths/caps/control/approval and output guards remain exact. No alternative locator, extra read, retry, public error field or broader exception permission is added.
+
+I independently derive the reachable optional IO call graph from CaptureIO.read_child through `_extend`, `_read_at`, `_check_chain`, `_identity` and `_close_chain`. Its actual fixed refusal labels are exactly the delivered16: leaf/path shape; opened directory/leaf identity and substitution; owner/mode/size and approved-fd binding; read stability; retained alias/directory identity; input and directory close. No active label is missing and no unrelated semantic label is promoted. Root `_dirs`/output/complete-operation guards remain outside this optional qualification boundary and still refuse independently.
+
+The ten original counterexamples—five read/identity/substitution labels at each owned_events/guided_log role—now all return **exit2**, optionalCorrelation=UNPROVEN/OPTIONAL_INSTRUMENTATION_FAILED, no protected manifest, and the valid snapshot report with its original source state/errorCode/bootstrapPhase preserved. All32label×role controls behave the same. Non-FileNotFound OSError/PermissionError and unexpected instrumentation remain nonzero incomplete; raw exception markers are never exported.
+
+Ordinary missing/deleted files still produce MISSING_OPTIONAL_SOURCE_ARTIFACT with exit0 and valid standalone facts. Source-shape/provenance/ambiguous/unsupported semantic witnesses remain OPTIONAL_PROVENANCE_OR_SHAPE_UNPROVEN, without discarding those facts or inventing a selected generation. This is qualified snapshot success, not completed optional evidence. Missing numeric entries stay absent, OTHER stays explicitly not-no-error, and exact first writer/chronology/cause remain UNPROVEN.
+
+## Independent controls
+
+`contracts.py/json` manually extracts the actual reviewed core/helper definitions with AST, excluding module input loading, main/local_bindings and loader execution. Only the prior **independent** review's fake packet/sign/IO definitions are reused as input builders; its loop/writers and the author's controls are not executed or credited. The core OS object permits only synthetic UID/fstat facts and forbids every other OS access. Synthetic packets use in-memory source-shaped bytes and modified public hashes, never actual source XML/private files or actual approvals.
+
+The73independent vectors comprise:
+
+- 48 completed exit2 cases:32active IO label×role controls,6non-FileNotFound/unexpected errors, and10preserved source-error-code variants.
+- 12 completed exit0 cases:2ordinary missing,8ordinary semantic,1complete optional-manifest synthetic positive and1false/NONE snapshot-only positive.
+- 13 whole-operation refusals: false approvals/live-or-unknown closure/wrong optional authority, missing required snapshot fields and unchanged enclosing root/output failures.
+
+Every original IO counterexample is included. Each optional role sequence stops exactly at the one failing read; only snapshot-facts.json is written for incomplete optional evidence. No fallback/duplicate read or partial protected manifest appears. The complete optional positive writes only the exact protected manifest and snapshot report. False/NONE makes only its snapshot read and no optional journal/log read. Pre-private approval/closure negatives make no control/private calls.
+
+Error-code preservation is exercised independently with OTHER, RUNTIME_INCOMPATIBLE, BUDGET_EXCEEDED, LOGIN_REQUIRED and SECRET_UNAVAILABLE. These are synthetic enum fixtures, not observations of current business evidence. Unchanged enclosing root or writer integrity failures may prevent any safe report write and still refuse the whole operation; the correction does not weaken those checks merely to retain a report. This qualification is necessary and implemented. No real filesystem race/permission behavior or helper runtime success is claimed.
+
+## Preservation and future packet boundary
+
+Reviewed new manifest SHA `0aeb9c6549d7ca4e0eff3466866e8a0e97e06256dab3bcc015a53b7ecd65db9d`; helper SHA `6a0156cc2de6a163420fab0d1db4ee2a1150665d18107263694c88bb2f46fec2`; receipt SHA `ac14fb6b9fd9572fc9d7b40b994f5f215eea21945e1d4d3868a9618441c08440`. All30dispatch pins and28new artifact entries/seals match. Original420cmanifest/a619helper and all24sealed SOURCE entries remain exact; all36SOURCE/approved PUBLIC bindings match. Retained core f015/dc9 and its source artifacts remain unchanged. Original actual release/output directories were never enumerated, statted or read; their already-consumed scope remains outside this review.
+
+The examples' root authorization and both approvals remain false/unreleased. The future optional scope explicitly requests true plus ONE_FIXED_OWNED_JOURNAL_GUIDED_INTERVAL_ONLY under this helper/package hash. The construction instructions have a feasible noncircular order: source-only control→terminal certification→PUBLIC certification→scope→independent same-scope approvals→authorization. They preserve collector-versus-outer receipt distinction, actual native command, fixed source/protocol/PUBLIC pins,≤1h freshness and six protected revision-local release files. A generated protected manifest is deliberately not an input hash required before its own generation. None of those source templates constitutes actual approval.
+
+False/NONE remains supported **in code**, without permission to repeat the valid consumed first capture. Root supplied the closed first facts FAILED/OTHER/CONTEXT_PENDING; this reviewer did not read that snapshot or its protected output. Those facts carry no independent UUID join or cause. A future optional operation is new bounded authority to read one exact journal and one uniquely source-selected log's hash/facts, not a retry of the first capture, startup parsing or downstream correlation execution. Actual complete packet/scope approval, fresh protected output and any later correlation projector review/release remain separate.
+
+Root may adopt this static correction. It does not authorize any optional private access, native retry, application or gate/lifecycle change. Actual original03 failure/coverage absence/sticky gap and every source/order/C8/GS-T/F1-GSMb/ownership/mutant/scratch/timing/finalG/story/external obligation remain unchanged.

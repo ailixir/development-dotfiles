@@ -1,0 +1,10 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java
+@@ -1311,7 +1311,6 @@
+         key,
+         proposal,
+         session -> {
+-          requireTranslation(id);
+           require(
+               Set.of("PROPOSING", "REPLAYING_PREFIX").contains(state(session)),
+               "STALE_GENERATION",

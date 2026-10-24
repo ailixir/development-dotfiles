@@ -1,0 +1,58 @@
+{
+  "kind": "RESERVED_BACKEND_SLOT4_LIVE_ORIGINAL_DRIVER_WILL_RUN5_ONLY_AFTER_STRICT_SUCCESS",
+  "atUtc": "2026-10-21T05:12:02.884193+00:00",
+  "goalTurnClassification": "PROGRESS_ACTUAL_D2_ALL_ORACLES_PASS_AND_FINAL_PAIR_LAUNCHED",
+  "currentWaitClassification": "VERIFIED_WAIT_ORIGINAL_TOOL55064_LATEST_GATEWAY_POLL_STILL_LIVE",
+  "allStoriesComplete": false,
+  "stories": {
+    "009": "InProgress",
+    "010": "InProgress",
+    "011": "InProgress"
+  },
+  "pair": {
+    "toolSession": 55064,
+    "driverPid": 69472,
+    "collectorLockWrapperPid": 69560,
+    "ownedInhibitorPid": 69475,
+    "activeSlot": 4,
+    "slot4Label": "obs011-lean-ir-final01",
+    "slot5Label": "obs011-lean-ir-final02",
+    "slot4ChargedByOriginalDriver": true,
+    "slot4Outcome": "NOT_TERMINAL",
+    "slot5": "UNRUN_AUTOMATIC_ONLY_AFTER4_READER_AND_POSTGUARDS_PASS",
+    "rootAdmission": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-root-admission05.json",
+      "sha256": "e5b7db3c1d6a6c5cedb4739155af2a2278cada1ca08292e43bf3378360d54ea3"
+    },
+    "rootReleaseCheckpoint": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair05-root-release-checkpoint.json",
+      "sha256": "d2f16472e45d3fdf894b08b03aa689e37ee4071ac761a8d984876c5a2e002564"
+    },
+    "qaOwner": "benchmark_report_candidate_qa",
+    "qaState": "COMPLETED_PHASE_METADATA_ONLY_UNTIL_BOTH_TERMINAL_ROOT_PRODUCER_PIN",
+    "sourceActualProductWriters": [],
+    "noOtherRuntimeSourceBuildBetween4And5": true,
+    "pollSameOriginalHandleNoRestart": true
+  },
+  "rootStatusWriterRule": "NEVERWRITE resumed-implementation-record.json whilepairlive; originaldriverCAS exclusivelyownsledger. Onlyother3statuspointers andnewseparatemetadata/handoff maybewritten.",
+  "chargedSlotsObserved": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "maximumReplayCalls": 6,
+  "slot6": "UNRUN_RESERVED_WHOLE_CHECK_SEPARATE_ROOT_RELEASE_REQUIRED",
+  "cutoffUtc": "2026-10-22T04:35:27.361777Z",
+  "postPairDiagnostics": "Existingreadonlydynamicowner/TEMP/cohortbindings/projectionsAFTERbothcalls, unknownsnot0",
+  "d2LocalComponent": "ACTUAL08PASS_QAe00f_ROOT75e7_GENUINE_ALL7_ORACLES",
+  "actualProductTuple": "A1source1814_E19host238_BD83image_unchanged",
+  "remaining011": [
+    "consecutivepair4and5 terminalandindependentQA",
+    "postexecutiondiagnosticsgenuineownerbindings",
+    "whole6full2792+originalcoverageandmatchedtiming",
+    "integratedT5independentdecision/adminclose"
+  ],
+  "external009010": "PENDING_EXISTING_APPROVED_REFERENCE_PACKET_QUESTION_NO_FAKE_APPROVAL",
+  "checkpointIsRuntimeAuthority": false
+}

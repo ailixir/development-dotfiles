@@ -1,0 +1,73 @@
+{
+  "owners": [
+    {
+      "resource": "Bootstrap directory/leaf FD",
+      "acquisition": "entry.open_owned",
+      "registeredBefore": "fstat/next open",
+      "close": "entry.close_owned exactlyonce; unknown retained"
+    },
+    {
+      "resource": "Runtime directory/leaf/output FD",
+      "acquisition": "Files.open -> Ownership.acquire",
+      "registeredBefore": "fstat/fchmod/copy/read/write",
+      "close": "Ownership.close exactlyonce; no retry of unknown bare FD"
+    },
+    {
+      "resource": "Parent directory FD",
+      "acquisition": "Files.parent each open",
+      "registeredBefore": "validation or next ancestor open",
+      "close": "Previous parent closes only after next handle captured; final retained parent anchors operation"
+    },
+    {
+      "resource": "Utility child and pipes",
+      "acquisition": "no_signal_process constructor attempt, child reference, sequential pipe registration",
+      "registeredBefore": "PID validation/communicate/next pipe property",
+      "close": "Actual communicate wait marks handle completion; timeout child/pipes retained UNKNOWN; no signals"
+    },
+    {
+      "resource": "Native child",
+      "acquisition": "run_native construction attempt and actual returned handle",
+      "registeredBefore": "PID encounter ledger/detail calls",
+      "close": "Actual direct wait, including bounded attempted wait after ledger/detail failure; unconfirmed child retained"
+    },
+    {
+      "resource": "Append-only sample FD",
+      "acquisition": "Ledger.__init__ via Files.create",
+      "registeredBefore": "fstat/first append",
+      "close": "freeze exact bytes/hash/sequence then owned close"
+    },
+    {
+      "resource": "Partially created E/H/W/archive",
+      "acquisition": "Exclusive mkdir/create",
+      "registeredBefore": "Retained parent/leaf tokens and typed failure state",
+      "close": "No deletion/reset/backfill; later separately reviewed failed-unit disposition required"
+    }
+  ],
+  "preC4FailureOutput": "Typed stdout control metadata only; no E output attempt before fresh scopedC4 and absence checks.",
+  "currentClientCompletion": "Owed separate actual tool result. Every prior journal requires root separatelyCaptured actualToolCompleted/actualCollectorExit0 and exact journalSha256, plus fresh legacy absence-or-different-start; same numeric current PID is ambiguous/HOLD.",
+  "noGlobalQuietCleanupOrStrongIdentityClaim": true,
+  "fixedInstaller": "Before any write, actual retained helperFD must match prepare dev/inode, be a regular single-link file, and contain exact original bytes. Replacement writes/truncate/fchmod/fsync use that SAME FD; post-workspace guards remain fresh.",
+  "privateCurrentControlPolicy": {
+    "regular": true,
+    "uid": "currentUID",
+    "mode": 384,
+    "nlink": 1,
+    "beforeBody": true,
+    "namedFdRecheck": true,
+    "publicSourceReviewMode": 420
+  },
+  "nativeHandledFailureSink": {
+    "functions": [
+      "Context.native_snapshot",
+      "Context.emit_native_fallback",
+      "entry.execute_context"
+    ],
+    "maximumBytes": 65536,
+    "once": true,
+    "survivesLedgerAndESinkUnavailable": true,
+    "actualWaitRecordsOnly": true,
+    "rawPrivateOutput": false
+  },
+  "inventoryAcquisition": "Actual remaining aggregate/per-file cap and exact enumerated metadata passed into opened-FD read; drift denies before body.",
+  "relevanceHistory": "Append-only prior relevance/launch association retained across samples and verified prior operation journals; present ambiguity HOLD."
+}

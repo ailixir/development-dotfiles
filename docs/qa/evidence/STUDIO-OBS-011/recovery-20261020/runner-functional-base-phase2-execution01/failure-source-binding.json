@@ -1,0 +1,26 @@
+{
+  "file": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+  "sha256": "7b928dc51eef99343cdeefdb1cbf8055c70b7d46c2ed086073ec380f92c17fb1",
+  "equalsFreshPassingB3Source": true,
+  "b3SourceSha256": "7b928dc51eef99343cdeefdb1cbf8055c70b7d46c2ed086073ec380f92c17fb1",
+  "reportedProjectFrames": [
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "line": 47,
+      "column": 267
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts",
+      "line": 47,
+      "column": 244
+    }
+  ],
+  "sourceLocation": "line47 synchronous ps comm snapshot inside pids.map",
+  "firstLaterAssertionOnSameLine": "expect(pids.length).toBeGreaterThan(1)",
+  "sourceColumn267Character": "e",
+  "assertionsAtLine48AndLater": "UNEXECUTED_FOR_FAILING_ITERATION_UNCREDITED",
+  "priorIterations": "NO_CREDIT_INFERRED_FROM_FAILED_TEST",
+  "historicalOrCurrentCause": "UNPROVED",
+  "retry": false,
+  "productOrFixtureEdited": false
+}

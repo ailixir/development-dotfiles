@@ -1,0 +1,15 @@
+
+ RUN  v3.2.7 /private/tmp/obs009-gateway-independent-20261019-0620-once/studio-runner
+
+ ❯ test/deployment/gateway-independent-mutants.test.ts (2 tests | 2 failed) 77ms
+   × independent gateway private-chart counterfactuals > M-RECURSION: nested refusal discriminates only recursive descent 12ms
+     → M-RECURSION: preserve all original assertion/restoration failures
+   × independent gateway private-chart counterfactuals > M-NORMALIZED-COMPARISON: relaxed refusal discriminates only protected-name case normalization 9ms
+     → M-NORMALIZED-COMPARISON: preserve all original assertion/restoration failures
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  02:18:48
+   Duration  281ms (transform 32ms, setup 0ms, collect 77ms, tests 77ms, environment 0ms, prepare 43ms)
+
+JSON report written to /private/tmp/obs009-gateway-independent-20261019-0620-once/vitest.json

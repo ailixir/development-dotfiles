@@ -1,0 +1,30 @@
+{
+  "kind": "ROOT_SOURCE_ONLY_MANDATORY_PACKET_REJECTION_CANDIDATE",
+  "atUtc": "2026-10-19T15:23:32.278735+00:00",
+  "packetManifestSha256": "1ab827247a9329cbadcea077595e57802cf8230ad77f5eaf11e8e223c17a7573",
+  "file": "failed_resource.py",
+  "runtimeSha256": "6a54a404f98e69c3d5e8d3c3116c71144fe73bcea1fbd6ca537ccdcc26f3a96f",
+  "code": "C8FRD_ROOT01_CONTROL_PACKAGE_MEMBERSHIP_ALWAYS_REJECTS",
+  "severity": "HIGH",
+  "actualControlExpected": [
+    "control/final_verifier.py",
+    "control/guard-exit.bash",
+    "control/policy.json",
+    "control/postclose.py",
+    "control/unlock_gate.py"
+  ],
+  "sourceExpressionActual": [
+    "control/final_verifier.py",
+    "control/policy.json",
+    "control/postclose.py",
+    "control/unlock_gate.py"
+  ],
+  "difference": [
+    "control/guard-exit.bash"
+  ],
+  "effect": "load_authority filters actual control package to .py/.json but compares to all five pinned controls including guard-exit.bash. Exact valid installed old package always raises ORIGINAL_PACKAGE_SET_CHANGED before new guard denial/client/admission. No actual invocation was attempted.",
+  "method": "Direct source expression using explicitly allowed current code-directory names and original release metadata; no runtime/main/helper/observer call.",
+  "requestedDisposition": "Independent reviews should validate and retain. Sourcefix must be in newly sealed successor packet; do not mutate resume1 or loosen exact old package membership.",
+  "actualRuntimeInstallOrAction": false,
+  "C8Credit": false
+}

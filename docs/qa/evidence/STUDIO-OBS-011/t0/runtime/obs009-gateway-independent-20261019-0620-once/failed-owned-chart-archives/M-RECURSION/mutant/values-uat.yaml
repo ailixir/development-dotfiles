@@ -1,0 +1,224 @@
+backend:
+  replicaCount: 2
+  springProfile: api,staging
+
+  ingress:
+    host: checks-api.uat.citi.com
+    tls:
+      - secretName: checks-api-uat-tls
+        hosts:
+          - checks-api.uat.citi.com
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 768Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+  autoscaling:
+    enabled: false
+
+  env:
+    # STUDIO-OBS-009 AC-4 / A6: heap and core dumps off (the two negative flags, no HeapDumpPath);
+    # asserted on every value set by dump-settings.test.ts.
+    JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError -XX:-HeapDumpOnOutOfMemoryError -XX:-CreateCoredumpOnCrash"
+    CHECKS_CORS_ALLOWED_ORIGINS: "https://checks.uat.citi.com"
+    CHECKS_CORE_SERVICE_URL: "http://checks-core.uat.svc.cluster.local:8081"
+
+
+  # ── ED-02: all three identity bypasses CLOSED in the STAGING profile (AC-19a, AC-20) ─────────
+  #
+  # Restated here rather than inherited from `values.yaml`, so that the profile a pilot is run
+  # against SAYS what it does instead of relying on a default somebody may change.
+  #
+  # ⚠ **THE CODE PATHS STILL EXIST. These flags close them; nothing removes them.** All three live
+  # in `BffSessionAuthenticationFilter` and all three produce an identity the platform never
+  # vouched for. The `X-User-Id` header path is checked FIRST, so closing `coreService` alone
+  # closes nothing for a client that can reach the pod and send a header — architecture §9.1
+  # requires a trusted gateway to strip those headers and this repository contains no such
+  # gateway.
+  #
+  # ⚠ **THE VAULT IS STILL A STUB**: `SecretsService` returns `REDACTED`, and secret-use
+  # authorization runs against a fake provider.
+  #
+  # ⚠ **NO CREDENTIALED PILOT MAY RUN UNTIL ED-02 HAS LINKED COMPLETED TICKETS.** That
+  # prohibition is unchanged and still in force: `ED-02` reads `status: open` and its
+  # `external_ticket` reads "to be linked — no ticket ID exists yet (2026-09-16)".
+  #
+  # ED-02's owner is the **PUT Core platform (Core BFF)** — the trusted identity gateway AND vault
+  # integration with secret-use authorization. Assigned by the project owner on 2026-09-16, recorded
+  # in `docs/epics/EPIC-10-EXECUTION.yaml` under `external_dependencies[ED-02].owner`, whose
+  # `owner_decision` block states plainly that this rests on the user's decision and is NOT
+  # traceable to the BRD. The escalation path is unchanged: @pm → Checks-squad engineering
+  # management (BRD §8 launch-exit row), with Security & Compliance (BRD §11) accepting.
+  #
+  # ⚠ **Two sentences stood here until 2026-09-17 and both were false. They are retracted rather
+  # than deleted**, so a reader who saw them knows they were withdrawn instead of wondering which
+  # version is current.
+  #   (1) This block used to say ED-02's owner reads "TBD — not assigned in sources", and that @po
+  #       could not name one. **It no longer does.** That phrase appears above only as the wording
+  #       being retracted; it stopped being true on 2026-09-16.
+  #   (2) It used to say "Story 10.19 may not be drafted while that owner reads TBD". **That
+  #       drafting gate was lifted.** Story 10.19 was drafted, validated GO 8/10, implemented,
+  #       QA-gated CONCERNS (merge-safe) and merged at `833b45da4`. What 10.19 does not have is its
+  #       seven staging criteria: AC-1…AC-7 are recorded *skipped, never passed*. That is a
+  #       different fact from a drafting gate and does not reinstate one.
+  #
+  # Corrected by @po on 2026-09-17 (closure plan, Phase 0 — record truing). **Only these two claims
+  # were touched.** The bypass paths still exist. The real Studio Vault adapter now exists but is
+  # default-off and unconnected; the legacy `SecretsService` remains a `REDACTED` stub. The pilot
+  # prohibition remains until ED-02 has a linked completed delivery.
+  #
+  # See `docs/runbooks/studio-runner.md` §9 for what an operator may and may not do with these.
+  identityBypass:
+    coreService: false
+    identityHeaders: false
+    csiRead: false
+  envFromSecrets:
+    - secretName: checks-db-credentials-uat
+      keys:
+        - SPRING_DATASOURCE_URL
+        - SPRING_DATASOURCE_USERNAME
+        - SPRING_DATASOURCE_PASSWORD
+
+  configOverrides:
+    spring.datasource.hikari.maximum-pool-size: "15"
+    checks.sources.UI_TEST: "true"
+    checks.scheduling.min-interval-seconds: "60"
+
+worker:
+  replicaCount: 2
+  springProfile: worker,staging
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 1536Mi
+
+  env:
+    # STUDIO-OBS-009 AC-4 / A6: heap and core dumps off (the two negative flags, no HeapDumpPath);
+    # asserted on every value set by dump-settings.test.ts.
+    JAVA_OPTS: "-Xms512m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError -XX:-HeapDumpOnOutOfMemoryError -XX:-CreateCoredumpOnCrash"
+    CHECKS_CORE_SERVICE_URL: "http://checks-core.uat.svc.cluster.local:8081"
+
+  envFromSecrets:
+    - secretName: checks-db-credentials-uat
+      keys:
+        - SPRING_DATASOURCE_URL
+        - SPRING_DATASOURCE_USERNAME
+        - SPRING_DATASOURCE_PASSWORD
+
+  configOverrides:
+    spring.datasource.hikari.maximum-pool-size: "20"
+    checks.executor.max-concurrency: "100"
+    checks.executor.source-limits.HTTP: "75"
+    checks.executor.source-limits.TCP: "75"
+    checks.executor.source-limits.SPLUNK: "25"
+    checks.executor.source-limits.GRAFANA: "25"
+    checks.executor.source-limits.ITRS: "25"
+    checks.executor.source-limits.APPDYNAMICS: "25"
+    checks.executor.source-limits.UI_TEST: "10"
+    checks.scheduling.batch-size: "200"
+    checks.scheduling.poll-interval-ms: "15000"
+    checks.scheduling.shutdown-timeout-sec: "30"
+    checks.scheduling.min-interval-seconds: "60"
+
+frontend:
+  replicaCount: 2
+
+  ingress:
+    host: checks.uat.citi.com
+    tls:
+      - secretName: checks-frontend-uat-tls
+        hosts:
+          - checks.uat.citi.com
+
+  env:
+    REACT_APP_API_BASE_URL: "https://checks-api.uat.citi.com/api/v1"
+    VITE_API_URL: "https://checks-api.uat.citi.com"
+    VITE_API_BASE_URL: "/api/v1"
+    VITE_ENABLE_STUDIO: "true"
+    VITE_ENABLE_REPORTS: "true"
+    VITE_DEBUG_MODE: "false"
+
+# ---------------------------------------------------------------------------
+# Studio runner (story 10.18a). UAT is the staging pilot target of BRD §9 — "prove one runner pod
+# in staging before templating production".
+# ---------------------------------------------------------------------------
+studioRunner:
+  # UAT currently uses the chart's shared local RWX claim. Switch objectStore.provider to `s3`
+  # when Sonic is connected; API, worker and runner then move together from the same values key.
+  enabled: true
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+  devShm:
+    sizeLimit: 1Gi
+  scratch:
+    sizeLimit: 4Gi
+  # STUDIO-OBS-009: the TLS listener's inputs. Secret NAMES are per environment; the fingerprint is
+  # NOT here, deliberately: it is the SHA-256 of this environment's backend client certificate,
+  # which this repository does not know. It is required, has no default, and the render fails
+  # without it (`--set-string studioRunner.tls.controllerCertificateFingerprint256=<AA:BB:...>`).
+  tls:
+    secretName: checks-studio-runner-tls-uat
+  backendTls:
+    secretName: checks-studio-backend-runner-tls-uat
+  # Guided mode is OFF here, as in every shipped values file. Enabling it is a per-environment
+  # decision that also needs `replicaCount: 1` and the token issuer (register U21). When it is on,
+  # the pod runs one replay browser plus one guided browser: these resources and /dev/shm replace
+  # the single-browser ones above. STARTING VALUES, UNMEASURED (GA plan G-4).
+  guided:
+    enabled: false
+    callbackToken:
+      secretName: checks-studio-guided-callback-token-uat
+    backendTokens:
+      secretName: checks-studio-guided-controller-tokens-uat
+    resources:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+      limits:
+        cpu: "3"
+        memory: 4Gi
+    devShm:
+      sizeLimit: 2Gi
+  seccompProfile:
+    type: RuntimeDefault
+  callbackBaseUrl: ""
+  identity:
+    secretName: checks-studio-runner-identity-uat
+  objectStore:
+    credentialsSecret: checks-studio-runner-object-store-uat
+objectStore:
+  credentialsSecret: checks-api-object-store-uat
+
+# Observed replay is ON in UAT (STUDIO-OBS-009 residue, architect ruling OI-06 B5). `catalog` and
+# `policies` are NOT committed: the catalog entry is specific to one runner image, and the policies
+# are reviewed per-environment trust configuration. They come at deploy time, and the render fails
+# naming the key until both are supplied, as with the controller pin above:
+#   -f observed-catalog.<digest>.yaml   (generated by CI from the pushed runner image)
+#   -f observed-policies.uat.yaml       (the reviewed UAT policy file: `studioObserved.policies`)
+studioObserved:
+  validationEnabled: true
+  replayEnabled: true
+
+# Plain-English authoring is a product capability in staging, so it uses the real Vertex AI
+# provider. Endpoint, project and location are environment-owned ConfigMap values; workload
+# identity supplies ADC. Recorded fixtures are rejected for this profile by the chart.
+studioGateway:
+  environment: staging
+  provider: vertex
+  model: gemini-3.8-flash
+  vertexConfigMap:
+    name: checks-studio-vertex-uat

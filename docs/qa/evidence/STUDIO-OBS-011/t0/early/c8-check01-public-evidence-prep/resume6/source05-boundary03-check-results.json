@@ -1,0 +1,439 @@
+{
+  "kind": "SOURCE03_ACTUAL_RELAY_AND_CONTRACT_GUARDED_FUNCTION_CHECKS",
+  "passed": 104,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "RETAIN_EXACT_SEMANTIC_IDENTITIES_pure-check-results.json",
+      "pass": true
+    },
+    {
+      "name": "RETAIN_EXACT_SEMANTIC_IDENTITIES_runtime-adapter-check-results.json",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_RELAY_END_TO_END_PROVISIONAL_ACK_COMMIT_DRAIN",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_RELAY_ONLY_ROOT_EXCLUSIVE0600_OUTPUT",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_RELAY_COLLECTOR_REQUIRES_MATCHING_COMPLETE_RECEIPT",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ACK_BOUNDED_EXACT_FIELDS",
+      "pass": true
+    },
+    {
+      "name": "SOCKET_NODE_AND_FD_IDENTITIES_DISTINCT",
+      "pass": true
+    },
+    {
+      "name": "NO_SOCKET_BODY_READ_OR_UNLINK",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ZERO_REQUEST_NOT_REPRODUCED",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ZERO_REQUEST_NO_DECISION",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_DATA_REJECT_protocolVersion",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_DATA_REJECT_controlSha256",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_DATA_REJECT_enrollmentNonce",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_DATA_REJECT_extra",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_DATA_REJECT_DISAGREEMENT",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CONTROL_REJECT_schemaVersion",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CONTROL_REJECT_protocolVersion",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CONTROL_REJECT_loopback",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CONTROL_REJECT_relayPath",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CONTROL_REJECT_enrollmentNonce",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CONTROL_REJECT_frameByteCap",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CONTROL_REJECT_totalBudgetNs",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CONTROL_REJECT_extra",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COMMIT_REJECT_protocolVersion_True",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COMMIT_REJECT_controlSha256_0000000000000000000000000000000000000000000000000000000000000000",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COMMIT_REJECT_projectionSha256_0000000000000000000000000000000000000000000000000000000000000000",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COMMIT_REJECT_status_ACK_ONLY",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COMMIT_REJECT_callerElapsedNs_True",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COMMIT_REJECT_callerElapsedNs_15000000000",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COMMIT_REJECT_callerElapsedNs_-1",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COMMIT_REJECT_extra_PRIVATE",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COMMIT_ADDS_ROOT_DURATION_CONSERVATIVELY",
+      "pass": true
+    },
+    {
+      "name": "STRICT_PROTOCOL_JSON_b'{\"x\":1,\"x\":2}'",
+      "pass": true
+    },
+    {
+      "name": "STRICT_PROTOCOL_JSON_b'\\xff'",
+      "pass": true
+    },
+    {
+      "name": "STRICT_PROTOCOL_JSON_b'{}{}'",
+      "pass": true
+    },
+    {
+      "name": "STRICT_PROTOCOL_JSON_b'NaN'",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_FRAME_REJECT_CAP_0",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_FRAME_REJECT_CAP_16385",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_FRAME_REJECT_CAP_4294967295",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_FRAME_PARTIAL_EOF",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PEER_REJECT_uid",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PEER_REJECT_pid",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PEER_REJECT_size",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PEER_REJECT_groups",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PEER_REJECT_version",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PEER_REJECT_platform",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PROTOCOL_FAIL_CLOSED_missing-commit",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PROTOCOL_FAIL_CLOSED_extra-frame",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PROTOCOL_FAIL_CLOSED_bad-nonce",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PROTOCOL_FAIL_CLOSED_bad-commit-hash",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PROTOCOL_FAIL_CLOSED_unresolved-network",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PROTOCOL_FAIL_CLOSED_bad-custody",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CLOSE_FAILURE_connection",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CLOSE_FAILURE_listener",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CLOSE_FAILURE_selector",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CLOSE_FAILURE_/private/tmp/obs011-pub-observe01",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_CLOSE_FAILURE_/private/tmp",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_NO_RECORD_NORMAL_STOP_FINITE_NO_CAPTURE",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_UNRESOLVED_THREAD_RETAINED_HOLD",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_callerAckConfirmed",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_peerEofObserved",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_threadTerminated",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_descriptorsClosed",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_qualified",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_failure",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_commitCount",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_enrollmentCount",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_callerElapsedNs",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_conservativeElapsedNs",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_projectionSha256",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_DENY_codePins",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_COLLECTOR_NO_NATIVE_DRAIN",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_PROVISIONAL_FILE_ALONE_UNAVAILABLE",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_NETWORK_DENY_workerTermination",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_NETWORK_DENY_acquiredSockets",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_NETWORK_DENY_successfulSocketCloses",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_NETWORK_DENY_connectCalls",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_NETWORK_DENY_requestStarts",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_NETWORK_DENY_requestCompleted",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_NETWORK_DENY_deadlineExceeded",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_NETWORK_DENY_callerInterrupted",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_NETWORK_DENY_networkCompletionElapsedNs",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ADAPTER_RELAY_LAUNCH_AND_STOP_COMPOSITION",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ADAPTER_PEER_RETURNS_EXACT_CURRENT_KERNEL",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ADAPTER_NO_ANY_JAVA_PEER",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ADAPTER_PEER_PID_REUSE_DENIED",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ADAPTER_LAUNCH_PIN_CHECKED_BEFORE_RELAY",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ADAPTER_BAD_PIN_NO_SHORT_DIRECTORY",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ADAPTER_SELECTED_SETUP_CAP_BEFORE_START",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ADAPTER_CLOSED_SOCKET_METADATA_REPLACEMENT",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_ADAPTER_POSTCLOSE_ACTIVE_UNIX_DESCRIPTOR",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_LOCK_ASSOCIATED_PID_FD_INODE_NAME",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_LOCK_ASSOCIATION_REJECT_wrong-pid",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_LOCK_ASSOCIATION_REJECT_fd-access-suffix",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_LOCK_ASSOCIATION_REJECT_cross-file",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_LOCK_ASSOCIATION_REJECT_wrong-name",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_LOCK_ASSOCIATION_REJECT_duplicate-inode",
+      "pass": true
+    },
+    {
+      "name": "ACTUAL_LOCK_ASSOCIATION_REJECT_missing-fd",
+      "pass": true
+    },
+    {
+      "name": "JAVA_RAW_SOCKET_SINGLE_CONNECT_REQUEST_NO_HTTPCLIENT",
+      "pass": true
+    },
+    {
+      "name": "JAVA_CAPS_PRECEDE_ARRAYCOPY",
+      "pass": true
+    },
+    {
+      "name": "JAVA_ACTUAL_THREAD_JOIN_NO_ASSERTION_SOCKET_CLOSE",
+      "pass": true
+    },
+    {
+      "name": "JAVA_NO_FILESYSTEM_OUTPUT_AND_COMMIT_AFTER_ACK",
+      "pass": true
+    },
+    {
+      "name": "JAVA_SAME_DEADLINE_BOUNDED_UNIX_IO",
+      "pass": true
+    },
+    {
+      "name": "ZERO_REAL_BOUNDARY_CALLS",
+      "pass": true
+    }
+  ],
+  "sourceSha256Pins": {
+    "public_relay.py": "0c3287e37bb06c037b27b84f349e16de1d42e36c44bee773e1e13fca0ac88c79",
+    "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+    "public_observation_unit.py": "8dd3bd21ddcf1bb446cc52c3510d58a1c21d734263bec389026c9875391d03d6",
+    "unit_policy.py": "757122dd9dbf2d1cadd85547db2c1f0058088f2f9a9f496c7360f329392e1f53",
+    "test_fixtures.py": "5e354e75e8ed6d95640831fe22e40e8765ab4af68d1847b2780918f69ae29388",
+    "launch-control.template.json": "48127bedaa0831b4c9d9945c18baeb1fdd081c1213649e9f23e37c70bffdc6f9",
+    "observer-fragment.java.txt": "0153a4d415ebd9e9c98d4230adacc4e807a9ed1dc583d8bf859a2dfaf20ebc66",
+    "pure-check-results.json": "ef481b92c8add8fbde761b8580838016a0df44c0c5710f541dbb18b2c0ec5567",
+    "runtime-adapter-check-results.json": "50d1f0f982d4510fa2cfb8f21b2e9dfe0036c56c915b89134276166c6ce9e9e8"
+  },
+  "realBoundaryCalls": [],
+  "JavaOrNativeExecuted": false,
+  "actualSourceRuntimePrivateKernelOrNamespaceActions": 0,
+  "JavaBoundaryCompatibilityAndNativeQualification": "UNEXECUTED_OWED",
+  "executionReady": false
+}

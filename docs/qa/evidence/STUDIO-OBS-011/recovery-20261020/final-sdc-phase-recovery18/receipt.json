@@ -1,0 +1,83 @@
+{
+  "scope": "HONEST_RETROSPECTIVE_LEGACY_SDC_PHASE_BOOKKEEPING_RECOVERY",
+  "atUtc": "2026-10-21T10:33:35.277848+00:00",
+  "commands": [
+    {
+      "label": "historical14-develop-readonly",
+      "argv": [
+        "node",
+        "tools/aiox-local.cjs",
+        "sdc",
+        "verify",
+        "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-developer-record-handoff14/story-after.md",
+        "develop",
+        "--json"
+      ],
+      "startedUtc": "2026-10-21T10:33:35.128736+00:00",
+      "endedUtc": "2026-10-21T10:33:35.183906+00:00",
+      "originalChildPid": 11637,
+      "originalPopenWaitReturned": true,
+      "rawExit": 0,
+      "stdoutSha256": "2de5856394481349ffdd34b815166f45fd917f5cc8b4b605836051e515a767b3",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "develop-recovery-mark",
+      "argv": [
+        "node",
+        "tools/aiox-local.cjs",
+        "sdc",
+        "mark",
+        "STUDIO-OBS-011",
+        "develop",
+        "--status",
+        "passed",
+        "--notes",
+        "Retrospective administrative recovery: actual developer14 InReview snapshot SHA0e4ad7f2220c9cecd0d24adad1515c61085e30dda4fad5015bd154e6989c41ff, handoff manifest6b110a94/receipt076d343a verified now with original develop verifier. Phase was not marked then; this event is recorded at current recovery time, no backdating, canonical current Done unchanged. No new implementation or native call.",
+        "--json"
+      ],
+      "startedUtc": "2026-10-21T10:33:35.183997+00:00",
+      "endedUtc": "2026-10-21T10:33:35.228439+00:00",
+      "originalChildPid": 11638,
+      "originalPopenWaitReturned": true,
+      "rawExit": 0,
+      "stdoutSha256": "5e7c4ed1df9839d6101979dc4d45e1857010c967e77bbc35dc81396288cc09a0",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "current-review-verify-and-mark",
+      "argv": [
+        "node",
+        "tools/aiox-local.cjs",
+        "sdc",
+        "verify",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+        "review",
+        "--mark",
+        "--json"
+      ],
+      "startedUtc": "2026-10-21T10:33:35.228517+00:00",
+      "endedUtc": "2026-10-21T10:33:35.276400+00:00",
+      "originalChildPid": 11641,
+      "originalPopenWaitReturned": true,
+      "rawExit": 0,
+      "stdoutSha256": "96e38df4024a283547d07f7d05d06065d2f9b19556be4fc44c3e56a6cbe3f9eb",
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "actualHistoricalDeveloperSnapshotSha256": "0e4ad7f2220c9cecd0d24adad1515c61085e30dda4fad5015bd154e6989c41ff",
+  "historicalNotCurrentDoneDevelopVerification": true,
+  "noStatusRollbackOrStateResetOrBackdating": true,
+  "canonicalStoryUnchangedSha256": "eaae8251c6084e3d4697f3bf0c52c92ddd12066b8194e76001183312f3b21dec",
+  "currentRevision": "story-content-sha256-v1:4a546acce5fcb68a9904f72e0cd979a669a481d705782656204b7d20b2ecefee",
+  "oldCreatedAtModeValidateAndQgCountersPreserved": true,
+  "rootRehashedQa17Artifacts": 14,
+  "currentPhase": "close",
+  "developAndReviewNowPassedFromActualEvidence": true,
+  "closeNotYetMarked": true,
+  "backendAttemptLedgerUntouched": true,
+  "noNativeTestSourceProviderOrQaLifecycleChange": true
+}

@@ -1,0 +1,34 @@
+{
+  "kind": "UNEXECUTED_BOUNDED_SEED_SUCCESSOR_PREPARATION",
+  "atUtc": "2026-10-20T17:59:35.003407+00:00",
+  "helperPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-current-plan/prepare-current-sandbox.py",
+  "helperSha256": "4b0d186af5b427fcc250cedfa3b02ec91a7857921c5bafdb2b2245313d1573ac",
+  "historicalHelperPreserved": true,
+  "parsedNotExecuted": true,
+  "catalogMeasured": false,
+  "sandboxCreated": false,
+  "actualSourceOrDistChanged": false,
+  "admission": "One fresh complete selected COPY-profile catalog after all predecessors land; no historical493/hash union. All7literalbefore/candidate and18protected checks retained, accepted0094 andFOLD2 exactgreen required. COPY/MKDIR, top-level approved omissions and dependency dereference unchanged. Both copies fullcatalog verified before7file overlay, aftertree only7hashchanges accepted.",
+  "futureArgv": {
+    "capture": [
+      "python3",
+      "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-current-plan/prepare-current-sandbox.py",
+      "<ACTUAL_ROOT>",
+      "capture",
+      "<FRESH_CURRENT_CATALOG>"
+    ],
+    "seed": [
+      "python3",
+      "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-current-plan/prepare-current-sandbox.py",
+      "<ACTUAL_ROOT>",
+      "seed",
+      "<FRESH_CURRENT_CATALOG>",
+      "<MEASURED_CATALOG_SHA256>",
+      "/private/tmp/obs011-rt-final-current-20261020-root01"
+    ]
+  },
+  "requiredEnv": {
+    "OBS011_RT_FINAL_COMPOSITION": "ALL_PREDECESSORS_APPLIED_LANE_IDLE"
+  },
+  "rootAndIndependentFinalQaStillOwed": true
+}

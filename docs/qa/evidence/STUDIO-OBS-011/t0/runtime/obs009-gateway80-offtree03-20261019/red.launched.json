@@ -1,0 +1,30 @@
+{
+  "pid": 72935,
+  "argv": [
+    "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+    "./node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.gateway80.config.mjs",
+    "--configLoader",
+    "native",
+    "test/deployment/integrations.test.ts",
+    "--testNamePattern=(backend|worker) rejects (flat|nested|relaxed)",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=../red-vitest.json"
+  ],
+  "cwd": "/private/tmp/obs009-gateway80-offtree03-20261019/repo/studio-runner",
+  "safeEnvironment": {
+    "HOME": "/Users/brunobuger",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8",
+    "PATH": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "TMPDIR": "/private/tmp/obs009-gateway80-offtree03-20261019/tmp",
+    "XDG_CACHE_HOME": "/private/tmp/obs009-gateway80-offtree03-20261019/cache",
+    "VITE_CACHE_DIR": "/private/tmp/obs009-gateway80-offtree03-20261019/repo/studio-runner/.vite-gateway80"
+  },
+  "startedAtUtc": "2026-10-19T18:17:33.126140+00:00",
+  "childUmask": "022",
+  "maximumSeconds": 300
+}

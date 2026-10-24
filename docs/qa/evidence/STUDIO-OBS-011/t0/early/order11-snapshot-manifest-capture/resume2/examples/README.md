@@ -1,0 +1,1 @@
+False/unreleased proposed templates only. None contains actual private data. These are not actual fresh release certifications and do not revise the already closed PUBLIC assessment. Follow PACKET-CONSTRUCTION.md after exact independent review. No current release/ exists.

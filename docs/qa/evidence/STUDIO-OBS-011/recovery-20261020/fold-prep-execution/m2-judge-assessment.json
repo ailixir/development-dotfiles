@@ -1,0 +1,74 @@
+{
+  "atUtc": "2026-10-20T14:47:47.170544+00:00",
+  "verdict": "INTENDED_ASSERTION_KILL_EXACT_RESTORE_GREEN",
+  "id": "m2-judge",
+  "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+  "patchSha256": "ee8d58938f8bb7484c85dbea6a9950d7ba13a59c62b93b4b1cb0874a13699d54",
+  "selector": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+  "oneExistingLockHold": true,
+  "exactPatchReverseRestore": true,
+  "runs": [
+    {
+      "label": "obs011-recovery-20261020-foldp-m2-judge-red01",
+      "phase": "red",
+      "resultSha256": "94f2829cfde7e78bcdb841230e23198e754edeeedb3d4860125cecf5182599ad",
+      "counts": {
+        "total": 3,
+        "passed": 1,
+        "failed": 2,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 22.54,
+      "sourceDigestBefore": "1a0f50bdb1a20042f2d8d3b83102e2ba1cf15bc3b6e32b63eee96aed98885dca",
+      "sourceDigestAfter": "1a0f50bdb1a20042f2d8d3b83102e2ba1cf15bc3b6e32b63eee96aed98885dca",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "targetSha256": "7c6ff1a0bb97a2496d47d0abad3c2855c786bd6b1a7921d126e0e816cf47b34b"
+    },
+    {
+      "label": "obs011-recovery-20261020-foldp-m2-judge-green01",
+      "phase": "green",
+      "resultSha256": "aec09ddfb9ece429c9c0fdab0fcb6452930fca06f5c3172a9e2ed06991d6e91b",
+      "counts": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "elapsedSeconds": 22.79,
+      "sourceDigestBefore": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+      "sourceDigestAfter": "b1de06061431bc676d15223b03abbdeb14a64984944565461a8aed6e9ef38116",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "targetSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35"
+    }
+  ],
+  "publicAssertionFailures": [
+    {
+      "name": "publicationMintAndJudgeReadDatabaseClockWithJvmAheadAndBehind()",
+      "type": "java.lang.AssertionError",
+      "message": "java.lang.AssertionError: [mint and judge, JVM offset 788] \nExpected size: 2 but was: 1 in:\n[2026-10-20T14:43:22.916513Z]",
+      "sites": [
+        "at com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.publicationMintAndJudgeReadDatabaseClockWithJvmAheadAndBehind(PublicationGrantClockIT.java:131)"
+      ]
+    },
+    {
+      "name": "databaseExpiredPublicationGrantRefusesDespiteJvmBehind()",
+      "type": "java.lang.AssertionError",
+      "message": "java.lang.AssertionError: [expired grant still mints and judges on DB] \nExpected size: 2 but was: 1 in:\n[2026-10-20T14:43:22.986896Z]",
+      "sites": [
+        "at com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.databaseExpiredPublicationGrantRefusesDespiteJvmBehind(PublicationGrantClockIT.java:148)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "at": "2026-10-19T00:45:42.823865+00:00",
+  "goal": "Finish all pending STUDIO-OBSERVED stories; no scope reduction",
+  "latestHandoff": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/RESUME-HANDOFF-20261018-CODEX.md",
+  "sourceStableSinceT0": true,
+  "distStableSinceT0": true,
+  "sourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+  "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "baselineLabel": "obs011-t0-baseline-check01",
+  "baselineWatchSession": null,
+  "baselineState": "Inherited B1 live at last probe; default test2711/2687PASS/15FAIL/9SKIP, incremental running; no terminal full result",
+  "tree": "FROZEN",
+  "dispatchPlan": "lanes.v4.json/w-brief.v4.md; immutable v3 preserved; root adoption conditional on terminal B1, B7 and cause ruling",
+  "workers": "All specialist turns finished or checkpointed; no active worker should be assumed in new session",
+  "stories": {
+    "009": "local validation MET; external gates open",
+    "010": "T2 complete; pilot/release/handoff owed",
+    "011": "T0 baseline and read-only preparation"
+  },
+  "budgetCeilingUsd": 500,
+  "actualSpend": "unavailable",
+  "decisionsPending": [
+    "ED-01 owner",
+    "U17 remaining budget",
+    "U18 price and thinking-token billing",
+    "U7 budget admission",
+    "U24 policy-content owner"
+  ],
+  "sdcDrift": [
+    "008 and 015 story Done but local CLI still develop; historical import/closure reconciliation owed, no lifecycle reset"
+  ],
+  "waveAdvance": "STUDIO-OBS-SINGLE-PATH advanced to batch 6 (009); early 010 T2/011 exception preserved",
+  "updatedAt": "2026-10-19T01:12:23.533674+00:00",
+  "b7QueuedSession": null,
+  "b7Queue": "Verified waiting for B1-DONE, then runs independent five-command frontend baseline. Do not start a duplicate.",
+  "obs010Dispatch": "Original exit5 status-format rejection preserved; header normalized outside frozen input sets, same preflight now PASS, documentation worker awaiting slot",
+  "artifacts": [
+    "early/T0-DEV/check.md",
+    "qa/baseline-assessment.md",
+    "qa/b1-failure-diagnosis.md",
+    "qa/d5-design-review.md",
+    "resume-architecture/review.md",
+    "root-resume-decisions.md",
+    "status-format/receipt.json"
+  ],
+  "goalStatus": "paused by user",
+  "copyablePrompt": "docs/qa/evidence/STUDIO-OBSERVED-NEXT/RESUME-PROMPT-20261018-CODEX.md",
+  "helpersAtPause": "Former sessions26469/39422 exit143 after owned childless helper cancellation; B7 NOT started",
+  "nativeFailureLatest": "Pre-injection browser PROCESS startup CONTEXT_LOST -> CANCELLED, 5676ms, zero actions/observations/provider reads; first abort origin unproven",
+  "drafts": {
+    "GS-T": "complete off-tree unvalidated draft; final TransportFault review and all runtime proofs owed",
+    "GS-M(a)": "complete off-tree unvalidated draft; disabled/preexisting-base direct-service edge unresolved",
+    "010": "partial drafts checkpointed; editorial, patches, traceability, hashes and independent review owed"
+  },
+  "pauseEvidence": [
+    "pause-runtime.json",
+    "pause-capture.json",
+    "qa/b1-fresh-forensics.md",
+    "early/obs010-draft/CHECKPOINT-PAUSED.md"
+  ]
+}

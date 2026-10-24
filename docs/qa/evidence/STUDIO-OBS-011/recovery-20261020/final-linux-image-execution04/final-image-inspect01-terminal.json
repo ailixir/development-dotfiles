@@ -1,0 +1,19 @@
+{
+  "id": "final-image-inspect01",
+  "argv": [
+    "docker",
+    "image",
+    "inspect",
+    "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "--format",
+    "{\"Id\":{{json .Id}},\"User\":{{json .Config.User}},\"Cmd\":{{json .Config.Cmd}},\"Os\":{{json .Os}},\"Architecture\":{{json .Architecture}}}"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T03:39:21.863601+00:00",
+  "pid": 8244,
+  "accepted": true,
+  "rawExit": 0,
+  "terminalAtUtc": "2026-10-21T03:39:21.943045+00:00",
+  "sourceTestInputDistFullCatalogCache191Protected21CliBrowserEnvStable": true,
+  "logSha256": "a5e1418430bb308be0d321269ba62aac0572e3b06289e6ea32bd64acb48794fc"
+}

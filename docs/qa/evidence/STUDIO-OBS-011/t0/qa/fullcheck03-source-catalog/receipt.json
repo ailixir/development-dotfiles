@@ -1,0 +1,51 @@
+{
+  "reviewer": "Quinn",
+  "decision": "ACCEPTED_FULL_UNCHANGED_S011_EXPECTED_IDENTITY_CATALOG",
+  "catalogPath": "docs/qa/evidence/STUDIO-OBS-011/t0/fullcheck03-case-catalog-candidate/resume2/expected-catalog.json",
+  "catalogSha256": "164e9d53985b7e1108d66952ae85d6293d83af907aa2d4c14ac94604e1d5b5b7",
+  "sourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+  "expectedCases": 2774,
+  "expectedTaskCounts": {
+    "test": 2710,
+    "guidedIncrementalTest": 62,
+    "crossReplicaTest": 2
+  },
+  "expectedStatusesNotObservedResults": {
+    "PASS": 2765,
+    "SKIP": 9
+  },
+  "sourceAnnotatedMethods": {
+    "Test": 2055,
+    "ParameterizedTest": 101
+  },
+  "parameterizedInvocations": 719,
+  "sourceDerivedIdentityMultisetExact": true,
+  "binaryClasses": 332,
+  "taskQualifiedClasses": 333,
+  "primaryTestITFiles": 318,
+  "nestedClassNames": 15,
+  "secondaryDeclarations": 2,
+  "mandatoryFindings": [],
+  "actualCaseExclusions": [],
+  "rawB1FailuresPreserved": 15,
+  "current03OutputReadOrOutcomeAssessed": false,
+  "nativeOrCoverageOrC8OrW1OrLifecycleCredit": false,
+  "sourceChangeRequiresExplicitReviewedDelta": true,
+  "transientScopeMistake": {
+    "taskOwnedTmpSourceSearchFileCreated": true,
+    "removed": true,
+    "privateRuntimePayload": false
+  },
+  "reviewSha256": "f8b43809a5243b69856a0c87fe721bd03a48826f0930de11cf4cbd6a0f001775",
+  "reviewFiles": {
+    "binding-audit.json": "91d17596b727a87bc7b0fc684f3dc488431c7a837f28c68a2334a1530ddb7eb2",
+    "binding_audit.py": "8d304c2fd3f689b0fdc104f8fd6dc1f1dc477eb1f7821e8219a2a9727e911779",
+    "derive_catalog.py": "bb12bc3366d001a54fe7bffc92a97dcf9c0dd4d631ed93105a9e71685c5eaa27",
+    "derived-method-coverage.json": "0c5b2d088d264df6db32459016e6ee8ff8e5e0643546c689f92a67c299418a10",
+    "historical-synthetic-origin.json": "c79f6eb0e07eb9f68e71604735e8ba45a9f3e48837731be5e19168f3d4af3614",
+    "methodsource-bodies.json": "3f61a928b9ad5eaa6b7e6f889b18d66b5e59438b5337c536de7ad7a8d3cae585",
+    "review.md": "f8b43809a5243b69856a0c87fe721bd03a48826f0930de11cf4cbd6a0f001775",
+    "source-methods.json": "c6104fdfe04651d4fe8684daa9ced4cfd4833ef88ec136b859ca248317dd04a5",
+    "source_scan.py": "fabfb59e490bd4ccee1d32690bd14f5ff1abdc96ac176881000eb0beb8524aca"
+  }
+}

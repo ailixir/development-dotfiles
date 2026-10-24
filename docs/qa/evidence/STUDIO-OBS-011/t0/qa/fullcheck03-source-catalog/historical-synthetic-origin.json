@@ -1,0 +1,53 @@
+{
+  "scope": "historical B1 only; no incoming error exclusion",
+  "xmlSha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+  "syntheticName": "executionError",
+  "failureType": "org.opentest4j.AssertionFailedError",
+  "sourceStackFramesOnly": [
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.collectJoinedSinks",
+      "source": "GuidedPublicationReplayIT.java:31923"
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.lambda$scanFinalOwnedSinks$81",
+      "source": "GuidedPublicationReplayIT.java:3454"
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.p3AttemptTeardown",
+      "source": "GuidedPublicationReplayIT.java:34252"
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.scanFinalOwnedSinks",
+      "source": "GuidedPublicationReplayIT.java:3450"
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.lambda$stopOwnedApplicationJobs$589",
+      "source": "GuidedPublicationReplayIT.java:34172"
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.p3AttemptTeardown",
+      "source": "GuidedPublicationReplayIT.java:34252"
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.stopOwnedApplicationJobs",
+      "source": "GuidedPublicationReplayIT.java:34172"
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.p3AttemptTeardown",
+      "source": "GuidedPublicationReplayIT.java:34252"
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.stop",
+      "source": "GuidedPublicationReplayIT.java:34381"
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.p3AttemptTeardown",
+      "source": "GuidedPublicationReplayIT.java:34252"
+    },
+    {
+      "method": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.detachAuditCapture",
+      "source": "GuidedPublicationReplayIT.java:577"
+    }
+  ],
+  "payloadCopied": false
+}

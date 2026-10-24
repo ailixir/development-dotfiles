@@ -1,0 +1,368 @@
+{
+  "atUtc": "2026-10-19T02:05:36.942224+00:00",
+  "isQaVerdict": false,
+  "collectorSha256": "914dcb06ea1d074f0bb3497a84e8b586752f63127717fc9fb12372bd6a8deb7a",
+  "exit": 1,
+  "gradleExit": 1,
+  "taskCollectionComplete": true,
+  "taskCollectionErrors": [],
+  "tasks": {
+    "test": {
+      "total": 2711,
+      "passed": 2687,
+      "failed": 15,
+      "errors": 0,
+      "skipped": 9,
+      "xmlFiles": 331,
+      "allXmlMtimesWithinRun": true,
+      "execs": [
+        {
+          "bytes": 26821347,
+          "sha256": "72fe840dc844f19351fd79421585fe425a90ac57283cbd5d17ad6d3bdc1a63e5",
+          "mtimeWithinRun": true
+        }
+      ]
+    },
+    "guidedIncrementalTest": {
+      "total": 62,
+      "passed": 62,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlFiles": 1,
+      "allXmlMtimesWithinRun": true,
+      "execs": [
+        {
+          "bytes": 995876,
+          "sha256": "63f3987bfb872b1dfc29dd38f7ec4fb1299f461c48e573d21d1bd8d2a638d928",
+          "mtimeWithinRun": true
+        }
+      ]
+    },
+    "crossReplicaTest": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlFiles": 1,
+      "allXmlMtimesWithinRun": true,
+      "execs": [
+        {
+          "bytes": 907675,
+          "sha256": "61fe4615d39bd4628e33e8fcb1e566fa3b56564cb9f9893d635964e189e828e3",
+          "mtimeWithinRun": true
+        }
+      ]
+    }
+  },
+  "manifestVerification": {
+    "xmlFiles": {
+      "files": 333,
+      "errors": []
+    },
+    "testHtmlFiles": {
+      "files": 395,
+      "errors": []
+    },
+    "jacocoExecFiles": {
+      "files": 3,
+      "errors": []
+    },
+    "guidedCohortFiles": {
+      "files": 546,
+      "errors": []
+    },
+    "guardTallies": {
+      "files": 2,
+      "errors": []
+    }
+  },
+  "cohorts": [
+    {
+      "task": "test",
+      "sha256": "00bfcd5a72e6e5cd54f48ff5a034cee9435bf4adea550539771d066a76c3058d",
+      "mtimeWithinRun": true,
+      "facts": {
+        "auditComplete": true,
+        "budgetEvidenceComplete": true,
+        "declaredOutputCeiling": 4000,
+        "finalScansAttempted": true,
+        "lane": "test",
+        "modelEvidenceComplete": true,
+        "privacyComplete": false,
+        "producersDrained": true,
+        "profile": "original4000",
+        "responseEvidenceComplete": true,
+        "retentionFailures": 0
+      },
+      "invocations": 46,
+      "passed": 32,
+      "afterEachComplete": 46,
+      "invocationCaseAndStatusMultisetEqualsXml": true,
+      "fullJOIN80OrPerInvocationProofCredited": false
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "sha256": "4192eef7461807485ae9d6cd2035bf3d324e38db460a99dcecfcb24d1534c070",
+      "mtimeWithinRun": true,
+      "facts": {
+        "auditComplete": true,
+        "budgetEvidenceComplete": true,
+        "declaredOutputCeiling": 2048,
+        "finalScansAttempted": true,
+        "lane": "guidedIncrementalTest",
+        "modelEvidenceComplete": true,
+        "privacyComplete": true,
+        "producersDrained": true,
+        "profile": "incremental2048",
+        "responseEvidenceComplete": true,
+        "retentionFailures": 0
+      },
+      "invocations": 62,
+      "passed": 62,
+      "afterEachComplete": 62,
+      "invocationCaseAndStatusMultisetEqualsXml": true,
+      "fullJOIN80OrPerInvocationProofCredited": false
+    }
+  ],
+  "classTimings": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "suiteTimeSeconds": 30.427,
+      "xml": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest.xml",
+      "sha256": "ffeb97dbd41a0960c754dcc7d002ca0a0d4a37396547858189010e0788d95a73",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "suiteTimeSeconds": 1000.36,
+      "xml": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+      "sha256": "66745d0dc9a0b2197357ea7ebde76b3a0cecae96b2fbcff2cafecfd7616d4876",
+      "tests": 47,
+      "failures": 15,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "suiteTimeSeconds": 93.624,
+      "xml": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.secret.SecretUseAuditIT.xml",
+      "sha256": "ba1362d3231fce8db5b3e405c3512782f716b3f86c4ad127111730e0008d0e6a",
+      "tests": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "suiteTimeSeconds": 54.613,
+      "xml": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest.xml",
+      "sha256": "2103a997b6f6e615b7188c32604f685aa68b808305da2283574c86d4402c5fe9",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "suiteTimeSeconds": 161.354,
+      "xml": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT.xml",
+      "sha256": "551330b327d77e0acd29d1d855bffc1f758bf9b35a42f40ff60034004c74d998",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT",
+      "suiteTimeSeconds": 16.771,
+      "xml": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT.xml",
+      "sha256": "824a6fbd9e98d69be027c99987b2f6956f1e310377ed62c944c7712f4b6fcdf7",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "suiteTimeSeconds": 369.502,
+      "xml": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest.xml",
+      "sha256": "5a9e9b57f49dba06bb1e99ef747aa062add5a64dca106e1918b3fe1429992f5c",
+      "tests": 57,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "suiteTimeSeconds": 38.313,
+      "xml": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.xml",
+      "sha256": "dd7a12a0fb76f4d521f367ce225a8d7fcf555a207db1ab1550d33acc525c8f56",
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT",
+      "suiteTimeSeconds": 18.751,
+      "xml": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01-task-outputs/test/xml/TEST-com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT.xml",
+      "sha256": "88e60f5a14f522d41f4b062669dc70f425afeba2a1d5ee7404eb877c43cd5298",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "suiteTimeSeconds": 2758.79,
+      "xml": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-t0-baseline-check01-task-outputs/guidedIncrementalTest/xml/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml",
+      "sha256": "c0fbabfdfcae87cc07f093fbdcd3afb7b2117d55ca3cab99509f002c48867a76",
+      "tests": 62,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "caseMultisetEqualsCollector": true,
+  "exactApprovedSkipMultiset": true,
+  "failures": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualSecretControlWindowLossBeforeReadyReachesTerminalError()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "incrementalSecretPrefixPreservesEveryVaultFaultOracle()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+      "name": "executionError",
+      "status": "FAIL"
+    }
+  ],
+  "nineNamedDefaultClassesPresentExactlyOnce": true,
+  "defaultNineClassSuiteTimeSumSeconds": 1783.7150000000001,
+  "timingLimitation": "Sum of XML suite times is not elapsed process wall time. Default ReplayIT is failed/fail-stop-truncated; attempted before sample is not a green equal-work baseline.",
+  "coverageTasks": {
+    "requireFreshGuidedPartitions": "ABSENT",
+    "jacocoTestReport": "ABSENT",
+    "jacocoTestCoverageVerification": "ABSENT",
+    "check": "ABSENT"
+  },
+  "logShaEqualsCollector": true,
+  "coverageReport": {
+    "copiedSha256": "c02dbcd6ee2b8f423f4a81b0837e717cbba3534cecd44aab020c54b80a563f24",
+    "originalSha256": "c02dbcd6ee2b8f423f4a81b0837e717cbba3534cecd44aab020c54b80a563f24",
+    "sameBytes": true,
+    "originalMtimeUtc": "2026-10-18T03:24:40.259070+00:00",
+    "sessionInfoCount": 27,
+    "latestDumpUtc": "2026-10-18T03:24:36.394000+00:00",
+    "allSessionsPredateB1": true,
+    "fresh": false,
+    "mergedCoverageCredited": false,
+    "bundleOrPackageRatiosCredited": false,
+    "RC10HeadroomCredited": false
+  },
+  "stability": {
+    "sourceStableReported": true,
+    "distStableReported": true,
+    "testInputStableReported": true,
+    "sourceDigestEqual": true,
+    "sourceFileManifestEqual": true,
+    "distEqual": true
+  },
+  "outcome": "B1_TERMINAL_RED_COLLECTION_VALID_CAUSE_UNRESOLVED_COVERAGE_NOT_EXECUTED",
+  "W1Authorized": false
+}

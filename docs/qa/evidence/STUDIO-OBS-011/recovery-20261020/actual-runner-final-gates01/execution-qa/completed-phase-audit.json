@@ -1,0 +1,324 @@
+{
+  "status": "ALL_FIVE_COMPLETED_AND_ROOT_PINNED_PRODUCER_VERIFIED",
+  "phases": [
+    {
+      "phase": "types",
+      "plannedArgvExact": true,
+      "rawOuter0Child0": true,
+      "resultExact": true,
+      "resultHashBound": true,
+      "sourceTestInputDistStable": true,
+      "capturedFullSourceArraysExact": true,
+      "capturedComplete238ProductExact": true,
+      "memberSetsUnchanged": true,
+      "allNonCacheInputRowsExactInitial": true,
+      "onlyAllowedWithinStageInputDelta": true,
+      "phaseCatalogInputChanges": [],
+      "originalConfigHashFromCapturedSource": true,
+      "canonicalNode24PnpmPolicy": true,
+      "noSourceExclusions": true,
+      "startedAfterPriorOriginalEnd": true
+    },
+    {
+      "phase": "lint",
+      "plannedArgvExact": true,
+      "rawOuter0Child0": true,
+      "resultExact": true,
+      "resultHashBound": true,
+      "sourceTestInputDistStable": true,
+      "capturedFullSourceArraysExact": true,
+      "capturedComplete238ProductExact": true,
+      "memberSetsUnchanged": true,
+      "allNonCacheInputRowsExactInitial": true,
+      "onlyAllowedWithinStageInputDelta": true,
+      "phaseCatalogInputChanges": [],
+      "originalConfigHashFromCapturedSource": true,
+      "canonicalNode24PnpmPolicy": true,
+      "noSourceExclusions": true,
+      "startedAfterPriorOriginalEnd": true
+    },
+    {
+      "phase": "unit",
+      "plannedArgvExact": true,
+      "rawOuter0Child0": true,
+      "resultExact": true,
+      "resultHashBound": true,
+      "sourceTestInputDistStable": true,
+      "capturedFullSourceArraysExact": true,
+      "capturedComplete238ProductExact": true,
+      "memberSetsUnchanged": true,
+      "allNonCacheInputRowsExactInitial": true,
+      "onlyAllowedWithinStageInputDelta": true,
+      "phaseCatalogInputChanges": [
+        "studio-runner/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json"
+      ],
+      "originalConfigHashFromCapturedSource": true,
+      "canonicalNode24PnpmPolicy": true,
+      "noSourceExclusions": true,
+      "startedAfterPriorOriginalEnd": true
+    },
+    {
+      "phase": "contracts",
+      "plannedArgvExact": true,
+      "rawOuter0Child0": true,
+      "resultExact": true,
+      "resultHashBound": true,
+      "sourceTestInputDistStable": true,
+      "capturedFullSourceArraysExact": true,
+      "capturedComplete238ProductExact": true,
+      "memberSetsUnchanged": true,
+      "allNonCacheInputRowsExactInitial": true,
+      "onlyAllowedWithinStageInputDelta": true,
+      "phaseCatalogInputChanges": [],
+      "originalConfigHashFromCapturedSource": true,
+      "canonicalNode24PnpmPolicy": true,
+      "noSourceExclusions": true,
+      "startedAfterPriorOriginalEnd": true
+    },
+    {
+      "phase": "host-pins",
+      "plannedArgvExact": true,
+      "rawOuter0Child0": true,
+      "resultExact": true,
+      "resultHashBound": true,
+      "sourceTestInputDistStable": true,
+      "capturedFullSourceArraysExact": true,
+      "capturedComplete238ProductExact": true,
+      "memberSetsUnchanged": true,
+      "allNonCacheInputRowsExactInitial": true,
+      "onlyAllowedWithinStageInputDelta": true,
+      "phaseCatalogInputChanges": [],
+      "originalConfigHashFromCapturedSource": true,
+      "canonicalNode24PnpmPolicy": true,
+      "noSourceExclusions": true,
+      "startedAfterPriorOriginalEnd": true
+    }
+  ],
+  "unit": {
+    "reportSha256": "c6c43a6f48c04741098e1911bb2a26c257b27e58438db571117d1a80cc3e4aa5",
+    "counts": {
+      "passed": 2692,
+      "skipped": 25
+    },
+    "total": 2717,
+    "physicalFiles": 118,
+    "nestedSuites": 419,
+    "distinctIdentityKeys": 2713,
+    "duplicateExcess": 4,
+    "duplicateMultiplicities": [
+      {
+        "file": "studio-runner/test/observedReplayEquivalence.test.ts",
+        "fullNameSha256": "0537d4cfac3f7cdf33792db14ac95af0ca06f81d2e3c06da827f95bed5180855",
+        "multiplicity": 3
+      },
+      {
+        "file": "studio-runner/test/observedReplayEquivalence.test.ts",
+        "fullNameSha256": "1f6c311e5aadd714b699e95fc1e49e6aa32a029897d5e099469cf9bb20de7386",
+        "multiplicity": 3
+      }
+    ],
+    "exactExpectedCounter": true,
+    "all118PerFileOrderExact": true,
+    "skipIdentityCounterExact": true,
+    "helper41Passed": true,
+    "success": true,
+    "allCaseFailureFieldsEmpty": true,
+    "allSuiteMessagesEmpty": true,
+    "optionalRuntimeErrorSummary": "NOT_EMITTED",
+    "controlledUnhandledClosedProjection": []
+  },
+  "coverage": {
+    "freshArchiveHash": "a9ad4d58a26248739269e6ad3f23f9f39a8cedce684288dd578e025e5d29f4b5",
+    "originalCollectorCopyHash": "a9ad4d58a26248739269e6ad3f23f9f39a8cedce684288dd578e025e5d29f4b5",
+    "hashesMatchProducer": true,
+    "changedFromOldCoverage": true,
+    "originalMtimeWithinUnitInvocation": true,
+    "exactConfigArchiveHash": true,
+    "enabledOriginalV8JsonSummary": true,
+    "globalPct": {
+      "lines": 97.75,
+      "statements": 97.75,
+      "functions": 97.68,
+      "branches": 90.14
+    },
+    "globalAll4AboveOriginalThresholds": true,
+    "sixScopes": {
+      "src/compat/**": {
+        "memberCount": 2,
+        "metrics": {
+          "lines": {
+            "total": 76,
+            "covered": 76,
+            "pct": 100.0
+          },
+          "statements": {
+            "total": 76,
+            "covered": 76,
+            "pct": 100.0
+          },
+          "functions": {
+            "total": 6,
+            "covered": 6,
+            "pct": 100.0
+          },
+          "branches": {
+            "total": 28,
+            "covered": 26,
+            "pct": 92.85714285714286
+          }
+        },
+        "matchesProducerMetrics": true,
+        "memberPathsMatchProducer": true
+      },
+      "scripts/**": {
+        "memberCount": 5,
+        "metrics": {
+          "lines": {
+            "total": 768,
+            "covered": 704,
+            "pct": 91.66666666666667
+          },
+          "statements": {
+            "total": 768,
+            "covered": 704,
+            "pct": 91.66666666666667
+          },
+          "functions": {
+            "total": 41,
+            "covered": 40,
+            "pct": 97.5609756097561
+          },
+          "branches": {
+            "total": 334,
+            "covered": 314,
+            "pct": 94.0119760479042
+          }
+        },
+        "matchesProducerMetrics": true,
+        "memberPathsMatchProducer": true
+      },
+      "src/server/**": {
+        "memberCount": 11,
+        "metrics": {
+          "lines": {
+            "total": 1754,
+            "covered": 1690,
+            "pct": 96.35119726339795
+          },
+          "statements": {
+            "total": 1754,
+            "covered": 1690,
+            "pct": 96.35119726339795
+          },
+          "functions": {
+            "total": 108,
+            "covered": 103,
+            "pct": 95.37037037037037
+          },
+          "branches": {
+            "total": 559,
+            "covered": 508,
+            "pct": 90.87656529516994
+          }
+        },
+        "matchesProducerMetrics": true,
+        "memberPathsMatchProducer": true
+      },
+      "src/reporting/**": {
+        "memberCount": 8,
+        "metrics": {
+          "lines": {
+            "total": 434,
+            "covered": 430,
+            "pct": 99.07834101382488
+          },
+          "statements": {
+            "total": 434,
+            "covered": 430,
+            "pct": 99.07834101382488
+          },
+          "functions": {
+            "total": 47,
+            "covered": 46,
+            "pct": 97.87234042553192
+          },
+          "branches": {
+            "total": 178,
+            "covered": 165,
+            "pct": 92.69662921348315
+          }
+        },
+        "matchesProducerMetrics": true,
+        "memberPathsMatchProducer": true
+      },
+      "src/main.ts": {
+        "memberCount": 1,
+        "metrics": {
+          "lines": {
+            "total": 178,
+            "covered": 174,
+            "pct": 97.75280898876404
+          },
+          "statements": {
+            "total": 178,
+            "covered": 174,
+            "pct": 97.75280898876404
+          },
+          "functions": {
+            "total": 11,
+            "covered": 11,
+            "pct": 100.0
+          },
+          "branches": {
+            "total": 74,
+            "covered": 68,
+            "pct": 91.89189189189189
+          }
+        },
+        "matchesProducerMetrics": true,
+        "memberPathsMatchProducer": true
+      },
+      "src/run/**": {
+        "memberCount": 32,
+        "metrics": {
+          "lines": {
+            "total": 2658,
+            "covered": 2652,
+            "pct": 99.77426636568849
+          },
+          "statements": {
+            "total": 2658,
+            "covered": 2652,
+            "pct": 99.77426636568849
+          },
+          "functions": {
+            "total": 291,
+            "covered": 289,
+            "pct": 99.3127147766323
+          },
+          "branches": {
+            "total": 2373,
+            "covered": 2062,
+            "pct": 86.89422671723557
+          }
+        },
+        "matchesProducerMetrics": true,
+        "memberPathsMatchProducer": true
+      }
+    },
+    "all24ScopedChecksPass": true
+  },
+  "cache": {
+    "beforeCount": 190,
+    "afterCount": 191,
+    "unique190And191": true,
+    "versionExact": true,
+    "onlyHelperNewKey": true,
+    "existing190RelativeOrderExact": true,
+    "allNonExecutedKeysValuesExact": true,
+    "onlyExecutedDurationFailedChanges": true,
+    "unitCacheBeforeAfterHashesBound": true
+  },
+  "qaAuditFormattingFailure": "An earlier inline metadata audit failed to parse before execution because of a missing space in a conditional expression; corrected metadata audit only, no product/runtime/source effects or test repeat.",
+  "producerManifestSha256": "345d1004c6ad7759a72b8b6c0afec8fb4ec5c0b1f6fc0b989db5973c27dc4020"
+}

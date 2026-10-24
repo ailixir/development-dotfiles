@@ -1,0 +1,403 @@
+{
+  "kind": "ONE_BOUNDED_METADATA_AUTHOR_FAKE_COMPOSITION",
+  "passed": 27,
+  "checks": [
+    {
+      "id": "positive_EMIT_AFTER_SELECTED_CLEANUP",
+      "passed": true
+    },
+    {
+      "id": "positive_SELF_KNOWN_BUT_COMPLETION_PENDING",
+      "passed": true
+    },
+    {
+      "id": "POSITIVE_METADATA_ONLY_EXIT_ZERO",
+      "passed": true
+    },
+    {
+      "id": "EXACT_FOUR_EXCLUSIVE_OUTPUTS",
+      "passed": true
+    },
+    {
+      "id": "OWNER_Aria_EXACT_RAW_COPY_PRIVATE",
+      "passed": true
+    },
+    {
+      "id": "OWNER_Quinn_EXACT_RAW_COPY_PRIVATE",
+      "passed": true
+    },
+    {
+      "id": "OWNER_root_EXACT_RAW_COPY_PRIVATE",
+      "passed": true
+    },
+    {
+      "id": "SCOPE_SHA_FROM_SAME_WRITTEN_BUFFER",
+      "passed": true
+    },
+    {
+      "id": "SCOPE_CURRENT_SOURCE07_PINS_NO_DERIVED_MAPS",
+      "passed": true
+    },
+    {
+      "id": "OLD_E_DIRECTORY_METADATA_ONLY",
+      "passed": true
+    },
+    {
+      "id": "NO_NEW_N03_OR_ENUMERATION",
+      "passed": true
+    },
+    {
+      "id": "CURRENT_CLI_SCOPE_REACHES_OWED_INITIAL_FACT_BOUNDARY",
+      "passed": true
+    },
+    {
+      "id": "wrong_pin_EMIT_AFTER_SELECTED_CLEANUP",
+      "passed": true
+    },
+    {
+      "id": "wrong_pin_SELF_KNOWN_BUT_COMPLETION_PENDING",
+      "passed": true
+    },
+    {
+      "id": "WRONG_PUBLIC_PIN_PRECREATE_HOLD",
+      "passed": true
+    },
+    {
+      "id": "manual_map_EMIT_AFTER_SELECTED_CLEANUP",
+      "passed": true
+    },
+    {
+      "id": "manual_map_SELF_KNOWN_BUT_COMPLETION_PENDING",
+      "passed": true
+    },
+    {
+      "id": "CALLER_MAP_PRECREATE_HOLD",
+      "passed": true
+    },
+    {
+      "id": "existing_path_EMIT_AFTER_SELECTED_CLEANUP",
+      "passed": true
+    },
+    {
+      "id": "existing_path_SELF_KNOWN_BUT_COMPLETION_PENDING",
+      "passed": true
+    },
+    {
+      "id": "EXISTING_PATH_CREATION_UNKNOWN_HOLD",
+      "passed": true
+    },
+    {
+      "id": "partial_cleanup_EMIT_AFTER_SELECTED_CLEANUP",
+      "passed": true
+    },
+    {
+      "id": "partial_cleanup_SELF_KNOWN_BUT_COMPLETION_PENDING",
+      "passed": true
+    },
+    {
+      "id": "PARTIAL_PRIMARY_AND_CLEANUP_DISTINCT",
+      "passed": true
+    },
+    {
+      "id": "PARTIAL_BYTES_IDENTITY_AND_FD_RETAINED",
+      "passed": true
+    },
+    {
+      "id": "NO_FUTURE_OWN_ZERO",
+      "passed": true
+    },
+    {
+      "id": "NO_REAL_TARGET_BOUNDARY",
+      "passed": true
+    }
+  ],
+  "cases": [
+    "positive metadata/copies/current CLI required-boundary",
+    "strict public input pin",
+    "no caller maps",
+    "exclusive existing-path hold",
+    "partial write plus unknown cleanup preserves artifacts"
+  ],
+  "failure": null,
+  "terminals": [
+    {
+      "case": "positive",
+      "exit": 0,
+      "terminal": {
+        "actualOwnCompletion": null,
+        "actualRuntimeAuthority": false,
+        "binaryOrSourceMapsAuthored": false,
+        "cleanup": [],
+        "creation": {
+          "attempted": true,
+          "created": true,
+          "openedIdentity": {
+            "dev": 16777229,
+            "ino": 144,
+            "mode": 448,
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01",
+            "uid": 501
+          }
+        },
+        "currentSourceOrResourceFacts": false,
+        "descriptorCompletion": "CLOSED",
+        "directoryEnumeration": false,
+        "kind": "SOURCE07_INSTALL_METADATA_AUTHOR_TERMINAL",
+        "newN03ObservedOrCreated": false,
+        "observerQualified": false,
+        "outerCompletionOwed": true,
+        "outputs": [
+          {
+            "complete": true,
+            "name": "owner-ruling-Aria.json",
+            "openAttempted": true,
+            "opened": true,
+            "writtenBytes": 1567
+          },
+          {
+            "complete": true,
+            "name": "owner-ruling-Quinn.json",
+            "openAttempted": true,
+            "opened": true,
+            "writtenBytes": 1568
+          },
+          {
+            "complete": true,
+            "name": "owner-ruling-root.json",
+            "openAttempted": true,
+            "opened": true,
+            "writtenBytes": 1567
+          },
+          {
+            "complete": true,
+            "name": "root-install-scope.json",
+            "openAttempted": true,
+            "opened": true,
+            "writtenBytes": 20095
+          }
+        ],
+        "primary": null,
+        "process": {
+          "actualStatus": null,
+          "completionOwedToOuterTool": true,
+          "fullFingerprint": null,
+          "pid": 990701,
+          "ppid": 17932,
+          "start": null
+        },
+        "result": {
+          "applicabilitySha256": "078592c5ec397e96eede17a9ec0ab8dfc402c150fdb7935fa154ce813e2db8fe",
+          "oldEDirectory": {
+            "dev": 16777229,
+            "ino": 219110222,
+            "mode": 448,
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree03-20261019",
+            "uid": 501
+          },
+          "outsideDirectoryFact": {
+            "dev": 16777229,
+            "ino": 144,
+            "mode": 448,
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01",
+            "uid": 501
+          },
+          "ownerCopyRawPins": {
+            "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01/owner-ruling-Aria.json": "ca0f69adf0033efa1df22596cf8e2add2e45052d69eeb8e94559aee1bfce76b9",
+            "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01/owner-ruling-Quinn.json": "269b9975622c0ac77720b75cae2f59ab7744eea1fc3ccef468400bf0a39cf628",
+            "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01/owner-ruling-root.json": "03dcfbd46719ac73a9129d704ce19e21be311352aaa1f73efbc843e6d81d8b27"
+          },
+          "scopeBytes": 20095,
+          "scopePath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01/root-install-scope.json",
+          "scopeSha256": "ebfb701e3175636a2393b71e7d94dd47f730af2ca2ed893f5ca23ff20aec4157",
+          "sourceManifestSha256": "045c5121ff25966eff78d741894684c776448e35c553cceb7765591ff70dd9b1"
+        },
+        "selectedReturnStatus": 0
+      }
+    },
+    {
+      "case": "wrong_pin",
+      "exit": 1,
+      "terminal": {
+        "actualOwnCompletion": null,
+        "actualRuntimeAuthority": false,
+        "binaryOrSourceMapsAuthored": false,
+        "cleanup": [],
+        "creation": {
+          "attempted": false,
+          "created": false,
+          "openedIdentity": null
+        },
+        "currentSourceOrResourceFacts": false,
+        "descriptorCompletion": "CLOSED",
+        "directoryEnumeration": false,
+        "kind": "SOURCE07_INSTALL_METADATA_AUTHOR_TERMINAL",
+        "newN03ObservedOrCreated": false,
+        "observerQualified": false,
+        "outerCompletionOwed": true,
+        "outputs": [],
+        "primary": {
+          "reason": "PUBLIC_INPUT_SHA",
+          "type": "RootInputHold"
+        },
+        "process": {
+          "actualStatus": null,
+          "completionOwedToOuterTool": true,
+          "fullFingerprint": null,
+          "pid": 990701,
+          "ppid": 17932,
+          "start": null
+        },
+        "result": null,
+        "selectedReturnStatus": 1
+      }
+    },
+    {
+      "case": "manual_map",
+      "exit": 1,
+      "terminal": {
+        "actualOwnCompletion": null,
+        "actualRuntimeAuthority": false,
+        "binaryOrSourceMapsAuthored": false,
+        "cleanup": [],
+        "creation": {
+          "attempted": false,
+          "created": false,
+          "openedIdentity": null
+        },
+        "currentSourceOrResourceFacts": false,
+        "descriptorCompletion": "CLOSED",
+        "directoryEnumeration": false,
+        "kind": "SOURCE07_INSTALL_METADATA_AUTHOR_TERMINAL",
+        "newN03ObservedOrCreated": false,
+        "observerQualified": false,
+        "outerCompletionOwed": true,
+        "outputs": [],
+        "primary": {
+          "reason": "AUTHOR_REQUEST_SCOPE",
+          "type": "RootInputHold"
+        },
+        "process": {
+          "actualStatus": null,
+          "completionOwedToOuterTool": true,
+          "fullFingerprint": null,
+          "pid": 990701,
+          "ppid": 17932,
+          "start": null
+        },
+        "result": null,
+        "selectedReturnStatus": 1
+      }
+    },
+    {
+      "case": "existing_path",
+      "exit": 1,
+      "terminal": {
+        "actualOwnCompletion": null,
+        "actualRuntimeAuthority": false,
+        "binaryOrSourceMapsAuthored": false,
+        "cleanup": [],
+        "creation": {
+          "attempted": true,
+          "created": null,
+          "openedIdentity": null
+        },
+        "currentSourceOrResourceFacts": false,
+        "descriptorCompletion": "CLOSED",
+        "directoryEnumeration": false,
+        "kind": "SOURCE07_INSTALL_METADATA_AUTHOR_TERMINAL",
+        "newN03ObservedOrCreated": false,
+        "observerQualified": false,
+        "outerCompletionOwed": true,
+        "outputs": [],
+        "primary": {
+          "reason": "OS_ERROR",
+          "type": "FileExistsError"
+        },
+        "process": {
+          "actualStatus": null,
+          "completionOwedToOuterTool": true,
+          "fullFingerprint": null,
+          "pid": 990701,
+          "ppid": 17932,
+          "start": null
+        },
+        "result": null,
+        "selectedReturnStatus": 1
+      }
+    },
+    {
+      "case": "partial_cleanup",
+      "exit": 1,
+      "terminal": {
+        "actualOwnCompletion": null,
+        "actualRuntimeAuthority": false,
+        "binaryOrSourceMapsAuthored": false,
+        "cleanup": [
+          {
+            "fd": 128,
+            "reason": "OS_ERROR",
+            "type": "OSError"
+          }
+        ],
+        "creation": {
+          "attempted": true,
+          "created": true,
+          "openedIdentity": {
+            "dev": 16777229,
+            "ino": 144,
+            "mode": 448,
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01",
+            "uid": 501
+          }
+        },
+        "currentSourceOrResourceFacts": false,
+        "descriptorCompletion": "UNKNOWN",
+        "directoryEnumeration": false,
+        "kind": "SOURCE07_INSTALL_METADATA_AUTHOR_TERMINAL",
+        "newN03ObservedOrCreated": false,
+        "observerQualified": false,
+        "outerCompletionOwed": true,
+        "outputs": [
+          {
+            "complete": false,
+            "name": "owner-ruling-Aria.json",
+            "openAttempted": true,
+            "opened": true,
+            "writtenBytes": 5
+          }
+        ],
+        "primary": {
+          "reason": "OS_ERROR",
+          "type": "OSError"
+        },
+        "process": {
+          "actualStatus": null,
+          "completionOwedToOuterTool": true,
+          "fullFingerprint": null,
+          "pid": 990701,
+          "ppid": 17932,
+          "start": null
+        },
+        "result": null,
+        "selectedReturnStatus": 1
+      }
+    }
+  ],
+  "diagnostics": [
+    {
+      "type": "Hold",
+      "args": [
+        "INITIAL_FACTS_RAW_PIN"
+      ]
+    }
+  ],
+  "authorSha256": "da0cc360580b7b4a8e70cebaa2c5add4aa0959811d31f48e1119eee77af880ce",
+  "callerSha256": "c3b00ecbadecd67cd5ebec9dce063770fb77bbf6bf30acf9a47c38c2fe637bd0",
+  "actualSource07CliSha256": "8d45661fe93ae8ceb72126778fa9e3b73af14e0ff16b0aaf4cb8022a4367401a",
+  "literalFixtureSha256": "7f30480979d11eecc4d885a03ffeda47d439b88ed9713d315c7136353ee24336",
+  "persistentDenyAuditUnchanged": true,
+  "realBoundaryCalls": [],
+  "actualTargetResourceEffects": 0,
+  "actualBashBuiltinsExecuted": false,
+  "actualMetadataAuthorizationIssued": false
+}

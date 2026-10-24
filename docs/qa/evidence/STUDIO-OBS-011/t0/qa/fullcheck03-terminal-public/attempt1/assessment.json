@@ -1,0 +1,244 @@
+{
+  "status": "ASSESSMENT_COMPLETE_NATIVE_FAIL_COVERAGE_UNPROVED_OUTER_QUALIFIED",
+  "executionLabel": "obs011-t0-fresh-check03",
+  "atUtc": "2026-10-19T06:02:31.381910+00:00",
+  "native": {
+    "collectorExit": 1,
+    "nativeGradleExit": 1,
+    "total": 2774,
+    "passed": 2764,
+    "failed": 1,
+    "skipped": 9,
+    "errors": 0,
+    "taskCounts": {
+      "test": {
+        "PASS": 2700,
+        "SKIP": 9,
+        "FAIL": 1
+      },
+      "guidedIncrementalTest": {
+        "PASS": 62
+      },
+      "crossReplicaTest": {
+        "PASS": 2
+      }
+    },
+    "failures": [
+      {
+        "task": "test",
+        "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+        "name": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope()",
+        "status": "FAIL",
+        "failureType": "org.opentest4j.AssertionFailedError",
+        "sourceFrames": [],
+        "rawMessageOrPayloadExported": false
+      }
+    ],
+    "allPass": false
+  },
+  "scope": {
+    "acceptedExpectedCases": 2774,
+    "identityMultisetExact": true,
+    "xmlCollectorStatusMultisetExact": true,
+    "missingExpected": 0,
+    "extraActual": 0,
+    "actualExclusions": [],
+    "classes": 332,
+    "taskQualifiedClasses": 333,
+    "sourceClassMappings": 332,
+    "sourceAcceptedAnnotatedMethods": 2156,
+    "sourceAcceptedParameterizedInvocations": 2774,
+    "nineExactSkips": true
+  },
+  "cohorts": [
+    {
+      "task": "test",
+      "invocations": 46,
+      "passed": 45,
+      "failed": 1,
+      "afterEachComplete": 46,
+      "flags": {
+        "auditComplete": true,
+        "privacyComplete": true,
+        "producersDrained": true,
+        "modelEvidenceComplete": true,
+        "budgetEvidenceComplete": true,
+        "responseEvidenceComplete": true
+      },
+      "auditContextClosed": true,
+      "retentionFailures": 0,
+      "xmlStatusMultisetEquals": true,
+      "completeAllPassed": false,
+      "privatePayloadRescanned": false
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "invocations": 62,
+      "passed": 62,
+      "failed": 0,
+      "afterEachComplete": 62,
+      "flags": {
+        "auditComplete": true,
+        "privacyComplete": true,
+        "producersDrained": true,
+        "modelEvidenceComplete": true,
+        "budgetEvidenceComplete": true,
+        "responseEvidenceComplete": true
+      },
+      "auditContextClosed": true,
+      "retentionFailures": 0,
+      "xmlStatusMultisetEquals": true,
+      "completeAllPassed": true,
+      "privatePayloadRescanned": false
+    }
+  ],
+  "dynamicFreshness": {
+    "freshCounts": {
+      "xmlFiles": 333,
+      "testHtmlFiles": 386,
+      "jacocoExecFiles": 3,
+      "guidedCohortFiles": 546,
+      "guardTallies": 2
+    },
+    "unresolvedAliases": [],
+    "classHtmlCoverageVerified": 333,
+    "originalPublicOutputsCompared": true,
+    "copyTimeUsed": false
+  },
+  "staticResources": {
+    "testReportRootProvenCounts": {
+      "test": 3,
+      "guidedIncrementalTest": 3,
+      "crossReplicaTest": 3
+    },
+    "jacocoProven": 20,
+    "exactDependencyEntriesVerified": 23,
+    "noFreshCaseRuntimeCoverageCredit": true,
+    "rawNineStaleAssetErrorsPreserved": 9,
+    "historicalRuntimeClasspathMeasured": false
+  },
+  "coverage": {
+    "reportExists": true,
+    "reportSha256": "c02dbcd6ee2b8f423f4a81b0837e717cbba3534cecd44aab020c54b80a563f24",
+    "unchangedFromBefore": true,
+    "originalMtimeFresh": false,
+    "sessionCount": 27,
+    "sessionsWithinCurrentRun": false,
+    "earliestSessionStart": 1792287836.814,
+    "latestSessionDump": 1792293876.394,
+    "dynamicFiles": 967,
+    "dynamicFilesFresh": 0,
+    "staticResourcesProven": 20,
+    "unknownAssets": [],
+    "requiredTaskStatuses": {
+      "test": "FAILED",
+      "guidedIncrementalTest": "EXECUTED",
+      "crossReplicaTest": "EXECUTED",
+      "requireFreshGuidedPartitions": "ABSENT",
+      "jacocoTestReport": "ABSENT",
+      "jacocoTestCoverageVerification": "ABSENT",
+      "check": "ABSENT"
+    },
+    "mergedExecTasks": [
+      "test",
+      "guidedIncrementalTest"
+    ],
+    "crossReplicaExecRequiredSeparately": true,
+    "reportAndVerificationActuallyExecuted": false,
+    "freshCoverageProved": false,
+    "ratiosOrHeadroomCredited": false
+  },
+  "source": {
+    "sourceFiles": 1808,
+    "sourceDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+    "distFiles": 238,
+    "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+    "helmFiles": 22,
+    "quotedFiles": 20,
+    "immutableHelpers": 6,
+    "sourceBeforeAfterMembershipEqual": true,
+    "currentListedPinsMatch": true,
+    "all356TestJavaMembershipVerified": true,
+    "beforeAfterTestInputStable": true,
+    "newGitIndexEnumerationPerformed": false
+  },
+  "terminal": {
+    "scope": "Independent same-start kernel census; public control metadata only",
+    "atUtc": "2026-10-19T05:59:00.736773+00:00",
+    "recordedIdentities": 2595,
+    "counts": {
+      "PID_ABSENT": 2595
+    },
+    "missingRecordedStarts": 0,
+    "wrapperAbsent": true,
+    "collectorAbsent": true,
+    "sourceReceiptSha256": "091d93b782a45406413d132e2e5d8fb921e4d21e22f3c7579773f8378afc4ff0",
+    "rootTerminalProofSha256": "d8387a34113066c4e3bc2656bfe969df9b61779117fa48ac3e40bbc7d1a08def",
+    "historicalObservationGapRemains": true,
+    "noPrivateDataRead": true,
+    "noNativeBuildOrTestExecuted": true
+  },
+  "outer": {
+    "rawHarnessStatus": "TERMINAL_INCOMPLETE_EVIDENCE",
+    "rawHarnessExit": 1,
+    "rawCollectorExit": 1,
+    "rawEvidenceErrors": [
+      "TASK_ARCHIVE_ORIGINAL_NOT_FRESH",
+      "TASK_ARCHIVE_ORIGINAL_NOT_FRESH",
+      "TASK_ARCHIVE_ORIGINAL_NOT_FRESH",
+      "TASK_ARCHIVE_ORIGINAL_NOT_FRESH",
+      "TASK_ARCHIVE_ORIGINAL_NOT_FRESH",
+      "TASK_ARCHIVE_ORIGINAL_NOT_FRESH",
+      "TASK_ARCHIVE_ORIGINAL_NOT_FRESH",
+      "TASK_ARCHIVE_ORIGINAL_NOT_FRESH",
+      "TASK_ARCHIVE_ORIGINAL_NOT_FRESH",
+      "TESTCASE_FAILURE_OR_EMPTY_FULL_SUITE",
+      "INCOMPLETE_JOIN_COHORT:test",
+      "FULL_TEST_OR_COVERAGE_TASK_NOT_EXECUTED_SUCCESSFULLY",
+      "GENUINELY_FRESH_MERGED_COVERAGE_NOT_PROVEN"
+    ],
+    "rawEvidenceComplete": false,
+    "rawFullGateSucceeded": false,
+    "ownedIdentityObservationGap": true,
+    "interrupted": false,
+    "rawJvmTerminalProofs": 235,
+    "rawRemainingOwnedNonJvm": 0,
+    "historicalGapResolved": false,
+    "inheritedBaselineCount": 6,
+    "inheritedBaselineUnchanged": true,
+    "quietHostOrInheritedCleanupClaim": false
+  },
+  "independentAudit": {
+    "checks": 35587,
+    "violations": [
+      "TASK_SCOPE",
+      "NATIVE_COMMAND_OPTIONS",
+      "COHORT_GUARD_SOURCE_IDENTITIES:guidedIncrementalTest"
+    ],
+    "stableReferencedInputs": 5666,
+    "sourceEdits": 0,
+    "testBuildCompilerHelmNodeCalls": 0,
+    "privateRuntimeInputsRead": 0,
+    "authorEntrypointsExecuted": 0,
+    "newRawPublicPayloadCopies": 0,
+    "exclusiveReferenceArchive": true
+  },
+  "disposition": {
+    "C8Passed": false,
+    "freshCoveragePassed": false,
+    "allJoinedInvocationsPassed": false,
+    "W1Released": false,
+    "laneCredit": false,
+    "storyLifecycleChanged": false,
+    "privateProjectionReleased": false,
+    "sourceWriterReleased": false,
+    "retryAuthorized": false,
+    "rootCauseEstablished": false,
+    "remaining": [
+      "Preserve native Order11 failure and establish its cause without weakening its oracle.",
+      "Satisfy C8 actual full fresh check and genuinely executed fresh merged coverage before lane credit.",
+      "Resolve or explicitly qualify the historical owned-identity observation gap under original authority.",
+      "Keep source/output hold until root adopts this completed assessment; unchanged-main five-class GS-T and all original sequencing/gates remain owed."
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "atUtc": "2026-10-20T14:38:36.182373+00:00",
+  "label": "obs011-recovery-20261020-foldp-red01",
+  "verdict": "INTENDED_OLD_JVM_CLOCK_ASSERTION_RED",
+  "resultSha256": "ac70c5b2bb58e3cd247a9dc5788df6f70606242ef2ed23a09618ea3b8eaa050b",
+  "counts": {
+    "total": 3,
+    "passed": 0,
+    "failed": 3,
+    "errors": 0,
+    "skipped": 0
+  },
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true,
+  "taskCollectionComplete": true,
+  "elapsedSeconds": 26.11,
+  "publicAssertionFailures": [
+    {
+      "name": "publicationMintAndJudgeReadDatabaseClockWithJvmAheadAndBehind()",
+      "type": "java.lang.AssertionError",
+      "message": "java.lang.AssertionError: [mint and judge, JVM offset 788] \nExpected size: 2 but was: 0 in:\n[]",
+      "sites": [
+        "at com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.publicationMintAndJudgeReadDatabaseClockWithJvmAheadAndBehind(PublicationGrantClockIT.java:131)"
+      ]
+    },
+    {
+      "name": "databaseExpiredPublicationGrantRefusesDespiteJvmBehind()",
+      "type": "java.lang.AssertionError",
+      "message": "java.lang.AssertionError: [expired grant still mints and judges on DB] \nExpected size: 2 but was: 0 in:\n[]",
+      "sites": [
+        "at com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.databaseExpiredPublicationGrantRefusesDespiteJvmBehind(PublicationGrantClockIT.java:148)"
+      ]
+    },
+    {
+      "name": "publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget()",
+      "type": "java.lang.AssertionError",
+      "message": "java.lang.AssertionError: \nExpecting actual throwable to be an instance of:\n  com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.ValidationReached\nbut was:\n  org.opentest4j.AssertionFailedError: [exact instant from DatabaseClock, never host clock] \nexpected: 2026-10-20T14:38:15.866677Z\n but was: 2026-10-20T14:38:15.896805Z\n\tat java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)\n\tat java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)\n\tat com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.lambda$publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget$7(PublicationGrantClockIT.java:186)\n\t...(94 remaining lines not displayed - this can be changed with Assertions.setMaxStackTraceElementsDisplayed)",
+      "sites": [
+        "at com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.lambda$publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget$7(PublicationGrantClockIT.java:186)",
+        "at com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT.publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget(PublicationGrantClockIT.java:214)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,618 @@
+{
+  "scope": "PURE_IN_MEMORY_SYNTHETIC_CONTRACTS_NO_ACTUAL_PRIVATE_INPUTS",
+  "parserSha256": "dc9dd58361c17f2efd4e298a925b3b6e891991963072dcdca5a01cf81d0f39f5",
+  "results": [
+    {
+      "name": "valid-wholly-synthetic-release-and-source-shaped-inputs",
+      "accepted": true,
+      "expected": true,
+      "reason": "BOUNDED_CANDIDATE_NOT_CAUSE",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-red-qualified-outer-negative-flags-retained-no-C8-pass-required",
+      "accepted": true,
+      "expected": true,
+      "reason": "BOUNDED_CANDIDATE_NOT_CAUSE",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "fresh-output-collision-zero-private-reads",
+      "accepted": false,
+      "expected": false,
+      "reason": "SYNTHETIC_OUTPUT_ALREADY_EXISTS",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "unknown-owned-Java-not-terminal",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "unknown-owned-UNKNOWN-not-terminal",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "live-collector-no-private-access",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-collectorTerminal-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-collectorTerminal-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-sameStartOwnedJvmTerminal-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-sameStartOwnedJvmTerminal-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-ownedUnknownTerminal-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-ownedUnknownTerminal-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-wholeExecutionClosed-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-wholeExecutionClosed-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-sourceHoldVerified-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-sourceHoldVerified-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-quotesHelmHelpersHeld-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-quotesHelmHelpersHeld-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-observationGapSticky-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-observationGapSticky-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "unreleased-zero-private-reads",
+      "accepted": false,
+      "expected": false,
+      "reason": "NO_EXECUTION_RELEASE",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "root-not-approved",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_INDEPENDENT_APPROVAL",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "quinn-not-approved",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_INDEPENDENT_APPROVAL",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "timeout-is-not-terminal",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "sticky-gap-no-recovery-proof",
+      "accepted": false,
+      "expected": false,
+      "reason": "STICKY_GAP_RECOVERY_NOT_BOUND",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-assessment-wholePublicArchiveFrozen-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-assessment-wholePublicAssessmentComplete-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-assessment-rawFailPreserved-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-assessment-observationGapPreserved-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-assessment-noLaneApproval-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "expired-authorization-no-private-read",
+      "accepted": false,
+      "expected": false,
+      "reason": "AUTHORIZATION_NOT_FRESH",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "future-authorization-no-private-read",
+      "accepted": false,
+      "expected": false,
+      "reason": "AUTHORIZATION_NOT_FRESH",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "release-before-owned-terminal-proof",
+      "accepted": false,
+      "expected": false,
+      "reason": "RELEASE_PRECEDES_TERMINAL_PROOF",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "original-protocol-binding-cannot-change",
+      "accepted": false,
+      "expected": false,
+      "reason": "ORIGINAL_PROTOCOL_CHANGED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "raw-receipt-green-is-not-gate",
+      "accepted": false,
+      "expected": false,
+      "reason": "RAW_FAIL_NOT_RETAINED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "partial-default-only-is-not-whole",
+      "accepted": false,
+      "expected": false,
+      "reason": "NOT_WHOLE_COLLECTOR",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "source-capture-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "HELD_CAPTURE_MISMATCH",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-inherited-root-refused-before-native-root-read",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG03_TEMP_REFERENCE",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-source-snapshot-path",
+      "accepted": false,
+      "expected": false,
+      "reason": "SNAPSHOT_SOURCE_LOCATOR",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "unknown-input-role",
+      "accepted": false,
+      "expected": false,
+      "reason": "PRIVATE_MANIFEST_ALLOWLIST",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "snapshot-identity-mismatch",
+      "accepted": false,
+      "expected": false,
+      "reason": "WARNING_ORDINAL18_IDENTITY_UNPROVEN",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "snapshot-post-cleanup-is-not-cause",
+      "accepted": true,
+      "expected": true,
+      "reason": "BOUNDED_CANDIDATE_NOT_CAUSE",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "snapshot-free-message-field-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "snapshot-free-code-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "SNAPSHOT_NOT_SOURCE_ENUM",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "snapshot-unrecorded-timestamp-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicate-start-record",
+      "accepted": false,
+      "expected": false,
+      "reason": "START_RECORD_MISSING_OR_AMBIGUOUS",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-start-record",
+      "accepted": false,
+      "expected": false,
+      "reason": "START_RECORD_MISSING_OR_AMBIGUOUS",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-runtime-phase",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_RUNTIME_PHASE",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "unknown-phase-not-START_SETTLE-inferred",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_UNBOUND_START_PHASE",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-launch-phase",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_RUNTIME_PHASE",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "first-start-name-unbound",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_UNBOUND_START_PHASE",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "startup-identity-field-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "startup-message-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "startup-path-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "startup-stack-rejected",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "startup-link-bound",
+      "accepted": false,
+      "expected": false,
+      "reason": "START_LINK_BOUND",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "elapsed-not-integer",
+      "accepted": false,
+      "expected": false,
+      "reason": "NUMERIC_BOUND",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "elapsed-no-new12second-cutoff",
+      "accepted": true,
+      "expected": true,
+      "reason": "BOUNDED_CANDIDATE_NOT_CAUSE",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "unbound-generation",
+      "accepted": false,
+      "expected": false,
+      "reason": "GUIDED_LOG_SOURCE_LOCATOR",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-producer-wrapper",
+      "accepted": false,
+      "expected": false,
+      "reason": "MIXED_GUIDED_PRODUCER",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "unconfirmed-guided-exit",
+      "accepted": false,
+      "expected": false,
+      "reason": "GUIDED_EXIT_UNCONFIRMED",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicate-producer-spawn",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_GUIDED_GENERATION",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "unknown-owned-record-field",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "syntactic-secret-markers-redacted",
+      "accepted": true,
+      "expected": true,
+      "reason": "BOUNDED_CANDIDATE_NOT_CAUSE",
+      "privateManifestReads": 1,
+      "nativeRootReadCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-local-parserSha256-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PARSER_OR_PACKAGE_CHANGED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-local-packageManifestSha256-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PARSER_OR_PACKAGE_CHANGED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "guard-local-sourceBindingsSha256-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PARSER_OR_PACKAGE_CHANGED",
+      "privateManifestReads": 0,
+      "nativeRootReadCalls": 0,
+      "fakeOnly": true
+    }
+  ],
+  "accepted": 5,
+  "rejected": 62,
+  "extraJsonSchemaRejections": 7,
+  "guardFailuresHaveZeroPrivateManifestAndNativeRootReads": true,
+  "syntheticPublicHashSubstitution": "Only module memory public XML/warning digests differ so synthetic bytes can exercise exact hash gates; real contract/source files never changed.",
+  "secretMarkerAndScalarHashAbsentFromOutput": true,
+  "actualPrivateEnumerationReadsGlobsExports": 0,
+  "actualExecutionRelease": false,
+  "nativeCompilerProbe": false
+}

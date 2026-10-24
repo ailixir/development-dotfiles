@@ -1,0 +1,86 @@
+{
+  "status": "CLOSED_TOOL_LINES_ONLY_NOT_XML_CASE_PROOF",
+  "perClassToolCounts": {
+    "GuidedCommittedRefreshStateTest": {
+      "PASSED": 3,
+      "FAILED": 0,
+      "SKIPPED": 0
+    },
+    "GuidedEvidencePendingAppendIT": {
+      "PASSED": 8,
+      "FAILED": 0,
+      "SKIPPED": 0
+    },
+    "GuidedLifecycleReasonIT": {
+      "PASSED": 5,
+      "FAILED": 0,
+      "SKIPPED": 0
+    },
+    "GuidedServiceTransportFaultIT": {
+      "PASSED": 17,
+      "FAILED": 13,
+      "SKIPPED": 1
+    }
+  },
+  "failedToolNames": [
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [1] mode=COMPLETE_200_NO_CALLBACK"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [2] mode=COMPLETE_200_OWNER_OK"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [3] mode=COMPLETE_200_OWNER_FAILED"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [4] mode=COMPLETE_503_NO_CALLBACK"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [5] mode=COMPLETE_503_OWNER_OK"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [6] mode=PARTIAL_200_NO_EOF"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [7] mode=PARTIAL_503_NO_EOF"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [8] mode=CALLER_EXPIRY_AFTER_CONSUME"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery(Mode) > [9] mode=INTERRUPT_AFTER_HEADERS"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop()"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback()"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit()"
+    },
+    {
+      "class": "GuidedServiceTransportFaultIT",
+      "displayName": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased()"
+    }
+  ],
+  "finiteDiagnosticLines": [
+    "GST_DIAG|site=CUT_PRIMARY|route=NONE|status=409|family=GUIDED_SESSION|code=UNKNOWN_OUTCOME|frame=CLIENT_SEND|line=296",
+    "GST_DIAG|site=CUT_PEER|route=NONE|status=NONE|family=DATA_INTEGRITY|code=UNPROVEN|frame=PEER_RELAY|line=5560"
+  ],
+  "completedXmlCases": 0,
+  "full99Proof": false,
+  "sameRequestFirstCauseOrSqlStateProven": false
+}

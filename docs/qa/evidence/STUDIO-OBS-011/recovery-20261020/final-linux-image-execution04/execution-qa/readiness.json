@@ -1,0 +1,72 @@
+{
+  "verdict": "PASS_FOR_FINAL_DEPLOYMENT_AND_D2",
+  "producerManifestSha256": "e4d7b082ea8b21ce3b2f4d7223ed6fa609e5722817455246f18ee50fe7d07183",
+  "producerArtifactsVerified": 116,
+  "collectorOutputsAndCopiesVerified": 12,
+  "originalOffline03SealSha256": "639d64d8c570e01b98a3bbd975c2c5e03ead42f2c38f44cc44c496e0fb76a4ad",
+  "old65ArtifactsAndRaw1Retained": true,
+  "image": {
+    "immutableId": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "os": "linux",
+    "architecture": "arm64",
+    "user": "pwuser",
+    "exactProductionCmd": true,
+    "measuredEntrypoint": null,
+    "freshTagAbsenceBeforeBuild": true,
+    "sourceBuiltRawOuterChild0": true,
+    "notRetagOrHostDistTransplant": true
+  },
+  "sourceContext": {
+    "sha256": "8457b7413e543ff88eea95e7fec554d380e5903e839e0f814c46739833bdb886",
+    "members": 111,
+    "regular": 101,
+    "directories": 10,
+    "allNamesHashSizeFileModesAndNormalizedDirectoryModesMatch": true,
+    "originalDockerfileAndLockUnchanged": true,
+    "publicResolvedIntegrityPinnedEntries": 407,
+    "installsBeforeProductCopy": true
+  },
+  "network": {
+    "buildRUN": "default, including compiler",
+    "runtimeVerification": "none/read-only",
+    "newExplicitRootCauseSupportedRelease": true,
+    "originalOfflineFailureNotRewritten": true
+  },
+  "strictPins": {
+    "rawOuterExit": 0,
+    "rawChildExit": 0,
+    "ok": true,
+    "failures": [],
+    "notAsserted": [],
+    "node": "v24.20.0",
+    "playwright": "1.63.0",
+    "chromium": "1243",
+    "linuxBrowserSha256": "839efe5fd8b6a773dd81b2e10afdc15f3c0a17316fb82b5908c0533306c4ed9e",
+    "imageOwnPackageLockMatchContext": true,
+    "ownDistBrowserLauncherNotOvermounted": true,
+    "publicReadonlySupportFiles": 18,
+    "canonicalContractFiles": 51,
+    "supportBeforeAfterAndContextExact": true
+  },
+  "actualFrozenInputs": {
+    "source": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "files": 1814,
+    "hostDist": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "hostDistFiles": 238,
+    "cacheKeys": 191,
+    "fullCatalogsAndProtected21LinksStable": true,
+    "imageDistNotClaimedHostE19Equivalent": true
+  },
+  "measuredBindings": {
+    "firstEightQualified": true,
+    "ninthDeploymentReceipt": "UNBOUND_NOT_EXECUTED",
+    "preparationNullsNotRewritten": true
+  },
+  "continuousAwakeClaim": false,
+  "originalOwnedInhibitorsReapedThroughPostguardBoundary": true,
+  "findings": [],
+  "deployment722OrD2RuntimeCredit": false,
+  "furtherRuntimeProviderOrLifecycleApproval": false,
+  "allStoriesInProgress": true,
+  "next": "Root separate deployment722 release on this immutable image; bind ninth field only to actual accepted result; then corrected D2. Other required gates remain."
+}

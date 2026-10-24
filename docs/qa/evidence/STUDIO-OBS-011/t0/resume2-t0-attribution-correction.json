@@ -1,0 +1,24 @@
+{
+  "atUtc": "2026-10-19T03:48:15.482632+00:00",
+  "scope": "root-owned unbound T0 evidence factual attribution correction and dated actual diagnostic facts; no source/quoted20/Helm mutation",
+  "beforeSha256": "41f42dd37a08206d3200dbe8a456bd8b6a4c8f850b0d74eb5710ec1370a8e1a4",
+  "afterSha256": "870046f592b620d3645e7857b26ae568482464646d9baeea3709713e88ace90c",
+  "beforeSnapshot": "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.before-attribution-correction.md",
+  "historicalAriaOriginalSha256": "0766e7d21023198cef275f05f5696c599d4b421a4ed1f4408439133d7d4b89d8",
+  "twoExactLineCorrections": [
+    {
+      "line": 18,
+      "before": "- **What Aria ran:** read-only grep, sed, cat, shasum, `uptime`, and `python3 -I` for JSON parsing, the per-file capture diff and the generation of `lanes.v6.json` and `w-brief.v6.md`.",
+      "after": "- **What Aria ran:** read-only grep, sed, cat, shasum, `uptime`, and `python3 -I` for JSON parsing, the per-file capture diff and the generation of `lanes.v3.json` and `w-brief.v3.md`."
+    },
+    {
+      "line": 20,
+      "before": "- **Written by Aria (this folder only):** `t0-record.md`, `lanes.v6.json`, `w-brief.v6.md` and `quoted-docs-s011.sha256`.",
+      "after": "- **Written by Aria (this folder only):** `t0-record.md`, `lanes.v3.json`, `w-brief.v3.md` and `quoted-docs-s011.sha256`."
+    }
+  ],
+  "appendOnlyActualFacts": "\n## Root diagnostic completion and attribution correction \u2014 2026-10-19T03:48:15.482632+00:00\n\nThe original Aria preparation ran/wrote plan v3. Root's later v6/v7 adoption is separate; the two historical author-attribution lines above are corrected accordingly. All other earlier record bytes remain, with the pre-correction root edition preserved at `t0-record.before-attribution-correction.md`. Current execution follows `lanes.v7.json` and its adopted rules; this does not retrospectively attribute those later revisions to Aria.\n\nThe sole authorized DIAG-START-1 run is now terminal: primary collector exit0,108 passed,0 failed/errors/skipped, task collection complete, source/dist/test inputs stable for the reviewed temporary candidate. The outer harness exits2 with `TERMINAL_INCOMPLETE_OBSERVATION` and its sticky observation gap preserved. Exact original ReplayIT bytes/mode0644 were restored and the original compile succeeded under the same lock; recorded original processes are absent. Full source capture `resume2-after-diagnostic-capture.json` again equals S0111808files and D009r238distfiles. Independent terminal QA assessment is still pending at this edit.\n\nThe original B1 startup cause remains unproved; the current selected case started normally before its expected UNKNOWN_OUTCOME stop. The one initial diagnostic budget is used. No implementation package has been applied, no W1 signature is granted, and the user's owed fresh fullcheck plus actually executed fresh coverage remains required before any011lane claims credit. The corrected fullcheck harness passed independent static re-review; it is still unlaunched and needs actual terminal QA/root SHA-bound authorization.\n",
+  "diagnosticReceiptSha256": "adf4b6da566ab3ef6ed0ecfc960ffbdfe21bb81ff47456bcbceebfe90a5a3921",
+  "inversePreservesAllPriorOtherBytes": true,
+  "noW1OrLaneCredit": true
+}

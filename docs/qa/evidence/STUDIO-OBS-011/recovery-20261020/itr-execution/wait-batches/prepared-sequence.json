@@ -1,0 +1,869 @@
+{
+  "kind": "EXACT_EXISTING_WAIT_BATCH_HUNKS_OVER_ACCEPTED_C6",
+  "sourceApplied": false,
+  "stages": [
+    {
+      "stage": "01-b1",
+      "batch": "B1",
+      "beforeSha256": "ab429398f750bb493982be321bea550f16823d5b5a58111a1a3d180bff2ece1c",
+      "candidateSha256": "06c27bb65d1db346e5ded7ebbdcb9c0f7ffd008df6a048a75697dea7dcdf8629",
+      "historicalBeforeSha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+      "historicalCandidateSha256": "07ef9fe937ea24f3a544289016c74123161afaa76a8786c6fbc668718dd8c2c8",
+      "historicalIncrementalPatchPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/stages/01-b1/incremental.patch",
+      "historicalIncrementalPatchSha256": "386021e9fd62c368e9e84c7e9b494c3825efe6b6164fe9d319f5da41a44fd418",
+      "exactExistingHunks": [
+        {
+          "historicalHeader": "@@ -7371,13 +7371,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 599,
+          "newBytes": 5991
+        },
+        {
+          "historicalHeader": "@@ -9606,13 +9705,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 455,
+          "newBytes": 5840
+        },
+        {
+          "historicalHeader": "@@ -11563,13 +11761,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 578,
+          "newBytes": 5963
+        },
+        {
+          "historicalHeader": "@@ -15667,13 +15964,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 617,
+          "newBytes": 5994
+        },
+        {
+          "historicalHeader": "@@ -16104,13 +16500,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 567,
+          "newBytes": 5969
+        },
+        {
+          "historicalHeader": "@@ -16143,13 +16638,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 703,
+          "newBytes": 6103
+        },
+        {
+          "historicalHeader": "@@ -17972,15 +18566,114 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 647,
+          "newBytes": 6023
+        },
+        {
+          "historicalHeader": "@@ -18158,12 +18851,111 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 446,
+          "newBytes": 5834
+        },
+        {
+          "historicalHeader": "@@ -18775,13 +19567,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 568,
+          "newBytes": 5978
+        },
+        {
+          "historicalHeader": "@@ -19147,13 +20038,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 564,
+          "newBytes": 5947
+        },
+        {
+          "historicalHeader": "@@ -19674,15 +20664,114 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 633,
+          "newBytes": 6024
+        },
+        {
+          "historicalHeader": "@@ -19921,14 +21010,113 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 546,
+          "newBytes": 5892
+        },
+        {
+          "historicalHeader": "@@ -27255,15 +28443,114 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 625,
+          "newBytes": 5928
+        },
+        {
+          "historicalHeader": "@@ -27477,9 +28764,107 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 545,
+          "newBytes": 5826
+        },
+        {
+          "historicalHeader": "@@ -29633,13 +31018,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 616,
+          "newBytes": 5967
+        }
+      ],
+      "forwardPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/01-b1/forward.patch",
+      "forwardSha256": "5adeb83e30874c8ea2bb4d549024be41b66c0db26898494b9fdc2fca4b6bc29d",
+      "inversePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/01-b1/inverse.patch",
+      "inverseSha256": "81f32bfa435034ee78ec7cc6d95e9de9b44941ba615a6388954e31cfa5b1522a",
+      "originalPollRowIds": [
+        7,
+        16,
+        22,
+        34,
+        35,
+        36,
+        45,
+        48,
+        51,
+        58,
+        61,
+        62,
+        82,
+        86,
+        87
+      ],
+      "orderedAnnotatedMethodsPreserved": 74,
+      "acceptedAndOriginalAssertionsPreserved": 2712,
+      "acceptedC6SupportBodyAndHelperByteExact": true,
+      "embeddedTextBlocksByteExact": 10,
+      "remainingOriginalSleeps": 80,
+      "retainedDeliberateSleepSequenceExact": true,
+      "selectors": {
+        "test": [
+          "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+          "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays"
+        ],
+        "guidedIncrementalTest": [
+          "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate"
+        ]
+      },
+      "compileArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py",
+        "obs011-recovery-20261020-itr-b1-compile01",
+        "compileTestJava",
+        "--no-daemon"
+      ],
+      "focusedArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-recovery-20261020-itr-b1-focused01",
+        "--test-tasks",
+        "test,guidedIncrementalTest",
+        "--require-exec-tasks",
+        "test,guidedIncrementalTest",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
+        "guidedIncrementalTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "fullClassSlotCost": 0,
+      "classGreenClaim": false
+    },
+    {
+      "stage": "02-b2",
+      "batch": "B2",
+      "beforeSha256": "06c27bb65d1db346e5ded7ebbdcb9c0f7ffd008df6a048a75697dea7dcdf8629",
+      "candidateSha256": "52fdebd2f39ee82a6cc6888c5399f2969a4b49cdea830bb1c29534447521d42d",
+      "historicalBeforeSha256": "07ef9fe937ea24f3a544289016c74123161afaa76a8786c6fbc668718dd8c2c8",
+      "historicalCandidateSha256": "772398e1b84fdb3c03ecf692685fb9a5ae3f76b6d81d6c0d980d72e3a41955f7",
+      "historicalIncrementalPatchPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/stages/02-b2/incremental.patch",
+      "historicalIncrementalPatchSha256": "530ab7e7f3ba6fff611a4bfb48738a511d5a081acdf99b1765e578a752fdf2da",
+      "exactExistingHunks": [
+        {
+          "historicalHeader": "@@ -7779,16 +7779,115 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 757,
+          "newBytes": 6180
+        },
+        {
+          "historicalHeader": "@@ -8508,9 +8607,108 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 472,
+          "newBytes": 5734
+        },
+        {
+          "historicalHeader": "@@ -8574,16 +8772,115 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 752,
+          "newBytes": 6007
+        },
+        {
+          "historicalHeader": "@@ -9462,11 +9759,110 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 598,
+          "newBytes": 5837
+        },
+        {
+          "historicalHeader": "@@ -9496,8 +9892,107 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 375,
+          "newBytes": 5602
+        },
+        {
+          "historicalHeader": "@@ -9574,15 +10069,114 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 542,
+          "newBytes": 5772
+        },
+        {
+          "historicalHeader": "@@ -9823,8 +10417,107 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 390,
+          "newBytes": 5617
+        },
+        {
+          "historicalHeader": "@@ -10345,27 +11038,225 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 931,
+          "newBytes": 11581
+        },
+        {
+          "historicalHeader": "@@ -10375,8 +11266,25 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 383,
+          "newBytes": 1371
+        },
+        {
+          "historicalHeader": "@@ -10415,10 +11323,92 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 357,
+          "newBytes": 4732
+        },
+        {
+          "historicalHeader": "@@ -11522,8 +12512,25 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 425,
+          "newBytes": 1413
+        },
+        {
+          "historicalHeader": "@@ -11600,10 +12607,92 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 404,
+          "newBytes": 4779
+        },
+        {
+          "historicalHeader": "@@ -12228,9 +13317,108 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 620,
+          "newBytes": 5840
+        },
+        {
+          "historicalHeader": "@@ -14660,9 +15848,108 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 335,
+          "newBytes": 5565
+        },
+        {
+          "historicalHeader": "@@ -14882,13 +16169,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 528,
+          "newBytes": 5853
+        },
+        {
+          "historicalHeader": "@@ -14920,33 +16306,330 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 1313,
+          "newBytes": 16985
+        },
+        {
+          "historicalHeader": "@@ -16809,14 +18492,113 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 683,
+          "newBytes": 6023
+        },
+        {
+          "historicalHeader": "@@ -17098,15 +18880,114 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 797,
+          "newBytes": 6066
+        },
+        {
+          "historicalHeader": "@@ -17446,13 +19327,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 519,
+          "newBytes": 5852
+        },
+        {
+          "historicalHeader": "@@ -17500,8 +19480,107 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 397,
+          "newBytes": 5627
+        },
+        {
+          "historicalHeader": "@@ -17623,8 +19702,107 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 404,
+          "newBytes": 5643
+        },
+        {
+          "historicalHeader": "@@ -28653,8 +30831,25 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 389,
+          "newBytes": 1433
+        },
+        {
+          "historicalHeader": "@@ -28662,7 +30857,7 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 298,
+          "newBytes": 309
+        },
+        {
+          "historicalHeader": "@@ -28675,7 +30870,7 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 523,
+          "newBytes": 534
+        },
+        {
+          "historicalHeader": "@@ -28686,13 +30881,95 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 397,
+          "newBytes": 4871
+        }
+      ],
+      "forwardPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/02-b2/forward.patch",
+      "forwardSha256": "4bee8dfe7fc3a91731443fb657c89d3682b57111fe0fdeb51ec7001c1a1e3b07",
+      "inversePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/02-b2/inverse.patch",
+      "inverseSha256": "e1dfaebe19f55380a10d33f69522734cf594f888110f80ad200983f07c54229b",
+      "originalPollRowIds": [
+        8,
+        9,
+        10,
+        11,
+        14,
+        15,
+        17,
+        18,
+        19,
+        20,
+        21,
+        23,
+        29,
+        30,
+        31,
+        32,
+        33,
+        37,
+        38,
+        41,
+        42,
+        43,
+        84
+      ],
+      "orderedAnnotatedMethodsPreserved": 74,
+      "acceptedAndOriginalAssertionsPreserved": 2712,
+      "acceptedC6SupportBodyAndHelperByteExact": true,
+      "embeddedTextBlocksByteExact": 10,
+      "remainingOriginalSleeps": 57,
+      "retainedDeliberateSleepSequenceExact": true,
+      "selectors": {
+        "test": [
+          "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck"
+        ],
+        "guidedIncrementalTest": [
+          "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+          "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest"
+        ]
+      },
+      "compileArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py",
+        "obs011-recovery-20261020-itr-b2-compile01",
+        "compileTestJava",
+        "--no-daemon"
+      ],
+      "focusedArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-recovery-20261020-itr-b2-focused01",
+        "--test-tasks",
+        "test,guidedIncrementalTest",
+        "--require-exec-tasks",
+        "test,guidedIncrementalTest",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
+        "guidedIncrementalTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "fullClassSlotCost": 0,
+      "classGreenClaim": false
+    },
+    {
+      "stage": "03-b3",
+      "batch": "B3",
+      "beforeSha256": "52fdebd2f39ee82a6cc6888c5399f2969a4b49cdea830bb1c29534447521d42d",
+      "candidateSha256": "5edc4f1a922967de8031de23689332f35ab39a5a502f9862941627bdfcf2722d",
+      "historicalBeforeSha256": "772398e1b84fdb3c03ecf692685fb9a5ae3f76b6d81d6c0d980d72e3a41955f7",
+      "historicalCandidateSha256": "3d9712871710704874c3aff4a3c5b79a62534ef370c07ef7fe5951869954d8ea",
+      "historicalIncrementalPatchPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/stages/03-b3/incremental.patch",
+      "historicalIncrementalPatchSha256": "995b5256353333eed248ebf365b0eb12750f587c73044bc7bb86d6d96972706f",
+      "exactExistingHunks": [
+        {
+          "historicalHeader": "@@ -20562,16 +20562,115 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 742,
+          "newBytes": 6091
+        },
+        {
+          "historicalHeader": "@@ -21009,9 +21108,108 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 469,
+          "newBytes": 5729
+        },
+        {
+          "historicalHeader": "@@ -21179,8 +21377,107 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 464,
+          "newBytes": 5724
+        },
+        {
+          "historicalHeader": "@@ -21655,11 +21952,28 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 536,
+          "newBytes": 1567
+        },
+        {
+          "historicalHeader": "@@ -21669,7 +21983,7 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 393,
+          "newBytes": 404
+        },
+        {
+          "historicalHeader": "@@ -21689,12 +22003,94 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 467,
+          "newBytes": 4867
+        },
+        {
+          "historicalHeader": "@@ -21914,13 +22310,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 584,
+          "newBytes": 5960
+        },
+        {
+          "historicalHeader": "@@ -22014,16 +22509,115 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 723,
+          "newBytes": 6165
+        },
+        {
+          "historicalHeader": "@@ -22035,13 +22629,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 585,
+          "newBytes": 6001
+        },
+        {
+          "historicalHeader": "@@ -22501,16 +23194,115 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 657,
+          "newBytes": 5998
+        },
+        {
+          "historicalHeader": "@@ -23618,19 +24410,36 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 805,
+          "newBytes": 2021
+        },
+        {
+          "historicalHeader": "@@ -23641,7 +24450,7 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 269,
+          "newBytes": 280
+        },
+        {
+          "historicalHeader": "@@ -23657,16 +24466,98 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 433,
+          "newBytes": 4919
+        },
+        {
+          "historicalHeader": "@@ -25500,10 +26391,109 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 574,
+          "newBytes": 5796
+        },
+        {
+          "historicalHeader": "@@ -25779,10 +26769,109 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 524,
+          "newBytes": 5756
+        },
+        {
+          "historicalHeader": "@@ -25813,14 +26902,113 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 508,
+          "newBytes": 5995
+        },
+        {
+          "historicalHeader": "@@ -26779,8 +27967,25 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 530,
+          "newBytes": 1499
+        },
+        {
+          "historicalHeader": "@@ -26795,9 +28000,91 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 297,
+          "newBytes": 4755
+        },
+        {
+          "historicalHeader": "@@ -27180,10 +28467,109 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 509,
+          "newBytes": 5874
+        },
+        {
+          "historicalHeader": "@@ -27345,13 +28731,112 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 509,
+          "newBytes": 5792
+        },
+        {
+          "historicalHeader": "@@ -28402,9 +29887,26 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 266,
+          "newBytes": 1270
+        },
+        {
+          "historicalHeader": "@@ -28413,11 +29915,93 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 479,
+          "newBytes": 4825
+        },
+        {
+          "historicalHeader": "@@ -28463,19 +30047,36 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 1051,
+          "newBytes": 2261
+        },
+        {
+          "historicalHeader": "@@ -28511,12 +30112,94 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 490,
+          "newBytes": 4840
+        },
+        {
+          "historicalHeader": "@@ -28767,8 +30450,107 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 394,
+          "newBytes": 5633
+        },
+        {
+          "historicalHeader": "@@ -29687,16 +31469,115 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 575,
+          "newBytes": 5844
+        },
+        {
+          "historicalHeader": "@@ -29759,20 +31640,119 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 1037,
+          "newBytes": 6495
+        },
+        {
+          "historicalHeader": "@@ -30736,9 +32716,107 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 450,
+          "newBytes": 5731
+        },
+        {
+          "historicalHeader": "@@ -31027,14 +33105,113 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 468,
+          "newBytes": 5846
+        },
+        {
+          "historicalHeader": "@@ -34935,19 +37112,36 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 1040,
+          "newBytes": 2240
+        },
+        {
+          "historicalHeader": "@@ -34961,12 +37155,94 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 405,
+          "newBytes": 4745
+        },
+        {
+          "historicalHeader": "@@ -36169,8 +38445,25 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 354,
+          "newBytes": 1287
+        },
+        {
+          "historicalHeader": "@@ -36178,9 +38471,91 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 359,
+          "newBytes": 4767
+        }
+      ],
+      "forwardPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/03-b3/forward.patch",
+      "forwardSha256": "27eacd0520fc66fd75c15e8cf264ba5188d9fd6e6d4875fb06cc742c07852217",
+      "inversePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/03-b3/inverse.patch",
+      "inverseSha256": "fdc454d1087f7aadcf9caac6898863616bca2aebe6e91c83c6d04db3ce870354",
+      "originalPollRowIds": [
+        44,
+        47,
+        49,
+        50,
+        52,
+        54,
+        55,
+        60,
+        63,
+        67,
+        69,
+        72,
+        73,
+        74,
+        75,
+        77,
+        78,
+        79,
+        80,
+        81,
+        83,
+        85,
+        89,
+        90
+      ],
+      "orderedAnnotatedMethodsPreserved": 74,
+      "acceptedAndOriginalAssertionsPreserved": 2712,
+      "acceptedC6SupportBodyAndHelperByteExact": true,
+      "embeddedTextBlocksByteExact": 10,
+      "remainingOriginalSleeps": 33,
+      "retainedDeliberateSleepSequenceExact": true,
+      "selectors": {
+        "test": [
+          "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
+          "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
+          "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending"
+        ],
+        "guidedIncrementalTest": [
+          "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate"
+        ]
+      },
+      "compileArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py",
+        "obs011-recovery-20261020-itr-b3-compile01",
+        "compileTestJava",
+        "--no-daemon"
+      ],
+      "focusedArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-recovery-20261020-itr-b3-focused01",
+        "--test-tasks",
+        "test,guidedIncrementalTest",
+        "--require-exec-tasks",
+        "test,guidedIncrementalTest",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending",
+        "guidedIncrementalTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "fullClassSlotCost": 0,
+      "classGreenClaim": false
+    },
+    {
+      "stage": "04-b4",
+      "batch": "B4",
+      "beforeSha256": "5edc4f1a922967de8031de23689332f35ab39a5a502f9862941627bdfcf2722d",
+      "candidateSha256": "abb4773016aa3499b76cf1aae3ac0da0f0b820ac4df19fb66887188c7dfe53f4",
+      "historicalBeforeSha256": "3d9712871710704874c3aff4a3c5b79a62534ef370c07ef7fe5951869954d8ea",
+      "historicalCandidateSha256": "98aec4f908d92c89a5d50155e35702eb8b8e3c98270d82655f212b328ca0e42c",
+      "historicalIncrementalPatchPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/it-r-draft/resume3/stages/04-b4/incremental.patch",
+      "historicalIncrementalPatchSha256": "a2d22ff800759d7de82e2fba35c75ec46b0b4227b3795f4487dbd64bcde3bfcf",
+      "exactExistingHunks": [
+        {
+          "historicalHeader": "@@ -737,25 +737,124 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 1194,
+          "newBytes": 6619
+        },
+        {
+          "historicalHeader": "@@ -954,10 +1053,109 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 530,
+          "newBytes": 5846
+        },
+        {
+          "historicalHeader": "@@ -1010,8 +1208,25 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 276,
+          "newBytes": 1292
+        },
+        {
+          "historicalHeader": "@@ -1043,7 +1258,7 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 257,
+          "newBytes": 264
+        },
+        {
+          "historicalHeader": "@@ -1065,7 +1280,7 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 351,
+          "newBytes": 358
+        },
+        {
+          "historicalHeader": "@@ -1076,14 +1291,96 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 644,
+          "newBytes": 5055
+        },
+        {
+          "historicalHeader": "@@ -2304,15 +2601,114 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 681,
+          "newBytes": 6242
+        },
+        {
+          "historicalHeader": "@@ -3938,15 +4334,114 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 603,
+          "newBytes": 5938
+        },
+        {
+          "historicalHeader": "@@ -25807,10 +26302,109 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 512,
+          "newBytes": 5793
+        },
+        {
+          "historicalHeader": "@@ -26227,8 +26821,25 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 346,
+          "newBytes": 1349
+        },
+        {
+          "historicalHeader": "@@ -26247,10 +26858,92 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 235,
+          "newBytes": 4610
+        },
+        {
+          "historicalHeader": "@@ -26888,10 +27581,109 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 443,
+          "newBytes": 5730
+        },
+        {
+          "historicalHeader": "@@ -40372,9 +41164,108 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 488,
+          "newBytes": 5762
+        },
+        {
+          "historicalHeader": "@@ -40535,10 +41426,109 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 437,
+          "newBytes": 5721
+        },
+        {
+          "historicalHeader": "@@ -40556,11 +41546,110 @@",
+          "completeOldContextMatches": 1,
+          "oldBytes": 499,
+          "newBytes": 5779
+        }
+      ],
+      "forwardPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/04-b4/forward.patch",
+      "forwardSha256": "08922e7adcb26b6868d40c02b5ea40c7c634fb4eab940fb0f32ca47d4dcdef29",
+      "inversePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/itr-execution/wait-batches/04-b4/inverse.patch",
+      "inverseSha256": "f464dcd5dfb258aeba6b12b23562bad94f5a15915acc1189ecd1ba5b3b90cce0",
+      "originalPollRowIds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        64,
+        66,
+        70,
+        93,
+        94,
+        95
+      ],
+      "orderedAnnotatedMethodsPreserved": 74,
+      "acceptedAndOriginalAssertionsPreserved": 2712,
+      "acceptedC6SupportBodyAndHelperByteExact": true,
+      "embeddedTextBlocksByteExact": 10,
+      "remainingOriginalSleeps": 21,
+      "retainedDeliberateSleepSequenceExact": true,
+      "selectors": {
+        "test": [
+          "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper",
+          "actualSecretControlWindowLossBeforeReadyReachesTerminalError"
+        ],
+        "guidedIncrementalTest": [
+          "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate"
+        ]
+      },
+      "compileArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend.py",
+        "obs011-recovery-20261020-itr-b4-compile01",
+        "compileTestJava",
+        "--no-daemon"
+      ],
+      "focusedArgv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-recovery-20261020-itr-b4-focused01",
+        "--test-tasks",
+        "test,guidedIncrementalTest",
+        "--require-exec-tasks",
+        "test,guidedIncrementalTest",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.actualSecretControlWindowLossBeforeReadyReachesTerminalError",
+        "guidedIncrementalTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "fullClassSlotCost": 0,
+      "classGreenClaim": false
+    }
+  ],
+  "frozenDistDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "pairedProofsRerun": false,
+  "readerChecksChanged": false,
+  "profileCorrection": "Historical lean example secret-version method is default test by exact source registry; plan uses its actual task, no new omission/allowance.",
+  "preparationObservation": "Bare loop text can repeat in both old/current buffers; first strict uniqueness assertion stopped source-only preparation without writing source. Complete existing patch hunks all match uniquely and reconstruct exact historical/current predictions.",
+  "allFullClassStagesRemainForRoot": true
+}

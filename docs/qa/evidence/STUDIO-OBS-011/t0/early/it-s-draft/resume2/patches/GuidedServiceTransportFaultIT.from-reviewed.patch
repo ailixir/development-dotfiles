@@ -1,0 +1,271 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -1328,17 +1328,22 @@
+     {
+       class ItsPollTransportownedrowlock {
+         Throwable failure;
++        boolean terminal;
+         boolean slept;
+         boolean initialAwaitTick = true;
+         Map<String, Object> result;
+ 
+         boolean step() {
++          if (terminal) {
++            return true;
++          }
+           try {
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+ 
+             if (!(System.nanoTime() < until)) {
++              terminal = true;
+               return true;
+             }
+             var rows =
+@@ -1351,6 +1356,7 @@
+                     holderPid);
+             if (rows.size() == 1) {
+               result = rows.getFirst();
++              terminal = true;
+               return true;
+             }
+             if (Thread.interrupted()) {
+@@ -1361,6 +1367,7 @@
+ 
+           } catch (Throwable caught) {
+             failure = caught;
++            terminal = true;
+             return true;
+           }
+         }
+@@ -1385,7 +1392,9 @@
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+           // Preserve the original last guard/observation and its assertion/error mapping.
+-          itsPoll.step();
++          if (!itsPoll.terminal) {
++            itsPoll.step();
++          }
+         }
+       }
+       if (itsPoll.failure instanceof InterruptedException interrupted) {
+@@ -1716,17 +1725,22 @@
+         {
+           class ItsPollTransportrouteidleobserve {
+             Throwable failure;
++            boolean terminal;
+             boolean slept;
+             boolean initialAwaitTick = true;
+ 
+ 
+             boolean step() {
++              if (terminal) {
++                return true;
++              }
+               try {
+                 if (slept && Thread.interrupted()) {
+                   throw new InterruptedException();
+                 }
+ 
+                 if (!(!route.idle() && System.nanoTime() < until)) {
++                  terminal = true;
+                   return true;
+                 }
+                 if (Thread.interrupted()) {
+@@ -1737,6 +1751,7 @@
+ 
+               } catch (Throwable caught) {
+                 failure = caught;
++                terminal = true;
+                 return true;
+               }
+             }
+@@ -1761,7 +1776,9 @@
+                       });
+             } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+               // Preserve the original last guard/observation and its assertion/error mapping.
+-              itsPoll.step();
++              if (!itsPoll.terminal) {
++                itsPoll.step();
++              }
+             }
+           }
+           if (itsPoll.failure instanceof Exception exception) {
+@@ -2109,17 +2126,22 @@
+       {
+         class ItsPollTransportrouteidlecleanup {
+           Throwable failure;
++          boolean terminal;
+           boolean slept;
+           boolean initialAwaitTick = true;
+ 
+ 
+           boolean step() {
++            if (terminal) {
++              return true;
++            }
+             try {
+               if (slept && Thread.interrupted()) {
+                 throw new InterruptedException();
+               }
+ 
+               if (!(!route.idle() && System.nanoTime() < until)) {
++                terminal = true;
+                 return true;
+               }
+               if (Thread.interrupted()) {
+@@ -2130,6 +2152,7 @@
+ 
+             } catch (Throwable caught) {
+               failure = caught;
++              terminal = true;
+               return true;
+             }
+           }
+@@ -2154,7 +2177,9 @@
+                     });
+           } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+             // Preserve the original last guard/observation and its assertion/error mapping.
+-            itsPoll.step();
++            if (!itsPoll.terminal) {
++              itsPoll.step();
++            }
+           }
+         }
+         if (itsPoll.failure instanceof Exception exception) {
+@@ -2880,11 +2905,15 @@
+       {
+         class ItsPollTransportcontrollerstage {
+           Throwable failure;
++          boolean terminal;
+           boolean slept;
+           boolean initialAwaitTick = true;
+           String stageContent = initialStageContent;
+ 
+           boolean step() {
++            if (terminal) {
++              return true;
++            }
+             try {
+               if (slept && Thread.interrupted()) {
+                 throw new InterruptedException();
+@@ -2895,6 +2924,7 @@
+               if (!(!stageContent.equals(expectedStage)
+                   && System.nanoTime() < stageDeadline
+                   && itsStageChild.isAlive())) {
++                terminal = true;
+                 return true;
+               }
+               if (Thread.interrupted()) {
+@@ -2905,6 +2935,7 @@
+ 
+             } catch (Throwable caught) {
+               failure = caught;
++              terminal = true;
+               return true;
+             }
+           }
+@@ -2929,7 +2960,9 @@
+                     });
+           } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+             // Preserve the original last guard/observation and its assertion/error mapping.
+-            itsPoll.step();
++            if (!itsPoll.terminal) {
++              itsPoll.step();
++            }
+           }
+         }
+         if (itsPoll.failure instanceof Exception exception) {
+@@ -4861,17 +4894,22 @@
+     {
+       class ItsPollTransportteardown {
+         Throwable failure;
++        boolean terminal;
+         boolean slept;
+         boolean initialAwaitTick = true;
+ 
+ 
+         boolean step() {
++          if (terminal) {
++            return true;
++          }
+           try {
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+ 
+             if (!(!condition.getAsBoolean())) {
++              terminal = true;
+               return true;
+             }
+             if (System.nanoTime() > until) {
+@@ -4885,6 +4923,7 @@
+ 
+           } catch (Throwable caught) {
+             failure = caught;
++            terminal = true;
+             return true;
+           }
+         }
+@@ -4909,7 +4948,9 @@
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+           // Preserve the original last guard/observation and its assertion/error mapping.
+-          itsPoll.step();
++          if (!itsPoll.terminal) {
++            itsPoll.step();
++          }
+         }
+       }
+       if (itsPoll.failure instanceof InterruptedException interrupted) {
+@@ -5044,17 +5085,22 @@
+     {
+       class ItsPollTransportactualstop {
+         Throwable failure;
++        boolean terminal;
+         boolean slept;
+         boolean initialAwaitTick = true;
+         boolean completed;
+ 
+         boolean step() {
++          if (terminal) {
++            return true;
++          }
+           try {
+             if (slept && Thread.interrupted()) {
+               throw new InterruptedException();
+             }
+ 
+             if (!(System.nanoTime() < until)) {
++              terminal = true;
+               return true;
+             }
+             assertThat(work.failure.get()).as("actual fixture stop delivery must succeed").isNull();
+@@ -5088,6 +5134,7 @@
+                 assertThat(status.get("teardown")).isEqualTo("CONFIRMED");
+               }
+               completed = true;
++              terminal = true;
+               return true;
+             }
+             if (Thread.interrupted()) {
+@@ -5098,6 +5145,7 @@
+ 
+           } catch (Throwable caught) {
+             failure = caught;
++            terminal = true;
+             return true;
+           }
+         }
+@@ -5122,7 +5170,9 @@
+                   });
+         } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+           // Preserve the original last guard/observation and its assertion/error mapping.
+-          itsPoll.step();
++          if (!itsPoll.terminal) {
++            itsPoll.step();
++          }
+         }
+       }
+       if (itsPoll.failure instanceof Exception exception) {

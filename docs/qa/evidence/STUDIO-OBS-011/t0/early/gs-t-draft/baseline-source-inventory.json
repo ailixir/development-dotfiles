@@ -1,0 +1,1140 @@
+[
+  {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+    "sha256": "4d47ad6f8d67bfd3278b0d3f3930085e90f190d0ea500875272082eb97a7754e",
+    "methods": [
+      {
+        "name": "migrationPreservesExistingDataAndFreshInstallWorks",
+        "annotation": "Test",
+        "line": 138,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 3
+        }
+      },
+      {
+        "name": "canonicalUnicodeParityAndClosedSchema",
+        "annotation": "Test",
+        "line": 159,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 1,
+          "assertions": 3
+        }
+      },
+      {
+        "name": "concurrentIdenticalStartsAndChangedDigestAreDurable",
+        "annotation": "Test",
+        "line": 171,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 4,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "concurrentConflictingStartsHaveOneWinner",
+        "annotation": "Test",
+        "line": 189,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 2,
+          "assertions": 1
+        }
+      },
+      {
+        "name": "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch",
+        "annotation": "Test",
+        "line": 204,
+        "calls": {
+          "admit": 2,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 5
+        }
+      },
+      {
+        "name": "conflictingAdmissionAndUniqueCoordinatesFail",
+        "annotation": "Test",
+        "line": 225,
+        "calls": {
+          "admit": 2,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 2
+        }
+      },
+      {
+        "name": "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge",
+        "annotation": "Test",
+        "line": 247,
+        "calls": {
+          "admit": 2,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "accessIsolationRechecksPrincipalCsiAccountAndScope",
+        "annotation": "Test",
+        "line": 265,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "workerSubjectFenceAndLeaseAreIndependent",
+        "annotation": "Test",
+        "line": 282,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 7
+        }
+      },
+      {
+        "name": "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown",
+        "annotation": "Test",
+        "line": 306,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "lostAckNeverRetriesAndDelayedCallbackCannotRevive",
+        "annotation": "Test",
+        "line": 328,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 6
+        }
+      },
+      {
+        "name": "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence",
+        "annotation": "Test",
+        "line": 344,
+        "calls": {
+          "admit": 1,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 2,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "expiryCannotBeExtendedAndTrustedReaperRevokes",
+        "annotation": "Test",
+        "line": 365,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "entireSessionBudgetsAreReservedAndMissingUsageIsConservative",
+        "annotation": "Test",
+        "line": 386,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 3
+        }
+      },
+      {
+        "name": "observationBudgetAndGenerationAreSharedAcrossActions",
+        "annotation": "Test",
+        "line": 412,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 2
+        }
+      },
+      {
+        "name": "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent",
+        "annotation": "Test",
+        "line": 424,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 3
+        }
+      },
+      {
+        "name": "noStateCanPublishWithoutExactVerifier",
+        "annotation": "Test",
+        "line": 440,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed",
+        "annotation": "Test",
+        "line": 456,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 2,
+          "assertions": 3
+        }
+      },
+      {
+        "name": "clarificationIsBoundToGenerationChoiceAndOriginalDeadline",
+        "annotation": "Test",
+        "line": 471,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 2
+        }
+      },
+      {
+        "name": "successfulLedgerStillCannotPublishWithoutExactPlanVerifier",
+        "annotation": "Test",
+        "line": 495,
+        "calls": {
+          "admit": 1,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 9
+        }
+      },
+      {
+        "name": "actionBudgetAndFalseAssertionReportsFailClosed",
+        "annotation": "Test",
+        "line": 554,
+        "calls": {
+          "admit": 1,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 2
+        }
+      },
+      {
+        "name": "gatewayOverrunIsDurablyChargedAndStopsFurtherWork",
+        "annotation": "Test",
+        "line": 574,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "evidenceReferencesAreScopedAndDoNotClaimReplay",
+        "annotation": "Test",
+        "line": 589,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 5
+        }
+      },
+      {
+        "name": "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping",
+        "annotation": "Test",
+        "line": 612,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 14
+        }
+      },
+      {
+        "name": "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState",
+        "annotation": "Test",
+        "line": 648,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 7
+        }
+      },
+      {
+        "name": "clarificationSelectionAndPauseChangeRollBackTogether",
+        "annotation": "Test",
+        "line": 673,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer",
+        "annotation": "Test",
+        "line": 697,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 10
+        }
+      },
+      {
+        "name": "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery",
+        "annotation": "Test",
+        "line": 725,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 6
+        }
+      },
+      {
+        "name": "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot",
+        "annotation": "Test",
+        "line": 756,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 7
+        }
+      },
+      {
+        "name": "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate",
+        "annotation": "Test",
+        "line": 782,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 5
+        }
+      },
+      {
+        "name": "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit",
+        "annotation": "Test",
+        "line": 825,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 6
+        }
+      },
+      {
+        "name": "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand",
+        "annotation": "Test",
+        "line": 864,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 7
+        }
+      },
+      {
+        "name": "liveOwnerRenewalPreservesAdmittedAndDispatchedActions",
+        "annotation": "Test",
+        "line": 927,
+        "calls": {
+          "admit": 1,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "takeoverCannotReopenFinalizingAfterExecutedEffects",
+        "annotation": "Test",
+        "line": 942,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 5
+        }
+      },
+      {
+        "name": "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict",
+        "annotation": "Test",
+        "line": 991,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 2
+        }
+      },
+      {
+        "name": "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack",
+        "annotation": "Test",
+        "line": 1024,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 3
+        }
+      },
+      {
+        "name": "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal",
+        "annotation": "Test",
+        "line": 1084,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 5
+        }
+      },
+      {
+        "name": "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults",
+        "annotation": "Test",
+        "line": 1118,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation",
+        "annotation": "Test",
+        "line": 1188,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority",
+        "annotation": "Test",
+        "line": 1223,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 11
+        }
+      },
+      {
+        "name": "unsupportedObservationEnvelopeUsesOriginalLockedValidation",
+        "annotation": "Test",
+        "line": 1266,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 2
+        }
+      },
+      {
+        "name": "unavailableObservationPreparationFallsBackAndFatalRemainsEarly",
+        "annotation": "Test",
+        "line": 1296,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 3
+        }
+      },
+      {
+        "name": "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite",
+        "annotation": "Test",
+        "line": 1329,
+        "calls": {
+          "admit": 2,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 3,
+          "materialize": 1,
+          "start": 1,
+          "assertions": 11
+        }
+      },
+      {
+        "name": "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash",
+        "annotation": "Test",
+        "line": 1593,
+        "calls": {
+          "admit": 1,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 2,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      }
+    ]
+  },
+  {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "sha256": "97162010003856cdc7f55f411e286a70f381a664c78c2e5b5cde7d5415784db9",
+    "methods": [
+      {
+        "name": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery",
+        "annotation": "ParameterizedTest",
+        "line": 429,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 1,
+          "dispatch": 3,
+          "observing": 0,
+          "materialize": 1,
+          "start": 2,
+          "assertions": 35
+        }
+      },
+      {
+        "name": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit",
+        "annotation": "Test",
+        "line": 703,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 1,
+          "dispatch": 3,
+          "observing": 0,
+          "materialize": 1,
+          "start": 2,
+          "assertions": 45
+        }
+      },
+      {
+        "name": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased",
+        "annotation": "Test",
+        "line": 1102,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 4,
+          "observing": 0,
+          "materialize": 0,
+          "start": 1,
+          "assertions": 62
+        }
+      },
+      {
+        "name": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+        "annotation": "Test",
+        "line": 1542,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 0
+        }
+      },
+      {
+        "name": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent",
+        "annotation": "Test",
+        "line": 1547,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 1,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 1,
+          "start": 1,
+          "assertions": 72
+        }
+      },
+      {
+        "name": "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop",
+        "annotation": "Test",
+        "line": 2233,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 27
+        }
+      },
+      {
+        "name": "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback",
+        "annotation": "Test",
+        "line": 2342,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 30
+        }
+      },
+      {
+        "name": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost",
+        "annotation": "Test",
+        "line": 2616,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 0
+        }
+      },
+      {
+        "name": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost",
+        "annotation": "Test",
+        "line": 2621,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 1,
+          "dispatch": 3,
+          "observing": 0,
+          "materialize": 1,
+          "start": 3,
+          "assertions": 60
+        }
+      },
+      {
+        "name": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+        "annotation": "Test",
+        "line": 3566,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 0
+        }
+      },
+      {
+        "name": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+        "annotation": "Test",
+        "line": 3571,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 0
+        }
+      },
+      {
+        "name": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+        "annotation": "Test",
+        "line": 3576,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 0
+        }
+      },
+      {
+        "name": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose",
+        "annotation": "Test",
+        "line": 3581,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 1,
+          "assertions": 33
+        }
+      },
+      {
+        "name": "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout",
+        "annotation": "Test",
+        "line": 3794,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 5
+        }
+      },
+      {
+        "name": "expiredTeardownConfirmsOnSweepAfterResendsExhausted",
+        "annotation": "Test",
+        "line": 3822,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 7
+        }
+      },
+      {
+        "name": "teardownWithoutAckNeverConfirmsAndStopsAfterWindow",
+        "annotation": "Test",
+        "line": 3851,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 1,
+          "assertions": 13
+        }
+      },
+      {
+        "name": "abandonedTeardownReportQueriesOncePerIntervalAndIsSilentWhenNone",
+        "annotation": "Test",
+        "line": 3910,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 1,
+          "assertions": 1
+        }
+      },
+      {
+        "name": "concurrentAfterCompletionAndSweepSendOneStopAtATime",
+        "annotation": "Test",
+        "line": 3947,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 8
+        }
+      },
+      {
+        "name": "legacyPendingWithoutRequestIsNotRedriven",
+        "annotation": "Test",
+        "line": 3989,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "publicationConflictTeardownTargetsTheAssignmentAndConfirms",
+        "annotation": "Test",
+        "line": 4039,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 5
+        }
+      },
+      {
+        "name": "publicationConflictedIsIdempotentAndFailsClosed",
+        "annotation": "Test",
+        "line": 4060,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 8
+        }
+      },
+      {
+        "name": "publicationConflictTeardownIsRedrivenAfterResendsExhausted",
+        "annotation": "Test",
+        "line": 4110,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 6
+        }
+      },
+      {
+        "name": "pendingAppendPublicationConflictTargetsTheAssignment",
+        "annotation": "Test",
+        "line": 4138,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 6
+        }
+      },
+      {
+        "name": "stopWithoutAStopTargetRecordsNoPendingTeardown",
+        "annotation": "Test",
+        "line": 4167,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "pendingAppendDeliveryTeardownTargetsTheAssignment",
+        "annotation": "Test",
+        "line": 4197,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 7
+        }
+      },
+      {
+        "name": "noPendingDeliveryKeepsIdentityTarget",
+        "annotation": "Test",
+        "line": 4232,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 5
+        }
+      },
+      {
+        "name": "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing",
+        "annotation": "Test",
+        "line": 4259,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 10
+        }
+      },
+      {
+        "name": "lifecycleAtLastAcknowledgedIdentityEndsSession",
+        "annotation": "Test",
+        "line": 4311,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "lifecycleAtAnyOtherIdentityIsRefusedWhilePending",
+        "annotation": "Test",
+        "line": 4339,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 11
+        }
+      },
+      {
+        "name": "consumingVerificationStaysRefusedWhilePending",
+        "annotation": "Test",
+        "line": 4396,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 3
+        }
+      },
+      {
+        "name": "lifecycleWithoutPendingDeliveryIsExactlyVerify",
+        "annotation": "Test",
+        "line": 4411,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 0,
+          "materialize": 1,
+          "start": 3,
+          "assertions": 43
+        }
+      }
+    ]
+  },
+  {
+    "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+    "sha256": "8e5e4473c54e3884008ca63a3c87888ba6dcca514b5165f9dc40f8f20991613b",
+    "methods": [
+      {
+        "name": "anExpiredReportAcceptedBeforeTheBackendExpiryEndsExpired",
+        "annotation": "Test",
+        "line": 131,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 5
+        }
+      },
+      {
+        "name": "everyOtherReasonStillEndsFailed",
+        "annotation": "Test",
+        "line": 152,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "aDispatchingActionStillEndsUnknownOutcomeWhateverTheReason",
+        "annotation": "Test",
+        "line": 173,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 4
+        }
+      },
+      {
+        "name": "aCallbackPastTheLeaseIsStillRefusedStaleFenceAndNothingIsStopped",
+        "annotation": "Test",
+        "line": 192,
+        "calls": {
+          "admit": 0,
+          "prepareAndAdmit": 0,
+          "dispatch": 0,
+          "observing": 1,
+          "materialize": 0,
+          "start": 0,
+          "assertions": 2
+        }
+      },
+      {
+        "name": "theContextIdentityIsStillCheckedWhateverTheReason",
+        "annotation": "Test",
+        "line": 206,
+        "calls": {
+          "admit": 1,
+          "prepareAndAdmit": 0,
+          "dispatch": 1,
+          "observing": 2,
+          "materialize": 1,
+          "start": 1,
+          "assertions": 3
+        }
+      }
+    ]
+  }
+]

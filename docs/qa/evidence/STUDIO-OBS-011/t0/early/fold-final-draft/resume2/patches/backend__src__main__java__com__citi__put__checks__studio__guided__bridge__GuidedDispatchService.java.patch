@@ -1,0 +1,151 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java
+@@ -19,40 +19,10 @@
+ public final class GuidedDispatchService {
+   private final GuidedSessionService sessions;
+   private final GuidedMaterializationService materialization;
+-  @FunctionalInterface
+-  private interface Send2 {
+-    JsonNode send(String operation, JsonNode body);
+-  }
+-  @FunctionalInterface
+-  private interface Send3 {
+-    JsonNode send(String operation, JsonNode body, String key);
+-  }
+-  @FunctionalInterface
+-  private interface Send4 {
+-    JsonNode send(String operation, JsonNode body, String key, java.time.Instant deadline);
+-  }
+-  @FunctionalInterface
+-  private interface SendSecret {
+-    JsonNode send(JsonNode body, JsonNode metadata,
+-        com.citi.put.checks.studio.secrets.SecretValue secret, java.time.Instant deadline);
+-  }
+-  private final Send2 sender2;
+-  private final Send3 sender3;
+-  private final Send4 sender4;
+-  private final SendSecret secretSender;
++  private final com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient runner;
+   private com.citi.put.checks.studio.dispatch.StudioReferenceResolver references;
+ 
+-  public GuidedDispatchService(
+-      GuidedSessionService sessions,
+-      GuidedMaterializationService materialization,
+-      GuidedRunnerClient runner) {
+-    this.sessions = sessions;
+-    this.materialization = materialization;
+-    this.sender2 = runner::send;
+-    this.sender3 = runner::send;
+-    this.sender4 = runner::send;
+-    this.secretSender = runner::sendSecret;
+-  }
++
+ 
+   public GuidedDispatchService(
+       GuidedSessionService sessions,
+@@ -60,22 +30,7 @@
+       com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient runner) {
+     this.sessions = sessions;
+     this.materialization = materialization;
+-    this.sender2 = runner::send;
+-    this.sender3 = runner::send;
+-    this.sender4 = runner::send;
+-    this.secretSender = runner::sendSecret;
+-  }
+-
+-  private JsonNode send(String operation, JsonNode body) {
+-    return sender2.send(operation, body);
+-  }
+-
+-  private JsonNode send(String operation, JsonNode body, String key) {
+-    return sender3.send(operation, body, key);
+-  }
+-
+-  private JsonNode send(String operation, JsonNode body, String key, java.time.Instant deadline) {
+-    return sender4.send(operation, body, key, deadline);
++    this.runner = runner;
+   }
+ 
+   public void installReferences(
+@@ -133,7 +88,7 @@
+   public JsonNode assign(Authentication controller, String id, String key, String workerId) {
+     noTransaction();
+     ObjectNode intent = sessions.prepareAssignment(controller, id, key, workerId);
+-    JsonNode receipt = send("assign", intent, key);
++    JsonNode receipt = runner.send("assign", intent, key);
+     sessions.acknowledgeAssignment(controller, id, receipt);
+     return receipt;
+   }
+@@ -146,8 +101,8 @@
+     // leaseExpiresAt (the V21 ACK deadline); the caller-deadline overload refuses locally.
+     JsonNode acknowledgement =
+         delivery == null
+-            ? send("context", context)
+-            : send(
++            ? runner.send("context", context)
++            : runner.send(
+                 "context",
+                 context,
+                 delivery,
+@@ -167,7 +122,7 @@
+     }
+     JsonNode response;
+     try {
+-      response = send("observe", request, key);
++      response = runner.send("observe", request, key);
+     } catch (RuntimeException failure) {
+       JsonNode recovered =
+           sessions.committedObservationRefresh(controller, id, fence, key, request, null);
+@@ -189,7 +144,7 @@
+     ObjectNode context = sessions.runnerContext(controller, id, fence);
+     preflight(id, secretInput(context, proposal));
+     try {
+-      send("context", context);
++      runner.send("context", context);
+     } catch (RuntimeException failure) {
+       if (com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.definiteContextRefusal(failure)) {
+         // ar-2-r14-stops ruling 2: the session ends FAILED RUNTIME_INCOMPATIBLE before prepare is
+@@ -202,14 +157,14 @@
+     request.set("proposal", proposal);
+     request.put("requestDigest", GuidedContracts.hash(proposal));
+     request.set("expiresAt", context.path("leaseExpiresAt"));
+-    JsonNode proof = send("prepare", request);
++    JsonNode proof = runner.send("prepare", request);
+     sessions.storePreparation(controller, id, fence, proposal, proof);
+     return sessions.admit(controller, id, fence, key, proposal);
+   }
+ 
+   public JsonNode preparePrefix(JsonNode request) {
+     noTransaction();
+-    return send("prepare", request, request.path("requestDigest").asText());
++    return runner.send("prepare", request, request.path("requestDigest").asText());
+   }
+ 
+   public JsonNode dispatch(
+@@ -234,7 +189,7 @@
+     try {
+       JsonNode input = secretInput(won.context(), won.proposal());
+       if (input == null) {
+-        send(
++        runner.send(
+             "dispatch",
+             payload,
+             java.util.UUID.randomUUID().toString(),
+@@ -279,7 +234,7 @@
+             throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+                 "ORIGIN_NOT_ALLOWED", 403);
+           }
+-          secretSender.send(
++          runner.sendSecret(
+               payload,
+               metadata,
+               resolved.secretValues().get(secretId),
+@@ -374,7 +329,7 @@
+       stop = materialization.identity(lastContext);
+     }
+     stop.put("reason", reason);
+-    send("stop", stop, "teardown-" + GuidedContracts.hash(stop));
++    runner.send("stop", stop, "teardown-" + GuidedContracts.hash(stop));
+   }
+ 
+   private static void noTransaction() {

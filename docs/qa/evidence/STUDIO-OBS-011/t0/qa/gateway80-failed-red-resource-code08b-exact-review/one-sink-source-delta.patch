@@ -1,0 +1,11 @@
+--- sealed/dispatcher_check.py
++++ review/one-sink-dispatcher_check.py
+@@ -38,7 +38,7 @@
+ K=json.loads(TARGET['contract.json'])
+ PRIVATE='docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-source04-install-input-directory-facts.json'
+ assert K['externalInputModes'][PRIVATE]==0o600 and len(K['externalInputModes'])==29
+-RESULT_FD=os.open(str(HERE/'dispatcher-results.json'),os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o644)
++RESULT_FD=os.open('/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/dispatcher-results.json',os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o644)
+ WRITE,CLOSE=os.write,os.close
+ CHECKS=[];DETAILS=[]
+ def check(name,value):

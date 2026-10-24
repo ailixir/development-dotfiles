@@ -1,0 +1,91 @@
+{
+  "strictForwardAndReverseFiles": [
+    "README.md",
+    "RECIPE.md",
+    "archive-and-close.json",
+    "boundary-controls.py",
+    "check-map.json",
+    "exit-gate.py",
+    "guard-exit.bash",
+    "provenance.json",
+    "run-private.py",
+    "scope.json",
+    "verify-final.py"
+  ],
+  "actualChangedCommonMembers": [
+    "CHECKPOINT.json",
+    "README.md",
+    "RECIPE.md",
+    "archive-and-close.json",
+    "boundary-controls.py",
+    "check-map.json",
+    "exit-gate.py",
+    "guard-exit.bash",
+    "preservation.json",
+    "provenance.json",
+    "run-private.py",
+    "scope.json",
+    "static-checks.json",
+    "strict-successor.diff.patch",
+    "strict-successor.reverse.patch",
+    "successor-diff.json",
+    "verify-final.py"
+  ],
+  "generatedCommonExclusions": {
+    "CHECKPOINT.json": {
+      "role": "GENERATED_PREPARATION_STATE_SUMMARY",
+      "oldSha256": "bc035b151aae8b70fb07605f18b7330a63035ce6369cd6b661f381d01ecfd86f",
+      "currentState": "REGENERATED_OR_REPLAYED; no unchanged/current digest claim in this descriptor",
+      "currentHashAuthority": "manifest.json files entry"
+    },
+    "boundary-control-results.json": {
+      "role": "GENERATED_RETAINED_FUNCTIONAL_CONTROL_RESULT",
+      "oldSha256": "258203a6f29f105ec1ad180a4a287fe136aecbf665fe89c55a040cae9f6adf22",
+      "currentState": "REGENERATED_OR_REPLAYED; no unchanged/current digest claim in this descriptor",
+      "currentHashAuthority": "manifest.json files entry"
+    },
+    "preservation.json": {
+      "role": "GENERATED_PRESERVATION_CHECK_SUMMARY",
+      "oldSha256": "0db116b447bd47ec2cc545f54ac988309e5cbe0d48274a8ecbe707116adfdce4",
+      "currentState": "REGENERATED_OR_REPLAYED; no unchanged/current digest claim in this descriptor",
+      "currentHashAuthority": "manifest.json files entry"
+    },
+    "revision-control-results.json": {
+      "role": "GENERATED_RETAINED_REVISION_CONTROL_RESULT",
+      "oldSha256": "9eb2f7f1a980f889a9d1d60f37d267b99658aeac1cd2b26fcb5e345423f36bd6",
+      "currentState": "REGENERATED_OR_REPLAYED; no unchanged/current digest claim in this descriptor",
+      "currentHashAuthority": "manifest.json files entry"
+    },
+    "static-checks.json": {
+      "role": "GENERATED_SOURCE_CHECK_SUMMARY",
+      "oldSha256": "b80921c09fe8ce6c7d438744a2cf1f3c49ec5e4caba1d45425326de65fc373ca",
+      "currentState": "REGENERATED_OR_REPLAYED; no unchanged/current digest claim in this descriptor",
+      "currentHashAuthority": "manifest.json files entry"
+    },
+    "strict-successor.diff.patch": {
+      "role": "GENERATED_STRICT_FORWARD_NONSELF_INPUT_DELTAS",
+      "oldSha256": "e889b0b958797597426e9704bfed69150e32aa747914ea944aaccfd10315ace5",
+      "currentState": "REGENERATED_OR_REPLAYED; no unchanged/current digest claim in this descriptor",
+      "currentHashAuthority": "manifest.json files entry"
+    },
+    "strict-successor.reverse.patch": {
+      "role": "GENERATED_STRICT_REVERSE_NONSELF_INPUT_DELTAS",
+      "oldSha256": "822561d8d671e401d3c854de305cd7f4abc0db078bce01c46e65c7b0dcd8a1dc",
+      "currentState": "REGENERATED_OR_REPLAYED; no unchanged/current digest claim in this descriptor",
+      "currentHashAuthority": "manifest.json files entry"
+    },
+    "successor-diff.json": {
+      "role": "GENERATED_COMPARISON_DESCRIPTOR_NO_CURRENT_SELF_HASH",
+      "oldSha256": "25e7e09ebc7a1e3202da589019d8744666f7c684baf72d4c288012c08087c2a6",
+      "currentState": "REGENERATED_OR_REPLAYED; no unchanged/current digest claim in this descriptor",
+      "currentHashAuthority": "manifest.json files entry"
+    }
+  },
+  "all76CurrentHashModeAssertionsVerified": true,
+  "driverChangedFunctionsOnly": [
+    "guard_leaf",
+    "run_native"
+  ],
+  "nativeScopeArgvBanksAndFinalControlsExact": true,
+  "noActualActions": true
+}

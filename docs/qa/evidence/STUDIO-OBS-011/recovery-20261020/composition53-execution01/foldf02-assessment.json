@@ -1,0 +1,1079 @@
+{
+  "id": "foldf02",
+  "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-final-compose-foldf02-results.json",
+  "resultSha256": "6c07941dd02da291a9d812c0c0d80f5e20d5def2d4c63491903131c997fdf2ec",
+  "counts": {
+    "total": 172,
+    "passed": 172,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "exactCompleteClassExpectedIdentityCounter": true,
+  "actualIdentities": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextDeadlineTest",
+      "name": "unkeyedContextPushPassesNoCallerDeadline()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextDeadlineTest",
+      "name": "keyedAppendIsSentWithTheFrozenLeaseAsCallerDeadline()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextRefusalTest",
+      "name": "aDefiniteContextRefusalFailsTheSessionBeforePrepare()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextRefusalTest",
+      "name": "anUncertainContextReplyKeepsUnknownOutcomeAndFailsNothing()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchStopKeyTest",
+      "name": "contextStopKeyFollowsTheIdentityBodyAndItsReason()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchStopKeyTest",
+      "name": "assignmentStopKeyIsTheTeardownHashOfTheUnchangedBodyOnEveryCall()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "name": "closeBeforeSubscriptionRefusesLateChunksWithoutConsumingThem()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "name": "requestCloseWaitsForOwnedReadMonitorAndRefusesSubsequentReads()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "name": "refusalReplyLimitCompletesExactlyAndCancelsOneByteBeyond()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "name": "oneByteBeyondLimitCancelsAndOwnerCloseErasesAccumulation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "name": "exactResponseLimitCompletesAndAllOwnedArraysAreErased()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerContextRefusalTest",
+      "name": "aPrepareRefusalIsNeverWidenedIntoADefiniteOne()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerContextRefusalTest",
+      "name": "anyOtherContextReplyStaysAnUnknownOutcome()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerContextRefusalTest",
+      "name": "identityMismatchAndSchemaRefusalsOfAContextAreDefinite()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "name": "actualProductionHttpsDefaultFifteenSecondBoundIncludesTheResponseBody()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "name": "[1] status=200",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "name": "[2] status=503",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "name": "guidedPublisherUsesOwnedBytesAndErasesBothBuffersAfterAckAndLostAck()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "name": "actualProductionHttpsInterruptionClosesPartialResponseAndErasesOwnedBuffers()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "storedActorGrantMismatchIsNotOverriddenByRequestHeaders()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] field=attemptId",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] field=revisionId",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[3] field=revisionDigest",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[4] field=artifactHash",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[5] field=configurationHash",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[6] field=learnedPlanHash",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[7] field=referencePolicyHash",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[8] field=publicationEvidenceHash",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[9] field=scopeHash",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[10] field=currentPolicyHash",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[11] field=grantId",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[12] field=startedAt",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] field=schemaVersion, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] field=schemaVersion, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[3] field=schemaVersion, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[4] field=kind, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[5] field=kind, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[6] field=kind, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[7] field=executionId, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[8] field=executionId, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[9] field=executionId, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[10] field=startedAt, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[11] field=startedAt, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[12] field=startedAt, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[13] field=attemptId, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[14] field=attemptId, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[15] field=attemptId, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[16] field=runnerInstanceId, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[17] field=runnerInstanceId, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[18] field=runnerInstanceId, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[19] field=admissionId, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[20] field=admissionId, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[21] field=admissionId, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[22] field=revisionId, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[23] field=revisionId, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[24] field=revisionId, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[25] field=revisionDigest, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[26] field=revisionDigest, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[27] field=revisionDigest, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[28] field=artifactHash, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[29] field=artifactHash, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[30] field=artifactHash, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[31] field=configurationHash, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[32] field=configurationHash, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[33] field=configurationHash, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[34] field=learnedPlanHash, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[35] field=learnedPlanHash, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[36] field=learnedPlanHash, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[37] field=referencePolicyHash, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[38] field=referencePolicyHash, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[39] field=referencePolicyHash, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[40] field=publicationEvidenceHash, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[41] field=publicationEvidenceHash, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[42] field=publicationEvidenceHash, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[43] field=scopeHash, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[44] field=scopeHash, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[45] field=scopeHash, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[46] field=currentPolicyHash, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[47] field=currentPolicyHash, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[48] field=currentPolicyHash, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[49] field=grantId, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[50] field=grantId, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[51] field=grantId, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[52] field=profile, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[53] field=profile, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[54] field=profile, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[55] field=build, mutation=missing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[56] field=build, mutation=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[57] field=build, mutation=wrong-type",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] credential=null, status=401, code=SERVICE_IDENTITY_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] credential=, status=401, code=SERVICE_IDENTITY_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[3] credential=Bearer, status=401, code=SERVICE_IDENTITY_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[4] credential=Bearer , status=401, code=SERVICE_IDENTITY_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[5] credential=Bearer synthetic-private-metadata-canary, status=403, code=SERVICE_IDENTITY_REJECTED",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[6] credential=Basic synthetic-ordinary-service-token-only, status=401, code=SERVICE_IDENTITY_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[7] credential=Bearer synthetic-guided-only-credential-canary, status=403, code=SERVICE_IDENTITY_REJECTED",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] field=principalId",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] field=account",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[3] field=credential",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[4] field=resolvedValues",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[5] field=certificateIdentity",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[6] field=accountGrantId",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "otherwiseValidTupleReachesTheLockedAdmissionTransactionButNeverCasOrSecretResolution()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] field=profile",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] field=build",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "strictParserMustNotQuotePrivateMalformedIdentityValues()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "malformedUtf8CannotTurnIntoReplacementCharacterAuthority()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "queryCredentialIsNotAnOrdinaryServiceCredential()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "bffCookieAndForgedCertificateOrForwardedIdentityGrantNothing()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "crossExecutionRequestRefusesBeforeDatabaseLookup()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "observedByteBoundDoesNotExposeTheBodyAndUnauthenticatedCallerStillGetsIdentityRefusal()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "expiredGrantAndCancelledExecutionStopBeforeAccountOrCas()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] invalid=null",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] invalid=[]",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[3] invalid=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[4] invalid={",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[5] invalid={\"schemaVersion\":2,\"schemaVersion\":2}",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "ordinaryProgressCallbackRetainsRealTokenAndStrictReaderBoundary()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "unknownBindingDoesNotReturnExecutionOrAccountMetadata()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "unsupportedNullCanonicalDependencyRetainsOriginalValidationAndBudgetOrder()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "compiledNodeIndependentlyValidatesChoiceAgainstCurrentPackagedBuild()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "correctedCompleteBasisPreimagesKeepExactlyTheOriginalEvidenceEnvelope()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: missing prospective choice witness",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: answer after expiry by one nanosecond",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: provider meanings order changed",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: coherently resealed singleton original question",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: exact locator kind differs with same text",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: missing original question observation",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: old duplicate locator on hidden unrelated node",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: fresh duplicate locator on hidden unrelated node",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: coherent changed operation",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: coherent alternative authored input",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: meaning cannot replace authored argument with binding",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: original question plan changed meaning despite resealing",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: old generation equals fresh preparation with coherent snapshot",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: unapproved original question origin coherently resealed",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "separateOwnedLoweringCopiesRetainCutAndIndependentArtifact()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "recipeBoundariesAndAuthoritativePlacementAreNotSilentlyNormalized()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "lawfulJoinedSemanticBasisAcceptsExactlySixMiBBeforeOneLegalByteIsRefused()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "exact tuple array and final plan commitments 0",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "exact tuple array and final plan commitments 1",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "exact tuple array and final plan commitments 2",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "choiceCanonicalHashesPreserveUnicodeAndOriginalInstantWithoutNormalization()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "defensiveCandidateCannotBeChangedThroughCallerJson()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "reproducesIndependentCanonicalUnicodeAndNumericVectors()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[1] mode=matched",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[2] mode=build",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[3] mode=representation",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[4] mode=invalid",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[5] mode=runtime",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[6] mode=fatal",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[7] mode=ambient",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independentUtf8LimitsDoNotBorrowTheLargerTransportAllowance()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "originalZeroAndSourceOnlyProofsOmitChoiceAndKeepReferenceBytes()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "reproducesIndependentPythonObservedChoiceArtifactAndAllHashes()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[1] name=fresh-order-reference",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[2] name=control-value-reference",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "providerAuditLabelsAndIdsNeverBecomeExecutableSelectors()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest",
+      "name": "ChecksApplication publication=false replay=false",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest",
+      "name": "ChecksApplication publication=false replay=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest",
+      "name": "ChecksApplication publication=true replay=false",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest",
+      "name": "ChecksApplication publication=true replay=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "retriedContinuationWithPendingDeliverySkipsSync()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "uncertainAppendResendsSameDeliveryAtMostThreeTimes()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "definiteAppendRefusalIsTerminal()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "presyncDefiniteRefusalIsTerminal()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "appendIsPrecededBySameVersionSync()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "acknowledgedAppendMovesToRefresh()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "closedNonDefiniteAppendRefusalIsTerminalOnFirstReceipt()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "appendAtOrAfterFrozenLeaseFailsWithoutSending()",
+      "status": "PASS"
+    }
+  ],
+  "taskResults": {
+    "test": {
+      "counts": {
+        "total": 172,
+        "passed": 172,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "freshXmlFiles": 10,
+      "freshHtmlIndex": true,
+      "freshExec": true,
+      "execRequired": true,
+      "joinCasesPresent": false,
+      "freshJoinCohorts": 0
+    }
+  },
+  "jacocoExecFiles": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-final-compose-foldf02-task-outputs/test/jacoco/test.exec",
+      "sha256": "447688ed0a41595873f8d596377806d41d951e2ae309cc7380d03dee12e33a33",
+      "bytes": 951058,
+      "mtimeNs": 1792522784357267281,
+      "mode": "0o644",
+      "task": "test",
+      "nonempty": true
+    }
+  ],
+  "guidedCohortFiles": [],
+  "sourceStable": true,
+  "testInputStable": true,
+  "distStable": true
+}

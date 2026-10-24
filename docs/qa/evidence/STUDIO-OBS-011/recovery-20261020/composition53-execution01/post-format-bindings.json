@@ -1,0 +1,797 @@
+{
+  "sourceBeforeFormat": "c1daeacf40277e64d55e445ded37be71c8cf10fdc7cfafea862282441525d140",
+  "sourceAfterFormat": "1f7ce1b1012b91913044b4bffaa30989d705c73e870bd8e7a8a214b116dd329e",
+  "dist": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "formatterChildExit": 0,
+  "formatterOuterExit": 2,
+  "actualChangedPaths": [
+    "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchTestAccess.java",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextRefusalTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSuffixMaterializationTest.java"
+  ],
+  "exact38PreviewMatch": true,
+  "outsidePreviewChanges": [],
+  "postFormatReplay": "5a39eb2689b66dead773ea31c44f4ab6e62b9f17d65389158271908c0e1f522e",
+  "finalDeliberateSleepCalls": 21,
+  "targetsAndApprovedPassThroughs": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "beforeSha256": "4eb8933ac540773c9526109076e412396cfc9e6163e36cd1e3bf777f039b2f24",
+      "afterSha256": "abea933dbeb42d41403629a293007f952064621751ee1ade98389a8460c36f60",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "678bbe3214c5975128623a62eae3ccedc73b8aa068c353783fa94ea01e46852a",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "beforeSha256": "b110f81571abf182f88254053792fdefa2554f792d871cd3b674925d47a6aa08",
+      "afterSha256": "18e55d0bf7123e1178bec58d145ce7099bc3506a5ad139c3dbca1dd484e7a4a7",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "60111409d163e6212fe36d30f1dfabbbce232a1c2f9947c8f0ed018198586290",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "beforeSha256": "9823a4d4c907fdb4a7b64449cc8a727b2de9b1160897058f5a6823590f42987d",
+      "afterSha256": null,
+      "beforeMode": "0o644",
+      "afterMode": null,
+      "group": "FOLD38",
+      "actualPostFormatSha256": null,
+      "actualPostFormatMode": null,
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "beforeSha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+      "afterSha256": "4cdc120830ebea83cac9a93f5d3c89b60166cf8ae834746fb2de536d4f5065e2",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "83ae80d2e17ff6487b264c59e1bb93a5f9f45ba0e77ba7771bbeb4c726189dae",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java",
+      "beforeSha256": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e",
+      "afterSha256": null,
+      "beforeMode": "0o644",
+      "afterMode": null,
+      "group": "FOLD38",
+      "actualPostFormatSha256": null,
+      "actualPostFormatMode": null,
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "beforeSha256": "0a6e7299e32c6aeeda9f1d91fdb3ee8d886964e3e72114c50f47156ce2c04575",
+      "afterSha256": "ac2043acdb7a75e7facd1bd45f023bcb0e3ebfd64fc6413fbcede81410906b83",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "b65000d8faaa2e0025ecb8335ee90cb060e38783589efa0f1b66941a28016332",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "beforeSha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8",
+      "afterSha256": "c3564b01efb0641a4d4d7bb90b45df7fa2797d3c5ae3e836fcdac576bbe18c9f",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "c3564b01efb0641a4d4d7bb90b45df7fa2797d3c5ae3e836fcdac576bbe18c9f",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+      "beforeSha256": "340eb5b7e8af6482aef63ebf0ea387f4d1650ae3cfe073fad117a5dfb79fdbaf",
+      "afterSha256": "386bcdc33645aad940814d62ce0d06f5fcaf621c086db65a075d17ac005849e4",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "d8e8cd6320676a67edd91e21f6fdbc7284d965b61de9a823182591d584365f35",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "beforeSha256": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871",
+      "afterSha256": "b70d3122822f83acbdbcaa2e7a0bab4a2c913a967432153b095650cf5339fad1",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "b70d3122822f83acbdbcaa2e7a0bab4a2c913a967432153b095650cf5339fad1",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "beforeSha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd",
+      "afterSha256": null,
+      "beforeMode": "0o644",
+      "afterMode": null,
+      "group": "FOLD38",
+      "actualPostFormatSha256": null,
+      "actualPostFormatMode": null,
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "beforeSha256": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660",
+      "afterSha256": "dca229b97a65fc31aae67a357cc09c99b165d34ef06059f117f8fb1b647a5f10",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "dca229b97a65fc31aae67a357cc09c99b165d34ef06059f117f8fb1b647a5f10",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+      "beforeSha256": "36b4b3c9d517fe4579bbf6f0f0dfae595c55084135e1aeda1a68f898212a68da",
+      "afterSha256": "bfccc4e83b259f5bd34f9ad3336ed65fa3252fb542550de034e183de42953a50",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "bfccc4e83b259f5bd34f9ad3336ed65fa3252fb542550de034e183de42953a50",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchTestAccess.java",
+      "beforeSha256": null,
+      "afterSha256": "2e6509a98e7c31da25e60d9f0b0509a600f52b069e794bca31c2651997f7e1cb",
+      "beforeMode": null,
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "241dd598bf7a79215b92a0ddf1bede11c608f92027f6cb919a0b25400fc50460",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/RunnerTlsClientCertIT.java",
+      "beforeSha256": "3467a465c5e3cc430275bed877a1d1923dcff60df26b9f2531418f5964cf6da3",
+      "afterSha256": "f9d39f9ed283187576b0e265fb2d1f169abc76d59f0ea1ddb3fba96de727b6f1",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "6e2437ad0bd5fe37fff3af676cc61af9ac9dc97a2d8ba962a0298c45d8f8b296",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "beforeSha256": "4bafbc3c281a4d7f87312a11840facf8538819de76d0938e28498721352eff07",
+      "afterSha256": "2e5d98fc8fb701c069efd041c8a83dcb89f61c5beebc651603ba8be912c2242f",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "693e95f0f9ace90451b2e83e63fa45716f8a0eabe45c2b3f6508a5a9d6f9d49a",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "beforeSha256": "94c040c2e6124bc82fc1a90e267fafe1b3b5821cabbcd68f208b5056c697438c",
+      "afterSha256": "8f4883e45341f81f043eb2795e229a129d0d8fa4a429143d8c7ddd5066d971fe",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "eb596dbcfae26a1ac3aff3f3d0bdba36660c8f3b7fe8b4c4a1f1936a8dcbf37a",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextDeadlineTest.java",
+      "beforeSha256": "a41fdac29753ea23778312a6e24152a8f7dd614602db8ec0d6146d493f564416",
+      "afterSha256": "c2f32ec312cd30c6f48ab78fbd4a2a690b928a4b4af06f109e9c076fda94d25f",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "4e220d3c08a64352a9d3ebf7c6c4c2e960cbd24ce99baa4d3488f0980f234e97",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchContextRefusalTest.java",
+      "beforeSha256": "594a90d0b11e9203054e485fae52cef28c80796179ed67a58375f586ef4e6681",
+      "afterSha256": "1403a3c4467e2c7630bc0d8f78cf0d7c69a203440e469109a78ea6ad8769e51f",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "c9fd6aece7c8987ef9e44c944f0ef50a938a6dbc7ee520e7a9edefaf1610e2d3",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchStopKeyTest.java",
+      "beforeSha256": "56de3065224b2891c353a1126a6ad3298e1e0b936016c060fdf9a2da5164dab5",
+      "afterSha256": "19f09dd1d3d45dc6d55231de7feecb10e9db77b98f3f7e9db5cc40760d6e0d43",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "aedeee92656956c72d0b7a94c528594d4f6dbaefc0c51e3078f33fa626a0ea9c",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedOwnedBufferBoundaryTest.java",
+      "beforeSha256": "7efd8bb612de9f9673f2489c8e08e90b44dcf544c144ab201ced442bc7132bfa",
+      "afterSha256": "42f7323d9af5da04c18b99770e7b482e5034e46918e5f4d2cdaa09ec1233546c",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "29b0a0f89d224f2f450b49912e5d3ae80be831d618881b24abb5f937ca88194f",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerContextRefusalTest.java",
+      "beforeSha256": "98144848bbc5c41db604cd6ed5c1bc6e889737c2c62b9c3f2d652b5e368e47f8",
+      "afterSha256": "7851c0ca5dc081b123e90398da87caf30653716f6bdc31f73f30a4ec9a969f2d",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "eb0f34197c1d27ab6314df518f8e1195fbc304b4bfe7728842c6981cc038e795",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSecretByteBodyTest.java",
+      "beforeSha256": "a1d66073ec6e2d1f72bf2f564136f5db1ceee8c1186c9505581b5109f57dd8af",
+      "afterSha256": "86df833069d4aac0123a48222ab5b532550e30482546cf85a3716e4414d79152",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "8b95d408b21010e7609c4bd452f1b906eaffb2614cba4394d0b50f8240a0f166",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java",
+      "beforeSha256": "25cd088252ce9a4e0437448d6645a58738ff7b9f9fc069c3883bc26f30aa73b5",
+      "afterSha256": null,
+      "beforeMode": "0o644",
+      "afterMode": null,
+      "group": "FOLD38",
+      "actualPostFormatSha256": null,
+      "actualPostFormatMode": null,
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "beforeSha256": "abb4773016aa3499b76cf1aae3ac0da0f0b820ac4df19fb66887188c7dfe53f4",
+      "afterSha256": "cf38d0c1314db3f4ae81c827846a97d144fdca5e9adb78de86e0723e8663a297",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "5a39eb2689b66dead773ea31c44f4ab6e62b9f17d65389158271908c0e1f522e",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      "beforeSha256": "94f4a7bde4ffc5928f5bd98659e03d592a931edfbe976db50d32c9c4fc63d447",
+      "afterSha256": "13f8c9b55bc08224b904bcdcf7ef70518cba15028db37c07554b5cccd050deeb",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "1974cc136ed6066b2d6046f3fbb3c614ebdb04601c7af29e4c0dc3847c2208ab",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "beforeSha256": "f85bf21c5efc68a213ce0ac418b2ebd3f4884610513d4a1a68eded71f0c85205",
+      "afterSha256": "ebb3d0e9bb9a3584bb3066763256a0b59d4dcbdc7e6c0464f77e65d812f16d61",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "1a5fb615f8022d2f65d2ddadf3fc9c16df790d81550a856bdf24263300c004db",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedGrantClockIT.java",
+      "beforeSha256": "cc9407be238952b82562707a32290fb73004cef988722aef9984739677a0ff21",
+      "afterSha256": "17599a87f05eb04cd7263a4d84bdae18981759cb6c186a49f9e156768acc765e",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "17599a87f05eb04cd7263a4d84bdae18981759cb6c186a49f9e156768acc765e",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java",
+      "beforeSha256": "40e83b12314d9656575270ca7c827490d16b383312778104faf8a35f2674974b",
+      "afterSha256": "480f5f9ba3cab2b7bcd45d6463c7cd48806f719ef9741888b11afe1df79db17f",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "ce954b7532b0aa019304f77e84bc7e78b6743b3df2e037a22ee8430d16d55024",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "beforeSha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+      "afterSha256": "1bce395fb2204ac1f5ea11175d96288b2e72a4b72dc9030c1a739c324a361af4",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "e354342aea22e68860085c714c5b9f780480f8922db168b83e9ee7c6d89ab74d",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "beforeSha256": "da5fb5916e21f3cb149ab4c46a1d6484e37168cbf92c7b51f0e814477b1c273a",
+      "afterSha256": "6d64b45946771f392a89467290b7c0b0cb94d2abe2afa1b38fbcdf3c13a9a5f5",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "7711053da6b4ae02945595d805fc617f20f5ed3d9e5a42bdcb9ee114d4c813da",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "beforeSha256": "a156ff590e975a66e22d52a01357452f8be9787cf30da4c2f204207e9050bbc5",
+      "afterSha256": "cd503d8d65e17cc2e36a3e73a39a2dc30a9865931e52905094bcb89455b976aa",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "cd503d8d65e17cc2e36a3e73a39a2dc30a9865931e52905094bcb89455b976aa",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "beforeSha256": "475820d678e16853e0759398e4be6cb7ff7791b8c9dbf78a7951f74f63191182",
+      "afterSha256": "61267e48a0bf66de82c47cb868c0dcb9d0bc2d3eeb4cc898abe3e0f90ec75f33",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "c3e92a3923d5d01f576dedac390d6abc2163eec48c116430e3481a4a9ce29733",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "beforeSha256": "7270cbfb450faa992cf6dc4d22e90f6b856645cf4b5f22779e7a036b83bdb3df",
+      "afterSha256": "28d96b4649838bb0ed71ee7309f4831911a66bb967d4f77e88bbc0e07de8ba62",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "ea5668997233696435f663ffe2d3fb388f0e6474c376a3920f4f05bfe8fa6cbe",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "beforeSha256": "389389d2413f5090bcd985309b06a614c93869d31ed98e1672bbe2237d0f5174",
+      "afterSha256": "7cc652e8ca50c488307a62206ea2d58db3c2a6cc850e8ff0c690e3d425ca785b",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "fa09a47fdaa7073d64aeeadacf609c8738fdc4a4b01ba8102f462805cf892add",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "beforeSha256": "cf44fc4c52706ff56370204af17281045b3b794ded792fb4c8022886b599c1eb",
+      "afterSha256": "f430d0fe9646f5ff4b8f916861f64f9920faead685e665e98a97ab22a102880d",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "cd32ec4e510b51344e5f3ec3e49227f34fb57d297418eca5e781607377950f4e",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSuffixMaterializationTest.java",
+      "beforeSha256": "710ccd98a04751a574940d8f5e5517005692c37b7750f950dc3f50e7fc6718cb",
+      "afterSha256": "d7f6aa200bf5ef8ba761c1ab3f8985fbf4097e1bce87d5ea3410a9a0b85743da",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "dcb8800848740f433c44009a9fdae089878756e835914d4f5ce842f2e2dea937",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guidedCloseBound.test.ts",
+      "beforeSha256": "16aaebe6db8386b06aedbc58b347bb57b3ff937989afa49db0eb8f4b4d99a588",
+      "afterSha256": "940554cdb7499eac57d8eb0dbe36341336e2943e826abb8e2c7fa81eced15aea",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "940554cdb7499eac57d8eb0dbe36341336e2943e826abb8e2c7fa81eced15aea",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "studio-runner/test/guided/runtime.test.ts",
+      "beforeSha256": "ad6ad7e20730e1dd775d15301450738ed227964057ab6edfeca36fd1307bc629",
+      "afterSha256": "53169404baaf3d8e2e52e87fdabd42f73e07566422a7017e74fb064720ae37ea",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FOLD38",
+      "actualPostFormatSha256": "53169404baaf3d8e2e52e87fdabd42f73e07566422a7017e74fb064720ae37ea",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+      "beforeSha256": "bb207af39e66f2681d9096ccdf6c61d8b4297c5ab0a0d02d03a1b5ba3d08731a",
+      "afterSha256": "002afb1bbb3d2215f0e20159a5ce09ccb80bf68fffec81693bf457ebd0f3eff9",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "LEFT10",
+      "actualPostFormatSha256": "002afb1bbb3d2215f0e20159a5ce09ccb80bf68fffec81693bf457ebd0f3eff9",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+      "beforeSha256": "970e028452274874b6e55f15c8e7b2e4b06740405d14529c0222b94f60eb32fe",
+      "afterSha256": "b3dd35d3ee7d1245c99bc3367f61dde76ff4cbc0db2b56c02aa005d48b6eda2c",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "LEFT10",
+      "actualPostFormatSha256": "b3dd35d3ee7d1245c99bc3367f61dde76ff4cbc0db2b56c02aa005d48b6eda2c",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+      "beforeSha256": "7e994ec1bcc7542f7cab05e7e8f448d542713ef90940fe018bf424864b993ebd",
+      "afterSha256": "c8e3cdf13223bedae3610d31177a4d02d4ef1355d82ddede26b7f1814ea29dda",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "LEFT10",
+      "actualPostFormatSha256": "c8e3cdf13223bedae3610d31177a4d02d4ef1355d82ddede26b7f1814ea29dda",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+      "beforeSha256": "88ddd68e15fba59505e2856305f91fb5acfdc17c00af64b329e2a9bb01a8a52a",
+      "afterSha256": "cb809a2d19ee6301f031e70f7b9de75f8e8c15dee1881022915f80f903c0984b",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "LEFT10",
+      "actualPostFormatSha256": "cb809a2d19ee6301f031e70f7b9de75f8e8c15dee1881022915f80f903c0984b",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAlreadyExistsException.java",
+      "beforeSha256": "90592f2c96dbf603276c3324ace67fcc3a78d7ca05c2d49410838a29308f8246",
+      "afterSha256": "d622e30b10450d0c9a94479f102fc542235a7ebda05f2a068d595e30ce5e1034",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "LEFT10",
+      "actualPostFormatSha256": "d622e30b10450d0c9a94479f102fc542235a7ebda05f2a068d595e30ce5e1034",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+      "beforeSha256": "526d8792b6c0b7f7b806d4d4577b4934757b230cd18b82515b75f911123f3ea2",
+      "afterSha256": "506739779151b0f9f4d86b23fe7c3e0d93ec9cfd5b22101bf273105a8a1aa5bf",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "LEFT10",
+      "actualPostFormatSha256": "309d4607c461eedd247cad7f910e89951c9705a44e8eef2b3cb0d1e808d5a59b",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/StudioKillSwitchWiringTest.java",
+      "beforeSha256": "6f925d7b56ae14d4230ccea9fd42b33b531df94c8176ec4db782c25eb0229188",
+      "afterSha256": "ff92e39dd4fd90434061943c6500d6779ddbefea6a5148b68773c7cd9f2f5f8c",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "LEFT10",
+      "actualPostFormatSha256": "ff92e39dd4fd90434061943c6500d6779ddbefea6a5148b68773c7cd9f2f5f8c",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+      "beforeSha256": "c9b8019dfc341633b8647fdce492814b31682a9ed2d5fd61a8516384ffafbfab",
+      "afterSha256": "238e8d9ef4b8f83e4f662e8dfe019b6f4c91d0180b4b5ec935e41c8c072c0efd",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "LEFT10",
+      "actualPostFormatSha256": "238e8d9ef4b8f83e4f662e8dfe019b6f4c91d0180b4b5ec935e41c8c072c0efd",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/resources/application.yml",
+      "beforeSha256": "271fac527d075f996173e6cf1ef52d409d4416d3d6a46114fc541097b3a25f75",
+      "afterSha256": "79e7b20e47f105bca8c79866507f4e8ab0449831cac591d55705690a7c510b61",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "LEFT10",
+      "actualPostFormatSha256": "79e7b20e47f105bca8c79866507f4e8ab0449831cac591d55705690a7c510b61",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/build.gradle.kts",
+      "beforeSha256": "fee7af874cc0875d8dd299f8f9e1a0739ae79347ba0b0de665c81931045cbe74",
+      "afterSha256": "a3ab3bdbb31bc1f71028d3c913029234fd736921ecb7295fd92a908fd4159c27",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "LEFT10",
+      "actualPostFormatSha256": "a3ab3bdbb31bc1f71028d3c913029234fd736921ecb7295fd92a908fd4159c27",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts",
+      "beforeSha256": "e385d1513965d06fe8921282074a415a1518445a74b240d3801b18f8a1f8e68c",
+      "afterSha256": "a84d582bf96493541c8af966deb8e23acce6acc7957832fb309b7ed06c29d356",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FE3",
+      "actualPostFormatSha256": "a84d582bf96493541c8af966deb8e23acce6acc7957832fb309b7ed06c29d356",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "frontend/src/components/studio/runs/RunDetailsDrawer.tsx",
+      "beforeSha256": "b26404272dc673a51076d7fba806ffe534d76c399125aea00dd2f4eed760dd9d",
+      "afterSha256": "932d40e0a32a9bad7a10509e5fb621b84998295937a9a47b2c8f3a6c4cc2b456",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FE3",
+      "actualPostFormatSha256": "932d40e0a32a9bad7a10509e5fb621b84998295937a9a47b2c8f3a6c4cc2b456",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx",
+      "beforeSha256": "039b0c6028b4e79bf195c109ccdaf1032a5d9086afbd4bf08838ca7b2cff9e1a",
+      "afterSha256": "b058c43309e5e3007e2e8b8159e4ed95e3bc91f92b4f9aee7410813681fec135",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "FE3",
+      "actualPostFormatSha256": "b058c43309e5e3007e2e8b8159e4ed95e3bc91f92b4f9aee7410813681fec135",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "docs/runbooks/studio-inference-rollout.md",
+      "beforeSha256": "28f789258453fcfdec2af56f4580046d8cd4f8350cb5b5ef1e1586f61c3d6e4f",
+      "afterSha256": "10ab0f1361689a2737c8dff3c339a6e58a2f55b57c327daf2ac445e7f6c891f9",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "DOC2",
+      "actualPostFormatSha256": "10ab0f1361689a2737c8dff3c339a6e58a2f55b57c327daf2ac445e7f6c891f9",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md",
+      "beforeSha256": "3f0d3a53f113d5bb17855cb60e38d1081d2f1dbccd824e1cec0d56702e91221d",
+      "afterSha256": "44b2a365837be747fe56315234d3870a9b0181245de1a1377c19fb56f5e210ea",
+      "beforeMode": "0o644",
+      "afterMode": "0o644",
+      "group": "DOC2",
+      "actualPostFormatSha256": "44b2a365837be747fe56315234d3870a9b0181245de1a1377c19fb56f5e210ea",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": false
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+      "beforeSha256": "60e84ab27c1039cda193ae8124cc724d76451bf679fe4c46918d11e2b8c78418",
+      "actualPostFormatSha256": "49378465158d2d9cf09c51622cc6160e1e68c869f23beb57e136193cb362648c",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "beforeSha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+      "actualPostFormatSha256": "3c14f53f50c16e37b49c52a178358da552c32192334b119c01a5a7c467708b0c",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "beforeSha256": "0719e4f633f8fcca251fb77852e2ec064b89bcf11294fc369d11b6e2c69ef55e",
+      "actualPostFormatSha256": "ddc49cbe993946434aa05dd0bdf6cd900ed1b707f6f3646833a332429879a935",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java",
+      "beforeSha256": "f9b529587d78b9927f1c0334bde7676f0e923bacf00d4628465bf5d4298c3670",
+      "actualPostFormatSha256": "7d86a0b4919a9cf1cdb92980b035b32c19758c83d2681abfab8f8f984ea43087",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "beforeSha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e",
+      "actualPostFormatSha256": "682454950e258d8aa341642015c97fc3cdd00eba6a2329753c4446d6b4859448",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java",
+      "beforeSha256": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1",
+      "actualPostFormatSha256": "81f799a068e78785b417716be585832062928a50428912ecf9f499ea35207d50",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "beforeSha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad",
+      "actualPostFormatSha256": "9ce00c54314e9e0ad24bd8955856582e9c247ac349f4a9067bea55d5a401558b",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java",
+      "beforeSha256": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463",
+      "actualPostFormatSha256": "f9fabccf22e84eab8324b4d559b974bd3ed8a0d7db6f11c02ac75fb3398ffd5f",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "beforeSha256": "2d5400d275d30730bb1ff71b5daca41434289fb1b57af59275c6ecc72ba83dd8",
+      "actualPostFormatSha256": "453fbd004f9a2c3aaa2d24e196be717e7e8cff8d9f870d36cd726b7a806448fe",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "beforeSha256": "255469af129ef55146c568d5a839d643c6469c54900bbd81c699b87b2f056c05",
+      "actualPostFormatSha256": "75daeeacbcda1192e6e0f219ed0574305a6646216a07f7cb16592e0cdfbe39b6",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "beforeSha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a",
+      "actualPostFormatSha256": "4d2329027617624f10b7376ec6f523c5d36aba2ac6808066a18f1a454daa5e4a",
+      "actualPostFormatMode": "0o644",
+      "formatterChanged": true,
+      "passThroughAddedOnlyForApprovedFormatting": true
+    }
+  ],
+  "protectedLiteralMovesSupplemented": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+      "preFormatProtectedSha256": "60e84ab27c1039cda193ae8124cc724d76451bf679fe4c46918d11e2b8c78418",
+      "postFormatSha256": "49378465158d2d9cf09c51622cc6160e1e68c869f23beb57e136193cb362648c",
+      "supplementalFormatOnlyBinding": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "preFormatProtectedSha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+      "postFormatSha256": "3c14f53f50c16e37b49c52a178358da552c32192334b119c01a5a7c467708b0c",
+      "supplementalFormatOnlyBinding": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "preFormatProtectedSha256": "0719e4f633f8fcca251fb77852e2ec064b89bcf11294fc369d11b6e2c69ef55e",
+      "postFormatSha256": "ddc49cbe993946434aa05dd0bdf6cd900ed1b707f6f3646833a332429879a935",
+      "supplementalFormatOnlyBinding": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java",
+      "preFormatProtectedSha256": "f9b529587d78b9927f1c0334bde7676f0e923bacf00d4628465bf5d4298c3670",
+      "postFormatSha256": "7d86a0b4919a9cf1cdb92980b035b32c19758c83d2681abfab8f8f984ea43087",
+      "supplementalFormatOnlyBinding": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "preFormatProtectedSha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e",
+      "postFormatSha256": "682454950e258d8aa341642015c97fc3cdd00eba6a2329753c4446d6b4859448",
+      "supplementalFormatOnlyBinding": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java",
+      "preFormatProtectedSha256": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1",
+      "postFormatSha256": "81f799a068e78785b417716be585832062928a50428912ecf9f499ea35207d50",
+      "supplementalFormatOnlyBinding": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "preFormatProtectedSha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad",
+      "postFormatSha256": "9ce00c54314e9e0ad24bd8955856582e9c247ac349f4a9067bea55d5a401558b",
+      "supplementalFormatOnlyBinding": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java",
+      "preFormatProtectedSha256": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463",
+      "postFormatSha256": "f9fabccf22e84eab8324b4d559b974bd3ed8a0d7db6f11c02ac75fb3398ffd5f",
+      "supplementalFormatOnlyBinding": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "preFormatProtectedSha256": "2d5400d275d30730bb1ff71b5daca41434289fb1b57af59275c6ecc72ba83dd8",
+      "postFormatSha256": "453fbd004f9a2c3aaa2d24e196be717e7e8cff8d9f870d36cd726b7a806448fe",
+      "supplementalFormatOnlyBinding": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "preFormatProtectedSha256": "255469af129ef55146c568d5a839d643c6469c54900bbd81c699b87b2f056c05",
+      "postFormatSha256": "75daeeacbcda1192e6e0f219ed0574305a6646216a07f7cb16592e0cdfbe39b6",
+      "supplementalFormatOnlyBinding": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "preFormatProtectedSha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a",
+      "postFormatSha256": "4d2329027617624f10b7376ec6f523c5d36aba2ac6808066a18f1a454daa5e4a",
+      "supplementalFormatOnlyBinding": true
+    }
+  ],
+  "protectedOutsidePreviewUnchanged": true,
+  "logicAssertionLiteralTextBlockProofPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/formatter-preservation-preview.json",
+  "proofHash": "3a51bbdae67522ecc2eb8321b5f77a4024a7262887e3054bb354bf362abb9a22",
+  "rootFiveMutationAdoptionSha256": "842ab9c82b8aeb835cabb644af4f2c8e7b6231ec260a1e9e46477ed198b6c25c",
+  "newMutationExecutionClaimed": false
+}

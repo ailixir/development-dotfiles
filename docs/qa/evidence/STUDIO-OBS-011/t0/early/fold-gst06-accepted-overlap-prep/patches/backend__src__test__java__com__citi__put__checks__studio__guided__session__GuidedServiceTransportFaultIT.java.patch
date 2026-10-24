@@ -1,0 +1,67 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java
+@@ -18,7 +18,7 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+ import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
++import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+ import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
+ import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
+ import com.citi.put.checks.studio.secrets.SecretAuditLifecycle;
+@@ -467,7 +467,7 @@
+                     && secret.equals("PASS")));
+     sessions.installStopSender(dispatch::stop);
+     var observer =
+-        GuidedRunnerClient.class.getDeclaredMethod(
++        HttpRunnerDispatchClient.class.getDeclaredMethod(
+             "observeRequestBytes", java.util.function.Consumer.class);
+     observer.setAccessible(true);
+     observer.invoke(
+@@ -751,7 +751,7 @@
+         sessions.installStopSender(
+             (contextToStop, reason) -> stopWork.send(dispatch, contextToStop, reason));
+         var observer =
+-            GuidedRunnerClient.class.getDeclaredMethod(
++            HttpRunnerDispatchClient.class.getDeclaredMethod(
+                 "observeRequestBytes", java.util.function.Consumer.class);
+         observer.setAccessible(true);
+         observer.invoke(
+@@ -2093,7 +2093,7 @@
+     sessions.installStopSender(
+         (contextToStop, reason) -> stopWork.send(dispatch, contextToStop, reason));
+     var observer =
+-        GuidedRunnerClient.class.getDeclaredMethod(
++        HttpRunnerDispatchClient.class.getDeclaredMethod(
+             "observeRequestBytes", java.util.function.Consumer.class);
+     observer.setAccessible(true);
+     observer.invoke(
+@@ -3272,7 +3272,7 @@
+       SSLContext tls = SSLContext.getInstance("TLS");
+       tls.init(km.getKeyManagers(), tm.getTrustManagers(), new SecureRandom());
+       var receiver =
+-          new GuidedRunnerClient(
++          new HttpRunnerDispatchClient(
+               URI.create(cfg.path("runner").asText()),
+               tls,
+               () -> cfg.path("runnerToken").asText(),
+@@ -5242,8 +5242,8 @@
+     }
+   }
+ 
+-  private static GuidedRunnerClient client() {
+-    return new GuidedRunnerClient(
++  private static HttpRunnerDispatchClient client() {
++    return new HttpRunnerDispatchClient(
+         URI.create("https://localhost:" + RELAY.getAddress().getPort()),
+         TLS,
+         () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+@@ -5397,7 +5397,7 @@
+ 
+   private static String gstFixedFrame(StackTraceElement frame) {
+     String type = frame.getClassName(), method = frame.getMethodName();
+-    if (type.equals("com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient")) {
++    if (type.equals("com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient")) {
+       return switch (method) {
+         case "send" -> "CLIENT_SEND";
+         case "remaining" -> "CLIENT_DEADLINE";

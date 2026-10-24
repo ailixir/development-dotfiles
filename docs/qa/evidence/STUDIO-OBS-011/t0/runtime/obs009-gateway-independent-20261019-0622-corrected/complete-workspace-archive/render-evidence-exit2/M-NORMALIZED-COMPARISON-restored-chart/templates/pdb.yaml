@@ -1,0 +1,44 @@
+{{- if and .Values.backend.enabled .Values.backend.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "put-checks.api.fullname" . }}
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.api.selectorLabels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.backend.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "put-checks.api.selectorLabels" . | nindent 6 }}
+{{- end }}
+{{- if and .Values.worker.enabled .Values.worker.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "put-checks.worker.fullname" . }}
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.worker.selectorLabels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.worker.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "put-checks.worker.selectorLabels" . | nindent 6 }}
+{{- end }}
+{{- if and .Values.studioRunner.enabled .Values.studioRunner.podDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "put-checks.studioRunner.fullname" . }}
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.studioRunner.selectorLabels" . | nindent 4 }}
+spec:
+  maxUnavailable: {{ .Values.studioRunner.podDisruptionBudget.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "put-checks.studioRunner.selectorLabels" . | nindent 6 }}
+{{- end }}

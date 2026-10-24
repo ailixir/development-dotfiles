@@ -1,0 +1,60 @@
+{
+  "state": "UNEXECUTED_SOURCE_WINDOW_AND_CODE_DOC_APPLICATION_FIRST",
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "nodePathPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+  "pnpmVersion": "10.33.0",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner-build.py",
+    "obs011-recovery-20261020-rt-bootstrap-actual-build01"
+  ],
+  "actualNestedCommand": [
+    "pnpm",
+    "--config.package-manager-strict=false",
+    "run",
+    "build"
+  ],
+  "nestedCwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/studio-runner",
+  "exactPackageBuildScript": "tsc -p tsconfig.build.json && node scripts/write-runtime-versions.mjs",
+  "sourceExclusions": null,
+  "clean": false,
+  "privateDistTransplant": false,
+  "dependencyInstallOrBinRepair": false,
+  "expectedActualBinSet": 21,
+  "expectedOutputMemberCount": 238,
+  "expectedMeasuredOutputDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "expectedCompleteOutputInventorySource": "ten-code-path-binding.json/privateComplete238ExpectedOutput",
+  "freshLabelRequired": true,
+  "beforeAfterCaptureByExistingCollector": true,
+  "checks": [
+    "raw child0/outer0 required; retain rawouter2 if any source/buildInput drift despite child0",
+    "sourceStable/buildInputStable true at freshly measured NEW source digest, not old3e",
+    "complete actual238 membernames+eachSHA+digest equal qualified privateE19; no unlisted output/missing/stale member",
+    "21 actual bin symlinks/dependencies/browser/protected inputs preserved beforeafter",
+    "no backend/native work until this actualconfigured output is accepted"
+  ],
+  "onFailure": "STOP retain rawsource/outputdelta; no clean/transplant/fuzzyacceptance/retry/speculativefix.",
+  "testsExecutedExpected": 0,
+  "nativeExecutedExpected": false,
+  "actualCatalogCaptureArgvTemplate": [
+    "python3",
+    "-c",
+    "from pathlib import Path; import runpy,json,sys; snapshot=runpy.run_path('/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-pure-proof-execution01/input-snapshot.py')['snapshot']; Path(sys.argv[1]).write_text(json.dumps(snapshot(Path.cwd()),indent=2)+'\\n')",
+    "FRESH_OUTPUT_JSON"
+  ],
+  "existingCopyProfileRecipeSha256": "b6d962a6aaba1c0135e3cee63cb66341bfd42dba3238deef8a7187992ba01849",
+  "catalogChecks": "full actual source/dependencies/membership before-after; inputFiles unchanged during build, only complete dist expected to move. No exclusions or evidence/media copies.",
+  "browserInputReference": "bootstrap-native-six02-root-admission.json/references/browserInput; rehash actual executable and bind provenance beforeafter without launching browser.",
+  "applyCodeArgv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application-preparation01/apply-reviewed.py",
+    "code",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/code-application.json"
+  ],
+  "applyDocsArgv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application-preparation01/apply-reviewed.py",
+    "documentation",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application01/documentation-application.json"
+  ]
+}

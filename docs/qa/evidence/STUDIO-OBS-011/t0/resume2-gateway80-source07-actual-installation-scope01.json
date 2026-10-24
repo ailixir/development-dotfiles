@@ -1,0 +1,505 @@
+{
+  "kind": "ROOT_SOURCE07_EXACT_ONCE_INSTALLATION_SCOPE_AFTER_ACTUAL_METADATA_AND_TRACE_BEARING_LOAD",
+  "authorizedBy": "root",
+  "subject": "obs009-gateway80-offtree03-20261019",
+  "pty": 29815,
+  "wrapperPid": 3720,
+  "shellPid": 3749,
+  "recordedStart": "Mon Oct 19 12:48:37 2026",
+  "sourceManifestSha256": "045c5121ff25966eff78d741894684c776448e35c553cceb7765591ff70dd9b1",
+  "sourceRootAdoption": "a08bbe402465c4956f78dcc8255619898df833f6b716133ba366f87fc9a323d6",
+  "threeOwnerRootAdoption": "665817a996d062417c5046d08320ff554fb501ee07aed3c3e17544e2aac2b1f6",
+  "conditionalApplicabilitySha256": "b16b54eb0c8e1b3f64c72176472012b9ddd41572c6f736ff85b8551bbc8a2285",
+  "transportRootAdoption": "88f5202618fdf74843ccd5b73a05e54c1a2f807a6e481e63f8a5eb44ce9e63b5",
+  "traceBearingLoaderScopeSha256": "e39b2357c684024a89b9f390adf7cb30e46c4487490be98700a26827dc6f601b",
+  "metadataCompletionSha256": "f51ac06eea083b5da82cd484327b7c085551a8e291529a3a2baabe5867e906ae",
+  "metadataTool": "c38f81",
+  "metadataExternalExit": 0,
+  "installScopeSha256": "137bcd4ccb982ce8bfadf3290cf2ee65ccf2b4f2b9514840f5d74e05c8f924ce",
+  "installScopeBytes": 20101,
+  "installScopePath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01/root-install-scope.json",
+  "allCompleteCurrentAndInheritedConditionsAccepted": true,
+  "loaderProgress": {
+    "current": 3,
+    "stage": "ALL_THREE_DEFINITIONS_LOADED",
+    "events": [],
+    "completed": [
+      {
+        "name": "install-loader.bash",
+        "events": [
+          {
+            "kind": "READ",
+            "tool": "dcd8c6",
+            "statusTool": "1a9d5b",
+            "actualStatus": 0
+          },
+          {
+            "kind": "INSPECTION",
+            "tool": "f6dc72",
+            "statusTool": "69d717",
+            "actualStatus": 0
+          },
+          {
+            "kind": "VERIFIER",
+            "tool": "a29003",
+            "statusTool": "34836b",
+            "actualStatus": 0,
+            "helper": {
+              "completionOwedToOuterTool": true,
+              "fullFingerprint": null,
+              "pid": 57463,
+              "ppid": 3749,
+              "start": null
+            },
+            "sha256": "347bd56afcd86321fc16cc60ccd0ef0828af7d8f82d7a6156faf8cb09392a9d2",
+            "bytes": 27866
+          },
+          {
+            "kind": "EVAL_DEFINITIONS",
+            "tool": "8bcc12",
+            "statusTool": "c86546",
+            "actualStatus": 0
+          }
+        ]
+      },
+      {
+        "name": "control-author-loader.bash",
+        "events": [
+          {
+            "kind": "READ",
+            "tool": "1f4c21",
+            "statusTool": "ad5e11",
+            "actualStatus": 0
+          },
+          {
+            "kind": "INSPECTION",
+            "tool": "116ed4",
+            "statusTool": "e3299b",
+            "actualStatus": 0
+          },
+          {
+            "kind": "VERIFIER",
+            "tool": "dd19c0",
+            "statusTool": "72cda5",
+            "actualStatus": 0,
+            "helper": {
+              "completionOwedToOuterTool": true,
+              "fullFingerprint": null,
+              "pid": 58610,
+              "ppid": 3749,
+              "start": null
+            },
+            "sha256": "fbd8205820b7a13b812bb2a318ad893c81e710a8c38180031c0ed632df75082c",
+            "bytes": 35488
+          },
+          {
+            "kind": "EVAL_DEFINITIONS",
+            "tool": "e82d68",
+            "statusTool": "1f70a9",
+            "actualStatus": 0
+          }
+        ]
+      },
+      {
+        "name": "binding-functions.bash",
+        "events": [
+          {
+            "kind": "READ",
+            "tool": "efd601",
+            "statusTool": "68e358",
+            "actualStatus": 0
+          },
+          {
+            "kind": "INSPECTION",
+            "tool": "6c3c70",
+            "statusTool": "43ca2d",
+            "actualStatus": 0
+          },
+          {
+            "kind": "VERIFIER",
+            "tool": "34240b",
+            "statusTool": "960344",
+            "actualStatus": 0,
+            "helper": {
+              "completionOwedToOuterTool": true,
+              "fullFingerprint": null,
+              "pid": 58764,
+              "ppid": 3749,
+              "start": null
+            },
+            "sha256": "00eaf7dc0795287f30398ee47545f813089338d7f637c9a3a30ba6c7d8046e35",
+            "bytes": 30117
+          },
+          {
+            "kind": "EVAL_DEFINITIONS",
+            "tool": "0ee16a",
+            "statusTool": "4314a4",
+            "actualStatus": 0
+          }
+        ]
+      }
+    ],
+    "loadedFunctionsInspected": true,
+    "loadedFunctionInspection": {
+      "tool": "8eab31",
+      "statusTool": "7545d2",
+      "actualStatus": 0
+    }
+  },
+  "preliminaryCompletedOriginalActors": [
+    {
+      "role": "EXTERNAL_ROOT_INPUT_AUTHOR",
+      "pid": 1319,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "dea8f3",
+      "separateStatusCaptured": true,
+      "purpose": "Source07 exact source root adoption",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_OWNER_RECORD_AUTHOR",
+      "pid": 6253,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "291206",
+      "separateStatusCaptured": true,
+      "purpose": "Root exact owner/rationale/writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_OWNER_RECORD_AUTHOR",
+      "pid": 3380,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "8d35e3",
+      "separateStatusCaptured": true,
+      "purpose": "Aria exact owner/rationale",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_INPUT_AUTHOR",
+      "pid": 3719,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "082006",
+      "separateStatusCaptured": true,
+      "purpose": "Aria owner provenance writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_OWNER_RECORD_AUTHOR",
+      "pid": 3009,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "86dc3d",
+      "separateStatusCaptured": true,
+      "purpose": "Quinn exact owner/rationale/pending writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_INPUT_AUTHOR",
+      "pid": 3296,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "7907a1",
+      "separateStatusCaptured": true,
+      "purpose": "Quinn separate completion writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_INPUT_AUTHOR",
+      "pid": 9896,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "7b45be",
+      "separateStatusCaptured": true,
+      "purpose": "Three-owner root adoption writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_INPUT_AUTHOR",
+      "pid": 27365,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "36a08c",
+      "separateStatusCaptured": true,
+      "purpose": "Lean-plan current state writer, conservatively retained",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_INPUT_AUTHOR",
+      "pid": 29997,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "aad98b",
+      "separateStatusCaptured": true,
+      "purpose": "NEW Source07 conditional applicability writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_INPUT_AUTHOR",
+      "pid": 30807,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "697dd1",
+      "separateStatusCaptured": true,
+      "purpose": "Current readiness state writer, conservatively retained",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_APPROVED_SOURCE_READER",
+      "pid": 35895,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "593d38",
+      "separateStatusCaptured": true,
+      "purpose": "Retained pure Source07 operator reader",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_APPROVED_SOURCE_READER",
+      "pid": 36487,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "85ca20",
+      "separateStatusCaptured": true,
+      "purpose": "Original metadata caller source reader",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_CONTROL_AUTHOR",
+      "pid": 39045,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "d69711",
+      "separateStatusCaptured": true,
+      "purpose": "Scope01/request01 writer, bootstrap consumed",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_APPROVED_HELPER",
+      "pid": 39213,
+      "ppid": 17932,
+      "actualStatus": 1,
+      "toolCallId": "7f2187",
+      "separateStatusCaptured": true,
+      "purpose": "ACTUAL failed Bash3.2 bootstrap, status1 preserved",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_INPUT_AUTHOR",
+      "pid": 40159,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "21ecf3",
+      "separateStatusCaptured": true,
+      "purpose": "Actual bootstrap failure trace writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_INPUT_AUTHOR",
+      "pid": 41884,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "6eb56a",
+      "separateStatusCaptured": true,
+      "purpose": "Current correction state writer, conservatively retained",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_APPROVED_SOURCE_READER",
+      "pid": 47913,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "738936",
+      "separateStatusCaptured": true,
+      "purpose": "Four corrected transport comparisons and retained metadata caller reader",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_CONTROL_AUTHOR",
+      "pid": 51923,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "b2525b",
+      "separateStatusCaptured": true,
+      "purpose": "NEW transport adoption and scope02/request02 writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_APPROVED_HELPER",
+      "pid": 52036,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "c38f81",
+      "separateStatusCaptured": true,
+      "purpose": "Actual metadata scope02 Bash caller",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_INSTALL_SCOPE_AUTHOR",
+      "pid": 52037,
+      "ppid": 52036,
+      "actualStatus": 0,
+      "toolCallId": "c38f81",
+      "separateStatusCaptured": true,
+      "purpose": "Actual metadata scope02 Python owner-copy/install-scope writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_INPUT_AUTHOR",
+      "pid": 53291,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "8a7271",
+      "separateStatusCaptured": true,
+      "purpose": "Actual metadata scope02 original stdout/completion writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_APPROVED_SOURCE_READER",
+      "pid": 54543,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "4c46b7",
+      "separateStatusCaptured": true,
+      "purpose": "Trace-bearing bootstrap/three read-prefix source reader",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_CONTROL_AUTHOR",
+      "pid": 56039,
+      "ppid": 17932,
+      "actualStatus": 0,
+      "toolCallId": "d1e5b1",
+      "separateStatusCaptured": true,
+      "purpose": "Trace-bearing loader-definition actual scope writer",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_APPROVED_HELPER",
+      "pid": 57463,
+      "ppid": 3749,
+      "actualStatus": 0,
+      "toolCallId": "a29003",
+      "separateStatusCaptured": true,
+      "purpose": "Actual SAME-buffer bootstrap install-loader.bash",
+      "separateStatusToolCallId": "34836b",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_APPROVED_HELPER",
+      "pid": 58610,
+      "ppid": 3749,
+      "actualStatus": 0,
+      "toolCallId": "dd19c0",
+      "separateStatusCaptured": true,
+      "purpose": "Actual SAME-buffer bootstrap control-author-loader.bash",
+      "separateStatusToolCallId": "72cda5",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    },
+    {
+      "role": "EXTERNAL_ROOT_APPROVED_HELPER",
+      "pid": 58764,
+      "ppid": 3749,
+      "actualStatus": 0,
+      "toolCallId": "34240b",
+      "separateStatusCaptured": true,
+      "purpose": "Actual SAME-buffer bootstrap binding-functions.bash",
+      "separateStatusToolCallId": "960344",
+      "start": null,
+      "fullFingerprint": null,
+      "completionMeaning": "ACTUAL_EXTERNAL_TOOL_EXIT_NOT_DIRECT_WAIT"
+    }
+  ],
+  "lastThisWriterMustBeAddedOnlyAfterActualExternal0": true,
+  "preliminaryFactsAreNotTheFinalCompleteEnvelope": true,
+  "actorSelection": "Complete known actual selected unit-control owners/provenance/adoptions, root input/scope writers, failed bootstrap, metadata caller/author, source readers and trace-bearing verification helpers. Conservatively includes known current-state writers. Frozen approved code/test/QA artifact preparation and dispatch preflights were source-only without actual unit resource rights; they are not silently converted into operational witnesses. Known prior11 and full historical/current global-table predicates are still derived/enforced by Source07; no residual project process is exempted.",
+  "noHiddenVerifier": true,
+  "noNewHelperAfterFinalSerialization": true,
+  "initialFactsStillOwed": "After this final scope/current-state writer separately returns actual0, add its ORIGINAL PID/parent/tool/status, then pure retained Source07 operator initialFacts/initialBinder only. Bind exact finite readonly JSON/SHA in held shell, inspect SAME actual buffer/bytes/readonly in pure memory, and separately capture binder/inspection0. No new source-reader/hash/writer/preflight process afterward; only current actual installer remains pending null.",
+  "actualInstallationAuthorized": true,
+  "onceAttemptOnly": true,
+  "exactInstallCommand": "gateway80_fr04_install_once '8d45661fe93ae8ceb72126778fa9e3b73af14e0ff16b0aaf4cb8022a4367401a' '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway80-fr04-root-install01/root-install-scope.json' '137bcd4ccb982ce8bfadf3290cf2ee65ccf2b4f2b9514840f5d74e05c8f924ce'\n",
+  "installAllowedEffects": "Reviewed Source07 install CLI/factory/installer only: derive all physical binary/code/loader/input/owner/actor maps from approved pinned buffers, strict pure preflight and seven actual witnesses BEFORE attempt/N03 mutation, exclusive approved outside draft/attempt records and N03/root-authorization/six code payloads, complete-first original facts plus pending actual installer; actual selected cleanup/status/partial state observed. No ad-hoc member/derived map.",
+  "actualGuardPhaseAuthorized": false,
+  "normalRoute": "HARD_HOLD",
+  "expectedWrapperExit": 1,
+  "credit": false,
+  "compileObligation": "NONE_NODE_ONLY_UNCHANGED_SOURCE",
+  "newNativeInvocations": 0,
+  "sourceWrites": [],
+  "sourceEquality": "EXPECTED_ANCESTRY_FRESH_QUALIFIED_SOURCE_PROOF_STILL_REQUIRED_BEFORE_ADMISSION_ARCHIVE_AND_CLOSING",
+  "freshQualifiedF9AndSeparateHeld0BeforeAdmissionStillRequired": true,
+  "forbidden": [
+    "No negative/held/archive/final/permit/gate/exit/postclose phase until separate exact scopes",
+    "No retry/reset/overwrite/delete/cleanup/signal; every partial/unknown HOLD and preserve",
+    "No extra backend/Java/Gradle/native/source-window/lease/compiler operations",
+    "No ad-hoc protectedbaseline/C5/C212/private/old closed body access",
+    "No future own0, omitted actor, direct-wait reinterpretation, manual derived map or extra child after final facts"
+  ],
+  "duringForeground": "Only empty PTY polls until actual prompt, then capture actual $? ALONE; no other commands/preflights while installer foreground",
+  "actualCompletionStillOwed": true,
+  "actualInstallationSucceeded": false,
+  "N03IdentityStillUnobserved": true,
+  "actualQualifiedSourceOrHolderFacts": false,
+  "allStoriesComplete": false,
+  "atUtc": "2026-10-20T01:51:53.797470+00:00",
+  "writer": {
+    "pid": 63949,
+    "parentPid": 17932,
+    "ownFutureStatus": null,
+    "externalCompletionOwed": true
+  }
+}

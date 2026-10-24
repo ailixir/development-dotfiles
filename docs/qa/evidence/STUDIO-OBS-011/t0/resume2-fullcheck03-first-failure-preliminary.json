@@ -1,0 +1,29 @@
+{
+  "atUtc": "2026-10-19T04:38:32.963242+00:00",
+  "state": "PRELIMINARY LIVE JOB DIAGNOSTIC FACT, NOT TERMINAL/GATE/COVERAGE EVIDENCE",
+  "label": "obs011-t0-fresh-check03",
+  "runtimeReceiptPath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fullcheck-harness/resume3/runs/obs011-t0-fresh-check03/receipt.json",
+  "runtimeReceiptObservedSha256": "061d52821cef6169074e6e329bfa4e0e2df64fe9a217040da92a132d2928484e",
+  "observedStatus": "RUNNING",
+  "ownedProcessObservations": [
+    "99563 99562 Mon Oct 19 00:02:44 2026     /opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python",
+    "99690 99564 Mon Oct 19 00:02:45 2026     /opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python"
+  ],
+  "firstLoggedFailure": "GuidedPublicationReplayIT > actualCoreGuidedSameSecretIdStaysWithinPersistedScope() FAILED",
+  "loggedFailureCount": 1,
+  "sourcePath": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+  "sourceSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "testMethod": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope",
+  "order": 11,
+  "sourceMethodLine": 20328,
+  "failureFrame": "GuidedPublicationReplayIT.java:32322",
+  "failingHelper": "awaitFinalizing",
+  "assertedState": "FINALIZING",
+  "assertionMeaning": "Second explicit learning reached one of original terminal-state guard values and failed exactFINALIZING assertion. Actual observed terminalenum/axis/cause unproved until bound closed/provisionalpublicfailure facts inspected without privatevalueexport.",
+  "comparison": "Different case/helper from historicalB1firstOrder32startupfailure; currentfocuseddiagall108passdidnotexplain eitherfullsuitefailure. Latercurrentcaseswerealreadyloggedpassing; no cleanup-state causalclaim.",
+  "observerGapPreserved": true,
+  "nativeOutcome": "At least one actual test failure; full nativejob still running atobservation. No freshcoverage/taskstatus inferred beforeactualterminal.",
+  "noRetryOrLiveMutation": true,
+  "w1Authorized": false,
+  "privateValuesOrPathsExported": false
+}

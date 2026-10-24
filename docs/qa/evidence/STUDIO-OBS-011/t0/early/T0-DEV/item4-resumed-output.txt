@@ -1,0 +1,22 @@
+PASS A: write paths with protected-entry co-location: 9
+  11-FOLD-final  edit     backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java                                 -> 1 entries: CFK-18
+  11-FOLD-final  edit     backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java                -> 1 entries: CFC-01
+  11-FOLD-prep   edit     backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java                                 -> 1 entries: CFK-18
+  11-FOLD-prep   edit     backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java                -> 1 entries: CFC-01
+  11-GS-M        edit     backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java                   -> 6 entries: RTP-16,RTP-17,RTP-18,RTP-19,RTP-20,RTP-21
+  11-LEFT        edit     backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java                                -> 1 entries: CFK-01
+  11-LEFT        edit     backend/src/main/resources/application.yml                                                                     -> 110 entries: CFB-001,CFB-002,CFB-003,CFB-004,CFB-005,CFB-006,CFB-007,CFB-008,CFB-009,CFB-010,CFB-011,CFB-012
+  11-MERGE       edit     studio-runner/src/guided/transport.ts                                                                          -> 8 entries: NEG-01,RKO-06,RTX-13,RTX-14,RTX-15,RTX-16,RTX-17,RTX-18
+  11-RT          edit     studio-runner/src/guided/transport.ts                                                                          -> 8 entries: NEG-01,RKO-06,RTX-13,RTX-14,RTX-15,RTX-16,RTX-17,RTX-18
+
+PASS B: symbol -> protected entries mentioning it (any field)
+  GuidedRunnerClient                 [11-FOLD-final delete] 9: RTP-16,RTP-17,RTP-18,RTP-19,RTP-20,RTP-21,RTP-22,RTP-23,CFC-01
+  StudioRunnerTls                    [11-FOLD-prep edit] 9: CFC-01,CFK-13,CFB-105,CFB-106,CFB-107,CFB-108,CFB-109,CFB-110,CFK-18
+  GuidedSessionConfiguration         [11-FOLD-prep edit] 9: RTP-16,RTP-17,RTP-18,RTP-19,RTP-20,RTP-21,RTP-22,RTP-23,CFC-01
+  read-interval                      [11-LEFT: yml leaf removed (prefix of rea] 1: CFB-079
+  READ_INTERVAL                      [11-LEFT: env of the removed leaf] 1: CFB-079
+  poll-interval                      [11-LEFT: component binding name] 3: CFB-058,CFB-059,CFB-070
+  V18                                [11-LEFT CLN-F2 (migration tests/fixture ] 7: MIG-12,MIG-13,MIG-14,MIG-15,MIG-16,MIG-17,MIG-18
+  GuidedSessionController            [11-GS-M edit] 6: RTP-16,RTP-17,RTP-18,RTP-19,RTP-20,RTP-21
+
+symbols with 0 protected hits: ['AccountAccess', 'CANONICAL', 'Confirmed revision', 'DiscardPolicy', 'DispatchAuthorization', 'ExecutionStatus', 'GuidedDispatchService', 'GuidedPlanPublisher', 'GuidedPreparationStore', 'GuidedPublicationAuthorization', 'GuidedPublicationConfiguration', 'GuidedPublicationResultProjector', 'GuidedSessionService', 'GuidedSourceInputResolver', 'GuidedTranslationService', 'HistoricalV18', 'HttpRunnerDispatchClient', 'OBSERVED_SCHEDULE_AUTH_REQUIRED', 'ObservedReplayAuthorization', 'ObservedReplayAuthorizer', 'ObservedReplayBindingBuilder', 'ObservedReplayConfiguration', 'ObservedValidationClient', 'POLL_INTERVAL', 'PinnedStoppedRunRecordingFacts', 'ProvisionalDispatchAuthorization', 'PublicationGrantAuthority', 'ReplayAccountAccess', 'RunDetailsDrawer', 'RunnerOutcomeCodes', 'STUDIO_AUTHORING_V2_ENABLED', 'STUDIO_INCREMENTAL_ENABLED', 'SecretAlreadyExistsException', 'StudioRunnerConfiguration', 'StudioRunnerValidated', 'StudioSecretsService', 'StudioService', 'TEARDOWNS_IN_FLIGHT', 'VITE_ALLOW_INSECURE_MSW_FALLBACK', 'VaultStudioReferenceResolver', 'allocationIds', 'axe-results', 'browser-oracle', 'complete API lifecycle', 'deferred.test', 'example-manifest', 'getSecretName', 'guidedBrowser', 'isApiAssigned', 'isCanonical', 'pollInterval', 'pollIntervalOrDefault', 'providerName', 'readInterval', 'readIntervalOrDefault', 'recordEvidence', 'requireTranslation', 'requireV18', 'studio.compile', 'studioAuthoringV2', 'unavailableGuidedRunnerClient', 'updateAuthoring']

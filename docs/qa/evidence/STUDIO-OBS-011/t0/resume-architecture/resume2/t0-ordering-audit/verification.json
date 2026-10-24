@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-19T06:33:37.546669+00:00",
+  "exactQuoteMatches": 44,
+  "authorityGroups": 12,
+  "inputCount": 30,
+  "lateSanitizedSnapshotSha256": "8c614f55800d99f619aa570a9ad0395506f444dae53bd19601bd0e5af7773445",
+  "changedInputsAtFinalCheck": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/CURRENT-EXECUTION.md",
+      "atReadSha256": "6bdca39f52ae52acf8b144d33bcb673039d36deb6210b89005764f93cde224bc",
+      "nowSha256": "b39bfa41dc15e5393b9e038dfe20f31146d8df451d97c3b61abd2d0e98679dc1",
+      "disposition": "Mutable root coordination record re-read; current capture-complete delta and continued source/output hold agree with parent update; original hash retained, not silently refreshed.",
+      "rereadSha256": "b39bfa41dc15e5393b9e038dfe20f31146d8df451d97c3b61abd2d0e98679dc1"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-root-state.json",
+      "atReadSha256": "1dfa54940a5d77031e7f1620f0061b0d17957461bf5d1c8cd1109ccdf57c664d",
+      "nowSha256": "ba379181ff4c1e187ff414cbbcb7a848bd5509ffac0349af233655c6e19c95fe",
+      "disposition": "Mutable root coordination record re-read; current capture-complete delta and continued source/output hold agree with parent update; original hash retained, not silently refreshed.",
+      "rereadSha256": "ba379181ff4c1e187ff414cbbcb7a848bd5509ffac0349af233655c6e19c95fe"
+    }
+  ],
+  "productRuntimeTests": 0,
+  "rawPrivateReads": 0,
+  "sourcePlanStoryOldRecordWrites": 0,
+  "subagents": 0,
+  "currentSourceWriterAuthorized": false,
+  "qaVerdictIssued": false,
+  "proposedNext": "Finish capture post-execution independent review; obtain independent Quinn ordering qualification of B1 step6 and current hold for exact uncredited GS-T test-only scope; then explicit signed root release/certifications if supported",
+  "actualC8": "UNMET",
+  "cause": "UNPROVEN",
+  "userPermissionRequiredForThisUnchangedRequirementsOrderingProposal": false,
+  "budgetCeilingUsd": 500,
+  "actualAggregateSpend": "UNAVAILABLE",
+  "validationScope": "Artifact consistency only; no product baseline or native proof",
+  "status": "COMPLETE_AUTHORITY_AUDIT_PROPOSED_ORDERING_NOT_RELEASED",
+  "unchangedPrimaryAuthorityInputs": 28,
+  "mutableCoordinationInputsReread": 2,
+  "independentQaOrderingDisposition": "REQUIRED_NOT_ISSUED_BY_ARIA",
+  "currentHoldReleased": false
+}

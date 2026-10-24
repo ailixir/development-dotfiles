@@ -1,0 +1,31 @@
+{
+  "kind": "BEFORE_ATTEMPT3_FAKE_INSPECTION",
+  "priorAttempt2": {
+    "tool": "de4096",
+    "actualExit": 1,
+    "stage": "fake successful flow regression collector",
+    "nativeStatus": "FAKE0",
+    "primary": "PHASE_EXCEPTION",
+    "firstInnerCause": "UNKNOWN_NOT_EXPORTED_BY_CONTROLLER"
+  },
+  "change": "Preload ET serialization codec before permanent audit; retain closed fake exception stage/type and denied event names for exact diagnosis. No target boundary gains real effect.",
+  "files": [
+    {
+      "path": "pure_controller.py",
+      "sha256": "541f17ff017595dd31c36a36c8d5818c6ad60bddd1651c9bf4db2b8b565c7b61",
+      "bytes": 20515
+    },
+    {
+      "path": "selected_adapter.py",
+      "sha256": "4c7abad2b75c1849d0b0f706bb446ef3b6bbd6737e8908871bd20be96fb171c4",
+      "bytes": 5319
+    },
+    {
+      "path": "fake_flow.py",
+      "sha256": "ab297ba19297db5ea4c1d4ab5a3f075d0de54f8d6d6394ce87c0f24f17ee4169",
+      "bytes": 18036
+    }
+  ],
+  "effectScope": "Unchanged FakePort, FakeET, FakePath; permanent audit retained; all target OS/path/process/FFI/fcntl/thread/socket/clock/helper/native FAKE; no legacy main/import execution",
+  "actualNativeOrRuntime": 0
+}

@@ -1,0 +1,4194 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java
+@@ -13,11 +13,9 @@
+ import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
+ import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
+ import com.citi.put.checks.studio.support.RunnerProcessHarness;
+-import com.citi.put.checks.studio.support.RunnerTestTls;
+ import com.citi.put.checks.studio.support.RunnerTestTls.Identity;
+ import com.fasterxml.jackson.databind.JsonNode;
+ import com.fasterxml.jackson.databind.node.ObjectNode;
+-import com.sun.net.httpserver.HttpServer;
+ import java.net.InetSocketAddress;
+ import java.net.URI;
+ import java.net.http.HttpClient;
+@@ -26,29 +24,19 @@
+ import java.nio.charset.StandardCharsets;
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+-import java.security.KeyPair;
+-import java.security.KeyPairGenerator;
+-import java.security.MessageDigest;
+ import java.security.Signature;
+ import java.time.Clock;
+ import java.time.Duration;
+ import java.time.Instant;
+ import java.util.ArrayList;
+ import java.util.Base64;
+-import java.util.HexFormat;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.UUID;
+-import java.util.concurrent.Callable;
+-import java.util.concurrent.CountDownLatch;
+-import java.util.concurrent.Executors;
+-import java.util.concurrent.Future;
+ import java.util.concurrent.TimeUnit;
+ import java.util.concurrent.atomic.AtomicInteger;
+ import java.util.concurrent.atomic.AtomicReference;
+-import javax.net.ssl.SSLContext;
+ import javax.sql.DataSource;
+-import org.flywaydb.core.Flyway;
+ import org.junit.jupiter.api.AfterAll;
+ import org.junit.jupiter.api.AfterEach;
+ import org.junit.jupiter.api.BeforeEach;
+@@ -69,7 +57,6 @@
+ import org.springframework.test.context.DynamicPropertyRegistry;
+ import org.springframework.test.context.DynamicPropertySource;
+ import org.springframework.transaction.support.TransactionTemplate;
+-import org.testcontainers.containers.PostgreSQLContainer;
+ 
+ /** Real PostgreSQL + real mutually authenticated HTTPS in both directions + actual Chromium. */
+ @SpringBootTest(
+@@ -81,243 +68,13 @@
+       "spring.jmx.enabled=false"
+     })
+ class GuidedBridgeIntegrationTest {
+-  static final GuidedContracts CONTRACTS = new GuidedContracts();
+-  static final PostgreSQLContainer<?> DATABASE = new PostgreSQLContainer<>("postgres:15-alpine");
+-  static final Path TEMP;
+-  static final Path DIST;
+-  static final RunnerTestTls RUNNER_TLS;
+-
+-  /** The backend's identity toward the runner: also the guided runner client's context. */
+-  static final SSLContext TLS;
+-
+-  /** What the runner (a worker calling the backend, or a double standing in for it) presents. */
+-  static final SSLContext RUNNER_SIDE;
+-
+-  static final KeyPair ISSUER;
+-  static final int RUNNER_PORT;
+-  static final HttpServer APPLICATION;
+-  static final AtomicInteger NAVIGATIONS = new AtomicInteger(), CONNECTIONS = new AtomicInteger();
+-  static final AtomicReference<String> RECEIPT = new AtomicReference<>();
+-  static final String CAPTURE = "  independent-" + UUID.randomUUID() + "-é😀  ";
+-  static final String PASSWORD_ECHO = "password-canary-" + UUID.randomUUID();
+-  static final String ORDINARY_ECHO = "  ordinary-canary-" + UUID.randomUUID() + "  ";
+-  static final AtomicInteger ECHO_NAVIGATIONS = new AtomicInteger(),
+-      TOGGLE_ATTEMPTS = new AtomicInteger();
+-  static volatile boolean privacyEcho, nativeToggle;
+-  static final String CONFIG_INPUT = "configured-" + UUID.randomUUID();
+-  static final String ORIGIN;
+-  static volatile boolean replaceTarget,
+-      wideSession,
+-      genericRead,
+-      belowFold,
+-      multiStep,
+-      dropCompletionCallbacks;
+-  static volatile boolean failClaims, corruptClaimResponse;
+-  static final java.util.concurrent.atomic.AtomicBoolean HOLD_NEXT_REFRESH =
+-      new java.util.concurrent.atomic.AtomicBoolean();
+-  static volatile CountDownLatch refreshCallbackHeld = new CountDownLatch(1),
+-      releaseRefreshCallback = new CountDownLatch(1);
+-  static volatile long slowNavigationMillis;
+-  static final java.util.concurrent.atomic.AtomicBoolean HOLD_NEXT_CLAIM =
+-      new java.util.concurrent.atomic.AtomicBoolean();
+-  static volatile CountDownLatch claimResponseCaptured = new CountDownLatch(1);
+-  static volatile CountDownLatch releaseClaimResponse = new CountDownLatch(1);
+-  static final AtomicInteger MUTATIONS = new AtomicInteger();
+-  static final AtomicInteger CLICK_RECEIPTS = new AtomicInteger();
+-  static final AtomicInteger FILL_RECEIPTS = new AtomicInteger();
++  static final GuidedBridgeFixture ENV;
+ 
+   static {
+     try {
+-      TEMP = Files.createTempDirectory("guided-bridge-");
+-      // STUDIO-OBS-009 AC-12 i: no private copy of dist. The harness spawns the real folded entry
+-      // point and records the digest of what it spawned; the sole rebuild is the F-merge's.
+-      DIST = RunnerProcessHarness.defaultDistDirectory().toAbsolutePath().normalize();
+-      ObjectNode workerEvidence = CONTRACTS.object().put("snapshot", DIST.toString());
+-      workerEvidence.put("distDigest", RunnerProcessHarness.distDigestOf(DIST));
+-      ObjectNode hashes = workerEvidence.putObject("sha256");
+-      for (String relative :
+-          List.of(
+-              "main.js",
+-              "run/browser.js",
+-              "guided/runtime.js",
+-              "guided/transport.js",
+-              "guided/schemas.json")) {
+-        hashes.put(
+-            relative,
+-            HexFormat.of()
+-                .formatHex(
+-                    MessageDigest.getInstance("SHA-256")
+-                        .digest(Files.readAllBytes(DIST.resolve(relative)))));
+-      }
+-      hashes.put(
+-          "scripts/browser-provenance.mjs",
+-          HexFormat.of()
+-              .formatHex(
+-                  MessageDigest.getInstance("SHA-256")
+-                      .digest(
+-                          Files.readAllBytes(
+-                              Path.of("../studio-runner/scripts/browser-provenance.mjs")))));
+-      Files.writeString(
+-          Path.of("/tmp/studio-obs004-tested-worker.json"), workerEvidence.toString());
+-      // One test CA (lane D3.0): the runner and the backend certificates chain to it, the runner
+-      // pins
+-      // the backend certificate, and the backend trusts only the CA.
+-      RUNNER_TLS = RunnerTestTls.shared();
+-      TLS = RUNNER_TLS.backendTls().sslContext();
+-      RUNNER_SIDE =
+-          RUNNER_TLS.serverContext(
+-              Identity.RUNNER, RUNNER_TLS.trustStore(), RUNNER_TLS.trustStorePasswordFile());
+-      var generator = KeyPairGenerator.getInstance("RSA");
+-      generator.initialize(2048);
+-      ISSUER = generator.generateKeyPair();
+-      Files.writeString(
+-          TEMP.resolve("issuer.pub"),
+-          "-----BEGIN PUBLIC KEY-----\n"
+-              + Base64.getMimeEncoder(64, new byte[] {10})
+-                  .encodeToString(ISSUER.getPublic().getEncoded())
+-              + "\n-----END PUBLIC KEY-----\n");
+-      // AC-12 h: an exclusive bind on both loopback families, outside the database range.
+-      RUNNER_PORT = RunnerProcessHarness.exclusivelyFreePort();
+-      APPLICATION = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+-      ORIGIN = "http://127.0.0.1:" + APPLICATION.getAddress().getPort();
+-      APPLICATION.createContext(
+-          "/connect",
+-          exchange -> {
+-            CONNECTIONS.incrementAndGet();
+-            byte[] body = "controlled-public-fixture-account".getBytes(StandardCharsets.UTF_8);
+-            exchange.sendResponseHeaders(200, body.length);
+-            exchange.getResponseBody().write(body);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/start",
+-          exchange -> {
+-            NAVIGATIONS.incrementAndGet();
+-            if (slowNavigationMillis > 0) {
+-              try {
+-                Thread.sleep(slowNavigationMillis);
+-              } catch (InterruptedException failure) {
+-                Thread.currentThread().interrupt();
+-              }
+-            }
+-            String html =
+-                "<html><body><main aria-label='Operations'><output aria-label='Order number' "
+-                    + "data-testid='source'>"
+-                    + CAPTURE
+-                    + "</output></main><input aria-label='Destination' data-testid='destination' "
+-                    + "oninput=\"fetch('/receipt',{method:'POST',body:this.value})\"><button "
+-                    + "data-testid='replace' onclick=\"document.querySelector('[data-testid=destin"
+-                    + "ation]').outerHTML='<input data-testid=destination "
+-                    + "aria-label=Destination>'\">Replace</button><script>setInterval(async()=>{if"
+-                    + "(await (await fetch('/mutation')).text()==='yes'){document.querySelector('["
+-                    + "data-testid=destination]').outerHTML='<input data-testid=destination "
+-                    + "aria-label=Destination>';await "
+-                    + "fetch('/mutated',{method:'POST'});}},25)</script></body></html>";
+-            if (genericRead) {
+-              html =
+-                  "<html><body><main aria-label='Operations'>"
+-                      + "<output aria-label='Order reference'>"
+-                      + CAPTURE
+-                      + "</output>"
+-                      + "<label>Destination<textarea oninput=\"fetch('/receipt',"
+-                      + "{method:'POST',body:this.value})\"></textarea></label>"
+-                      + "</main></body></html>";
+-            }
+-            if (privacyEcho) {
+-              html =
+-                  "<html><body><input type='password' aria-label='Login secret' value='"
+-                      + PASSWORD_ECHO
+-                      + "'><input aria-label='Ordinary input' value='"
+-                      + ORDINARY_ECHO
+-                      + "'></body></html>";
+-            }
+-            if (nativeToggle) {
+-              html =
+-                  "<html><body><input type='checkbox' aria-label='Prevented toggle' "
+-                      + "onclick=\"event.preventDefault();fetch('/toggle',{method:'POST'})\">"
+-                      + "<input type='radio' checked aria-label='Selected radio' "
+-                      + "onclick=\"fetch('/toggle',{method:'POST'})\"></body></html>";
+-            }
+-            if (belowFold) {
+-              html =
+-                  html.replace(
+-                      "</body>",
+-                      "<div style='height:2200px'></div>"
+-                          + "<button aria-label='Continue' onclick=\"fetch('/clicked',"
+-                          + "{method:'POST'})\">Continue</button></body>");
+-            }
+-            byte[] body = html.getBytes(StandardCharsets.UTF_8);
+-            exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
+-            exchange.sendResponseHeaders(200, body.length);
+-            exchange.getResponseBody().write(body);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/echo",
+-          exchange -> {
+-            ECHO_NAVIGATIONS.incrementAndGet();
+-            byte[] bytes =
+-                ("<html><body><button>"
+-                        + PASSWORD_ECHO
+-                        + "</button><button>"
+-                        + ORDINARY_ECHO.strip()
+-                        + "</button></body></html>")
+-                    .getBytes(StandardCharsets.UTF_8);
+-            exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
+-            exchange.sendResponseHeaders(200, bytes.length);
+-            exchange.getResponseBody().write(bytes);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/toggle",
+-          exchange -> {
+-            TOGGLE_ATTEMPTS.incrementAndGet();
+-            exchange.sendResponseHeaders(204, -1);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/receipt",
+-          exchange -> {
+-            FILL_RECEIPTS.incrementAndGet();
+-            RECEIPT.set(
+-                new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+-            exchange.sendResponseHeaders(204, -1);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/mutation",
+-          exchange -> {
+-            byte[] body = (replaceTarget ? "yes" : "no").getBytes(StandardCharsets.UTF_8);
+-            exchange.sendResponseHeaders(200, body.length);
+-            exchange.getResponseBody().write(body);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/mutated",
+-          exchange -> {
+-            replaceTarget = false;
+-            MUTATIONS.incrementAndGet();
+-            exchange.sendResponseHeaders(204, -1);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/clicked",
+-          exchange -> {
+-            if (exchange.getRequestMethod().equals("POST")) {
+-              CLICK_RECEIPTS.incrementAndGet();
+-            }
+-            exchange.sendResponseHeaders(204, -1);
+-            exchange.close();
+-          });
+-      APPLICATION.start();
+-      DATABASE.start();
+-      // STUDIO-OBS-012A / ADR-SC-005 D-B: the re-baselined schema head (core V1–V11 + V12–V18).
+-      Flyway.configure()
+-          .dataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword())
+-          .locations("classpath:db/migration")
+-          .target("22") // STUDIO-OBS-014 S3: governance tables (V19) at head
+-          .load()
+-          .migrate();
++      ENV = new GuidedBridgeFixture(
++          "guided-bridge-", Path.of("/tmp/studio-obs004-tested-worker.json"));
++      ENV.start();
+     } catch (Exception failure) {
+       throw new ExceptionInInitializerError(failure);
+     }
+@@ -325,13 +82,7 @@
+ 
+   @DynamicPropertySource
+   static void properties(DynamicPropertyRegistry registry) {
+-    RunnerProcessHarness.backendServerSslProperties(RUNNER_TLS)
+-        .forEach((name, value) -> registry.add(name, () -> value));
+-    registry.add(
+-        "studio.guided-authoring.service-public-key",
+-        () -> Base64.getEncoder().encodeToString(ISSUER.getPublic().getEncoded()));
+-    registry.add("studio.guided-authoring.service-issuer", () -> "fixture-issuer");
+-    registry.add("studio.guided-authoring.mtls-required", () -> true);
++    ENV.properties(registry);
+   }
+ 
+   @Configuration(proxyBeanMethods = false)
+@@ -346,64 +97,13 @@
+     @Bean
+     org.springframework.boot.web.servlet.FilterRegistrationBean<jakarta.servlet.Filter>
+         completionFault() {
+-      jakarta.servlet.Filter filter =
+-          (request, response, chain) -> {
+-            String uri = ((jakarta.servlet.http.HttpServletRequest) request).getRequestURI();
+-            var http = (jakarta.servlet.http.HttpServletResponse) response;
+-            String callbackKey =
+-                ((jakarta.servlet.http.HttpServletRequest) request).getHeader("Idempotency-Key");
+-            if (uri.endsWith("/observations")
+-                && callbackKey != null
+-                && callbackKey.startsWith("oref-")
+-                && HOLD_NEXT_REFRESH.compareAndSet(true, false)) {
+-              refreshCallbackHeld.countDown();
+-              try {
+-                releaseRefreshCallback.await(10, TimeUnit.SECONDS);
+-              } catch (InterruptedException failure) {
+-                Thread.currentThread().interrupt();
+-              }
+-            }
+-            if (dropCompletionCallbacks && (uri.endsWith("/outcomes") || uri.endsWith("/lifecycle"))
+-                || failClaims && uri.endsWith("/claim")) {
+-              http.setStatus(503);
+-              return;
+-            }
+-            if (uri.endsWith("/claim") && (corruptClaimResponse || HOLD_NEXT_CLAIM.get())) {
+-              var buffered = new org.springframework.web.util.ContentCachingResponseWrapper(http);
+-              chain.doFilter(request, buffered);
+-              if (buffered.getStatus() == 202 && corruptClaimResponse) {
+-                ObjectNode grant =
+-                    (ObjectNode)
+-                        CONTRACTS.parse(
+-                            new String(buffered.getContentAsByteArray(), StandardCharsets.UTF_8));
+-                grant
+-                    .withObject("/owner")
+-                    .put("fence", grant.path("owner").path("fence").asInt() + 1);
+-                byte[] changed = grant.toString().getBytes(StandardCharsets.UTF_8);
+-                buffered.resetBuffer();
+-                buffered.setContentLength(changed.length);
+-                buffered.getOutputStream().write(changed);
+-              }
+-              if (buffered.getStatus() == 202 && HOLD_NEXT_CLAIM.compareAndSet(true, false)) {
+-                claimResponseCaptured.countDown();
+-                try {
+-                  releaseClaimResponse.await(15, TimeUnit.SECONDS);
+-                } catch (InterruptedException failure) {
+-                  Thread.currentThread().interrupt();
+-                }
+-              }
+-              buffered.copyBodyToResponse();
+-              return;
+-            }
+-            chain.doFilter(request, response);
+-          };
+-      return new org.springframework.boot.web.servlet.FilterRegistrationBean<>(filter);
++      return ENV.completionFault();
+     }
+ 
+     @Bean
+     DataSource dataSource() {
+       return new DriverManagerDataSource(
+-          DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword());
++          ENV.database.getJdbcUrl(), ENV.database.getUsername(), ENV.database.getPassword());
+     }
+ 
+     @Bean
+@@ -413,7 +113,7 @@
+ 
+     @Bean
+     GuidedContracts contracts() {
+-      return CONTRACTS;
++      return ENV.contracts;
+     }
+ 
+     @Bean
+@@ -421,7 +121,7 @@
+       return new GuidedSessionRepository(
+           jdbc,
+           new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource())),
+-          CONTRACTS);
++          ENV.contracts);
+     }
+ 
+     @Bean
+@@ -431,7 +131,7 @@
+ 
+     @Bean
+     GuidedMaterializationService materialization(JdbcTemplate jdbc) {
+-      return new GuidedMaterializationService(jdbc, CONTRACTS);
++      return new GuidedMaterializationService(jdbc, ENV.contracts);
+     }
+ 
+     @Bean
+@@ -443,20 +143,20 @@
+       var service =
+           new GuidedSessionService(
+               repository,
+-              CONTRACTS,
++              ENV.contracts,
+               access,
+               new GuidedSessionProperties(true, Map.of()),
+               Clock.systemUTC());
+       service.installBridge(
+           materialization,
+-          new GuidedPreparationStore(jdbc, CONTRACTS),
+-          new GuidedBindingStore(jdbc, CONTRACTS, materialization),
+-          new com.citi.put.checks.studio.guided.bridge.GuidedAssignmentStore(jdbc, CONTRACTS));
++          new GuidedPreparationStore(jdbc, ENV.contracts),
++          new GuidedBindingStore(jdbc, ENV.contracts, materialization),
++          new com.citi.put.checks.studio.guided.bridge.GuidedAssignmentStore(jdbc, ENV.contracts));
+       // Single path: production always installs translation (GuidedSessionConfiguration).
+       service.installTranslation(
+-          new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, CONTRACTS),
++          new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, ENV.contracts),
+           new com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore(
+-              jdbc, CONTRACTS));
++              jdbc, ENV.contracts));
+       // STUDIO-OBS-014 S3: one uniform governed policy for the class (ar-mounted-rules B14).
+       com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
+           service,
+@@ -464,7 +164,7 @@
+           "CSI-123",
+           "orders",
+           "fixture",
+-          java.util.List.of(ORIGIN),
++          java.util.List.of(ENV.origin),
+           governedPolicy());
+       return service;
+     }
+@@ -472,10 +172,10 @@
+     @Bean
+     GuidedRunnerClient runner() {
+       return new GuidedRunnerClient(
+-          URI.create("https://127.0.0.1:" + RUNNER_PORT),
+-          TLS,
++          URI.create("https://127.0.0.1:" + ENV.runnerPort),
++          ENV.tls,
+           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+-          CONTRACTS);
++          ENV.contracts);
+     }
+ 
+     @Bean
+@@ -496,28 +196,7 @@
+    * behaves as "no grants" there.
+    */
+   static ObjectNode governedPolicy() {
+-    ObjectNode policy =
+-        CONTRACTS
+-            .object()
+-            .put("policyRuleId", "structural-policy")
+-            .put("allowStructuralDiscovery", true);
+-    ObjectNode grant =
+-        CONTRACTS.object().put("policyRuleId", "business-read").put("origin", ORIGIN);
+-    grant
+-        .putObject("region")
+-        .put("kind", "role")
+-        .put("role", "main")
+-        .put("name", "Operations")
+-        .put("exact", true);
+-    grant.putObject("visibleText").put("classification", "permittedBusinessData");
+-    grant
+-        .putObject("controlValue")
+-        .put("classification", "nonsecretApproved")
+-        .putArray("types")
+-        .add("text")
+-        .add("textarea");
+-    policy.putArray("readGrants").add(grant);
+-    return policy;
++    return ENV.governedPolicy();
+   }
+ 
+   static class FixtureAccess implements GuidedSessionAccess, GuidedSessionService.StepVerifier {
+@@ -529,9 +208,9 @@
+ 
+     @Override
+     public Snapshot resolve(Authentication principal, JsonNode start) {
+-      assertThat(CONNECTIONS.get()).isGreaterThan(0);
++      assertThat(ENV.connections.get()).isGreaterThan(0);
+       ObjectNode scope =
+-          CONTRACTS
++          ENV.contracts
+               .object()
+               .put("principalId", "user-1")
+               .put("csiId", "CSI-123")
+@@ -541,7 +220,7 @@
+               .put("configurationRevision", "config-1")
+               .put("modelDataPolicyId", "labels-only-1")
+               .putNull("valueTransferPolicyId");
+-      scope.putArray("approvedOrigins").add(ORIGIN);
++      scope.putArray("approvedOrigins").add(ENV.origin);
+       scope
+           .putArray("capabilities")
+           .add("observe")
+@@ -552,19 +231,19 @@
+           .add("check")
+           .add("uncheck")
+           .add("assert");
+-      var steps = CONTRACTS.object().putArray("steps");
+-      steps.add(CONTRACTS.object().put("stepId", "step-1").put("requiresAssertion", false));
+-      if (wideSession) {
++      var steps = ENV.contracts.object().putArray("steps");
++      steps.add(ENV.contracts.object().put("stepId", "step-1").put("requiresAssertion", false));
++      if (ENV.wideSession) {
+         for (int n = 1; n < 100; n++) {
+           steps.add(
+-              CONTRACTS
++              ENV.contracts
+                   .object()
+                   .put("stepId", n + "😀".repeat(250))
+                   .put("requiresAssertion", false));
+         }
+       }
+-      if (multiStep) {
+-        steps.add(CONTRACTS.object().put("stepId", "step-2").put("requiresAssertion", false));
++      if (ENV.multiStep) {
++        steps.add(ENV.contracts.object().put("stepId", "step-2").put("requiresAssertion", false));
+       }
+       return new Snapshot(scope, steps);
+     }
+@@ -572,7 +251,7 @@
+     /** Controlled two-step semantics only; never a production English/question verifier. */
+     @Override
+     public boolean complete(JsonNode session, JsonNode completion, List<ObjectNode> actions) {
+-      if (!multiStep
++      if (!ENV.multiStep
+           || !completion.path("stepId").asText().equals("step-1")
+           || actions.size() != 2) {
+         return false;
+@@ -581,7 +260,7 @@
+           actions.stream()
+               .map(
+                   action ->
+-                      CONTRACTS
++                      ENV.contracts
+                           .parse(
+                               jdbc.queryForObject(
+                                   "SELECT proposal::text FROM studio_guided_actions WHERE admission_id=?",
+@@ -592,7 +271,7 @@
+                           .asText())
+               .toList();
+       return kinds.equals(List.of("navigate", "read"))
+-          && NAVIGATIONS.get() == 1
++          && ENV.navigations.get() == 1
+           && jdbc.queryForObject(
+                   "SELECT count(*) FROM studio_guided_producers WHERE session_id=?",
+                   Integer.class,
+@@ -681,48 +360,8 @@
+ 
+   @BeforeEach
+   void startWorker(org.junit.jupiter.api.TestInfo testInfo) throws Exception {
+-    String testName = testInfo.getTestMethod().orElseThrow().getName();
+-    privacyEcho =
+-        testName.equals(
+-            "uncapturedPasswordAndInputEchoesStayPrivateAcrossActualDocumentNavigation");
+-    nativeToggle =
+-        testName.equals("preventedNativeToggleNeverCommitsSuccessOrRetries")
+-            || testName.equals("nativeRadioUncheckIsRefusedBeforeAnyBrowserAttempt");
+-    ECHO_NAVIGATIONS.set(0);
+-    TOGGLE_ATTEMPTS.set(0);
+-    genericRead =
+-        testInfo
+-            .getTestMethod()
+-            .orElseThrow()
+-            .getName()
+-            .equals("configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules");
+-    belowFold =
+-        testInfo
+-            .getTestMethod()
+-            .orElseThrow()
+-            .getName()
+-            .equals("belowFoldClickUsesNativeRevealAndOneReceipt");
+-    CLICK_RECEIPTS.set(0);
+-    FILL_RECEIPTS.set(0);
+-    multiStep =
+-        testInfo
+-            .getTestMethod()
+-            .orElseThrow()
+-            .getName()
+-            .equals("freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer");
+-    genericRead = genericRead || multiStep;
+-    String isolatedDatabase = "bridge_" + UUID.randomUUID().toString().replace("-", "");
+-    var admin =
+-        new DriverManagerDataSource(
+-            DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword());
+-    new JdbcTemplate(admin).execute("CREATE DATABASE " + isolatedDatabase);
+-    ((DriverManagerDataSource) fixtureDataSource)
+-        .setUrl(DATABASE.getJdbcUrl().replace(DATABASE.getDatabaseName(), isolatedDatabase));
+-    Flyway.configure()
+-        .dataSource(fixtureDataSource)
+-        .locations("classpath:db/migration")
+-        .load()
+-        .migrate();
++    ENV.prepareScenario(testInfo);
++    ENV.isolateDatabase(fixtureDataSource);
+     jdbc.execute(
+         "CREATE TABLE IF NOT EXISTS bridge_fixture_sources(id integer PRIMARY "
+             + "KEY,revision text NOT NULL,source text NOT NULL)");
+@@ -730,82 +369,41 @@
+         "INSERT INTO bridge_fixture_sources VALUES (1,'source-1',?) ON CONFLICT(id) DO "
+             + "UPDATE SET revision='source-1',source=excluded.source",
+         "Visit "
+-            + ORIGIN
++            + ENV.origin
+             + "/start then copy the displayed order into Destination and type fixture-input."
+-            + (privacyEcho ? " Then visit " + ORIGIN + "/echo." : ""));
++            + (ENV.privacyEcho ? " Then visit " + ENV.origin + "/echo." : ""));
+     jdbc.execute(
+         "CREATE TABLE IF NOT EXISTS bridge_fixture_configuration(id integer PRIMARY KEY,"
+             + "revision text NOT NULL,input_value text NOT NULL)");
+     jdbc.update(
+         "INSERT INTO bridge_fixture_configuration VALUES (1,'config-1',?)"
+             + " ON CONFLICT(id) DO UPDATE SET revision='config-1',input_value=excluded.input_value",
+-        CONFIG_INPUT);
++        ENV.configInput);
+     // STUDIO-OBS-014 S3b: each test runs on a freshly migrated isolated database, so the class's
+     // approved governed policy is seeded here; the bean-time seed only reached the base database.
+     com.citi.put.checks.studio.support.ObservedPublicationFixture.seedPolicy(
+-        jdbc, "CSI-123", "orders", "fixture", List.of(ORIGIN), governedPolicy(), "ALLOW");
+-    HOLD_NEXT_REFRESH.set(false);
+-    refreshCallbackHeld = new CountDownLatch(1);
+-    releaseRefreshCallback = new CountDownLatch(1);
+-    dropCompletionCallbacks = false;
+-    failClaims = false;
+-    corruptClaimResponse = false;
+-    slowNavigationMillis = 0;
+-    HOLD_NEXT_CLAIM.set(false);
+-    claimResponseCaptured = new CountDownLatch(1);
+-    releaseClaimResponse = new CountDownLatch(1);
+-    NAVIGATIONS.set(0);
+-    CONNECTIONS.set(0);
+-    RECEIPT.set(null);
+-    replaceTarget = false;
+-    wideSession = false;
+-    MUTATIONS.set(0);
+-    Files.writeString(
+-        TEMP.resolve("worker.jwt"), token("owning-worker", "worker-1", "studio-guided-controller"));
+-    Path journal = Files.createTempDirectory(TEMP, "journal-");
++        jdbc, "CSI-123", "orders", "fixture", List.of(ENV.origin), governedPolicy(), "ALLOW");
++    ENV.resetWorkerState();
++    Path journal = ENV.prepareWorkerJournal();
+     // STUDIO-OBS-009 AC-3 / AC-12 h: the one folded entry point over TLS, spawned and reaped by the
+     // harness. STUDIO-OBS-013/014 S3: a per-class object store, never a shared default directory.
+-    workerHarness =
+-        RunnerProcessHarness.builder(RUNNER_TLS)
+-            .port(RUNNER_PORT)
+-            .workDirectory(Files.createTempDirectory(TEMP, "runner-"))
+-            .callbackBaseUrl("https://localhost:" + backendPort)
+-            .env(RunnerProcessHarness.KEY_OBJECT_STORE_DIR, TEMP.resolve("objects").toString())
+-            .guided(
+-                new RunnerProcessHarness.Guided(
+-                    "worker-1",
+-                    journal,
+-                    "fixture-issuer",
+-                    "controller-1",
+-                    TEMP.resolve("issuer.pub"),
+-                    "https://localhost:" + backendPort,
+-                    TEMP.resolve("worker.jwt")))
+-            .start();
++    workerHarness = ENV.startWorker(journal, backendPort);
+     workerHarness.awaitReady(Duration.ofSeconds(60));
+   }
+ 
+   @AfterEach
+   void closeWorker() throws Exception {
+-    releaseClaimResponse.countDown();
+-    releaseRefreshCallback.countDown();
++    ENV.releaseClaimResponse.countDown();
++    ENV.releaseRefreshCallback.countDown();
+     var harness = workerHarness;
+     workerHarness = null;
+-    if (harness != null) {
+-      // AC-11 k / I-T1: stop the runner and everything it left. The privacy oracle reads the log
+-      // first; then a clean exit is asserted (exit 0, no force within the guided grace) and no
+-      // survivor.
+-      var report = harness.teardown();
+-      assertThat(Files.readString(harness.logFile()))
+-          .doesNotContain(CAPTURE, PASSWORD_ECHO, ORDINARY_ECHO.strip());
+-      report.assertNoSurvivors();
+-      report.assertCleanExit();
+-    }
++    ENV.closeWorker(harness);
+   }
+ 
+   @AfterAll
+   static void close() {
+-    APPLICATION.stop(0);
+-    DATABASE.stop();
++    ENV.application.stop(0);
++    ENV.database.stop();
+   }
+ 
+   @Test
+@@ -813,7 +411,7 @@
+     String id = prepareSession();
+     ObjectNode context = sessions.runnerContext(controller, id, 1);
+     ObjectNode claim =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("schemaVersion", 3)
+             .put("sessionId", id)
+@@ -860,7 +458,7 @@
+         "fence",
+         token("owning-worker", "worker-1", "studio-guided-controller"),
+         409);
+-    assertThat(NAVIGATIONS.get()).isZero();
++    assertThat(ENV.navigations.get()).isZero();
+     assertThat(actionCount(id)).isZero();
+   }
+ 
+@@ -869,76 +467,19 @@
+         "SELECT count(*) FROM studio_guided_actions WHERE session_id=?", Integer.class, id);
+   }
+ 
+-  JsonNode action(String id) {
+-    return CONTRACTS.parse(
+-        jdbc.queryForObject(
+-            "SELECT document::text FROM studio_guided_actions WHERE session_id=? ORDER BY "
+-                + "ordinal LIMIT 1",
+-            String.class,
+-            id));
+-  }
+-
+-  ObjectNode navigation(String id) {
+-    ObjectNode proposal = proposal(id, 0, "navigate", null);
+-    proposal
+-        .withObject("/operation")
+-        .put(
+-            "destinationInputId",
+-            sessions
+-                .runnerContext(controller, id, 1)
+-                .path("authoredInputs")
+-                .path("inputs")
+-                .get(0)
+-                .path("inputId")
+-                .asText());
+-    return proposal;
+-  }
+-
+-  ObjectNode advanceRequest(String id, JsonNode ledger) {
+-    return CONTRACTS
+-        .object()
+-        .put("schemaVersion", 3)
+-        .put("sessionId", id)
+-        .put("ownerFence", 1)
+-        .put("admissionId", ledger.path("admission").path("admissionId").asText())
+-        .put("operationHash", ledger.path("operationHash").asText());
+-  }
+-
+-  @SafeVarargs
+-  static <T> List<T> race(Callable<T>... calls) throws Exception {
+-    var start = new CountDownLatch(1);
+-    try (var pool = Executors.newVirtualThreadPerTaskExecutor()) {
+-      var futures = new ArrayList<Future<T>>();
+-      for (var call : calls) {
+-        futures.add(
+-            pool.submit(
+-                () -> {
+-                  start.await();
+-                  return call.call();
+-                }));
+-      }
+-      start.countDown();
+-      var results = new ArrayList<T>();
+-      for (var future : futures) {
+-        results.add(future.get(20, TimeUnit.SECONDS));
+-      }
+-      return results;
+-    }
+-  }
+-
+   @Test
+   void callbackAcceptsValidUnicodeSessionLargerThan64KiB() throws Exception {
+-    wideSession = true;
++    ENV.wideSession = true;
+     String id = prepareSession();
+     JsonNode session = repository.transaction(() -> repository.lock(id).document());
+-    CONTRACTS.validate("v3/session", session);
++    ENV.contracts.validate("v3/session", session);
+     assertThat(session.toString().getBytes(StandardCharsets.UTF_8).length)
+         .isGreaterThan(65536)
+         .isLessThan(1048576);
+     dispatch.pushContext(controller, id, 1);
+     assertThat(progress(id).path("executionEvidence").path("kind").asText())
+         .isEqualTo("initialBlank");
+-    assertThat(NAVIGATIONS.get()).isZero();
++    assertThat(ENV.navigations.get()).isZero();
+   }
+ 
+   /**
+@@ -960,7 +501,7 @@
+         runner,
+         (java.util.function.Consumer<byte[]>)
+             bytes -> {
+-              JsonNode body = CONTRACTS.parse(new String(bytes, StandardCharsets.UTF_8));
++              JsonNode body = ENV.contracts.parse(new String(bytes, StandardCharsets.UTF_8));
+               if (body.has("reason") && body.path("sessionId").asText().equals(id)) {
+                 digests.add(GuidedContracts.hash(body));
+               }
+@@ -981,8 +522,72 @@
+           user,
+           id,
+           "cancel",
+-          CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-      await(() -> lost.get() == 3 && !sessions.teardownInFlight(id), 60000);
++          ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
++      {
++        long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(60000);
++        class BridgePoll1 {
++          Throwable failure;
++          boolean terminal;
++          boolean slept;
++          boolean initialAwaitTick = true;
++      
++          boolean step() {
++            if (terminal) {
++              return true;
++            }
++            try {
++              if (slept && Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              if (!(!(lost.get() == 3 && !sessions.teardownInFlight(id))
++                  && System.nanoTime() < bridgeDeadline)) {
++                terminal = true;
++                return true;
++              }
++              if (Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              slept = true;
++              return false;
++            } catch (Throwable caught) {
++              failure = caught;
++              terminal = true;
++              return true;
++            }
++          }
++        }
++        var bridgePoll = new BridgePoll1();
++        if (!bridgePoll.step()) {
++          try {
++            org.awaitility.Awaitility.await()
++                .alias("GuidedBridgeIntegrationTest: three refused stops finish")
++                .pollInSameThread()
++                .dontCatchUncaughtExceptions()
++                .pollDelay(Duration.ZERO)
++                .pollInterval(Duration.ofMillis(25))
++                .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++                .until(
++                    () -> {
++                      if (bridgePoll.initialAwaitTick) {
++                        bridgePoll.initialAwaitTick = false;
++                        return false;
++                      }
++                      return bridgePoll.step();
++                    });
++          } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++            if (!bridgePoll.terminal) {
++              bridgePoll.step();
++            }
++          }
++        }
++        if (bridgePoll.failure instanceof Exception exception) {
++          throw exception;
++        }
++        if (bridgePoll.failure instanceof Error error) {
++          throw error;
++        }
++        assertThat(lost.get() == 3 && !sessions.teardownInFlight(id)).isTrue();
++      }
+       assertThat(progress(id).path("teardownStatus").asText()).isEqualTo("PENDING");
+       assertThat(progress(id).path("teardownRequest").path("reason").asText())
+           .isEqualTo("CANCELLED");
+@@ -991,7 +596,71 @@
+ 
+       sessions.redriveTeardowns(Duration.ofMinutes(15), 32);
+ 
+-      await(() -> progress(id).path("teardownStatus").asText().equals("CONFIRMED"), 30000);
++      {
++        long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(30000);
++        class BridgePoll2 {
++          Throwable failure;
++          boolean terminal;
++          boolean slept;
++          boolean initialAwaitTick = true;
++      
++          boolean step() {
++            if (terminal) {
++              return true;
++            }
++            try {
++              if (slept && Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
++                  && System.nanoTime() < bridgeDeadline)) {
++                terminal = true;
++                return true;
++              }
++              if (Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              slept = true;
++              return false;
++            } catch (Throwable caught) {
++              failure = caught;
++              terminal = true;
++              return true;
++            }
++          }
++        }
++        var bridgePoll = new BridgePoll2();
++        if (!bridgePoll.step()) {
++          try {
++            org.awaitility.Awaitility.await()
++                .alias("GuidedBridgeIntegrationTest: teardown confirmed")
++                .pollInSameThread()
++                .dontCatchUncaughtExceptions()
++                .pollDelay(Duration.ZERO)
++                .pollInterval(Duration.ofMillis(25))
++                .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++                .until(
++                    () -> {
++                      if (bridgePoll.initialAwaitTick) {
++                        bridgePoll.initialAwaitTick = false;
++                        return false;
++                      }
++                      return bridgePoll.step();
++                    });
++          } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++            if (!bridgePoll.terminal) {
++              bridgePoll.step();
++            }
++          }
++        }
++        if (bridgePoll.failure instanceof Exception exception) {
++          throw exception;
++        }
++        if (bridgePoll.failure instanceof Error error) {
++          throw error;
++        }
++        assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
++      }
+       assertThat(lost.get()).isEqualTo(4);
+       assertThat(progress(id).has("teardownRequest")).isFalse();
+       assertThat(digests).hasSize(4).containsOnly(digests.getFirst());
+@@ -1037,8 +706,72 @@
+           user,
+           id,
+           "cancel",
+-          CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-      await(() -> progress(id).path("teardownStatus").asText().equals("CONFIRMED"), 60000);
++          ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
++      {
++        long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(60000);
++        class BridgePoll3 {
++          Throwable failure;
++          boolean terminal;
++          boolean slept;
++          boolean initialAwaitTick = true;
++      
++          boolean step() {
++            if (terminal) {
++              return true;
++            }
++            try {
++              if (slept && Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
++                  && System.nanoTime() < bridgeDeadline)) {
++                terminal = true;
++                return true;
++              }
++              if (Thread.interrupted()) {
++                throw new InterruptedException();
++              }
++              slept = true;
++              return false;
++            } catch (Throwable caught) {
++              failure = caught;
++              terminal = true;
++              return true;
++            }
++          }
++        }
++        var bridgePoll = new BridgePoll3();
++        if (!bridgePoll.step()) {
++          try {
++            org.awaitility.Awaitility.await()
++                .alias("GuidedBridgeIntegrationTest: teardown confirmed")
++                .pollInSameThread()
++                .dontCatchUncaughtExceptions()
++                .pollDelay(Duration.ZERO)
++                .pollInterval(Duration.ofMillis(25))
++                .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++                .until(
++                    () -> {
++                      if (bridgePoll.initialAwaitTick) {
++                        bridgePoll.initialAwaitTick = false;
++                        return false;
++                      }
++                      return bridgePoll.step();
++                    });
++          } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++            if (!bridgePoll.terminal) {
++              bridgePoll.step();
++            }
++          }
++        }
++        if (bridgePoll.failure instanceof Exception exception) {
++          throw exception;
++        }
++        if (bridgePoll.failure instanceof Error error) {
++          throw error;
++        }
++        assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
++      }
+     } finally {
+       sessions.installStopSender(dispatch::stop);
+     }
+@@ -1051,31 +784,76 @@
+     workerHarness.teardown().assertNoSurvivors();
+   }
+ 
+-  ObjectNode proposalByLocator(String id, int ordinal, String kind, JsonNode locator) {
+-    ObjectNode proposal = proposal(id, ordinal, kind, null);
+-    JsonNode selected = null;
+-    for (JsonNode node : progress(id).path("observation").path("nodes")) {
+-      for (JsonNode hint : node.path("locatorHints")) {
+-        if (hint.equals(locator)) {
+-          assertThat(selected).isNull();
+-          selected = node;
+-        }
+-      }
+-    }
+-    assertThat(selected).isNotNull();
+-    ObjectNode target = proposal.withObject("/target");
+-    target.remove("kind");
+-    target.put("nodeId", selected.path("nodeId").asText());
+-    target.set("locator", locator);
+-    return proposal;
+-  }
+-
+   @Test
+   void assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot() throws Exception {
+     String id = createSession();
+     JsonNode owned = dispatch.assign(controller, id, "assignment", "worker-1");
+     Instant originalLease = Instant.parse(owned.path("leaseExpiresAt").asText());
+-    await(() -> claimCount(id) >= 2, 15000);
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(15000);
++      class BridgePoll4 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(claimCount(id) >= 2)
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll4();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgeIntegrationTest: owner renewal recorded")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(claimCount(id) >= 2).isTrue();
++    }
+     assertThat(Instant.parse(session(id).path("owner").path("leaseExpiresAt").asText()))
+         .isAfter(originalLease);
+     assertThat(
+@@ -1085,15 +863,79 @@
+                 id))
+         .isZero();
+     assertThat(progress(id).has("executionEvidence")).isFalse();
+-    assertThat(NAVIGATIONS.get()).isZero();
++    assertThat(ENV.navigations.get()).isZero();
+     JsonNode current = dispatch.assign(controller, id, "assignment", "worker-1");
+     assertThat(Instant.parse(current.path("leaseExpiresAt").asText())).isAfter(originalLease);
+     sessions.cancel(
+         user,
+         id,
+         "cancel-before-context",
+-        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-    await(() -> progress(id).path("teardownStatus").asText().equals("CONFIRMED"), 5000);
++        ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++      class BridgePoll5 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll5();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgeIntegrationTest: teardown confirmed")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
++    }
+     assertThatThrownBy(() -> runner.send("assign", assignment(id), "assignment"))
+         .hasMessage("UNKNOWN_OUTCOME");
+     assertThat(
+@@ -1105,7 +947,7 @@
+     String next = createSession();
+     assertThat(dispatch.assign(controller, next, "assignment", "worker-1").path("status").asText())
+         .isEqualTo("OWNED");
+-    assertThat(NAVIGATIONS.get()).isZero();
++    assertThat(ENV.navigations.get()).isZero();
+   }
+ 
+   @Test
+@@ -1113,7 +955,7 @@
+       throws Exception {
+     String id = createSession();
+     ObjectNode claim =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("schemaVersion", 3)
+             .put("sessionId", id)
+@@ -1136,11 +978,75 @@
+         "wrong-assignee",
+         token("owning-worker", "other-worker", "studio-guided-controller"),
+         403);
+-    corruptClaimResponse = true;
++    ENV.corruptClaimResponse = true;
+     assertThatThrownBy(() -> dispatch.assign(controller, id, "assignment", "worker-1"))
+         .isInstanceOf(GuidedSessionException.class);
+-    await(() -> session(id).path("state").asText().equals("FAILED"), 5000);
+-    assertThat(NAVIGATIONS.get()).isZero();
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++      class BridgePoll6 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(session(id).path("state").asText().equals("FAILED"))
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll6();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgeIntegrationTest: terminal failure recorded")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(session(id).path("state").asText().equals("FAILED")).isTrue();
++    }
++    assertThat(ENV.navigations.get()).isZero();
+     assertThat(
+             jdbc.queryForObject(
+                 "SELECT count(*) FROM studio_guided_materializations WHERE session_id=?",
+@@ -1161,13 +1067,77 @@
+         });
+     JsonNode receipt = dispatch.assign(controller, id, "max-fence", "worker-1");
+     assertThat(receipt.path("ownerFence").asInt()).isEqualTo(Integer.MAX_VALUE);
+-    await(() -> claimCount(id) >= 2, 15000);
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(15000);
++      class BridgePoll7 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(claimCount(id) >= 2)
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll7();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgeIntegrationTest: owner renewal recorded")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(claimCount(id) >= 2).isTrue();
++    }
+     assertThat(session(id).path("owner").path("fence").asInt()).isEqualTo(Integer.MAX_VALUE);
+-    assertThat(NAVIGATIONS.get()).isZero();
++    assertThat(ENV.navigations.get()).isZero();
+   }
+ 
+   JsonNode session(String id) {
+-    return CONTRACTS.parse(
++    return ENV.contracts.parse(
+         jdbc.queryForObject(
+             "SELECT document::text FROM studio_guided_sessions WHERE session_id=?",
+             String.class,
+@@ -1175,7 +1145,7 @@
+   }
+ 
+   JsonNode assignment(String id) {
+-    return CONTRACTS.parse(
++    return ENV.contracts.parse(
+         jdbc.queryForObject(
+             "SELECT intent::text FROM studio_guided_assignments WHERE session_id=?",
+             String.class,
+@@ -1206,7 +1176,7 @@
+     // body.
+     ObjectNode legacyQuestion =
+         (ObjectNode)
+-            CONTRACTS.parse(
++            ENV.contracts.parse(
+                 "{\"schemaVersion\":1,\"clarificationId\":\"question-1\",\"sessionId\":\"session-1\","
+                     + "\"scopeHash\":\"2fec131b52b0144e082e963564fc3d114f068e5ef4d795a82c8f3b5653186861\","
+                     + "\"coordinate\":{\"stepId\":\"step-2\",\"ordinal\":0},\"documentId\":\"document-1\","
+@@ -1219,7 +1189,7 @@
+         .hasMessage("INVALID_CONTRACT");
+ 
+     ObjectNode answer =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("schemaVersion", 1)
+             .put("clarificationId", "old-question")
+@@ -1241,7 +1211,7 @@
+   void actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims() throws Exception {
+     String id = prepareSession();
+     ObjectNode claim =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("schemaVersion", 3)
+             .put("sessionId", id)
+@@ -1275,12 +1245,12 @@
+               "malformed-" + index++,
+               token("owning-worker", "worker-1", "studio-guided-controller"));
+       assertThat(response.statusCode()).isEqualTo(422);
+-      assertThat(CONTRACTS.parseWire(response.body()).path("code").asText())
++      assertThat(ENV.contracts.parseWire(response.body()).path("code").asText())
+           .isEqualTo("INVALID_CONTRACT");
+     }
+     long now = Instant.now().getEpochSecond();
+     String claims =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("iss", "fixture-issuer")
+             .put("sub", "worker-1")
+@@ -1301,7 +1271,7 @@
+                 .withoutPadding()
+                 .encodeToString(claims.getBytes(StandardCharsets.UTF_8));
+     Signature signature = Signature.getInstance("SHA256withRSA");
+-    signature.initSign(ISSUER.getPrivate());
++    signature.initSign(ENV.issuer.getPrivate());
+     signature.update(signed.getBytes(StandardCharsets.US_ASCII));
+     String jwt =
+         signed + "." + Base64.getUrlEncoder().withoutPadding().encodeToString(signature.sign());
+@@ -1316,14 +1286,14 @@
+                 Integer.class,
+                 id))
+         .isZero();
+-    assertThat(NAVIGATIONS.get()).isZero();
++    assertThat(ENV.navigations.get()).isZero();
+     assertThat(session(id).path("state").asText()).isEqualTo("PREPARING");
+   }
+ 
+   HttpResponse<byte[]> rawBackendPost(String id, byte[] body, String key, String bearer)
+       throws Exception {
+     return HttpClient.newBuilder()
+-        .sslContext(RUNNER_SIDE)
++        .sslContext(ENV.runnerSide)
+         .build()
+         .send(
+             HttpRequest.newBuilder(
+@@ -1349,10 +1319,10 @@
+     ObjectNode identity = materialization.identity(sessions.runnerContext(controller, id, 1));
+     var proxy = com.sun.net.httpserver.HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
+     proxy.setHttpsConfigurator(
+-        new com.sun.net.httpserver.HttpsConfigurator(RUNNER_SIDE) {
++        new com.sun.net.httpserver.HttpsConfigurator(ENV.runnerSide) {
+           @Override
+           public void configure(com.sun.net.httpserver.HttpsParameters parameters) {
+-            var ssl = RUNNER_SIDE.getDefaultSSLParameters();
++            var ssl = ENV.runnerSide.getDefaultSSLParameters();
+             ssl.setNeedClientAuth(true);
+             parameters.setSSLParameters(ssl);
+           }
+@@ -1373,9 +1343,9 @@
+       var client =
+           new GuidedRunnerClient(
+               URI.create("https://localhost:" + proxy.getAddress().getPort()),
+-              TLS,
++              ENV.tls,
+               () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+-              CONTRACTS);
++              ENV.contracts);
+       String valid = identity.toString();
+       var payloads = new java.util.ArrayList<byte[]>();
+       for (String raw :
+@@ -1397,10 +1367,10 @@
+       assertThat(client.send("context", identity)).isEqualTo(identity);
+       JsonNode intent = assignment(id);
+       ObjectNode receipt =
+-          CONTRACTS.object().put("schemaVersion", 3).put("status", "OWNED").put("ownerFence", 1);
++          ENV.contracts.object().put("schemaVersion", 3).put("status", "OWNED").put("ownerFence", 1);
+       receipt.set("assignment", intent);
+       var vectors =
+-          CONTRACTS.parse(
++          ENV.contracts.parse(
+               Files.readString(
+                   Path.of(
+                       "../docs/specs/studio-observed-authoring/contracts/v3/wire-parity.fixtures.json")));
+@@ -1417,22 +1387,16 @@
+     }
+   }
+ 
+-  ObjectNode refreshRequest(String id) {
+-    ObjectNode request = materialization.identity(sessions.runnerContext(controller, id, 1));
+-    request.put("expectedGeneration", progress(id).path("generation").asInt());
+-    return request;
+-  }
+-
+   String createSession() throws Exception {
+     var connection =
+         HttpClient.newHttpClient()
+             .send(
+-                HttpRequest.newBuilder(URI.create(ORIGIN + "/connect")).GET().build(),
++                HttpRequest.newBuilder(URI.create(ENV.origin + "/connect")).GET().build(),
+                 HttpResponse.BodyHandlers.ofString());
+     assertThat(connection.statusCode()).isEqualTo(200);
+     assertThat(connection.body()).isEqualTo("controlled-public-fixture-account");
+     ObjectNode start =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("schemaVersion", 3)
+             .put("testId", "test-1")
+@@ -1449,14 +1413,14 @@
+         () -> {
+           JsonNode session = repository.lock(id).document();
+           ObjectNode manifest =
+-              CONTRACTS
++              ENV.contracts
+                   .object()
+                   .put("testId", session.path("testId").asText())
+                   .put("sourceRevision", "source-1")
+                   .put("configurationRevision", "config-1")
+                   .put("policy", "INPUT-POLICY-01-A");
+           manifest.set("sourceSteps", session.path("sourceSteps").deepCopy());
+-          new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, CONTRACTS)
++          new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, ENV.contracts)
+               .initialize(session, manifest);
+           return null;
+         });
+@@ -1471,21 +1435,21 @@
+   }
+ 
+   void materializeSession(String id) {
+-    var refs = CONTRACTS.object().putArray("references");
++    var refs = ENV.contracts.object().putArray("references");
+     refs.add(
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("referenceKind", "sourceSpan")
+             .put("sourceRevision", "source-1")
+             .put("stepId", "step-1")
+             .put("startUtf16", 6)
+-            .put("endUtf16", 6 + (ORIGIN + "/start").length())
++            .put("endUtf16", 6 + (ENV.origin + "/start").length())
+             .put("kind", "destination")
+             .put("intendedSlot", "navigate.destination"));
+     String source =
+         jdbc.queryForObject("SELECT source FROM bridge_fixture_sources WHERE id=1", String.class);
+     refs.add(
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("referenceKind", "sourceSpan")
+             .put("sourceRevision", "source-1")
+@@ -1495,7 +1459,7 @@
+             .put("kind", "nonsecretText")
+             .put("intendedSlot", "fill.value"));
+     refs.add(
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("referenceKind", "configuration")
+             .put("configurationRevision", "config-1")
+@@ -1503,82 +1467,27 @@
+             .put("referenceId", "config-value")
+             .put("kind", "nonsecretText")
+             .put("intendedSlot", "fill.value"));
+-    if (privacyEcho) {
+-      int start = source.indexOf(ORIGIN + "/echo");
++    if (ENV.privacyEcho) {
++      int start = source.indexOf(ENV.origin + "/echo");
+       refs.add(
+-          CONTRACTS
++          ENV.contracts
+               .object()
+               .put("referenceKind", "sourceSpan")
+               .put("sourceRevision", "source-1")
+               .put("stepId", "step-1")
+               .put("startUtf16", start)
+-              .put("endUtf16", start + (ORIGIN + "/echo").length())
++              .put("endUtf16", start + (ENV.origin + "/echo").length())
+               .put("kind", "destination")
+               .put("intendedSlot", "navigate.destination"));
+     }
+     sessions.materialize(controller, id, 1, "materialize", refs);
+-  }
+-
+-  ObjectNode proposal(String id, int ordinal, String kind, String testId) {
+-    JsonNode evidence = progress(id).path("executionEvidence");
+-    ObjectNode context = sessions.runnerContext(controller, id, 1);
+-    ObjectNode p =
+-        CONTRACTS
+-            .object()
+-            .put("schemaVersion", 3)
+-            .put("sessionId", id)
+-            .put("scopeHash", context.path("scopeHash").asText())
+-            .put("generation", evidence.path("generation").asInt())
+-            .put("evidenceHash", GuidedContracts.hash(evidence))
+-            .put("authoredInputsHash", context.path("authoredInputsHash").asText())
+-            .put("contextRevision", 1);
+-    p.set("executionEvidence", evidence);
+-    p.putObject("coordinate").put("stepId", "step-1").put("ordinal", ordinal);
+-    p.putObject("operation").put("kind", kind);
+-    ObjectNode target =
+-        p.putObject("target")
+-            .put("documentId", evidence.path("documentId").asText())
+-            .put("generation", evidence.path("generation").asInt());
+-    if (testId == null) {
+-      target.put("kind", "page");
+-    } else {
+-      JsonNode selected = null;
+-      for (JsonNode node : progress(id).path("observation").path("nodes")) {
+-        for (JsonNode hint : node.path("locatorHints")) {
+-          if (hint.path("kind").asText().equals("testId")
+-              && hint.path("value").asText().equals(testId)) {
+-            selected = node;
+-          }
+-        }
+-      }
+-      assertThat(selected).isNotNull();
+-      target.put("nodeId", selected.path("nodeId").asText());
+-      target.putObject("locator").put("kind", "testId").put("value", testId).put("exact", true);
+-    }
+-    return p;
+-  }
+-
+-  JsonNode advance(String id, JsonNode ledger, String key) throws Exception {
+-    return post(
+-        id,
+-        "advance",
+-        CONTRACTS
+-            .object()
+-            .put("schemaVersion", 3)
+-            .put("sessionId", id)
+-            .put("ownerFence", 1)
+-            .put("admissionId", ledger.path("admission").path("admissionId").asText())
+-            .put("operationHash", ledger.path("operationHash").asText()),
+-        key,
+-        token("backend-controller", "controller-1", "studio-guided-controller"),
+-        202);
+   }
+ 
+   JsonNode post(String id, String route, JsonNode body, String key, String token, int expected)
+       throws Exception {
+     var response =
+         HttpClient.newBuilder()
+-            .sslContext(RUNNER_SIDE)
++            .sslContext(ENV.runnerSide)
+             .build()
+             .send(
+                 HttpRequest.newBuilder(
+@@ -1598,11 +1507,11 @@
+                     .build(),
+                 HttpResponse.BodyHandlers.ofString());
+     assertThat(response.statusCode()).as("%s: %s", route, response.body()).isEqualTo(expected);
+-    return CONTRACTS.parse(response.body());
++    return ENV.contracts.parse(response.body());
+   }
+ 
+   JsonNode progress(String id) {
+-    return CONTRACTS.parse(
++    return ENV.contracts.parse(
+         jdbc.queryForObject(
+             "SELECT progress::text FROM studio_guided_sessions WHERE session_id=?",
+             String.class,
+@@ -1610,62 +1519,11 @@
+   }
+ 
+   static ObjectNode versions() {
+-    return (ObjectNode) CONTRACTS.parse("{\"contract\":3}");
+-  }
+-
+-  static String operationHash(JsonNode proposal) {
+-    ObjectNode identity = CONTRACTS.object();
+-    identity.set("coordinate", proposal.path("coordinate"));
+-    identity.set("origin", proposal.path("executionEvidence").path("origin"));
+-    identity.set(
+-        "locator",
+-        proposal.path("target").has("locator")
+-            ? proposal.path("target").path("locator")
+-            : com.fasterxml.jackson.databind.node.NullNode.instance);
+-    identity.set("operation", proposal.path("operation"));
+-    return GuidedContracts.hash(identity);
++    return (ObjectNode) ENV.contracts.parse("{\"contract\":3}");
+   }
+ 
+   static String token(String role, String subject, String audience) {
+-    try {
+-      long now = Instant.now().getEpochSecond();
+-      String header =
+-          Base64.getUrlEncoder()
+-              .withoutPadding()
+-              .encodeToString(
+-                  "{\"alg\":\"RS256\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
+-      String claims =
+-          CONTRACTS
+-              .object()
+-              .put("iss", "fixture-issuer")
+-              .put("sub", subject)
+-              .put("aud", audience)
+-              .put("role", role)
+-              .put("iat", now)
+-              .put("exp", now + 300)
+-              .toString();
+-      String signed =
+-          header
+-              + "."
+-              + Base64.getUrlEncoder()
+-                  .withoutPadding()
+-                  .encodeToString(claims.getBytes(StandardCharsets.UTF_8));
+-      Signature signature = Signature.getInstance("SHA256withRSA");
+-      signature.initSign(ISSUER.getPrivate());
+-      signature.update(signed.getBytes(StandardCharsets.US_ASCII));
+-      return signed
+-          + "."
+-          + Base64.getUrlEncoder().withoutPadding().encodeToString(signature.sign());
+-    } catch (Exception failure) {
+-      throw new IllegalStateException(failure);
+-    }
+-  }
+-
+-  static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+-    long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-    while (!condition.getAsBoolean() && System.nanoTime() < end) {
+-      Thread.sleep(25);
+-    }
+-    assertThat(condition.getAsBoolean()).isTrue();
+-  }
++    return ENV.token(role, subject, audience);
++  }
++
+ }
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java
+@@ -36,7 +36,6 @@
+ import com.citi.put.checks.studio.guided.translation.GuidedTranslationService;
+ import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
+ import com.citi.put.checks.studio.support.RunnerProcessHarness;
+-import com.citi.put.checks.studio.support.RunnerTestTls;
+ import com.citi.put.checks.studio.support.RunnerTestTls.Identity;
+ import com.fasterxml.jackson.databind.JsonNode;
+ import com.fasterxml.jackson.databind.ObjectMapper;
+@@ -50,16 +49,10 @@
+ import java.nio.charset.StandardCharsets;
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+-import java.security.KeyPair;
+-import java.security.KeyPairGenerator;
+-import java.security.MessageDigest;
+-import java.security.Signature;
+ import java.time.Clock;
+ import java.time.Duration;
+ import java.time.Instant;
+ import java.util.ArrayList;
+-import java.util.Base64;
+-import java.util.HexFormat;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.UUID;
+@@ -70,10 +63,7 @@
+ import java.util.concurrent.Future;
+ import java.util.concurrent.TimeUnit;
+ import java.util.concurrent.atomic.AtomicInteger;
+-import java.util.concurrent.atomic.AtomicReference;
+-import javax.net.ssl.SSLContext;
+ import javax.sql.DataSource;
+-import org.flywaydb.core.Flyway;
+ import org.junit.jupiter.api.AfterAll;
+ import org.junit.jupiter.api.AfterEach;
+ import org.junit.jupiter.api.BeforeEach;
+@@ -95,7 +85,6 @@
+ import org.springframework.test.context.DynamicPropertySource;
+ import org.springframework.transaction.PlatformTransactionManager;
+ import org.springframework.transaction.support.TransactionTemplate;
+-import org.testcontainers.containers.PostgreSQLContainer;
+ 
+ /**
+  * STUDIO-OBS-015 (aria-bridge-ruling01 §4): the joined bridge cases that need a positive admission,
+@@ -121,50 +110,7 @@
+       "spring.jpa.hibernate.ddl-auto=none"
+     })
+ class GuidedBridgePlannedIT {
+-  static final GuidedContracts CONTRACTS = new GuidedContracts();
+-  static final PostgreSQLContainer<?> DATABASE = new PostgreSQLContainer<>("postgres:15-alpine");
+-  static final Path TEMP;
+-  static final Path DIST;
+-  static final RunnerTestTls RUNNER_TLS;
+-
+-  /** The backend's identity toward the runner: also the guided runner client's context. */
+-  static final SSLContext TLS;
+-
+-  /** What the runner (a worker calling the backend, or a double standing in for it) presents. */
+-  static final SSLContext RUNNER_SIDE;
+-
+-  static final KeyPair ISSUER;
+-  static final int RUNNER_PORT;
+-  static final HttpServer APPLICATION;
+-  static final AtomicInteger NAVIGATIONS = new AtomicInteger(), CONNECTIONS = new AtomicInteger();
+-  static final AtomicReference<String> RECEIPT = new AtomicReference<>();
+-  static final String CAPTURE = "  independent-" + UUID.randomUUID() + "-é😀  ";
+-  static final String PASSWORD_ECHO = "password-canary-" + UUID.randomUUID();
+-  static final String ORDINARY_ECHO = "  ordinary-canary-" + UUID.randomUUID() + "  ";
+-  static final AtomicInteger ECHO_NAVIGATIONS = new AtomicInteger(),
+-      TOGGLE_ATTEMPTS = new AtomicInteger();
+-  static volatile boolean privacyEcho, nativeToggle;
+-  static final String CONFIG_INPUT = "configured-" + UUID.randomUUID();
+-  static final String ORIGIN;
+-  static volatile boolean replaceTarget,
+-      wideSession,
+-      genericRead,
+-      belowFold,
+-      multiStep,
+-      dropCompletionCallbacks;
+-  static volatile boolean failClaims, corruptClaimResponse;
+-  static final java.util.concurrent.atomic.AtomicBoolean HOLD_NEXT_REFRESH =
+-      new java.util.concurrent.atomic.AtomicBoolean();
+-  static volatile CountDownLatch refreshCallbackHeld = new CountDownLatch(1),
+-      releaseRefreshCallback = new CountDownLatch(1);
+-  static volatile long slowNavigationMillis;
+-  static final java.util.concurrent.atomic.AtomicBoolean HOLD_NEXT_CLAIM =
+-      new java.util.concurrent.atomic.AtomicBoolean();
+-  static volatile CountDownLatch claimResponseCaptured = new CountDownLatch(1);
+-  static volatile CountDownLatch releaseClaimResponse = new CountDownLatch(1);
+-  static final AtomicInteger MUTATIONS = new AtomicInteger();
+-  static final AtomicInteger CLICK_RECEIPTS = new AtomicInteger();
+-  static final AtomicInteger FILL_RECEIPTS = new AtomicInteger();
++  static final GuidedBridgeFixture ENV;
+ 
+   // aria-bridge-ruling01 N5: the controlled model provider (R-2). It only selects.
+   static final HttpServer PROVIDER;
+@@ -183,199 +129,20 @@
+ 
+   static {
+     try {
+-      TEMP = Files.createTempDirectory("guided-bridge-planned-");
+-      // STUDIO-OBS-009 AC-12 i: no private copy of dist. The harness spawns the real folded entry
+-      // point and records the digest of what it spawned; the sole rebuild is the F-merge's.
+-      DIST = RunnerProcessHarness.defaultDistDirectory().toAbsolutePath().normalize();
+-      ObjectNode workerEvidence = CONTRACTS.object().put("snapshot", DIST.toString());
+-      workerEvidence.put("distDigest", RunnerProcessHarness.distDigestOf(DIST));
+-      ObjectNode hashes = workerEvidence.putObject("sha256");
+-      for (String relative :
+-          List.of(
+-              "main.js",
+-              "run/browser.js",
+-              "guided/runtime.js",
+-              "guided/transport.js",
+-              "guided/schemas.json")) {
+-        hashes.put(
+-            relative,
+-            HexFormat.of()
+-                .formatHex(
+-                    MessageDigest.getInstance("SHA-256")
+-                        .digest(Files.readAllBytes(DIST.resolve(relative)))));
+-      }
+-      hashes.put(
+-          "scripts/browser-provenance.mjs",
+-          HexFormat.of()
+-              .formatHex(
+-                  MessageDigest.getInstance("SHA-256")
+-                      .digest(
+-                          Files.readAllBytes(
+-                              Path.of("../studio-runner/scripts/browser-provenance.mjs")))));
+-      Files.writeString(
+-          Path.of("/tmp/studio-obs015-bridge-planned-worker.json"), workerEvidence.toString());
+-      // One test CA (lane D3.0): the runner and the backend certificates chain to it, the runner
+-      // pins
+-      // the backend certificate, and the backend trusts only the CA.
+-      RUNNER_TLS = RunnerTestTls.shared();
+-      TLS = RUNNER_TLS.backendTls().sslContext();
+-      RUNNER_SIDE =
+-          RUNNER_TLS.serverContext(
+-              Identity.RUNNER, RUNNER_TLS.trustStore(), RUNNER_TLS.trustStorePasswordFile());
+-      var generator = KeyPairGenerator.getInstance("RSA");
+-      generator.initialize(2048);
+-      ISSUER = generator.generateKeyPair();
+-      Files.writeString(
+-          TEMP.resolve("issuer.pub"),
+-          "-----BEGIN PUBLIC KEY-----\n"
+-              + Base64.getMimeEncoder(64, new byte[] {10})
+-                  .encodeToString(ISSUER.getPublic().getEncoded())
+-              + "\n-----END PUBLIC KEY-----\n");
+-      // AC-12 h: an exclusive bind on both loopback families, outside the database range.
+-      RUNNER_PORT = RunnerProcessHarness.exclusivelyFreePort();
+-      APPLICATION = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+-      ORIGIN = "http://127.0.0.1:" + APPLICATION.getAddress().getPort();
+-      APPLICATION.createContext(
+-          "/connect",
+-          exchange -> {
+-            CONNECTIONS.incrementAndGet();
+-            byte[] body = "controlled-public-fixture-account".getBytes(StandardCharsets.UTF_8);
+-            exchange.sendResponseHeaders(200, body.length);
+-            exchange.getResponseBody().write(body);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/start",
+-          exchange -> {
+-            NAVIGATIONS.incrementAndGet();
+-            if (slowNavigationMillis > 0) {
+-              try {
+-                Thread.sleep(slowNavigationMillis);
+-              } catch (InterruptedException failure) {
+-                Thread.currentThread().interrupt();
+-              }
+-            }
+-            String html =
+-                "<html><body><main aria-label='Operations'><output aria-label='Order number' "
+-                    + "data-testid='source'>"
+-                    + CAPTURE
+-                    + "</output></main><input aria-label='Destination' data-testid='destination' "
+-                    + "oninput=\"fetch('/receipt',{method:'POST',body:this.value})\"><button "
+-                    + "data-testid='replace' onclick=\"document.querySelector('[data-testid=destin"
+-                    + "ation]').outerHTML='<input data-testid=destination "
+-                    + "aria-label=Destination>'\">Replace</button><script>setInterval(async()=>{if"
+-                    + "(await (await fetch('/mutation')).text()==='yes'){document.querySelector('["
+-                    + "data-testid=destination]').outerHTML='<input data-testid=destination "
+-                    + "aria-label=Destination>';await "
+-                    + "fetch('/mutated',{method:'POST'});}},25)</script></body></html>";
+-            if (genericRead) {
+-              html =
+-                  "<html><body><main aria-label='Operations'>"
+-                      + "<output aria-label='Order reference'>"
+-                      + CAPTURE
+-                      + "</output>"
+-                      + "<label>Destination<textarea oninput=\"fetch('/receipt',"
+-                      + "{method:'POST',body:this.value})\"></textarea></label>"
+-                      + "</main></body></html>";
+-            }
+-            if (privacyEcho) {
+-              html =
+-                  "<html><body><input type='password' aria-label='Login secret' value='"
+-                      + PASSWORD_ECHO
+-                      + "'><input aria-label='Ordinary input' value='"
+-                      + ORDINARY_ECHO
+-                      + "'></body></html>";
+-            }
+-            if (nativeToggle) {
+-              html =
+-                  "<html><body><input type='checkbox' aria-label='Prevented toggle' "
+-                      + "onclick=\"event.preventDefault();fetch('/toggle',{method:'POST'})\">"
+-                      + "<input type='radio' checked aria-label='Selected radio' "
+-                      + "onclick=\"fetch('/toggle',{method:'POST'})\"></body></html>";
+-            }
+-            if (belowFold) {
+-              html =
+-                  html.replace(
+-                      "</body>",
+-                      "<div style='height:2200px'></div>"
+-                          + "<button aria-label='Continue' onclick=\"fetch('/clicked',"
+-                          + "{method:'POST'})\">Continue</button></body>");
+-            }
+-            byte[] body = html.getBytes(StandardCharsets.UTF_8);
+-            exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
+-            exchange.sendResponseHeaders(200, body.length);
+-            exchange.getResponseBody().write(body);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/echo",
+-          exchange -> {
+-            ECHO_NAVIGATIONS.incrementAndGet();
+-            byte[] bytes =
+-                ("<html><body><button>"
+-                        + PASSWORD_ECHO
+-                        + "</button><button>"
+-                        + ORDINARY_ECHO.strip()
+-                        + "</button></body></html>")
+-                    .getBytes(StandardCharsets.UTF_8);
+-            exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
+-            exchange.sendResponseHeaders(200, bytes.length);
+-            exchange.getResponseBody().write(bytes);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/toggle",
+-          exchange -> {
+-            TOGGLE_ATTEMPTS.incrementAndGet();
+-            exchange.sendResponseHeaders(204, -1);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/receipt",
+-          exchange -> {
+-            FILL_RECEIPTS.incrementAndGet();
+-            RECEIPT.set(
+-                new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+-            exchange.sendResponseHeaders(204, -1);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/mutation",
+-          exchange -> {
+-            byte[] body = (replaceTarget ? "yes" : "no").getBytes(StandardCharsets.UTF_8);
+-            exchange.sendResponseHeaders(200, body.length);
+-            exchange.getResponseBody().write(body);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/mutated",
+-          exchange -> {
+-            replaceTarget = false;
+-            MUTATIONS.incrementAndGet();
+-            exchange.sendResponseHeaders(204, -1);
+-            exchange.close();
+-          });
+-      APPLICATION.createContext(
+-          "/clicked",
+-          exchange -> {
+-            if (exchange.getRequestMethod().equals("POST")) {
+-              CLICK_RECEIPTS.incrementAndGet();
+-            }
+-            exchange.sendResponseHeaders(204, -1);
+-            exchange.close();
+-          });
++      ENV = new GuidedBridgeFixture(
++          "guided-bridge-planned-", Path.of("/tmp/studio-obs015-bridge-planned-worker.json"));
+       PROVIDER = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+       PROVIDER.createContext(
+           "/",
+           exchange -> {
+             try {
+               JsonNode wire =
+-                  CONTRACTS.parse(
++                  ENV.contracts.parse(
+                       new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+               JsonNode request =
+-                  CONTRACTS.parse(
++                  ENV.contracts.parse(
+                       wire.path("contents").get(0).path("parts").get(0).path("text").asText());
+-              ObjectNode envelope = CONTRACTS.object();
++              ObjectNode envelope = ENV.contracts.object();
+               envelope
+                   .putArray("candidates")
+                   .addObject()
+@@ -401,15 +168,7 @@
+             }
+           });
+       PROVIDER.start();
+-      APPLICATION.start();
+-      DATABASE.start();
+-      // STUDIO-OBS-012A / ADR-SC-005 D-B: the re-baselined schema head (core V1–V11 + V12–V18).
+-      Flyway.configure()
+-          .dataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword())
+-          .locations("classpath:db/migration")
+-          .target("22") // STUDIO-OBS-014 S3: governance tables (V19) at head
+-          .load()
+-          .migrate();
++      ENV.start();
+     } catch (Exception failure) {
+       throw new ExceptionInInitializerError(failure);
+     }
+@@ -417,13 +176,7 @@
+ 
+   @DynamicPropertySource
+   static void properties(DynamicPropertyRegistry registry) {
+-    RunnerProcessHarness.backendServerSslProperties(RUNNER_TLS)
+-        .forEach((name, value) -> registry.add(name, () -> value));
+-    registry.add(
+-        "studio.guided-authoring.service-public-key",
+-        () -> Base64.getEncoder().encodeToString(ISSUER.getPublic().getEncoded()));
+-    registry.add("studio.guided-authoring.service-issuer", () -> "fixture-issuer");
+-    registry.add("studio.guided-authoring.mtls-required", () -> true);
++    ENV.properties(registry);
+   }
+ 
+   /**
+@@ -444,85 +197,34 @@
+     @Bean
+     org.springframework.boot.web.servlet.FilterRegistrationBean<jakarta.servlet.Filter>
+         completionFault() {
+-      jakarta.servlet.Filter filter =
+-          (request, response, chain) -> {
+-            String uri = ((jakarta.servlet.http.HttpServletRequest) request).getRequestURI();
+-            var http = (jakarta.servlet.http.HttpServletResponse) response;
+-            String callbackKey =
+-                ((jakarta.servlet.http.HttpServletRequest) request).getHeader("Idempotency-Key");
+-            if (uri.endsWith("/observations")
+-                && callbackKey != null
+-                && callbackKey.startsWith("oref-")
+-                && HOLD_NEXT_REFRESH.compareAndSet(true, false)) {
+-              refreshCallbackHeld.countDown();
+-              try {
+-                releaseRefreshCallback.await(10, TimeUnit.SECONDS);
+-              } catch (InterruptedException failure) {
+-                Thread.currentThread().interrupt();
+-              }
+-            }
+-            if (dropCompletionCallbacks && (uri.endsWith("/outcomes") || uri.endsWith("/lifecycle"))
+-                || failClaims && uri.endsWith("/claim")) {
+-              http.setStatus(503);
+-              return;
+-            }
+-            if (uri.endsWith("/claim") && (corruptClaimResponse || HOLD_NEXT_CLAIM.get())) {
+-              var buffered = new org.springframework.web.util.ContentCachingResponseWrapper(http);
+-              chain.doFilter(request, buffered);
+-              if (buffered.getStatus() == 202 && corruptClaimResponse) {
+-                ObjectNode grant =
+-                    (ObjectNode)
+-                        CONTRACTS.parse(
+-                            new String(buffered.getContentAsByteArray(), StandardCharsets.UTF_8));
+-                grant
+-                    .withObject("/owner")
+-                    .put("fence", grant.path("owner").path("fence").asInt() + 1);
+-                byte[] changed = grant.toString().getBytes(StandardCharsets.UTF_8);
+-                buffered.resetBuffer();
+-                buffered.setContentLength(changed.length);
+-                buffered.getOutputStream().write(changed);
+-              }
+-              if (buffered.getStatus() == 202 && HOLD_NEXT_CLAIM.compareAndSet(true, false)) {
+-                claimResponseCaptured.countDown();
+-                try {
+-                  releaseClaimResponse.await(15, TimeUnit.SECONDS);
+-                } catch (InterruptedException failure) {
+-                  Thread.currentThread().interrupt();
+-                }
+-              }
+-              buffered.copyBodyToResponse();
+-              return;
+-            }
+-            chain.doFilter(request, response);
+-          };
+-      return new org.springframework.boot.web.servlet.FilterRegistrationBean<>(filter);
++      return ENV.completionFault();
+     }
+ 
+     @Bean
+     DataSource dataSource() {
+       return new DriverManagerDataSource(
+-          DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword());
++          ENV.database.getJdbcUrl(), ENV.database.getUsername(), ENV.database.getPassword());
+     }
+ 
+     @Bean
+     GuidedContracts contracts() {
+-      return CONTRACTS;
++      return ENV.contracts;
+     }
+ 
+     /** JDBC and JPA (StudioRepository.findByIdForUpdate) share one transaction. */
+     @Bean
+     GuidedSessionRepository repository(JdbcTemplate jdbc, PlatformTransactionManager manager) {
+-      return new GuidedSessionRepository(jdbc, new TransactionTemplate(manager), CONTRACTS);
++      return new GuidedSessionRepository(jdbc, new TransactionTemplate(manager), ENV.contracts);
+     }
+ 
+     @Bean
+     GuidedTranslationStore translationStore(JdbcTemplate jdbc) {
+-      return new GuidedTranslationStore(jdbc, CONTRACTS);
++      return new GuidedTranslationStore(jdbc, ENV.contracts);
+     }
+ 
+     @Bean
+     GuidedClarificationContextStore questions(JdbcTemplate jdbc) {
+-      return new GuidedClarificationContextStore(jdbc, CONTRACTS);
++      return new GuidedClarificationContextStore(jdbc, ENV.contracts);
+     }
+ 
+     @Bean
+@@ -533,17 +235,17 @@
+ 
+     @Bean
+     GuidedSourceSnapshotRepository snapshots(StudioRepository repository) {
+-      return new GuidedSourceSnapshotRepository(repository, CONTRACTS);
++      return new GuidedSourceSnapshotRepository(repository, ENV.contracts);
+     }
+ 
+     @Bean
+     GuidedSourceClassifier classifier(GuidedTranslationProperties props) {
+-      return new GuidedSourceClassifier(CONTRACTS, props, new CredentialPatternScreen());
++      return new GuidedSourceClassifier(ENV.contracts, props, new CredentialPatternScreen());
+     }
+ 
+     @Bean
+     GuidedSourceInputResolver inputs() {
+-      return new GuidedSourceInputResolver(CONTRACTS);
++      return new GuidedSourceInputResolver(ENV.contracts);
+     }
+ 
+     @Bean
+@@ -553,7 +255,7 @@
+ 
+     private com.citi.put.checks.studio.guided.publication.ObservedReplayPins fixturePins() {
+       var policy =
+-          CONTRACTS
++          ENV.contracts
+               .object()
+               .put("version", 1)
+               .put("policyId", "fixture-policy")
+@@ -561,11 +263,11 @@
+               .put("applicationId", "orders")
+               .put("environment", "fixture")
+               .put("entryPolicyId", "blank");
+-      policy.putArray("allowedOrigins").add(ORIGIN);
++      policy.putArray("allowedOrigins").add(ENV.origin);
+       policy.putArray("rules");
+       policy.putNull("applicationPolicy");
+       return new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
+-          CONTRACTS,
++          ENV.contracts,
+           new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
+               true, 30000, 1048576, 4194304, 2097152, "[]", "[" + policy + "]", 1280, 720));
+     }
+@@ -593,7 +295,7 @@
+ 
+     @Bean
+     GuidedMaterializationService materialization(JdbcTemplate jdbc) {
+-      return new GuidedMaterializationService(jdbc, CONTRACTS);
++      return new GuidedMaterializationService(jdbc, ENV.contracts);
+     }
+ 
+     @Bean
+@@ -607,22 +309,22 @@
+       var service =
+           new GuidedSessionService(
+               repository,
+-              CONTRACTS,
++              ENV.contracts,
+               access,
+               new GuidedSessionProperties(true, Map.of()),
+               Clock.systemUTC());
+       service.installBridge(
+           materialization,
+-          new GuidedPreparationStore(jdbc, CONTRACTS),
+-          new GuidedBindingStore(jdbc, CONTRACTS, materialization),
+-          new GuidedAssignmentStore(jdbc, CONTRACTS));
++          new GuidedPreparationStore(jdbc, ENV.contracts),
++          new GuidedBindingStore(jdbc, ENV.contracts, materialization),
++          new GuidedAssignmentStore(jdbc, ENV.contracts));
+       service.installTranslation(store, questions);
+       service.installEvidence(
+           new com.citi.put.checks.studio.guided.evidence.RecordedGuidedEvidenceProjection(
+               new com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceRepository(jdbc),
+               new com.citi.put.checks.studio.guided.evidence.GuidedRecordingProperties(null),
+               false,
+-              CONTRACTS));
++              ENV.contracts));
+       // STUDIO-OBS-014 S3: one uniform governed policy for the class (ar-mounted-rules B14); the
+       // migrated reads rely on its business-read grant.
+       com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
+@@ -631,7 +333,7 @@
+           "CSI-123",
+           "orders",
+           "fixture",
+-          java.util.List.of(ORIGIN),
++          java.util.List.of(ENV.origin),
+           governedPolicy());
+       return service;
+     }
+@@ -639,10 +341,10 @@
+     @Bean
+     GuidedRunnerClient runner() {
+       return new GuidedRunnerClient(
+-          URI.create("https://127.0.0.1:" + RUNNER_PORT),
+-          TLS,
++          URI.create("https://127.0.0.1:" + ENV.runnerPort),
++          ENV.tls,
+           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+-          CONTRACTS);
++          ENV.contracts);
+     }
+ 
+     @Bean
+@@ -676,7 +378,7 @@
+ 
+     @Bean
+     GuidedLlmGatewayClient gateway(GenAiGatewayTransport transport) {
+-      return new GenAiGuidedLlmGatewayClient(transport, new GuidedResponseParser(CONTRACTS));
++      return new GenAiGuidedLlmGatewayClient(transport, new GuidedResponseParser(ENV.contracts));
+     }
+ 
+     @Bean
+@@ -698,10 +400,10 @@
+               questions,
+               dispatch,
+               gateway,
+-              CONTRACTS,
+-              new GuidedPromptAssembler(CONTRACTS),
++              ENV.contracts,
++              new GuidedPromptAssembler(ENV.contracts),
+               inputs,
+-              new GuidedProposalValidator(CONTRACTS),
++              new GuidedProposalValidator(ENV.contracts),
+               new GuidedDependencyPlanner(sessions),
+               properties,
+               Clock.systemUTC());
+@@ -717,28 +419,7 @@
+    * behaves as "no grants" there.
+    */
+   static ObjectNode governedPolicy() {
+-    ObjectNode policy =
+-        CONTRACTS
+-            .object()
+-            .put("policyRuleId", "structural-policy")
+-            .put("allowStructuralDiscovery", true);
+-    ObjectNode grant =
+-        CONTRACTS.object().put("policyRuleId", "business-read").put("origin", ORIGIN);
+-    grant
+-        .putObject("region")
+-        .put("kind", "role")
+-        .put("role", "main")
+-        .put("name", "Operations")
+-        .put("exact", true);
+-    grant.putObject("visibleText").put("classification", "permittedBusinessData");
+-    grant
+-        .putObject("controlValue")
+-        .put("classification", "nonsecretApproved")
+-        .putArray("types")
+-        .add("text")
+-        .add("textarea");
+-    policy.putArray("readGrants").add(grant);
+-    return policy;
++    return ENV.governedPolicy();
+   }
+ 
+   /**
+@@ -752,7 +433,7 @@
+     String kind = request.path("kind").asText();
+     PROVIDER_KINDS.add(kind);
+     ObjectNode response =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("schemaVersion", 3)
+             .put("kind", kind)
+@@ -807,7 +488,7 @@
+   static ObjectNode obligation(
+       String step, int occurrence, String kind, String target, Integer reference, String need) {
+     ObjectNode item =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("stepId", step)
+             .put("occurrence", occurrence)
+@@ -830,7 +511,7 @@
+   /** The single authored step; the configuration case declares and references a plain input. */
+   static String sourceText() {
+     return "Visit "
+-        + ORIGIN
++        + ENV.origin
+         + "/start then copy the displayed order into Destination and type fixture-input."
+         + (configuredInput ? " Use <var config>." : "");
+   }
+@@ -866,52 +547,12 @@
+ 
+   @BeforeEach
+   void startWorker(org.junit.jupiter.api.TestInfo testInfo) throws Exception {
+-    String testName = testInfo.getTestMethod().orElseThrow().getName();
+-    privacyEcho =
+-        testName.equals(
+-            "uncapturedPasswordAndInputEchoesStayPrivateAcrossActualDocumentNavigation");
+-    nativeToggle =
+-        testName.equals("preventedNativeToggleNeverCommitsSuccessOrRetries")
+-            || testName.equals("nativeRadioUncheckIsRefusedBeforeAnyBrowserAttempt");
+-    ECHO_NAVIGATIONS.set(0);
+-    TOGGLE_ATTEMPTS.set(0);
+-    genericRead =
+-        testInfo
+-            .getTestMethod()
+-            .orElseThrow()
+-            .getName()
+-            .equals("configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules");
+-    belowFold =
+-        testInfo
+-            .getTestMethod()
+-            .orElseThrow()
+-            .getName()
+-            .equals("belowFoldClickUsesNativeRevealAndOneReceipt");
+-    CLICK_RECEIPTS.set(0);
+-    FILL_RECEIPTS.set(0);
+-    multiStep =
+-        testInfo
+-            .getTestMethod()
+-            .orElseThrow()
+-            .getName()
+-            .equals("freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer");
+-    genericRead = genericRead || multiStep;
+-    String isolatedDatabase = "bridge_" + UUID.randomUUID().toString().replace("-", "");
+-    var admin =
+-        new DriverManagerDataSource(
+-            DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword());
+-    new JdbcTemplate(admin).execute("CREATE DATABASE " + isolatedDatabase);
+-    ((DriverManagerDataSource) fixtureDataSource)
+-        .setUrl(DATABASE.getJdbcUrl().replace(DATABASE.getDatabaseName(), isolatedDatabase));
+-    Flyway.configure()
+-        .dataSource(fixtureDataSource)
+-        .locations("classpath:db/migration")
+-        .load()
+-        .migrate();
++    String testName = ENV.prepareScenario(testInfo);
++    ENV.isolateDatabase(fixtureDataSource);
+     // STUDIO-OBS-014 S3b: each test runs on a freshly migrated isolated database, so the class's
+     // approved governed policy is seeded here; the bean-time seed only reached the base database.
+     com.citi.put.checks.studio.support.ObservedPublicationFixture.seedPolicy(
+-        jdbc, "CSI-123", "orders", "fixture", List.of(ORIGIN), governedPolicy(), "ALLOW");
++        jdbc, "CSI-123", "orders", "fixture", List.of(ENV.origin), governedPolicy(), "ALLOW");
+     // aria-bridge-ruling01 N6: the real source of truth is one ui_tests row (planning IT shape).
+     configuredInput =
+         testName.equals("authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly");
+@@ -939,97 +580,56 @@
+         testId,
+         mapper.writeValueAsString(List.of(sourceText())),
+         configuredInput
+-            ? "[{\"name\":\"config\",\"kind\":\"plain\",\"value\":\"" + CONFIG_INPUT + "\"}]"
++            ? "[{\"name\":\"config\",\"kind\":\"plain\",\"value\":\"" + ENV.configInput + "\"}]"
+             : "[]",
+         mapper.writeValueAsString(authoring),
+         mapper.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of())));
+-    HOLD_NEXT_REFRESH.set(false);
+-    refreshCallbackHeld = new CountDownLatch(1);
+-    releaseRefreshCallback = new CountDownLatch(1);
+-    dropCompletionCallbacks = false;
+-    failClaims = false;
+-    corruptClaimResponse = false;
+-    slowNavigationMillis = 0;
+-    HOLD_NEXT_CLAIM.set(false);
+-    claimResponseCaptured = new CountDownLatch(1);
+-    releaseClaimResponse = new CountDownLatch(1);
+-    NAVIGATIONS.set(0);
+-    CONNECTIONS.set(0);
+-    RECEIPT.set(null);
+-    replaceTarget = false;
+-    wideSession = false;
+-    MUTATIONS.set(0);
+-    Files.writeString(
+-        TEMP.resolve("worker.jwt"), token("owning-worker", "worker-1", "studio-guided-controller"));
+-    Path journal = Files.createTempDirectory(TEMP, "journal-");
++    ENV.resetWorkerState();
++    Path journal = ENV.prepareWorkerJournal();
+     // STUDIO-OBS-014 S3 (RK-2, ar-mounted-rules): the worker is given neither `rules` nor
+     // `applicationPolicy`; the class's governed policy (governedPolicy()) is frozen into each
+     // session and reaches the worker in the hash-bound context. This record is what the runner was
+     // configured with (no secret); the runner refuses any key it does not enumerate.
+     ObjectNode config =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("workerId", "worker-1")
+             .put("host", "127.0.0.1")
+-            .put("port", RUNNER_PORT)
++            .put("port", ENV.runnerPort)
+             .put("journalDirectory", journal.toString())
+             .put("controllerIssuer", "fixture-issuer")
+             .put("controllerSubject", "controller-1")
+             .put("callbackBaseUrl", "https://localhost:" + backendPort);
+-    Files.writeString(TEMP.resolve("worker.json"), config.toString());
++    Files.writeString(ENV.temp.resolve("worker.json"), config.toString());
+     // STUDIO-OBS-009 AC-3 / AC-12 h: the one folded entry point over TLS, spawned and reaped by the
+     // harness. STUDIO-OBS-013/014 S3: a per-class object store, never a shared default directory.
+-    workerHarness =
+-        RunnerProcessHarness.builder(RUNNER_TLS)
+-            .port(RUNNER_PORT)
+-            .workDirectory(Files.createTempDirectory(TEMP, "runner-"))
+-            .callbackBaseUrl("https://localhost:" + backendPort)
+-            .env(RunnerProcessHarness.KEY_OBJECT_STORE_DIR, TEMP.resolve("objects").toString())
+-            .guided(
+-                new RunnerProcessHarness.Guided(
+-                    "worker-1",
+-                    journal,
+-                    "fixture-issuer",
+-                    "controller-1",
+-                    TEMP.resolve("issuer.pub"),
+-                    "https://localhost:" + backendPort,
+-                    TEMP.resolve("worker.jwt")))
+-            .start();
++    workerHarness = ENV.startWorker(journal, backendPort);
+     workerHarness.awaitReady(Duration.ofSeconds(60));
+   }
+ 
+   @AfterEach
+   void closeWorker() throws Exception {
+-    releaseClaimResponse.countDown();
+-    releaseRefreshCallback.countDown();
++    ENV.releaseClaimResponse.countDown();
++    ENV.releaseRefreshCallback.countDown();
+     var harness = workerHarness;
+     workerHarness = null;
+-    if (harness != null) {
+-      // AC-11 k / I-T1: stop the runner and everything it left. The privacy oracle reads the log
+-      // first; then a clean exit is asserted (exit 0, no force within the guided grace) and no
+-      // survivor.
+-      var report = harness.teardown();
+-      assertThat(Files.readString(harness.logFile()))
+-          .doesNotContain(CAPTURE, PASSWORD_ECHO, ORDINARY_ECHO.strip());
+-      report.assertNoSurvivors();
+-      report.assertCleanExit();
+-    }
++    ENV.closeWorker(harness);
+     // aria-bridge-ruling01 §4.5: the controlled model only ever plans and selects.
+     assertThat(PROVIDER_KINDS).isSubsetOf("SOURCE_PLAN", "NEXT_ACTION");
+   }
+ 
+   @AfterAll
+   static void close() {
+-    APPLICATION.stop(0);
++    ENV.application.stop(0);
+     PROVIDER.stop(0);
+-    DATABASE.stop();
++    ENV.database.stop();
+   }
+ 
+   @Test
+   void realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch() throws Exception {
+     String id = plannedSession(planDataflow());
+-    assertThat(CONNECTIONS.get()).isEqualTo(1);
+-    assertThat(NAVIGATIONS.get()).isZero();
++    assertThat(ENV.connections.get()).isEqualTo(1);
++    assertThat(ENV.navigations.get()).isZero();
+     JsonNode blank = progress(id).path("executionEvidence");
+     assertThat(blank.path("origin").isNull()).isTrue();
+     assertThat(blank.path("kind").asText()).isEqualTo("initialBlank");
+@@ -1038,17 +638,17 @@
+     JsonNode navigateAssociation = reserve(id, navigate);
+     JsonNode first = admit(id, navigateAssociation);
+     JsonNode firstConsumed = advance(id, first, "first");
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(ENV.navigations.get()).isEqualTo(1);
+     assertThat(progress(id).path("executionEvidence").path("kind").asText())
+         .isEqualTo("observedDocument");
+     assertThat(advance(id, first, "first").path("dispatchCount").asInt()).isEqualTo(1);
+     assertThat(advance(id, first, "new-key").path("dispatchCount").asInt()).isEqualTo(1);
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(ENV.navigations.get()).isEqualTo(1);
+     String binding = bindingId(id, "order");
+     ObjectNode premature = proposal(id, 1, "fill", "destination");
+     premature
+         .withObject("/operation")
+-        .set("value", CONTRACTS.object().put("kind", "binding").put("bindingId", binding));
++        .set("value", ENV.contracts.object().put("kind", "binding").put("bindingId", binding));
+     // Negative probe (R-4): a hand-crafted consumer before its producer is refused.
+     JsonNode refusedOrder =
+         post(
+@@ -1065,7 +665,7 @@
+         .put("bindingId", binding)
+         .set(
+             "recipe",
+-            CONTRACTS
++            ENV.contracts
+                 .object()
+                 .put("kind", "visibleText")
+                 .put("classification", "permittedBusinessData")
+@@ -1081,13 +681,13 @@
+     ObjectNode callback = materialization.identity(sessions.runnerContext(controller, id, 1));
+     callback.set(
+         "ledger",
+-        CONTRACTS.parse(
++        ENV.contracts.parse(
+             jdbc.queryForObject(
+                 "SELECT document::text FROM studio_guided_actions WHERE admission_id=?",
+                 String.class,
+                 readLedger.path("admission").path("admissionId").asText())));
+     JsonNode receipt =
+-        CONTRACTS
++        ENV.contracts
+             .parse(
+                 jdbc.queryForObject(
+                     "SELECT document::text FROM studio_guided_producers WHERE session_id=?",
+@@ -1116,7 +716,7 @@
+         token("owning-worker", "worker-1", "studio-guided-controller"),
+         409);
+     ObjectNode valueLeak = callback.deepCopy();
+-    valueLeak.withObject("/availability").put("value", CAPTURE);
++    valueLeak.withObject("/availability").put("value", ENV.capture);
+     JsonNode refused =
+         post(
+             id,
+@@ -1125,14 +725,78 @@
+             "private-value",
+             token("owning-worker", "worker-1", "studio-guided-controller"),
+             422);
+-    assertThat(refused.toString()).doesNotContain(CAPTURE);
++    assertThat(refused.toString()).doesNotContain(ENV.capture);
+     ObjectNode fill = proposal(id, 2, "fill", "destination");
+     fill.withObject("/operation")
+-        .set("value", CONTRACTS.object().put("kind", "binding").put("bindingId", binding));
++        .set("value", ENV.contracts.object().put("kind", "binding").put("bindingId", binding));
+     JsonNode fillLedger = admit(id, reserve(id, fill));
+     advance(id, fillLedger, "fill");
+-    await(() -> RECEIPT.get() != null, 5000);
+-    assertThat(RECEIPT.get()).isEqualTo(CAPTURE);
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++      class BridgePoll1 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(ENV.receipt.get() != null)
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll1();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgePlannedIT: application fill receipt")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(ENV.receipt.get() != null).isTrue();
++    }
++    assertThat(ENV.receipt.get()).isEqualTo(ENV.capture);
+     assertThat(
+             jdbc.queryForObject(
+                 "SELECT count(*) FROM studio_guided_consumer_edges WHERE session_id=?",
+@@ -1144,28 +808,92 @@
+             "SELECT string_agg(document::text,'') FROM studio_guided_producers WHERE session_id=?",
+             String.class,
+             id);
+-    assertThat(persisted).doesNotContain(CAPTURE, "valueHash", "length", "sample");
++    assertThat(persisted).doesNotContain(ENV.capture, "valueHash", "length", "sample");
+     JsonNode admittedNavigate = navigateAssociation.path("proposal");
+     assertThat(
+             GuidedContracts.hash(
+-                CONTRACTS.object().set("coordinate", admittedNavigate.path("coordinate"))))
++                ENV.contracts.object().set("coordinate", admittedNavigate.path("coordinate"))))
+         .hasSize(64);
+     assertThat(firstConsumed.path("operationHash").asText())
+         .isEqualTo(operationHash(admittedNavigate));
+     ObjectNode fake = (ObjectNode) admittedNavigate.deepCopy();
+-    fake.withObject("/executionEvidence").put("origin", ORIGIN);
++    fake.withObject("/executionEvidence").put("origin", ENV.origin);
+     assertThat(operationHash(fake)).isNotEqualTo(operationHash(admittedNavigate));
+     sessions.cancel(
+         user,
+         id,
+         "cancel",
+-        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-    await(() -> progress(id).path("teardownStatus").asText().equals("CONFIRMED"), 5000);
++        ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++      class BridgePoll2 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll2();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgePlannedIT: teardown confirmed")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
++    }
+     assertThatThrownBy(() -> sessions.runnerContext(controller, id, 1)).hasMessage("CANCELLED");
+     // ar-mounted-rules qaOracle (3), moved from the retired configured-region case: the mounted
+     // worker.json carries neither `rules` nor `applicationPolicy`; the read above was authorized by
+     // the governed policy alone.
+-    JsonNode mounted = CONTRACTS.parse(Files.readString(TEMP.resolve("worker.json")));
++    JsonNode mounted = ENV.contracts.parse(Files.readString(ENV.temp.resolve("worker.json")));
+     assertThat(mounted.has("rules")).isFalse();
+     assertThat(mounted.has("applicationPolicy")).isFalse();
+     // aria-bridge-ruling01 §4.3: compensating DB oracle for the retired private-echo case.
+@@ -1174,7 +902,7 @@
+                 "SELECT string_agg(response::text,'') FROM studio_guided_commands WHERE namespace=?",
+                 String.class,
+                 id))
+-        .doesNotContain(CAPTURE.strip());
++        .doesNotContain(ENV.capture.strip());
+   }
+ 
+   @Test
+@@ -1200,7 +928,7 @@
+     assertThat(admissions.get(0).path("admission")).isEqualTo(admissions.get(1).path("admission"));
+     assertThat(actionCount(id)).isEqualTo(1);
+     advance(id, admissions.get(0), "once");
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(ENV.navigations.get()).isEqualTo(1);
+   }
+ 
+   @Test
+@@ -1214,7 +942,7 @@
+             () -> dispatch.dispatch(controller, id, 1, "same", request),
+             () -> dispatch.dispatch(controller, id, 1, "other", request));
+     assertThat(results).hasSize(3);
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(ENV.navigations.get()).isEqualTo(1);
+     assertThat(
+             jdbc.queryForObject(
+                 "SELECT count(*) FROM studio_guided_commands WHERE route='v2-consume'",
+@@ -1246,7 +974,7 @@
+     // Simulated controller death after commit/before send. Restart/status/cache has no permit.
+     new GuidedDispatchService(sessions, materialization, runner)
+         .dispatch(controller, id, 1, "after-restart", request);
+-    assertThat(NAVIGATIONS.get()).isZero();
++    assertThat(ENV.navigations.get()).isZero();
+     sessions.lostAcknowledgment(id);
+     assertThat(action(id).path("state").asText()).isEqualTo("UNKNOWN_OUTCOME");
+     assertThatThrownBy(() -> sessions.consume(controller, id, 1, "late", request))
+@@ -1273,7 +1001,7 @@
+           .hasMessageContaining("Unable to commit")
+           .rootCause()
+           .hasMessageContaining("injected commit failure");
+-      assertThat(NAVIGATIONS.get()).isZero();
++      assertThat(ENV.navigations.get()).isZero();
+       assertThat(action(id).path("dispatchCount").asInt()).isZero();
+       assertThat(
+               jdbc.queryForObject(
+@@ -1285,7 +1013,7 @@
+       jdbc.execute("DROP FUNCTION bridge_fail_commit()");
+     }
+     dispatch.dispatch(controller, id, 1, "after-rollback", request);
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(ENV.navigations.get()).isEqualTo(1);
+   }
+ 
+   @Test
+@@ -1327,7 +1055,7 @@
+       assertThatThrownBy(() -> consume.get(5, TimeUnit.SECONDS))
+           .hasCauseInstanceOf(GuidedSessionException.class);
+     }
+-    assertThat(NAVIGATIONS.get()).isZero();
++    assertThat(ENV.navigations.get()).isZero();
+     assertThat(action(id).path("dispatchCount").asInt()).isZero();
+     jdbc.update("UPDATE ui_tests SET source_revision=1 WHERE id=?", testId);
+     jdbc.update(
+@@ -1335,19 +1063,19 @@
+     assertThatThrownBy(
+             () -> dispatch.dispatch(controller, id, 1, "configuration-revision", request))
+         .hasMessage("REVISION_CONFLICT");
+-    assertThat(NAVIGATIONS.get()).isZero();
++    assertThat(ENV.navigations.get()).isZero();
+     assertThat(action(id).path("dispatchCount").asInt()).isZero();
+     jdbc.update("UPDATE ui_tests SET configuration_revision=1 WHERE id=?", testId);
+     // A direct controller allocation call (precedent: planning IT, ReplayIT) is not obligation
+     // authority; the planner already allocated this need at bootstrap.
+-    ObjectNode need = CONTRACTS.object().put("needId", "order").put("producerStepId", stepId(id));
++    ObjectNode need = ENV.contracts.object().put("needId", "order").put("producerStepId", stepId(id));
+     need.putArray("consumers")
+-        .add(CONTRACTS.object().put("stepId", stepId(id)).put("argumentSlot", "fill.value"));
++        .add(ENV.contracts.object().put("stepId", stepId(id)).put("argumentSlot", "fill.value"));
+     JsonNode allocation = sessions.allocateBinding(controller, id, 1, "allocate", need);
+     assertThat(allocation.path("bindingId").asText()).isEqualTo(bindingId(id, "order"));
+     ObjectNode more = need.deepCopy();
+     ((com.fasterxml.jackson.databind.node.ArrayNode) more.path("consumers"))
+-        .add(CONTRACTS.object().put("stepId", stepId(id)).put("argumentSlot", "assert.expected"));
++        .add(ENV.contracts.object().put("stepId", stepId(id)).put("argumentSlot", "assert.expected"));
+     assertThat(sessions.allocateBinding(controller, id, 1, "append", more).path("bindingId"))
+         .isEqualTo(allocation.path("bindingId"));
+     assertThatThrownBy(() -> sessions.allocateBinding(controller, id, 1, "erase", need))
+@@ -1377,13 +1105,77 @@
+     fill.withObject("/operation")
+         .set(
+             "value",
+-            CONTRACTS.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
++            ENV.contracts.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
+     JsonNode admitted = admit(id, reserve(id, fill));
+-    replaceTarget = true;
+-    await(() -> MUTATIONS.get() > 0, 5000);
++    ENV.replaceTarget = true;
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++      class BridgePoll3 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(ENV.mutations.get() > 0)
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll3();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgePlannedIT: DOM replacement receipt")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(ENV.mutations.get() > 0).isTrue();
++    }
+     advance(id, admitted, "stale-target");
+     JsonNode result =
+-        CONTRACTS.parse(
++        ENV.contracts.parse(
+             jdbc.queryForObject(
+                 "SELECT document::text FROM studio_guided_actions WHERE admission_id=?",
+                 String.class,
+@@ -1391,8 +1183,8 @@
+     assertThat(result.path("dispatchCount").asInt()).isEqualTo(1);
+     assertThat(result.path("state").asText()).isEqualTo("FAILED");
+     assertThat(result.path("outcomeCode").asText()).isEqualTo("TARGET_CHANGED");
+-    assertThat(RECEIPT.get()).isNull();
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(ENV.receipt.get()).isNull();
++    assertThat(ENV.navigations.get()).isEqualTo(1);
+   }
+ 
+   @Test
+@@ -1404,7 +1196,7 @@
+         .put("bindingId", bindingId(id, "order"))
+         .set(
+             "recipe",
+-            CONTRACTS
++            ENV.contracts
+                 .object()
+                 .put("kind", "visibleText")
+                 .put("classification", "permittedBusinessData")
+@@ -1435,7 +1227,7 @@
+                 id))
+         .isZero();
+     JsonNode stored =
+-        CONTRACTS.parse(
++        ENV.contracts.parse(
+             jdbc.queryForObject(
+                 "SELECT document::text FROM studio_guided_actions WHERE admission_id=?",
+                 String.class,
+@@ -1444,8 +1236,8 @@
+     assertThatThrownBy(
+             () -> dispatch.dispatch(controller, id, 1, "retry", advanceRequest(id, admission)))
+         .hasMessage("UNKNOWN_OUTCOME");
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+-    assertThat(RECEIPT.get()).isNull();
++    assertThat(ENV.navigations.get()).isEqualTo(1);
++    assertThat(ENV.receipt.get()).isNull();
+   }
+ 
+   @Test
+@@ -1453,25 +1245,89 @@
+     String id = plannedSession(planConfig());
+     JsonNode input = input(id, 1);
+     assertThat(input.path("provenance").path("referenceKind").asText()).isEqualTo("configuration");
+-    assertThat(input.path("value").asText()).isEqualTo(CONFIG_INPUT);
++    assertThat(input.path("value").asText()).isEqualTo(ENV.configInput);
+     advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+     ObjectNode fill = proposal(id, 1, "fill", "destination");
+     fill.withObject("/operation")
+         .set(
+             "value",
+-            CONTRACTS
++            ENV.contracts
+                 .object()
+                 .put("kind", "authoredLiteral")
+                 .put("sourceInputId", input.path("inputId").asText()));
+     advance(id, admit(id, reserve(id, fill)), "configured-fill");
+-    await(() -> RECEIPT.get() != null, 5000);
+-    assertThat(RECEIPT.get()).isEqualTo(CONFIG_INPUT);
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++      class BridgePoll4 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(ENV.receipt.get() != null)
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll4();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgePlannedIT: application fill receipt")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(ENV.receipt.get() != null).isTrue();
++    }
++    assertThat(ENV.receipt.get()).isEqualTo(ENV.configInput);
+     assertThat(
+             jdbc.queryForObject(
+                 "SELECT string_agg(document::text,'') FROM studio_guided_actions WHERE session_id=?",
+                 String.class,
+                 id))
+-        .doesNotContain(CONFIG_INPUT);
++        .doesNotContain(ENV.configInput);
+   }
+ 
+   @Test
+@@ -1483,7 +1339,7 @@
+     fill.withObject("/operation")
+         .set(
+             "value",
+-            CONTRACTS.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
++            ENV.contracts.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
+     JsonNode second = admit(id, reserve(id, fill));
+     sessions.consume(controller, id, 1, "second", advanceRequest(id, second));
+     sessions.lostAcknowledgment(id, first.path("admission").path("admissionId").asText());
+@@ -1516,7 +1372,7 @@
+         .put("bindingId", binding)
+         .set(
+             "recipe",
+-            CONTRACTS
++            ENV.contracts
+                 .object()
+                 .put("kind", "visibleText")
+                 .put("classification", "permittedBusinessData")
+@@ -1537,7 +1393,71 @@
+             "SELECT document::text FROM studio_guided_producers WHERE session_id=?",
+             String.class,
+             id);
+-    await(() -> Instant.now().isAfter(firstLease.plusMillis(500)), 35000);
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(35000);
++      class BridgePoll5 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(Instant.now().isAfter(firstLease.plusMillis(500)))
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll5();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgePlannedIT: first lease plus 500 ms")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(Instant.now().isAfter(firstLease.plusMillis(500))).isTrue();
++    }
+     assertThat(session(id).path("state").asText()).isEqualTo("AWAITING_CLARIFICATION");
+     assertThat(session(id).path("owner").path("fence").asInt()).isEqualTo(1);
+     assertThat(Instant.parse(session(id).path("owner").path("leaseExpiresAt").asText()))
+@@ -1551,7 +1471,7 @@
+                 id))
+         .isEqualTo(producer);
+     assertThat(claimCount(id)).isGreaterThanOrEqualTo(3);
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(ENV.navigations.get()).isEqualTo(1);
+     // The planner's assignment key (GuidedTranslationService.plan), so the duplicate keeps meaning.
+     JsonNode duplicate = dispatch.assign(controller, id, "translation-assignment", "worker-1");
+     assertThat(duplicate.path("assignment")).isEqualTo(assignment(id));
+@@ -1565,10 +1485,74 @@
+         });
+     ObjectNode fill = proposal(id, 2, "fill", "destination");
+     fill.withObject("/operation")
+-        .set("value", CONTRACTS.object().put("kind", "binding").put("bindingId", binding));
++        .set("value", ENV.contracts.object().put("kind", "binding").put("bindingId", binding));
+     advance(id, admit(id, reserve(id, fill)), "fill-after-renewal");
+-    await(() -> RECEIPT.get() != null, 5000);
+-    assertThat(RECEIPT.get()).isEqualTo(CAPTURE);
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++      class BridgePoll6 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(ENV.receipt.get() != null)
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll6();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgePlannedIT: application fill receipt")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(ENV.receipt.get() != null).isTrue();
++    }
++    assertThat(ENV.receipt.get()).isEqualTo(ENV.capture);
+   }
+ 
+   @Test
+@@ -1576,21 +1560,85 @@
+     String id = plannedSession(planNav());
+     advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+     ObjectNode oldContext = sessions.runnerContext(controller, id, 1);
+-    HOLD_NEXT_CLAIM.set(true);
+-    assertThat(claimResponseCaptured.await(15, TimeUnit.SECONDS)).isTrue();
++    ENV.holdNextClaim.set(true);
++    assertThat(ENV.claimResponseCaptured.await(15, TimeUnit.SECONDS)).isTrue();
+     sessions.cancel(
+         user,
+         id,
+         "cancel-delayed-renewal",
+-        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-    await(() -> progress(id).path("teardownStatus").asText().equals("CONFIRMED"), 5000);
+-    releaseClaimResponse.countDown();
++        ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
++    {
++      long bridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
++      class BridgePoll7 {
++        Throwable failure;
++        boolean terminal;
++        boolean slept;
++        boolean initialAwaitTick = true;
++    
++        boolean step() {
++          if (terminal) {
++            return true;
++          }
++          try {
++            if (slept && Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
++                && System.nanoTime() < bridgeDeadline)) {
++              terminal = true;
++              return true;
++            }
++            if (Thread.interrupted()) {
++              throw new InterruptedException();
++            }
++            slept = true;
++            return false;
++          } catch (Throwable caught) {
++            failure = caught;
++            terminal = true;
++            return true;
++          }
++        }
++      }
++      var bridgePoll = new BridgePoll7();
++      if (!bridgePoll.step()) {
++        try {
++          org.awaitility.Awaitility.await()
++              .alias("GuidedBridgePlannedIT: teardown confirmed")
++              .pollInSameThread()
++              .dontCatchUncaughtExceptions()
++              .pollDelay(Duration.ZERO)
++              .pollInterval(Duration.ofMillis(25))
++              .atMost(Duration.ofNanos(Math.max(1L, bridgeDeadline - System.nanoTime())))
++              .until(
++                  () -> {
++                    if (bridgePoll.initialAwaitTick) {
++                      bridgePoll.initialAwaitTick = false;
++                      return false;
++                    }
++                    return bridgePoll.step();
++                  });
++        } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
++          if (!bridgePoll.terminal) {
++            bridgePoll.step();
++          }
++        }
++      }
++      if (bridgePoll.failure instanceof Exception exception) {
++        throw exception;
++      }
++      if (bridgePoll.failure instanceof Error error) {
++        throw error;
++      }
++      assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
++    }
++    ENV.releaseClaimResponse.countDown();
+     Thread.sleep(200);
+     assertThatThrownBy(() -> runner.send("assign", assignment(id), "assignment"))
+         .hasMessage("UNKNOWN_OUTCOME");
+     assertThatThrownBy(() -> runner.send("context", oldContext)).hasMessage("UNKNOWN_OUTCOME");
+     assertThat(session(id).path("state").asText()).isEqualTo("CANCELLED");
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(ENV.navigations.get()).isEqualTo(1);
+   }
+ 
+   @Test
+@@ -1601,10 +1649,10 @@
+     int before = session(id).path("counters").path("observations").asInt();
+     var proxy = com.sun.net.httpserver.HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
+     proxy.setHttpsConfigurator(
+-        new com.sun.net.httpserver.HttpsConfigurator(RUNNER_SIDE) {
++        new com.sun.net.httpserver.HttpsConfigurator(ENV.runnerSide) {
+           @Override
+           public void configure(com.sun.net.httpserver.HttpsParameters parameters) {
+-            var ssl = RUNNER_SIDE.getDefaultSSLParameters();
++            var ssl = ENV.runnerSide.getDefaultSSLParameters();
+             ssl.setNeedClientAuth(true);
+             parameters.setSSLParameters(ssl);
+           }
+@@ -1615,7 +1663,7 @@
+         exchange -> {
+           try {
+             JsonNode body =
+-                CONTRACTS.parse(
++                ENV.contracts.parse(
+                     new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+             runner.send("observe", body, exchange.getRequestHeaders().getFirst("Idempotency-Key"));
+             requests.incrementAndGet();
+@@ -1632,9 +1680,9 @@
+       var faultClient =
+           new GuidedRunnerClient(
+               URI.create("https://localhost:" + proxy.getAddress().getPort()),
+-              TLS,
++              ENV.tls,
+               () -> token("backend-controller", "controller-1", "studio-guided-runner"),
+-              CONTRACTS);
++              ENV.contracts);
+       var faultDispatch = new GuidedDispatchService(sessions, materialization, faultClient);
+       JsonNode result = faultDispatch.observe(controller, id, 1, "lost-refresh-response", request);
+       assertThat(result.path("observation")).isEqualTo(progress(id).path("observation"));
+@@ -1642,7 +1690,7 @@
+           .isEqualTo(result);
+       assertThat(requests.get()).isEqualTo(1);
+       assertThat(session(id).path("counters").path("observations").asInt()).isEqualTo(before + 1);
+-      assertThat(NAVIGATIONS.get()).isEqualTo(1);
++      assertThat(ENV.navigations.get()).isEqualTo(1);
+     } finally {
+       proxy.stop(0);
+     }
+@@ -1694,7 +1742,7 @@
+     fill.withObject("/operation")
+         .set(
+             "value",
+-            CONTRACTS.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
++            ENV.contracts.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
+     admit(id, reserve(id, fill));
+     // The refusal below is attributable to the active admission, not to a stale generation.
+     assertThat(progress(id).path("generation").asInt())
+@@ -1705,11 +1753,11 @@
+         user,
+         id,
+         "cancel",
+-        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
++        ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
+     assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "after-cancel", request))
+         .hasMessage("CANCELLED");
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+-    assertThat(FILL_RECEIPTS.get()).isZero();
++    assertThat(ENV.navigations.get()).isEqualTo(1);
++    assertThat(ENV.fillReceipts.get()).isZero();
+   }
+ 
+   @Test
+@@ -1726,7 +1774,7 @@
+     assertThat(session(id).path("counters").path("observations").asInt())
+         .isEqualTo(observations + 1);
+     assertThat(actionCount(id)).isEqualTo(1);
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
++    assertThat(ENV.navigations.get()).isEqualTo(1);
+   }
+ 
+   @Test
+@@ -1735,7 +1783,7 @@
+     advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+     ObjectNode request = refreshRequest(id);
+     int generation = progress(id).path("generation").asInt();
+-    HOLD_NEXT_REFRESH.set(true);
++    ENV.holdNextRefresh.set(true);
+     try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+       var collecting =
+           executor.submit(
+@@ -1747,7 +1795,7 @@
+                   return failure.getMessage();
+                 }
+               });
+-      assertThat(refreshCallbackHeld.await(5, TimeUnit.SECONDS)).isTrue();
++      assertThat(ENV.refreshCallbackHeld.await(5, TimeUnit.SECONDS)).isTrue();
+       assertThat(session(id).path("state").asText()).isEqualTo("OBSERVING");
+       assertThatThrownBy(
+               () -> dispatch.observe(controller, id, 1, "different-inflight-key", request))
+@@ -1756,15 +1804,15 @@
+           user,
+           id,
+           "cancel-refresh",
+-          CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+-      releaseRefreshCallback.countDown();
++          ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
++      ENV.releaseRefreshCallback.countDown();
+       assertThat(collecting.get(10, TimeUnit.SECONDS))
+           .isIn("CANCELLED", "UNKNOWN_OUTCOME", "STALE_FENCE");
+     }
+     assertThat(session(id).path("state").asText()).isEqualTo("CANCELLED");
+     assertThat(progress(id).path("generation").asInt()).isEqualTo(generation);
+-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+-    assertThat(FILL_RECEIPTS.get()).isZero();
++    assertThat(ENV.navigations.get()).isEqualTo(1);
++    assertThat(ENV.fillReceipts.get()).isZero();
+   }
+ 
+   int actionCount(String id) {
+@@ -1773,7 +1821,7 @@
+   }
+ 
+   JsonNode action(String id) {
+-    return CONTRACTS.parse(
++    return ENV.contracts.parse(
+         jdbc.queryForObject(
+             "SELECT document::text FROM studio_guided_actions WHERE session_id=? ORDER BY "
+                 + "ordinal LIMIT 1",
+@@ -1788,7 +1836,7 @@
+   }
+ 
+   ObjectNode advanceRequest(String id, JsonNode ledger) {
+-    return CONTRACTS
++    return ENV.contracts
+         .object()
+         .put("schemaVersion", 3)
+         .put("sessionId", id)
+@@ -1820,7 +1868,7 @@
+   }
+ 
+   JsonNode session(String id) {
+-    return CONTRACTS.parse(
++    return ENV.contracts.parse(
+         jdbc.queryForObject(
+             "SELECT document::text FROM studio_guided_sessions WHERE session_id=?",
+             String.class,
+@@ -1828,7 +1876,7 @@
+   }
+ 
+   JsonNode assignment(String id) {
+-    return CONTRACTS.parse(
++    return ENV.contracts.parse(
+         jdbc.queryForObject(
+             "SELECT intent::text FROM studio_guided_assignments WHERE session_id=?",
+             String.class,
+@@ -1853,12 +1901,12 @@
+     var connection =
+         HttpClient.newHttpClient()
+             .send(
+-                HttpRequest.newBuilder(URI.create(ORIGIN + "/connect")).GET().build(),
++                HttpRequest.newBuilder(URI.create(ENV.origin + "/connect")).GET().build(),
+                 HttpResponse.BodyHandlers.ofString());
+     assertThat(connection.statusCode()).isEqualTo(200);
+     assertThat(connection.body()).isEqualTo("controlled-public-fixture-account");
+     ObjectNode start =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("schemaVersion", 3)
+             .put("testId", testId.toString())
+@@ -1875,7 +1923,7 @@
+     return repository.transaction(
+         () -> {
+           var session = repository.lock(id);
+-          return CONTRACTS
++          return ENV.contracts
+               .object()
+               .put("schemaVersion", 3)
+               .put("sessionId", id)
+@@ -1899,7 +1947,7 @@
+   }
+ 
+   ObjectNode span(String kind, String slot, int start, int end) {
+-    return CONTRACTS
++    return ENV.contracts
+         .object()
+         .put("referenceKind", "sourceSpan")
+         .put("sourceRevision", "1")
+@@ -1912,7 +1960,7 @@
+ 
+   /** The authored navigation destination. */
+   ObjectNode destinationReference() {
+-    return span("destination", "navigate.destination", 6, 6 + (ORIGIN + "/start").length());
++    return span("destination", "navigate.destination", 6, 6 + (ENV.origin + "/start").length());
+   }
+ 
+   /** The authored literal {@code fixture-input}. */
+@@ -1922,7 +1970,7 @@
+   }
+ 
+   ObjectNode planTemplate(List<ObjectNode> references, List<ObjectNode> obligations) {
+-    ObjectNode plan = CONTRACTS.object();
++    ObjectNode plan = ENV.contracts.object();
+     references.forEach(plan.putArray("sourceReferences")::add);
+     obligations.forEach(plan.putArray("obligations")::add);
+     plan.putArray("needs");
+@@ -2042,7 +2090,7 @@
+           .as("reserve only after prior actions settle")
+           .isEqualTo("SUCCEEDED");
+     }
+-    ObjectNode action = CONTRACTS.object();
++    ObjectNode action = ENV.contracts.object();
+     ObjectNode target = hand.path("target").deepCopy();
+     target.remove(List.of("documentId", "generation"));
+     action.set("target", target);
+@@ -2066,10 +2114,10 @@
+             questions,
+             stopped,
+             gateway,
+-            CONTRACTS,
+-            new GuidedPromptAssembler(CONTRACTS),
++            ENV.contracts,
++            new GuidedPromptAssembler(ENV.contracts),
+             inputs,
+-            new GuidedProposalValidator(CONTRACTS),
++            new GuidedProposalValidator(ENV.contracts),
+             new GuidedDependencyPlanner(sessions),
+             properties,
+             Clock.systemUTC());
+@@ -2119,7 +2167,7 @@
+     JsonNode evidence = progress(id).path("executionEvidence");
+     ObjectNode context = sessions.runnerContext(controller, id, 1);
+     ObjectNode p =
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("schemaVersion", 3)
+             .put("sessionId", id)
+@@ -2158,7 +2206,7 @@
+     return post(
+         id,
+         "advance",
+-        CONTRACTS
++        ENV.contracts
+             .object()
+             .put("schemaVersion", 3)
+             .put("sessionId", id)
+@@ -2174,7 +2222,7 @@
+       throws Exception {
+     var response =
+         HttpClient.newBuilder()
+-            .sslContext(RUNNER_SIDE)
++            .sslContext(ENV.runnerSide)
+             .build()
+             .send(
+                 HttpRequest.newBuilder(
+@@ -2194,11 +2242,11 @@
+                     .build(),
+                 HttpResponse.BodyHandlers.ofString());
+     assertThat(response.statusCode()).as("%s: %s", route, response.body()).isEqualTo(expected);
+-    return CONTRACTS.parse(response.body());
++    return ENV.contracts.parse(response.body());
+   }
+ 
+   JsonNode progress(String id) {
+-    return CONTRACTS.parse(
++    return ENV.contracts.parse(
+         jdbc.queryForObject(
+             "SELECT progress::text FROM studio_guided_sessions WHERE session_id=?",
+             String.class,
+@@ -2206,11 +2254,11 @@
+   }
+ 
+   static ObjectNode versions() {
+-    return (ObjectNode) CONTRACTS.parse("{\"contract\":3}");
++    return (ObjectNode) ENV.contracts.parse("{\"contract\":3}");
+   }
+ 
+   static String operationHash(JsonNode proposal) {
+-    ObjectNode identity = CONTRACTS.object();
++    ObjectNode identity = ENV.contracts.object();
+     identity.set("coordinate", proposal.path("coordinate"));
+     identity.set("origin", proposal.path("executionEvidence").path("origin"));
+     identity.set(
+@@ -2223,45 +2271,7 @@
+   }
+ 
+   static String token(String role, String subject, String audience) {
+-    try {
+-      long now = Instant.now().getEpochSecond();
+-      String header =
+-          Base64.getUrlEncoder()
+-              .withoutPadding()
+-              .encodeToString(
+-                  "{\"alg\":\"RS256\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
+-      String claims =
+-          CONTRACTS
+-              .object()
+-              .put("iss", "fixture-issuer")
+-              .put("sub", subject)
+-              .put("aud", audience)
+-              .put("role", role)
+-              .put("iat", now)
+-              .put("exp", now + 300)
+-              .toString();
+-      String signed =
+-          header
+-              + "."
+-              + Base64.getUrlEncoder()
+-                  .withoutPadding()
+-                  .encodeToString(claims.getBytes(StandardCharsets.UTF_8));
+-      Signature signature = Signature.getInstance("SHA256withRSA");
+-      signature.initSign(ISSUER.getPrivate());
+-      signature.update(signed.getBytes(StandardCharsets.US_ASCII));
+-      return signed
+-          + "."
+-          + Base64.getUrlEncoder().withoutPadding().encodeToString(signature.sign());
+-    } catch (Exception failure) {
+-      throw new IllegalStateException(failure);
+-    }
+-  }
+-
+-  static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
+-    long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+-    while (!condition.getAsBoolean() && System.nanoTime() < end) {
+-      Thread.sleep(25);
+-    }
+-    assertThat(condition.getAsBoolean()).isTrue();
+-  }
++    return ENV.token(role, subject, audience);
++  }
++
+ }
+--- /dev/null
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java
+@@ -0,0 +1,515 @@
++package com.citi.put.checks.studio.guided.session;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++import com.citi.put.checks.studio.support.RunnerProcessHarness;
++import com.citi.put.checks.studio.support.RunnerTestTls;
++import com.citi.put.checks.studio.support.RunnerTestTls.Identity;
++import com.fasterxml.jackson.databind.node.ObjectNode;
++import com.sun.net.httpserver.HttpServer;
++import java.net.InetSocketAddress;
++import java.nio.charset.StandardCharsets;
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.security.KeyPair;
++import java.security.KeyPairGenerator;
++import java.security.MessageDigest;
++import java.security.Signature;
++import java.time.Instant;
++import java.util.Base64;
++import java.util.HexFormat;
++import java.util.List;
++import java.util.UUID;
++import java.util.concurrent.CountDownLatch;
++import java.util.concurrent.TimeUnit;
++import java.util.concurrent.atomic.AtomicInteger;
++import java.util.concurrent.atomic.AtomicReference;
++import javax.net.ssl.SSLContext;
++import javax.sql.DataSource;
++import org.flywaydb.core.Flyway;
++import org.springframework.jdbc.core.JdbcTemplate;
++import org.springframework.jdbc.datasource.DriverManagerDataSource;
++import org.springframework.test.context.DynamicPropertyRegistry;
++import org.testcontainers.containers.PostgreSQLContainer;
++
++/**
++ * Shared transport/application fixture with one independently owned instance per bridge test class.
++ * Planning, source access, reservations, and admission authority remain in their respective tests.
++ * The support-folder location intentionally retains the tests' declared guided.session package.
++ */
++final class GuidedBridgeFixture {
++  final GuidedContracts contracts = new GuidedContracts();
++  final PostgreSQLContainer<?> database = new PostgreSQLContainer<>("postgres:15-alpine");
++  final Path temp;
++  final Path dist;
++  final RunnerTestTls runnerTls;
++
++  /** The backend's identity toward the runner: also the guided runner client's context. */
++  final SSLContext tls;
++
++  /** What the runner (a worker calling the backend, or a double standing in for it) presents. */
++  final SSLContext runnerSide;
++
++  final KeyPair issuer;
++  final int runnerPort;
++  final HttpServer application;
++  final AtomicInteger navigations = new AtomicInteger(), connections = new AtomicInteger();
++  final AtomicReference<String> receipt = new AtomicReference<>();
++  final String capture = "  independent-" + UUID.randomUUID() + "-é😀  ";
++  final String passwordEcho = "password-canary-" + UUID.randomUUID();
++  final String ordinaryEcho = "  ordinary-canary-" + UUID.randomUUID() + "  ";
++  final AtomicInteger echoNavigations = new AtomicInteger(),
++      toggleAttempts = new AtomicInteger();
++  volatile boolean privacyEcho, nativeToggle;
++  final String configInput = "configured-" + UUID.randomUUID();
++  final String origin;
++  volatile boolean replaceTarget,
++      wideSession,
++      genericRead,
++      belowFold,
++      multiStep,
++      dropCompletionCallbacks;
++  volatile boolean failClaims, corruptClaimResponse;
++  final java.util.concurrent.atomic.AtomicBoolean holdNextRefresh =
++      new java.util.concurrent.atomic.AtomicBoolean();
++  volatile CountDownLatch refreshCallbackHeld = new CountDownLatch(1),
++      releaseRefreshCallback = new CountDownLatch(1);
++  volatile long slowNavigationMillis;
++  final java.util.concurrent.atomic.AtomicBoolean holdNextClaim =
++      new java.util.concurrent.atomic.AtomicBoolean();
++  volatile CountDownLatch claimResponseCaptured = new CountDownLatch(1);
++  volatile CountDownLatch releaseClaimResponse = new CountDownLatch(1);
++  final AtomicInteger mutations = new AtomicInteger();
++  final AtomicInteger clickReceipts = new AtomicInteger();
++  final AtomicInteger fillReceipts = new AtomicInteger();
++
++  GuidedBridgeFixture(String temporaryPrefix, Path workerEvidencePath) throws Exception {
++    temp = Files.createTempDirectory(temporaryPrefix);
++    // STUDIO-OBS-009 AC-12 i: no private copy of dist. The harness spawns the real folded entry
++    // point and records the digest of what it spawned; the sole rebuild is the F-merge's.
++    dist = RunnerProcessHarness.defaultDistDirectory().toAbsolutePath().normalize();
++    ObjectNode workerEvidence = contracts.object().put("snapshot", dist.toString());
++    workerEvidence.put("distDigest", RunnerProcessHarness.distDigestOf(dist));
++    ObjectNode hashes = workerEvidence.putObject("sha256");
++    for (String relative :
++        List.of(
++            "main.js",
++            "run/browser.js",
++            "guided/runtime.js",
++            "guided/transport.js",
++            "guided/schemas.json")) {
++      hashes.put(
++          relative,
++          HexFormat.of()
++              .formatHex(
++                  MessageDigest.getInstance("SHA-256")
++                      .digest(Files.readAllBytes(dist.resolve(relative)))));
++    }
++    hashes.put(
++        "scripts/browser-provenance.mjs",
++        HexFormat.of()
++            .formatHex(
++                MessageDigest.getInstance("SHA-256")
++                    .digest(
++                        Files.readAllBytes(
++                            Path.of("../studio-runner/scripts/browser-provenance.mjs")))));
++    Files.writeString(
++        workerEvidencePath, workerEvidence.toString());
++    // One test CA (lane D3.0): the runner and the backend certificates chain to it, the runner
++    // pins
++    // the backend certificate, and the backend trusts only the CA.
++    runnerTls = RunnerTestTls.shared();
++    tls = runnerTls.backendTls().sslContext();
++    runnerSide =
++        runnerTls.serverContext(
++            Identity.RUNNER, runnerTls.trustStore(), runnerTls.trustStorePasswordFile());
++    var generator = KeyPairGenerator.getInstance("RSA");
++    generator.initialize(2048);
++    issuer = generator.generateKeyPair();
++    Files.writeString(
++        temp.resolve("issuer.pub"),
++        "-----BEGIN PUBLIC KEY-----\n"
++            + Base64.getMimeEncoder(64, new byte[] {10})
++                .encodeToString(issuer.getPublic().getEncoded())
++            + "\n-----END PUBLIC KEY-----\n");
++    // AC-12 h: an exclusive bind on both loopback families, outside the database range.
++    runnerPort = RunnerProcessHarness.exclusivelyFreePort();
++    application = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
++    origin = "http://127.0.0.1:" + application.getAddress().getPort();
++    application.createContext(
++        "/connect",
++        exchange -> {
++          connections.incrementAndGet();
++          byte[] body = "controlled-public-fixture-account".getBytes(StandardCharsets.UTF_8);
++          exchange.sendResponseHeaders(200, body.length);
++          exchange.getResponseBody().write(body);
++          exchange.close();
++        });
++    application.createContext(
++        "/start",
++        exchange -> {
++          navigations.incrementAndGet();
++          if (slowNavigationMillis > 0) {
++            try {
++              Thread.sleep(slowNavigationMillis);
++            } catch (InterruptedException failure) {
++              Thread.currentThread().interrupt();
++            }
++          }
++          String html =
++              "<html><body><main aria-label='Operations'><output aria-label='Order number' "
++                  + "data-testid='source'>"
++                  + capture
++                  + "</output></main><input aria-label='Destination' data-testid='destination' "
++                  + "oninput=\"fetch('/receipt',{method:'POST',body:this.value})\"><button "
++                  + "data-testid='replace' onclick=\"document.querySelector('[data-testid=destin"
++                  + "ation]').outerHTML='<input data-testid=destination "
++                  + "aria-label=Destination>'\">Replace</button><script>setInterval(async()=>{if"
++                  + "(await (await fetch('/mutation')).text()==='yes'){document.querySelector('["
++                  + "data-testid=destination]').outerHTML='<input data-testid=destination "
++                  + "aria-label=Destination>';await "
++                  + "fetch('/mutated',{method:'POST'});}},25)</script></body></html>";
++          if (genericRead) {
++            html =
++                "<html><body><main aria-label='Operations'>"
++                    + "<output aria-label='Order reference'>"
++                    + capture
++                    + "</output>"
++                    + "<label>Destination<textarea oninput=\"fetch('/receipt',"
++                    + "{method:'POST',body:this.value})\"></textarea></label>"
++                    + "</main></body></html>";
++          }
++          if (privacyEcho) {
++            html =
++                "<html><body><input type='password' aria-label='Login secret' value='"
++                    + passwordEcho
++                    + "'><input aria-label='Ordinary input' value='"
++                    + ordinaryEcho
++                    + "'></body></html>";
++          }
++          if (nativeToggle) {
++            html =
++                "<html><body><input type='checkbox' aria-label='Prevented toggle' "
++                    + "onclick=\"event.preventDefault();fetch('/toggle',{method:'POST'})\">"
++                    + "<input type='radio' checked aria-label='Selected radio' "
++                    + "onclick=\"fetch('/toggle',{method:'POST'})\"></body></html>";
++          }
++          if (belowFold) {
++            html =
++                html.replace(
++                    "</body>",
++                    "<div style='height:2200px'></div>"
++                        + "<button aria-label='Continue' onclick=\"fetch('/clicked',"
++                        + "{method:'POST'})\">Continue</button></body>");
++          }
++          byte[] body = html.getBytes(StandardCharsets.UTF_8);
++          exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
++          exchange.sendResponseHeaders(200, body.length);
++          exchange.getResponseBody().write(body);
++          exchange.close();
++        });
++    application.createContext(
++        "/echo",
++        exchange -> {
++          echoNavigations.incrementAndGet();
++          byte[] bytes =
++              ("<html><body><button>"
++                      + passwordEcho
++                      + "</button><button>"
++                      + ordinaryEcho.strip()
++                      + "</button></body></html>")
++                  .getBytes(StandardCharsets.UTF_8);
++          exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
++          exchange.sendResponseHeaders(200, bytes.length);
++          exchange.getResponseBody().write(bytes);
++          exchange.close();
++        });
++    application.createContext(
++        "/toggle",
++        exchange -> {
++          toggleAttempts.incrementAndGet();
++          exchange.sendResponseHeaders(204, -1);
++          exchange.close();
++        });
++    application.createContext(
++        "/receipt",
++        exchange -> {
++          fillReceipts.incrementAndGet();
++          receipt.set(
++              new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
++          exchange.sendResponseHeaders(204, -1);
++          exchange.close();
++        });
++    application.createContext(
++        "/mutation",
++        exchange -> {
++          byte[] body = (replaceTarget ? "yes" : "no").getBytes(StandardCharsets.UTF_8);
++          exchange.sendResponseHeaders(200, body.length);
++          exchange.getResponseBody().write(body);
++          exchange.close();
++        });
++    application.createContext(
++        "/mutated",
++        exchange -> {
++          replaceTarget = false;
++          mutations.incrementAndGet();
++          exchange.sendResponseHeaders(204, -1);
++          exchange.close();
++        });
++    application.createContext(
++        "/clicked",
++        exchange -> {
++          if (exchange.getRequestMethod().equals("POST")) {
++            clickReceipts.incrementAndGet();
++          }
++          exchange.sendResponseHeaders(204, -1);
++          exchange.close();
++        });
++  }
++
++  void start() {
++    application.start();
++    database.start();
++    // STUDIO-OBS-012A / ADR-SC-005 D-B: the re-baselined schema head (core V1–V11 + V12–V18).
++    Flyway.configure()
++        .dataSource(database.getJdbcUrl(), database.getUsername(), database.getPassword())
++        .locations("classpath:db/migration")
++        .target("22") // STUDIO-OBS-014 S3: governance tables (V19) at head
++        .load()
++        .migrate();
++  }
++
++  void properties(DynamicPropertyRegistry registry) {
++    RunnerProcessHarness.backendServerSslProperties(runnerTls)
++        .forEach((name, value) -> registry.add(name, () -> value));
++    registry.add(
++        "studio.guided-authoring.service-public-key",
++        () -> Base64.getEncoder().encodeToString(issuer.getPublic().getEncoded()));
++    registry.add("studio.guided-authoring.service-issuer", () -> "fixture-issuer");
++    registry.add("studio.guided-authoring.mtls-required", () -> true);
++  }
++
++  ObjectNode governedPolicy() {
++    ObjectNode policy =
++        contracts
++            .object()
++            .put("policyRuleId", "structural-policy")
++            .put("allowStructuralDiscovery", true);
++    ObjectNode grant =
++        contracts.object().put("policyRuleId", "business-read").put("origin", origin);
++    grant
++        .putObject("region")
++        .put("kind", "role")
++        .put("role", "main")
++        .put("name", "Operations")
++        .put("exact", true);
++    grant.putObject("visibleText").put("classification", "permittedBusinessData");
++    grant
++        .putObject("controlValue")
++        .put("classification", "nonsecretApproved")
++        .putArray("types")
++        .add("text")
++        .add("textarea");
++    policy.putArray("readGrants").add(grant);
++    return policy;
++  }
++
++  String token(String role, String subject, String audience) {
++    try {
++      long now = Instant.now().getEpochSecond();
++      String header =
++          Base64.getUrlEncoder()
++              .withoutPadding()
++              .encodeToString(
++                  "{\"alg\":\"RS256\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
++      String claims =
++          contracts
++              .object()
++              .put("iss", "fixture-issuer")
++              .put("sub", subject)
++              .put("aud", audience)
++              .put("role", role)
++              .put("iat", now)
++              .put("exp", now + 300)
++              .toString();
++      String signed =
++          header
++              + "."
++              + Base64.getUrlEncoder()
++                  .withoutPadding()
++                  .encodeToString(claims.getBytes(StandardCharsets.UTF_8));
++      Signature signature = Signature.getInstance("SHA256withRSA");
++      signature.initSign(issuer.getPrivate());
++      signature.update(signed.getBytes(StandardCharsets.US_ASCII));
++      return signed
++          + "."
++          + Base64.getUrlEncoder().withoutPadding().encodeToString(signature.sign());
++    } catch (Exception failure) {
++      throw new IllegalStateException(failure);
++    }
++  }
++
++  org.springframework.boot.web.servlet.FilterRegistrationBean<jakarta.servlet.Filter>
++      completionFault() {
++    jakarta.servlet.Filter filter =
++        (request, response, chain) -> {
++          String uri = ((jakarta.servlet.http.HttpServletRequest) request).getRequestURI();
++          var http = (jakarta.servlet.http.HttpServletResponse) response;
++          String callbackKey =
++              ((jakarta.servlet.http.HttpServletRequest) request).getHeader("Idempotency-Key");
++          if (uri.endsWith("/observations")
++              && callbackKey != null
++              && callbackKey.startsWith("oref-")
++              && holdNextRefresh.compareAndSet(true, false)) {
++            refreshCallbackHeld.countDown();
++            try {
++              releaseRefreshCallback.await(10, TimeUnit.SECONDS);
++            } catch (InterruptedException failure) {
++              Thread.currentThread().interrupt();
++            }
++          }
++          if (dropCompletionCallbacks && (uri.endsWith("/outcomes") || uri.endsWith("/lifecycle"))
++              || failClaims && uri.endsWith("/claim")) {
++            http.setStatus(503);
++            return;
++          }
++          if (uri.endsWith("/claim") && (corruptClaimResponse || holdNextClaim.get())) {
++            var buffered = new org.springframework.web.util.ContentCachingResponseWrapper(http);
++            chain.doFilter(request, buffered);
++            if (buffered.getStatus() == 202 && corruptClaimResponse) {
++              ObjectNode grant =
++                  (ObjectNode)
++                      contracts.parse(
++                          new String(buffered.getContentAsByteArray(), StandardCharsets.UTF_8));
++              grant
++                  .withObject("/owner")
++                  .put("fence", grant.path("owner").path("fence").asInt() + 1);
++              byte[] changed = grant.toString().getBytes(StandardCharsets.UTF_8);
++              buffered.resetBuffer();
++              buffered.setContentLength(changed.length);
++              buffered.getOutputStream().write(changed);
++            }
++            if (buffered.getStatus() == 202 && holdNextClaim.compareAndSet(true, false)) {
++              claimResponseCaptured.countDown();
++              try {
++                releaseClaimResponse.await(15, TimeUnit.SECONDS);
++              } catch (InterruptedException failure) {
++                Thread.currentThread().interrupt();
++              }
++            }
++            buffered.copyBodyToResponse();
++            return;
++          }
++          chain.doFilter(request, response);
++        };
++    return new org.springframework.boot.web.servlet.FilterRegistrationBean<>(filter);
++  }
++
++  String prepareScenario(org.junit.jupiter.api.TestInfo testInfo) {
++    String testName = testInfo.getTestMethod().orElseThrow().getName();
++    privacyEcho =
++        testName.equals(
++            "uncapturedPasswordAndInputEchoesStayPrivateAcrossActualDocumentNavigation");
++    nativeToggle =
++        testName.equals("preventedNativeToggleNeverCommitsSuccessOrRetries")
++            || testName.equals("nativeRadioUncheckIsRefusedBeforeAnyBrowserAttempt");
++    echoNavigations.set(0);
++    toggleAttempts.set(0);
++    genericRead =
++        testInfo
++            .getTestMethod()
++            .orElseThrow()
++            .getName()
++            .equals("configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules");
++    belowFold =
++        testInfo
++            .getTestMethod()
++            .orElseThrow()
++            .getName()
++            .equals("belowFoldClickUsesNativeRevealAndOneReceipt");
++    clickReceipts.set(0);
++    fillReceipts.set(0);
++    multiStep =
++        testInfo
++            .getTestMethod()
++            .orElseThrow()
++            .getName()
++            .equals("freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer");
++    genericRead = genericRead || multiStep;
++    return testName;
++  }
++
++  void isolateDatabase(DataSource fixtureDataSource) {
++    String isolatedDatabase = "bridge_" + UUID.randomUUID().toString().replace("-", "");
++    var admin =
++        new DriverManagerDataSource(
++            database.getJdbcUrl(), database.getUsername(), database.getPassword());
++    new JdbcTemplate(admin).execute("CREATE DATABASE " + isolatedDatabase);
++    ((DriverManagerDataSource) fixtureDataSource)
++        .setUrl(database.getJdbcUrl().replace(database.getDatabaseName(), isolatedDatabase));
++    Flyway.configure()
++        .dataSource(fixtureDataSource)
++        .locations("classpath:db/migration")
++        .load()
++        .migrate();
++  }
++
++  void resetWorkerState() {
++    holdNextRefresh.set(false);
++    refreshCallbackHeld = new CountDownLatch(1);
++    releaseRefreshCallback = new CountDownLatch(1);
++    dropCompletionCallbacks = false;
++    failClaims = false;
++    corruptClaimResponse = false;
++    slowNavigationMillis = 0;
++    holdNextClaim.set(false);
++    claimResponseCaptured = new CountDownLatch(1);
++    releaseClaimResponse = new CountDownLatch(1);
++    navigations.set(0);
++    connections.set(0);
++    receipt.set(null);
++    replaceTarget = false;
++    wideSession = false;
++    mutations.set(0);
++  }
++
++  Path prepareWorkerJournal() throws Exception {
++    Files.writeString(
++        temp.resolve("worker.jwt"), token("owning-worker", "worker-1", "studio-guided-controller"));
++    Path journal = Files.createTempDirectory(temp, "journal-");
++    return journal;
++  }
++
++  RunnerProcessHarness startWorker(Path journal, int backendPort) throws Exception {
++    RunnerProcessHarness workerHarness =
++        RunnerProcessHarness.builder(runnerTls)
++            .port(runnerPort)
++            .workDirectory(Files.createTempDirectory(temp, "runner-"))
++            .callbackBaseUrl("https://localhost:" + backendPort)
++            .env(RunnerProcessHarness.KEY_OBJECT_STORE_DIR, temp.resolve("objects").toString())
++            .guided(
++                new RunnerProcessHarness.Guided(
++                    "worker-1",
++                    journal,
++                    "fixture-issuer",
++                    "controller-1",
++                    temp.resolve("issuer.pub"),
++                    "https://localhost:" + backendPort,
++                    temp.resolve("worker.jwt")))
++            .start();
++    return workerHarness;
++  }
++
++  void closeWorker(RunnerProcessHarness harness) throws Exception {
++    if (harness != null) {
++      // AC-11 k / I-T1: stop the runner and everything it left. The privacy oracle reads the log
++      // first; then a clean exit is asserted (exit 0, no force within the guided grace) and no
++      // survivor.
++      var report = harness.teardown();
++      assertThat(Files.readString(harness.logFile()))
++          .doesNotContain(capture, passwordEcho, ordinaryEcho.strip());
++      report.assertNoSurvivors();
++      report.assertCleanExit();
++    }
++  }
++}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "protocolVersion": 2,
+  "unit": "obs011-t0-c8-public-error-observe01",
+  "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+  "method": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
+  "amendedPlanManifestSha256": "d9130ec418878668b4309e8e523032565a363f1fcf0c712000c08e9a397f6a8e",
+  "loopback": "127.0.0.1",
+  "tlsHost": "localhost",
+  "relayPath": "/private/tmp/obs011-pub-observe01/r.sock",
+  "enrollmentNonce": null,
+  "workBudgetNs": 12000000000,
+  "networkBudgetNs": 14000000000,
+  "totalBudgetNs": 15000000000,
+  "bodyByteCap": 262144,
+  "headerByteCap": 16384,
+  "chunkLineByteCap": 128,
+  "trailerByteCap": 8192,
+  "frameByteCap": 16384,
+  "ackByteCap": 256,
+  "commitByteCap": 512
+}

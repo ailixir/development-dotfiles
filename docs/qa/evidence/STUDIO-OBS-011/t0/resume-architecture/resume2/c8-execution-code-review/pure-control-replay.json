@@ -1,0 +1,13 @@
+{
+  "status": "INSPECTED_INJECTED_PURE_CONTROLS_REPLAY_PASS",
+  "count": 258,
+  "allPassed": true,
+  "removedAuthorSideEffects": [
+    "(D / 'pure-check-results.json').write_text(json.dumps(result, indent=2) + '\\n')",
+    "print(json.dumps({'checks': len(checks), 'allPassed': True, 'nativeCommands': 0}))"
+  ],
+  "authorHelperMainsInvoked": false,
+  "actualCensusLockOrNativeCalls": false,
+  "sealedOutputWritten": false,
+  "limitation": "Existing controls pass but omit the two independent mandatory-finding counterexamples."
+}

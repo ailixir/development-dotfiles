@@ -1,0 +1,42 @@
+--- a/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume1/control/shared-interface.json
++++ b/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-fullcheck-prep/resume2/control/shared-interface.json
+@@ -1,11 +1,11 @@
+ {
+   "protocol": "C8_UNLOCK_V1",
+-  "status": "PREPARED_ONLY_EXECUTION_SUCCESSOR_PENDING",
++  "status": "PREPARED_EXECUTION03_BOUND_COMPONENT_UNSUPPORTED_FOR_ADMISSION_PENDING04",
+   "runtime": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01",
+-  "executionPreparationManifestSha256": "3352981d0bec3b88e9a70258125857627aef73e7bc572a85bbc2b709a8fcb5ca",
+-  "executionInterfaceSha256": "1a77c541278d9bd2e165633db8c478709d713746ccd72e483556a509b7ed02dc",
++  "executionPreparationManifestSha256": "f1513a5051fed560760be6e3ae41db2a2392e786f667bc5702a0c09b0e4ff692",
++  "executionInterfaceSha256": "9adcfedf3b69cf44b1644978e9561b5077f4584288ba90536855e874a2fb9128",
+   "executionActualAdmissionAccepted": false,
+-  "mandatoryDependencyFinding": "C8-EXEC-01: require assessment.evidenceErrors check before reconciliation; root routing immutable execution successor; no actual release",
++  "mandatoryDependencyFinding": "C8-EXEC-04; root routing corrected04. Explicit new compatibility successor needed; current03 pins must remain exact.",
+   "fixedSourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+   "successorPlanSha256": "9391e76dd403d45a1c8ab09c428ed6884a762c326959cefa63c781633c687313",
+   "successorCatalogSha256": "d96334bc0559bad126a82d6f84bd91a0ca1442288c713c764588173cec2e04ba",
+@@ -56,11 +56,21 @@
+     "full-check/build-provenance.json",
+     "compile-reconcile/source-before.json",
+     "compile-reconcile/source-after.json",
+-    "compile-reconcile/build-provenance.json"
++    "compile-reconcile/build-provenance.json",
++    "full-check/report-manifest-before-archive.json"
+   ],
+   "rootCompositionRequired": true,
+   "noMutualManifestRecursion": true,
+   "release": false,
+   "readiness": false,
+-  "C8Credit": false
++  "C8Credit": false,
++  "executionPureApiSha256": "16182094da3b793084cf48b9f24aefaf1e2f19eb4fc6b68866c78d0862d1ea96",
++  "reportManifestPath": "full-check/report-manifest-before-archive.json",
++  "taskReducer": "pinned assessor::task_event_proof+task_statuses; AST-only/re global",
++  "fixedPureDependency": "explicit pinned report_inventory plus execution_checks isolated binding; no report_inventory path/cache lookup",
++  "integrationFindings": [
++    "C8-INTEGRATION-01",
++    "C8-INTEGRATION-02",
++    "C8-INTEGRATION-03"
++  ]
+ }

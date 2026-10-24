@@ -1,0 +1,32 @@
+import hashlib, os, stat, sys
+path, expected, mode, release, entry_name, entry_sha, *statuses = sys.argv[1:]
+assert mode in ("held-proof", "stage", "selected", "collect-public", "restore", "compile-restored", "final", "gate", "postclose")
+assert (len(statuses) == 1 and statuses[0] in ("0", "1")) if mode in ("held-proof", "gate") else len(statuses) == 0
+assert path.startswith("/") and "//" not in path and "/../" not in path and "/./" not in path
+parts = path.split("/")[1:]
+assert parts and all(parts) and len(parts) < 128
+handles = [os.open("/", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)]
+try:
+    for part in parts[:-1]:
+        handles.append(os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=handles[-1]))
+    fd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW, dir_fd=handles[-1])
+    handles.append(fd)
+    before = os.fstat(fd)
+    assert stat.S_ISREG(before.st_mode) and stat.S_IMODE(before.st_mode) == 0o600 and before.st_uid == os.getuid()
+    assert 0 < before.st_size <= 1048576
+    chunks, remaining = [], before.st_size
+    while remaining:
+        piece = os.read(fd, remaining)
+        assert piece
+        chunks.append(piece)
+        remaining -= len(piece)
+    assert os.read(fd, 1) == b""
+    after = os.fstat(fd)
+    assert (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns, before.st_ctime_ns) == (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns)
+    raw = b"".join(chunks)
+    assert hashlib.sha256(raw).hexdigest() == expected
+finally:
+    for fd in reversed(handles):
+        os.close(fd)
+sys.argv = [path, mode, release, entry_name, entry_sha, *statuses]
+exec(compile(raw, path, "exec"), {"__name__": "__main__", "__file__": path})

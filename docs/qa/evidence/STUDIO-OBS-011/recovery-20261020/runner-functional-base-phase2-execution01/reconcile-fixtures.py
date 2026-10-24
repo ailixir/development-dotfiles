@@ -1,0 +1,19 @@
+from pathlib import Path
+from collections import Counter,defaultdict
+import json,hashlib
+O=Path(__file__).resolve().parent;R=Path.cwd();S=Path('/private/tmp/obs011-rt-functional-base-20261020-root01/repo');rawpath=S/'full-fixture-raw/vitest.json';expectedPath=R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-composed-phase2-execution01/fixtures-expected-identities.json'
+raw=json.loads(rawpath.read_text());expected=json.loads(expectedPath.read_text())['expectedCases'];cases=[];caseMessagesEmpty=True;suiteMessagesEmpty=True;suiteMetadata=[]
+for file in raw['testResults']:
+ name='studio-runner/'+Path(file['name']).relative_to(S/'studio-runner').as_posix();suiteMessagesEmpty &= not bool(file.get('message'));suiteMetadata.append({'file':name,'status':file['status'],'hasMessage':bool(file.get('message')),'assertionResultsCount':len(file['assertionResults'])})
+ for a in file['assertionResults']:
+  caseMessagesEmpty &= not bool(a.get('failureMessages'));cases.append({'file':name,'ancestorTitles':a['ancestorTitles'],'title':a['title'],'fullName':a['fullName'],'status':a['status']})
+keys=['file','ancestorTitles','title','fullName','status'];key=lambda r:json.dumps({k:r[k] for k in keys},sort_keys=True);identity=lambda r:json.dumps({k:r[k] for k in keys if k!='status'},sort_keys=True)
+a=Counter(map(key,cases));e=Counter(map(key,expected));missing=[{'case':json.loads(k),'multiplicity':n} for k,n in (e-a).items()];extra=[{'case':json.loads(k),'multiplicity':n} for k,n in (a-e).items()];by=defaultdict(list);eb=defaultdict(list)
+for r in cases:by[r['file']].append(r)
+for r in expected:eb[r['file']].append(r)
+order=set(by)==set(eb) and all(list(map(identity,by[k]))==list(map(identity,eb[k])) for k in by);counts=Counter(r['status'] for r in cases);nativeRecord=json.loads((O/'fixtures-terminal.json').read_text());ok=a==e and order and counts==Counter({'passed':298,'skipped':9}) and raw['success'] is True and raw['numFailedTestSuites']==0 and caseMessagesEmpty and suiteMessagesEmpty and nativeRecord['rawNativeExit']==0 and raw.get('numRuntimeErrorTestSuites',0)==0
+result={'gatePassed':ok,'rawNativeExit':nativeRecord['rawNativeExit'],'statusCounts':dict(counts),'caseCount':len(cases),'physicalResultFiles':len(raw['testResults']),'nestedSuiteSummary':{k:raw.get(k) for k in ['numTotalTestSuites','numPassedTestSuites','numFailedTestSuites']},'fullIdentityMultisetIgnoringStatusExact':Counter(map(identity,cases))==Counter(map(identity,expected)),'fullIdentityStatusMultisetExact':a==e,'perFileGroupCaseIdentityOrderExact':order,'allNineHistoricalSkipIdentitiesExact':Counter(key(r) for r in cases if r['status']=='skipped')==Counter(key(r) for r in expected if r['status']=='skipped'),'missingExpectedStatuses':missing,'extraActualStatuses':extra,'allCaseFailureMessagesEmpty':caseMessagesEmpty,'allSuiteMessagesEmpty':suiteMessagesEmpty,'runtimeReportSuccess':raw['success'],'optionalRuntimeErrorSummary':raw.get('numRuntimeErrorTestSuites','NOT_EMITTED'),'cases':cases,'suites':suiteMetadata,'reportSha256':hashlib.sha256(rawpath.read_bytes()).hexdigest(),'expectedMapSha256':hashlib.sha256(expectedPath.read_bytes()).hexdigest(),'strictNativeAssertionsUnchanged':True,'postFailureAssertionsCredited':False,'fullPrivateProofOnly':True,'finalActualFixtureAdoptionFulfilled':False,'noRetry':True}
+(O/'fixtures-reconciliation.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps({k:v for k,v in result.items() if k not in ['cases','suites','missingExpectedStatuses','extraActualStatuses']},indent=2))
+if not ok:
+ (O/'fixture-public-failure-metadata.json').write_text(json.dumps({'failedPublicCases':[r for r in cases if r['status']=='failed'],'caseCount':len(cases),'rawNativeExit':nativeRecord['rawNativeExit'],'allAssertionsAfterFailureUncredited':True,'rawFailureBodiesReadOrExported':False,'retry':False},indent=2)+'\n')
+ raise SystemExit(1)

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-public-evidence-prep/resume4/pure_checks.py", line 537, in <module>
+    tests()
+    ~~~~~^^
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-public-evidence-prep/resume4/pure_checks.py", line 418, in tests
+    events,executed,runtime=loader_case()
+                            ~~~~~~~~~~~^^
+  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/c8-check01-public-evidence-prep/resume4/pure_checks.py", line 303, in loader_case
+    exec(compile(loader,'<prospective-guard-loader-with-fully-fake-os>','exec'),namespace)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<prospective-guard-loader-with-fully-fake-os>", line 2, in <module>
+ValueError: not enough values to unpack (expected 6, got 4)

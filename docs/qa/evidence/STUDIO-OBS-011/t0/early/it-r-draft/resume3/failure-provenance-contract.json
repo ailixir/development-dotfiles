@@ -1,0 +1,44 @@
+{
+  "contracts": [
+    {
+      "mutation": "M-empty-canaries",
+      "sourceSha256": "7375b936c211c86f705b60cc3324a4bbc780c13ac138f15cb1f2b05b96046015",
+      "assertionLine": 34566,
+      "scanLine": 34556,
+      "ownedLine": 3447,
+      "closedLine": 3570,
+      "description": "the OBS-007 case registered its canaries"
+    },
+    {
+      "mutation": "M-missing-admitted",
+      "sourceSha256": "de50bc400b1787b67d54af36dfa3227ac0fa78e019d305a9cca575ba460ef3f1",
+      "assertionLine": 34570,
+      "scanLine": 34556,
+      "ownedLine": 3447,
+      "closedLine": 3570,
+      "description": "the joined runs emitted admitted-action and replay-dispatch events"
+    },
+    {
+      "mutation": "M-missing-dispatch",
+      "sourceSha256": "2caec98631ec4b5fe39a4a984a1e425f30ed792cf6f7b607cd17cc570dbfed8b",
+      "assertionLine": 34571,
+      "scanLine": 34556,
+      "ownedLine": 3447,
+      "closedLine": 3570,
+      "description": "the joined runs emitted admitted-action and replay-dispatch events"
+    },
+    {
+      "mutation": "M-gate-true-subset",
+      "sourceSha256": "6a10fca7681b6d11d5cc82927fe6b632025abe85554884975ca1378b2e6b6b36",
+      "assertionLine": 34566,
+      "scanLine": 34556,
+      "ownedLine": 3447,
+      "closedLine": 3570,
+      "description": "the OBS-007 case registered its canaries"
+    }
+  ],
+  "shape": "Exactly one executionError synthetic testcase per task. Exactly2 java.lang.AssertionError nodes: primary OWNED_SINKS, one suppressed CONTEXT_CLOSED. Both original assertion message prefixes/exact line+caller frames pinned; all other primary/suppressed/cause/setup/body/privacy/cleanup/retention failures reject.",
+  "sourceTrace": "throwTeardownFailures rethrows first object and adds remaining objects suppressed; detachAuditCapture attempts stop then final boundary then retention. No source wrapper/type waiver inferred.",
+  "runtimeWireFormat": "UNPROVED. Unknown actual framework/type/stack format is incomplete; named QA disposition required before any parser adaptation.",
+  "privateRawFailureExport": false
+}

@@ -1,0 +1,339 @@
+{
+  "kind": "UNEXECUTED_BOUNDED_COMMAND_DATA_SUCCESSOR",
+  "sourceCommandsPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-current-plan/commands.json",
+  "sourceCommandsSha256": "c8fe254a8de221f0e265096bf0406ccfa4b6ea67c90b3e6a61d7b453a0c1292b",
+  "nodePathPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+  "pnpmVersionFromCreditedBaseline": "10.33.0",
+  "helper": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-successor-preparation/candidate/prepare-current-sandbox.py",
+    "sha256": "e38a3fd99798d55d2e46bb2fb1ce0d4c3b9a4b799f5d0c8cfdc16d79af5edaef",
+    "bindingPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-successor-preparation/candidate/copy-back-binding.json",
+    "bindingSha256": "95427bbdaf0cc709d50341a7c9d2f7d5e223c56ff54bc6c48ec2e52f7a2cf621"
+  },
+  "sandboxProposal": "/private/tmp/obs011-rt-functional-base-20261020-root01",
+  "sandboxAbsenceCheckedOnlyNotReserved": true,
+  "futureExecutionDirectoryNotCreated": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-execution01",
+  "requiredEnvUnchanged": {
+    "OBS011_RT_FINAL_COMPOSITION": "ALL_PREDECESSORS_APPLIED_LANE_IDLE"
+  },
+  "futureCapture": {
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-successor-preparation/candidate/prepare-current-sandbox.py",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "capture",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-execution01/fresh-copy-catalog.json"
+    ],
+    "admission": "UNBOUND"
+  },
+  "futureSeed": {
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-successor-preparation/candidate/prepare-current-sandbox.py",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "seed",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-execution01/fresh-copy-catalog.json",
+      "<MEASURED_NEW_FUNCTIONAL_BASE_CATALOG_SHA256>",
+      "/private/tmp/obs011-rt-functional-base-20261020-root01"
+    ],
+    "admission": "UNBOUND"
+  },
+  "commands": [
+    {
+      "id": "ast01",
+      "stage": "sandbox",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-ast01",
+        "node",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/ast-equal.mjs",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/before-repo",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/repo",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/exact-comment-allowance.json"
+      ],
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION"
+    },
+    {
+      "id": "names01",
+      "stage": "sandbox",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-names01",
+        "node",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/test-name-map.mjs",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/before-repo",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/repo",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/deferred-name-map.json"
+      ],
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION"
+    },
+    {
+      "id": "types01",
+      "stage": "sandbox",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-types01",
+        "pnpm",
+        "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.json",
+        "--noEmit"
+      ],
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION"
+    },
+    {
+      "id": "lint01",
+      "stage": "sandbox",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-lint01",
+        "pnpm",
+        "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+        "."
+      ],
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION"
+    },
+    {
+      "id": "emit-before01",
+      "stage": "sandbox",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-emit-before01",
+        "pnpm",
+        "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/before-repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/before-repo/studio-runner/node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.build.json"
+      ],
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION"
+    },
+    {
+      "id": "emit-after01",
+      "stage": "sandbox",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-emit-after01",
+        "pnpm",
+        "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.build.json"
+      ],
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION"
+    },
+    {
+      "id": "stamp-before01",
+      "stage": "sandbox-build-metadata-after-canonical-emit",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-stamp-before01",
+        "pnpm",
+        "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/before-repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "node",
+        "scripts/write-runtime-versions.mjs"
+      ],
+      "note": "Existing configured-build metadata writer, sandbox only. Necessary because accepted009 browser.js changes and stale copied D698 would retain old launcher hash. Both trees use identical current metadata inputs/browser cache and no SOURCE mutation. Bind raw TSC-only inventory before this step and final full inventory afterward; compare final complete configured-build outputs.",
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION"
+    },
+    {
+      "id": "stamp-after01",
+      "stage": "sandbox-build-metadata-after-canonical-emit",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-stamp-after01",
+        "pnpm",
+        "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "node",
+        "scripts/write-runtime-versions.mjs"
+      ],
+      "note": "Existing configured-build metadata writer, sandbox only. Necessary because accepted009 browser.js changes and stale copied D698 would retain old launcher hash. Both trees use identical current metadata inputs/browser cache and no SOURCE mutation. Bind raw TSC-only inventory before this step and final full inventory afterward; compare final complete configured-build outputs.",
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION"
+    },
+    {
+      "id": "emit-compare01",
+      "stage": "sandbox",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-emit-compare01",
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/runner-draft/compare-emit.py",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/before-repo/studio-runner/dist",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/dist"
+      ],
+      "requiredDisposition": "If exit1 differences, preserve raw result and full inventories; stop before fixtures for root written exact measured before/after full-digest acceptance; no oldDf726 acceptance reuse.",
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION"
+    },
+    {
+      "id": "unit01",
+      "stage": "sandbox",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "argv": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-unit01",
+        "pnpm",
+        "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "--coverage.enabled=false",
+        "--minWorkers=1",
+        "--maxWorkers=2"
+      ],
+      "expectedOnly": {
+        "passed": 2651,
+        "failed": 0,
+        "skipped": 25,
+        "total": 2676
+      },
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION",
+      "identityForecast": "full-unit-forecast-identities.json",
+      "explicitDefaultUnitConfigReason": "Same existing unit config made explicit to avoid unchanged collector stale actual coverage-summary carry."
+    },
+    {
+      "id": "fixtures01",
+      "stage": "sandbox-after-root-emit-disposition",
+      "executed": false,
+      "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+      "expectedOnly": {
+        "passed": 298,
+        "failed": 0,
+        "skipped": 9,
+        "total": 307
+      },
+      "admission": "UNBOUND_ROOT_AFTER_SOURCE_QA_AND_ACTUAL_INTEGRATION",
+      "historicalCollectorArgvReferenceOnly": true,
+      "routingAdmission": "Existing direct canonical fixture route, config/globalSetup/default+JSON reporters and actual before/after captures; full tier without file/name filter. No broad historical-payload backup.",
+      "argvAdmission": "UNBOUND_ROOT_SAFE_DIRECT_ROUTE_BINDING_REQUIRED",
+      "historicalWrapperArgvReferenceOnly": [
+        "python3",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+        "obs011-recovery-20261020-rt-functional-base-fixtures01",
+        "pnpm",
+        "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+        "--config.package-manager-strict=false",
+        "exec",
+        "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.fixtures.config.ts",
+        "--minWorkers=1",
+        "--maxWorkers=1"
+      ],
+      "futureExistingDirectCanonicalShape": {
+        "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+        "actualBeforeCapture": [
+          "python3",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-execution01/fixtures-actual-before.json"
+        ],
+        "nativeArgv": [
+          "pnpm",
+          "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+          "run",
+          "--config",
+          "vitest.fixtures.config.ts",
+          "--minWorkers=1",
+          "--maxWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/private/tmp/obs011-rt-functional-base-20261020-root01/full-fixtures-vitest.json"
+        ],
+        "nativeStdoutAndStderrPrivatePath": "/private/tmp/obs011-rt-functional-base-20261020-root01/full-fixtures.log",
+        "actualAfterCaptureEvenOnFailure": [
+          "python3",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/strict-qa-20261014/capture-manifest.py",
+          "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-functional-base-execution01/fixtures-actual-after.json"
+        ],
+        "unitOrFixtureConfigSourceChanged": false,
+        "globalSetupPreserved": true,
+        "fullTierNoFileOrNameFilter": true,
+        "exactOutputCaptureCleanupAndPublicProjectionBinding": "UNBOUND_ROOT_OWNS_FINAL_SHAPE",
+        "noNewCollector": true
+      }
+    }
+  ],
+  "unchangedLaterCommandDataReference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-final-current-plan/commands.json",
+    "sha256": "c8fe254a8de221f0e265096bf0406ccfa4b6ea67c90b3e6a61d7b453a0c1292b",
+    "ids": [
+      "copyback1",
+      "copyback2",
+      "copyback3",
+      "copyback4",
+      "copyback5",
+      "copyback6",
+      "copyback7",
+      "final-build01",
+      "final-types01",
+      "final-lint01",
+      "final-unit01",
+      "final-fixtures01",
+      "final-contracts01",
+      "final-codegen01",
+      "final-host-pins01",
+      "final-base-inspect01",
+      "final-context01",
+      "final-image-build01",
+      "final-image-inspect01",
+      "final-image-pins01",
+      "final-deployment01"
+    ],
+    "status": "REFERENCE_ONLY_ROOT_MUST_REBIND_FRESH_OUTPUT_LABELS_AND_FINAL_SOURCE_IMAGE_IDENTITIES_BEFORE_ANY_EXECUTION",
+    "explicitSafeRoutingStillOwed": {
+      "final-fixtures01": "Root must bind existing safe direct full-fixture actual route and fresh outputs/captures separately. Do not execute old run-runner.py broad historical-payload backup branch."
+    }
+  },
+  "noNewObserverCollectorCheckerOrFramework": true,
+  "allCommandsAreUnexecutedForecastData": true
+}

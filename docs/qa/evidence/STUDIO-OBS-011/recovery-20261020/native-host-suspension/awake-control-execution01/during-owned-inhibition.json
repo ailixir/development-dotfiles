@@ -1,0 +1,62 @@
+{
+  "capturedAtUtc": "2026-10-20T21:55:57.833996+00:00",
+  "outerOwnedPid": 46715,
+  "outerOwnedStartDisplay": "Tue Oct 20 17:55:30 2026",
+  "ownedCaffeinateProcesses": [
+    {
+      "pid": 46717,
+      "parentPid": 46715,
+      "startDisplay": "Tue Oct 20 17:55:30 2026",
+      "executableBasename": "caffeinate"
+    },
+    {
+      "pid": 46744,
+      "parentPid": 46743,
+      "startDisplay": "Tue Oct 20 17:55:30 2026",
+      "executableBasename": "caffeinate"
+    }
+  ],
+  "ownedAssertions": [
+    {
+      "pid": 46744,
+      "type": "PreventUserIdleSystemSleep",
+      "ownedProcess": {
+        "pid": 46744,
+        "parentPid": 46743,
+        "startDisplay": "Tue Oct 20 17:55:30 2026",
+        "executableBasename": "caffeinate"
+      }
+    },
+    {
+      "pid": 46717,
+      "type": "PreventUserIdleSystemSleep",
+      "ownedProcess": {
+        "pid": 46717,
+        "parentPid": 46715,
+        "startDisplay": "Tue Oct 20 17:55:30 2026",
+        "executableBasename": "caffeinate"
+      }
+    }
+  ],
+  "aggregate": {
+    "PreventUserIdleSystemSleep": 1,
+    "PreventSystemSleep": 1,
+    "PreventUserIdleDisplaySleep": 1
+  },
+  "outerPreventUserIdleSystemSleepObserved": false,
+  "commands": [
+    [
+      "ps",
+      "-axo",
+      "pid=,ppid=,lstart=,comm="
+    ],
+    [
+      "pmset",
+      "-g",
+      "assertions"
+    ]
+  ],
+  "rawAssertionsSha256": "e90e464ba58ff864ba1c14fd8728d128a4f35696ee246346af9c40e400072333",
+  "unrelatedProcessOrAssertionDetailsExported": false,
+  "persistentSettingsChanged": false
+}

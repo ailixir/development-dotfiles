@@ -1,0 +1,27 @@
+{
+  "sourceCheck": {
+    "actualStatus": 0,
+    "tool": "560523",
+    "checks": 3218
+  },
+  "targetedAttempts": [
+    {
+      "attempt": 1,
+      "actualStatus": 1,
+      "tool": "6b4633",
+      "reason": "Reviewer fake FileAPI.open lacked positional mode for create_fd; no real boundary; subject/audit unchanged.",
+      "retainedStdout": "acquisition-attempt01.stdout",
+      "retainedStderr": "acquisition-attempt01.stderr"
+    },
+    {
+      "attempt": 2,
+      "actualStatus": 0,
+      "tool": "284bb2",
+      "checks": 46,
+      "cases": 11,
+      "reason": "Only fake open signature corrected. All expected outcomes passed."
+    }
+  ],
+  "successful374ControlsRepeated": false,
+  "actualActions": 0
+}

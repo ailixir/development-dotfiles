@@ -1,0 +1,31 @@
+# GSMB-WRAPPER-1 — bounded F-1 wrapper/control ruling
+
+Aria, 2026-10-19. Static source ruling on the exact GSM(b) package reviewed here. This records the architecture half; Quinn's independent test/gate disposition and root's explicit adoption remain required. It does not edit the plan, waive runtime proof, permit application or open W1.
+
+## Source facts and read footprint
+
+Actual `GuidedSessionService.sideEffectConfirmation` invokes `translationTransaction`. That wrapper authenticates the controller, opens `repository.transaction`, takes `repository.lock(id)` (`SELECT … FOR UPDATE`), checks current scope/owner/fence/lease/active/source, then already requires installed translation plus `translation.exists(id)` **before** `operation.apply(session)`. The part-b first-lambda call is consequently dominated by the wrapper's identical predicate. `GuidedTranslationStore.exists` requires an actual transaction and issues `SELECT EXISTS` against `studio_guided_translation_state`. `initialize` inserts that state; the source supplies no runtime uninstall/state-deletion operation which could lawfully remove it between these two calls. No application-issued existence transition has been identified that makes the added lambda guard the first refusal in this path. Arbitrary administrative SQL or mock flapping is outside this proof.
+
+For a valid command which reaches this wrapper, the translation-existence read counts are:
+
+| Composition | Old F1 | New F1 | Delete only new side-effect call |
+|---|---:|---:|---:|
+| Missing store | 0, wrapper409 | 0, wrapper409 | 0, wrapper409 |
+| Installed empty store | 1, wrapper409 | 1, wrapper409 | 1, wrapper409 |
+| Installed present state | 1 | 2 | 1 |
+
+These are source-derived query footprints, not measured timings/query logs. The second present-state read is a real additional read; do not describe the new source as issuing an identical number of queries. Production installation is unconditional, and production start initializes state in its session transaction. Both existing `instanceof GuidedProductionSessionAccess` branches remain. The status/state transition is intended neutral in that production composition; fresh runtime neutrality proof is still owed.
+
+## Bounded disposition
+
+1. **Keep the exact required source shape:** one helper; three normalized existing guards plus four new first-operation-lambda calls = seven calls/one declaration; a single `translation != null &&` predicate inside the helper; all five former arms unwrapped; admission before bindings/preparation/access authorization and writes; both production SPI conditionals preserved. Do not remove the seemingly redundant new side-effect guard or move/remove the original wrapper guard to manufacture a kill.
+2. **Keep all five negative identities and both missing-store/installed-empty compositions.** The side-effect creation case is an existing409/no-write control on old and new main, not an old-behavior accepted-red case. Four other case identities remain required intended accepted-red before the F1 edit; all five must be green after it, with the exact409/code/no-side-effect/no-new-or-changed-row assertions. Normal red execution is fail-fast within a case: do not claim both composition iterations executed on a failing case unless actual XML/log evidence demonstrates it.
+3. **Keep and execute the exact isolated `delete-side-effect` candidate**, as well as the other four prepared mutants. Its absent-state negative suite is expected to survive because the wrapper still refuses. Record that survivor honestly. A survivor is not a test kill, accepted-red or evidence that the new lambda ran.
+4. **Preserve per-site proof for this dominated call through the existing source-shape obligation, explicitly rather than silently.** Inspect the actual staged method/lambda placement and show the controlled deletion changes the seven-call/per-site rule (seven→six, specifically that lambda). This is structural proof of the mandated source shape; do not present it as a behavioral failure of `GuidedAdmissionWithoutTranslationIT`, add fake query-flapping authority, delete the wrapper guard, bypass authentication/transaction checks or execute a doubled mutation. The other three deletion mutants and the moved-admit mutant still require genuine new-assertion failures with complete fresh discovery. This bounded exception applies only to the logically redundant side-effect lambda deletion; it does not reduce refusal/no-write coverage for any operation or either clarify arm.
+5. Before lane credit, root/Quinn must explicitly reconcile this fact with v7's universal “four deletion mutants, each red”/per-case accepted-red wording in a durable ruling/plan adoption, preserving the original evidence. If that explicit adoption is absent, the mutation criterion remains unresolved and no F-1 exit can be claimed. Runtime execution of the survivor/control and all other required runs remains owed; this static ruling cannot label any unexecuted mutant passed/killed.
+
+## Negative-only confirmation progress fixture
+
+The ordinary service creates the real authenticated pending clarification before the test's repository transaction adds only `{clarificationId,status:PENDING}` as `sideEffectConfirmation`. It does not seed a plan/manifest/translation-state/obligation/admission or planner acceptance, and it is not positive production authority. The session remains in ordinary `AWAITING_CLARIFICATION`; this fresh no-prefix fixture has no pending V21 delivery or prefix program. V21's stronger prefix-confirmation guards are conditional on a pending prefix, so they are not bypassed here. `repository.save` still performs its session-schema validation and real PostgreSQL triggers remain installed.
+
+This is a bounded, disclosed negative-only fixture for the legacy confirmation-answer arm, statically acceptable for this test purpose. It is not a legal method to make a positive executable session or demonstrate production issuance. Actual migration/schema/fixture startup and intended old accepted-red still need execution. Any setup/trigger/contract/owner/lease/source/preparation failure is not an accepted-red or mutation kill. The production authority invariants and original GS-T migration rules are unchanged.

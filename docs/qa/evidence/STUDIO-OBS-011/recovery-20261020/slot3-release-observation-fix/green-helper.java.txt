@@ -1,0 +1,16 @@
+  private static boolean p8TerminatedUnsignalled(ProcessHandle pinned) {
+    return p8TerminatedUnsignalled(() -> pinned.isAlive(), () -> p6Status(pinned).state());
+  }
+
+  private static boolean p8TerminatedUnsignalled(
+      java.util.function.BooleanSupplier isAlive, java.util.function.Supplier<String> status) {
+    try {
+      if (!isAlive.getAsBoolean()) {
+        return true;
+      }
+      String state = status.get();
+      return "X".equals(state) || state.startsWith("Z") || !isAlive.getAsBoolean();
+    } catch (RuntimeException | AssertionError unknown) {
+      return false; // Unknown state keeps the original verification failure.
+    }
+  }

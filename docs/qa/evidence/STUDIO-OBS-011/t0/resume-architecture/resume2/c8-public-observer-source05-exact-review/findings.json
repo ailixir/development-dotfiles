@@ -1,0 +1,85 @@
+{
+  "reviewer": "Aria",
+  "verdict": "HOLD_NEW_EXACT_SOURCE_SUCCESSOR_REQUIRED",
+  "subjectManifestSha256": "4ee4fabed829952e235d1c2ff820c4a7f37e43970aab03d3b47d446a0436267f",
+  "qaManifestSha256": "c128434100f0b123bccd54636fc19738fcffb15b38c85909ba98ce0a94a6fb92",
+  "mandatoryCount": 1,
+  "mandatoryFindings": [
+    {
+      "id": "OBS05-ARCH-CUSTODY-01",
+      "includesQaFinding": "OBS05-QA-CUSTODY-01",
+      "priorCategory": "OBS04-ARCH-CUSTODY-02 / original OBS03-QA-02",
+      "severity": "HIGH",
+      "title": "Acquired resources can escape the owner ledger before construction/transfer or after temporary close failure",
+      "source": [
+        "public_observation_unit.py:155-171 Custody.__init__",
+        "public_observation_unit.py:200-272 Custody read/create_fd/write/replace_exact",
+        "public_observation_unit.py:274-277 Custody.close",
+        "public_observation_unit.py:285-290 System.read;350-385 sink/lock_free same ownership invariant",
+        "public_observation_unit.py:1298-1302 load acquisitions outside try",
+        "public_observation_unit.py:1397 load outside main try/finally",
+        "public_relay.py:117/121 factory assignment;254-269 assigned-resource closure",
+        "public_observation_unit.py:591-626 Effects.release_custody"
+      ],
+      "concreteEvidence": [
+        {
+          "group": "Failed constructor",
+          "actualMethods": "Custody.__init__/close; Relay.start/check/stop/refresh; Effects.stop/release; main",
+          "cases": 5,
+          "adverse": 3,
+          "result": "Root/child post-open fstat failure leaves1/1 fake FD; constructor close failure leaves3. Relay.parent=None, canonicalClosed=true, main1, Effects not retained. Clean and successful-validation-cleanup pairs close all."
+        },
+        {
+          "group": "Temporary file close",
+          "actualMethods": "Custody.read/write/create_fd/close; Relay.stop/refresh; Effects.stop/release; main with disclosed synthetic operate callback",
+          "cases": 4,
+          "adverse": 2,
+          "result": "Read/write failed close leaves1 fake file FD after directory chain emptied and main discharged owner, canonicalClosed=true, main1. Clean pairs close all. No unchanged serve/native execution claim."
+        },
+        {
+          "group": "Bootstrap transfer",
+          "actualMethods": "load/main with fake custody factories and validation read",
+          "cases": 2,
+          "adverse": 1,
+          "result": "Second factory failure before load try leaves first fake custody unclosed, no Effects object; rejecting after both acquisitions closes both. No real FD or bootstrap observation."
+        }
+      ],
+      "requiredCorrection": "One immutable successor: register every successful acquisition before fallible identity/validation/next factory; retain or transfer failed/unreturned constructor, temporary-FD and pre-Effects bootstrap ownership into actual invocation owner. Canonical closure and discharge must include complete acquired-resource ledger. Preserve all actual refs while any closure unknown. Track confirmed/unknown/transferred close progress; no blind reclose/retry of confirmed or possibly reused bare FD. Apply same invariant to reached custody/System acquisition helpers; keep no force-close, bounded joins and clean fully closed failed-protocol/native teardown. Bind maps/pins/common entries and exact positive/adverse cases. No Java/business/privacy/runtime/source-window change.",
+      "targetedChecks": 46,
+      "targetedCases": 11,
+      "actualActions": 0
+    }
+  ],
+  "bootstrapDisposition": "CORRECTED_AT_SOURCE_LEVEL; all explicit non-removable common precompile checks; exact APIs and sealed normal/optimized evidence bound",
+  "assignedResourceClosureDisposition": "CORRECTED_AT_SOURCE_LEVEL; complete acquisition ledger still missing",
+  "architectureSourceChecks": 3218,
+  "distinctPublicPreparedPins": 375,
+  "sourceMembers": 177,
+  "priorMembers": 149,
+  "preparedInputRows": 173,
+  "reusedGuardedControls": 374,
+  "reusedSealedQaSourceChecks": 2290,
+  "reusedPriorUnchangedControls": 432,
+  "totalSourceControlCoverage": 806,
+  "retainedSemanticIds": 727,
+  "reachedInterpretationSites": 99,
+  "inputClasses": 15,
+  "requiredCallbacks": 18,
+  "cliModes": 9,
+  "targetedAcquisitionChecks": 46,
+  "targetedAcquisitionCases": 11,
+  "reviewerFixtureFailureRetained": "Attempt01 FileAPI.open omitted positional creation mode; only fake signature corrected; subject/audit unchanged; attempt02 actual0. Static checks first attempt0.",
+  "limitations": {
+    "integratedScheduler": "ONE registered synthetic client plus ONE READY yield; instrumented cooperative composition, not actual cross-process/thread/unchanged complete serve proof",
+    "acquisitionModel": "Actual methods over fake ownership resources and synthetic operate/factory callback, no actual FD/OS/thread/native",
+    "JavaHarness": "Literal03/04, uncompiled/unexecuted",
+    "actualPlatformQualification": "Owed cached Java21/Darwin/ABI/provider/TLS/Unix/parsercaps/stalls/dribble/blockedwrite/cancel/socket/thread/native/-c launcher qualification"
+  },
+  "actualRuntimeNativePrivateBaselineSourceWindowActions": 0,
+  "sourceApproval": false,
+  "operationalAuthority": false,
+  "sourceWindowOrLease": false,
+  "readiness": false,
+  "permit": false,
+  "C8GatewayMainSourceIrLaneLifecycleCredit": false
+}

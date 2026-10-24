@@ -1,0 +1,272 @@
+{
+  "kind": "ROOT_EXACT_SOURCE08B_ALL_FINDINGS_AND_CONDITIONS_ACKNOWLEDGMENT",
+  "atUtc": "2026-10-20T02:47:00.166192+00:00",
+  "subject": "obs009-gateway80-offtree03-20261019",
+  "sourceManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume8b/manifest.json",
+    "sha256": "7fec05dfe1ea4d59447b10f2b79ed9516c0a56fce51236581381edc001f7e8e6",
+    "bytes": 6592
+  },
+  "rootSourceVerified": "33 payload hashes/bytes/modes/exactmembership and34 checksum rows; raw contract/29 modes unchanged; minimum normalized dispatcher/currentpath bindings read",
+  "reviews": {
+    "Aria": {
+      "manifest": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code08b-exact-review/manifest.json",
+        "sha256": "546805bc5e0e7f653212f88a8bcc97f6b13d38dffb77398c14b0f4c00ae97e92",
+        "bytes": 1984
+      },
+      "prose": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code08b-exact-review/review.md",
+        "sha256": "b4b7d66351fbc02d38dd94a8ba13bda70a00558d017620b03b6c37a30f43c3f7",
+        "bytes": 5376
+      },
+      "findings": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code08b-exact-review/findings.json",
+        "sha256": "db377eed24f5ae73343752417776ed51fad9bc8fd1623e8372510bdbe7f7395d",
+        "bytes": 1052
+      },
+      "conditions": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code08b-exact-review/conditions.json",
+        "sha256": "c28e2c00ca99e62ebb60c4be29ecc3ae136963326968cee7758dc548f91361e4",
+        "bytes": 26637
+      },
+      "record": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code08b-exact-review/review-record.json",
+        "sha256": "9f136549df7cf776977e5431bc42ead0bd2269a96d0291ea711fe559ba21a489",
+        "bytes": 1014
+      },
+      "completeFindings": {
+        "kind": "INDEPENDENT_ARIA_CODE08B_COMPLETE_FINDINGS",
+        "reviewer": "Aria",
+        "subjectManifestSha256": "7fec05dfe1ea4d59447b10f2b79ed9516c0a56fce51236581381edc001f7e8e6",
+        "verdict": "PASS_SOURCE_ONLY_EXACT_CORRECTION",
+        "mandatoryFindingCount": 0,
+        "mandatoryFindings": [],
+        "advisories": [],
+        "allMandatoryFindingsTogether": true,
+        "allChangedAndInheritedCategoriesAssessed": true,
+        "resolvedSourceFinding": {
+          "id": "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS",
+          "scope": "Exact Source08b successor reader dispatch only; original Source08 HOLD preserved",
+          "reason": "Approved self.s.path normalization precedes registry membership; the same normalized variable reaches declared bound or the unchanged unregistered fallback",
+          "method": "Independent source/AST inspection and exact binding verification; developer45/4 evidence reused without duplication"
+        },
+        "sourceOnly": true,
+        "technicalOwnerDecisionIssued": false,
+        "phaseBEntered": false,
+        "actualAuthority": false,
+        "credit": false,
+        "allStoriesComplete": false
+      },
+      "currentReviewRecord": {
+        "kind": "INDEPENDENT_ARIA_EXACT_SOURCE08B_REVIEW",
+        "reviewer": "Aria",
+        "subjectManifestSha256": "7fec05dfe1ea4d59447b10f2b79ed9516c0a56fce51236581381edc001f7e8e6",
+        "subjectManifestBytes": 6592,
+        "payloads": 33,
+        "checksumRows": 34,
+        "protocol": "FAILED_RESOURCE_TYPED_SELF_TEXT_AND_PHYSICAL_ROLES_V1",
+        "verdict": "PASS_SOURCE_ONLY_EXACT_CORRECTION",
+        "mandatoryFindingCount": 0,
+        "mandatoryFindings": [],
+        "sourceOnly": true,
+        "finiteStaticChecks": 221,
+        "pinRecords": 72,
+        "uniqueAssertionsClaimed": false,
+        "staticTool": "0f4afa",
+        "staticExternalExit": 0,
+        "dispatcher45FourScenariosReusedOnly": true,
+        "dispatcherTool": "94df81",
+        "dispatcherRecordedExternalExit": 0,
+        "independentDispatcherExecution": false,
+        "old41SevenCasesReusedOnly": true,
+        "actualTargetEffects": 0,
+        "originalPrivateBodyStatHashRead": false,
+        "technicalOwnerDecisionIssued": false,
+        "phaseBEntered": false,
+        "actualAuthority": false,
+        "allActualGatesOwed": true,
+        "sharedUsd500Aggregate": "UNKNOWN"
+      }
+    },
+    "Quinn": {
+      "manifest": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/manifest.json",
+        "sha256": "22b0ba8bb52fd0360e30a3a9b9e51011872ac529af7d177ee61513e726f56a40",
+        "bytes": 2992
+      },
+      "prose": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/review.md",
+        "sha256": "9263b38b4ed10db0651488856f2cdbb26ccc511edf18a3b5376ab4cbc9c556a1",
+        "bytes": 8024
+      },
+      "findings": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/findings.json",
+        "sha256": "cc9fb535cdcf57659dc591ef2dd4d0fe0f859ce420038d756a82eaf324633899",
+        "bytes": 1349
+      },
+      "conditions": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/conditions.json",
+        "sha256": "0b23127c05837b063ed5c5f03636c7698267d34c9d33ff91d3f87c92a00fd194",
+        "bytes": 29201
+      },
+      "record": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/review-record.json",
+        "sha256": "224405b2b4e6cc80cdf03629e644874db4b518ef0d1ad2fa1ee49e88224a9b99",
+        "bytes": 2932
+      },
+      "completeFindings": {
+        "kind": "QUINN_SOURCE08B_COMPLETE_FINDINGS",
+        "reviewer": "Quinn",
+        "subject": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume8b/manifest.json",
+          "sha256": "7fec05dfe1ea4d59447b10f2b79ed9516c0a56fce51236581381edc001f7e8e6",
+          "bytes": 6592,
+          "mode": 420
+        },
+        "verdict": "PASS_BOUNDED_SOURCE_ONLY_ALL_ACTUAL_AUTHORITY_HOLD",
+        "mandatoryFindingCount": 0,
+        "mandatoryFindings": [],
+        "advisories": [],
+        "allMandatoryFindingsTogether": true,
+        "disposition": [
+          {
+            "id": "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS",
+            "status": "CORRECTED_IN_EXACT_SOURCE08B",
+            "oldSource08HoldRetained": true,
+            "explanation": "Approved self.s.path constructor precedes membership and same normalized object flows to bound/fallback. Independent real System/Custody four-callback synthetic alias replay verifies accepted, wrongmode before body, wronghash before use and unchanged unregistered policy."
+          }
+        ],
+        "findingsConditionsReference": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/conditions.json",
+          "sha256": "0b23127c05837b063ed5c5f03636c7698267d34c9d33ff91d3f87c92a00fd194",
+          "bytes": 29201,
+          "mode": 420
+        },
+        "sourceOnly": true,
+        "ownerDecisionIssued": false,
+        "actualRuntimeAuthority": false
+      },
+      "currentReviewRecord": {
+        "kind": "INDEPENDENT_QUINN_EXACT_SOURCE08B_REVIEW",
+        "subject": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume8b/manifest.json",
+          "sha256": "7fec05dfe1ea4d59447b10f2b79ed9516c0a56fce51236581381edc001f7e8e6",
+          "bytes": 6592,
+          "mode": 420
+        },
+        "verdict": "PASS_BOUNDED_SOURCE_ONLY_ALL_ACTUAL_AUTHORITY_HOLD",
+        "sourceOnly": true,
+        "mandatoryFindingCount": 0,
+        "currentDispatcherAssertions": 45,
+        "currentFixedScenarios": 4,
+        "currentHarnessExecutions": 1,
+        "inherited41SevenCases": "EXACT_COMPONENT_PROOF_REUSE_ONLY_NOT_RERUN",
+        "staticChecks": 198,
+        "staticPinRecords": 72,
+        "staticAuthorErrorPreserved": "static-attempt01.json",
+        "commandStatusReference": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/dispatcher-command-status.json",
+          "sha256": "b24cb533d98ab80861e37c551c23933598c2ba190f83eac81d7915bfcf28b519",
+          "bytes": 476,
+          "mode": 420
+        },
+        "independentResultReference": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/dispatcher-results.json",
+          "sha256": "e2097f70245a0a9a4eae594c67518dd414b38b4a3d75e1260b800b8e02630dff",
+          "bytes": 3380,
+          "mode": 420
+        },
+        "oneSinkLauncherReference": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/replay-launcher.py",
+          "sha256": "e3a8bd2bc62cd4cbbb4a669db7b1d3465ab21b364ba6c9163defe6caf2f1c6e3",
+          "bytes": 1698,
+          "mode": 420
+        },
+        "oneSinkDeltaReference": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/one-sink-source-delta.patch",
+          "sha256": "00ceefeb1cd50acdef53c4d56ad2a18f1f02d84cbb70953c1276ae40f9233551",
+          "bytes": 722,
+          "mode": 420
+        },
+        "exactReplayBindingsReference": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/replay-bindings.json",
+          "sha256": "7075326bb3ab083f340d70cb5aed362b82b771e8f4c0ff8632d7869db0e199a7",
+          "bytes": 987,
+          "mode": 420
+        },
+        "fullConditionsReference": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/conditions.json",
+          "sha256": "0b23127c05837b063ed5c5f03636c7698267d34c9d33ff91d3f87c92a00fd194",
+          "bytes": 29201,
+          "mode": 420
+        },
+        "reviewProseReference": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/review.md",
+          "sha256": "9263b38b4ed10db0651488856f2cdbb26ccc511edf18a3b5376ab4cbc9c556a1",
+          "bytes": 8024,
+          "mode": 420
+        },
+        "allActualGatesOwed": true,
+        "ownerDecisionIssued": false,
+        "phaseBEntered": false,
+        "actualAuthority": false,
+        "originalPrivateBodyStatHashAcquired": false,
+        "actualTargetEffects": 0,
+        "credit": false,
+        "storyCompletion": false,
+        "sharedUsd500Aggregate": "UNKNOWN"
+      }
+    }
+  },
+  "rootReviewVerification": "Aria8payloads/9checksums;Quinn14payloads/15checksums; exact hash/bytes/modes/membership. Both complete prose read; full Aria current11conditions and full QA phaseB8conditions read. Both inherited full Aria/Quinn condition objects and QA prior findings matched byte-content objects to exact oldroot.",
+  "allFindingsAndAllCurrentInheritedConditionsAcknowledged": true,
+  "sourceFindingDisposition": {
+    "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS": "Corrected on exact successor only; Source08 HOLD immutable",
+    "newMandatoryFindings": 0
+  },
+  "fullConditionsRetainedByExactCarriers": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway-failed-resource-source08-all-findings-root-adoption.json",
+      "sha256": "1e70ebf9a8a07eea2107d74783e0e0be8150183aa356414673b1a25705161706",
+      "bytes": 29095
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code08b-exact-review/conditions.json",
+      "sha256": "c28e2c00ca99e62ebb60c4be29ecc3ae136963326968cee7758dc548f91361e4",
+      "bytes": 26637
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08b-exact-review/conditions.json",
+      "sha256": "0b23127c05837b063ed5c5f03636c7698267d34c9d33ff91d3f87c92a00fd194",
+      "bytes": 29201
+    }
+  ],
+  "currentAriaConditions": [
+    "This is a bounded exact Source08b independent code review only. It discharges no owner/runtime/actual-resource gate, issues no grant or waiver and credits no story. Original Source08 and all old packets remain immutable with their original HOLD/failure dispositions. Source08b generation8 and prospective N04/FR05 were not operated here. No Source07/Source09/C8 authority transfers.",
+    "The exact normalization correction must remain self.s.path before registry membership, with the same validated normalized variable on both registered and existing fallback routes. All29 unchanged externalSourcePins/externalInputModes pairs remain strict builtin types, private0600/public0644, no caller map/default/None escape for registered resources. Unregistered NORMAL06/package/binary/prior/qualified-baseline semantics/caps remain unchanged. The original private1212 body/stat/hash/chmod/copy stays prohibited.",
+    "Recorded dispatcher94df81/external0 is one synthetic45-assertion/four-scenario composition through actual callbacks/System/Custody under fakeAPI. It was inspected and bound, not independently rerun. Parent41/seven-case proofs are exact unchanged-component reuse only. No actual original private/source/holder/kernel/installer/whole-flow qualification or current exploit/historical failed-member attribution is established. Test PID/parent remain null; external status is not direct Popen.wait.",
+    "Both current exact independent clean reviews plus explicit root acknowledgement of ALL findings/conditions and actual review hashes must precede any THREE new source-specific named technical-owner decisions. No owner record may be issued under this review. Metadata-author/applicability/transport/copy/install/bind/phase/actual-QA/root scopes remain distinct and owed.",
+    "The original obs009-gateway80-offtree03-20261019, PTY29815/wrapper3720/shell3749/recorded Oct19 12:48:37 starts and expected failed-wrapper1 remain the only held-unit subject. Tool29815 is unavailable in the current session. Root metadata liveness is not an I/O/holder/kernel/source proof. No alternate shell, direct tty input, signal, EOF, reset, retry or cleanup follows; external supported original-host handle restoration is a separate blocking dependency.",
+    "Preserve consumed FR04 once and readonly original facts, original27 actor facts, failed39213 external1 and65140 external1, every later known actual writer/reader/helper and separate actual traces/statuses. Complete-first means COMPLETE, never subset/nonadmitting. All selected actual actors must finish before final trusted facts serialization; installer stays pendingnull. Unknown starts/fingerprints remain null. No omission, invented PID-reuse exemption, future own0, last hashing child or caller-derived maps.64facts/65536bytes/8192actors and all remaining bounds unchanged.",
+    "OldE2263/N01exact7/N02exact8/outsideFR04 remain preserved. Known premutation failure is not qualified N03 absence or postexit leak proof; do not discover/freeze N03. Exact ancestry rejects unexpected03 before mutation. Source graph/same buffers/preflight before draft/attempt/mkdir/write, actual opened identity/immediate ownership/pending authors/state reconstruction/primary failure/partial UNKNOWN/closed selected cleanup/one outer finalizer stay unchanged.",
+    "All seven physical witnesses and opaque44/orig124/literalAPP, legacycanonicalfalse/equivalencefalse, original source/holder/kernel/parent/inherited/listener/current/history/numeric absence/wait/UNKNOWN/security obligations stay independent. Literal807/1690 components and Bash3.2 finite read EOF1/count/readonly/SAME buffer requirements remain; prefixes stop before verifier/eval. Each future selected actual helper needs its own real PID/parent/tool/status/full inspection before builtin SAME-buffer eval and before final facts.",
+    "Fresh qualifiedf9 plus separately observed SAME-held0 must be inspected before FAILED_GUARD_ADMISSION/archive/closing through the existing reviewed observer only. Expectedf9 is ancestry only. Original permit60s/raw pins/existing nonreversing clock must survive all selected cleanup/delivery preparation through FINAL_GUARDED_ACCEPTANCE. Parent physical scheduling remains UNPROVED. Actual installation/binding/qualifiednegative1/separate1/held0/archive0/actualQAroot/final0/gate0/wrapper1/outerpostclose0/observercompletion/independent closure QA/root remain individually owed.",
+    "Only explicitly named PUBLIC source/evidence and this new review output were accessed. No protected baseline/private captures/current runtime bodies, E/W/N/FR04/FR05, binaries, process census/kernel observations, actual holder/helper/installer/observer/proof, network/provider/API/native run, source-window/lease or cleanup operation was performed. C5/C212 and dirtygovernance remain closed. No source mutations or broad old-suite replay.",
+    "C8 synthetic qualification and GST auxiliary infrastructure remain PARKED. Fresh backendcheck+JaCoCo before011credit, final affected T5 suites, AC5/TEST-001, default4000/Order17/original assertions/skips/timeouts, Live/business/security/privacy/T0root731/Replay/mainIR/external21 and all lifecycle holds remain. Accessibility scope is unchanged. No staging/commit/push/deployment. Shared USD500 aggregate spend remains UNKNOWN."
+  ],
+  "rootReasoning": "Approved self.s.path constructor now precedes membership and feeds both routes; registered aliases retain declared mode/hash checks, existing unregistered route/caps unchanged. Developer45/4 and one independent45/4 synthetic dispatcher replay support affected behavior only. Ancestor41/7 is unchanged-component reuse only; no fullflow/private/currentresource qualification inferred.",
+  "technicalOwnerDecisionsIssued": false,
+  "next": "Separate THREE current named source-specific technical-owner decisions may now be requested. No runtime/metadata/applicability/transport scope follows.",
+  "originalHostSessionRestoration": "Still missing; original29815 tool unavailable, last metadata alive wrappers not I/O/holder/kernel/source proof. Async clarification pending. No alternate holder/restart/signal/cleanup.",
+  "allActualScopesAndGatesOwed": true,
+  "actualAuthority": false,
+  "sourceWindowOrLeaseAuthority": false,
+  "credit": false,
+  "storyLifecycleChanged": false,
+  "writer": {
+    "pid": 47728,
+    "parentPid": 18919,
+    "ownFutureStatus": null
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "statuses": [
+    {
+      "exit_code": null,
+      "session_id": 45346,
+      "outputBytes": 0,
+      "done": []
+    },
+    {
+      "exit_code": null,
+      "session_id": 45346,
+      "outputBytes": 8127,
+      "done": []
+    },
+    {
+      "exit_code": 1,
+      "session_id": null,
+      "outputBytes": 10436,
+      "done": [
+        "FR06_DONE:{\"passed\": 6, \"failure\": {\"type\": \"NameError\", \"args\": [\"name 'sys' is not defined\"]}, \"operatorSteps\": 1}"
+      ]
+    }
+  ],
+  "observedFinalExit": 1,
+  "failure": "generated control-author loader omitted import sys; source snapshot and exact script preserved",
+  "operatorSteps": 1,
+  "passedBeforeFailure": 6,
+  "actualTargetEffects": 0
+}

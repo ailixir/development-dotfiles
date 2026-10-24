@@ -1,0 +1,49 @@
+{
+  "id": "types-old01",
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs009-recovery-20261020-bootstrap-observation-v2-types-old01",
+    "pnpm",
+    "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/typescript/bin/tsc",
+    "-p",
+    "tsconfig.json",
+    "--noEmit"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-21T01:08:36.547184+00:00",
+  "collectorPid": 63692,
+  "rawOuterExit": 0,
+  "endedAtUtc": "2026-10-21T01:08:44.516855+00:00",
+  "actualCollectorResult": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/typescript/bin/tsc",
+      "-p",
+      "tsconfig.json",
+      "--noEmit"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T01:08:36.852694+00:00",
+    "elapsedSeconds": 7.66,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+    "testInputStable": true,
+    "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f"
+  },
+  "resultSha256": "fe7222427f7a99072784d3096d61c0cf591b060c88eb8de31d4eeb851b9536b8",
+  "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+  "privateInputDelta": [],
+  "beforeCopyUnchanged": true,
+  "actualFullSelectedInputsStable": true,
+  "complete238PrivateProductStable": true
+}

@@ -1,0 +1,31 @@
+# INACTIVE reviewed literal. One child verifies and consumes the same body argument.
+try:
+    import hashlib, os, sys
+    if len(sys.argv) != 2 or type(sys.argv[1]) is not str:
+        raise ValueError
+    raw = sys.argv[1].encode('utf-8')
+    if not (0 < len(raw) <= 4096) or hashlib.sha256(raw).hexdigest() != 'c4d32e5d7c060901e241b105761f87399f98843a730544ed880d40785e27c7db':
+        raise ValueError
+    exec(compile(raw, '<reviewed-python-self-role-metadata>', 'exec'), {'__name__': '__main__'})
+except SystemExit:
+    raise
+except BaseException:
+    pid = ppid = None
+    try:
+        pid, ppid = os.getpid(), os.getppid()
+        if type(pid) is not int or type(ppid) is not int or not (0 < pid < 2147483648 and 0 < ppid < 2147483648):
+            pid = ppid = None
+    except BaseException:
+        pass
+    record = ('{"kind":"PYTHON_SELF_REPORTED_ROLE_METADATA_V1","status":"HOLD",'
+              '"reason":"LITERAL_INTEGRITY_OR_EXECUTION_FAILURE","pid":%s,"ppid":%s,'
+              '"reportedRole":"UNAVAILABLE","origArgv0Role":"UNAVAILABLE",'
+              '"start":null,"argvHash":null,"fullFingerprint":null,"observedProcessImage":null,'
+              '"timestamp":null,"qualified":false,"NFact":false,"descriptorCompletion":"NOT_OBSERVED",'
+              '"postExitLeakProof":false,"outerObserverCompletionOwed":true}\n') % (
+                  'null' if pid is None else str(pid), 'null' if ppid is None else str(ppid))
+    try:
+        sys.stdout.write(record)
+    except BaseException:
+        pass
+    raise SystemExit(1)

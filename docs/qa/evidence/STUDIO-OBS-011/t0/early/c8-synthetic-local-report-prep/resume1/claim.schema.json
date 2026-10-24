@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Envelope only; purpose-specific exact executable schemas and pinned root/owner rulings mandatory. This file grants no authority.",
+  "properties": {
+    "C8": {
+      "const": false
+    },
+    "claimSet": {
+      "const": "LOCAL_SYNTHETIC_MODE_REPORT_WITH_SAMPLED_OBSERVATIONS"
+    },
+    "cleanupAuthorized": {
+      "const": false
+    },
+    "credit": {
+      "const": false
+    },
+    "guarantees": {
+      "additionalProperties": false,
+      "properties": {
+        "adversarialReplacementRaceExcluded": {
+          "const": false
+        },
+        "completeIntervalHistoryProved": {
+          "const": false
+        },
+        "exhaustiveDescendantDiscoveryProved": {
+          "const": false
+        },
+        "globalQuietProved": {
+          "const": false
+        },
+        "highResolutionProcessIdentityProved": {
+          "const": false
+        },
+        "intervalCaptureClaimed": {
+          "const": false
+        },
+        "kernelMainMappedVnodeEqualityProved": {
+          "const": false
+        },
+        "launchTimeExecutableObjectBound": {
+          "const": false
+        },
+        "legacyOrdinaryGateSatisfied": {
+          "const": false
+        },
+        "strongExecutableObjectIdentityProved": {
+          "const": false
+        }
+      },
+      "required": [
+        "strongExecutableObjectIdentityProved",
+        "kernelMainMappedVnodeEqualityProved",
+        "highResolutionProcessIdentityProved",
+        "launchTimeExecutableObjectBound",
+        "completeIntervalHistoryProved",
+        "exhaustiveDescendantDiscoveryProved",
+        "adversarialReplacementRaceExcluded",
+        "globalQuietProved",
+        "legacyOrdinaryGateSatisfied",
+        "intervalCaptureClaimed"
+      ],
+      "type": "object"
+    },
+    "historicalIdentityUncertainty": {
+      "const": true
+    },
+    "identityComplete": {
+      "const": false
+    },
+    "kernelIdentityComplete": {
+      "const": false
+    },
+    "protocol": {
+      "const": "C8_JAVA_SYNTHETIC_LOCAL_REPORT_V1"
+    },
+    "sourceWrites": {
+      "const": []
+    },
+    "unsupportedEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "kernelMainExecutableObject": {
+          "const": {
+            "reason": "NOT_PROVED_BY_SYNTHETIC_LOCAL_REPORT_PROFILE",
+            "value": null
+          }
+        },
+        "kernelStartMicroseconds": {
+          "const": {
+            "reason": "NOT_PROVED_BY_SYNTHETIC_LOCAL_REPORT_PROFILE",
+            "value": null
+          }
+        },
+        "kernelStartSeconds": {
+          "const": {
+            "reason": "NOT_PROVED_BY_SYNTHETIC_LOCAL_REPORT_PROFILE",
+            "value": null
+          }
+        },
+        "launchTimeObjectBinding": {
+          "const": {
+            "reason": "NOT_PROVED_BY_SYNTHETIC_LOCAL_REPORT_PROFILE",
+            "value": null
+          }
+        },
+        "mainMappedObjectEquality": {
+          "const": {
+            "reason": "NOT_PROVED_BY_SYNTHETIC_LOCAL_REPORT_PROFILE",
+            "value": null
+          }
+        },
+        "strongPlatformCertificateSha256": {
+          "const": {
+            "reason": "NOT_PROVED_BY_SYNTHETIC_LOCAL_REPORT_PROFILE",
+            "value": null
+          }
+        }
+      },
+      "required": [
+        "kernelStartSeconds",
+        "kernelStartMicroseconds",
+        "kernelMainExecutableObject",
+        "mainMappedObjectEquality",
+        "launchTimeObjectBinding",
+        "strongPlatformCertificateSha256"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "protocol",
+    "claimSet",
+    "guarantees",
+    "unsupportedEvidence",
+    "historicalIdentityUncertainty",
+    "identityComplete",
+    "kernelIdentityComplete",
+    "C8",
+    "credit",
+    "cleanupAuthorized",
+    "sourceWrites"
+  ],
+  "title": "UNADOPTED C8 synthetic claim envelope",
+  "type": "object"
+}

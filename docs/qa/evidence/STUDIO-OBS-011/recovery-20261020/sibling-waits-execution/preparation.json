@@ -1,0 +1,374 @@
+{
+  "atUtc": "2026-10-20T14:52:30.682601+00:00",
+  "status": "SOURCE_ONLY_READY_AWAITING_EXPLICIT_ROOT_GO_NO_PRODUCT_EDITS_OR_RUNTIME",
+  "scope": [
+    {
+      "lane": "GS-T2",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "preimageSha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+      "actualSha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+      "candidateSha256": "4bafbc3c281a4d7f87312a11840facf8538819de76d0938e28498721352eff07",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "mode": "0o644",
+      "declaredPackage": "com.citi.put.checks.studio.guided.session"
+    },
+    {
+      "lane": "GS-T2",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "preimageSha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+      "actualSha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+      "candidateSha256": "1c5091bf059b4098960f50ce4b244f35b7866ca99c6c086392c36b7f11a2d51f",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "mode": "0o644",
+      "declaredPackage": "com.citi.put.checks.studio.guided.session"
+    },
+    {
+      "lane": "GS-T2",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java",
+      "preimageSha256": null,
+      "actualSha256": null,
+      "candidateSha256": "5e4bff8c8ad0ae122580e4f17cc87dd5b116f44334905fdfb7def600b3a6d463",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/bridge/support/GuidedBridgeFixture.java",
+      "mode": null,
+      "declaredPackage": "com.citi.put.checks.studio.guided.session"
+    },
+    {
+      "lane": "IT-S",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "preimageSha256": "a910868c92c01ce4ec95a6ed3d158fc7ee2d944de3801475fa49ccafdbf49fd8",
+      "actualSha256": "a910868c92c01ce4ec95a6ed3d158fc7ee2d944de3801475fa49ccafdbf49fd8",
+      "candidateSha256": "475820d678e16853e0759398e4be6cb7ff7791b8c9dbf78a7951f74f63191182",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "mode": "0o644",
+      "declaredPackage": "com.citi.put.checks.studio.guided.session",
+      "namedTests": 31,
+      "expectedInvocations": 39,
+      "assertionChains": 541,
+      "deliberateSleeps": [
+        ".sleep(300);",
+        ".sleep(300);",
+        ".sleep(300);",
+        ".sleep(300);",
+        ".sleep(300);",
+        ".sleep(300);",
+        ".sleep(300);",
+        ".sleep(20);"
+      ]
+    },
+    {
+      "lane": "IT-S",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "preimageSha256": "9c68ac5bcdc79fba476177cf6bbbab12ee5583e9bfd3fe2c9449fb3a92d41aa9",
+      "actualSha256": "9c68ac5bcdc79fba476177cf6bbbab12ee5583e9bfd3fe2c9449fb3a92d41aa9",
+      "candidateSha256": "cf44fc4c52706ff56370204af17281045b3b794ded792fb4c8022886b599c1eb",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "mode": "0o644",
+      "declaredPackage": "com.citi.put.checks.studio.guided.session",
+      "namedTests": 35,
+      "expectedInvocations": 57,
+      "assertionChains": 295,
+      "deliberateSleeps": []
+    },
+    {
+      "lane": "IT-S",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "preimageSha256": "280e2d1768ee41c9be34e3b10659b1afa7714f5aa4e33de9dba75bb89f0bbeaa",
+      "actualSha256": "280e2d1768ee41c9be34e3b10659b1afa7714f5aa4e33de9dba75bb89f0bbeaa",
+      "candidateSha256": "74ed1658684b7ce272eb256600c13cda367afd20e186c4617eb68177d32f9f91",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+      "mode": "0o644",
+      "declaredPackage": "com.citi.put.checks.studio.guided.secret",
+      "namedTests": 36,
+      "expectedInvocations": 36,
+      "assertionChains": 225,
+      "deliberateSleeps": []
+    },
+    {
+      "lane": "IT-S",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "preimageSha256": "2aaef85fbdb885996029e9610416aa13ff93bdec703f3c233418f1ca62cfc532",
+      "actualSha256": "2aaef85fbdb885996029e9610416aa13ff93bdec703f3c233418f1ca62cfc532",
+      "candidateSha256": "2d5400d275d30730bb1ff71b5daca41434289fb1b57af59275c6ecc72ba83dd8",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "mode": "0o644",
+      "declaredPackage": "com.citi.put.checks.studio.guided.publication",
+      "namedTests": 6,
+      "expectedInvocations": 13,
+      "assertionChains": 30,
+      "deliberateSleeps": [
+        ".sleep(1100);"
+      ]
+    },
+    {
+      "lane": "IT-S",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "preimageSha256": "3ece2d6301108590089dc015886dc4aab940ae418e38af4941ceca586f1acbb8",
+      "actualSha256": "3ece2d6301108590089dc015886dc4aab940ae418e38af4941ceca586f1acbb8",
+      "candidateSha256": "389389d2413f5090bcd985309b06a614c93869d31ed98e1672bbe2237d0f5174",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+      "mode": "0o644",
+      "declaredPackage": "com.citi.put.checks.studio.guided.translation",
+      "namedTests": 2,
+      "expectedInvocations": 2,
+      "assertionChains": 22,
+      "deliberateSleeps": [
+        ".sleep(slowNavigationMillis);"
+      ]
+    },
+    {
+      "lane": "IT-S",
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "preimageSha256": "1daad099ea5fbf23cf4108b00fe3266f08a2c34fba88dcf098851003832023d4",
+      "actualSha256": "1daad099ea5fbf23cf4108b00fe3266f08a2c34fba88dcf098851003832023d4",
+      "candidateSha256": "da5fb5916e21f3cb149ab4c46a1d6484e37168cbf92c7b51f0e814477b1c273a",
+      "candidatePath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/candidates/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java",
+      "mode": "0o644",
+      "declaredPackage": "com.citi.put.checks.studio.guided.session",
+      "namedTests": 2,
+      "expectedInvocations": 2,
+      "assertionChains": 58,
+      "deliberateSleeps": []
+    }
+  ],
+  "all9PreimagesAndCandidatesMatch": true,
+  "bridgeManifestSha256": "6b9d4f8c9f65e7cf10e13e7e0e5fb7059bb9fc16ce069b7030ca00914051c46f",
+  "bridgePatch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t2-draft/resume2/candidate.patch",
+  "bridgePatchSha256": "fe9568cfdcc9e1c6f4401447a86efb6f2b2d9a2294e5b480778ced20a2cad11f",
+  "itsManifestSha256": "ff210efb14792e8f5d76bcd0599e2cd10c381b3374b8698326beef96eb685798",
+  "itsPatch": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/it-s-composed-style03/it-s-after-style03.patch",
+  "itsPatchSha256": "993d7c920549a50fdd1aa085ea3af61a9ee6c0ca4bd859fb2f14354ee52f2ef5",
+  "nativeCommands": [
+    {
+      "label": "obs011-recovery-20261020-gst2-01",
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-recovery-20261020-gst2-01",
+        "--test-tasks",
+        "test",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+        "--no-daemon"
+      ],
+      "expectedInvocations": 26,
+      "expectedSkips": 0,
+      "expectedErrors": 0
+    },
+    {
+      "label": "obs011-recovery-20261020-its-01",
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-recovery-20261020-its-01",
+        "--test-tasks",
+        "test",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+        "--tests",
+        "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+        "--tests",
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+        "--no-daemon"
+      ],
+      "expectedInvocations": 88,
+      "expectedSkips": 0,
+      "expectedErrors": 0
+    },
+    {
+      "label": "obs011-recovery-20261020-its-02",
+      "argv": [
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-008/with-gradle-lock.py",
+        "python3",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-recovery-20261020-its-02",
+        "--test-tasks",
+        "test",
+        "--",
+        "test",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+        "--tests",
+        "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT",
+        "--tests",
+        "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT",
+        "--no-daemon"
+      ],
+      "expectedInvocations": 61,
+      "expectedSkips": 0,
+      "expectedErrors": 0
+    }
+  ],
+  "bridgeWaitChains": 14,
+  "bridgeNamedMethods": 26,
+  "itsWaitConversions": 12,
+  "itsTransportWaitConversions": 6,
+  "itsNamedMethods": 112,
+  "itsInvocations": 149,
+  "itsOrderedAssertionChains": 1171,
+  "itsDeliberateSleeps": 10,
+  "bridgeDeliberateOriginalRows": 4,
+  "bridgeOrphans": {
+    "removedHelpers": [
+      "action",
+      "navigation",
+      "advanceRequest",
+      "race",
+      "proposalByLocator",
+      "refreshRequest",
+      "proposal",
+      "advance",
+      "operationHash"
+    ],
+    "unreachableAssertionStarts": 3,
+    "targetPresenceStarts": 2,
+    "uniquenessStarts": 1,
+    "reachableAssertionDrops": 0,
+    "testMethodDrops": 0
+  },
+  "protectedFoldAndGsmFiles": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+      "sha256": "60e84ab27c1039cda193ae8124cc724d76451bf679fe4c46918d11e2b8c78418"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "sha256": "4eb8933ac540773c9526109076e412396cfc9e6163e36cd1e3bf777f039b2f24"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "sha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+      "sha256": "876d4f38cc416055162baa3ee3b4d5a8b72aa77a05b983176e109476021cd407"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "sha256": "0719e4f633f8fcca251fb77852e2ec064b89bcf11294fc369d11b6e2c69ef55e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "b110f81571abf182f88254053792fdefa2554f792d871cd3b674925d47a6aa08"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+      "sha256": "39ed4e0b080aab54449dc4845e0fbee167b57b02ffa4121886a2c91b71a8aa6f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "sha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "sha256": "0a6e7299e32c6aeeda9f1d91fdb3ee8d886964e3e72114c50f47156ce2c04575"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "sha256": "7c4adda1e4d8c2debec77e612147f528ffbd856df9fecf48208ff2289b15befe"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+      "sha256": "340eb5b7e8af6482aef63ebf0ea387f4d1650ae3cfe073fad117a5dfb79fdbaf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayBindingBuilder.java",
+      "sha256": "f9b529587d78b9927f1c0334bde7676f0e923bacf00d4628465bf5d4298c3670"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "sha256": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+      "sha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "sha256": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+      "sha256": "36b4b3c9d517fe4579bbf6f0f0dfae595c55084135e1aeda1a68f898212a68da"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "a02318fffffc71827bca03a3dd49145e7dc89effa960b688b07c4080f7037bd5"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/DispatchAuthorizationIT.java",
+      "sha256": "0216a0ae7170dafd1f33ebab73d40e9e4c456ad1d888f8b023135915e0051af1"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "sha256": "52d02aa8c7d5d6f6d1748186e68a2a27f18e91c87c032ef27e42617ec5c1ecad"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/PublicationGrantClockIT.java",
+      "sha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "sha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "sha256": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "sha256": "255469af129ef55146c568d5a839d643c6469c54900bbd81c699b87b2f056c05"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "sha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a"
+    }
+  ],
+  "styleBatons": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "requiredStyle03Sha256": "a910868c92c01ce4ec95a6ed3d158fc7ee2d944de3801475fa49ccafdbf49fd8",
+      "preservedAddedBlockBraceTokens": 28,
+      "mode": "0o644",
+      "inItsApplySet": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "requiredStyle03Sha256": "a156ff590e975a66e22d52a01357452f8be9787cf30da4c2f204207e9050bbc5",
+      "preservedAddedBlockBraceTokens": 20,
+      "mode": "0o644",
+      "inItsApplySet": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "requiredStyle03Sha256": "7270cbfb450faa992cf6dc4d22e90f6b856645cf4b5f22779e7a036b83bdb3df",
+      "preservedAddedBlockBraceTokens": 38,
+      "mode": "0o644",
+      "inItsApplySet": false
+    }
+  ],
+  "limits": [
+    "Existing CONFORMANCE-I1 during-library-interval interruption remains unproved by the proposed234comparison launcher; no new test is authorized here and no false completion claim will be made.",
+    "Existing native timing/cleanup/privacy and independent final QA remain actual execution obligations; static preservation and baseline identities grant no after credit.",
+    "Historical packet F1/GS-Mb prerequisite text is preserved. Root owns its adopted current sequence/implementation window; no legacy admission main rewrite is authorized here."
+  ],
+  "javaHome": "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home",
+  "nodePath": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN",
+  "reviewSha256": "bf82f3ee582a0725eb8dc324c42a460dade9e615aa4d933522af3279944584a5"
+}

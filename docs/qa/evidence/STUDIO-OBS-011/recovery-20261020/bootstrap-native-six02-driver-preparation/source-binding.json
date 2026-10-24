@@ -1,0 +1,57 @@
+{
+  "referenceDriver": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution01/run-native-six.py",
+  "referenceDriverSha256": "b174e406cad56e5f5ae379dd53eff1eadf468d00264e8c66fcf4db830b09769b",
+  "pure02ProducerManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-owned-scope-pure-proof-execution02/manifest.json",
+    "sha256": "24b7b9d8807983f7065e5e149771546667595af844f050a9cc0828a8388b844c",
+    "reportedArtifacts": 117
+  },
+  "measuredProducerMetadataReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-owned-scope-pure-proof-execution02/terminal-private-full-snapshots.json",
+      "sha256": "5fed3403d96e6d3b454803a2b254703c73e42d89fd2bff80070b4a1402d26374"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-owned-scope-pure-proof-execution02/actual-terminal-full-selected.json",
+      "sha256": "b8589ca4c13c8276afd6eb374c6aae2106cb8484ceb4237d0a498881d5b42025"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-owned-scope-pure-proof-execution02/terminal-canonical-cli-pins.json",
+      "sha256": "d03c0551a032e321fdbd9dc99bb6a2d27c4ee0ded6512656b1a868b9a9e1de1d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-owned-scope-pure-proof-execution02/terminal-browser-binding.json",
+      "sha256": "5d429a1a19648bb5415239a4aae84a1c04510914b7f988f5854de34b43c0cc9a"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-owned-scope-pure-proof-execution02/runtime-input-binding.json",
+      "sha256": "6da6521854ebb8dfc664b5c2c6c1c21ddd65110b2aa129ac31af11f22f865cc4"
+    }
+  ],
+  "knownPrivateSourcePins": {
+    "studio-runner/test/fixtures-tier/observed-bootstrap-process-tree.test.ts": "f4cc9fb3be55dad91daa30e2d169e9d1d872a8be4a4901649d61c681cf858eba",
+    "studio-runner/test/helpers/bootstrapProcessTreeObservation.ts": "ab10aa5a188d07aba698704af1f43abd5f6f86ff1c90f8922f7c8ea17435c998",
+    "studio-runner/test/run/bootstrapProcessTreeObservation.test.ts": "e22cfa670de9996381663b29f60d23a6590aa72a5cccd4dcfd76b77c865ee7bd"
+  },
+  "sourcePrepMetadataOnly": "Only existing public source/evidence metadata read; no live private guards/walk/browser/host/probe/inhibitor/runtime executed.",
+  "futureRuntimeEvidence": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/bootstrap-process-tree-native-six-execution02",
+  "futureRaw": "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/bootstrap-six-raw02",
+  "futureLabel": "obs009-recovery-20261020-bootstrap-native-six02",
+  "staleDraft4737": "Superseded by final ab10; draft task not execution authority.",
+  "nativeGo": false,
+  "driverSha256": "cb48c6249d98f27ec018e0e1874facbac86a2d35a38d59108f5114c9137106d9",
+  "exactDriverDiffSha256": "9fbed776bf274dc581b04c0efe4c169d96ba7bb4dd5a08284a12f5b2a5958dd3",
+  "falseNullAdmissionTemplateSha256": "57069a963f1ff2770b90c0bef45ed6edb22d0643c3fca59dc3a421ed3d1364c7",
+  "driverCodeParserOrCompilerRun": false,
+  "driverExecuted": false,
+  "runtimeArguments": [
+    "ROOT_ADMISSION_PATH",
+    "EXACT_ROOT_ADMISSION_SHA256"
+  ],
+  "dynamicQaReferenceFiles": "Root supplies emitted review/readiness/manifest paths and exact hashes; no filename guess or stale QA lookup.",
+  "rootReadyAndResourceAttestations": "Driver requires authorized/pureExecutionQaAccepted/prospectiveResourceLimitationAccepted true on the root-bound admission, plus exact referenced file hashes; source template keeps all false.",
+  "sourcePinActualPreimages": "Future driver compares exactly fixture7b exists and helper/unit ABSENT; no live preimage read in this preparation.",
+  "inhibitorChange": "outer finally releases only owned inhibitor after native-original-handle terminal and after actual capture/full selected private+actual/product/cache/CLI/browser/host metadata collection; separate timestamps/native elapsed; no continuous-awake inference.",
+  "futureClosed12LeafAndCaseProjection": "Not added to driver; only separately authorized later execution allowlist may decode fresh typed leaves/public result. No raw payload body logic here.",
+  "preparationWriteSetOnly": true
+}

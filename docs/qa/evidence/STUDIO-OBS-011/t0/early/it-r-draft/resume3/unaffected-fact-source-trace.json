@@ -1,0 +1,38 @@
+{
+  "originalSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "sourceTraces": [
+    {
+      "name": "finalOwnedIndependentAttempts",
+      "originalStartLine": 3437,
+      "sha256": "58db75235fdb5e616165efde446c229553219d3b6ec28aee5feb57f15e9b33d3"
+    },
+    {
+      "name": "retentionLocalFailures",
+      "originalStartLine": 3585,
+      "sha256": "21bd90480c82ac29a7250d440b4f88c87453a644d9bfe829f99f5d3f538f7b8a"
+    },
+    {
+      "name": "twoBoundaryFailureAggregation",
+      "originalStartLine": 573,
+      "sha256": "aff5a9734c58058f994570bf642ed4e388aa7fa4484f4cc32f8098675e3a25b9"
+    }
+  ],
+  "coupledOnly": [
+    "auditComplete=false (cohort and invocation privacy copies)",
+    "audit-final.json absent because final boundary throws before writer"
+  ],
+  "notWaived": [
+    "privacyComplete",
+    "modelEvidenceComplete",
+    "budgetEvidenceComplete",
+    "responseEvidenceComplete",
+    "producersDrained",
+    "finalScansAttempted",
+    "zero retentionFailures",
+    "all actual body/afterEach passes",
+    "all final/after-each budget/response and privacy artifact joins"
+  ],
+  "contradiction": "NONE_FOUND_STATICALLY: independent p3AttemptTeardown stages continue after audit fault; retentionFailures is local to retainFinalCohort. If actual allegedly unaffected fact fails, proof is rejected, not waived.",
+  "budgetMetadataScope": "Original budget writer has ordinal/variantOrdinal/fixture ceiling/complete but no lane/method/class fields. Require exact path key containing task+ordinal+method+variant in same cohort folder plus those actual written fields; require response/privacy full identity fields. Actual phases are after-each and final, both required.",
+  "rawStatus": "Keep collector exit/gradleExit nonzero, validationSucceeded=false and taskCollectionComplete=false for injected assertion faults. Only exact per-task audit-final missing errors allowed; any other gap rejects."
+}

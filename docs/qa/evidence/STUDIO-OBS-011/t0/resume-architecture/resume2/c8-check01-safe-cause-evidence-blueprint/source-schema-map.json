@@ -1,0 +1,82 @@
+{
+  "kind": "SOURCE_SCHEMA_AVAILABILITY_MAP_NOT_CAPTURED_CAUSE",
+  "sources": [
+    {
+      "producer": "root-authorized single public XML closed-enum projection",
+      "binding": "f64c6c1e7a5bf2920ad9add54da0d02198d10555bc457996bddeda53fd22c506",
+      "actuallyEstablished": [
+        "unique selected source failure",
+        "expected FINALIZING",
+        "observed FAILED"
+      ],
+      "unavailable": [
+        "cause",
+        "runtime stage",
+        "bootstrap phase",
+        "guard/admission code"
+      ]
+    },
+    {
+      "producer": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py:48-65",
+      "shape": [
+        "task",
+        "class",
+        "name",
+        "status"
+      ],
+      "availability": "Public metadata manifest proves retained artifact inventory; case-body values beyond supplied projection were not read.",
+      "sufficiency": "Identity/status only; no structured stage or causal code."
+    },
+    {
+      "producer": "GuidedPublicationReplayIT.java:3584-3646 retainFinalCohort",
+      "shape": [
+        "invocations.method",
+        "invocations.passed",
+        "invocations.afterEachComplete",
+        "aggregate retention/privacy/budget/response flags"
+      ],
+      "availability": "Source-defined public cohort fields; current field values not inspected.",
+      "sufficiency": "Does not identify a failed guard or capture-time bootstrap state. Whole sink inventory/private hashes are excluded."
+    },
+    {
+      "producer": "GuidedPublicationReplayIT.java:380-413 retainResponseFacts and468-483 refreshActualResponseDispositions",
+      "shape": [
+        "model-call validity/ceiling counters",
+        "attemptDispositionRead",
+        "attemptApplied"
+      ],
+      "availability": "Source-defined response facts; current model/response bodies and joins not read.",
+      "sufficiency": "Not a session failure code or stage; not selected as a cause-projection input."
+    },
+    {
+      "producer": "GuidedSessionService.java:2864-2941 + GuidedPublicPresentationProjector.java:90-140",
+      "shape": [
+        "public result.outcome",
+        "public result.errorCode",
+        "public progress.stepCount",
+        "public progress.activeStep"
+      ],
+      "availability": "Public API shape exists. No retained current-case result response/capture established by permitted metadata. No new GET is authorized.",
+      "sufficiency": "A uniquely retained exact current public result.errorCode, if independently supplied/bound, is the preferred smallest fact. FAILED activeStep is deliberately null and cannot recover stage."
+    },
+    {
+      "producer": "GuidedPublicationReplayIT.java:3827-3884,4237-4534,4683-4740",
+      "shape": [
+        "captureFailure if collection throws",
+        "state",
+        "errorCode",
+        "bootstrapPhase",
+        "continuation",
+        "actions.operationKind/state/outcomeCode/dispatchCount",
+        "obligationAdmissions.admitted and ordinal-like numbers"
+      ],
+      "availability": "Logical source-defined failure metadata only; current record existence, actual fields, role, custody, cardinality and freshness all NOT_ESTABLISHED. No private record/metadata/body/path/key was inspected.",
+      "sufficiency": "Possible bounded captured-state/code/phase and uniquely associated action tuple. Not assertion-time cause. Producer includes identifiers/other arrays; those are forbidden in the proposed output."
+    }
+  ],
+  "timingLimit": "safeFailureMetadata is called by framework AfterEach after p3Case finally has already attempted case resource cleanup. The producer is not an assertion-site observer and does not record a failure-time stage tag.",
+  "publicManifestOnlySummary": "333 XML metadata rows,395 test-HTML rows,546 cohort rows,3 exec rows,2 tally rows; no listed body was read. Cohort row categories are2 cohort/2 audit-final/2 guard-tally/216 model-budget/216 response/108 privacy. Metadata existence is not payload capture validation.",
+  "sourceProducerHash": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "currentPrivateRecordStatus": "UNKNOWN",
+  "noPrivateLocatorsOrJoinKeysDerived": true
+}

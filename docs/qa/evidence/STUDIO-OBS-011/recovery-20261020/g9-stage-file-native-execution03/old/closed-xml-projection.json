@@ -1,0 +1,31 @@
+{
+  "xmlPath": "/private/tmp/obs009-g9-f2-current-20261020-root01/old-existence-consumer/g9-f2-output/obs009-g9-f2-old-red01-xml/TEST-com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT.xml",
+  "xmlSha256": "be0945b4c6c9c843003fa2f5fedab1bfc440dcbe73a87d4c733ea946401cf24c",
+  "case": {
+    "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+    "name": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost()",
+    "durationSeconds": 2.845
+  },
+  "rootCounts": {
+    "total": 1,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "xmlFresh": true,
+  "failureLeafReads": 1,
+  "rawFailureTextExported": false,
+  "failureType": "org.opentest4j.AssertionFailedError",
+  "expectedReadBeforeDecisionActualEmptyPair": true,
+  "knownPublicFrame": {
+    "file": "GuidedServiceTransportFaultIT.java",
+    "method": "runGuidedControllerCut",
+    "line": 2998
+  },
+  "suppressedTextPresent": false,
+  "suppressedXmlElementsPresent": false,
+  "fixedCleanupSentinelPresent": false,
+  "boundedFailureBytesScanDisclosed": "Only fixed expected/empty pair, public frame and suppression/cleanup predicates from this one known failure text; raw XML/log bodies are never exported.",
+  "semanticAndOriginalCleanupLifecycleQualified": true,
+  "cleanupCreditBoundary": "Unchanged original method finally/sticky latch and class-owned termination assertions with complete single-case JUnit lifecycle and no additional/suppressed failure; no external PID absence/ESRCH assertion."
+}

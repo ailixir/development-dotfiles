@@ -1,0 +1,51 @@
+{
+  "finding": "G80-LINK-06",
+  "kind": "PURE_ACTUAL_FUNCTION_COUNTEREXAMPLE",
+  "results": [
+    {
+      "case": "normal-absent",
+      "pathSemantics": {
+        "exists": false,
+        "is_symlink": false
+      },
+      "actualFunction": "run_native",
+      "fakePopenReached": true,
+      "outcome": "EXPECTED_NATIVE_LAUNCH_ADMISSION",
+      "actualProcessOrTargetWrite": false
+    },
+    {
+      "case": "dangling-link",
+      "pathSemantics": {
+        "exists": false,
+        "is_symlink": true
+      },
+      "actualFunction": "run_native",
+      "fakePopenReached": true,
+      "outcome": "PASSES_UNSAFE_NATIVE_LAUNCH_BOUNDARY",
+      "actualProcessOrTargetWrite": false
+    },
+    {
+      "case": "existing-regular",
+      "pathSemantics": {
+        "exists": true,
+        "is_symlink": false
+      },
+      "actualFunction": "run_native",
+      "fakePopenReached": false,
+      "outcome": "HOLD_BEFORE_NATIVE:REPORT_ALREADY_EXISTS",
+      "actualProcessOrTargetWrite": false
+    },
+    {
+      "case": "link-existing-target",
+      "pathSemantics": {
+        "exists": true,
+        "is_symlink": true
+      },
+      "actualFunction": "run_native",
+      "fakePopenReached": false,
+      "outcome": "HOLD_BEFORE_NATIVE:REPORT_ALREADY_EXISTS",
+      "actualProcessOrTargetWrite": false
+    }
+  ],
+  "realOSProcessPrivateOrSourceAction": false
+}

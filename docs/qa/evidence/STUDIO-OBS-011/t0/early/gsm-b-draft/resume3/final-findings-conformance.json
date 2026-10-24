@@ -1,0 +1,213 @@
+{
+  "kind": "EXTRACTED_ACTUAL_AST_FAKE_CONFORMANCE_ONLY",
+  "testsRun": 8,
+  "passed": true,
+  "commandContract": [
+    {
+      "suffix": "b03",
+      "command": [
+        "/opt/homebrew/opt/python@3.13/bin/python3.13",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-contract",
+        "--test-tasks",
+        "test,guidedIncrementalTest",
+        "--",
+        "test",
+        "--tests",
+        "example.CompleteIT",
+        "guidedIncrementalTest",
+        "--tests",
+        "example.CompleteIT",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "selectedTasks": [
+        "test",
+        "guidedIncrementalTest"
+      ],
+      "requiredFreshExecTasks": [],
+      "actualAssessorAccepted": false,
+      "omittedForNegativeControl": true
+    },
+    {
+      "suffix": "b01",
+      "command": [
+        "/opt/homebrew/opt/python@3.13/bin/python3.13",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-contract",
+        "--test-tasks",
+        "test",
+        "--require-exec-tasks",
+        "test",
+        "--",
+        "test",
+        "--tests",
+        "example.CompleteIT",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "selectedTasks": [
+        "test"
+      ],
+      "requiredFreshExecTasks": [
+        "test"
+      ],
+      "actualAssessorAccepted": true,
+      "omittedForNegativeControl": false
+    },
+    {
+      "suffix": "b02",
+      "command": [
+        "/opt/homebrew/opt/python@3.13/bin/python3.13",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-contract",
+        "--test-tasks",
+        "test",
+        "--require-exec-tasks",
+        "test",
+        "--",
+        "test",
+        "--tests",
+        "example.CompleteIT",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "selectedTasks": [
+        "test"
+      ],
+      "requiredFreshExecTasks": [
+        "test"
+      ],
+      "actualAssessorAccepted": true,
+      "omittedForNegativeControl": false
+    },
+    {
+      "suffix": "b03",
+      "command": [
+        "/opt/homebrew/opt/python@3.13/bin/python3.13",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-contract",
+        "--test-tasks",
+        "test,guidedIncrementalTest",
+        "--require-exec-tasks",
+        "test,guidedIncrementalTest",
+        "--",
+        "test",
+        "--tests",
+        "example.CompleteIT",
+        "guidedIncrementalTest",
+        "--tests",
+        "example.CompleteIT",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "selectedTasks": [
+        "test",
+        "guidedIncrementalTest"
+      ],
+      "requiredFreshExecTasks": [
+        "guidedIncrementalTest",
+        "test"
+      ],
+      "actualAssessorAccepted": true,
+      "omittedForNegativeControl": false
+    },
+    {
+      "suffix": "green",
+      "command": [
+        "/opt/homebrew/opt/python@3.13/bin/python3.13",
+        ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+        "obs011-contract",
+        "--test-tasks",
+        "test",
+        "--require-exec-tasks",
+        "test",
+        "--",
+        "test",
+        "--tests",
+        "example.CompleteIT",
+        "--continue",
+        "--rerun-tasks",
+        "--no-daemon"
+      ],
+      "selectedTasks": [
+        "test"
+      ],
+      "requiredFreshExecTasks": [
+        "test"
+      ],
+      "actualAssessorAccepted": true,
+      "omittedForNegativeControl": false
+    }
+  ],
+  "threeActualFinalizerWitnesses": [
+    {
+      "fault": "original-second-proof-read",
+      "disposition": "HELD_NOT_ESCAPING_OSERROR",
+      "heldReason": [
+        "ORIGINAL_INTEGRITY_OBSERVATION_OSError"
+      ],
+      "trace": [
+        "drain",
+        "boundary",
+        "restore",
+        "original-compile",
+        "drain",
+        "boundary",
+        "post-compile-proof",
+        "drain",
+        "boundary",
+        "HELD"
+      ],
+      "finalizedSuccess": false,
+      "keptSuccessfulFreezeUnit": false
+    },
+    {
+      "fault": "post-terminal-original-compile-exception",
+      "disposition": "HELD_NOT_ESCAPING_OSERROR",
+      "heldReason": [
+        "POST_DECISION_COMPILE_OR_INTEGRITY_EXCEPTION_OSError"
+      ],
+      "trace": [
+        "drain",
+        "boundary",
+        "UNIT_TERMINAL",
+        "restore",
+        "post-decision-original-compile",
+        "drain",
+        "boundary",
+        "HELD"
+      ],
+      "finalizedSuccess": false,
+      "keptSuccessfulFreezeUnit": false
+    },
+    {
+      "fault": "post-terminal-second-proof-read",
+      "disposition": "HELD_NOT_ESCAPING_OSERROR",
+      "heldReason": [
+        "POST_DECISION_COMPILE_OR_INTEGRITY_EXCEPTION_OSError"
+      ],
+      "trace": [
+        "drain",
+        "boundary",
+        "UNIT_TERMINAL",
+        "restore",
+        "post-decision-original-compile",
+        "post-compile-proof",
+        "drain",
+        "boundary",
+        "HELD"
+      ],
+      "finalizedSuccess": false,
+      "keptSuccessfulFreezeUnit": false
+    }
+  ],
+  "collectorParserSha256": "799ead7c9c622b7a8b1500d1e89762a689b11e472a8d2bf16101cb9b54f29cd4",
+  "noActualEntryPointOrNativeExecution": true,
+  "productSourceOrLiveOutputWrites": false,
+  "scope": "exclusive resume3/test-scratch; fake native/source/parent/signal operations"
+}

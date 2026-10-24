@@ -1,0 +1,42 @@
+{
+  "kind": "MINIMAL_REMAINING_REQUIRED_FRONTEND_CANDIDATE",
+  "atUtc": "2026-10-20T16:18:32.177552+00:00",
+  "sourceApplied": false,
+  "runtimeExecuted": false,
+  "paths": [
+    {
+      "path": "frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts",
+      "beforeSha256": "e385d1513965d06fe8921282074a415a1518445a74b240d3801b18f8a1f8e68c",
+      "afterSha256": "a84d582bf96493541c8af966deb8e23acce6acc7957832fb309b7ed06c29d356",
+      "inheritedPatch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/frontend-draft/resume2/patches/frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts.patch",
+      "patchSha256": "60669a9aae1943c2f2e0aba0dd539d9a6ce4600abaf9bcdce74155ab3f60477a",
+      "candidateByteEqualReviewedDraft": true
+    },
+    {
+      "path": "frontend/src/components/studio/runs/RunDetailsDrawer.tsx",
+      "beforeSha256": "b26404272dc673a51076d7fba806ffe534d76c399125aea00dd2f4eed760dd9d",
+      "afterSha256": "932d40e0a32a9bad7a10509e5fb621b84998295937a9a47b2c8f3a6c4cc2b456",
+      "inheritedPatch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/frontend-draft/resume2/patches/frontend/src/components/studio/runs/RunDetailsDrawer.tsx.patch",
+      "patchSha256": "7453578bd50acb5343bff389d41e13f4ac9133deaa213d604d8c09b615cc2a49",
+      "candidateByteEqualReviewedDraft": true
+    },
+    {
+      "path": "frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx",
+      "beforeSha256": "039b0c6028b4e79bf195c109ccdaf1032a5d9086afbd4bf08838ca7b2cff9e1a",
+      "afterSha256": "b058c43309e5e3007e2e8b8159e4ed95e3bc91f92b4f9aee7410813681fec135",
+      "inheritedPatch": "docs/qa/evidence/STUDIO-OBS-011/t0/early/frontend-draft/resume2/patches/frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx.patch",
+      "patchSha256": "1eda1401938e6297a88f29903dc7a89f6b20c435cc682d3034a1347e9e4de47d",
+      "candidateByteEqualReviewedDraft": true
+    }
+  ],
+  "combinedPatchSha256": "465af063c294fae20b90132e57594fbfe4af74ad19ceff57ed085d7fcdacb610",
+  "retained": "CLN07 unusedinterface removal; approved RCO scheduled-provenance label/assertion. No testcase drop/add.",
+  "alreadyApplied": [
+    "C0085 validate-variables correction and two focused cases",
+    "ReportsPage unusedparameter rename",
+    "README currentoperationalcorrections"
+  ],
+  "deferred": "C0083 narrative metadata extraction and registry/barrel/test changes; optional authoring-mirror extra validation. Existing WCAG audit remains untouched regressionguard under functional-onlyscope.",
+  "historicalReview": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/fe-rt-drafts/review.md",
+  "nextValidation": "At root-selected sourcewritewindow verify exactpreimages and apply onlythreepatches; focused existing scheduling suite plus frontendtype/lint/strictunused, finalaffectedT5once. Preserve originalaudit artifact."
+}

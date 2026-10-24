@@ -1,0 +1,7 @@
+{
+  "protocol": "GST_UNLOCK_V1",
+  "minimumFutureUnit": 4,
+  "maxReadinessAgeSeconds": 60,
+  "requiredHistoricalGapCodes": ["GST03_FORMAT_IDENTITY_GAP", "GST03_PREMATURE_UNLOCK_INTERVAL"],
+  "gapKeys": ["ownedIdentityObservationGap", "ownershipOrLockObservationGap", "drainObservationGap", "waitObservationGap", "receiptWriteFailed", "prematureUnlockGap", "resourceObservationGap"]
+}

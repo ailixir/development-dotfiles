@@ -1,0 +1,121 @@
+{
+  "exactPacketSha256": "607859e3f5e43ab4dad52afdcf1f1842801f2abacc197527b819e11668ccf1ab",
+  "packetMembersVerified": 109,
+  "oldMembersVerified": 93,
+  "authorControls": 248,
+  "retainedControls": 215,
+  "newAuthorControls": 33,
+  "allAuthorControlsPassed": true,
+  "strictForwardReverseVerified": {
+    "status": "PURE_STATIC_HASH_AND_STRICT_DIFF_CHECKS_PASSED",
+    "nonGeneratedComparisons": 82,
+    "strictDeltaCoverage": [
+      "README.md",
+      "RECIPE.md",
+      "archive-and-close.json",
+      "check-map.json",
+      "exit-gate.py",
+      "guard-exit.bash",
+      "provenance.json",
+      "run-private.py",
+      "scope.json",
+      "verify-final.py",
+      "verify-proofs.py"
+    ],
+    "strictForwardAndReverseExact": true,
+    "actualChangedCommonMembers": [
+      "CHECKPOINT.json",
+      "README.md",
+      "RECIPE.md",
+      "archive-and-close.json",
+      "check-map.json",
+      "diff-validation.json",
+      "exit-gate.py",
+      "guard-exit.bash",
+      "preservation.json",
+      "provenance.json",
+      "run-private.py",
+      "scope.json",
+      "static-checks.json",
+      "strict-successor.diff.patch",
+      "strict-successor.reverse.patch",
+      "successor-diff.json",
+      "verify-final.py",
+      "verify-proofs.py"
+    ],
+    "generatedCommonMembersExcludedFromPatchAndDescriptorCurrentHashAssertions": [
+      "CHECKPOINT.json",
+      "boundary-control-results.json",
+      "diff-validation.json",
+      "preservation.json",
+      "pure-control-results.json",
+      "report-admission-control-results.json",
+      "revision-control-results.json",
+      "static-checks.json",
+      "strict-successor.diff.patch",
+      "strict-successor.reverse.patch",
+      "successor-diff.json"
+    ],
+    "selfAndGeneratedHashesAuthority": "manifest.json files entries; no self hash asserted here",
+    "allDescriptorCurrentHashAndModeAssertionsVerified": true,
+    "nativeExecutions": 0,
+    "readiness": false,
+    "released": false
+  },
+  "independentCases": 7,
+  "independentOrderingCounterexamples": [
+    {
+      "case": "start-or-argv-changed",
+      "actual": "HOLD_AFTER_ATTEMPT_WRITE",
+      "fakeWrites": [
+        "admission-capture-attempt.json"
+      ],
+      "realActions": 0
+    },
+    {
+      "case": "wrapper-fd-gone",
+      "actual": "HOLD_AFTER_ATTEMPT_WRITE",
+      "fakeWrites": [
+        "admission-capture-attempt.json"
+      ],
+      "realActions": 0
+    },
+    {
+      "case": "kernel-lock-free",
+      "actual": "HOLD_AFTER_ATTEMPT_WRITE",
+      "fakeWrites": [
+        "admission-capture-attempt.json"
+      ],
+      "realActions": 0
+    }
+  ],
+  "independentLsofControls": [
+    {
+      "status": 0,
+      "stdoutEmpty": false,
+      "stderrEmpty": true,
+      "actual": "ACCEPT"
+    },
+    {
+      "status": 1,
+      "stdoutEmpty": false,
+      "stderrEmpty": true,
+      "actual": "HOLD"
+    },
+    {
+      "status": 0,
+      "stdoutEmpty": true,
+      "stderrEmpty": true,
+      "actual": "HOLD"
+    },
+    {
+      "status": 0,
+      "stdoutEmpty": false,
+      "stderrEmpty": false,
+      "actual": "HOLD"
+    }
+  ],
+  "allRealOperationalBoundariesBlocked": true,
+  "actualRuntimeOrSourceCaptureOrNativeOrPrivateActions": 0,
+  "conditionalSupport": false
+}

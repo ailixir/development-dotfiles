@@ -1,0 +1,13 @@
+from pathlib import Path
+import json,hashlib,runpy,subprocess,sys
+R=Path.cwd();O=Path(__file__).resolve().parent;B=R/'docs/qa/evidence/STUDIO-OBS-011/recovery-20261020';C=B/'bootstrap-owned-scope-row-tail-correction01';S=Path('/private/tmp/obs009-bootstrap-observation-20261020-proof01');P1=B/'bootstrap-process-tree-pure-proof-execution01';snap=runpy.run_path(str(P1/'input-snapshot.py'))['snapshot'];key=sys.argv[1];assert key in ['red','green'];out=O/('helper-only-'+key+'-application.json');assert not out.exists()
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def w(n,d):(O/n).write_text(json.dumps(d,indent=2)+'\n')
+if key=='red':assert json.loads((O/'lint-green-pre01-terminal.json').read_text())['rawOuterExit']==0;previous=json.loads((O/'lint-green-pre01-private-after.json').read_text());filename='helper-only-green.inverse.patch';beforeStage='green';afterStage='red'
+else:assert json.loads((O/'red-reconciliation.json').read_text())['genuineIntendedRed'];previous=json.loads((O/'red01-private-after.json').read_text());filename='helper-only-green.patch';beforeStage='red';afterStage='green'
+before={n:snap(S/n) for n in ['before-repo','repo']};assert before==previous;actual=snap(R);assert actual==json.loads((O/'actual-initial-full-selected.json').read_text());bindings=json.loads((C/'buffer-and-patch-bindings.json').read_text())['files']
+for row in bindings:assert sha(S/'repo'/row['path'])==row[beforeStage+'Sha256']
+argv=['patch','-p1','-F','0','--batch','--forward','-i',str(C/filename)];r=subprocess.run(argv,cwd=S/'repo',capture_output=True,text=True);(O/('helper-only-'+key+'-patch.log')).write_text(r.stdout+r.stderr);assert r.returncode==0 and 'offset' not in r.stdout and 'fuzz' not in r.stdout
+for row in bindings:assert sha(S/'repo'/row['path'])==row[afterStage+'Sha256']
+after={n:snap(S/n) for n in ['before-repo','repo']};assert after['before-repo']==before['before-repo'] and after['repo']['dist']==before['repo']['dist'];x={r['path']:r for r in before['repo']['copyProfileFiles']};y={r['path']:r for r in after['repo']['copyProfileFiles']};assert x.keys()==y.keys();delta=[{'path':p,'before':x[p],'after':y[p]} for p in x if x[p]!=y[p]];assert {r['path'] for r in delta}=={'studio-runner/test/helpers/bootstrapProcessTreeObservation.ts'};assert snap(R)==actual
+w('helper-only-'+key+'-after.json',after);w(out.name,{'argv':argv,'patchSha256':sha(C/filename),'exit':r.returncode,'privateOnly':True,'sameUnitFixtureBuffers':True,'delta':delta,'otherCatalogBeforeCopyActualProductExact':True});print(json.dumps({'helperSwap':key,'exactSinglePath':True,'privateProductAndActualStable':True}))

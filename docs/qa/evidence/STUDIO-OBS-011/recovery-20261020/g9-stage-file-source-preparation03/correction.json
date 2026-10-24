@@ -1,0 +1,201 @@
+{
+  "kind": "CAUSE_SUPPORTED_SOURCE_ONLY_G9_SYMLINK_SCOPE_SUCCESSOR03",
+  "atUtc": "2026-10-21T03:16:42.873556+00:00",
+  "status": "SOURCE_PREPARED_AST_PARSED_NOT_EXECUTED",
+  "originalFailureManifestSha256": "6ff626b91dec7da2865fa58f7aa398bc66478fce97dd5c1eb8247743193c1ac9",
+  "originalFailedHelperSha256": "b5e67eda310d34ea1f71c1b46ef1482089f1d1404c6f21b680affaaf9c38a4e4",
+  "originalFailureReceiptSha256": "64d0276a5bffcfc1c6a0d6840aa4a6ba3ca0df25d141ca253dba7a9b4fdf7ea0",
+  "newHelperSha256": "7420a7eca88fe7a0220d2258c2dd4e5aa2f25b22c967d7b02da8f2970d44bd38",
+  "fullDiffSha256": "1c50d098fdc3c5c287758dfc281748b055f3f9f642eef36791803994392ecade",
+  "acceptedBaseline": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application02/after-build-21-bin-links.json",
+    "sha256": "284ae82a7b4f2c0b0b002d16fdef8cac63ff83d9c9588432772e975df5544ca1",
+    "producerManifestSha256": "ec0cc03c9e30429bd3e87231a3730025202a1636c17082d3a7bd5581fe594bdf",
+    "producerManifestArtifactEntry": {
+      "path": "after-build-21-bin-links.json",
+      "sha256": "284ae82a7b4f2c0b0b002d16fdef8cac63ff83d9c9588432772e975df5544ca1",
+      "bytes": 3644
+    },
+    "capturedScope": "exact21direct SDK node_modules/.bin symlinks",
+    "count": 21,
+    "modeConversion": "explicit type/string octal validation and int(mode,8), no defaults; device/inode exact ints",
+    "normalizedRows": [
+      {
+        "path": "studio-runner/node_modules/.bin/acorn",
+        "target": "../acorn/bin/acorn",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500667
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/esbuild",
+        "target": "../esbuild/bin/esbuild",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500665
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/eslint",
+        "target": "../eslint/bin/eslint.js",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500662
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/glob",
+        "target": "../glob/dist/esm/bin.mjs",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500660
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/js-yaml",
+        "target": "../js-yaml/bin/js-yaml.js",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500659
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/json5",
+        "target": "../json5/lib/cli.js",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500663
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/nanoid",
+        "target": "../nanoid/bin/nanoid.cjs",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500664
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/node-which",
+        "target": "../which/bin/node-which",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500674
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/parser",
+        "target": "../@babel/parser/bin/babel-parser.js",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500658
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/playwright",
+        "target": "../playwright/cli.js",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500666
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/playwright-core",
+        "target": "../playwright-core/cli.js",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500668
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/resolve",
+        "target": "../resolve/bin/resolve",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500669
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/rollup",
+        "target": "../rollup/dist/bin/rollup",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500672
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/semver",
+        "target": "../semver/bin/semver.js",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500670
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/tsc",
+        "target": "../typescript/bin/tsc",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500679
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/tsserver",
+        "target": "../typescript/bin/tsserver",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500671
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/vite",
+        "target": "../vite/bin/vite.js",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500675
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/vite-node",
+        "target": "../vite-node/vite-node.mjs",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500676
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/vitest",
+        "target": "../vitest/vitest.mjs",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500677
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/why-is-node-running",
+        "target": "../why-is-node-running/cli.js",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500678
+      },
+      {
+        "path": "studio-runner/node_modules/.bin/yaml",
+        "target": "../yaml/bin.mjs",
+        "mode": 493,
+        "device": 16777229,
+        "inode": 190500680
+      }
+    ]
+  },
+  "observedEntireCurrentDependencySymlinkCount": "UNKNOWN_NOT_MEASURED_UNDER_THIS_CORRECTION",
+  "observedCurrentBinCount": "UNMEASURED; 21 here is accepted archived baseline",
+  "deltaScope": [
+    "OUT evidence directory02\u219203",
+    "exact immutable .bin baseline path/hash constants",
+    "replace wrong global21count with strict exact .bin21 fulltuple equality; keep entire link inventory",
+    "truthful release field scope and separate inventory count"
+  ],
+  "unchangedGuards": [
+    "all selected dependency symlinks retained and compared before/after",
+    "resolved target contained in dependency root and regular",
+    "directory-link refusal",
+    "source link/type/media exclusion",
+    "exact COPY argv/profile/bytehash/mode/member equality",
+    "no source hardlinks",
+    "Java source and patchpreimages",
+    "A1 source1814/buildaa55/E19238 membership/hash",
+    "no source/globalcatalog exemption or provider/runtime authority"
+  ],
+  "cachePolicy": "future before catalog snapshots then-current copied dependency/cache values and requires unchanged throughCOPY only; no equality to build-time whole dependencies/cache; normal finalunit cache mutations beforefutureCOPY allowed",
+  "astParseOnly": true,
+  "newHelperExecuted": false,
+  "freshActualInputReads": false,
+  "actualReadQuietWindowHeld": false,
+  "copyOrPrivateWrites": false,
+  "patchOrCompilerOrNativeOrTestRun": false,
+  "businessAssertionsOrG9OraclesChanged": false,
+  "sourceGateAuthority": "root narrow delta review then separately released fresh COPY window after actual runner gates; no runtimeGO",
+  "clockOrReplayCapChanged": false
+}

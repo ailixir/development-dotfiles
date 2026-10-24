@@ -1,0 +1,35 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java
+@@ -85,8 +85,8 @@
+       GuidedPublicationRepository publications,
+       GuidedContracts contracts,
+       ObservedReplayPins pins,
+-      ObservedValidationClient validator,
+-      GuidedPublicationAuthorization authorization,
++      com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient validator,
++      com.citi.put.checks.studio.dispatch.DispatchAuthorization authorization,
+       GuidedSessionAccess access,
+       GuidedPublicationProperties properties,
+       ObservedReplayProperties replay, JdbcTemplate jdbc) {
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java
+@@ -15,7 +15,7 @@
+       GuidedContracts contracts,
+       ObservedRevisionVerifier verifier,
+       ObservedReplayPins pins,
+-      GuidedPublicationAuthorization authorization,
++      com.citi.put.checks.studio.dispatch.DispatchAuthorization authorization,
+       ObservedReplayProperties properties) {
+     return new ObservedReplayAuthorizer(
+         jdbc, contracts, verifier, pins, authorization, properties, new DatabaseClock(jdbc));
+--- a/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java
+@@ -140,7 +140,7 @@
+   @Bean
+   com.citi.put.checks.studio.guided.bridge.GuidedDispatchService guidedDispatchService(
+       GuidedSessionService sessions,
+-      com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient runner,
++      com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient runner,
+       JdbcTemplate jdbc,
+       GuidedContracts contracts,
+       com.citi.put.checks.studio.dispatch.StudioReferenceResolver references) {

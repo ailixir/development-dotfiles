@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-19T03:39:23.559806+00:00",
+  "status": "COMPLETE_OFF_TREE_PREPARATION_FOR_INDEPENDENT_EXACT_REVIEW",
+  "notLaneExit": true,
+  "notQaVerdict": true,
+  "noLifecycleChange": true,
+  "actualSourceApplied": false,
+  "testOrCompilerRun": false,
+  "liveReplayITReadAsBaseline": false,
+  "verifiedOriginalBackupSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "originalPrepEvidencePreserved": true,
+  "census": {
+    "total": 95,
+    "pollRows": 74,
+    "directLoops": 73,
+    "deliberate": 21
+  },
+  "annotatedMethodsPreserved": 74,
+  "originalAssertionStatementsPreservedAfterTransparentNormalization": 2686,
+  "embeddedTextBlocksPreserved": 10,
+  "exactPatchReconstructions": 32,
+  "inputHashesStillEqual": 10,
+  "stages": [
+    {
+      "stage": "00-test001",
+      "batches": [],
+      "sourceSha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+      "candidateSha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+      "incrementalPatchSha256": "390c124ddc289fce12590c15e583fdfa21b2cf82cba2d53048af86b7061e7add",
+      "fromOriginalPatchSha256": "390c124ddc289fce12590c15e583fdfa21b2cf82cba2d53048af86b7061e7add",
+      "remainingSleeps": 95
+    },
+    {
+      "stage": "01-b1",
+      "batches": [
+        "B1"
+      ],
+      "sourceSha256": "e10c162d057c87a906a32e162614d29f3f4ba5a0e7000c52e9f77e46b0cdd616",
+      "candidateSha256": "1824c600a5ad947583232823886859cff020275a9a291a2d78c700bb92a799b8",
+      "incrementalPatchSha256": "55cae0d416c9166042a0fcab978375ff82c460859d81264597785d348f74578d",
+      "fromOriginalPatchSha256": "54ebc116acb48d9e49db8b36aca1058aa307e8217d34184ff80ec46a1630e575",
+      "remainingSleeps": 80
+    },
+    {
+      "stage": "02-b2",
+      "batches": [
+        "B1",
+        "B2"
+      ],
+      "sourceSha256": "1824c600a5ad947583232823886859cff020275a9a291a2d78c700bb92a799b8",
+      "candidateSha256": "fb15d49dd8d4202d839f9606c7fb28c8ccbe15b58c08c185ca59552c6b3c3cff",
+      "incrementalPatchSha256": "3772822feb68ba267910c66f25b4d0175508e7a85229c6392d4992c7afe4f194",
+      "fromOriginalPatchSha256": "52a960fc89e15e33df6b378eed27bd9084c582a114040ba16b6e69c9d080c367",
+      "remainingSleeps": 57
+    },
+    {
+      "stage": "03-b3",
+      "batches": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "sourceSha256": "fb15d49dd8d4202d839f9606c7fb28c8ccbe15b58c08c185ca59552c6b3c3cff",
+      "candidateSha256": "9aa8b01600d867aa94eb5ba4cca442aa6aaab46a6cacf4779cb5752537356622",
+      "incrementalPatchSha256": "eb18213f3fd3fd2a7d2f6efbfdc02d6f7f28ca0fa3932e1421b24ffc3e36415a",
+      "fromOriginalPatchSha256": "e7ca49dd36eed624671e0b4bf058e1b4306c2490ba8b0b838df61734905dc4e3",
+      "remainingSleeps": 33
+    },
+    {
+      "stage": "04-b4",
+      "batches": [
+        "B1",
+        "B2",
+        "B3",
+        "B4"
+      ],
+      "sourceSha256": "9aa8b01600d867aa94eb5ba4cca442aa6aaab46a6cacf4779cb5752537356622",
+      "candidateSha256": "ed3f8ddb8312fe9dc59a5f5c1326932b8ed3993ed2355c0c324a7c63cc5ad663",
+      "incrementalPatchSha256": "77b7920167a127b616d7e6c2d7a976df3bbba2f9062da98775384d20ddd13d22",
+      "fromOriginalPatchSha256": "706f54b634306d275614eab82f29248c6e1d4e4366356b9273b6aeb54f2a34c4",
+      "remainingSleeps": 21
+    },
+    {
+      "stage": "04-b4-carry6",
+      "batches": [
+        "B1",
+        "B2",
+        "B3",
+        "B4"
+      ],
+      "carriedPollIds": [
+        1,
+        2,
+        4,
+        6,
+        93,
+        95
+      ],
+      "sourceSha256": "9aa8b01600d867aa94eb5ba4cca442aa6aaab46a6cacf4779cb5752537356622",
+      "candidateSha256": "c2f7107da2c4874a4e4487f246133b296c3a2b26a960ba16d2145ae0350732c3",
+      "incrementalPatchSha256": "5f47cbf90c33f50bafd1a843b114eae37a4cf0f9990ef0c23f6b064b760851fd",
+      "fromOriginalPatchSha256": "6c3974e82c5440579f8914381d34d5e3dd951a162f741c423afc089cfba1cfd9",
+      "remainingSleeps": 27
+    }
+  ],
+  "runtimeProof": "NOT_RUN_UNPROVEN",
+  "actualGreenTwiceBaton": null,
+  "declaredBudgetUsd": 500,
+  "actualSpend": "UNAVAILABLE",
+  "rootStateProvenanceSha256": "8572f03861424bc0cc49ce2af18a6ddcd76bf8c8bc28d53540271fc3fc6097b3"
+}

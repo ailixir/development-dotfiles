@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "decisionId": "ROOT-ORDER11-SNAPSHOT-CONDITIONAL-SOURCE-GUIDANCE-20261019",
+  "atUtc": "2026-10-19T05:40:01.624392+00:00",
+  "owner": "root",
+  "reference": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/order11-terminal-snapshot-dara/review.md",
+    "sha256": "9d6b2107297498f52c04ca52c21b1c37c0ab1067aed781be44ad8a5776a7d472"
+  },
+  "accepts": "Conditional source interpretation only: V14 protects terminal state; actual FAILED cleanup skips cancellation and preserves errorCode/bootstrap phase while teardown and other progress can change. This is no whole-row/error-code DB immutability claim.",
+  "conditionalUse": "Only with exact original source/schema and same invocation/session identity, genuine complete snapshot provenance, triggers enabled, no delete/recreate/admin/test bypass, and the audited reachable writer paths, a recognized preserved errorCode may narrow stopping writer FAMILY without a timestamp. It does not prove an exact first writer, native startup phase, transport failure or root cause.",
+  "importantLimits": [
+    "Missing or unrecognized errorCode both map OTHER; OTHER is not no-error or proof of a lifecycle writer. Missing numeric fields are omitted, not zero.",
+    "Bootstrap phase is committed progress under guarded writers; it is not native startup success. Retention may remove phase.",
+    "Assignment lifecycle/context lifecycle can stop FAILED without setting progress.errorCode; multiple translation/budget origins share other codes.",
+    "Private snapshot is after inner cleanup. Exact warning-to-session association, prefix-only worker diagnostic matching, producer association, chronology and causal conclusions remain separate.",
+    "No actual snapshot/log/private data was read; no value or actual writer family is asserted."
+  ],
+  "preservedAriaReview": "812eaefe30e4485abd31ef812f1aeab191a4e35de5a2250c5bbfa611ddc774d8 remains unchanged; this narrows only conditional evidentiary use, not its unknown-cause conclusion.",
+  "privateAccessAuthorized": false,
+  "sourceOrNativeActionAuthorized": false,
+  "futurePrivateRequirements": "Whole03collector+recorded ownedJavaUNKNOWN actually terminal, frozen PUBLIC assessment, sealed exact parser and independentQuinn/root scope approval plus fresh actual root release. All native FAIL/coverage/cohort/outer sticky gaps preserved; C8/GS-T/F1GSMb/source gates unchanged.",
+  "lifecycleOrLaneCredit": false
+}

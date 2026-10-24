@@ -1,0 +1,148 @@
+{
+  "kind": "D2_07_FAILURE_LOCALIZED_TO_UNMATCHED_LIMITS_ROW_KERNEL_FORMAT_FIX03_AND_PREP08_SOURCE_READY",
+  "atUtc": "2026-10-21T04:54:55.582082+00:00",
+  "allStoriesComplete": false,
+  "stories": {
+    "009": "InProgress",
+    "010": "InProgress",
+    "011": "InProgress"
+  },
+  "actualProductTuple": {
+    "source": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "sourceFiles": 1814,
+    "hostDist": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "hostDistFiles": 238,
+    "image": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "unchangedThrough07Postguards": true
+  },
+  "historicalD2Failures": {
+    "05": "NO_CREDIT_8a16_QA35aa",
+    "06": "NO_CREDIT_106a_QA47bf",
+    "07": {
+      "toolSession": 12962,
+      "driverCollectorChildExits": [
+        1,
+        1,
+        1
+      ],
+      "collectorPid": 35799,
+      "inhibitorPid": 35798,
+      "inhibitorWaitExit": -15,
+      "nativeSeconds": 8.034561125095934,
+      "producer": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution07/manifest.json",
+        "sha256": "b7a0339d43ad8c1dd4db1f0a7a76e42bcff04909656d2fed37ac6a2a10744d85"
+      },
+      "qa": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution07/execution-qa/manifest.json",
+        "sha256": "2e3c067591e74013ebd3bfff9d518d34b9644070029ffd9c1c9e372b64ac15fa"
+      },
+      "rootRehashedProducerArtifacts": 46,
+      "rootRehashedQaArtifacts": 3,
+      "diagnostic": {
+        "mode": "inspect",
+        "stage": "core-limits",
+        "reason": "D2_CORE_LIMIT",
+        "coreSoftZero": null,
+        "coreHardZero": null
+      },
+      "actualLimits": "UNKNOWN_UNPARSED_NOT_NONZERO",
+      "observedBeforeFailure": {
+        "activeRecordingDirectories": 1,
+        "journals": 2,
+        "nonemptyJournals": 2,
+        "owners": 2,
+        "liveOwnedBrowserLeaders": 1
+      },
+      "negativeChecks": "BOTH_EXACT78_REFUSAL_TRUE_STARTED_FALSE_BOUND_MISS_FALSE",
+      "cleanup": {
+        "commandExit": 1,
+        "ownedResourcesRemaining": 0
+      },
+      "drainAndResult": "MISSING_NO_CREDIT",
+      "completeD2Projection": false,
+      "heavyCurrentReadWindowReleased": true
+    }
+  },
+  "acceptedInspectionDiagnosticSource": {
+    "owner02": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation02/manifest.json",
+      "sha256": "dc3c2724fbf0e7f79abba0aa2ce31a60058fa86757e42b02fc1e9ccfd0455803"
+    },
+    "qa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation01/independent-qa/manifest.json",
+      "sha256": "fb06b248b27c55f7e67171698381becd60b8b08172374173aa7e7bbf7eb0ce67"
+    },
+    "historicalNullabilityV1": "ResolvedProspectively02_v1Preserved"
+  },
+  "kernelParser03": {
+    "owner": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-linux-limits-parser-correction03/manifest.json",
+      "sha256": "f0d41c372cb5558037153267f53e8940b4d5778110a651c9711e9a5a396df973"
+    },
+    "rootSourceReview": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-linux-limits-parser03-root-source-review.json",
+      "sha256": "95a9371d900c98ba4d744bf8ad1051604b39ec31e413bdd2968f711235f074b6"
+    },
+    "candidate": "b73395f135d5db15fca3a575c43b9c58e6c4a03e6ca8e2f06e3ef3931ce9a95d",
+    "oneRegexSuffixOnly": true,
+    "actualZeroZeroAssertionUnchanged": true,
+    "purePublicFormatControlsPassed": 8,
+    "pureNodeInvocations": 1,
+    "candidateSyntaxOnlyInvocations": 1,
+    "realProcOrD2Probe": false,
+    "primaryProducerReference": "https://raw.githubusercontent.com/torvalds/linux/v6.10/fs/proc/base.c",
+    "historical07KernelAndRow": "UNRETAINED"
+  },
+  "prospective08": {
+    "preparation": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-preparation08/manifest.json",
+      "sha256": "e662674c76b290797154297cc93eaa01c19afae2dd45b489d2c32a9887cfa2a3"
+    },
+    "rootRehashedArtifacts": 4,
+    "driverAndBinderAstOnlyValid": true,
+    "allFunctionsAndNativeTailByteExact07": true,
+    "sourceQaOwner": "benchmark_report_candidate_qa",
+    "sourceQa": "FINAL_SEAL_PENDING",
+    "bindingAndRuntime": "NOT_RELEASED"
+  },
+  "heavyLaneOwner": null,
+  "actualSourceWriters": [],
+  "backend": {
+    "sourcePreparation": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-admission-preparation04/manifest.json",
+      "sha256": "986d9ed6eeb628d57af08650639194083421d3e02c1b3f59516b802e5a8bf20c"
+    },
+    "pairExecutionEnvelope": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-execution-preparation05/manifest.json",
+      "sha256": "c1bd95f1f8802af769877cae4c4775037932ed1e720d639596c50546c7343930"
+    },
+    "pairRootSourceReview": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-envelope05-root-source-review.json",
+      "sha256": "8de478d6d269361766d7dda5cad04b262ed2098d23eb8653b527137a841686dc"
+    },
+    "actualRuntimeToolPins": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-runtime-tool-pins05.json",
+      "sha256": "a96a221697ec79a81e421461f72ed2e3e0eca5d4060ee1d58f3402f158585cdb"
+    },
+    "node": "v24.20.0",
+    "jdk": "21.0.10",
+    "nodeJvmToolOptionsAbsent": true,
+    "reserved4and5": "UNRUN_NOT_ADMITTED",
+    "reserved6": "UNRUN",
+    "charged": [
+      1,
+      2,
+      3
+    ],
+    "cutoffUtc": "2026-10-22T04:35:27.361777Z",
+    "tailBefore4Seconds": 32709.735,
+    "doNotWriteDuringFuturePair": "resumed-implementation-record.json driverCASownsledger"
+  },
+  "t5Preparation": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-t5-readiness-preparation05/manifest.json",
+    "sha256": "ba96fed586249fe33601241d5ea5d71d4b07a9e1255034a699de76bd048a3b9e"
+  },
+  "external009010": "MISSING_APPROVED_REFERENCES_PENDING_EXISTING_QUESTION",
+  "checkpointIsRuntimeAuthority": false
+}

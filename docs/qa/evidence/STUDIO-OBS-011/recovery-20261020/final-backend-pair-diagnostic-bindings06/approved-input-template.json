@@ -1,0 +1,82 @@
+{
+  "status": "UNBOUND_NOT_EXECUTED",
+  "readOnlyProjectionOnly": true,
+  "runs": [
+    {
+      "slot": 4,
+      "receipt": "UNBOUND_ACTUAL_RECEIPT",
+      "receiptSha256": "UNBOUND",
+      "finalSourceDistBinding": "UNBOUND_ACTUAL_FINAL_INPUTS",
+      "normalOrderFullReplayDenominator": "UNBOUND_ACTUAL_CASE_COUNTER_AND_BOTH_COHORTS",
+      "lanes": [
+        {
+          "task": "test",
+          "expectedReplayCaseRows": 46,
+          "tempRoot": "UNBOUND_EXACT_OWNER_TEMP_ROOT",
+          "ownerToTaskBinding": "UNBOUND_EXISTING_OWNER_EVIDENCE",
+          "taskCohortSha256": "UNBOUND",
+          "guidedGenerationLogOwnership": "UNBOUND_EXISTING_OWNED_WORKER_METADATA"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "expectedReplayCaseRows": 62,
+          "tempRoot": "UNBOUND_EXACT_OWNER_TEMP_ROOT",
+          "ownerToTaskBinding": "UNBOUND_EXISTING_OWNER_EVIDENCE",
+          "taskCohortSha256": "UNBOUND",
+          "guidedGenerationLogOwnership": "UNBOUND_EXISTING_OWNED_WORKER_METADATA"
+        }
+      ]
+    },
+    {
+      "slot": 5,
+      "receipt": "UNBOUND_ACTUAL_RECEIPT",
+      "receiptSha256": "UNBOUND",
+      "finalSourceDistBinding": "UNBOUND_ACTUAL_FINAL_INPUTS",
+      "normalOrderFullReplayDenominator": "UNBOUND_ACTUAL_CASE_COUNTER_AND_BOTH_COHORTS",
+      "lanes": [
+        {
+          "task": "test",
+          "expectedReplayCaseRows": 46,
+          "tempRoot": "UNBOUND_EXACT_OWNER_TEMP_ROOT",
+          "ownerToTaskBinding": "UNBOUND_EXISTING_OWNER_EVIDENCE",
+          "taskCohortSha256": "UNBOUND",
+          "guidedGenerationLogOwnership": "UNBOUND_EXISTING_OWNED_WORKER_METADATA"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "expectedReplayCaseRows": 62,
+          "tempRoot": "UNBOUND_EXACT_OWNER_TEMP_ROOT",
+          "ownerToTaskBinding": "UNBOUND_EXISTING_OWNER_EVIDENCE",
+          "taskCohortSha256": "UNBOUND",
+          "guidedGenerationLogOwnership": "UNBOUND_EXISTING_OWNED_WORKER_METADATA"
+        }
+      ]
+    },
+    {
+      "slot": 6,
+      "receipt": "UNBOUND_ACTUAL_RECEIPT",
+      "receiptSha256": "UNBOUND",
+      "finalSourceDistBinding": "UNBOUND_ACTUAL_FINAL_INPUTS",
+      "normalOrderFullReplayDenominator": "UNBOUND_ACTUAL_CASE_COUNTER_AND_BOTH_COHORTS",
+      "lanes": [
+        {
+          "task": "test",
+          "expectedReplayCaseRows": 46,
+          "tempRoot": "UNBOUND_EXACT_OWNER_TEMP_ROOT",
+          "ownerToTaskBinding": "UNBOUND_EXISTING_OWNER_EVIDENCE",
+          "taskCohortSha256": "UNBOUND",
+          "guidedGenerationLogOwnership": "UNBOUND_EXISTING_OWNED_WORKER_METADATA"
+        },
+        {
+          "task": "guidedIncrementalTest",
+          "expectedReplayCaseRows": 62,
+          "tempRoot": "UNBOUND_EXACT_OWNER_TEMP_ROOT",
+          "ownerToTaskBinding": "UNBOUND_EXISTING_OWNER_EVIDENCE",
+          "taskCohortSha256": "UNBOUND",
+          "guidedGenerationLogOwnership": "UNBOUND_EXISTING_OWNED_WORKER_METADATA"
+        }
+      ]
+    }
+  ],
+  "warning": "Never derive task ownership solely from TEMP basename, mtime, parent record count or similarity to S-W3."
+}

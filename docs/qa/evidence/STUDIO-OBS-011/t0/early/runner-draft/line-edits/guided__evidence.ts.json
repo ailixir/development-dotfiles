@@ -1,0 +1,54 @@
+{
+  "73": {
+    "before": "export type RecordingEvidenceCallback = (route: 'recording-evidence', message: RecordingEvidenceBody, idempotencyKey: string) => Promise<void>;",
+    "after": "export type RecordingEvidenceCallback = (\n  route: 'recording-evidence', message: RecordingEvidenceBody, idempotencyKey: string\n) => Promise<void>;"
+  },
+  "101": {
+    "before": "  open(session: { readonly sessionId: string; readonly csiId: string | null; readonly maxSessionSeconds: number }): Promise<GuidedSessionRecording>;",
+    "after": "  open(session: {\n    readonly sessionId: string; readonly csiId: string | null; readonly maxSessionSeconds: number\n  }): Promise<GuidedSessionRecording>;"
+  },
+  "108": {
+    "before": "  const owned = (): Promise<RecordingScratch> => scratch ??= ports.recordingScratch ? Promise.resolve(ports.recordingScratch) : prepareRecordingScratch({ workerId: 'embedded-recorder', journalDirectory: ports.evidenceRoot ?? process.env.TMPDIR ?? tmpdir(), ...(ports.evidenceRoot === undefined ? {} : { evidenceRoot: ports.evidenceRoot }) });",
+    "after": "  const owned = (): Promise<RecordingScratch> => scratch ??= ports.recordingScratch ?\n    Promise.resolve(ports.recordingScratch) : prepareRecordingScratch({\n      workerId: 'embedded-recorder', journalDirectory: ports.evidenceRoot ?? process.env.TMPDIR ?? tmpdir(),\n      ...(ports.evidenceRoot === undefined ? {} : { evidenceRoot: ports.evidenceRoot })\n    });"
+  },
+  "161": {
+    "before": "    .sort((a, b) => a.startMs - b.startMs || a.ordinal - b.ordinal || compareCodePoints(a.stepId, b.stepId) || compareCodePoints(a.admissionId, b.admissionId))",
+    "after": "    .sort((a, b) => a.startMs - b.startMs || a.ordinal - b.ordinal ||\n      compareCodePoints(a.stepId, b.stepId) || compareCodePoints(a.admissionId, b.admissionId))"
+  },
+  "162": {
+    "before": "    .map((r): ActionTiming => ({ kind: 'action', stepId: r.stepId, admissionId: r.admissionId, ordinal: r.ordinal, startMs: r.startMs, endMs: r.endMs }));",
+    "after": "    .map((r): ActionTiming => ({\n      kind: 'action', stepId: r.stepId, admissionId: r.admissionId, ordinal: r.ordinal, startMs: r.startMs, endMs: r.endMs\n    }));"
+  },
+  "172": {
+    "before": "  return timings.every(t => Number.isSafeInteger(t.startMs) && t.startMs >= 0 && t.startMs <= bound && (t.endMs === null || (Number.isSafeInteger(t.endMs) && t.endMs >= t.startMs && t.endMs <= bound)));",
+    "after": "  return timings.every(t => Number.isSafeInteger(t.startMs) && t.startMs >= 0 && t.startMs <= bound &&\n    (t.endMs === null || (Number.isSafeInteger(t.endMs) && t.endMs >= t.startMs && t.endMs <= bound)));"
+  },
+  "234": {
+    "before": "  settle(input: { readonly identity: BridgeIdentity; readonly videoPath: string | null; readonly orderlyClose: boolean; readonly callback: RecordingEvidenceCallback }): Promise<GuidedRecordingState> {",
+    "after": "  settle(input: {\n    readonly identity: BridgeIdentity; readonly videoPath: string | null; readonly orderlyClose: boolean;\n    readonly callback: RecordingEvidenceCallback\n  }): Promise<GuidedRecordingState> {"
+  },
+  "239": {
+    "before": "  private async run(input: { readonly identity: BridgeIdentity; readonly videoPath: string | null; readonly orderlyClose: boolean; readonly callback: RecordingEvidenceCallback }): Promise<GuidedRecordingState> {",
+    "after": "  private async run(input: {\n    readonly identity: BridgeIdentity; readonly videoPath: string | null; readonly orderlyClose: boolean;\n    readonly callback: RecordingEvidenceCallback\n  }): Promise<GuidedRecordingState> {"
+  },
+  "244": {
+    "before": "      const ports = { store: this.ports.store, fileSystem: this.ports.fileSystem, bounds: this.ports.bounds, now: this.ports.now, sleep: this.ports.sleep, redactor };",
+    "after": "      const ports = {\n        store: this.ports.store, fileSystem: this.ports.fileSystem, bounds: this.ports.bounds,\n        now: this.ports.now, sleep: this.ports.sleep, redactor\n      };"
+  },
+  "248": {
+    "before": "          .catch((): RecordingObservation => ({ attempted: true, path: null, bytes: null, header: false, error: 'RECORDING_FAILED', orderlyClose: input.orderlyClose }));",
+    "after": "          .catch((): RecordingObservation => ({\n            attempted: true, path: null, bytes: null, header: false, error: 'RECORDING_FAILED', orderlyClose: input.orderlyClose\n          }));"
+  },
+  "251": {
+    "before": "          const uploaded = await uploadRecording(ports, window, { videoKey: this.keys.videoKey, path: observed.path, state: 'PENDING', partial: observed.partial });",
+    "after": "          const uploaded = await uploadRecording(ports, window, {\n            videoKey: this.keys.videoKey, path: observed.path, state: 'PENDING', partial: observed.partial\n          });"
+  },
+  "260": {
+    "before": "        const manifest = buildGuidedRecordingManifest({ sessionId: input.identity.sessionId, recordingId: this.recordingId, workerId: input.identity.workerId, ownerFence: input.identity.ownerFence, evidenceState: state, evidencePartial: partial, videoKey: this.keys.videoKey, manifestKey: this.keys.manifestKey, timings });",
+    "after": "        const manifest = buildGuidedRecordingManifest({\n          sessionId: input.identity.sessionId, recordingId: this.recordingId, workerId: input.identity.workerId,\n          ownerFence: input.identity.ownerFence, evidenceState: state, evidencePartial: partial,\n          videoKey: this.keys.videoKey, manifestKey: this.keys.manifestKey, timings\n        });"
+  },
+  "262": {
+    "before": "        await writeResultManifest(ports, window, this.keys.manifestKey, serializeResultManifest(manifest, redactor), RESULT_MANIFEST_CONTENT_TYPE);",
+    "after": "        await writeResultManifest(\n          ports, window, this.keys.manifestKey, serializeResultManifest(manifest, redactor), RESULT_MANIFEST_CONTENT_TYPE\n        );"
+  }
+}

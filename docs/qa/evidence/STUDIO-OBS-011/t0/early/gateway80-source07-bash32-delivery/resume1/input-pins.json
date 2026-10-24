@@ -1,0 +1,84 @@
+{
+  "exactPacketReferences": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-source07-install-input-author/resume1/manifest.json",
+      "sha256": "044755a1f70943e4eb7523a8a60a45e7feb4ff442a23d91f0ddf8df6cd76072f",
+      "bytes": 4025
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/manifest.json",
+      "sha256": "045c5121ff25966eff78d741894684c776448e35c553cceb7765591ff70dd9b1",
+      "bytes": 9816
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-source07-install-input-author-review/resume1/manifest.json",
+      "sha256": "88b50e644b01ced8c47e1486c03eaad22c5d29fe9ce82a4e49f01551f27b3791",
+      "bytes": 2367
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway80-source07-metadata-bootstrap-failure01.json",
+      "sha256": "d3d7584b13e24cc054bd15423647a38a58c66399b1dba20e6fe856c405793147",
+      "bytes": 1636
+    }
+  ],
+  "deliveries": [
+    {
+      "payloadPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-source07-install-input-author/resume1/metadata-author.py",
+      "payloadSha256": "da0cc360580b7b4a8e70cebaa2c5add4aa0959811d31f48e1119eee77af880ce",
+      "payloadBytes": 17384,
+      "payloadMode": 420,
+      "oldHelperPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-source07-install-input-author/resume1/metadata-author.first-read.bash",
+      "oldHelperSha256": "c3b00ecbadecd67cd5ebec9dce063770fb77bbf6bf30acf9a47c38c2fe637bd0",
+      "newHelper": "metadata-author.first-read.bash",
+      "newHelperSha256": "fb7315b4d9029e9d073dda4cd858b7c8501ae0404dd6cfde5d9d40581d4a1d84",
+      "changedLines": 1,
+      "oldLine": "if LC_ALL=C builtin read -r -N 17385 GATEWAY_S07_META_BUFFER < '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-source07-install-input-author/resume1/metadata-author.py'; then return 1; else GATEWAY_S07_META_READ_STATUS=$?; fi",
+      "newLine": "if IFS= LC_ALL=C builtin read -r -d '' -n 17385 GATEWAY_S07_META_BUFFER < '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-source07-install-input-author/resume1/metadata-author.py'; then return 1; else GATEWAY_S07_META_READ_STATUS=$?; fi",
+      "allOtherBytesExact": true
+    },
+    {
+      "payloadPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/binding-functions.bash",
+      "payloadSha256": "00eaf7dc0795287f30398ee47545f813089338d7f637c9a3a30ba6c7d8046e35",
+      "payloadBytes": 30117,
+      "payloadMode": 420,
+      "oldHelperPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/binding-functions.bash.first-read.bash",
+      "oldHelperSha256": "3de5a36e939e7670dcdc0f057142bd6d2ffd125aa71497bd149ceaf9a1fec8ac",
+      "newHelper": "binding-functions.bash.first-read.bash",
+      "newHelperSha256": "ec76439bbbb165c724761ff0c32b37a63c593ec77f3b1427a20861957d335601",
+      "changedLines": 1,
+      "oldLine": "if LC_ALL=C builtin read -r -N 30118 GATEWAY_FR04_READ_BINDING_FUNCTIONS_BUFFER < '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/binding-functions.bash'; then return 1; else GATEWAY_FR04_READ_BINDING_FUNCTIONS_STATUS=$?; fi",
+      "newLine": "if IFS= LC_ALL=C builtin read -r -d '' -n 30118 GATEWAY_FR04_READ_BINDING_FUNCTIONS_BUFFER < '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/binding-functions.bash'; then return 1; else GATEWAY_FR04_READ_BINDING_FUNCTIONS_STATUS=$?; fi",
+      "allOtherBytesExact": true
+    },
+    {
+      "payloadPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/install-loader.bash",
+      "payloadSha256": "347bd56afcd86321fc16cc60ccd0ef0828af7d8f82d7a6156faf8cb09392a9d2",
+      "payloadBytes": 27866,
+      "payloadMode": 420,
+      "oldHelperPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/install-loader.bash.first-read.bash",
+      "oldHelperSha256": "fbf5920b9e6dbbc299afdb1b99826c966ed3963f3b58e6e1846bf3f08ab787cb",
+      "newHelper": "install-loader.bash.first-read.bash",
+      "newHelperSha256": "91c2848685ccf2bbb4e0514430457f48825a8f9fab702772eb404b2aae466d7a",
+      "changedLines": 1,
+      "oldLine": "if LC_ALL=C builtin read -r -N 27867 GATEWAY_FR04_READ_INSTALL_LOADER_BUFFER < '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/install-loader.bash'; then return 1; else GATEWAY_FR04_READ_INSTALL_LOADER_STATUS=$?; fi",
+      "newLine": "if IFS= LC_ALL=C builtin read -r -d '' -n 27867 GATEWAY_FR04_READ_INSTALL_LOADER_BUFFER < '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/install-loader.bash'; then return 1; else GATEWAY_FR04_READ_INSTALL_LOADER_STATUS=$?; fi",
+      "allOtherBytesExact": true
+    },
+    {
+      "payloadPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/control-author-loader.bash",
+      "payloadSha256": "fbd8205820b7a13b812bb2a318ad893c81e710a8c38180031c0ed632df75082c",
+      "payloadBytes": 35488,
+      "payloadMode": 420,
+      "oldHelperPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/control-author-loader.bash.first-read.bash",
+      "oldHelperSha256": "83cf033895c888278e044081c3b9f7ccaee3b2154e197506de4a1b0643cd9c86",
+      "newHelper": "control-author-loader.bash.first-read.bash",
+      "newHelperSha256": "c0dac8c2ee1b0002ad8ebd9897c2a925007374c29a5d5e59943437867122a078",
+      "changedLines": 1,
+      "oldLine": "if LC_ALL=C builtin read -r -N 35489 GATEWAY_FR04_READ_CONTROL_AUTHOR_LOADER_BUFFER < '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/control-author-loader.bash'; then return 1; else GATEWAY_FR04_READ_CONTROL_AUTHOR_LOADER_STATUS=$?; fi",
+      "newLine": "if IFS= LC_ALL=C builtin read -r -d '' -n 35489 GATEWAY_FR04_READ_CONTROL_AUTHOR_LOADER_BUFFER < '/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume7/control-author-loader.bash'; then return 1; else GATEWAY_FR04_READ_CONTROL_AUTHOR_LOADER_STATUS=$?; fi",
+      "allOtherBytesExact": true
+    }
+  ],
+  "allPayloadsUnchanged": true,
+  "oldHelpersImmutable": true
+}

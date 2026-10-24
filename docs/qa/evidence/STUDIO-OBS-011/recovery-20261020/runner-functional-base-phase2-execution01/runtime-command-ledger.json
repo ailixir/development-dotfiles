@@ -1,0 +1,71 @@
+{
+  "unit": {
+    "toolSession": 69930,
+    "terminalToolExit": 0,
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+      "obs011-recovery-20261020-rt-functional-base-unit01",
+      "pnpm",
+      "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "--coverage.enabled=false",
+      "--minWorkers=1",
+      "--maxWorkers=2"
+    ],
+    "collectorPid": 69844,
+    "rawCollectorExit": 0,
+    "childExit": 0,
+    "elapsedSeconds": 50.97,
+    "sourceStable": true,
+    "testInputStable": true,
+    "distStable": true
+  },
+  "fixtures": {
+    "toolSession": 79655,
+    "terminalToolExit": 1,
+    "argv": [
+      "pnpm",
+      "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.fixtures.config.ts",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/full-fixture-raw/vitest.json"
+    ],
+    "cwd": "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+    "nativePid": 76261,
+    "driverPid": 75975,
+    "rawNativeExit": 1,
+    "elapsedSeconds": 384.9972180419136,
+    "caffeinateArgv": [
+      "/usr/bin/caffeinate",
+      "-i"
+    ],
+    "caffeinatePid": 76260,
+    "caffeinateExit": -15,
+    "caffeinateReleased": true,
+    "noFixtureRunRunnerBranch": true,
+    "sourceCaptureBeforeExit": 0,
+    "sourceCaptureAfterEvenFailureExit": 0,
+    "actualSelectedSourceAndDistStable": true,
+    "onlyOneOriginalInvocation": true
+  },
+  "metadataReconciliation": {
+    "fixtureReaderExit": 1,
+    "reason": "Correctly retains gate FAIL from the same one native report; no additional runtime",
+    "failureFreeTextOrPrivateCaptureBodiesExported": false
+  },
+  "rootNewDigestDispositionSha256": "899e3b66ba46164bead693d157b78a8fb4cb605f7e761e27e70257e5dcfc07b5"
+}

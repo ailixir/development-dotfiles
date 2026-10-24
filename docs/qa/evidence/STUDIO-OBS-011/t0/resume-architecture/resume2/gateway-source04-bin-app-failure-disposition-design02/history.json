@@ -1,0 +1,44 @@
+{
+  "rootSafeAttestation": {
+    "tool": "e70581",
+    "actualExit": 0,
+    "inspection": "bd1187",
+    "safe": true,
+    "threats": []
+  },
+  "correctionDesignSavedBeforeLiteralEdits": true,
+  "priorQaFakeSourceInspectedBeforeEdits": true,
+  "guardedAttempts": [
+    {
+      "tool": "ef629a",
+      "actualExit": 0,
+      "checks": 85,
+      "cases": 12,
+      "bodyFakeExecutions": 8,
+      "bootstrapFakeExecutions": 5,
+      "stderrEmpty": true,
+      "boundaryAttempts": []
+    }
+  ],
+  "staticAttempts": [
+    {
+      "tool": "e7b081",
+      "actualExit": 1,
+      "error": "NO_JOINT_ID_ACQUISITION_python-self-roles.py.txt",
+      "classification": "Reviewer checker rejected unchanged status/reason/code tuple, not a PID tuple. No literal or guarded-model change."
+    },
+    {
+      "tool": "c7d68b",
+      "actualExit": 0,
+      "checks": 126,
+      "pinRecords": 25,
+      "correction": "Restrict metadata predicate to tuple targets containing pid or ppid only."
+    }
+  ],
+  "originalDesignAndQaImmutable": true,
+  "prior756And1020Replayed": false,
+  "additionalTargetCasesAfterPass": 0,
+  "actualDiagnostics": 0,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

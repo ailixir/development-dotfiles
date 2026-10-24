@@ -1,0 +1,317 @@
+{
+  "status": "PROPOSED_SCOPE_ONLY_NOT_RELEASED_NOT_EXECUTED",
+  "story": "STUDIO-OBS-009",
+  "suggestedFreshLabelStem": "obs009-gateway80-offtree01",
+  "labelPolicy": "Root must bind a never-used concrete label, workspace and evidence path in the next sealed packet; no old release, PID or receipt is reusable.",
+  "budget": {
+    "sharedCeilingUsd": 500,
+    "aggregateSpend": "unavailable"
+  },
+  "authorization": {
+    "actualExecution": false,
+    "sourceApplication": false,
+    "C8": false,
+    "laneCredit": false,
+    "Done": false
+  },
+  "sourceBaseline": {
+    "rootAcceptedDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+    "meaning": "Safe root adoption binding, not a fresh 1808-file census by this review",
+    "main": "506 unchanged",
+    "dist": "238 unchanged",
+    "actualChart": "22 original files unchanged"
+  },
+  "workspace": {
+    "root": "${OWNED_WORKSPACE}",
+    "cwd": "${OWNED_WORKSPACE}/repo/studio-runner",
+    "topMode": "0700",
+    "tmpdir": "${OWNED_WORKSPACE}/tmp",
+    "parentUmask": "077",
+    "testChildUmask": "022 via subprocess.run(..., umask=0o022), never change parent mask",
+    "dependencyEntry": "${OWNED_WORKSPACE}/repo/studio-runner/node_modules -> root-verified existing local studio-runner/node_modules; do not install, edit or delete target",
+    "copyPolicy": "Exact finite source inputs only. No raw old scratch, native evidence, dist, backend build output or C8-preparation directories copied."
+  },
+  "inputs": {
+    "combinedAcceptedPatchSha256": "30080476f4b6fdf3a7c1ec3dd7ad06ef050ff6342f5cca6a73000110bff68b0d",
+    "chartFiles": [
+      {
+        "path": ".helmignore",
+        "sourceSha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+        "fixedSha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+        "mode": "0644"
+      },
+      {
+        "path": "Chart.yaml",
+        "sourceSha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+        "fixedSha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/NOTES.txt",
+        "sourceSha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+        "fixedSha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/_helpers.tpl",
+        "sourceSha256": "976cc0e8cd9a97240fa18651481172d89354fbd59b8131bb47437973ad45962f",
+        "fixedSha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/api-guided-tls-networkpolicy.yaml",
+        "sourceSha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+        "fixedSha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/configmap.yaml",
+        "sourceSha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+        "fixedSha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/deployment.yaml",
+        "sourceSha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+        "fixedSha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/hpa.yaml",
+        "sourceSha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+        "fixedSha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/ingress.yaml",
+        "sourceSha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+        "fixedSha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/pdb.yaml",
+        "sourceSha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+        "fixedSha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/service.yaml",
+        "sourceSha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+        "fixedSha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/serviceaccount.yaml",
+        "sourceSha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+        "fixedSha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/studio-object-store-pvc.yaml",
+        "sourceSha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+        "fixedSha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/studio-runner-deployment.yaml",
+        "sourceSha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+        "fixedSha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/studio-runner-networkpolicy.yaml",
+        "sourceSha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+        "fixedSha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/studio-runner-scaledobject.yaml",
+        "sourceSha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+        "fixedSha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/studio-runner-service.yaml",
+        "sourceSha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+        "fixedSha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+        "mode": "0644"
+      },
+      {
+        "path": "templates/studio-sse-ingress.yaml",
+        "sourceSha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+        "fixedSha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+        "mode": "0644"
+      },
+      {
+        "path": "values-dev.yaml",
+        "sourceSha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+        "fixedSha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+        "mode": "0644"
+      },
+      {
+        "path": "values-prod.yaml",
+        "sourceSha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+        "fixedSha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+        "mode": "0644"
+      },
+      {
+        "path": "values-uat.yaml",
+        "sourceSha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+        "fixedSha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+        "mode": "0644"
+      },
+      {
+        "path": "values.yaml",
+        "sourceSha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+        "fixedSha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+        "mode": "0644"
+      }
+    ],
+    "unchangedRunnerCopies": [
+      {
+        "path": "studio-runner/test/deployment/helm.ts",
+        "sha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0",
+        "mode": "0644"
+      },
+      {
+        "path": "studio-runner/test/helpers/corpus.ts",
+        "sha256": "63c091d87319035db1673bfbca75d31a02206697ed454f52b3e8f21093dfab79",
+        "mode": "0644"
+      },
+      {
+        "path": "studio-runner/vitest.deployment.config.ts",
+        "sha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b",
+        "mode": "0644"
+      },
+      {
+        "path": "studio-runner/tsconfig.json",
+        "sha256": "723196d470e796a3638c23d794004b30053e0e334a0bb3f1fa270a0a75075046",
+        "mode": "0644"
+      },
+      {
+        "path": "studio-runner/package.json",
+        "sha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e",
+        "mode": "0644"
+      },
+      {
+        "path": "studio-runner/package-lock.json",
+        "sha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613",
+        "mode": "0644"
+      },
+      {
+        "path": "studio-runner/eslint.config.js",
+        "sha256": "9a90981a969856f3190f82b4bcebf1a04a0fa38abe0a5fc5571f83f01d8e68eb",
+        "mode": "0644"
+      }
+    ],
+    "integrationFixture": {
+      "from": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/repo/studio-runner/test/deployment/integrations.test.ts",
+      "to": "repo/studio-runner/test/deployment/integrations.test.ts",
+      "sha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907"
+    },
+    "originalHelper": {
+      "from": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/originals/helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "976cc0e8cd9a97240fa18651481172d89354fbd59b8131bb47437973ad45962f"
+    },
+    "fixedHelper": {
+      "from": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/repo/helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e"
+    },
+    "toolIdentitiesHistoricalOnly": {
+      "node": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+      "nodeSha256": "9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a",
+      "helm": "/opt/homebrew/bin/helm",
+      "helmSha256": "87c4f99aa4edc63a5536838123680bece0e63c51019e515b122ba27f6276a3c9",
+      "nodeVersion": "24.20.0",
+      "helmVersion": "4.2.0+g0646808",
+      "rule": "Root binds fresh exact tool/dependency identity in the next packet; this review did not stat/read tool executables or dependency inventory."
+    }
+  },
+  "environment": {
+    "PATH": "${VERIFIED_NODE24_BIN}:${VERIFIED_HELM_BIN}:${BOUND_BASE_PATH}",
+    "TMPDIR": "${OWNED_WORKSPACE}/tmp",
+    "network": "No install/pull/build/provider/deploy; existing local dependencies only",
+    "cache": "Owned .vite-gateway80; native .mjs config loading avoids bundled config write into shared node_modules/.vite-temp"
+  },
+  "phases": [
+    {
+      "id": "red",
+      "helper": "original",
+      "argv": [
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+        "./node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.gateway80.config.mjs",
+        "--configLoader",
+        "native",
+        "test/deployment/integrations.test.ts",
+        "--testNamePattern=(backend|worker) rejects (flat|nested|relaxed)",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=../red-vitest.json"
+      ],
+      "maximumSeconds": 300,
+      "expectedProcessExit": 1,
+      "expectedSelectedTests": 48,
+      "expectedSelectedFailures": 48,
+      "expectedExplicitlyFilteredTests": 47,
+      "expectedPassingSelectedTests": 0,
+      "expectedSourcePredictedTemplateCalls": 48,
+      "admissionToNext": "Root inspects terminal red receipt before next phase: all 48 identities fail at expected ok=false assertion with actual ok=true; no missing prerequisite, collection/parse, signal, spawn or timeout failure. Filtering 47 tests is intentional selection and never pass credit. Unexpected result stops this unit; no retry."
+    },
+    {
+      "id": "green",
+      "helper": "fixed",
+      "argv": [
+        "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin/node",
+        "./node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.gateway80.config.mjs",
+        "--configLoader",
+        "native",
+        "test/deployment/integrations.test.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=../green-vitest.json"
+      ],
+      "maximumSeconds": 300,
+      "expectedProcessExit": 0,
+      "expectedTests": 95,
+      "expectedPass": 95,
+      "expectedFailErrorSkipTodo": 0,
+      "existingTests": 15,
+      "newTests": 80,
+      "expectedSourcePredictedTemplateCalls": 112,
+      "newCaseGroups": {
+        "currentRefusals": 48,
+        "legacyRefusals": 14,
+        "allowedTuning": 2,
+        "tokenDeletionCounterfactuals": 8,
+        "wholeManifestEquality": 8
+      },
+      "admissionToClose": "Root independently reconciles exact testcase identities, both phases, all original/new assertions and final source/owned-resource state. A green summary alone cannot discharge missing/partial collection."
+    }
+  ],
+  "countsQualification": "All counts here are source-derived predictions, not collected/runtime results. 80 tests are not 80 renders: new cases predict 96 template calls; existing 15 tests predict 16. Each render also probes helm version. No actual per-render frame/count claim without observation evidence. No extra repeat of the embedded eight mutants is needed in this minimal unit.",
+  "observation": "Keep fixture and helm.ts byte-exact; no new interception framework required for original fixture proof. Archive exact invocation/process status and complete Vitest JSON/stdout/stderr. Inspect expected red assertion provenance and green named errors/mounted-map/equality assertions from unchanged harness; do not claim actual40-style independent native frames or success-stderr observation.",
+  "rootPreparationFiles": [
+    "scope.json with concrete workspace/label, 009 binding, uncredited limits, finite maximum, exact tool/dependency/source identities",
+    "input-manifest.json and finite repo/ source copy, original/fixed helper banks and inert proposed config",
+    "run-private.py or established copy-aware collector source: parent077/child022, exact cwd/env, separate recorded invocations, expected-red qualification, no automatic retry and no source-tree cwd fallback",
+    "archive-and-close.json policy plus exact safe projected receipt schema; actual resource identities recorded only during an authorized unit",
+    "root-authorization.json bound to exact prepared hashes after independent narrow review; prior40 authorization consumed"
+  ],
+  "archivePolicy": "After each terminal phase retain exact argv/cwd/environment-safe fields/start/end/exit, full JSON and stdout/stderr, hashes and fixture/helper identities. Preserve original/fixed helper banks and exact phase inventories; retain final 22-file fixed-chart archive plus full owned-workspace archive/inventory (record symlink entry, never traverse dependency target). Record internal fixture scratch cleanup and caller TMPDIR inventory; do not infer terminality or no residue solely from Vitest exit.",
+  "cleanupPolicy": "No cleanup by this review. Future root cleanup only after actual terminal/resource verification, exact owned root uid/dev/ino/path identity, archive equality and finite inventory verification. Remove only that owned workspace/own symlink entry, retain dependency target and all evidence. On unknown/timeout/incomplete state preserve scratch and report; no broad ps/pkill/rm or unrelated TEMP traversal. A failed attempt stays red and cannot be silently retried.",
+  "rollbackPolicy": "No product rollback exists because no product source is touched. The only planned phase change is exact original-helper -> fixed-helper replacement in owned copy after verified red, each pre/postimage hashed. Preserve both inputs; fixture internal mutant copies remove exact tokens and are already cleaned by its unchanged afterAll. Record failure of cleanup rather than hiding it.",
+  "remainingAfterAnySuccessfulScratchUnit": [
+    "Actual real-tree two-file application and fresh binding under root source-open/quiet-window ordering",
+    "Runner full-project typecheck and integration-fixture lint at applicable digest",
+    "Complete deployment tier with verified existing local image and real prerequisites; no skip/missing-image success",
+    "Runbook current disclosure/update and full regression/fresh JaCoCo C8 before any 011 lane credit",
+    "Actual deployment/shared environment/provider/pilot gates and all 21 unanswered external inputs",
+    "No automatic equivalence between accepted two-case40 counterfactuals and exhaustive mutated48-matrix reruns if later gate requires those exact reruns"
+  ]
+}

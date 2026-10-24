@@ -1,0 +1,672 @@
+{
+  "scope": "STATIC_OVERLAP_SOURCE_ONLY_NOT_FULL_FOLD_PROOF",
+  "sourceMethodsAcrossThreeGsFiles": 80,
+  "originalAssertionExpressionsAcrossThreeGsFiles": 751,
+  "gsModeVariants": 9,
+  "gsExpectedCases": 99,
+  "unchangedSentinels": 11,
+  "perFile": [
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "role": "REBASED_OVERLAP_PREVIEW",
+      "sourceMethods": 44,
+      "originalAssertionExpressionsCarried": 212,
+      "all05SourceExactAfterDeclaredTypeMap": true,
+      "methods": [
+        {
+          "name": "migrationPreservesExistingDataAndFreshInstallWorks",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "614211be0577d4d290df937488b267e638584515f2584ec7869e6e07fc4c1477",
+          "previewBodySha256": "614211be0577d4d290df937488b267e638584515f2584ec7869e6e07fc4c1477"
+        },
+        {
+          "name": "canonicalUnicodeParityAndClosedSchema",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "be4d1ed7655ca3174f8092592f74aec270711dd73b92dd795b9808f1a83ba308",
+          "previewBodySha256": "be4d1ed7655ca3174f8092592f74aec270711dd73b92dd795b9808f1a83ba308"
+        },
+        {
+          "name": "concurrentIdenticalStartsAndChangedDigestAreDurable",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "eb39f62f64fa9008bcd57c44869d01f9c9dc3b8f747227e30c826275c400a90c",
+          "previewBodySha256": "eb39f62f64fa9008bcd57c44869d01f9c9dc3b8f747227e30c826275c400a90c"
+        },
+        {
+          "name": "concurrentConflictingStartsHaveOneWinner",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "9c763f4d06de62e641382a1ca1699d3edf783823a2cfbfea4080b021200ae75a",
+          "previewBodySha256": "9c763f4d06de62e641382a1ca1699d3edf783823a2cfbfea4080b021200ae75a"
+        },
+        {
+          "name": "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "3cebb30ee0a2b1cd54e95b6acd1375d99ce50c62b764f85df1f661c8a36c0a62",
+          "previewBodySha256": "3cebb30ee0a2b1cd54e95b6acd1375d99ce50c62b764f85df1f661c8a36c0a62"
+        },
+        {
+          "name": "conflictingAdmissionAndUniqueCoordinatesFail",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "100816f197356747c8234d4bf74cf919d600983aa1a635518395981b64c89cdb",
+          "previewBodySha256": "100816f197356747c8234d4bf74cf919d600983aa1a635518395981b64c89cdb"
+        },
+        {
+          "name": "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "ee0e30279bfd3c16c626aa9ab82ccf5dee64cb7872a74b04d5097f8564ff95d0",
+          "previewBodySha256": "ee0e30279bfd3c16c626aa9ab82ccf5dee64cb7872a74b04d5097f8564ff95d0"
+        },
+        {
+          "name": "accessIsolationRechecksPrincipalCsiAccountAndScope",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "dbd754f9c15d6d71ada4af9c862317e93204a020219813f3403277eb99a76662",
+          "previewBodySha256": "dbd754f9c15d6d71ada4af9c862317e93204a020219813f3403277eb99a76662"
+        },
+        {
+          "name": "workerSubjectFenceAndLeaseAreIndependent",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "e7590f8a9039f4b56bda4e42d7ea9d52071b7fc99b156c15b467c9a7d5b4f859",
+          "previewBodySha256": "e7590f8a9039f4b56bda4e42d7ea9d52071b7fc99b156c15b467c9a7d5b4f859"
+        },
+        {
+          "name": "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "ca9eeba01eacdd53bc54a99908bafa214a06667b17daf42043677b6e04d6c845",
+          "previewBodySha256": "ca9eeba01eacdd53bc54a99908bafa214a06667b17daf42043677b6e04d6c845"
+        },
+        {
+          "name": "lostAckNeverRetriesAndDelayedCallbackCannotRevive",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "91045eac61c1f685804b78ae737ff0c6df25113e95d07ff8be540482f2c3e683",
+          "previewBodySha256": "91045eac61c1f685804b78ae737ff0c6df25113e95d07ff8be540482f2c3e683"
+        },
+        {
+          "name": "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "6813292926c86f279d712498cd58f67ac18300cda52a354e2c305e4587f0e784",
+          "previewBodySha256": "6813292926c86f279d712498cd58f67ac18300cda52a354e2c305e4587f0e784"
+        },
+        {
+          "name": "expiryCannotBeExtendedAndTrustedReaperRevokes",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "7401ce0dfe3f20cf7792ad039fb1fb868eb3b42ece4b449701866282c56b4c74",
+          "previewBodySha256": "7401ce0dfe3f20cf7792ad039fb1fb868eb3b42ece4b449701866282c56b4c74"
+        },
+        {
+          "name": "entireSessionBudgetsAreReservedAndMissingUsageIsConservative",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "d0309dbb823f410a35cdcf48ad99705da95c3415902e9b42558df9481c271581",
+          "previewBodySha256": "d0309dbb823f410a35cdcf48ad99705da95c3415902e9b42558df9481c271581"
+        },
+        {
+          "name": "observationBudgetAndGenerationAreSharedAcrossActions",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "bde3adf541cd9d211f4d90563101ff210253cbf98e9063481ae38a533e636cb2",
+          "previewBodySha256": "bde3adf541cd9d211f4d90563101ff210253cbf98e9063481ae38a533e636cb2"
+        },
+        {
+          "name": "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "9b49bbb39dbf23ed05a0945e6e46c2ddcfab586852a1a1a750e7d7e94d0b184e",
+          "previewBodySha256": "9b49bbb39dbf23ed05a0945e6e46c2ddcfab586852a1a1a750e7d7e94d0b184e"
+        },
+        {
+          "name": "noStateCanPublishWithoutExactVerifier",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "10b3a593b1905c8650f8acf2b678d8958a4f274a0c6ae3e747c3cb6630aaa6cf",
+          "previewBodySha256": "10b3a593b1905c8650f8acf2b678d8958a4f274a0c6ae3e747c3cb6630aaa6cf"
+        },
+        {
+          "name": "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "927e3f455f47d0d058909155e851f1b93ae76146ebee43c031fbdbaaa68d23f4",
+          "previewBodySha256": "927e3f455f47d0d058909155e851f1b93ae76146ebee43c031fbdbaaa68d23f4"
+        },
+        {
+          "name": "clarificationIsBoundToGenerationChoiceAndOriginalDeadline",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "cbdd0ad3e844f1a6d4dbf1af2cda6d836e9d701988185a6fa69d3a4a4c434c5e",
+          "previewBodySha256": "cbdd0ad3e844f1a6d4dbf1af2cda6d836e9d701988185a6fa69d3a4a4c434c5e"
+        },
+        {
+          "name": "successfulLedgerStillCannotPublishWithoutExactPlanVerifier",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "f7cc52e981d744a7cb411b8218b1dd31aea5800c7aa808915ff7028f563014f2",
+          "previewBodySha256": "f7cc52e981d744a7cb411b8218b1dd31aea5800c7aa808915ff7028f563014f2"
+        },
+        {
+          "name": "actionBudgetAndFalseAssertionReportsFailClosed",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "82ce5b00597d33c76ba4274651d5583a4422b8506e3cdbc960c9738606c9a882",
+          "previewBodySha256": "82ce5b00597d33c76ba4274651d5583a4422b8506e3cdbc960c9738606c9a882"
+        },
+        {
+          "name": "gatewayOverrunIsDurablyChargedAndStopsFurtherWork",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "4d39eab9a4788472e9b6d0178c8cbb1f67a9809c44b81955ffca3031ae24f4e5",
+          "previewBodySha256": "4d39eab9a4788472e9b6d0178c8cbb1f67a9809c44b81955ffca3031ae24f4e5"
+        },
+        {
+          "name": "evidenceReferencesAreScopedAndDoNotClaimReplay",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "7c77aee194ac8244a9c73f5b885b0bc1993606f4b86e2a5878673352ec9deb79",
+          "previewBodySha256": "7c77aee194ac8244a9c73f5b885b0bc1993606f4b86e2a5878673352ec9deb79"
+        },
+        {
+          "name": "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "f34f8e3bd89bca51d1f2b7aee982fc1e3d1470d647074b54007966bd30e355f8",
+          "previewBodySha256": "f34f8e3bd89bca51d1f2b7aee982fc1e3d1470d647074b54007966bd30e355f8"
+        },
+        {
+          "name": "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "dbe54afb8fca436a4356c6641447444467b1cc8a06507031458aaf39b062a1fd",
+          "previewBodySha256": "dbe54afb8fca436a4356c6641447444467b1cc8a06507031458aaf39b062a1fd"
+        },
+        {
+          "name": "clarificationSelectionAndPauseChangeRollBackTogether",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "9e2a5ff8a35ef45db8bda9dcd7939e006b789d1f0e5987e20a0b7446b07a6464",
+          "previewBodySha256": "9e2a5ff8a35ef45db8bda9dcd7939e006b789d1f0e5987e20a0b7446b07a6464"
+        },
+        {
+          "name": "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "88a430b583de0e184dd62c4e94ab292d8840c6090d5eea4e883df9468d9cb110",
+          "previewBodySha256": "88a430b583de0e184dd62c4e94ab292d8840c6090d5eea4e883df9468d9cb110"
+        },
+        {
+          "name": "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "2ec86fdbbacd83ba76f6d4cf0ff2f343c5efe92c86d201bc140ef2c24db44d11",
+          "previewBodySha256": "2ec86fdbbacd83ba76f6d4cf0ff2f343c5efe92c86d201bc140ef2c24db44d11"
+        },
+        {
+          "name": "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "20053901671509e0bd5e675d6a08406c0b7b636429f55db83d56858d7bca7300",
+          "previewBodySha256": "20053901671509e0bd5e675d6a08406c0b7b636429f55db83d56858d7bca7300"
+        },
+        {
+          "name": "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "3fec8cf2bc8561173d9d6859266affccfaf57ee8b54c65f53425ff17ab992d6a",
+          "previewBodySha256": "3fec8cf2bc8561173d9d6859266affccfaf57ee8b54c65f53425ff17ab992d6a"
+        },
+        {
+          "name": "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "66ea6da5eff2695f4a55c3d92f9b03021ce9b18b20cfa6db9dc33b7719dbe94b",
+          "previewBodySha256": "66ea6da5eff2695f4a55c3d92f9b03021ce9b18b20cfa6db9dc33b7719dbe94b"
+        },
+        {
+          "name": "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "3cb05a62a06bdd5697313d8fd28820be0993597083b25a9d4fb642966b0bbd1a",
+          "previewBodySha256": "3cb05a62a06bdd5697313d8fd28820be0993597083b25a9d4fb642966b0bbd1a"
+        },
+        {
+          "name": "liveOwnerRenewalPreservesAdmittedAndDispatchedActions",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "561a83eb611f0cdf97c8c67fb5fc8a2a17e9b2b474d6014ab6b90d9b53455db7",
+          "previewBodySha256": "561a83eb611f0cdf97c8c67fb5fc8a2a17e9b2b474d6014ab6b90d9b53455db7"
+        },
+        {
+          "name": "takeoverCannotReopenFinalizingAfterExecutedEffects",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "e4ab7813e870e454a968baf3436aac15bf37bad6392c21543f8db50e1fd8ac40",
+          "previewBodySha256": "e4ab7813e870e454a968baf3436aac15bf37bad6392c21543f8db50e1fd8ac40"
+        },
+        {
+          "name": "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "f3c74368723d73a482b42c9c6ebf64ffb8bd1806ac066d66749a922a53344460",
+          "previewBodySha256": "f3c74368723d73a482b42c9c6ebf64ffb8bd1806ac066d66749a922a53344460"
+        },
+        {
+          "name": "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "884da74bb1f83e17faad26a9571cd2eecaeb8a14c7c28b36c72b7dd8fa160e98",
+          "previewBodySha256": "884da74bb1f83e17faad26a9571cd2eecaeb8a14c7c28b36c72b7dd8fa160e98"
+        },
+        {
+          "name": "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "7562d0d771fd589eefc5ab87b62e2a58ba70d5c0b7030f1ad228d90fa311f758",
+          "previewBodySha256": "7562d0d771fd589eefc5ab87b62e2a58ba70d5c0b7030f1ad228d90fa311f758"
+        },
+        {
+          "name": "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "5eb5583fb0df4451a0ea5c9b5a046097650a609e9b49afdab97b8d0cc39658b3",
+          "previewBodySha256": "5eb5583fb0df4451a0ea5c9b5a046097650a609e9b49afdab97b8d0cc39658b3"
+        },
+        {
+          "name": "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "5a2970a869082fd36d6047073786ba3e046520e9d2e7e6dd192002a180c5aaa2",
+          "previewBodySha256": "5a2970a869082fd36d6047073786ba3e046520e9d2e7e6dd192002a180c5aaa2"
+        },
+        {
+          "name": "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "9ec0e57c5d0c074cc717a79c2970db62f59dc6169201c437a5faf055b1453109",
+          "previewBodySha256": "9ec0e57c5d0c074cc717a79c2970db62f59dc6169201c437a5faf055b1453109"
+        },
+        {
+          "name": "unsupportedObservationEnvelopeUsesOriginalLockedValidation",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "e9bf388d9a0241a2e49ad4432fb0aa04b6ec848d9c685bb52a521705c79c9c7a",
+          "previewBodySha256": "e9bf388d9a0241a2e49ad4432fb0aa04b6ec848d9c685bb52a521705c79c9c7a"
+        },
+        {
+          "name": "unavailableObservationPreparationFallsBackAndFatalRemainsEarly",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "ad4dcff64863241b49fab00e721d2440472392665f0d541091819824806642fb",
+          "previewBodySha256": "ad4dcff64863241b49fab00e721d2440472392665f0d541091819824806642fb"
+        },
+        {
+          "name": "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "97d90c95d144441c862e51b1e37564ac5aaad97135ffb69e93c604bbe42d739a",
+          "previewBodySha256": "97d90c95d144441c862e51b1e37564ac5aaad97135ffb69e93c604bbe42d739a"
+        },
+        {
+          "name": "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "25c863d2b86b928ec4c7b247b1cbbb53f619d7c9bb754d8bcaaf9cd1558befa9",
+          "previewBodySha256": "25c863d2b86b928ec4c7b247b1cbbb53f619d7c9bb754d8bcaaf9cd1558befa9"
+        }
+      ]
+    },
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "role": "REBASED_OVERLAP_PREVIEW",
+      "sourceMethods": 31,
+      "originalAssertionExpressionsCarried": 521,
+      "all05SourceExactAfterDeclaredTypeMap": true,
+      "methods": [
+        {
+          "name": "actualServicesJoinOneConsumedSecretReadAndPostWithAuthenticatedRecovery",
+          "annotation": "ParameterizedTest",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "6b3975ad836c105f9c195836e39cac8844d47a8375a56f57dd6baec05623a368",
+          "previewBodySha256": "d26ead23cb5618b12b22943fa4fe6d011eee280a1a10231910d26bad9f7fcdea"
+        },
+        {
+          "name": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "60ad68f24fdfde1dbc8a16f3729b7c415b224a88ad9eec28f20953b15aeb7c43",
+          "previewBodySha256": "05182441bee467ec83e0312bedceec6ba09b7f4addc351a2148c3d1e17526eb7"
+        },
+        {
+          "name": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "7e75656a66caa6d47e8b0c5afc6d75fa473fce0c2ff482008f413b888fc1cd2a",
+          "previewBodySha256": "7e75656a66caa6d47e8b0c5afc6d75fa473fce0c2ff482008f413b888fc1cd2a"
+        },
+        {
+          "name": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "b48f80add5ec18eccfbb6ab8987c8336d0c90ca6717b860e3c70efc1a96981b6",
+          "previewBodySha256": "b48f80add5ec18eccfbb6ab8987c8336d0c90ca6717b860e3c70efc1a96981b6"
+        },
+        {
+          "name": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "14666b3c44c893abb095da6e3ae52ea2c504e34234d611cab0675c5266fac668",
+          "previewBodySha256": "14666b3c44c893abb095da6e3ae52ea2c504e34234d611cab0675c5266fac668"
+        },
+        {
+          "name": "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "ef454b0e173d2a6740626576465e8020da68a917d141e72cfe049e0a6da29605",
+          "previewBodySha256": "ef454b0e173d2a6740626576465e8020da68a917d141e72cfe049e0a6da29605"
+        },
+        {
+          "name": "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "5b462c5759676fe69c119e312b605a4892fd120e0234de78907a8dd193a7edee",
+          "previewBodySha256": "5b462c5759676fe69c119e312b605a4892fd120e0234de78907a8dd193a7edee"
+        },
+        {
+          "name": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "22ef1eb0eb039093efe0a9596031e893e3756fc58279bb6dfc4604e780f8010c",
+          "previewBodySha256": "22ef1eb0eb039093efe0a9596031e893e3756fc58279bb6dfc4604e780f8010c"
+        },
+        {
+          "name": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "bd57a2dbb17ed6330cad1fc82e9c024dc2a2da90586cbfc687421e530d1d4a5a",
+          "previewBodySha256": "bd57a2dbb17ed6330cad1fc82e9c024dc2a2da90586cbfc687421e530d1d4a5a"
+        },
+        {
+          "name": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "a47cbdc784566cf6f2a5fe3bb195823e13291747d5fb10d0adf9f1e863a7467d",
+          "previewBodySha256": "a47cbdc784566cf6f2a5fe3bb195823e13291747d5fb10d0adf9f1e863a7467d"
+        },
+        {
+          "name": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "bce8c0b2ea019628eca202dd93ae20d3a69edeb32559f37d4189739ec59ad825",
+          "previewBodySha256": "bce8c0b2ea019628eca202dd93ae20d3a69edeb32559f37d4189739ec59ad825"
+        },
+        {
+          "name": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "e701cebe556b39e9efc7c060053eb9e9742b4bf63ca3ac38dd0e53f7057ae531",
+          "previewBodySha256": "e701cebe556b39e9efc7c060053eb9e9742b4bf63ca3ac38dd0e53f7057ae531"
+        },
+        {
+          "name": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "949214821b3974b41de5065db2a2bf9436ccd43946e429b750359bdbb58b0793",
+          "previewBodySha256": "949214821b3974b41de5065db2a2bf9436ccd43946e429b750359bdbb58b0793"
+        },
+        {
+          "name": "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "5f9ea132cade2fa71543fa656b842b0e8c6b36566a5f6478f59567997d0d4731",
+          "previewBodySha256": "5f9ea132cade2fa71543fa656b842b0e8c6b36566a5f6478f59567997d0d4731"
+        },
+        {
+          "name": "expiredTeardownConfirmsOnSweepAfterResendsExhausted",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "5b42b997b6f4f8f1e3f4284a2567b1e4c9cd9425087a0913529d45ab8c6a33b8",
+          "previewBodySha256": "5b42b997b6f4f8f1e3f4284a2567b1e4c9cd9425087a0913529d45ab8c6a33b8"
+        },
+        {
+          "name": "teardownWithoutAckNeverConfirmsAndStopsAfterWindow",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "f24376a85977c82390075baa5562691b64c8b236372077053bd045fafdfa5f0d",
+          "previewBodySha256": "f24376a85977c82390075baa5562691b64c8b236372077053bd045fafdfa5f0d"
+        },
+        {
+          "name": "abandonedTeardownReportQueriesOncePerIntervalAndIsSilentWhenNone",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "2173c52d02b578d7bdb0e535e458113bc6cc2f2b30ac77c4a3b13792749dff23",
+          "previewBodySha256": "2173c52d02b578d7bdb0e535e458113bc6cc2f2b30ac77c4a3b13792749dff23"
+        },
+        {
+          "name": "concurrentAfterCompletionAndSweepSendOneStopAtATime",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "1ebd8d5b5dc709e4b64bcb34c38aae5831b602b63b774a0eb1b72a0e01a4cad6",
+          "previewBodySha256": "1ebd8d5b5dc709e4b64bcb34c38aae5831b602b63b774a0eb1b72a0e01a4cad6"
+        },
+        {
+          "name": "legacyPendingWithoutRequestIsNotRedriven",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "9ff5fea156c6e4b4ca70eb20c34580aeecc752c363fca017e2c44862f47aea47",
+          "previewBodySha256": "9ff5fea156c6e4b4ca70eb20c34580aeecc752c363fca017e2c44862f47aea47"
+        },
+        {
+          "name": "publicationConflictTeardownTargetsTheAssignmentAndConfirms",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "4976df8b4a8da006bb32dfbf17de2c663f6f18ffa8779eb8769eac150ae7f041",
+          "previewBodySha256": "4976df8b4a8da006bb32dfbf17de2c663f6f18ffa8779eb8769eac150ae7f041"
+        },
+        {
+          "name": "publicationConflictedIsIdempotentAndFailsClosed",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "ea4201dfee95f3c23da5515712b3bcece8df065a0cf6aad8a97485a8ea36f10e",
+          "previewBodySha256": "ea4201dfee95f3c23da5515712b3bcece8df065a0cf6aad8a97485a8ea36f10e"
+        },
+        {
+          "name": "publicationConflictTeardownIsRedrivenAfterResendsExhausted",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "8068046d524ff5e10397b4d2e464dd1926a0cd2879314a1d47dae6839ac77c0a",
+          "previewBodySha256": "8068046d524ff5e10397b4d2e464dd1926a0cd2879314a1d47dae6839ac77c0a"
+        },
+        {
+          "name": "pendingAppendPublicationConflictTargetsTheAssignment",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "838a06b70072ee54057ef61fddb8f096de37652a1bcbd2684a3d2d3b6fdaefa9",
+          "previewBodySha256": "838a06b70072ee54057ef61fddb8f096de37652a1bcbd2684a3d2d3b6fdaefa9"
+        },
+        {
+          "name": "stopWithoutAStopTargetRecordsNoPendingTeardown",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "377d92dfb28134aeafa53438329017df4bd56c1a1f28b49f320de7eeb4be7d15",
+          "previewBodySha256": "377d92dfb28134aeafa53438329017df4bd56c1a1f28b49f320de7eeb4be7d15"
+        },
+        {
+          "name": "pendingAppendDeliveryTeardownTargetsTheAssignment",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "965e8f914335b7c690a97c894cf8c7ea204a21daf554c9fee8f9a2dbb233012f",
+          "previewBodySha256": "965e8f914335b7c690a97c894cf8c7ea204a21daf554c9fee8f9a2dbb233012f"
+        },
+        {
+          "name": "noPendingDeliveryKeepsIdentityTarget",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "a0dc6af3726d70636733dfd45cbbed7cb0bd6bfe5f29eb50496dd19de42ce324",
+          "previewBodySha256": "a0dc6af3726d70636733dfd45cbbed7cb0bd6bfe5f29eb50496dd19de42ce324"
+        },
+        {
+          "name": "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "99cd7fe2531ccad11a0eb8cbf07d24cc61e98c096f01f212c9d92a34b95ad1ef",
+          "previewBodySha256": "99cd7fe2531ccad11a0eb8cbf07d24cc61e98c096f01f212c9d92a34b95ad1ef"
+        },
+        {
+          "name": "lifecycleAtLastAcknowledgedIdentityEndsSession",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "bc99f6d20cf410a2f4f12d79fd80531ee0a2d0c7eef317a82c6b3a3e975523b0",
+          "previewBodySha256": "bc99f6d20cf410a2f4f12d79fd80531ee0a2d0c7eef317a82c6b3a3e975523b0"
+        },
+        {
+          "name": "lifecycleAtAnyOtherIdentityIsRefusedWhilePending",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "8f546bb8f70ebb787f44a726f7616ec362708a1c1b609b5a54ad1e91b8b6719b",
+          "previewBodySha256": "8f546bb8f70ebb787f44a726f7616ec362708a1c1b609b5a54ad1e91b8b6719b"
+        },
+        {
+          "name": "consumingVerificationStaysRefusedWhilePending",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "dbebfdc5ec75ddb4eed7c6b608d0109c6fe949c11fdbebd68795dd3ee0ea3775",
+          "previewBodySha256": "dbebfdc5ec75ddb4eed7c6b608d0109c6fe949c11fdbebd68795dd3ee0ea3775"
+        },
+        {
+          "name": "lifecycleWithoutPendingDeliveryIsExactlyVerify",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "60644bfd22cb524a54bc8c1196fdf61b7131ce606e5b4e2d16e6669b699282dc",
+          "previewBodySha256": "60644bfd22cb524a54bc8c1196fdf61b7131ce606e5b4e2d16e6669b699282dc"
+        }
+      ]
+    },
+    {
+      "file": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "role": "UNCHANGED_NOT_A_FOLD_OPERATION",
+      "sourceMethods": 5,
+      "originalAssertionExpressionsCarried": 18,
+      "all05SourceExactAfterDeclaredTypeMap": true,
+      "methods": [
+        {
+          "name": "anExpiredReportAcceptedBeforeTheBackendExpiryEndsExpired",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "584e5fa4c93ca171b0f40242351c0489631f456e0accf0e11720fbb3a02e0f6f",
+          "previewBodySha256": "584e5fa4c93ca171b0f40242351c0489631f456e0accf0e11720fbb3a02e0f6f"
+        },
+        {
+          "name": "everyOtherReasonStillEndsFailed",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "4b5d51df32be3329ce52902ac3f1f177597d0103e5c5773d5952b447061d1620",
+          "previewBodySha256": "4b5d51df32be3329ce52902ac3f1f177597d0103e5c5773d5952b447061d1620"
+        },
+        {
+          "name": "aDispatchingActionStillEndsUnknownOutcomeWhateverTheReason",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "14d739c4acddd6029b84cbcabd54445b3256c248c22f5d94d7be0dcbb6e2c844",
+          "previewBodySha256": "14d739c4acddd6029b84cbcabd54445b3256c248c22f5d94d7be0dcbb6e2c844"
+        },
+        {
+          "name": "aCallbackPastTheLeaseIsStillRefusedStaleFenceAndNothingIsStopped",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "36532cc0c48a2e93a9d65b4b69795e86a1e0c9e5c81ae041a7aeba7ad63413d0",
+          "previewBodySha256": "36532cc0c48a2e93a9d65b4b69795e86a1e0c9e5c81ae041a7aeba7ad63413d0"
+        },
+        {
+          "name": "theContextIdentityIsStillCheckedWhateverTheReason",
+          "annotation": "Test",
+          "exact05BodyAfterDeclaredTypeMap": true,
+          "gs05BodySha256": "421946436129b683c36db166c466ee888f1731e5543f0c1ecd0e12311f8813e6",
+          "previewBodySha256": "421946436129b683c36db166c466ee888f1731e5543f0c1ecd0e12311f8813e6"
+        }
+      ]
+    }
+  ],
+  "protectedSourceFixAnchors": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "unchangedGsSourceAnchors": [
+        {
+          "anchor": "INSERT INTO users(sso_id,name,email)",
+          "gs05Count": 1,
+          "previewCount": 1,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)",
+          "gs05Count": 1,
+          "previewCount": 1,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "Click Order number.",
+          "gs05Count": 2,
+          "previewCount": 2,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "principal.email()",
+          "gs05Count": 3,
+          "previewCount": 3,
+          "oldFoldCandidateCount": 0
+        }
+      ]
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "unchangedGsSourceAnchors": [
+        {
+          "anchor": "NOT (progress ??",
+          "gs05Count": 1,
+          "previewCount": 1,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "\"CUT_PEER\"",
+          "gs05Count": 2,
+          "previewCount": 2,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "gstFixedFrame",
+          "gs05Count": 2,
+          "previewCount": 2,
+          "oldFoldCandidateCount": 0
+        },
+        {
+          "anchor": "Translation state and manifest were initialized by genuine production access.start.",
+          "gs05Count": 5,
+          "previewCount": 5,
+          "oldFoldCandidateCount": 5
+        }
+      ]
+    }
+  ],
+  "onlyDeclaredTypeMappingChangesInTwoPreviews": true,
+  "allOther05BytesPreserved": true,
+  "remaining35OperationsUnchanged": true,
+  "unresolvedLifecycleBlocksCompleteFold": true,
+  "prerequisites": [
+    "actual accepted complete GS-T proof",
+    "later actual GS-M",
+    "later actual ITS",
+    "later actual IR-B4",
+    "LEFT",
+    "MERGE/RT"
+  ],
+  "nativeActualOutcome": "UNKNOWN",
+  "runtimeOrLaneProof": false,
+  "irScratchClockOrCallStarted": false
+}

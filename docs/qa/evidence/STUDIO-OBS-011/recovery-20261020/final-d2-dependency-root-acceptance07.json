@@ -1,0 +1,74 @@
+{
+  "kind": "ROOT_BOUNDED_D2_INSPECTION_DIAGNOSTIC_DEPENDENCY_ACCEPTANCE07",
+  "atUtc": "2026-10-21T04:46:52.255011+00:00",
+  "accepted": true,
+  "sourceQaVerdict": "SOURCE_CLEAN_FOR_BOUNDED_D2_INSPECTION_DIAGNOSTIC",
+  "sourceQa": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation01/independent-qa/manifest.json",
+    "sha256": "fb06b248b27c55f7e67171698381becd60b8b08172374173aa7e7bbf7eb0ce67",
+    "bytes": 1224
+  },
+  "inspectionOwner": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation02/manifest.json",
+    "sha256": "dc3c2724fbf0e7f79abba0aa2ce31a60058fa86757e42b02fc1e9ccfd0455803"
+  },
+  "inspectionFixture": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation02/fixture.mjs",
+    "sha256": "b1d881b1d1a0669c83b1e630dbebd87b31bfa02b921b7a68dfeeb2d066dfb9a1",
+    "bytes": 15522
+  },
+  "inspectionSchema": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-active-inspection-diagnostic-preparation02/diagnostic-schema.json",
+    "sha256": "9015f9683d7765e4dd207d07a9eaa6f32426de698491256024d2a395d49688bb",
+    "bytes": 3516
+  },
+  "rootOwner02SourceReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-inspection-diagnostic02-root-source-review.json",
+    "sha256": "a0e18e33ba56807a064cf09da0cbc0af76094ea7db1e4eef682ecd50705935f4",
+    "bytes": 1036
+  },
+  "preparation": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-preparation07/manifest.json",
+    "sha256": "78df2b3b8e93bb8f74fa206fd969e9dd4dfded6f8ceab18621198d00941c7f09",
+    "bytes": 1664
+  },
+  "driver": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-preparation07/run-d2.py",
+    "sha256": "1a4da0ce1dc6f35eea454e5536262026a8232205ea6abe00256b4586b6c5bb73",
+    "bytes": 25549
+  },
+  "rootAstOnlyDriverAndBinderValid": true,
+  "newBinderInlineSha256": "a1f4d50e89ae715e1daf018c6684b551479d3e73289ec701157f4e4ca26f6963",
+  "allOriginalSuccessPredicatesAndNativeAcceptanceTailUnchanged": true,
+  "diagnosticFailureCannotSatisfyActiveOrAfter": true,
+  "nullRemainsUnknown": true,
+  "priorExactDependenciesAndShellAcceptance": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-dependency-root-acceptance06.json",
+    "sha256": "c33f3c59eb1b4fe6f2e1c4d6231be693ea5852b65b6c1a6edf51fc98ec4e8273",
+    "bytes": 3717
+  },
+  "nineFinalBindings": {
+    "acceptedSourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "acceptedTestInputDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "acceptedDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "buildContextSha256": "8457b7413e543ff88eea95e7fec554d380e5903e839e0f814c46739833bdb886",
+    "finalBuildReceiptSha256": "2d46c813bc32bcd8f56eecc48e65c30ba0871328ecac54a26bc554fe66a3ce3d",
+    "configuredImageReference": "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "measuredImmutableImageId": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "finalImagePinsReceiptSha256": "effa2ebb317234691de3de9c09e5a5b7cd194b59e0ed23df0f00ae1fe0ac3ab1",
+    "finalDeployment722ReceiptSha256": "3ba83d0f0af820cbe836714a2142fba380cd6d8b3c3f71bb32a4aa181e9c9329"
+  },
+  "canonicalShell": {
+    "path": "/bin/bash",
+    "sha256": "41e7f937a0d2e7e0bc03884595f54f7a892e468087519de1fc53e177b2503308",
+    "mode": "0o555",
+    "versionFirstLine": "GNU bash, version 3.2.57(1)-release (arm64-apple-darwin23)"
+  },
+  "historicalFailures": [
+    "05NO_CREDIT",
+    "06NO_CREDIT_activePredicateUNKNOWN"
+  ],
+  "purpose": "One separately admitted execution of SAME required D2 case to retain bounded failure diagnostics if inspection fails; no new scenario or weakened assertion. Any actual success requires independent runtime QA, not this source acceptance.",
+  "bindingOnlyReleased": true,
+  "runtimeReleased": false
+}

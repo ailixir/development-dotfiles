@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "status": "SEALED_INDEPENDENT_QA_CONDITIONAL_SOURCE_ORDERING_SUPPORT_NO_ACTUAL_RELEASE",
+  "reviewer": "Quinn / aiox-qa",
+  "independence": "No component or root composition source contribution; fresh inspection and replay",
+  "subjectCompositionManifestSha256": "5fd6e9a1f3e11b11266a47520cebf5dc9c009d61c4fe0036cbf5d00668ee33f2",
+  "executionManifestSha256": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7",
+  "controlManifestSha256": "d4e68dba1e67268ab271841ef3ba4838cdc39a4cb804c983014f9f6f611dc87f",
+  "apiLinkageSha256": "1659a503c6f0aa8a7c8107133efeee874e9374a0670b88a7adbc18b2bb5ad762",
+  "requiredBindingsNoteSha256": "ee50f02ad02a4799a538152903a8be42d2895e2ffecd3ae76a8f3f9332fcf3bc",
+  "peerArchitectureManifestHashVerifiedAfterIndependentConclusion": "a19d6f106eb8eaef64afdb9ba1c046847d7289d3bc566411e23ceb392eb5008e",
+  "pureChecks": 584,
+  "staticOrderingChecks": 23,
+  "mandatoryFindings": 0,
+  "files": [
+    {
+      "path": "control-pure-reproduction.json",
+      "sha256": "49e0a3669dec83ad6f2d5953d139534fe452e42cceb8e9f352a169ec041ebe8d",
+      "bytes": 6722
+    },
+    {
+      "path": "execution-pure-reproduction.json",
+      "sha256": "f48da6809c37392d50364f037e5fbf82699f022083b68e34886083d42b4d02c3",
+      "bytes": 65174
+    },
+    {
+      "path": "findings.json",
+      "sha256": "e449f524e794ec50af3c56a26b7ba379d18d1df23d735b60e2ff3e5886d84d22",
+      "bytes": 1519
+    },
+    {
+      "path": "input-pins.json",
+      "sha256": "8eb605ac81214ed04e13b9bdea34e5e7d926ede8c9dfd77d8bff5f0107c5423b",
+      "bytes": 36113
+    },
+    {
+      "path": "inspect_ordering.py",
+      "sha256": "653ad9c58fb520f89ab4f19aaf27e16fd63bc39f6a50d0fa30951e11bbb3c399",
+      "bytes": 8518
+    },
+    {
+      "path": "integration-pure-reproduction.json",
+      "sha256": "3bd9c2eec0aa47b3f695ab75bd81a32907fbbd3608639d18dd7683bbed59ebe4",
+      "bytes": 5677
+    },
+    {
+      "path": "ordering-inspection.json",
+      "sha256": "e8a239ef50417d860369f67b70eff1365f0c6f8acfba519205a758c1243bb08c",
+      "bytes": 5459
+    },
+    {
+      "path": "replay-results.json",
+      "sha256": "2374b55e8bc4385281ced77e2f34caefe2ff67f9d53f939824042906c20554d2",
+      "bytes": 698
+    },
+    {
+      "path": "replay.py",
+      "sha256": "25f40a92a74a13b003d3cfe89ce2f5895c00d426786263e03ee338a8b24ca47b",
+      "bytes": 11461
+    },
+    {
+      "path": "review.md",
+      "sha256": "a2c9defa27b358a8b4f7cf5b42267ddb85acb9311e5631cafcf23976f65821a4",
+      "bytes": 9682
+    },
+    {
+      "path": "strict-diff-reproduction.json",
+      "sha256": "a5eaa6506fe51fbda1a1a9a21ad65fbd069725a4391273aeb8daa43e53afdb0f",
+      "bytes": 2595
+    }
+  ],
+  "actualExecution": false,
+  "release": false,
+  "readiness": false,
+  "permit": false,
+  "credit": false,
+  "historicalGapsRepaired": false,
+  "laneOrStoryLifecycleAuthority": false,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

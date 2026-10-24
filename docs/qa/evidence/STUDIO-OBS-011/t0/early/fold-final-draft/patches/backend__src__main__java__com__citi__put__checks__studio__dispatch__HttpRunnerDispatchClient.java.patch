@@ -1,0 +1,108 @@
+--- a/backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java
++++ b/backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java
+@@ -78,6 +78,9 @@
+   private final StudioRunnerProperties runner;
+   private StudioDispatchMetrics metrics;
+   private HttpClient validationClient;
++  private URI validationOrigin;
++  private boolean explicitValidationOrigin;
++  private java.util.function.Supplier<String> validationToken;
+   private HttpClient guidedClient;
+   private URI guidedOrigin;
+   private java.util.function.Supplier<String> token;
+@@ -125,6 +128,7 @@
+     this.objectMapper = objectMapper;
+     this.properties = properties;
+     this.runner = runner;
++    this.validationToken = () -> runner == null ? null : runner.serviceIdentityToken();
+     this.httpClient =
+         builder
+             .followRedirects(HttpClient.Redirect.NEVER)
+@@ -377,6 +381,11 @@
+   }
+ 
+   private void initializeGuided(URI origin, StudioRunnerTls tls,
++      java.util.function.Supplier<String> token, GuidedContracts contracts) {
++    initializeGuided(origin, tls.sslContext(), token, contracts);
++  }
++
++  private void initializeGuided(URI origin, javax.net.ssl.SSLContext tls,
+       java.util.function.Supplier<String> token, GuidedContracts contracts) {
+     require(
+         origin.getScheme().equals("https")
+@@ -395,7 +404,7 @@
+     this.token = token;
+     this.contracts = contracts;
+     this.guidedClient =
+-        HttpClient.newBuilder().sslContext(tls.sslContext())
++        HttpClient.newBuilder().sslContext(tls)
+             .connectTimeout(Duration.ofSeconds(5))
+             .followRedirects(HttpClient.Redirect.NEVER)
+             .version(HttpClient.Version.HTTP_1_1)
+@@ -403,7 +412,9 @@
+   }
+   public JsonNode validate(JsonNode request, PublicationBudget budget, int maxValidationBytes, long validationTimeoutMs) {
+     require(contracts != null, "RUNTIME_INCOMPATIBLE", 409);
+-    URI endpoint = runner != null && runner.isConfigured() ? URI.create(runner.baseUrl()).resolve("/v2/validate-observed") : null;
++    URI validationOrigin = explicitValidationOrigin ? this.validationOrigin
++        : runner != null && runner.isConfigured() ? URI.create(runner.baseUrl()) : null;
++    URI endpoint = validationOrigin == null ? null : validationOrigin.resolve("/v2/validate-observed");
+     require(!Boolean.getBoolean("jdk.httpclient.enableAllMethodRetry"), "RUNTIME_INCOMPATIBLE", 409);
+     require(
+         !TransactionSynchronizationManager.isActualTransactionActive(),
+@@ -411,7 +422,7 @@
+         409);
+     require(endpoint != null && endpoint.getHost() != null
+         && endpoint.getUserInfo() == null && endpoint.getQuery() == null && endpoint.getFragment() == null
+-        && (URI.create(runner.baseUrl()).getPath().isEmpty() || URI.create(runner.baseUrl()).getPath().equals("/"))
++        && (validationOrigin.getPath().isEmpty() || validationOrigin.getPath().equals("/"))
+         && (endpoint.getScheme().equals("http") || endpoint.getScheme().equals("https")),
+         "RUNTIME_INCOMPATIBLE", 409);
+     String representation = contracts.validateAndCanonical("v3/replay-validation", request);
+@@ -422,7 +433,7 @@
+     }
+     byte[] payload = representation.getBytes(StandardCharsets.UTF_8);
+     require(payload.length <= maxValidationBytes, "BUDGET_EXCEEDED", 413);
+-    String credential = runner.serviceIdentityToken();
++    String credential = validationToken.get();
+     require(credential != null && !credential.isBlank(), "UNAUTHENTICATED", 401);
+     Duration remaining = budget.remaining();
+     if (remaining.compareTo(Duration.ofMillis(validationTimeoutMs)) > 0) {
+@@ -914,4 +925,37 @@
+       }
+     }
+   }
++  /** Explicit guided operation setup; deployed composition remains the TLS constructor above. */
++  public HttpRunnerDispatchClient(URI origin, javax.net.ssl.SSLContext tls,
++      java.util.function.Supplier<String> token, GuidedContracts contracts) {
++    this.objectMapper = new ObjectMapper();
++    this.properties = new StudioExecutionProperties(null, null, null, null, null, null, null, null, null, null, null);
++    this.runner = new StudioRunnerProperties(null, null, null);
++    initializeGuided(origin, tls, token, contracts);
++    this.httpClient = guidedClient;
++    this.validationClient = guidedClient;
++    this.validationToken = () -> null;
++  }
++
++  /** Explicit validation operation setup; limits are still supplied on each validate call. */
++  public HttpRunnerDispatchClient(URI origin, HttpClient client,
++      java.util.function.Supplier<String> token, GuidedContracts contracts) {
++    this.objectMapper = new ObjectMapper();
++    this.properties = new StudioExecutionProperties(null, null, null, null, null, null, null, null, null, null, null);
++    this.runner = new StudioRunnerProperties(null, null, null);
++    this.httpClient = client;
++    require(origin == null || origin.getHost() != null && origin.getUserInfo() == null
++        && origin.getQuery() == null && origin.getFragment() == null
++        && (origin.getPath().isEmpty() || origin.getPath().equals("/"))
++        && (origin.getScheme().equals("https") || origin.getScheme().equals("http")),
++        "RUNTIME_INCOMPATIBLE", 409);
++    require(client.followRedirects() == HttpClient.Redirect.NEVER
++        && !Boolean.getBoolean("jdk.httpclient.enableAllMethodRetry"), "RUNTIME_INCOMPATIBLE", 409);
++    this.validationOrigin = origin;
++    this.explicitValidationOrigin = true;
++    this.validationClient = client;
++    this.validationToken = token;
++    this.contracts = contracts;
++  }
++
+ }

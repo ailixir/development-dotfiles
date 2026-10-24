@@ -1,0 +1,24 @@
+{
+  "kind": "FUTURE_EXACT_SOURCE9_REVIEW_CONTRACT_NOT_AN_ACTUAL_REVIEW",
+  "sourceOnly": true,
+  "subject": "The independently supplied SHA256 of this final source9 manifest.json; manifest cannot self-pin.",
+  "requiredIndependentRecords": [
+    {
+      "reviewer": "Aria",
+      "subjectManifestSha256": null,
+      "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+      "mandatoryFindings": null,
+      "status": "OWED_NOT_ISSUED"
+    },
+    {
+      "reviewer": "Quinn",
+      "subjectManifestSha256": null,
+      "protocol": "GATEWAY_LOCAL_RUNNER_REPORT_SAMPLED_OBSERVATIONS_V1",
+      "mandatoryFindings": null,
+      "status": "OWED_NOT_ISSUED"
+    }
+  ],
+  "acceptance": "Each independently issued record must bind exact new subject manifest SHA, exact protocol and reviewer; runtime requires mandatoryFindings exactly[]. A source8 review with6 findings or root authored substitute cannot satisfy it.",
+  "namedLimitedProfileRuling": "Separately owed Aria/Quinn/root records with exact code-review raw pins and package SHA, limited to replacing strong initial subject for this local profile; all10 false guarantees preserved.",
+  "actualRuntimeEvidence": "Owed independently after proper prior failed-unit closure and fresh root scope; source fake results cannot satisfy actual phase/QA/gate evidence."
+}

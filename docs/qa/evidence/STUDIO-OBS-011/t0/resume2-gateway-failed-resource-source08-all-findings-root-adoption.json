@@ -1,0 +1,294 @@
+{
+  "kind": "ROOT_CODE08_ALL_COMPLETE_FINDINGS_AND_CONDITIONS_ADOPTION",
+  "atUtc": "2026-10-20T02:21:09.353550+00:00",
+  "authorizedBy": "root",
+  "subject": "obs009-gateway80-offtree03-20261019",
+  "sourceManifestSha256": "3fe65bc487f8badf8329ff44040b11d1634e93145142eb3b5bd72d782a82190b",
+  "sourceManifestBytes": 7608,
+  "sourcePayloads": 41,
+  "rootSourceAll41Plus42Verification": "544121 actual0",
+  "rootRelevantActualSourceReads": [
+    "fa4e38",
+    "a82707",
+    "303c70",
+    "0b33e0",
+    "9c3ec8",
+    "5cad05"
+  ],
+  "canonicalMandatoryFinding": "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS",
+  "mandatoryCategories": 1,
+  "reviews": {
+    "Aria": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-failed-red-resource-code08-exact-review",
+      "manifestSha256": "abf10d6e3561bd5194b7d58777a6827156547a777ca8721a002e9895ccc1497c",
+      "manifestBytes": 4282,
+      "payloads": 22,
+      "rootAllHashBytesModesMembershipAndFullProseConditionsRead": "1b870a actual0",
+      "reviewProseSha256": "29e1f1e8a98c88761c430eb951954f313077521b5298792ed4ceebd0258b2dd5",
+      "completeFindings": {
+        "kind": "INDEPENDENT_ARIA_CODE08_COMPLETE_FINDINGS",
+        "reviewer": "Aria",
+        "subjectManifestSha256": "3fe65bc487f8badf8329ff44040b11d1634e93145142eb3b5bd72d782a82190b",
+        "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+        "mandatoryFindingCount": 1,
+        "mandatoryFindings": [
+          {
+            "id": "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS",
+            "mandatory": true,
+            "severity": "HIGH",
+            "category": "All-consumer registered external mode/hash dispatch before body",
+            "locations": [
+              "failed_gateway.py:180 Unit.retained_source_read",
+              "failed_gateway.py:263/279-280 leaf.anchored_raw and d.SAFE_READER/TOOL_READER/d.sha",
+              "failed_gateway.py:72 System.read",
+              "failed_gateway.py:155 Unit.bound"
+            ],
+            "problem": "retained_source_read tests str(path) membership before applying the System path representation. An accepted raw string /./ alias misses the canonical registry key, then generic System.read normalizes Path(path) and reads the same registered file with mode=None, without registered SHA validation or retained-buffer continuity.",
+            "supportedInputAssessment": "No type/canonical-Path-only requirement is enforced on this callback. Historical anchored_raw coerces Path(path), System.read accepts and normalizes str, and the d.sha wrapper forwards its argument directly to SAFE_READER. Usual internal Path callers do not establish a restriction excluding supported raw-string input.",
+            "evidence": "Independent Aria source/control trace bound to Quinn's single real-System/real-Custody fake alias pair a2c9db/exit0: direct bound(alias) normalizes and rejects fixed actual644 versus declared600 before body; retained_source_read(alias) returns changed synthetic bytes with wrong mode and hash, one fake body read, no registered buffer entry, closed selected descriptors and zero real boundaries. Exact alias-results SHA6abc8efaeddb52859dbdb7d74e550627bec5d864a70e01499c89a7525729338d/567B; no duplicate target case was run by Aria.",
+            "impact": "The all-consumer exact mode/hash-before-body invariant fails for an accepted spelling of a registered resource. This is a source-level reader-boundary defect; it establishes no actual private-file access/current exploit or precise immediate member of historical Source07 failure.",
+            "minimumCorrection": "Normalize to the approved System path representation BEFORE membership and use that same canonical identity in both routes, or reject noncanonical/unsupported input before access. Every accepted registered spelling must use bound with declared600/644 and SHA or HOLD before body. Keep unregistered package/binary/prior/control/qualified-baseline policies and all caps unchanged. Seal an immutable exact correction with independent affected reviews/root adoption/new source-specific owners and fresh actual scopes; do not weaken mode/hash or change original private mode.",
+            "ownerDecisionIssued": false,
+            "actualRuntimeAuthority": false
+          }
+        ],
+        "advisories": [],
+        "allMandatoryFindingsTogether": true,
+        "allChangedAndInheritedCategoriesAssessed": true,
+        "ownerDecisionIssued": false
+      },
+      "completeConditions": {
+        "kind": "ARIA_CODE08_COMPLETE_RETAINED_CONDITIONS",
+        "allCompleteInheritedConditionsRetained": true,
+        "exactReferences": {
+          "source08Design": "de8eb1e7182294e48bcf546d5fb64352c1abb6443042537f42f5547e74415ead",
+          "source08DesignRoot": "dfe2788d7ab43124ad09aee99748b3109e6038e09d1ac63877faf421d2e3e6d7",
+          "Source07Root": "a08bbe402465c4956f78dcc8255619898df833f6b716133ba366f87fc9a323d6",
+          "threeSource07Owners": "665817a996d062417c5046d08320ff554fb501ee07aed3c3e17544e2aac2b1f6",
+          "rootSource06": "afef93b9b60792d3427207748a5983dc2509366a3a0ce100156b3ce48d12908a",
+          "completeInheritedRoot": "7abc98e0eb0dadbff1a21476cc38faff0c551e4ea59bff78c288ebd785560b7d",
+          "preuse": "572809ccb13c2ece5a0a5e57d6222d79865a601334515367a6347b0ac37230a9",
+          "Source07ConditionalApplicability": "b16b54eb0c8e1b3f64c72176472012b9ddd41572c6f736ff85b8551bbc8a2285",
+          "metadataRoot": "820f4b12161b8b2229288a4f56e25a3c906469bdee98f14d4e6f8c8d93c78470",
+          "transportRoot": "88f5202618fdf74843ccd5b73a05e54c1a2f807a6e481e63f8a5eb44ce9e63b5",
+          "actualSource07Failure": "65e5d40f7073b48a780b6d822527cfa3b552a5b386917bce84fd1e17f3d28848",
+          "approvedMetadataResult": "9f86df4d8378aa1d62e433a9a83e7f123652004153045cfc9e0d1c20674224ae"
+        },
+        "completeConditionCarriers": "Source08 phase-b-authorization-bindings.json and phase-a-impact.json, full sealed Aria design5/rootdfe, current Source07 both complete reviews/roota08b and rootafef/root7abc/typed-design/Source04/05/06 lineage retain all full conditions; exact immutable pins recorded in pins.json.",
+        "conditions": [
+          "HOLD FR08-REGISTERED-READER-PATH-ALIAS-BYPASS until coherent immutable normalization/rejection correction and exact independent affected reviews/root adoption. No PhaseB owner, Source08 installation, actual scope or credit is issued. Canonical passing cases do not waive the all-consumer alias gap.",
+          "Closed source registry29 joins unchanged externalSourcePins, private0600/public0644 strictbuiltinints/no missingextra/default/None/caller map. Normalize accepted resource identity before registry and access in all callback routes, or HOLD before access. Preserve exactSHA/mode-before-body and retainedbuffercontinuity, unregistered package/binary/prior/control/qualified-baseline policy/caps. Never chmod/read/copy/stat/hash original private1212 ad-hoc; metadata9f result only.",
+          "Source07 FILE_OWNER_MODE_CAP immediate failed member remains NOT_EMITTED/UNKNOWN; current mode mismatch is independent. Source07 cap/readonlyfacts consumed, no retry/reset/rebind. OutsideFR04/oldE/N01/N02 remain preserved; no frozenN03 or qualifiedphysicalabsence. NewN04/FR05 prospective, exact oldE ancestry rejects unexpected03. Source08 code/owners/scopes are new exact subjects; no Source07/Source09/C8 approval transfer.",
+          "Complete-FIRST source-derived authorization/all original trusted facts with matching separate traces/derived inclusion/pending actual installer remain required before preflight/draft/attempt/mkdir/write. No subset/nonadmitting boundary or caller binary/code/loader/input/member/typedactor/mode maps. Strict owners and designated pending current authors/producer/path/source/identity checks, full custodied state/history and exact separately captured pending completion set preserved.",
+          "All original27,39213external1/65140external1 and every subsequent known actual owner/scope/input/source-reader/first-read/verifier/eval/helper writer must complete with originalPID/parent/tool/status before final initial serialization. Unknown starts/FP null, externaltool status notdirectwait. Trusted root completeness cannot find unreported actors; actualQAroot must match all originals.64facts/65536bytes/8192actors and every physical/archive/fileJSON/completion/census/copy budget unchanged; no future0/last hashingwriter/omission/PIDreuseexemption.",
+          "Only originalunit obs009-gateway80-offtree03-20261019/PTY29815/wrapper3720/shell3749/startMonOct19 12:48:37/expectedfailedwrapper1, NormalGateway06/e2e3340 provenance and rolecontractf7fe. Opaque reported44/SHA6ca8+orig124/SHA246e/literalAPP; legacycanonical/equivalencefalse, rawreportedUNKNOWN/memoryonly, exactly7 independent physical witnesses and all source/holder/kernel/parent/inherited/listener/current/history/numericabsence/wait/UNKNOWN predicates remain.",
+          "Seven physical acquisition/SAMEbuffers/full purefactory preflight before mutation, actualopenedidentity/immediateownership/partialmkdirUNKNOWN/primary-before-fallible-publication/knownchildren/closedselectedcleanup/oneopaqueouterfinalizer preserved. SelecteddescriptorCLOSED not postexitleak proof. Node121911744 fits existing134217728 cap, no increase.",
+          "Correct Bash3.2 finite IFS=/C/read-r-dempty-n(expected+1)/EOF1/readonly/externalSHA and concrete trace-bearing807/1690/SAME-buffer/status/eval caller composition remain. Prefix stops before verifier/eval; no silent verifier/hidden helper/guessed PID or borrowed actual grant. Source08 changed payloads require exact current caller/transport pins/independent review and actual scopes.",
+          "Current fake23 is two fixedcases plus one explicitconflict group; canonical positive reachesactualpurepreflight thenTESTsentinel1 before mutation, never installation0. Synthetic29 content/hashes/witnesses, no actualprivateoriginal. Peer41/7 and one aliaspair separatelyrawbound; old27/31/39/13/history permit/initial proofs are exactcomponentreuse only, not current fullflow or actualsource/resource proof.",
+          "Freshqualifiedf9+separatelyobservedSAMEheld0 inspected BEFORE admission/archive/closing via existing observer only. Expectedf9 ancestry, no backendexecutable/buildartifact/compiler/native consumer/newproofadapter. Originalreadiness60s/permit/rawpins/existingnonreverseclock through all selectedcleanup/delivery preparation toFINAL_GUARDED_ACCEPTANCE, parentphysicalschedulingUNPROVED. Actualwrapper1/outerpostclose0/observercompletion/independentactualQAroot and all actualmetadata/install/bind/negative/held/archive/final/gate scopes/outcomes remain separate OWED.",
+          "New corrected exact code/BOTH independent clean reviews/rootallconditionsack+actualreviewhashes precede any THREE source-specific named technicalowners. Later metadataauthor/applicability/copy/install/phase/actualQAroot remain distinct. No ownerrecord on currentHOLD, no prospectiveFR05/owner path creation.",
+          "Only exact approved public source/metadata reads and this named review output writes. No actual EWN/FR04/FR05/holder/lock/process/census/kernel/binary/protectedbaseline/private/runtimebody/home/cache/Java/Node/Gradle/Helm/network/provider/API/native/signal/cleanup/sharedsource/sourcewindow/lease action. C5/C212/dirtygovernance untouched. C8/GST PARKED; freshbackendcheck+JaCoCo before011credit/finalT5/AC5/default4000/Order17/originaltests/skips/Live/business/security/privacy/T0root731/Replay/C8beforecredit/mainIR/external21/lifecycle holds unchanged. USD500sharedaggregateUNKNOWN."
+        ],
+        "allActualGatesOwed": true,
+        "technicalOwnerDecisionIssued": false,
+        "actualAuthority": false
+      },
+      "completeReviewRecord": {
+        "kind": "INDEPENDENT_ARIA_EXACT_FAILED_RESOURCE_SOURCE08_REVIEW",
+        "reviewer": "Aria",
+        "subjectManifestSha256": "3fe65bc487f8badf8329ff44040b11d1634e93145142eb3b5bd72d782a82190b",
+        "protocol": "FAILED_RESOURCE_TYPED_SELF_TEXT_AND_PHYSICAL_ROLES_V1",
+        "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+        "mandatoryFindingCount": 1,
+        "mandatoryFindings": [
+          "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS"
+        ],
+        "sourceOnly": true,
+        "currentFixedHarnessAssertions": 16,
+        "currentFixedCases": 2,
+        "currentIndependentConflictAssertions": 7,
+        "extraConcreteConcernGroups": 1,
+        "currentPythonAssertionTotal": 23,
+        "uniqueAssertionsClaimed": false,
+        "finiteChecks": 247,
+        "uniqueNamedPublicPins": 104,
+        "peerCurrentFixedCasesBound": 7,
+        "peerSingleAliasPairBound": true,
+        "actualTargetEffects": 0,
+        "originalPrivateBodyStatHashAcquired": false,
+        "technicalOwnerDecisionIssued": false,
+        "phaseBEntered": false,
+        "actualAuthority": false,
+        "sharedUsd500Aggregate": "UNKNOWN"
+      }
+    },
+    "Quinn": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08-exact-review",
+      "manifestSha256": "5c47a27dc8b941231d19ba7f7fab7809fd8eb252c94daa2352af428e87bbef07",
+      "manifestBytes": 2825,
+      "payloads": 12,
+      "rootAllHashBytesModesMembershipAndFullProseConditionsRead": "d9ccc7 actual0",
+      "reviewProseSha256": "06f0f7081e61f328478777167880f920ee27b2d4bfc9549f7b94b464138259fe",
+      "completeFindings": {
+        "kind": "QUINN_CODE08_COMPLETE_FINDINGS",
+        "reviewer": "Quinn",
+        "subjectManifestSha256": "3fe65bc487f8badf8329ff44040b11d1634e93145142eb3b5bd72d782a82190b",
+        "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+        "mandatoryFindingCount": 1,
+        "mandatoryFindings": [
+          {
+            "id": "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS",
+            "mandatory": true,
+            "severity": "HIGH",
+            "category": "All-consumer registered mode/hash dispatch before private body",
+            "locations": [
+              "failed_gateway.py:180-184 Unit.retained_source_read raw membership/fallback",
+              "failed_gateway.py:263/279-280 leaf.anchored_raw and d.SAFE_READER/TOOL_READER/d.sha assignments",
+              "failed_gateway.py:72-75 System.read Path normalization",
+              "failed_gateway.py:154-179 Unit.bound canonical dispatch"
+            ],
+            "problem": "retained_source_read checks str(path) in the canonical external_inputs registry before normalizing. A supported raw string alias containing /./ misses that test, then generic System.read normalizes Path(path) and opens the same registered leaf with mode=None and without registered raw SHA verification or retained-buffer continuity. This is an unchecked route around the declared600/644 hash/mode join.",
+            "evidence": "One synthetic fakeFS alias pair a2c9db actual0: fixed private node metadata644 versus declared600 and changedraw. Unit.bound(alias) normalizes and raises FILE_OWNER_MODE_CAP before body. retained_source_read(the same raw alias) takes fallback actual System.read/actual Custody.read(None), returns changedraw with mismatched registered SHA, reads one fake body and leaves registeredbuffers unpopulated. All selected FD close, realBoundaryCalls=[], originalprivate never read/stat/hash. alias-results.json6abc8efaeddb52859dbdb7d74e550627bec5d864a70e01499c89a7525729338d/567B.",
+            "supportedInputAdjudication": "No type/canonical-Path-only precondition is enforced by the new callback. The historical anchored_raw explicitly coerced Path(path), generic System.read accepts str and normalizes, and direct d.sha calls SAFE_READER without its own canonical guard. Usual internal Path callers do not establish an invariant excluding supported str input.",
+            "impact": "The exact all-consumer mode/hash-before-body promise fails for a registered alias. This is a source-level bypass under supported reader input, not evidence of a current actual exploit, original private-file access or the immediate historical failed member.",
+            "requiredCorrection": "In a new immutable exact correction, normalize to the approved System path representation before membership dispatch, or explicitly reject noncanonical aliases before any body/metadata access. Use that same validated canonical identity for registry lookup and both downstream routes, preserving existing unregistered package/binary/prior/qualified-baseline policies/caps. Every registered alias must either use declared expectedmode/hash via bound or HOLD before body. Preserve original600 privacy, no source/caller modes/None/default escape, complete-first actors and all inherited invariants; exact affected independent review/root adoption remains required.",
+            "allMandatoryFindingsTogether": true,
+            "ownerDecisionIssued": false,
+            "actualRuntimeAuthority": false
+          }
+        ],
+        "allMandatoryFindingsTogether": true,
+        "actualRuntimeAuthority": false
+      },
+      "completeConditions": {
+        "kind": "QUINN_CODE08_COMPLETE_RETAINED_CONDITIONS",
+        "exactReferences": [
+          {
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume8/phase-a-impact.json",
+            "sha256": "eda936dd83e1b4803b1360c16c68278f27c3f2469685b69d694abfb33cb46f46",
+            "bytes": 10671,
+            "mode": 420
+          },
+          {
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume8/phase-b-authorization-bindings.json",
+            "sha256": "6172a56f1e58d2eddab5891e597d9805c1ef1da1f139d78abe174f49df5584a8",
+            "bytes": 6156,
+            "mode": 420
+          },
+          {
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway-source08-private-input-mode-design-root-adoption.json",
+            "sha256": "dfe2788d7ab43124ad09aee99748b3109e6038e09d1ac63877faf421d2e3e6d7",
+            "bytes": 16038,
+            "mode": 420
+          },
+          {
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-source08-private-input-mode-scope/manifest.json",
+            "sha256": "de8eb1e7182294e48bcf546d5fb64352c1abb6443042537f42f5547e74415ead",
+            "bytes": 1199,
+            "mode": 420
+          },
+          {
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway80-source08-private-input-mode-scope/conditions.json",
+            "sha256": "14e0b2afd98bddfb1b5dca280aebbd77f7f8041d8168e1578d67bc242c78ac24",
+            "bytes": 4067,
+            "mode": 420
+          },
+          {
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway-failed-resource-source07-exact-source-root-adoption.json",
+            "sha256": "a08bbe402465c4956f78dcc8255619898df833f6b716133ba366f87fc9a323d6",
+            "bytes": 20086,
+            "mode": 420
+          },
+          {
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway-failed-resource-source07-owner-rulings-root-adoption.json",
+            "sha256": "665817a996d062417c5046d08320ff554fb501ee07aed3c3e17544e2aac2b1f6",
+            "bytes": 10351,
+            "mode": 420
+          },
+          {
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway-failed-resource-source06-all-findings-root-adoption.json",
+            "sha256": "afef93b9b60792d3427207748a5983dc2509366a3a0ce100156b3ce48d12908a",
+            "bytes": 27433,
+            "mode": 420
+          },
+          {
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume6/complete-root-all-findings-adoption.json",
+            "sha256": "7abc98e0eb0dadbff1a21476cc38faff0c551e4ea59bff78c288ebd785560b7d",
+            "bytes": 202238,
+            "mode": 420
+          }
+        ],
+        "conditions": [
+          "Code08 remains immutable HOLD for FR08-REGISTERED-READER-PATH-ALIAS-BYPASS until exact successor correction and complete independent reviews/root adoption. No PhaseB owner decision/staging leaf, actual applicability/scope/install/phase authority or partial waiver issued. All current/inherited conditions in exact dfe2788d/de8eb1/a08b/6658/afef/7abc/preuse572809/conditionalSource07b16b/transport88f520/metadata/root records remain by full references, no old grants transfer.",
+          "Exact source-owned29 externalInputModes key/hash join, strict builtinint600/644, private original1212 remains600 and untouched,28public644 unchanged. No caller mode/map/default/None escape or privacy-normalized replacement. All installer/controlauthor/Unit/leaf/driver callbacks must dispatch the same validated canonical identity through exact mode/SHA before bodies; aliases cannot fall to generic policy. Unregistered old package/binary/prior/qualified-baseline readers retain original policies/caps. Custody metadata-before-read and retained/namedidentity/primary/cleanup remain.",
+          "Historical immediate Source07 failed member remains NOT_EMITTED/UNKNOWN. Public metadata29 shows an independent definite mode-policy inconsistency, not precise historical attribution. Original private1212 body/stat/hash/chmod/copy prohibited and not performed. Node121911744 fits existing134217728 cap; no cap increase. Fixtures are expressly synthetic29contents/hashes/witnesses with fixed fake metadata; tests are not actual private/resource qualification.",
+          "Code07 failure65140/parent3749 external1 and39213/parent17932 external1, all original27facts and every later known metadata/writer/reader/helper remain with actual separate statuses/null start/fingerprint. FR04 installonce/facts consumed, no retry/reset/rebinding/overwrite/copy/chmod. namespaceCreationnull/selecteddescriptorCLOSED is unqualified/no postexit leak or N03 physicalabsence proof; N03 not frozen/discovered. Only oldE2263/N01exact7/N02exact8 retained. ProspectiveN04/FR05; exact oldE ancestry rejects unexpected03 before mutation.",
+          "Complete first immutable root authorization and first source-produced state remain COMPLETE, never subset/nonadmitting. ALL actual selected owner/scope/input/source-reader/first-read/verifier/eval/helper writers finish with original PID/parent/tool/status before final trusted originalfacts serialization.64facts/65536bytes/8192actors and file/aggregate/archive/JSON/completion/census budgets unchanged; pending installer/null/no future0/no final hashing writer/no caller binary/code/loader/input/member/actor/mode maps. Trusted completeness is not autodiscovery; later actualQAroot compare ALL originaltraces.",
+          "Only original obs009-gateway80-offtree03-20261019/PTY29815/wrapper3720/shell3749/startMonOct19 12:48:37/expectedwrapper1. NORMAL06/e2e3340b provenance and typedrolef7fe2d5f unchanged. Opaque44/SHA6ca8+orig124/SHA246e/literalAPP/legacycanonicalfalse/equivalencefalse/all7physical/source/holder/kernel/parent/inherited/listener/current/history/numericabsence/wait/UNKNOWN/security remain independent.",
+          "Same-buffer/sourcegraph/preflight-before-draft/attempt/mkdir/write, strict owner28scalars/designatedpendingauthors/current-state reconstruction/immediateownership/primary-before-publication/partialunknown/closedcleanup/oneouterfinalizer remain. Positive fake quoted loader reached realCustody/actualpureF.preflight then deliberate TEST sentinel1 BEFORE mutation; this is not install0 or physical readset qualification. No full7/6 suite replay/actualboundary or broad mutant matrix.",
+          "New Source08 source/reviews/root/THREE named owners, metadataauthor/applicability/transport bindings and ALL actual metadata/install/bind/negative/held/archive/final/gate scopes remain owed. Correct Bash3.2 prefix EOF1/cap/readonly/SAME-buffer requirements and separately selected trace-bearing literalCode07-origin807/1690 plus actualPID/parent/status/fullinspection/builtin eval are concrete staged components, not actual executions or inherited authority. No silent verifier or inferred helperIDs; every actual step must finish before facts.",
+          "Fresh qualifiedf9+separately observed SAMEheld0 inspected BEFORE FAILED_GUARD_ADMISSION/archive/closing; expectedf9 ancestry only. Existing observer/sourceproof only; no backend executable/buildartifact/compiler/native consumer/new proofadapter. Originalreadiness60s/permit/rawpins/existingnonreversingclock through selectedcleanup/delivery to FINAL_GUARDED_ACCEPTANCE; physicalparent scheduling UNPROVED. Actualwrapper1/outerpostclose0/observercompletion/independentactualQAroot and every actualscope/result separate.",
+          "Only exact approved PUBLIC source/metadata-result reads and this review directory writes. No actualEWN/FR04/FR05/holder/lock/process/census/kernel/binary/protectedbaseline/private/runtimebody/home/cache/Java/Node/Gradle/Helm/network/provider/API/native/signal/cleanup/sharedsource/sourcewindow/lease/actualhelper/installer/observer call or oldscope retry. C5/C212/dirtygovernance closed; C8/GST PARKED. Freshbackendcheck+JaCoCo before011credit/finalT5/AC5/default4000/Order17/originaltests/skips/Live/business/security/privacy/T0root731/Replay/mainIR/external21/lifecycle holds unchanged. USD500aggregateUNKNOWN. No credit/Done."
+        ],
+        "allActualGatesOwed": true,
+        "actualAuthority": false
+      },
+      "completeReviewRecord": {
+        "kind": "INDEPENDENT_QUINN_EXACT_SOURCE08_REVIEW",
+        "reviewer": "Quinn",
+        "subjectManifestSha256": "3fe65bc487f8badf8329ff44040b11d1634e93145142eb3b5bd72d782a82190b",
+        "subjectBytes": 7608,
+        "payloads": 41,
+        "verdict": "HOLD_EXACT_SOURCE_CORRECTION_REQUIRED",
+        "mandatoryFindingCount": 1,
+        "mandatoryFindings": [
+          "FR08-REGISTERED-READER-PATH-ALIAS-BYPASS"
+        ],
+        "sourceOnly": true,
+        "criticalFixedAssertions": 41,
+        "criticalFixedCases": 7,
+        "criticalTool": "285e92",
+        "criticalActualExit": 0,
+        "extraConcreteAliasCases": 1,
+        "aliasTool": "a2c9db",
+        "aliasActualExit": 0,
+        "finiteChecks": 493,
+        "finitePinRecords": 67,
+        "finiteTool": "aa8174",
+        "finiteActualExit": 0,
+        "actualTargetEffects": 0,
+        "originalPrivateBodyStatHashRead": false,
+        "phaseBEntered": false,
+        "technicalOwnerDecisionIssued": false,
+        "actualRuntimeAuthorized": false
+      }
+    }
+  },
+  "allFindingsAndAllCurrentInheritedConditionsAdopted": true,
+  "rootIndependentReasoning": "Unit.bound normalizes path first, retained_source_read does raw str membership then generic System.read normalizes. Supported raw-string /./ spelling can therefore target the same registered leaf without mode/SHA. Independent realSystem/realCustody fake evidence confirms wrongmode+changedraw body return. The minimum correction is approved pure path construction before membership and both routes, or fail-closed rejection before access. Preserve unregistered semantics/caps; no real exploit/private access/historical cause is inferred.",
+  "aliasEvidence": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-code08-exact-review/alias-results.json",
+    "sha256": "6abc8efaeddb52859dbdb7d74e550627bec5d864a70e01499c89a7525729338d",
+    "bytes": 567,
+    "tool": "a2c9db",
+    "actualExit": 0,
+    "actualOriginalPrivateAccess": false,
+    "currentExploitProved": false
+  },
+  "source08ImmutableHold": true,
+  "technicalOwnerDecisionsIssued": false,
+  "conditionalPhaseBOwnersRevokedByHold": true,
+  "correctedSourceOnlySuccessorRequired": true,
+  "proposedSuccessor": "Source08 revisionB at resume8b; generation8/N04/FR05 remain prospective because no Code08 actual cap/function/namespace/owner grant was exercised. Old Source07 FR04 once/facts remain consumed. New exact source/currentreview paths/rawpins only, not an old grant transfer.",
+  "minimumCurrentCorrection": "Normalize using the same approved self.s.path constructor BEFORE registry membership and use that normalized object in both bound and existing fallback. No filesystem resolve/symlink normalization/new API/caller map. Preserve identical29mode/hash policy, entire inherited completefirst/history/physical/cleanup/permit contract; test only changed dispatcher behavior and reuse unchanged proofs.",
+  "source08bCandidateBytesApproved": false,
+  "actualAuthority": false,
+  "credit": false,
+  "allStoriesComplete": false,
+  "writer": {
+    "pid": 4868,
+    "parentPid": 17932,
+    "ownFutureStatus": null,
+    "externalCompletionOwed": true
+  }
+}

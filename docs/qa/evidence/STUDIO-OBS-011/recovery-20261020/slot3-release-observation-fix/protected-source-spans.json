@@ -1,0 +1,71 @@
+{
+  "blocks": [
+    {
+      "name": "ownedCommandHash",
+      "beforeSha256": "6ad412439a5fffc772e75e6043ad5b37c9b5a06d5d7f4b336e276e3918d81234",
+      "byteIdenticalOccurrenceCount": {
+        "before": 1,
+        "red": 1,
+        "green": 1
+      }
+    },
+    {
+      "name": "verifyOwnedDescendant",
+      "beforeSha256": "ec8352b38c9b0ef628e3c60ed425c657dd0c108c0744345d3e572c642bbb6dc0",
+      "byteIdenticalOccurrenceCount": {
+        "before": 1,
+        "red": 1,
+        "green": 1
+      }
+    },
+    {
+      "name": "p6Status",
+      "beforeSha256": "5e1247ef0a429d2f4258ac6c06529afed31a2edd7886158f37e2e62c5dff31a0",
+      "byteIdenticalOccurrenceCount": {
+        "before": 1,
+        "red": 1,
+        "green": 1
+      }
+    },
+    {
+      "name": "p6AwaitProcesses",
+      "beforeSha256": "19045cdbd4f03a9d608c452924f781e833341260440043b0e72508eb26937557",
+      "byteIdenticalOccurrenceCount": {
+        "before": 1,
+        "red": 1,
+        "green": 1
+      }
+    },
+    {
+      "name": "p8KillRefusedWhileAlive",
+      "beforeSha256": "0047ff945aff2761d45cab1d1e7dad38f910b7ffc0c7af47686ca8bd867b5b54",
+      "byteIdenticalOccurrenceCount": {
+        "before": 1,
+        "red": 1,
+        "green": 1
+      }
+    },
+    {
+      "name": "p8C6RunAndRelease",
+      "beforeSha256": "7e4467a1fdcd1f0c76b174aae31daf5508608f8b4cc19d7053e202fce97d1a63",
+      "byteIdenticalOccurrenceCount": {
+        "before": 1,
+        "red": 1,
+        "green": 1
+      }
+    },
+    {
+      "name": "p8AwaitC6Closed",
+      "beforeSha256": "93289165b25dc223ac55e82f3697f5069140634810cc795a1e198d594c9f6bf2",
+      "byteIdenticalOccurrenceCount": {
+        "before": 1,
+        "red": 1,
+        "green": 1
+      }
+    }
+  ],
+  "allProtectedSpansExactlyOnceAllStages": true,
+  "allCleanupUnconfirmedLinesIdentical": true,
+  "noSignalRetryPollDeadlineCodeAdded": true,
+  "note": "Whole-source inverse proof preserves all untouched release assertions, waits, sticky guard, authority and interruption code; no signal/process provider is reachable from controlled suppliers."
+}

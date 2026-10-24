@@ -1,0 +1,67 @@
+"""One independent bounded CODE05 batch; exact inspected fake prefix and audit."""
+from pathlib import Path
+import ast,builtins,copy,ctypes,errno,fcntl,hashlib,io,json,os,socket,stat,subprocess,sys,time,types
+from contextlib import ExitStack
+from unittest.mock import patch
+S=Path('docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway80-failed-red-resource-prep/resume5').absolute()
+raw=(S/'source05_checks.py').read_bytes();sourcepin=hashlib.sha256(raw).hexdigest();prefix,tail=raw.split(b"\nsys.addaudithook(ns['audit'])",1);assert prefix+b"\nsys.addaudithook(ns['audit'])"+tail==raw
+G={'__file__':str(S/'source05_checks.py'),'__name__':'_quinn_source05_actual_fake_namespace'};exec(compile(prefix,'<exact inspected source05 fake definitions>','exec'),G)
+A,P,C,F,MemPath=[G[n] for n in ('A','P','C','F','MemPath')];checks=[];cases=[]
+def check(n,v):
+ if v is not True:raise AssertionError(n)
+ checks.append({'id':n,'passed':True})
+def denied(fn):
+ try:fn()
+ except P.Hold as e:return e.args[0]
+ raise AssertionError('EXPECTED_PROTOCOL_DENIAL')
+def native_negative(s,k,a,auth,b,alter=None,empty=False):
+ path=A.N/'root-setup-ownership.json';setup=P.decode(s.fs.nodes[str(path)]['raw'])
+ if alter:alter(setup)
+ data=P.packed(setup);s.fs.put(path,data);h=P.sha(data)
+ comp=G['completion'](s,k,h,[] if empty else setup['typedPriorActors'])
+ with patch.dict(A.__dict__,MANIFEST06=s.package_sha),patch.object(fcntl,'flock',G['held']):
+  status=A.run('negative',auth,h,system=s,root_raw=P.packed(a),code_buffers=b,completion_raw=comp,completion_sha=P.sha(comp))
+ return status,setup,P.decode(comp)
+def tests():
+ # Complete six-mode flow already reached in attempt01; separately sealed Aria34 evidence is bound, not replayed here.
+ # Pure physical-seven preflight positive and exact source-owner wrong-subject control.
+ s,k,a,b,w,records=G['factory_fixture']();before=copy.deepcopy(s.fs.nodes);draft=F.preflight(a,k,b,w,records)
+ check('PURE_SEVEN_PREFLIGHT_POSITIVE',len(draft['candidate']['binaryWitnesses'])==7 and s.fs.nodes==before and draft['candidate']['newDirectoryPins']=={})
+ ownerpath=next(iter(a['typedOwnerRecordPins']));bad=P.decode(records[ownerpath]);bad['code05ManifestSha256']='0'*64;modified=dict(records);aa=copy.deepcopy(a);modified[ownerpath]=P.packed(bad);aa['typedOwnerRecordPins'][ownerpath]=P.sha(modified[ownerpath])
+ reason=denied(lambda:F.preflight(aa,k,b,w,modified));check('OWNER_WRONG_SUBJECT_DENIED',reason=='TYPED_OWNER_EXACT_DECISION' and s.fs.nodes==before)
+ cases.append({'case':'owner_wrong_subject_control','reason':reason})
+ # Same external raw-pin graph, but Boolean owner scalars replaced by numeric1/0.
+ bad=P.decode(records[ownerpath]);bad['authorized']=1;bad['legacyReportedCanonicalPredicateSatisfied']=0;bad['physicalSevenAndAllActualIdentitySecurityObligationsPreserved']=1
+ modified=dict(records);aa=copy.deepcopy(a);modified[ownerpath]=P.packed(bad);aa['typedOwnerRecordPins'][ownerpath]=P.sha(modified[ownerpath]);draft=F.preflight(aa,k,b,w,modified)
+ check('REPRO_NUMERIC_OWNER_FLAGS_ACCEPTED',type(bad['authorized']) is int and type(bad['legacyReportedCanonicalPredicateSatisfied']) is int and draft['candidate']['typedOwnerRecordPins'][ownerpath]==P.sha(modified[ownerpath]) and s.fs.nodes==before)
+ cases.append({'case':'owner_numeric_boolean_coercion','authorized':bad['authorized'],'legacyReportedCanonicalPredicateSatisfied':bad['legacyReportedCanonicalPredicateSatisfied'],'physicalPreserved':bad['physicalSevenAndAllActualIdentitySecurityObligationsPreserved'],'preflightAccepted':True,'mutation':False})
+ # Normal pending author cannot be discharged by an empty attestation.
+ s,k,a,auth,b=G['build']()
+ reason=denied(lambda:native_negative(s,k,a,auth,b,empty=True));check('PENDING_AUTHOR_MISSING_ATTESTATION_DENIED',reason=='ROOT_COMPLETION_EXACT_PENDING_SET' and not any(MemPath(p).name.startswith('client-') for p in s.fs.nodes if p.startswith(str(A.N)+'/')))
+ cases.append({'case':'pending_author_empty_attestation_control','reason':reason})
+ # But the same current control can declare its own completion or omit its author.
+ for mode in ('self_completed','omitted'):
+  s,k,a,auth,b=G['build']()
+  def alter(value):
+   if mode=='self_completed':value['typedPriorActors'][-1]['actualStatus']=0
+   else:value['typedPriorActors']=value['typedPriorActors'][:-1]
+  status,control,att=native_negative(s,k,a,auth,b,alter=alter,empty=True)
+  denial=P.decode(s.fs.nodes[str(A.N/'negative-denial.json')]['raw'])
+  check('REPRO_CURRENT_AUTHOR_'+mode+'_QUALIFIED',status==1 and denial['reason']=='MISSING_READINESS' and denial['status']==1 and denial['clientJournal'] in {MemPath(p).name for p in s.fs.nodes if p.startswith(str(A.N)+'/')} and s.operator_records==[] and att['actors']==[])
+  cases.append({'case':'current_author_'+mode,'status':status,'qualifiedNegativeProduced':True,'reason':denial['reason'],'currentAuthor900102InControl':any(r['pid']==900102 for r in control['typedPriorActors']),'attestationActors':att['actors']})
+ # Strict input-text conversion remains bounded and does not invoke a subclass.
+ callbacks=[]
+ class Hostile(str):
+  def __len__(self):callbacks.append('len');raise RuntimeError('PRIVATE')
+  def encode(self,*a,**kw):callbacks.append('encode');raise RuntimeError('PRIVATE')
+ fact=P.text_fact(Hostile('opaque'));check('STRICT_TEXT_SUBCLASS_NO_CALLBACK',fact['status']=='UNAVAILABLE' and fact['textSha256'] is None and callbacks==[])
+ with patch.object(P,'sha',lambda raw:(_ for _ in ()).throw(ValueError('PRIVATE_HASH'))):fact=P.text_fact('synthetic')
+ check('HASH_FAILURE_KNOWN_COUNT_CLOSED',fact['status']=='HASH_UNAVAILABLE' and fact['utf8Bytes']==9 and fact['textSha256'] is None)
+ check('ZERO_REAL_TARGET_BOUNDARIES',G['ns']['BLOCKED']==[])
+sys.addaudithook(G['ns']['audit'])
+with ExitStack() as stack:
+ for obj,names in ((builtins,('open',)),(io,('open',)),(Path,('open','read_bytes','read_text','stat','lstat','mkdir','iterdir','resolve','unlink','rglob','write_bytes','write_text')),(os,('open','read','write','close','fstat','stat','lstat','listdir','mkdir','symlink','readlink','fdopen','fsync','fchmod','kill','fork','system','getpid','getppid','getuid','umask')),(socket,('socket','create_connection')),(subprocess,('Popen','run','call','check_output','check_call')),(fcntl,('flock','fcntl','ioctl')),(ctypes,('CDLL',)),(time,('time','sleep','monotonic_ns'))):
+  for name in names:
+   if hasattr(obj,name):stack.enter_context(patch.object(obj,name,G['ns']['blocked']))
+ tests()
+print(json.dumps({'kind':'QUINN_CODE05_BOUNDED_ACTUAL_FUNCTION_SECURITY_PAIRS','checks':len(checks),'results':checks,'cases':cases,'composedFlowAssertionsSeparatelyIncluded':0,'source05FixtureSha256':sourcepin,'prefixReverseProof':True,'persistentAuditUnchanged':True,'subjectSafetyEdits':False,'actualTargetActions':0,'realBoundaryCalls':G['ns']['BLOCKED']},indent=2))

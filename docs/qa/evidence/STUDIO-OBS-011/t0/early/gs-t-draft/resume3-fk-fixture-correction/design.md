@@ -1,0 +1,13 @@
+# GS-T registered source-fixture correction design
+
+Design recorded before successor construction. Source-only proposal; no application or execution release.
+
+Use the sealed resume2 complete three-file successor as predecessor, retaining its duplicate translation-install correction byte for byte in Transport. The only new edits are inside the two newly introduced `sourceFixture` helpers in GuidedSessionIT and GuidedLifecycleReasonIT. Do not read live test files as a baseline.
+
+Each helper runs once after Flyway in an isolated fresh per-case database. Read the existing authenticated BFF fixture principal (`userId=user-1`, `email=fixture@example.test`, CSI-123 owner). Insert a real `users` row with that SSO ID/email, then a registered CSI-123 owned by that email, using the schema-supported LOW criticality, Development CSI environment and non-null test business unit/name. Change only the new ui_tests insertion's created_by value from the opaque user ID to a bound principal email. Preserve the UI test environment `fixture`, source UUID, authored source/revision inputs, browser `chromium` and all source/case behavior. CSI environment is a constrained registry field; it does not replace the UI test's existing environment.
+
+Use ordinary INSERT statements, with no ON CONFLICT, synthetic authority, FK bypass, migration/seed change, trigger reset or exception suppression. Fresh per-case isolation supplies uniqueness; unexpected preexisting conflicts must remain failures. Leave DB-generated IDs/timestamps and other valid schema defaults intact. Transport already creates its real users/CSI parents before its source fixtures and requires no FK edit.
+
+Retain all original assertions, SQL oracles, timer literals, method/case identities, all nine Mode variants, 11 sentinel invocations, native/UNKNOWN_OUTCOME and ownership/cleanup source. Carry the complete 99-case public corpus unchanged. Build complete three-file candidates plus predecessor, formatted and S011 deltas and S011 restoration; seal source hashes, preservation checks, FK/default/browser audit and actual-vs-unrun defect classification.
+
+The safe closed case-status projection establishes five Lifecycle DataIntegrityViolationException tool lines at its new source insert; it does not name the violated constraint. The source proves missing parents and the wrong created_by identity. Session's 44 cases did not run. Keep assignment/plan/claim/acknowledgement and ownership-stall causes OPEN. No compile, formatter, JVM, native/probe/helper-main execution, private data access, actual source/story/plan write, delegation, QA verdict or lane credit is authorized.

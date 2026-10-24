@@ -1,0 +1,76 @@
+{
+  "originalToolSession": 56688,
+  "originalDriverExit": 1,
+  "driverSha256": "dd88b2239e15624613c5f57e2b6e399cec66b113f3867baf477b1e0c277f870b",
+  "originalCollector": {
+    "driverPid": 89330,
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+      "obs011-recovery-20261020-final-linux-d2-smoke01",
+      "bash",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-final-bound03/future-smoke.sh",
+      "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+      "obs011-d2-final-01",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/d2-execution01"
+    ],
+    "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "rootAdmissionPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-root-runtime-admission05.json",
+    "rootAdmissionSha256": "76c190111c6c01028059cdefcde3a184af0f721c672f319678d1b0615ec8c723",
+    "rootDependencyReference": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-dependency-root-acceptance05.json@sha256:855a7ff18815776de5afb3ddcf09293f74cbdcb8ad1bba551f30421bbf2e29e0",
+    "startedAtUtc": "2026-10-21T04:18:41.222800+00:00",
+    "accepted": false,
+    "runtimeInvocationCount": 1,
+    "continuousAwakeClaim": false,
+    "caffeinatePid": 89436,
+    "caffeinateArgv": [
+      "/usr/bin/caffeinate",
+      "-i"
+    ],
+    "collectorPid": 89437,
+    "rawCollectorExit": 0,
+    "nativeElapsedSeconds": 3.1098542080726475,
+    "collectorEndedAtUtc": "2026-10-21T04:18:44.334074+00:00",
+    "rawChildExit": 0,
+    "collectorReceiptSha256": "eae57a762c71134fcd8fdd29578988c09adfde7d6b0711b1d29154a9896baf08",
+    "inhibitorHeldThroughAllPostguards": false,
+    "caffeinateExit": -15,
+    "caffeinateReleased": true,
+    "caffeinateReleasedAtUtc": "2026-10-21T04:18:46.613558+00:00"
+  },
+  "collectorResult": {
+    "command": [
+      "bash",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-final-bound03/future-smoke.sh",
+      "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+      "obs011-d2-final-01",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/d2-execution01"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T04:18:41.383139+00:00",
+    "elapsedSeconds": 2.94,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "d0f458d13320e0c0857ae54122e9b6579f7d43aef7795082ecd27d352be59592",
+    "testInputStable": true,
+    "testInputDigestBefore": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "testInputDigestAfter": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc"
+  },
+  "failureFrame": "run-d2.py:205 projectionComplete/result qualification assertion",
+  "requiredPrelaunchLookupsAll0": "required-prelaunch-verification.json",
+  "runtimeInvocations": 1,
+  "awakeBoundaryQualification": {
+    "ownedPid": 89436,
+    "waitExit": -15,
+    "releasedAtUtc": "2026-10-21T04:18:46.613558+00:00",
+    "persistedAfterGuardAtUtc": "2026-10-21T04:18:46.590773+00:00",
+    "projectionFileMtimeUtc": "2026-10-21T04:18:46.611384+00:00",
+    "projectionMtimeIsFileMetadata": true,
+    "afterGuardsAndProjectionAttemptBeforeRelease": true,
+    "rawHeldThroughAllPostguardsField": false,
+    "fieldQualification": "The raw boolean is gated on overall accepted; it remains false for incomplete proof. Persisted afterguards passed and the projection attempt preceded finally termination; no successful smoke/continuous-awake fact is inferred.",
+    "continuousAwakeClaim": false
+  },
+  "noSecondPrivateLeafBodyReadOrLogReadOrProbeOrRetry": true
+}

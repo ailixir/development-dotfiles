@@ -1,0 +1,921 @@
+{
+  "kind": "INDEPENDENT_NARROW_STATIC_REVIEW_ONLY",
+  "timestampUtc": "2026-10-19T05:26:49.680954+00:00",
+  "checksPassed": 410,
+  "checks": [
+    "prior independent review bound",
+    "new manifest bound",
+    "new receipt bound",
+    "new checkpoint bound",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/CHECKPOINT.md",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/DESIGN.md",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/FUTURE-EXECUTION.md",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/SHA256SUMS",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/chart-bindings.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/future-commands.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/historical-source-proof-reconciliation.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/manifest.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-NORMALIZED-COMPARISON/forward.patch",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-NORMALIZED-COMPARISON/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-NORMALIZED-COMPARISON/restore.patch",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-RECURSION/forward.patch",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-RECURSION/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-RECURSION/restore.patch",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutations.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/original-80-case-map.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/prepare.py",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/.helmignore",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/Chart.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/NOTES.txt",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/configmap.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/deployment.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/hpa.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/ingress.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/pdb.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/service.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/serviceaccount.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-runner-service.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/values-dev.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/values-prod.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/values-uat.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/values.yaml",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/eslint.config.js",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/package-lock.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/package.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/test/deployment/gateway-independent-mutants.test.ts",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/test/deployment/helm.ts",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/test/helpers/corpus.ts",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/tsconfig.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/vitest.deployment.config.ts",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/vitest.gateway-independent.config.ts",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/receipt.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/receipt.md",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/review-inputs.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/static-checks.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/verify-static.py",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/design.md",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/future-verification.md",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/gateway-chart-draft.patch",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/helper.patch",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/manifest.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/originals/helm-chart/put-checks/templates/_helpers.tpl",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/originals/studio-runner/test/deployment/integrations.test.ts",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/receipt.md",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/repo/studio-runner/test/deployment/integrations.test.ts",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/source-proof.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/static-checks.json",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/tests.patch",
+    "carry exact docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/verify-static.py",
+    "carry exact helm-chart/put-checks/.helmignore",
+    "carry exact helm-chart/put-checks/Chart.yaml",
+    "carry exact helm-chart/put-checks/templates/NOTES.txt",
+    "carry exact helm-chart/put-checks/templates/_helpers.tpl",
+    "carry exact helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+    "carry exact helm-chart/put-checks/templates/configmap.yaml",
+    "carry exact helm-chart/put-checks/templates/deployment.yaml",
+    "carry exact helm-chart/put-checks/templates/hpa.yaml",
+    "carry exact helm-chart/put-checks/templates/ingress.yaml",
+    "carry exact helm-chart/put-checks/templates/pdb.yaml",
+    "carry exact helm-chart/put-checks/templates/service.yaml",
+    "carry exact helm-chart/put-checks/templates/serviceaccount.yaml",
+    "carry exact helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+    "carry exact helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+    "carry exact helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+    "carry exact helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+    "carry exact helm-chart/put-checks/templates/studio-runner-service.yaml",
+    "carry exact helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+    "carry exact helm-chart/put-checks/values-dev.yaml",
+    "carry exact helm-chart/put-checks/values-prod.yaml",
+    "carry exact helm-chart/put-checks/values-uat.yaml",
+    "carry exact helm-chart/put-checks/values.yaml",
+    "carry exact studio-runner/test/deployment/helm.ts",
+    "carry exact studio-runner/test/helpers/corpus.ts",
+    "carry exact studio-runner/vitest.deployment.config.ts",
+    "carry exact studio-runner/tsconfig.json",
+    "carry exact studio-runner/package.json",
+    "carry exact studio-runner/package-lock.json",
+    "carry exact studio-runner/eslint.config.js",
+    "new artifact DESIGN.md",
+    "new artifact FUTURE-EXECUTION.md",
+    "new artifact chart-bindings.json",
+    "new artifact future-commands.json",
+    "new artifact historical-source-proof-reconciliation.json",
+    "new artifact history/CHECKPOINT.md",
+    "new artifact history/DESIGN.md",
+    "new artifact history/FUTURE-EXECUTION.md",
+    "new artifact history/SHA256SUMS",
+    "new artifact history/future-commands.json",
+    "new artifact history/manifest.json",
+    "new artifact history/prepare.py",
+    "new artifact history/receipt.json",
+    "new artifact history/receipt.md",
+    "new artifact history/review-inputs.json",
+    "new artifact history/static-checks.json",
+    "new artifact history/verify-static.py",
+    "new artifact mutants/M-NORMALIZED-COMPARISON/forward.patch",
+    "new artifact mutants/M-NORMALIZED-COMPARISON/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "new artifact mutants/M-NORMALIZED-COMPARISON/restore.patch",
+    "new artifact mutants/M-RECURSION/forward.patch",
+    "new artifact mutants/M-RECURSION/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "new artifact mutants/M-RECURSION/restore.patch",
+    "new artifact mutations.json",
+    "new artifact native-contracts.json",
+    "new artifact original-80-case-map.json",
+    "new artifact preservation.json",
+    "new artifact private-repo/helm-chart/put-checks/.helmignore",
+    "new artifact private-repo/helm-chart/put-checks/Chart.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/NOTES.txt",
+    "new artifact private-repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "new artifact private-repo/helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/configmap.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/deployment.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/hpa.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/ingress.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/pdb.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/service.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/serviceaccount.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/studio-runner-service.yaml",
+    "new artifact private-repo/helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+    "new artifact private-repo/helm-chart/put-checks/values-dev.yaml",
+    "new artifact private-repo/helm-chart/put-checks/values-prod.yaml",
+    "new artifact private-repo/helm-chart/put-checks/values-uat.yaml",
+    "new artifact private-repo/helm-chart/put-checks/values.yaml",
+    "new artifact private-repo/studio-runner/eslint.config.js",
+    "new artifact private-repo/studio-runner/package-lock.json",
+    "new artifact private-repo/studio-runner/package.json",
+    "new artifact private-repo/studio-runner/test/deployment/gateway-independent-mutants.test.ts",
+    "new artifact private-repo/studio-runner/test/deployment/gateway-native-observer.ts",
+    "new artifact private-repo/studio-runner/test/deployment/helm.ts",
+    "new artifact private-repo/studio-runner/test/helpers/corpus.ts",
+    "new artifact private-repo/studio-runner/tsconfig.json",
+    "new artifact private-repo/studio-runner/vitest.deployment.config.ts",
+    "new artifact private-repo/studio-runner/vitest.gateway-independent.config.ts",
+    "new artifact review-inputs.json",
+    "new artifact scratch-exit-observation.patch",
+    "new artifact scratch-source-map.json",
+    "new artifact verify-static.py",
+    "63 sealed artifacts",
+    "original seal copied exactly",
+    "actual seal copied exactly",
+    "unchanged current carried source chart-bindings.json",
+    "unchanged current carried source mutants/M-NORMALIZED-COMPARISON/forward.patch",
+    "unchanged current carried source mutants/M-NORMALIZED-COMPARISON/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "unchanged current carried source mutants/M-NORMALIZED-COMPARISON/restore.patch",
+    "unchanged current carried source mutants/M-RECURSION/forward.patch",
+    "unchanged current carried source mutants/M-RECURSION/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "unchanged current carried source mutants/M-RECURSION/restore.patch",
+    "unchanged current carried source mutations.json",
+    "unchanged current carried source original-80-case-map.json",
+    "unchanged current carried source private-repo/helm-chart/put-checks/.helmignore",
+    "unchanged current carried source private-repo/helm-chart/put-checks/Chart.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/NOTES.txt",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/configmap.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/deployment.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/hpa.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/ingress.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/pdb.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/service.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/serviceaccount.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/studio-runner-service.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/values-dev.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/values-prod.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/values-uat.yaml",
+    "unchanged current carried source private-repo/helm-chart/put-checks/values.yaml",
+    "unchanged runner copy studio-runner/test/deployment/helm.ts",
+    "unchanged runner copy studio-runner/test/helpers/corpus.ts",
+    "unchanged runner copy studio-runner/vitest.deployment.config.ts",
+    "unchanged runner copy studio-runner/tsconfig.json",
+    "unchanged runner copy studio-runner/package.json",
+    "unchanged runner copy studio-runner/package-lock.json",
+    "unchanged runner copy studio-runner/eslint.config.js",
+    "new review reference .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway-exit-fix-intent.txt",
+    "new review reference .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway-exit-fix-context.txt",
+    "new review reference .aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/gateway-exit-fix-preflight.json",
+    "new review reference docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway-independent-mutants-review/review.md",
+    "new review reference docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway-independent-mutants-review/audit.json",
+    "exact existing scratch patch reconstruction",
+    "exact added observer patch reconstruction",
+    "unchanged controls and loop expansion",
+    "unchanged restoration and cleanup body",
+    "one existing render call site",
+    "two identical scratch IDs",
+    "40-render native plan retained",
+    "80 published IDs carried unchanged",
+    "scratch integration validateNativeObservation(observed, expectedNative, accepts);",
+    "scratch integration expect(outcome.error).toContain(intended);",
+    "scratch integration .toMatchObject(control.properties);",
+    "scratch integration nativeFrames: observed.frames",
+    "scratch integration ...observed.nativeErrors, ...observed.observerErrors",
+    "single transparent measured edge result = Reflect.apply(original, this, call);",
+    "single transparent measured edge throw nativeError;",
+    "single transparent measured edge return result;",
+    "observer edge return Reflect.apply(original, this, call);",
+    "observer edge childProcess.execFileSync = wrapper;",
+    "observer edge syncBuiltinESMExports();",
+    "observer edge if (esmExecFileSync !== wrapper)",
+    "observer edge childProcess.execFileSync = original;",
+    "observer edge builtinRestored = childProcess.execFileSync === original && esmExecFileSync === original;",
+    "observer edge if (!builtinRestored || observerErrors.length > 0) observerPoisoned = true;",
+    "installed ESM synchronization contract",
+    "installed synchronous return/failure contract",
+    "17 exact source clauses parsed",
+    "model exact return none",
+    "model one exact this/args Falsenone",
+    "model exact return before",
+    "model one exact this/args Falsebefore",
+    "model exact return after",
+    "model one exact this/args Falseafter",
+    "model exact return restore",
+    "model one exact this/args Falserestore",
+    "model exact throw none",
+    "model one exact this/args Truenone",
+    "model exact throw before",
+    "model one exact this/args Truebefore",
+    "model exact throw after",
+    "model one exact this/args Trueafter",
+    "model exact throw restore",
+    "model one exact this/args Truerestore",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/CHECKPOINT.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/DESIGN.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/FUTURE-EXECUTION.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/SHA256SUMS",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/chart-bindings.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/future-commands.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/historical-source-proof-reconciliation.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/manifest.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-NORMALIZED-COMPARISON/forward.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-NORMALIZED-COMPARISON/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-NORMALIZED-COMPARISON/restore.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-RECURSION/forward.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-RECURSION/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutants/M-RECURSION/restore.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/mutations.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/original-80-case-map.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/prepare.py",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/.helmignore",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/Chart.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/NOTES.txt",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/configmap.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/deployment.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/hpa.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/ingress.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/pdb.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/service.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/serviceaccount.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-runner-service.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/values-dev.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/values-prod.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/values-uat.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/helm-chart/put-checks/values.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/eslint.config.js",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/package-lock.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/package.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/test/deployment/gateway-independent-mutants.test.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/test/deployment/helm.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/test/helpers/corpus.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/tsconfig.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/vitest.deployment.config.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/private-repo/studio-runner/vitest.gateway-independent.config.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/receipt.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/receipt.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/review-inputs.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/static-checks.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/verify-static.py",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/design.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/future-verification.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/gateway-chart-draft.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/helper.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/manifest.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/originals/helm-chart/put-checks/templates/_helpers.tpl",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/originals/studio-runner/test/deployment/integrations.test.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/receipt.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/repo/studio-runner/test/deployment/integrations.test.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/source-proof.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/static-checks.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/tests.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/verify-static.py",
+    "final preservation helm-chart/put-checks/.helmignore",
+    "final preservation helm-chart/put-checks/Chart.yaml",
+    "final preservation helm-chart/put-checks/templates/NOTES.txt",
+    "final preservation helm-chart/put-checks/templates/_helpers.tpl",
+    "final preservation helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+    "final preservation helm-chart/put-checks/templates/configmap.yaml",
+    "final preservation helm-chart/put-checks/templates/deployment.yaml",
+    "final preservation helm-chart/put-checks/templates/hpa.yaml",
+    "final preservation helm-chart/put-checks/templates/ingress.yaml",
+    "final preservation helm-chart/put-checks/templates/pdb.yaml",
+    "final preservation helm-chart/put-checks/templates/service.yaml",
+    "final preservation helm-chart/put-checks/templates/serviceaccount.yaml",
+    "final preservation helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+    "final preservation helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+    "final preservation helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+    "final preservation helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+    "final preservation helm-chart/put-checks/templates/studio-runner-service.yaml",
+    "final preservation helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+    "final preservation helm-chart/put-checks/values-dev.yaml",
+    "final preservation helm-chart/put-checks/values-prod.yaml",
+    "final preservation helm-chart/put-checks/values-uat.yaml",
+    "final preservation helm-chart/put-checks/values.yaml",
+    "final preservation studio-runner/test/deployment/helm.ts",
+    "final preservation studio-runner/test/helpers/corpus.ts",
+    "final preservation studio-runner/vitest.deployment.config.ts",
+    "final preservation studio-runner/tsconfig.json",
+    "final preservation studio-runner/package.json",
+    "final preservation studio-runner/package-lock.json",
+    "final preservation studio-runner/eslint.config.js",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/DESIGN.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/FUTURE-EXECUTION.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/chart-bindings.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/future-commands.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/historical-source-proof-reconciliation.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/CHECKPOINT.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/DESIGN.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/FUTURE-EXECUTION.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/SHA256SUMS",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/future-commands.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/manifest.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/prepare.py",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/receipt.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/receipt.md",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/review-inputs.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/static-checks.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/history/verify-static.py",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/mutants/M-NORMALIZED-COMPARISON/forward.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/mutants/M-NORMALIZED-COMPARISON/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/mutants/M-NORMALIZED-COMPARISON/restore.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/mutants/M-RECURSION/forward.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/mutants/M-RECURSION/repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/mutants/M-RECURSION/restore.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/mutations.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/native-contracts.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/original-80-case-map.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/preservation.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/.helmignore",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/Chart.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/NOTES.txt",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/_helpers.tpl",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/configmap.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/deployment.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/hpa.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/ingress.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/pdb.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/service.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/serviceaccount.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/studio-runner-service.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/values-dev.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/values-prod.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/values-uat.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/helm-chart/put-checks/values.yaml",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/studio-runner/eslint.config.js",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/studio-runner/package-lock.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/studio-runner/package.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/studio-runner/test/deployment/gateway-independent-mutants.test.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/studio-runner/test/deployment/gateway-native-observer.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/studio-runner/test/deployment/helm.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/studio-runner/test/helpers/corpus.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/studio-runner/tsconfig.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/studio-runner/vitest.deployment.config.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/private-repo/studio-runner/vitest.gateway-independent.config.ts",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/review-inputs.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/scratch-exit-observation.patch",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/scratch-source-map.json",
+    "final preservation docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-independent-mutants/resume2/verify-static.py"
+  ],
+  "priorInputFilesCarried": 67,
+  "actualInputsPreserved": 29,
+  "newManifestArtifactsVerified": 63,
+  "sourceClauses": [
+    {
+      "name": "BUILTIN_RESTORED",
+      "expression": "builtinRestored === true"
+    },
+    {
+      "name": "NO_OBSERVER_FAILURE",
+      "expression": "observerErrors.length === 0"
+    },
+    {
+      "name": "COMPLETE_FRAME",
+      "expression": "f.observerComplete === true"
+    },
+    {
+      "name": "HELM_AND_OPTIONS",
+      "expression": "f.executable === 'helm' && f.optionsMatched === true"
+    },
+    {
+      "name": "ARGV_SELF_BINDING",
+      "expression": "argvHash(f.argv) === f.argvSha256"
+    },
+    {
+      "name": "ARGV_BINDING",
+      "expression": "f.argvSha256 === expected.argvSha256"
+    },
+    {
+      "name": "CWD_BINDING",
+      "expression": "f.cwd === expected.cwd"
+    },
+    {
+      "name": "INPUT_BINDING",
+      "expression": "f.chartBeforeSha256 === expected.chartSha256 && f.chartAfterSha256 === expected.chartSha256"
+    },
+    {
+      "name": "REAL_EXIT",
+      "expression": "f.nativeExit !== null && Number.isInteger(f.nativeExit) && f.nativeExit >= 0"
+    },
+    {
+      "name": "NO_SIGNAL",
+      "expression": "f.signalKnown === true && f.signal === null"
+    },
+    {
+      "name": "NO_SPAWN_ERROR",
+      "expression": "f.setupErrorCode === null && f.spawnErrorPresent === false"
+    },
+    {
+      "name": "STDOUT_BINDING",
+      "expression": "f.stdoutKnown === true && f.stdoutSha256 === byteHash(outcome.raw)"
+    },
+    {
+      "name": "PARSED_OUTCOME",
+      "expression": "outcome.ok === accepts"
+    },
+    {
+      "name": "EXPECTED_NATIVE_EXIT",
+      "expression": "(!accepts || f.nativeExit === 0) && (accepts || f.nativeExit !== 0)"
+    },
+    {
+      "name": "EXPECTED_NATIVE_THROW",
+      "expression": "(!accepts || f.nativeThrew === false) && (accepts || f.nativeThrew === true)"
+    },
+    {
+      "name": "EXPECTED_EXIT_SOURCE",
+      "expression": "(!accepts || f.exitSource === 'EXECFILESYNC_RETURN') && (accepts || f.exitSource === 'THROWN_NATIVE_STATUS')"
+    },
+    {
+      "name": "ERROR_OUTPUT_BINDING",
+      "expression": "(!accepts || outcome.error === '') && (accepts || (f.stderrKnown === true && f.messageKnown === true && f.mergedErrorSha256 === byteHash(outcome.error)))"
+    }
+  ],
+  "fakeClassifierVectors": [
+    {
+      "name": "returned success",
+      "expectedAccepted": true,
+      "observedAccepted": true,
+      "reason": "ACCEPTED"
+    },
+    {
+      "name": "refusal status 1",
+      "expectedAccepted": true,
+      "observedAccepted": true,
+      "reason": "ACCEPTED"
+    },
+    {
+      "name": "refusal status 3",
+      "expectedAccepted": true,
+      "observedAccepted": true,
+      "reason": "ACCEPTED"
+    },
+    {
+      "name": "refusal status 17",
+      "expectedAccepted": true,
+      "observedAccepted": true,
+      "reason": "ACCEPTED"
+    },
+    {
+      "name": "refusal status 255",
+      "expectedAccepted": true,
+      "observedAccepted": true,
+      "reason": "ACCEPTED"
+    },
+    {
+      "name": "reject nativeExit None",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "REAL_EXIT"
+    },
+    {
+      "name": "reject nativeExit -1",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "REAL_EXIT"
+    },
+    {
+      "name": "reject nativeExit True",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "REAL_EXIT"
+    },
+    {
+      "name": "reject nativeExit 1.25",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "REAL_EXIT"
+    },
+    {
+      "name": "reject nativeExit 0",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "EXPECTED_NATIVE_EXIT"
+    },
+    {
+      "name": "reject signal SIGTERM",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_SIGNAL"
+    },
+    {
+      "name": "reject signalKnown False",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_SIGNAL"
+    },
+    {
+      "name": "reject setupErrorCode ENOENT",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_SPAWN_ERROR"
+    },
+    {
+      "name": "reject setupErrorCode ENOBUFS",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_SPAWN_ERROR"
+    },
+    {
+      "name": "reject setupErrorCode ETIMEDOUT",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_SPAWN_ERROR"
+    },
+    {
+      "name": "reject spawnErrorPresent True",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_SPAWN_ERROR"
+    },
+    {
+      "name": "reject stdoutKnown False",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "STDOUT_BINDING"
+    },
+    {
+      "name": "reject stderrKnown False",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ERROR_OUTPUT_BINDING"
+    },
+    {
+      "name": "reject messageKnown False",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ERROR_OUTPUT_BINDING"
+    },
+    {
+      "name": "reject stdoutSha256 bad",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "STDOUT_BINDING"
+    },
+    {
+      "name": "reject mergedErrorSha256 bad",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ERROR_OUTPUT_BINDING"
+    },
+    {
+      "name": "reject chartBeforeSha256 bad",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "INPUT_BINDING"
+    },
+    {
+      "name": "reject chartAfterSha256 bad",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "INPUT_BINDING"
+    },
+    {
+      "name": "reject observerComplete False",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "COMPLETE_FRAME"
+    },
+    {
+      "name": "reject cwd OTHER",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "CWD_BINDING"
+    },
+    {
+      "name": "reject executable OTHER",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "HELM_AND_OPTIONS"
+    },
+    {
+      "name": "reject optionsMatched False",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "HELM_AND_OPTIONS"
+    },
+    {
+      "name": "reject nativeThrew False",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "EXPECTED_NATIVE_THROW"
+    },
+    {
+      "name": "reject exitSource EXECFILESYNC_RETURN",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "EXPECTED_EXIT_SOURCE"
+    },
+    {
+      "name": "missing field executable",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "HELM_AND_OPTIONS"
+    },
+    {
+      "name": "missing field argv",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ARGV_SELF_BINDING_MALFORMED"
+    },
+    {
+      "name": "missing field argvSha256",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ARGV_SELF_BINDING"
+    },
+    {
+      "name": "missing field cwd",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "CWD_BINDING"
+    },
+    {
+      "name": "missing field optionsMatched",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "HELM_AND_OPTIONS"
+    },
+    {
+      "name": "missing field chartBeforeSha256",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "INPUT_BINDING"
+    },
+    {
+      "name": "missing field chartAfterSha256",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "INPUT_BINDING"
+    },
+    {
+      "name": "missing field nativeExit",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "REAL_EXIT"
+    },
+    {
+      "name": "missing field signal",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_SIGNAL"
+    },
+    {
+      "name": "missing field signalKnown",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_SIGNAL"
+    },
+    {
+      "name": "missing field setupErrorCode",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_SPAWN_ERROR"
+    },
+    {
+      "name": "missing field spawnErrorPresent",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_SPAWN_ERROR"
+    },
+    {
+      "name": "missing field nativeThrew",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "EXPECTED_NATIVE_THROW"
+    },
+    {
+      "name": "missing field stdoutKnown",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "STDOUT_BINDING"
+    },
+    {
+      "name": "missing field stdoutSha256",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "STDOUT_BINDING"
+    },
+    {
+      "name": "missing field stderrKnown",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ERROR_OUTPUT_BINDING"
+    },
+    {
+      "name": "missing field messageKnown",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ERROR_OUTPUT_BINDING"
+    },
+    {
+      "name": "missing field mergedErrorSha256",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ERROR_OUTPUT_BINDING"
+    },
+    {
+      "name": "missing field observerComplete",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "COMPLETE_FRAME"
+    },
+    {
+      "name": "missing field exitSource",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "EXPECTED_EXIT_SOURCE"
+    },
+    {
+      "name": "frame count 0",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ONE_FRAME"
+    },
+    {
+      "name": "frame count 2",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ONE_FRAME"
+    },
+    {
+      "name": "observation observerErrors",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "NO_OBSERVER_FAILURE"
+    },
+    {
+      "name": "observation builtinRestored",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "BUILTIN_RESTORED"
+    },
+    {
+      "name": "self-consistent wrong argv",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ARGV_BINDING"
+    },
+    {
+      "name": "stdout disagreement",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "STDOUT_BINDING"
+    },
+    {
+      "name": "stderr disagreement",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ERROR_OUTPUT_BINDING"
+    },
+    {
+      "name": "native0 parser failure cannot be refusal",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "EXPECTED_NATIVE_EXIT"
+    },
+    {
+      "name": "parsed success cannot bind nonzero refusal",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "PARSED_OUTCOME"
+    },
+    {
+      "name": "success cannot carry parser error",
+      "expectedAccepted": false,
+      "observedAccepted": false,
+      "reason": "ERROR_OUTPUT_BINDING"
+    }
+  ],
+  "fakeAccepted": 5,
+  "fakeRejected": 54,
+  "sourceEdgeIdentityModels": [
+    {
+      "nativeThrows": false,
+      "faultAt": "none",
+      "originalIdentityRetained": true,
+      "oneOriginalCall": true,
+      "observerPoisonRequired": false
+    },
+    {
+      "nativeThrows": false,
+      "faultAt": "before",
+      "originalIdentityRetained": true,
+      "oneOriginalCall": true,
+      "observerPoisonRequired": true
+    },
+    {
+      "nativeThrows": false,
+      "faultAt": "after",
+      "originalIdentityRetained": true,
+      "oneOriginalCall": true,
+      "observerPoisonRequired": true
+    },
+    {
+      "nativeThrows": false,
+      "faultAt": "restore",
+      "originalIdentityRetained": true,
+      "oneOriginalCall": true,
+      "observerPoisonRequired": true
+    },
+    {
+      "nativeThrows": true,
+      "faultAt": "none",
+      "originalIdentityRetained": true,
+      "oneOriginalCall": true,
+      "observerPoisonRequired": false
+    },
+    {
+      "nativeThrows": true,
+      "faultAt": "before",
+      "originalIdentityRetained": true,
+      "oneOriginalCall": true,
+      "observerPoisonRequired": true
+    },
+    {
+      "nativeThrows": true,
+      "faultAt": "after",
+      "originalIdentityRetained": true,
+      "oneOriginalCall": true,
+      "observerPoisonRequired": true
+    },
+    {
+      "nativeThrows": true,
+      "faultAt": "restore",
+      "originalIdentityRetained": true,
+      "oneOriginalCall": true,
+      "observerPoisonRequired": true
+    }
+  ],
+  "installedTypes": [
+    {
+      "path": "studio-runner/node_modules/@types/node/module.d.ts",
+      "sha256": "e6fa9ad47c5f71ff733744a029d1dc472c618de53804eae08ffc243b936f87ff"
+    },
+    {
+      "path": "studio-runner/node_modules/@types/node/child_process.d.ts",
+      "sha256": "13f5c844119c43e51ce777c509267f14d6aaf31eafb2c2b002ca35584cd13b29"
+    }
+  ],
+  "nativeCommandsExecuted": 0,
+  "typescriptExecuted": false,
+  "sourceApplied": false,
+  "requiredFindings": [],
+  "priorFinding": "GWM-EXIT-01 CLOSED STATICALLY ONLY"
+}

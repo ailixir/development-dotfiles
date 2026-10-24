@@ -1,0 +1,26 @@
+[
+  {
+    "before": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient",
+    "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient"
+  },
+  {
+    "before": "com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorization",
+    "after": "com.citi.put.checks.studio.dispatch.DispatchAuthorization"
+  },
+  {
+    "before": "com.citi.put.checks.studio.guided.publication.ObservedValidationClient",
+    "after": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient"
+  },
+  {
+    "before": "GuidedPublicationAuthorization",
+    "after": "DispatchAuthorization"
+  },
+  {
+    "before": "ObservedValidationClient",
+    "after": "HttpRunnerDispatchClient"
+  },
+  {
+    "before": "GuidedRunnerClient",
+    "after": "HttpRunnerDispatchClient"
+  }
+]

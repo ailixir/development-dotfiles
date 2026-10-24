@@ -1,0 +1,236 @@
+{
+  "kind": "BOUNDED_DECLARATIVE_STAGE_LOGICAL_DELIVERY_MODEL",
+  "targetExecuted": false,
+  "cases": [
+    {
+      "case": "staged-only",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": true,
+        "finalSourceClosed": false,
+        "originalGuard": false,
+        "delivery": false,
+        "outer0": false,
+        "rootAdoption": false,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": true,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": false,
+      "expectedSyntheticExternalOutcome": false,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "complete-synthetic-outcome",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": true,
+        "finalSourceClosed": true,
+        "originalGuard": true,
+        "delivery": true,
+        "outer0": true,
+        "rootAdoption": true,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": true,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": true,
+      "expectedSyntheticExternalOutcome": true,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "stage-write-close-fails",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": false,
+        "finalSourceClosed": true,
+        "originalGuard": true,
+        "delivery": true,
+        "outer0": true,
+        "rootAdoption": true,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": true,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": false,
+      "expectedSyntheticExternalOutcome": false,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "final-source-drift-or-close",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": true,
+        "finalSourceClosed": false,
+        "originalGuard": true,
+        "delivery": true,
+        "outer0": true,
+        "rootAdoption": true,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": true,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": false,
+      "expectedSyntheticExternalOutcome": false,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "guard-expired-after-stage",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": true,
+        "finalSourceClosed": true,
+        "originalGuard": false,
+        "delivery": true,
+        "outer0": true,
+        "rootAdoption": true,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": true,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": false,
+      "expectedSyntheticExternalOutcome": false,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "delivery-fails-after-logical",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": true,
+        "finalSourceClosed": true,
+        "originalGuard": true,
+        "delivery": false,
+        "outer0": true,
+        "rootAdoption": true,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": true,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": true,
+      "expectedSyntheticExternalOutcome": false,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "outer-status-unknown",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": true,
+        "finalSourceClosed": true,
+        "originalGuard": true,
+        "delivery": true,
+        "outer0": false,
+        "rootAdoption": true,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": true,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": true,
+      "expectedSyntheticExternalOutcome": false,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "root-adoption-missing",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": true,
+        "finalSourceClosed": true,
+        "originalGuard": true,
+        "delivery": true,
+        "outer0": true,
+        "rootAdoption": false,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": true,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": true,
+      "expectedSyntheticExternalOutcome": false,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "body-work-unresolved",
+      "syntheticFields": {
+        "bodyDrained": false,
+        "stageClosed": true,
+        "finalSourceClosed": true,
+        "originalGuard": true,
+        "delivery": true,
+        "outer0": true,
+        "rootAdoption": true,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": true,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": false,
+      "expectedSyntheticExternalOutcome": false,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "staged-lease-unknown",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": true,
+        "finalSourceClosed": true,
+        "originalGuard": true,
+        "delivery": true,
+        "outer0": true,
+        "rootAdoption": true,
+        "stagedTransitionQualified": false,
+        "strictStrongProved": true,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": false,
+      "expectedSyntheticExternalOutcome": false,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "source03-ordinary-strong-unsupported",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": true,
+        "finalSourceClosed": true,
+        "originalGuard": true,
+        "delivery": true,
+        "outer0": true,
+        "rootAdoption": true,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": false,
+        "afterAllowQualified": true
+      },
+      "expectedLogicalEligible": true,
+      "expectedSyntheticExternalOutcome": true,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    },
+    {
+      "case": "afterallow-close-proof-unknown",
+      "syntheticFields": {
+        "bodyDrained": true,
+        "stageClosed": true,
+        "finalSourceClosed": true,
+        "originalGuard": true,
+        "delivery": true,
+        "outer0": true,
+        "rootAdoption": true,
+        "stagedTransitionQualified": true,
+        "strictStrongProved": true,
+        "afterAllowQualified": false
+      },
+      "expectedLogicalEligible": true,
+      "expectedSyntheticExternalOutcome": true,
+      "expectedActualAuthority": false,
+      "strictStrongOrAfterAllowStillRequired": true
+    }
+  ],
+  "interpretation": "Syntheticexternaloutcomeis a declarativeconjunction only, neveractualfact/policy/closure. Evenpositivehasnoactualauthority. Strictstrong/afterallowfieldsarenotfakedintolegitimacy: theirabsencekeepsactualoperationHOLD independentlyoflocalreport/outcomecompleteness.",
+  "noFurtherTargetScenarios": true
+}

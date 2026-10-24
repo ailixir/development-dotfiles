@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "phase": "format",
+  "status": "NATIVE_PHASE_TERMINAL",
+  "phases": [
+    {
+      "phase": "COLLECTOR_WAIT",
+      "atUtc": "2026-10-19T08:30:11.778542+00:00",
+      "pid": 73882,
+      "ownedIdentityCount": 1
+    },
+    {
+      "phase": "COLLECTOR_WAIT",
+      "atUtc": "2026-10-19T08:30:16.897034+00:00",
+      "pid": 73882,
+      "ownedIdentityCount": 3
+    },
+    {
+      "phase": "COLLECTOR_WAIT",
+      "atUtc": "2026-10-19T08:30:22.017917+00:00",
+      "pid": 73882,
+      "ownedIdentityCount": 3
+    },
+    {
+      "phase": "OWNED_JAVA_OR_UNKNOWN_DRAIN_WAIT",
+      "atUtc": "2026-10-19T08:30:22.064120+00:00",
+      "identities": [
+        {
+          "pid": 73940,
+          "start": "Mon Oct 19 04:30:12 2026"
+        },
+        {
+          "pid": 74044,
+          "start": "Mon Oct 19 04:30:16 2026"
+        }
+      ]
+    },
+    {
+      "phase": "NATIVE_PHASE_TERMINAL",
+      "atUtc": "2026-10-19T08:30:27.122945+00:00",
+      "exit": 0
+    }
+  ],
+  "evidenceErrors": [],
+  "command": [
+    "./gradlew",
+    "--offline",
+    "--no-configuration-cache",
+    "--no-build-cache",
+    "--init-script",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-restricted-unit-prep/resume3/gst-three-only.init.gradle",
+    "spotlessJavaApply",
+    "--rerun-tasks",
+    "--no-daemon"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend",
+  "rootUnitAuthorizationSha256": "2e705692283c0e4fbc6bd8661c2eee19416c22d6baac4cf7ccde5505163acfd0",
+  "phaseKeeperSha256": "b6bd13ec275f236b9f457667cbb9709eaa6347c88f5ea8492accd7cd112ef9fb",
+  "ownershipCoreSha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+  "lockPin": {
+    "atUtc": "2026-10-19T08:29:48.111007+00:00",
+    "wrapperPid": 72960,
+    "wrapperStart": "Mon Oct 19 04:29:37 2026",
+    "wrapperArgvSha256": "1d1638cae329a35e35525dbea90f90afea0724722d4b3ae17d673fa8a10670f6",
+    "shellPid": 72961,
+    "shellStart": "Mon Oct 19 04:29:37 2026",
+    "lockDevInode": [
+      16777229,
+      215213569
+    ],
+    "kernelExclusiveLockObserved": true,
+    "toolSession": 70580,
+    "sourceWriterScope": "Only root-authorized complete GS-T three tests; no lane credit"
+  },
+  "sourceWriterScope": "Only the three released GS-T tests",
+  "noLaneCredit": true,
+  "automaticRetry": false,
+  "collectorPid": 73882,
+  "collectorStartedAtUtc": "2026-10-19T08:30:11.657632+00:00",
+  "ownedIdentityObservationGap": true,
+  "collectorExit": 0,
+  "ownedJvmTerminalProof": [
+    {
+      "pid": 73882,
+      "start": "Mon Oct 19 04:30:11 2026",
+      "proof": "PID_ABSENT"
+    },
+    {
+      "pid": 73940,
+      "start": "Mon Oct 19 04:30:12 2026",
+      "proof": "PID_ABSENT"
+    },
+    {
+      "pid": 74044,
+      "start": "Mon Oct 19 04:30:16 2026",
+      "proof": "PID_ABSENT"
+    }
+  ],
+  "remainingOwnedNonJvmFacts": [],
+  "ownedIdentities": [
+    {
+      "pid": 73882,
+      "ppid": 73867,
+      "start": "Mon Oct 19 04:30:11 2026",
+      "argvHash": "47b7a6c0bf15ecf4a393ceedb79fa49aa5c032c87b1e0dc961ed099a916e9a9f",
+      "projectMarkerCandidate": true,
+      "javaPreviouslyProved": true,
+      "executableState": "JAVA",
+      "identityObservation": "MATCHED",
+      "executableObservation": "JAVA",
+      "observationError": false
+    },
+    {
+      "pid": 73940,
+      "ppid": 1,
+      "start": "Mon Oct 19 04:30:12 2026",
+      "argvHash": "3a3a7babf6ea765794501bed6dae29095bbeb38d960804472f3579fc1d7af10f",
+      "projectMarkerCandidate": false,
+      "javaPreviouslyProved": true,
+      "executableState": "JAVA",
+      "identityObservation": "UNKNOWN",
+      "executableObservation": "UNKNOWN",
+      "observationError": false
+    },
+    {
+      "pid": 74044,
+      "ppid": 73940,
+      "start": "Mon Oct 19 04:30:16 2026",
+      "argvHash": "5194b07d059df70f994827259eb149363e885d5c0d24288abce38599e27fc775",
+      "projectMarkerCandidate": false,
+      "javaPreviouslyProved": true,
+      "executableState": "JAVA",
+      "identityObservation": "MATCHED",
+      "executableObservation": "JAVA",
+      "observationError": false
+    }
+  ],
+  "collectorTerminatedAtUtc": "2026-10-19T08:30:27.122813+00:00"
+}

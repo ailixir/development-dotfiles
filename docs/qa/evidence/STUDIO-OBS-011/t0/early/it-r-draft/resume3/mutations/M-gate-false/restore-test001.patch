@@ -1,0 +1,11 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -4861,7 +4861,7 @@
+     var actual = FIXTURE_INVOCATIONS.stream().collect(java.util.stream.Collectors.groupingBy(
+         invocation -> invocation.method + "/" + invocation.variant + "/" + invocation.variantOrdinal,
+         java.util.TreeMap::new, java.util.stream.Collectors.counting()));
+-    return false;
++    return actual.equals(itrExpectedInvocationMultiset());
+   }
+ 
+   @Test

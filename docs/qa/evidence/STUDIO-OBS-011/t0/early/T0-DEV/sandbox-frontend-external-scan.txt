@@ -1,0 +1,67 @@
+frontend/src/components/providers/realStudioStartup.test.ts:7:    const script = readFileSync(resolve(process.cwd(), '..', 'dev.sh'), 'utf8');
+frontend/src/components/providers/realStudioStartup.test.ts:23:    ].map((file) => readFileSync(resolve(process.cwd(), file), 'utf8')).join('\n');
+frontend/src/types/studio/studioContextContract.test.ts:26:  JSON.parse(fs.readFileSync(path.join(EXAMPLE_DIR, 'context-authoring-valid.json'), 'utf8')) as {
+frontend/src/types/studio/studioContextContract.test.ts:31:  JSON.parse(fs.readFileSync(path.join(EXAMPLE_DIR, 'context-authoring-invalid.json'), 'utf8')) as {
+frontend/src/components/checks/wizard/configs/UiTestConfig.test.tsx:25:const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8')) as {
+frontend/src/components/checks/wizard/configs/UiTestConfig.test.tsx:51:  observed.push({ method: request.method, path: new URL(request.url).pathname });
+frontend/src/services/api/studioGuidedApi.test.ts:172:        seen.push({ method: 'GET', path: new URL(request.url).pathname, key: null, body: null });
+frontend/src/services/api/studioGuidedApi.test.ts:344:    expect(new URL(url).search).toBe('');
+frontend/src/pages/ChecksStudioPage/authoredLiteralHint.test.ts:19:const fixtures = JSON.parse(fs.readFileSync(path.join(V3, 'fixtures.json'), 'utf8'));
+frontend/src/pages/ChecksStudioPage/pageGuidedRun.test.tsx:75:    path: new URL(request.url).pathname,
+frontend/src/components/studio/run/runGate.test.tsx:40:const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
+frontend/src/components/studio/run/runGate.test.tsx:876:    const modules = GUARDED_MODULES.map((file) => [file, fs.readFileSync(file, 'utf8')] as const);
+frontend/src/components/studio/run/runGate.test.tsx:909:    const real = GUARDED_MODULES.flatMap((file) => moduleSpecifiers(fs.readFileSync(file, 'utf8')));
+frontend/src/services/mocks/studio/confirmedRevisionEscalation.test.ts:67:const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
+frontend/src/services/mocks/studio/confirmedRevisionEscalation.test.ts:94:      const schemaId = (JSON.parse(fs.readFileSync(file, 'utf8')) as { $id?: string }).$id;
+frontend/src/services/mocks/studio/confirmedRevisionEscalation.test.ts:106:    const text = fs.readFileSync(file, 'utf8');
+frontend/src/services/api/studioSchedulesApi.test.ts:14:const spec = parse(fs.readFileSync(path.resolve(__dirname, '../../../../docs/specs/studio/openapi.yaml'), 'utf8'));
+frontend/src/pages/StudioTestsPage/StudioTestsPage.test.tsx:48:      const params = new URL(request.url).searchParams;
+frontend/src/pages/StudioTestsPage/StudioTestsPage.test.tsx:188:        const params = new URL(request.url).searchParams;
+frontend/src/pages/ChecksStudioPage/pageEvidence.test.tsx:210:      .readFileSync(path.resolve(__dirname, 'ChecksStudioPage.tsx'), 'utf8')
+frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx:53:  observed.push({ method: request.method, path: new URL(request.url).pathname });
+frontend/src/components/studio/references/referencePicker.test.tsx:40:const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8')) as {
+frontend/src/components/studio/references/referencePicker.test.tsx:73:  observed.push({ method: request.method, path: new URL(request.url).pathname });
+frontend/src/components/studio/references/referencePicker.test.tsx:598:      const source = fs.readFileSync(path.join(__dirname, file), 'utf8');
+frontend/src/services/mocks/studio/authoringHandlers.test.ts:11:  fs.readFileSync(
+frontend/src/components/studio/guided/guided.test.tsx:50:const REPO_ROOT = path.resolve(__dirname, '../../../../..');
+frontend/src/components/studio/guided/guided.test.tsx:51:const V3 = path.join(REPO_ROOT, 'docs/specs/studio-observed-authoring/contracts/v3');
+frontend/src/components/studio/guided/guided.test.tsx:52:const fixtures = JSON.parse(fs.readFileSync(path.join(V3, 'fixtures.json'), 'utf8'));
+frontend/src/components/studio/guided/guided.test.tsx:53:const publicationFixtures = JSON.parse(fs.readFileSync(path.join(V3, 'publication-fixtures.json'), 'utf8'));
+frontend/src/components/studio/guided/guided.test.tsx:113:  const text = fs.readFileSync(path.join(REPO_ROOT, file), 'utf8');
+frontend/src/components/studio/guided/guided.test.tsx:150:    const source = fs.readFileSync(path.join(__dirname, 'guidedNarratives.ts'), 'utf8');
+frontend/src/services/api/studioAuthoringTransport.test.ts:17:  fs.readFileSync(
+frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx:39:const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
+frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx:288:    observed.filter((entry) => entry.method === method && suffix.test(new URL(entry.url).pathname));
+frontend/src/components/studio/SecretInput.test.tsx:58:  observed.push({ method: request.method, path: new URL(request.url).pathname });
+frontend/src/components/studio/SecretInput.test.tsx:302:const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8')) as {
+frontend/src/pages/StudioRunsPage/StudioRunsPage.test.tsx:68:      const params = new URL(request.url).searchParams;
+frontend/src/components/studio/guided/planExplanation.test.tsx:16:const REPO_ROOT = path.resolve(__dirname, '../../../../..');
+frontend/src/components/studio/guided/planExplanation.test.tsx:17:const V3 = path.join(REPO_ROOT, 'docs/specs/studio-observed-authoring/contracts/v3');
+frontend/src/components/studio/guided/planExplanation.test.tsx:18:const fixtures = JSON.parse(fs.readFileSync(path.join(V3, 'fixtures.json'), 'utf8'));
+frontend/src/components/studio/guided/planExplanation.test.tsx:19:const publicationFixtures = JSON.parse(fs.readFileSync(path.join(V3, 'publication-fixtures.json'), 'utf8'));
+frontend/src/components/studio/run/refusals.test.tsx:53:const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
+frontend/src/components/studio/run/refusals.test.tsx:333:    const specifiers = moduleSpecifiers(fs.readFileSync(pin, 'utf8'));
+frontend/src/components/studio/run/refusals.test.tsx:361:      fs.readFileSync(path.join(__dirname, 'pinnedExecutionErrorFacts.ts'), 'utf8'),
+frontend/src/services/mocks/studio/guidedHandlers.test.ts:67:  ajv.addSchema(JSON.parse(fs.readFileSync(path.join(V3_DIR, file), 'utf8')));
+frontend/src/services/mocks/studio/guidedHandlers.test.ts:558:      fs.readFileSync(path.resolve(__dirname, '../../../../../docs/specs/studio/openapi.yaml'), 'utf8'),
+frontend/src/components/studio/guided/clarification.test.tsx:23:const REPO_ROOT = path.resolve(__dirname, '../../../../..');
+frontend/src/components/studio/guided/clarification.test.tsx:25:  fs.readFileSync(path.join(REPO_ROOT, 'docs/specs/studio-observed-authoring/contracts/v3/fixtures.json'), 'utf8'),
+frontend/src/services/mocks/studio/executionScenarioMatrix.test.ts:34:    const source = fs.readFileSync(file, 'utf8');
+frontend/src/services/mocks/studio/studioEscalation.test.ts:66:const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
+frontend/src/services/mocks/studio/studioEscalation.test.ts:93:      const schemaId = (JSON.parse(fs.readFileSync(file, 'utf8')) as { $id?: string }).$id;
+frontend/src/services/mocks/studio/studioEscalation.test.ts:105:    const text = fs.readFileSync(file, 'utf8');
+frontend/src/services/mocks/studio/executionFixtureMatrix.test.ts:109:const ALL_TITLES = storyTestFiles().flatMap((file) => testTitles(fs.readFileSync(file, 'utf8')));
+frontend/src/components/studio/guided/loginRequired.test.tsx:26:const REPO_ROOT = path.resolve(__dirname, '../../../../..');
+frontend/src/components/studio/guided/loginRequired.test.tsx:28:  fs.readFileSync(path.join(REPO_ROOT, 'docs/specs/studio-observed-authoring/contracts/v3/fixtures.json'), 'utf8'),
+frontend/src/pages/ChecksStudioPage/pageReplayAndReferences.test.tsx:65:    path: new URL(request.url).pathname,
+frontend/src/components/studio/evidence/studioVideoUrl.test.tsx:97:  const sameOrigin = new URL(base, window.location.href).origin === window.location.origin;
+frontend/src/components/studio/evidence/studioVideoUrl.test.tsx:111:      expect(row.expectedOrigin(), row.name).toBe(new URL(row.base, window.location.href).origin);
+frontend/src/components/studio/evidence/studioVideoUrl.test.tsx:154:    const playback = new URL(urls.studioVideoUrl(VIDEO_PATH));
+frontend/src/components/studio/evidence/studioVideoUrl.test.tsx:161:    expect([...new URL(src).searchParams.keys()]).toEqual([]);
+frontend/src/components/studio/evidence/guidedEvidence.test.tsx:23:const REPO_ROOT = path.resolve(__dirname, '../../../../..');
+frontend/src/components/studio/evidence/guidedEvidence.test.tsx:25:  fs.readFileSync(path.join(REPO_ROOT, 'docs/specs/studio-observed-authoring/contracts/v3/fixtures.json'), 'utf8'),
+frontend/src/services/mocks/studio/studioContract.test.ts:55:const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
+frontend/src/services/mocks/studio/studioContract.test.ts:326:    JSON.parse(fs.readFileSync(path.join(SPEC_DIR, 'examples', 'context-authoring-valid.json'), 'utf8')) as {
+frontend/src/services/mocks/studio/studioContract.test.ts:456:    v3.addSchema(JSON.parse(fs.readFileSync(path.join(V3_DIR, file), 'utf8')));
+frontend/src/components/studio/evidence/evidencePanel.test.tsx:209:    const specifiers = moduleSpecifiers(fs.readFileSync(PIN_FILE, 'utf8'));
+frontend/src/components/studio/evidence/evidencePanel.test.tsx:237:    expect(moduleSpecifiers(fs.readFileSync(PIN_FILE, 'utf8'))).toEqual([

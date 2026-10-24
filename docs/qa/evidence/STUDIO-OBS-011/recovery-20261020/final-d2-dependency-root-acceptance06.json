@@ -1,0 +1,74 @@
+{
+  "kind": "ROOT_EXACT_D2_DEPENDENCY_WRAPPER_SHELL_ACCEPTANCE06",
+  "atUtc": "2026-10-21T04:30:25.012585+00:00",
+  "accepted": true,
+  "sourceCorrectionAccepted": true,
+  "sourceCorrection": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-correction01/manifest.json",
+    "sha256": "1b6ac6c046dd173aede93a492491533b4d9156996083698f832ff54ee9a5c315",
+    "bytes": 1515
+  },
+  "sourceCorrectionQa": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-correction01/independent-qa/manifest.json",
+    "sha256": "d5c33394a4c5a61d5fe2ab17d541f2473f89d7e43615305e1542e90c13f08cdd",
+    "bytes": 1179
+  },
+  "sourceQaVerdict": "SOURCE_CLEAN_FOR_EXACT_D2_SUCCESSOR_BINDING",
+  "preparation": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-preparation06/manifest.json",
+    "sha256": "e8f7762a1d4dac16079e07c4f5f52c4899b20701faf0adb56e5a3aa445b915f6",
+    "bytes": 1488
+  },
+  "driver": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-preparation06/run-d2.py",
+    "sha256": "523d167e03dce51b204370ffb8cd47f1fef4ea3c54591270adf77296b756605b",
+    "bytes": 21442
+  },
+  "rootDriverAstOnlyParsed": true,
+  "unchangedNativeAndClosedProjectionTailVerified": true,
+  "newBinderInlineSha256": "3d327e6e07a7b468b5b1cec665c87b5324b267ba89e4314ea41ee211434f31f2",
+  "priorExact33DependencyAcceptance": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-dependency-root-acceptance05.json",
+    "sha256": "855a7ff18815776de5afb3ddcf09293f74cbdcb8ad1bba551f30421bbf2e29e0",
+    "bytes": 9176
+  },
+  "sameExact33DependenciesAndNineGenuineFacts": true,
+  "nineFinalBindings": {
+    "acceptedSourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "acceptedTestInputDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "acceptedDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+    "buildContextSha256": "8457b7413e543ff88eea95e7fec554d380e5903e839e0f814c46739833bdb886",
+    "finalBuildReceiptSha256": "2d46c813bc32bcd8f56eecc48e65c30ba0871328ecac54a26bc554fe66a3ce3d",
+    "configuredImageReference": "put-checks-studio-runner:obs011-recovery-20261020-final01-local",
+    "measuredImmutableImageId": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+    "finalImagePinsReceiptSha256": "effa2ebb317234691de3de9c09e5a5b7cd194b59e0ed23df0f00ae1fe0ac3ab1",
+    "finalDeployment722ReceiptSha256": "3ba83d0f0af820cbe836714a2142fba380cd6d8b3c3f71bb32a4aa181e9c9329"
+  },
+  "canonicalShell": {
+    "path": "/bin/bash",
+    "sha256": "41e7f937a0d2e7e0bc03884595f54f7a892e468087519de1fc53e177b2503308",
+    "mode": "0o555",
+    "versionFirstLine": "GNU bash, version 3.2.57(1)-release (arm64-apple-darwin23)"
+  },
+  "singleScriptExpansionReplacement": true,
+  "oldScriptFixtureAndActualProductUnchanged": true,
+  "historicalFailure": {
+    "producer": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/manifest.json",
+      "sha256": "8a1607502869f9f041b56fe62b437e9b496672f0065ca2f5fe825d0ea7864420",
+      "bytes": 8905
+    },
+    "qa": {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/execution-qa/manifest.json",
+      "sha256": "35aa5807cc3694b560d949217687f57d6b876cd875ce759e0c113232520a54b4",
+      "bytes": 998
+    },
+    "status": "NO_CREDIT_NOT_READY",
+    "historicalPreciseError": "UNKNOWN"
+  },
+  "controlledNewShellReproductions": 2,
+  "prospectiveCompatibilityFixSupported": true,
+  "bindingOnlyReleased": true,
+  "runtimeReleased": false,
+  "noNewProductScenarioOrWeakenedOracle": true
+}

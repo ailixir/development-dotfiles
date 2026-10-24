@@ -1,0 +1,103 @@
+{
+  "actualJava": 0,
+  "actualMainExecuted": false,
+  "actualModes": 0,
+  "actualPlatform": 0,
+  "authorCasesReplayed": 0,
+  "authorWorldClassesReused": true,
+  "bytecodeDisabled": true,
+  "checks": 56,
+  "declaredCases": 7,
+  "deniedHostEvents": [],
+  "executedCases": 7,
+  "failures": 0,
+  "kind": "QUINN_SOURCE01_INDEPENDENT_CRITICAL_FAKE_ONLY",
+  "peerCasesReplayed": 0,
+  "permanentDenyAudit": true,
+  "results": [
+    {
+      "checks": 7,
+      "details": {
+        "completion": "UNKNOWN",
+        "recordedStatus": null,
+        "returnedStatus": 7,
+        "waitReturned": true
+      },
+      "id": "QA-utility-nonzero-independent-wait-facts",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 1,
+      "details": {
+        "originalOnlyInContext": true,
+        "propagated": "CLEANUP"
+      },
+      "id": "QA-write-first-primary-replaced-by-close",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 1,
+      "details": {
+        "hashCalls": 1,
+        "separateOrigFactRetained": false
+      },
+      "id": "QA-self-text-hash-failure-loses-other-field",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 2,
+      "details": {
+        "allow": true,
+        "permitTimes": [
+          1000000009000,
+          1000000003000
+        ],
+        "readinessCreatedAtNs": 1
+      },
+      "id": "QA-gate-stale-original-readiness-and-reversed-clock",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 1,
+      "details": {
+        "actualFakeDeliveryNs": 1060000000001,
+        "permitExpiresNs": 1060000000000,
+        "returnedGuardStatus": 0
+      },
+      "id": "QA-gate-delivery-expires-after-post",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 6,
+      "details": {
+        "acceptedWithZeroEntries": true,
+        "actualFakeDirectoryCount": 2,
+        "entryBudget": 0,
+        "inventoryRows": 0
+      },
+      "id": "QA-empty-directory-omitted-and-zero-cap-admitted",
+      "outcome": "PASS"
+    },
+    {
+      "checks": 38,
+      "details": {
+        "directWaitFact": null,
+        "earlyEnrollmentConsumed": true,
+        "invalidReturnedWaitCount": 1
+      },
+      "id": "QA-preserved-enrollment-cap-and-returned-null-wait",
+      "outcome": "PASS"
+    }
+  ],
+  "sourceHashes": {
+    "controls.py": "db12611b6ba64746dd5d934e904e7b3a0a6d6ab17a049405bd503330d8442397",
+    "entry.py": "a1355be9cb40575ea0a4be6fe7de171356b7dd42d104285c7044e8197ad155dd",
+    "mode_predicates.py": "d882e49e61db40a6083295193b2e2014567c17afd656f572357b6511284f121c",
+    "profile.py": "e9c5db06fd9cca5a80e13e4d1ec94906456dd882a159bfb9a949e06df5121b25",
+    "public_contract.py": "843a78630666b3ddac6b687021a50517a7594ab8c575ccc9546835348e0d4baf",
+    "qualification_custody.py": "3e25302799610383899b7a20f814e4ea519f6ec0ea4b49654736ccb10001cfab",
+    "runtime.py": "9c8c8a0d6209c9b9d80f3adeb6e01d4ec29cc3c14b1a9b18d88c13e07c3c0dc8",
+    "storage.py": "515655dea6115dc69d24b4666b79204370846bd4257fde44a7a3975dbef6101b"
+  },
+  "targetBoundaryGlobalsFaked": true
+}

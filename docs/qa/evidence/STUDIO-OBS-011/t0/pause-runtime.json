@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-19T01:09:47.420551+00:00",
+  "reason": "User paused goal and requested new-session handoff",
+  "stoppedOnlyCurrentSessionOwnedHelpers": [
+    {
+      "pid": 56180,
+      "start": "Sun Oct 18 20:43:52 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -u -",
+      "parentPid": 31460,
+      "childrenAtSignal": 0,
+      "signal": "SIGTERM",
+      "role": "read-only B1 watcher"
+    },
+    {
+      "pid": 86038,
+      "start": "Sun Oct 18 20:55:37 2026",
+      "command": "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/Resources/Python.app/Contents/MacOS/Python -u -",
+      "parentPid": 31460,
+      "childrenAtSignal": 0,
+      "signal": "SIGTERM",
+      "role": "B7 queue waiter; frontend not started"
+    }
+  ],
+  "inheritedBaselineNotSignalled": {
+    "collectorPid": 88144,
+    "wrapperPid": 88167,
+    "daemonPid": 88182,
+    "label": "obs011-t0-baseline-check01"
+  },
+  "b7Started": false
+}

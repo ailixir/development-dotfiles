@@ -1,0 +1,58 @@
+{
+  "rootAuditManifestSha256": "d206a339b3bb5b8676d1e02e4aea7896c3ba4b97348d94568569e5db5ed451a6",
+  "sourceOnlyComponentNotVerdict": true,
+  "findings": [
+    {
+      "id": "C8-INTEGRATION-01",
+      "actualBoundaryFunctions": [
+        "task_reducer",
+        "selected_build_task_requirements",
+        "native_task_log_requirements"
+      ],
+      "binding": {
+        "assessorSha256": "db0d5458d60093aa452106d020f3eff45089ae978ba0c8cd0080bc3dd3b9dbef",
+        "definitions": [
+          "task_event_proof",
+          "task_statuses"
+        ],
+        "globals": [
+          "re"
+        ]
+      },
+      "noDuplicateGrammar": true,
+      "oldMarkerCountRuleRemoved": true
+    },
+    {
+      "id": "C8-INTEGRATION-02",
+      "actualBoundaryFunctions": [
+        "load_pure_execution"
+      ],
+      "bindings": {
+        "execution_checks.py": "c980be5b812cdfc2b43f41715cb3ce30c4dcbb772bfa6b0eeefbacc346423194",
+        "report_inventory.py": "2c29fa7f368b906a65deea92b2d4b17b95080b25eea2729b4888b16eb2cda69d"
+      },
+      "dependencyLookup": "private fixed import binding; no report_inventory sys.path/sys.modules fallback",
+      "actualPureLoaderAndApiControls": true
+    },
+    {
+      "id": "C8-INTEGRATION-03",
+      "actualBoundaryFunctions": [
+        "report_manifest_requirements",
+        "loaded_metadata_unchanged"
+      ],
+      "physicalPath": "full-check/report-manifest-before-archive.json",
+      "binding": "safe metadata read -> loadedHashes/evidencePins -> coverage manifestSHA/current inventory -> preserved coverageSHA -> readiness/permit/basis/current recheck",
+      "blockedRuleSourceSha256": "f13e744f1d1294f023d3d6ea7da75b67fcb9956066a5fd2fb2e79650f7ad8ed5",
+      "blockedRuleExport": "evidenced_failed_test_report_block",
+      "noOldBodyOrRatioCredit": true
+    }
+  ],
+  "prior128LabelsRetained": true,
+  "knownExecution03MandatoryFinding": "Historical C8-EXEC-04; corrected04 source candidate bound, independent acceptance owed",
+  "corrected04CompatibilityPending": false,
+  "release": false,
+  "readiness": false,
+  "predecessorControlManifestSha256": "ead32301e2131fe9c7e6ba4a4b1beaf8720c9bba2df5bcd735cdadfdaedff65a",
+  "explicitExecution04Compatibility": "fb038d62107aeae456650077eaa7ace5e5bdff2761b21fee99358406bf2c2bc7",
+  "wholeUnitReviewAndRootCompositionPending": true
+}

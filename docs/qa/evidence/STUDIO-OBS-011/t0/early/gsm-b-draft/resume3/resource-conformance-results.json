@@ -1,0 +1,25 @@
+{
+  "testsRun": 7,
+  "passed": true,
+  "closedDiagnosticWitness": {
+    "kind": "READONLY_CLOSED_DIAGNOSTIC_CODE_CONTRACT_WITNESS_NOT_NEW_NATIVE_RESULT",
+    "collectorPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-diag-start1-full01-results.json",
+    "collectorSha256": "9b991d479cbe6176a4631c43abcc28f1c14f2e7f3d2d269e920c40b44013babe",
+    "positiveCodeAssessment": true,
+    "exactInheritedResources": 6,
+    "missingCurrentClassReportRejected": true,
+    "changedKnownResourceWithReboundFakeManifestRejected": "EXACT_STATIC_RESOURCE_CONTENT_CHANGED",
+    "negativeInjections": "In-memory only; actual public archive/receipt bytes/times unchanged",
+    "outerQualificationPreserved": {
+      "sha256": "adf4b6da566ab3ef6ed0ecfc960ffbdfe21bb81ff47456bcbceebfe90a5a3921",
+      "status": "TERMINAL_INCOMPLETE_OBSERVATION",
+      "exit": 2,
+      "observationFailure": true,
+      "ownedIdentityObservationGap": true
+    },
+    "noLive03OutputsReadOrWritten": true,
+    "noRuntimeGsmLaneFullT0OrCoverageCredit": true
+  },
+  "noActualEntryPointNativeSignalOrProductWrite": true,
+  "actualMergedCoverageGateAdded": false
+}

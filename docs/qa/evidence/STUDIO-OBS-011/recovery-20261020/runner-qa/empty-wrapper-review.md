@@ -1,0 +1,9 @@
+# Limited source review: empty pointer wrappers
+
+**Supported; no mandatory source correction identified.** Reviewed exact patch `daa989a00ed81ad628791c37ababfb75bbb59c5515c9fffe81d8b82fb4f94fd4`, corrected deferred candidate `90f886fa3edd85f3a4246d40e097fe1ff1bd7863830c47dd81a74247ad539461`, and seven-path binding `0ceb51bb6ec7c21947bb61d80fb3e6fc2b25010bd78cc7902d7f554e2638ceb7`.
+
+The four-hunk delta replaces exactly two comment-only `describe` openings with comments retaining their complete titles and removes their two corresponding closing lines. Every inner historical pointer block remains byte-identical. All 15 retained `it.skip` calls remain complete and byte-identical, each occurring once, and their genuine criterion suite paths are untouched. No dummy test/skip, assertion, timeout, empty-suite opt-out, config/dependency or six-file TS change is introduced. All seven real preimages and proposed candidate hashes independently match; the actual unified diff independently reproduces the submitted patch.
+
+The existing unit01 report independently reconciles all 117 files' ordered testcase names/statuses to fresh B2 after removing only the four exact approved skipped-pointer identities. Its actual exit remains 1 because of the two empty-suite errors; 2,643 passes and 25 skips are not a green run. Historical failure and original draft remain preserved.
+
+This is a source verdict for the minimal correction, not a runtime or copy-back verdict. Root controls application and affected lint/name-map/full-unit reruns. Complete emits, exact actual-digest disposition, full fixtures, final source/binding review and independent RT copy-back verdict remain owed. No source/sandbox edit, runtime/checker/test/compiler invocation, private-body access or delegation was performed by this reviewer.

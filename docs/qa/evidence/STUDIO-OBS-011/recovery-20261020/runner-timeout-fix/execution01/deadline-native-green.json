@@ -1,0 +1,82 @@
+{
+  "actual": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.fixtures.config.ts",
+      "test/fixtures-tier/guided-start-deadline.test.ts",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-deadline-native01-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-20T16:40:43.457435+00:00",
+    "elapsedSeconds": 16.57,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "e08771d9a2f72855bdbf5bda8218a0b1190c4e6eb42ed26b5cdd3c1e4ae71485",
+    "testInputStable": true,
+    "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+    "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+    "vitest": {
+      "success": true,
+      "numPassedTests": 9,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTests": 9,
+      "numPassedTestSuites": 3,
+      "numFailedTestSuites": 0
+    },
+    "vitestReportSha256": "5a1334ea81be71b354c919d09b05bbc5d5702877af80580b0b282e1b4c3936f0"
+  },
+  "allCases": [
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at the deadline with TIMEOUT, and after close() no process, scratch or recording file remains",
+      "status": "passed"
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a bare abort'), naming 'CANCELLED', with the same teardown",
+      "status": "passed"
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a CANCELLED reason (a stop)'), naming 'CANCELLED', with the same teardown",
+      "status": "passed"
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a TIMEOUT reason (the runtime\\'s budg\u2026'), naming 'TIMEOUT', with the same teardown",
+      "status": "passed"
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down with a recording on disk: kills the encoder as well, and leaves the recorder's files exactly as they were",
+      "status": "passed"
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled",
+      "status": "passed"
+    },
+    {
+      "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down Quinn F5: refuses to confirm the teardown while a process it enumerated is still alive, and leaves the scratch directory in place",
+      "status": "passed"
+    },
+    {
+      "fullName": "controlled startup timeout-origin handoff for 009 hands an absolute startup timeout to the caller before pending teardown when the wall sample is still before its deadline",
+      "status": "passed"
+    },
+    {
+      "fullName": "controlled startup timeout-origin handoff for 009 keeps an earlier operation-cap TIMEOUT on the ordinary cleanup-before-response path",
+      "status": "passed"
+    }
+  ],
+  "allSevenOriginalAndTwoControlledPass": true,
+  "orderedNamesExact": true,
+  "zeroSkips": true,
+  "green492SourcesAndDistStable": true
+}

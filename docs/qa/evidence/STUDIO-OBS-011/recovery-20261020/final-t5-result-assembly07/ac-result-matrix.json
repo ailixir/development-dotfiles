@@ -1,0 +1,638 @@
+{
+  "status": "CANONICAL_AC1_TO_7_REVIEW_ASSEMBLY_NOT_QA_VERDICT",
+  "canonicalStory": {
+    "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+    "sha256": "7df0b9eb84d4b2a4f35bb219f5d5f1f5891ee00e48e5b928eb3370cbf72b9f6f",
+    "bytes": 116163,
+    "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+  },
+  "canonicalPreparedMapping": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-t5-readiness-preparation05/manifest.json",
+    "sha256": "ba96fed586249fe33601241d5ea5d71d4b07a9e1255034a699de76bd048a3b9e",
+    "bytes": 610
+  },
+  "acMatrix": [
+    {
+      "id": "AC-1",
+      "requirement": "Per-item inventory at final HEAD with recorded query/result, original and added candidates, deltas and dispositions",
+      "accepted": "Source QA c26: all60 CLN IDs and22 scoped queries, original56 scopes plus57\u201360; named accepted transformations and source exceptions",
+      "state": "SOURCE_INVENTORY_AND_FROZEN_INPUT_COMPONENTS_QUALIFIED_FINAL_ADOPTION_PENDING",
+      "references": [
+        "sourceLiveInventory",
+        "sourceLiveMapping",
+        "canonicalInventory"
+      ],
+      "preparedStateRetainedAsHistory": "ACCEPTED_SOURCE_COMPONENT_FINAL_ADOPTION_UNBOUND",
+      "measuredReferences": {
+        "sourceLiveInventory": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-source-inventory03/independent-qa/manifest.json",
+          "sha256": "c26a4230199af546d64ea8bc7b8ae1d62935721ab803f1e5a617cf5bb9c22b73",
+          "bytes": 626,
+          "role": "accepted component carry"
+        },
+        "sourceLiveMapping": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-source-inventory03/bindings.json",
+          "sha256": "20886f8cab622a33c0febfab33817ff2974d09f295bd3c0670f47f144a94da4b",
+          "bytes": 721840,
+          "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+        },
+        "finalTupleReview": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-final-tuple-review05.json",
+          "sha256": "3e19516b0616facff1811e9daa30e8ec035aa5894967023fd890bccac2c93973",
+          "bytes": 6493
+        },
+        "wholeRawCounterQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+          "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+          "bytes": 6839,
+          "role": "Independent raw safe collector Counter, not XML/cohort/task projection"
+        }
+      },
+      "remainingFinalObligations": [
+        "Independent final source/symbol/inventory adoption from existing60CLN/729Live metadata; no broad re-search"
+      ],
+      "criterionVerdict": null,
+      "remainingSnapshotFromPrepared05": "Final tuple/freeze equivalence and independent T5 adoption; no new inventory search or protected walk under this preparation"
+    },
+    {
+      "id": "AC-2",
+      "requirement": "Neutral leftover cleanup; ruled classC decisions; mandatory mirror fallback fix; explicit F1/F2 and inbound carries",
+      "accepted": "LEFT/FE accepted source and ordinary runner/FE carries; TOTAL_TIMEOUT_MESSAGE KEEP; CLN10 existing DevOps co-sign and first production artifact+28days trigger; F1/F2 optional inbound carries retained",
+      "state": "ACCEPTED_CARRIES_PLUS_EXACT_RAW_CASE_COUNTER_XML_AND_FINAL_ADOPTION_PENDING",
+      "references": [
+        "sourceLiveInventory",
+        "frontendRelevantCarry",
+        "runnerFiveGates"
+      ],
+      "preparedStateRetainedAsHistory": "SOURCE_AND_ALLOWED_CARRIES_ACCEPTED_BACKEND_UNBOUND",
+      "measuredReferences": {
+        "sourceLiveInventory": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-source-inventory03/independent-qa/manifest.json",
+          "sha256": "c26a4230199af546d64ea8bc7b8ae1d62935721ab803f1e5a617cf5bb9c22b73",
+          "bytes": 626,
+          "role": "accepted component carry"
+        },
+        "frontendRelevantCarry": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/frontend-final-carry02/manifest.json",
+          "sha256": "03672093f3ba6c057e1105e2d451932a12a65838da297c4f8871f14d429318f1",
+          "bytes": 771,
+          "role": "accepted component carry"
+        },
+        "runnerFiveGates": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/execution-qa/manifest.json",
+          "sha256": "4624779b021f678a017338c85e8b44408529d53b64ec5035f9b0de5edb89e3c7",
+          "bytes": 916,
+          "role": "accepted component carry"
+        },
+        "wholeRawCounterQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+          "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+          "bytes": 6839,
+          "role": "Independent raw safe collector Counter, not XML/cohort/task projection"
+        }
+      },
+      "remainingFinalObligations": [
+        "Independent whole XML/task/cohort proof and final named disposition adoption; deferred F1/F2 remain incomplete"
+      ],
+      "criterionVerdict": null,
+      "remainingSnapshotFromPrepared05": "Whole6 affected ordinary backend results and final named counts/source preservation; no completion claim for deferred implementations"
+    },
+    {
+      "id": "AC-3",
+      "requirement": "Observed schedule emitters conditional on009 schedules; immutable V16 value retained",
+      "accepted": "PO P1/009 laneS and source inventory disposition: zero production emitters, immutable CHECK value retained; reopen only if governing A17 changes",
+      "state": "ACCEPTED_SOURCE_CARRY_RAW_BACKEND_COMPONENT_QUALIFIED_FINAL_ADOPTION_PENDING",
+      "references": [
+        "canonicalStory",
+        "sourceLiveInventory"
+      ],
+      "preparedStateRetainedAsHistory": "ACCEPTED_SOURCE_CARRY_FINAL_BACKEND_UNBOUND",
+      "measuredReferences": {
+        "sourceLiveInventory": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-source-inventory03/independent-qa/manifest.json",
+          "sha256": "c26a4230199af546d64ea8bc7b8ae1d62935721ab803f1e5a617cf5bb9c22b73",
+          "bytes": 626,
+          "role": "accepted component carry"
+        },
+        "finalTupleReview": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-final-tuple-review05.json",
+          "sha256": "3e19516b0616facff1811e9daa30e8ec035aa5894967023fd890bccac2c93973",
+          "bytes": 6493
+        },
+        "wholeRawCounterQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+          "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+          "bytes": 6839,
+          "role": "Independent raw safe collector Counter, not XML/cohort/task projection"
+        }
+      },
+      "remainingFinalObligations": [
+        "Final source/affected-case adoption; unchanged immutable V16 and A17 condition retained"
+      ],
+      "criterionVerdict": null,
+      "remainingSnapshotFromPrepared05": "Final source applicability and final affected backend result"
+    },
+    {
+      "id": "AC-4",
+      "requirement": "One client/TLS/secret serializer; authorization and DB-clock fold; accepted split drift; neutral runner formatting; schema regeneration; two declared behavior exceptions",
+      "accepted": "FOLD source/integration and five qualified mutation carries; claim/checkCommand resolved by drift98/22 with no split/SQL-count demand; hand-format/structural proof under ratified R4d; runner contracts regenerated byte-identically; publication DatabaseClock and disabled-publication v3 result are declared changes",
+      "state": "ACCEPTED_CODE_HEALTH_CARRIES_RAW_ORDINARY_CASE_COMPONENT_XML_PROOF_PENDING",
+      "references": [
+        "foldComposedSource",
+        "foldIntegrationQa",
+        "foldQualifiedMutationCarry",
+        "runnerFiveGates",
+        "sourceLiveInventory"
+      ],
+      "preparedStateRetainedAsHistory": "ACCEPTED_SOURCE_PROOFS_ORDINARY_BACKEND_UNBOUND",
+      "measuredReferences": {
+        "foldComposedSource": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-final-c6-successor/manifest.json",
+          "sha256": "d2ca2f6485721bb4f030ada707242f33e6f59770d14d739773c8000ee4dfeb68",
+          "bytes": 5672,
+          "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+        },
+        "foldIntegrationQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/c6-and-fold-integration-qa/review.json",
+          "sha256": "97fd82c4797d62d07f9be180b76a50b957b8c4839a8186ae7027d7a2a8b9d2bc",
+          "bytes": 694,
+          "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+        },
+        "foldQualifiedMutationCarry": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-case-reconciliation-preparation/fold-mutation-carry.json",
+          "sha256": "f14bfea61d4ab6026adf658e6dd31dd3dbeb3488590fabe0875c780e0a511a7f",
+          "bytes": 7438,
+          "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+        },
+        "runnerFiveGates": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/execution-qa/manifest.json",
+          "sha256": "4624779b021f678a017338c85e8b44408529d53b64ec5035f9b0de5edb89e3c7",
+          "bytes": 916,
+          "role": "accepted component carry"
+        },
+        "wholeRawCounterQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+          "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+          "bytes": 6839,
+          "role": "Independent raw safe collector Counter, not XML/cohort/task projection"
+        },
+        "finalTupleReview": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-final-tuple-review05.json",
+          "sha256": "3e19516b0616facff1811e9daa30e8ec035aa5894967023fd890bccac2c93973",
+          "bytes": 6493
+        }
+      },
+      "remainingFinalObligations": [
+        "Whole XML/task/cohort proof and independent ordinary carry fulfillment; no new final mutants or SQL-count demand"
+      ],
+      "criterionVerdict": null,
+      "remainingSnapshotFromPrepared05": "Whole6 includes original named folded/client/clock/GS-M tests; final codehealth and protected secret writer/body digest source binding"
+    },
+    {
+      "id": "AC-5",
+      "requirement": "Condition waits without weaker bounds/assertions; exact nine-class before/after timing; TEST001 full class and P7/order evidence",
+      "accepted": "Existing wait conversion/sibling175 proof and descriptive timing; real P7 singles64.27/45.34s and reverse4PASS108.15s carried by exact2d0f source bridge; no new singles/order run",
+      "state": "REPLAY_PAIR_QUALIFIED_WHOLE_RAW_COMPONENT_QUALIFIED_DIAGNOSTICS_TIMING_PENDING",
+      "references": [
+        "r5Rulings",
+        "test001SourceApplicability",
+        "baselineSiblingTiming",
+        "baselineReplayTiming",
+        "backendSourcePreparationOnly"
+      ],
+      "preparedStateRetainedAsHistory": "FINAL_PAIR_WHOLE_DIAGNOSTICS_TIMING_UNBOUND",
+      "measuredReferences": {
+        "test001SourceApplicability": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/test001-final-source-applicability03/manifest.json",
+          "sha256": "2d0f4554519f7ef1663cde3507d864fbc2eb77e5ac52edd9e97a07d5a08029d2",
+          "bytes": 489,
+          "role": "canonical requirement, accepted closed finding or source-only expectation; no new component audit"
+        },
+        "pairFinalQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/execution-qa/manifest.json",
+          "sha256": "208203ff6c8b760b7b0c45c16040b648fc5cd27bbb74e280d73c977ca952ca36",
+          "bytes": 1304,
+          "role": "Accepted original reserved4/5 component; separate final diagnostics remain owed"
+        },
+        "wholeRawCounterQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+          "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+          "bytes": 6839,
+          "role": "Independent raw safe collector Counter, not XML/cohort/task projection"
+        },
+        "wholeCoverageLedgerQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/coverage-and-ledger.json",
+          "sha256": "acca9a5185014666266c963174f182ea8d3b1ca29657f3018461acc7ff87da91",
+          "bytes": 4460
+        }
+      },
+      "remainingFinalObligations": [
+        "Original whole closed XML/task/cohort proof",
+        "Exact nine-class after-suite timing join",
+        "Genuine retained owner/task/generation bindings and unchanged diagnostic projections with explicit unknowns"
+      ],
+      "criterionVerdict": null,
+      "remainingSnapshotFromPrepared05": "Consecutive Replay4/5 each108PASS then whole6; genuine diagnostics/cleanup; same nine-class final timing list from original outputs"
+    },
+    {
+      "id": "AC-6",
+      "requirement": "Contract/OpenAPI pins and generator wiring; dated records/live docs; historical headers; explicit .ai disposition; no evidence staging",
+      "accepted": "Source QA51 declared contract-file anchors/22 migrations; runner contracts/codegen; approved dated DOC2/business-status successors; .ai KEEP tracked perPO P4, no new archive claim; existing WCAG regression preserved only",
+      "state": "PIN_DOC_SOURCE_AND_RUNTIME_COMPONENTS_QUALIFIED_FINAL_RECORD_PENDING",
+      "references": [
+        "sourceLiveInventory",
+        "runnerFiveGates",
+        "deployment722",
+        "canonicalStory"
+      ],
+      "preparedStateRetainedAsHistory": "ACCEPTED_PIN_DOC_CARRY_FINAL_RECORD_UNBOUND",
+      "measuredReferences": {
+        "sourceLiveInventory": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-source-inventory03/independent-qa/manifest.json",
+          "sha256": "c26a4230199af546d64ea8bc7b8ae1d62935721ab803f1e5a617cf5bb9c22b73",
+          "bytes": 626,
+          "role": "accepted component carry"
+        },
+        "runnerFiveGates": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/execution-qa/manifest.json",
+          "sha256": "4624779b021f678a017338c85e8b44408529d53b64ec5035f9b0de5edb89e3c7",
+          "bytes": 916,
+          "role": "accepted component carry"
+        },
+        "deployment722": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/execution-qa/manifest.json",
+          "sha256": "6fcb72a51b17ccab34989ac8a7541940234ba2c9b9831872259426808a213de3",
+          "bytes": 1028,
+          "role": "accepted component carry"
+        },
+        "finalTupleReview": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-final-tuple-review05.json",
+          "sha256": "3e19516b0616facff1811e9daa30e8ec035aa5894967023fd890bccac2c93973",
+          "bytes": 6493
+        },
+        "wholeRawCounterQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+          "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+          "bytes": 6839,
+          "role": "Independent raw safe collector Counter, not XML/cohort/task projection"
+        }
+      },
+      "remainingFinalObligations": [
+        "Actual changed File List and dated verification/carried-forward record for QA adoption; no story edits in this assembly"
+      ],
+      "criterionVerdict": null,
+      "remainingSnapshotFromPrepared05": "Final relevant pin/source/quote equivalence, actual changed FileList and dated verification record; later Git/administration outside prep"
+    },
+    {
+      "id": "AC-7",
+      "requirement": "Independent final deleted-symbol disposition, exact names/counts/multiplicities/skips, Live protection, bounded all affected suites, final QA",
+      "accepted": "Source component22 queries with known exceptions and all729 Live IDs; FE1388, runner2717 and exact coverage, qualified private301+6 fixture composition, deployment722/image/G9 accepted separately",
+      "state": "REVIEW_READY_COMPONENT_ASSEMBLY_FINAL_T5_VERDICT_PENDING",
+      "references": [
+        "sourceLiveInventory",
+        "frontendRelevantCarry",
+        "runnerFiveGates",
+        "actualApplicationBuild",
+        "linuxImage",
+        "g9StageFile",
+        "deployment722",
+        "countsPreparation",
+        "backendSourcePreparationOnly"
+      ],
+      "preparedStateRetainedAsHistory": "FINAL_T5_NOT_READY_OUTCOMES_UNBOUND",
+      "measuredReferences": {
+        "sourceLiveInventory": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-source-inventory03/independent-qa/manifest.json",
+          "sha256": "c26a4230199af546d64ea8bc7b8ae1d62935721ab803f1e5a617cf5bb9c22b73",
+          "bytes": 626,
+          "role": "accepted component carry"
+        },
+        "frontendRelevantCarry": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/frontend-final-carry02/manifest.json",
+          "sha256": "03672093f3ba6c057e1105e2d451932a12a65838da297c4f8871f14d429318f1",
+          "bytes": 771,
+          "role": "accepted component carry"
+        },
+        "runnerFiveGates": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/execution-qa/manifest.json",
+          "sha256": "4624779b021f678a017338c85e8b44408529d53b64ec5035f9b0de5edb89e3c7",
+          "bytes": 916,
+          "role": "accepted component carry"
+        },
+        "actualApplicationBuild": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/rt-bootstrap-actual-application02/execution-qa/manifest.json",
+          "sha256": "7032cd338b78e9d89e95e6d09b40163fa74aabd9b2ce99e48c8d6aaef713f693",
+          "bytes": 778,
+          "role": "accepted component carry"
+        },
+        "linuxImage": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-linux-image-execution04/execution-qa/manifest.json",
+          "sha256": "cfb01d05a730ea24667445a37041e33e09454f73e7bad77909e1cc98aacf7c6c",
+          "bytes": 765,
+          "role": "accepted component carry"
+        },
+        "g9StageFile": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/g9-stage-file-native-execution03/execution-qa/manifest.json",
+          "sha256": "c0b0df799c0569a54053561af5bfcd7ad2aa929ab2f9b4a5d8f667b4a29643c4",
+          "bytes": 739,
+          "role": "accepted component carry"
+        },
+        "deployment722": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-execution05/execution-qa/manifest.json",
+          "sha256": "6fcb72a51b17ccab34989ac8a7541940234ba2c9b9831872259426808a213de3",
+          "bytes": 1028,
+          "role": "accepted component carry"
+        },
+        "d2FinalQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution08/execution-qa/manifest.json",
+          "sha256": "e00f602cca023c3477272635a97b8c70145e27c98abdaf13066e3b58218b3844",
+          "bytes": 1000,
+          "role": "Accepted actual D2 component"
+        },
+        "pairFinalQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/execution-qa/manifest.json",
+          "sha256": "208203ff6c8b760b7b0c45c16040b648fc5cd27bbb74e280d73c977ca952ca36",
+          "bytes": 1304,
+          "role": "Accepted original reserved4/5 component; separate final diagnostics remain owed"
+        },
+        "wholeRawCounterQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/closed-native-counter.json",
+          "sha256": "71cda2318eb8025d93ccc6e7073282152fb6cde949ee4c2dd2705a753c795d7f",
+          "bytes": 6839,
+          "role": "Independent raw safe collector Counter, not XML/cohort/task projection"
+        },
+        "wholeCoverageLedgerQa": {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/coverage-and-ledger.json",
+          "sha256": "acca9a5185014666266c963174f182ea8d3b1ca29657f3018461acc7ff87da91",
+          "bytes": 4460
+        }
+      },
+      "remainingFinalObligations": [
+        "Remaining XML/task/cohort proof",
+        "Timing and diagnostics with missing-v-null/controlReads/UNKNOWN retained",
+        "Independent integrated AC1-7/T5 verdict and final records; QA owns lifecycle"
+      ],
+      "criterionVerdict": null,
+      "remainingSnapshotFromPrepared05": "D2; final source/runtime/reader guard; Replay4/5; whole6 fresh partitions and original coverage; exact named count/timing/diagnostic reconciliation; independent integrated verdict"
+    }
+  ],
+  "codeHealthCarry": {
+    "foldFiveMutations": {
+      "kind": "QUALIFIED_EXISTING_FOLD_MUTATION_CARRY_NOT_NEW_EXECUTION",
+      "acceptedPrepReceiptPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/fold-prep-execution/receipt.json",
+      "acceptedPrepReceiptSha256": "6de8cc161bee1e087128d1c69a6c262c9a17ecf925612a281c5ed7dbb20a632b",
+      "mutations": [
+        {
+          "id": "m1-mint",
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+          "selector": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+          "acceptedHistoricalTargetSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+          "prospectiveFinalTargetSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+          "sameLiteralMainTarget": true,
+          "restoredGreenResultSha256": "718a64805e8212cb49d4b1e717f6a80b2007cc60cffdf57dea7dac07ec983031",
+          "intendedRedResultSha256": "26d30d503e4e2bb738554987ce1ff5526d1318abd9360413bf57fa8918137357",
+          "acceptedHistoricalRedCounts": {
+            "total": 3,
+            "passed": 1,
+            "failed": 2,
+            "errors": 0,
+            "skipped": 0
+          },
+          "acceptedHistoricalRestoredGreenCounts": {
+            "total": 3,
+            "passed": 3,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "exactHistoricalRestore": true,
+          "finalMutationExecuted": false,
+          "qualification": "Exact main target retained; active oracle logic retained, but final class/source composition still needs ordinary final validation."
+        },
+        {
+          "id": "m2-judge",
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationGrantAuthority.java",
+          "selector": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+          "acceptedHistoricalTargetSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+          "prospectiveFinalTargetSha256": "f2220f238e0663c6cb83a311841946c4704cadcb9b861160be6ad888a15e0a35",
+          "sameLiteralMainTarget": true,
+          "restoredGreenResultSha256": "aec09ddfb9ece429c9c0fdab0fcb6452930fca06f5c3172a9e2ed06991d6e91b",
+          "intendedRedResultSha256": "94f2829cfde7e78bcdb841230e23198e754edeeedb3d4860125cecf5182599ad",
+          "acceptedHistoricalRedCounts": {
+            "total": 3,
+            "passed": 1,
+            "failed": 2,
+            "errors": 0,
+            "skipped": 0
+          },
+          "acceptedHistoricalRestoredGreenCounts": {
+            "total": 3,
+            "passed": 3,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "exactHistoricalRestore": true,
+          "finalMutationExecuted": false,
+          "qualification": "Exact main target retained; active oracle logic retained, but final class/source composition still needs ordinary final validation."
+        },
+        {
+          "id": "m3-claim",
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+          "selector": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+          "acceptedHistoricalTargetSha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+          "prospectiveFinalTargetSha256": "4cdc120830ebea83cac9a93f5d3c89b60166cf8ae834746fb2de536d4f5065e2",
+          "sameLiteralMainTarget": false,
+          "restoredGreenResultSha256": "b8b1248553d9d657b4f1951a2d033100793dcb7ac064ef127fbd37dd40f24e96",
+          "intendedRedResultSha256": "9b4a4cf1791adae6177f859276180721bfe66261b619d86d281703eddf92ffeb",
+          "acceptedHistoricalRedCounts": {
+            "total": 3,
+            "passed": 2,
+            "failed": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "acceptedHistoricalRestoredGreenCounts": {
+            "total": 3,
+            "passed": 3,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "exactHistoricalRestore": true,
+          "finalMutationExecuted": false,
+          "qualification": "Publisher final type/constructor/client plumbing differs; original claim clock and validation-budget clock logic retained. Carry historical kill only with this source-isomorphism qualification, never claim a mutant run on final bytes."
+        },
+        {
+          "id": "m4-budget",
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+          "selector": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+          "acceptedHistoricalTargetSha256": "dd96080567ebe1f6fbabff02caeed7d6ef038de44019035250e82af780fe1b21",
+          "prospectiveFinalTargetSha256": "4cdc120830ebea83cac9a93f5d3c89b60166cf8ae834746fb2de536d4f5065e2",
+          "sameLiteralMainTarget": false,
+          "restoredGreenResultSha256": "072775042120b87a68917e70d85d7cab90b68a515bd019caaf0c5c98d74f4b24",
+          "intendedRedResultSha256": "80e16ef45614a0fac1983e07c0d4e38a7f225d57766b127e9f23a6c76cd750f9",
+          "acceptedHistoricalRedCounts": {
+            "total": 3,
+            "passed": 2,
+            "failed": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "acceptedHistoricalRestoredGreenCounts": {
+            "total": 3,
+            "passed": 3,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "exactHistoricalRestore": true,
+          "finalMutationExecuted": false,
+          "qualification": "Publisher final type/constructor/client plumbing differs; original claim clock and validation-budget clock logic retained. Carry historical kill only with this source-isomorphism qualification, never claim a mutant run on final bytes."
+        },
+        {
+          "id": "m5-worker",
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+          "selector": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT.workerWithoutPublicationCollaboratorRefusesEveryPublicationOperation",
+          "acceptedHistoricalTargetSha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+          "prospectiveFinalTargetSha256": "014471b9833f6e87bad4f9dfed64523550dba2edfb940a47a1459716ef61829e",
+          "sameLiteralMainTarget": true,
+          "restoredGreenResultSha256": "1cad18e8d2518393c0af2e116d27282d4cdbb9c75fe6a05228bbdf84fd2f4c2b",
+          "intendedRedResultSha256": "e87f3a9e0ea520ed190761e0ba4c06db41bf7af734aaaf7a2a6e95fa3642759d",
+          "acceptedHistoricalRedCounts": {
+            "total": 1,
+            "passed": 0,
+            "failed": 1,
+            "errors": 0,
+            "skipped": 0
+          },
+          "acceptedHistoricalRestoredGreenCounts": {
+            "total": 1,
+            "passed": 1,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "exactHistoricalRestore": true,
+          "finalMutationExecuted": false,
+          "qualification": "Exact main target retained; active oracle logic retained, but final class/source composition still needs ordinary final validation."
+        }
+      ],
+      "clockOracle": {
+        "beforeSha256": "6bcac2c98cae5a99f344076e7848156d10934a2606fff30253fa391062d3e3b2",
+        "finalSha256": "1bce395fb2204ac1f5ea11175d96288b2e72a4b72dc9030c1a739c324a361af4",
+        "exactDelta": "Remove legacyAuthority injected field and replace inactive legacy-bean fallback with direct existing publicationGrantAuthority bean lookup. All3 test methods/assertion bodies unchanged.",
+        "alreadyActivePath": "Accepted prep configuration/clock mutants used the publicationGrantAuthority bean; no changed clock assertion or new oracle."
+      },
+      "noNewMutantsOrRerunsRequested": true,
+      "finalRuntimeOrMutationCreditGranted": false
+    },
+    "test001": "realP7singles/reverse sourcequalified2d0f carried; finalpair/wholeowed, no extraP7/order run",
+    "C10Subjects": [
+      {
+        "subject": "S3",
+        "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+        "currentMatchesQaWholeFileReadTime": true,
+        "originalGuardTextSha256": "6c690d04d7c48693294edfc5a453a82f780014e236401b995f98fe0f759b5653",
+        "uniquenessAtQaReadTime": 1,
+        "wholeFileEqualityMakesGuardAndScopeUnchangedSinceQa": true,
+        "carry": "CARRIED_NOT_RERUN",
+        "runtimeFulfillment": "PENDING_REQUIRED_PAIR_AND_WHOLE_ORDINARY_RESULTS"
+      },
+      {
+        "subject": "S4",
+        "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/ConfiguredBackgroundAuthorization.java",
+        "currentMatchesQaWholeFileReadTime": true,
+        "originalGuardTextSha256": "70d8ff566420520bb917369b5bdcc6207d9cdbf17ec39622b830290f1e1f5f8e",
+        "uniquenessAtQaReadTime": 1,
+        "wholeFileEqualityMakesGuardAndScopeUnchangedSinceQa": true,
+        "carry": "CARRIED_NOT_RERUN",
+        "runtimeFulfillment": "PENDING_REQUIRED_PAIR_AND_WHOLE_ORDINARY_RESULTS"
+      },
+      {
+        "subject": "B1",
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceService.java",
+        "currentMatchesQaWholeFileReadTime": true,
+        "originalGuardTextSha256": "b804c74d535c29d691cea72606868e2e1570ed67331de2c1d138ad0c06cad796",
+        "uniquenessAtQaReadTime": 1,
+        "wholeFileEqualityMakesGuardAndScopeUnchangedSinceQa": true,
+        "carry": "CARRIED_NOT_RERUN",
+        "runtimeFulfillment": "PENDING_REQUIRED_PAIR_AND_WHOLE_ORDINARY_RESULTS"
+      },
+      {
+        "subject": "B2",
+        "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+        "currentMatchesQaWholeFileReadTime": true,
+        "originalGuardTextSha256": "279a1fcd7a9a38182a6ddf0358c84bcb313e47ff10c9908f05d590c7581dfd85",
+        "uniquenessAtQaReadTime": 1,
+        "wholeFileEqualityMakesGuardAndScopeUnchangedSinceQa": true,
+        "carry": "CARRIED_NOT_RERUN",
+        "runtimeFulfillment": "PENDING_REQUIRED_PAIR_AND_WHOLE_ORDINARY_RESULTS"
+      },
+      {
+        "subject": "B3",
+        "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+        "currentMatchesQaWholeFileReadTime": true,
+        "originalGuardTextSha256": "279a1fcd7a9a38182a6ddf0358c84bcb313e47ff10c9908f05d590c7581dfd85",
+        "uniquenessAtQaReadTime": 1,
+        "wholeFileEqualityMakesGuardAndScopeUnchangedSinceQa": true,
+        "carry": "CARRIED_NOT_RERUN",
+        "runtimeFulfillment": "PENDING_REQUIRED_PAIR_AND_WHOLE_ORDINARY_RESULTS"
+      },
+      {
+        "subject": "F1",
+        "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+        "currentMatchesQaWholeFileReadTime": true,
+        "originalGuardTextSha256": "4e0c9c8ade8c912363a3d8415e7d4df47e3d934123aac9322445826f9c320966",
+        "uniquenessAtQaReadTime": 1,
+        "wholeFileEqualityMakesGuardAndScopeUnchangedSinceQa": true,
+        "carry": "CARRIED_NOT_RERUN",
+        "runtimeFulfillment": "PENDING_REQUIRED_PAIR_AND_WHOLE_ORDINARY_RESULTS"
+      },
+      {
+        "subject": "S1",
+        "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java",
+        "currentMatchesQaWholeFileReadTime": true,
+        "originalGuardTextSha256": "3a9859ebaa3bef403bc4cad925ce2a6c8e4d1dee90e4a44c057e7980ddcee6c3",
+        "uniquenessAtQaReadTime": 1,
+        "wholeFileEqualityMakesGuardAndScopeUnchangedSinceQa": true,
+        "carry": "CARRIED_NOT_RERUN",
+        "runtimeFulfillment": "PENDING_REQUIRED_PAIR_AND_WHOLE_ORDINARY_RESULTS"
+      },
+      {
+        "subject": "LR",
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+        "currentMatchesQaWholeFileReadTime": true,
+        "originalGuardTextSha256": "1b022fa3728e31c60c2b839cd5cf5444ee331b3dc1972bb53a4150632e4ab4ad",
+        "uniquenessAtQaReadTime": 1,
+        "wholeFileEqualityMakesGuardAndScopeUnchangedSinceQa": true,
+        "carry": "CARRIED_NOT_RERUN",
+        "runtimeFulfillment": "PENDING_REQUIRED_PAIR_AND_WHOLE_ORDINARY_RESULTS"
+      },
+      {
+        "subject": "F2",
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+        "currentMatchesQaWholeFileReadTime": true,
+        "originalGuardTextSha256": "d13301b03f087addadd28c72b2f49e4dcbe0da7cf4f10f170e749381df2a9421",
+        "uniquenessAtQaReadTime": 1,
+        "wholeFileEqualityMakesGuardAndScopeUnchangedSinceQa": true,
+        "carry": "CARRIED_NOT_RERUN",
+        "runtimeFulfillment": "PENDING_REQUIRED_PAIR_AND_WHOLE_ORDINARY_RESULTS"
+      }
+    ],
+    "C10Limitations": {
+      "M4": "SURVIVED34OF34; not killed/no single lock indispensable claim",
+      "S3": "historical5reds constraint-mediated; actual rejectioncauseUNTRACED",
+      "B2B3": "reportboundarynarrowness, realUSAGEUNKNOWN_OUTCOME/weakjoined either-value, singlewriterANDNULL notDBtrigger",
+      "fulfilledNow": false,
+      "ordinaryFinalRegressionMayBeSuppliedByWhole6": true,
+      "extraMatrixAuthorized": false
+    },
+    "C10State": "CARRIED_NOT_RERUN; ordinaryfinalresultfulfillmentUNBOUND",
+    "codeHealthFinalOrdinaryProof": null
+  },
+  "carryFulfillmentState": "Ordinary raw cases available; full measured XML/cohort evidence and independent final adoption pending. Historical mutation carries remain CARRIED_NOT_RERUN.",
+  "negativeAndLeanScope": "See source-live-carry.json; no runtime credit inferred for NEG01-07, no F1/F2/CLN deferred work called complete.",
+  "finalQaVerdict": null,
+  "lifecycleAuthority": false
+}

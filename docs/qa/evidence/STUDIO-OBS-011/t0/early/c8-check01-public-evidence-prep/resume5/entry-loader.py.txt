@@ -1,0 +1,42 @@
+import hashlib, os, stat, sys
+path, expected, mode, release, entry_name, entry_sha, *statuses = sys.argv[1:]
+if not mode in ("held-proof", "stage", "selected", "collect-public", "restore", "compile-restored", "final", "gate", "postclose"):
+    raise RuntimeError("HOLD: ENTRY_BOOTSTRAP_INTEGRITY")
+if not (len(statuses) == 1 and statuses[0] in ("0", "1") if mode in ("held-proof", "gate") else len(statuses) == 0):
+    raise RuntimeError("HOLD: ENTRY_BOOTSTRAP_INTEGRITY")
+if not (path.startswith("/") and "//" not in path and ("/../" not in path) and ("/./" not in path)):
+    raise RuntimeError("HOLD: ENTRY_BOOTSTRAP_INTEGRITY")
+parts = path.split("/")[1:]
+if not (parts and all(parts) and (len(parts) < 128)):
+    raise RuntimeError("HOLD: ENTRY_BOOTSTRAP_INTEGRITY")
+handles = [os.open("/", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)]
+try:
+    for part in parts[:-1]:
+        handles.append(os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=handles[-1]))
+    fd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW, dir_fd=handles[-1])
+    handles.append(fd)
+    before = os.fstat(fd)
+    if not (stat.S_ISREG(before.st_mode) and stat.S_IMODE(before.st_mode) == 384 and (before.st_uid == os.getuid())):
+        raise RuntimeError("HOLD: ENTRY_BOOTSTRAP_INTEGRITY")
+    if not 0 < before.st_size <= 1048576:
+        raise RuntimeError("HOLD: ENTRY_BOOTSTRAP_INTEGRITY")
+    chunks, remaining = ([], before.st_size)
+    while remaining:
+        piece = os.read(fd, remaining)
+        if not piece:
+            raise RuntimeError("HOLD: ENTRY_BOOTSTRAP_INTEGRITY")
+        chunks.append(piece)
+        remaining -= len(piece)
+    if not os.read(fd, 1) == b"":
+        raise RuntimeError("HOLD: ENTRY_BOOTSTRAP_INTEGRITY")
+    after = os.fstat(fd)
+    if not (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns, before.st_ctime_ns) == (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns):
+        raise RuntimeError("HOLD: ENTRY_BOOTSTRAP_INTEGRITY")
+    raw = b"".join(chunks)
+    if not hashlib.sha256(raw).hexdigest() == expected:
+        raise RuntimeError("HOLD: ENTRY_BOOTSTRAP_INTEGRITY")
+finally:
+    for fd in reversed(handles):
+        os.close(fd)
+sys.argv = [path, mode, release, entry_name, entry_sha, *statuses]
+exec(compile(raw, path, "exec"), {"__name__": "__main__", "__file__": path})

@@ -1,0 +1,76 @@
+{
+  "originalToolSession": 79033,
+  "originalDriverExit": 1,
+  "driverSha256": "523d167e03dce51b204370ffb8cd47f1fef4ea3c54591270adf77296b756605b",
+  "requiredPrelaunchReferencesAll0": "required-prelaunch-verification.json",
+  "originalCollector": {
+    "driverPid": 9076,
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+      "obs011-recovery-20261020-final-linux-d2-smoke02",
+      "/bin/bash",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-final-bound04/future-smoke.sh",
+      "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+      "obs011-d2-final-02",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution06/d2-execution01"
+    ],
+    "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "rootAdmissionPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-root-runtime-admission06.json",
+    "rootAdmissionSha256": "21892f4630cbb126ff83aaf8e24f8d923d9836a9012e7105a8adef23131dd850",
+    "rootDependencyReference": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-dependency-root-acceptance06.json@sha256:c33f3c59eb1b4fe6f2e1c4d6231be693ea5852b65b6c1a6edf51fc98ec4e8273",
+    "startedAtUtc": "2026-10-21T04:31:24.242754+00:00",
+    "accepted": false,
+    "runtimeInvocationCount": 1,
+    "continuousAwakeClaim": false,
+    "caffeinatePid": 9206,
+    "caffeinateArgv": [
+      "/usr/bin/caffeinate",
+      "-i"
+    ],
+    "collectorPid": 9207,
+    "rawCollectorExit": 1,
+    "nativeElapsedSeconds": 8.224663583096117,
+    "collectorEndedAtUtc": "2026-10-21T04:31:32.468967+00:00",
+    "rawChildExit": 1,
+    "collectorReceiptSha256": "37eb491e36055672e59a9a939ab32992191821e5dfb33e5d5254d91f5616bdcf",
+    "inhibitorHeldThroughAllPostguards": false,
+    "caffeinateExit": -15,
+    "caffeinateReleased": true,
+    "caffeinateReleasedAtUtc": "2026-10-21T04:31:34.598506+00:00"
+  },
+  "collectorResult": {
+    "command": [
+      "/bin/bash",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-final-bound04/future-smoke.sh",
+      "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+      "obs011-d2-final-02",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution06/d2-execution01"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-21T04:31:24.404413+00:00",
+    "elapsedSeconds": 8.06,
+    "exit": 1,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "testInputStable": true,
+    "testInputDigestBefore": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+    "testInputDigestAfter": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc"
+  },
+  "runtimeInvocationCountThisRelease": 1,
+  "historical05AttemptPreservedNoCredit": true,
+  "awakeBoundary": {
+    "ownedPid": 9206,
+    "waitExit": -15,
+    "releasedAtUtc": "2026-10-21T04:31:34.598506+00:00",
+    "postguardAtUtc": "2026-10-21T04:31:34.577543+00:00",
+    "custodyFileMtimeUtc": "2026-10-21T04:31:34.596072+00:00",
+    "custodyMtimeIsFileMetadata": true,
+    "actualPostguardsAndProjectionAttemptPrecededRelease": true,
+    "rawHeldThroughAllPostguardsField": false,
+    "qualification": "Raw boolean is gated on overall accepted; retain false. Actual postguards passed before the projection schema failure and finally release. No successful complete projection/smoke or continuous-awake inference.",
+    "continuousAwakeClaim": false
+  },
+  "noFallbackRetrySecondLeafReadOpaqueLogDecodeOrProbe": true
+}

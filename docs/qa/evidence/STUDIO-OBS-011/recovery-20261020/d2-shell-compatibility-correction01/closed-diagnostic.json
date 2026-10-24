@@ -1,0 +1,73 @@
+{
+  "scope": "Exactly two isolated shell-builtin checks; no product, Node, Docker, browser, filesystem observer, or historical output read.",
+  "environment": {
+    "pathPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+    "pathSha256": "333e38c9ae21ab06b24adfa219bf2424b0e6d716f0199b1d95eadafcce3e75ba",
+    "playwrightSkipBrowserDownload": "1"
+  },
+  "interpreter": {
+    "resolved": "/bin/bash",
+    "realpath": "/bin/bash",
+    "mode": "0o555",
+    "sha256": "41e7f937a0d2e7e0bc03884595f54f7a892e468087519de1fc53e177b2503308",
+    "versionExit": 0,
+    "versionFirstLine": "GNU bash, version 3.2.57(1)-release (arm64-apple-darwin23)"
+  },
+  "checks": [
+    {
+      "name": "original_empty",
+      "script": "set -euo pipefail\ncleanup() { rc=$?; trap - EXIT; printf 'EXIT_TRAP_RC=%s\\n' \"$rc\"; exit \"$rc\"; }\ntrap cleanup EXIT\nextra=()\npublic_argv() { printf 'EMPTY_ARGC=%s\\n' \"$#\"; }\npublic_argv \"${extra[@]}\"\n",
+      "scriptSha256": "9360d51d56f181adcb9b9531cf5c50e59ae7f29a617b3a25b6efd6cc281c3bcb",
+      "rawExit": 0,
+      "stdout": "EXIT_TRAP_RC=0\n",
+      "stdoutBytes": 15,
+      "stderrBytes": 46,
+      "stderrSha256": "3a853c05e4f123ac18fc225a6dad56591d6b05cbe5175f3d08058fe6be99fd77",
+      "finiteError": {
+        "unboundVariable": true,
+        "exactExtraArrayUnbound": true
+      },
+      "stderrRawRetained": false
+    },
+    {
+      "name": "safe_empty_and_debug",
+      "script": "set -euo pipefail\nextra=()\nset -- ${extra[@]+\"${extra[@]}\"}\nprintf 'EMPTY_ARGC=%s\\n' \"$#\"\n[[ \"$#\" == 0 ]]\nextra=(--init -e NODE_OPTIONS=--max-old-space-size=1024)\nset -- ${extra[@]+\"${extra[@]}\"}\nprintf 'DEBUG_ARGC=%s\\n' \"$#\"\n[[ \"$#\" == 3 && \"$1\" == --init && \"$2\" == -e && \"$3\" == NODE_OPTIONS=--max-old-space-size=1024 ]]\nprintf 'DEBUG_TOKENS_EXACT=true\\n'\n",
+      "scriptSha256": "ed7f37ec57495c82a684a8ba11fb6e883f13ed295be2731a866734d72a1bbce5",
+      "rawExit": 0,
+      "stdout": "EMPTY_ARGC=0\nDEBUG_ARGC=3\nDEBUG_TOKENS_EXACT=true\n",
+      "stdoutBytes": 50,
+      "stderrBytes": 0,
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finiteError": {
+        "unboundVariable": false,
+        "exactExtraArrayUnbound": false
+      },
+      "stderrRawRetained": false
+    }
+  ],
+  "checkCount": 2,
+  "hypothesisConfirmed": true,
+  "historicalPreciseError": "UNKNOWN; no historical stderr read; isolated reproduction supports source compatibility cause, not an observed original error.",
+  "candidateSyntaxOnly": {
+    "argv": [
+      "/bin/bash",
+      "-n",
+      "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/d2-shell-compatibility-correction01/future-smoke.sh"
+    ],
+    "rawExit": 0,
+    "stdoutBytes": 0,
+    "stderrBytes": 0,
+    "candidateSha256": "ea56c0ef2c45b4107a726b3c26cfd5cb35a96e51d18820da5d28463f6a414455",
+    "scriptExecuted": false
+  },
+  "sourceDeltaProof": {
+    "originalOccurrenceCount": 1,
+    "literalSubstitutionCount": 1,
+    "removedLines": 1,
+    "addedLines": 1,
+    "patchReconstructionExact": true,
+    "reverseSubstitutionReconstructsOriginal": true,
+    "allOtherBytesIdentical": true,
+    "sourceLine": 61
+  }
+}

@@ -1,0 +1,2656 @@
+{
+  "status": "PREPARATION_PURE_CHECKS_PASS",
+  "actualNativeCommands": 0,
+  "actualLockOrCensusCalls": 0,
+  "protectedPayloadReads": 0,
+  "sourceWrites": 0,
+  "checks": [
+    {
+      "name": "accepted-source-1808-exact",
+      "passed": true
+    },
+    {
+      "name": "reject-source-outside-three-hash",
+      "passed": true
+    },
+    {
+      "name": "reject-source-drop",
+      "passed": true
+    },
+    {
+      "name": "reject-source-add",
+      "passed": true
+    },
+    {
+      "name": "reject-source-mode",
+      "passed": true
+    },
+    {
+      "name": "reject-source-main",
+      "passed": true
+    },
+    {
+      "name": "reject-source-dist",
+      "passed": true
+    },
+    {
+      "name": "reject-source-Replay/source",
+      "passed": true
+    },
+    {
+      "name": "reject-source-auxiliary",
+      "passed": true
+    },
+    {
+      "name": "catalog2774-nine-skips",
+      "passed": true
+    },
+    {
+      "name": "reject-catalog-missing",
+      "passed": true
+    },
+    {
+      "name": "reject-catalog-extra-executionError",
+      "passed": true
+    },
+    {
+      "name": "reject-catalog-failed",
+      "passed": true
+    },
+    {
+      "name": "reject-catalog-extra-skip",
+      "passed": true
+    },
+    {
+      "name": "complete-coverage-contract",
+      "passed": true
+    },
+    {
+      "name": "reject-coverage-allExecsFreshNonempty",
+      "passed": true
+    },
+    {
+      "name": "reject-coverage-mergedSessionsExactExecUnion",
+      "passed": true
+    },
+    {
+      "name": "reject-coverage-allInternalSessionsCurrent",
+      "passed": true
+    },
+    {
+      "name": "reject-coverage-dynamicArtifactsFresh",
+      "passed": true
+    },
+    {
+      "name": "reject-coverage-staticResourcesExact",
+      "passed": true
+    },
+    {
+      "name": "reject-coverage-freshReport",
+      "passed": true
+    },
+    {
+      "name": "reject-coverage-nativeReportAndVerificationSuccessful",
+      "passed": true
+    },
+    {
+      "name": "reject-task-UP-TO-DATE",
+      "passed": true
+    },
+    {
+      "name": "reject-task-FROM-CACHE",
+      "passed": true
+    },
+    {
+      "name": "reject-task-SKIPPED",
+      "passed": true
+    },
+    {
+      "name": "reject-task-ABSENT",
+      "passed": true
+    },
+    {
+      "name": "reject-task-FAILED",
+      "passed": true
+    },
+    {
+      "name": "reject-nonfinite-coverage-nan",
+      "passed": true
+    },
+    {
+      "name": "reject-nonfinite-coverage-inf",
+      "passed": true
+    },
+    {
+      "name": "reject-nonfinite-coverage--inf",
+      "passed": true
+    },
+    {
+      "name": "reject-floor-bundle",
+      "passed": true
+    },
+    {
+      "name": "reject-floor-compile.gateway",
+      "passed": true
+    },
+    {
+      "name": "reject-floor-dispatch",
+      "passed": true
+    },
+    {
+      "name": "reject-floor-internal",
+      "passed": true
+    },
+    {
+      "name": "reject-floor-recovery",
+      "passed": true
+    },
+    {
+      "name": "reject-floor-sse",
+      "passed": true
+    },
+    {
+      "name": "reject-floor-compile",
+      "passed": true
+    },
+    {
+      "name": "reject-coverage-scope-staticOutputOccurrences",
+      "passed": true
+    },
+    {
+      "name": "reject-coverage-scope-staticDistinctResources",
+      "passed": true
+    },
+    {
+      "name": "reject-coverage-scope-execTasks",
+      "passed": true
+    },
+    {
+      "name": "exact23-static-resources",
+      "passed": true
+    },
+    {
+      "name": "static-exact-0",
+      "passed": true
+    },
+    {
+      "name": "static-reject-0-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-0-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-0-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-0-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-0-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-0-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-1",
+      "passed": true
+    },
+    {
+      "name": "static-reject-1-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-1-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-1-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-1-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-1-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-1-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-2",
+      "passed": true
+    },
+    {
+      "name": "static-reject-2-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-2-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-2-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-2-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-2-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-2-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-3",
+      "passed": true
+    },
+    {
+      "name": "static-reject-3-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-3-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-3-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-3-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-3-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-3-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-4",
+      "passed": true
+    },
+    {
+      "name": "static-reject-4-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-4-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-4-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-4-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-4-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-4-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-5",
+      "passed": true
+    },
+    {
+      "name": "static-reject-5-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-5-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-5-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-5-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-5-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-5-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-6",
+      "passed": true
+    },
+    {
+      "name": "static-reject-6-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-6-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-6-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-6-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-6-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-6-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-7",
+      "passed": true
+    },
+    {
+      "name": "static-reject-7-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-7-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-7-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-7-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-7-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-7-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-8",
+      "passed": true
+    },
+    {
+      "name": "static-reject-8-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-8-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-8-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-8-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-8-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-8-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-9",
+      "passed": true
+    },
+    {
+      "name": "static-reject-9-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-9-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-9-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-9-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-9-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-9-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-10",
+      "passed": true
+    },
+    {
+      "name": "static-reject-10-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-10-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-10-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-10-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-10-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-10-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-11",
+      "passed": true
+    },
+    {
+      "name": "static-reject-11-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-11-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-11-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-11-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-11-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-11-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-12",
+      "passed": true
+    },
+    {
+      "name": "static-reject-12-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-12-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-12-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-12-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-12-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-12-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-13",
+      "passed": true
+    },
+    {
+      "name": "static-reject-13-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-13-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-13-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-13-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-13-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-13-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-14",
+      "passed": true
+    },
+    {
+      "name": "static-reject-14-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-14-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-14-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-14-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-14-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-14-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-15",
+      "passed": true
+    },
+    {
+      "name": "static-reject-15-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-15-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-15-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-15-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-15-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-15-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-16",
+      "passed": true
+    },
+    {
+      "name": "static-reject-16-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-16-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-16-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-16-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-16-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-16-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-17",
+      "passed": true
+    },
+    {
+      "name": "static-reject-17-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-17-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-17-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-17-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-17-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-17-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-18",
+      "passed": true
+    },
+    {
+      "name": "static-reject-18-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-18-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-18-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-18-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-18-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-18-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-19",
+      "passed": true
+    },
+    {
+      "name": "static-reject-19-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-19-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-19-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-19-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-19-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-19-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-20",
+      "passed": true
+    },
+    {
+      "name": "static-reject-20-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-20-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-20-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-20-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-20-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-20-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-21",
+      "passed": true
+    },
+    {
+      "name": "static-reject-21-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-21-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-21-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-21-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-21-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-21-entry",
+      "passed": true
+    },
+    {
+      "name": "static-exact-22",
+      "passed": true
+    },
+    {
+      "name": "static-reject-22-generator",
+      "passed": true
+    },
+    {
+      "name": "static-reject-22-reportRelativePath",
+      "passed": true
+    },
+    {
+      "name": "static-reject-22-sha256",
+      "passed": true
+    },
+    {
+      "name": "static-reject-22-bytes",
+      "passed": true
+    },
+    {
+      "name": "static-reject-22-jar",
+      "passed": true
+    },
+    {
+      "name": "static-reject-22-entry",
+      "passed": true
+    },
+    {
+      "name": "unknown-resource-not-static",
+      "passed": true
+    },
+    {
+      "name": "green-close-contract",
+      "passed": true
+    },
+    {
+      "name": "unknown-classification-HOLD",
+      "passed": true
+    },
+    {
+      "name": "accounted-red-reconciled-nonzero-close",
+      "passed": true
+    },
+    {
+      "name": "reject-failed-close-missing-reconcile",
+      "passed": true
+    },
+    {
+      "name": "reject-failed-close-reconcile-nonzero",
+      "passed": true
+    },
+    {
+      "name": "reject-failed-close-cached-compile",
+      "passed": true
+    },
+    {
+      "name": "reject-failed-close-missing-explicit-root",
+      "passed": true
+    },
+    {
+      "name": "reject-failed-close-zero-failed-close",
+      "passed": true
+    },
+    {
+      "name": "reject-failed-close-build-unproved",
+      "passed": true
+    },
+    {
+      "name": "reject-failed-close-source-drift",
+      "passed": true
+    },
+    {
+      "name": "reject-failed-close-phase-receipt-unbound",
+      "passed": true
+    },
+    {
+      "name": "sticky-gap-ownedIdentityObservationGap",
+      "passed": true
+    },
+    {
+      "name": "sticky-gap-ownershipOrLockObservationGap",
+      "passed": true
+    },
+    {
+      "name": "sticky-gap-drainObservationGap",
+      "passed": true
+    },
+    {
+      "name": "sticky-gap-waitObservationGap",
+      "passed": true
+    },
+    {
+      "name": "sticky-gap-receiptWriteFailed",
+      "passed": true
+    },
+    {
+      "name": "sticky-gap-prematureUnlockGap",
+      "passed": true
+    },
+    {
+      "name": "sticky-gap-resourceObservationGap",
+      "passed": true
+    },
+    {
+      "name": "sticky-gap-interrupted",
+      "passed": true
+    },
+    {
+      "name": "sticky-gap-sourceObservationGap",
+      "passed": true
+    },
+    {
+      "name": "green-reconcile-forbidden",
+      "passed": true
+    },
+    {
+      "name": "owned-UNKNOWN-missing-comm",
+      "passed": true
+    },
+    {
+      "name": "owned-UNKNOWN-blank-comm",
+      "passed": true
+    },
+    {
+      "name": "owned-UNKNOWN-missing-rechecked-start",
+      "passed": true
+    },
+    {
+      "name": "owned-UNKNOWN-reused-during-observation",
+      "passed": true
+    },
+    {
+      "name": "owned-UNKNOWN-observer-error",
+      "passed": true
+    },
+    {
+      "name": "java-promotion-sticky",
+      "passed": true
+    },
+    {
+      "name": "reparented-known-root-retained",
+      "passed": true
+    },
+    {
+      "name": "PID-reuse-resolves-old-only",
+      "passed": true
+    },
+    {
+      "name": "observer-failure-never-terminal",
+      "passed": true
+    },
+    {
+      "name": "injected-holder-proves-exact-chain-inode-kernel",
+      "passed": true
+    },
+    {
+      "name": "reject-holder-wrong-start",
+      "passed": true
+    },
+    {
+      "name": "reject-holder-wrong-argv",
+      "passed": true
+    },
+    {
+      "name": "reject-holder-wrong-parent-chain",
+      "passed": true
+    },
+    {
+      "name": "reject-holder-wrong-pin-release",
+      "passed": true
+    },
+    {
+      "name": "reject-holder-no-held-kernel",
+      "passed": true
+    },
+    {
+      "name": "reject-holder-wrong-inode",
+      "passed": true
+    },
+    {
+      "name": "reject-holder-no-holder-FD",
+      "passed": true
+    },
+    {
+      "name": "reject-holder-wrong-direct-shell",
+      "passed": true
+    },
+    {
+      "name": "injected-exec-session-parser",
+      "passed": true
+    },
+    {
+      "name": "reject-exec-wrong-version",
+      "passed": true
+    },
+    {
+      "name": "reject-exec-truncated",
+      "passed": true
+    },
+    {
+      "name": "reject-exec-unknown-block",
+      "passed": true
+    },
+    {
+      "name": "task-status-parser-exact",
+      "passed": true
+    },
+    {
+      "name": "syntax-boundary_checks.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-assessor.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-evidence_classification.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-pure_checks.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-public_cohort_checks.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-phase_keeper.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-report_boundary_checks.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-held_preflight.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-runtime_support.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-report_inventory.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-task_parser_checks.py",
+      "passed": true
+    },
+    {
+      "name": "syntax-execution_checks.py",
+      "passed": true
+    },
+    {
+      "name": "one-owned-call-site",
+      "passed": true
+    },
+    {
+      "name": "fixed-two-phases-only",
+      "passed": true
+    },
+    {
+      "name": "explicit-native-DEVNULL",
+      "passed": true
+    },
+    {
+      "name": "no-helper-main-run-in-checks",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-current-complete-report-positive",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-missing-jacocoTestReport.xml",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-missing-html/index.html",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-missing-html/jacoco-sessions.html",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-missing-html/com.example/index.html",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-missing-html/com.example/index.source.html",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-missing-html/com.example/P$1.html",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-missing-html/com.example/P.java.html",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-applicable-source-index-rule-positive",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-reviewer-XML-plus-static-only",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-duplicate",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-escape",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-symlink",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-stale",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-unstable-mode",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-malformed-mode",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-wrong-hash",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-wrong-size",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-extra-dynamic",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-broken-active-link",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-escaping-link",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-missing-required-link",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-broken-source-fragment",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-duplicate-package",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-escaping-XML-package",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-escaping-XML-source",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-old-crafted-coverage-proof-rejected",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-public-fixture-complete-positive",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-classify-missing-per-invocation-file",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-keeper-blocks-missing-per-invocation-file",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-close-blocks-missing-per-invocation-file",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-exact-raw-public-preserved-missing-per-invocation-file",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-classify-public-invocation-ordinal",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-keeper-blocks-public-invocation-ordinal",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-close-blocks-public-invocation-ordinal",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-exact-raw-public-preserved-public-invocation-ordinal",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-classify-public-source-identity",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-keeper-blocks-public-source-identity",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-close-blocks-public-source-identity",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-exact-raw-public-preserved-public-source-identity",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-classify-pre-send-correspondence",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-keeper-blocks-pre-send-correspondence",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-close-blocks-pre-send-correspondence",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-exact-raw-public-preserved-pre-send-correspondence",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-classify-public-terminal-join",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-keeper-blocks-public-terminal-join",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-close-blocks-public-terminal-join",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-exact-raw-public-preserved-public-terminal-join",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-classify-public-directory-identity",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-keeper-blocks-public-directory-identity",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-close-blocks-public-directory-identity",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-exact-raw-public-preserved-public-directory-identity",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-classify-public-field-absent",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-keeper-blocks-public-field-absent",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-close-blocks-public-field-absent",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-exact-raw-public-preserved-public-field-absent",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-classify-public-limits-field-absent",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-keeper-blocks-public-limits-field-absent",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-actual-close-blocks-public-limits-field-absent",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-exact-raw-public-preserved-public-limits-field-absent",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-classified-TASK_COLLECTION_INCOMPLETE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-keeper-TASK_COLLECTION_INCOMPLETE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-close-TASK_COLLECTION_INCOMPLETE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-classified-RAW_SOURCE_OR_TEST_INPUT_STABILITY_UNPROVEN",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-keeper-RAW_SOURCE_OR_TEST_INPUT_STABILITY_UNPROVEN",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-close-RAW_SOURCE_OR_TEST_INPUT_STABILITY_UNPROVEN",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-classified-STALE_XML",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-keeper-STALE_XML",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-close-STALE_XML",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-classified-STALE_DYNAMIC_TEST_HTML",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-keeper-STALE_DYNAMIC_TEST_HTML",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-close-STALE_DYNAMIC_TEST_HTML",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-classified-PUBLIC_COHORT_DIRECTORY_IDENTITY_MISMATCH",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-keeper-PUBLIC_COHORT_DIRECTORY_IDENTITY_MISMATCH",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-close-PUBLIC_COHORT_DIRECTORY_IDENTITY_MISMATCH",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-classified-DYNAMIC_JACOCO_REPORT_INCOMPLETE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-keeper-DYNAMIC_JACOCO_REPORT_INCOMPLETE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-direct-evidence-close-DYNAMIC_JACOCO_REPORT_INCOMPLETE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-exact-reviewer-counterexample-keeper",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-generic-close-qualification-cannot-bypass",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-complete-real-test-red-admitted",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-complete-real-test-red-clean-compile-nonzero-close",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-genuine-evidenced-floor-red-not-evidence",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-evidenced-floor-red-clean-compile-nonzero-close",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-observed-budget-oracle-red-remains-validation",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-complete-observed-retention-red-remains-validation",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-unknown-classification-HOLD",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-real-assessor-input-incomplete-collection",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-real-assessor-input-unstable-source",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-real-assessor-input-unstable-input",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-real-assessor-input-wrong-task-scope",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-real-output-boundary-archive-hash-mismatch",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-real-output-keeper-archive-hash-mismatch",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-real-output-close-archive-hash-mismatch",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-real-output-boundary-original-archive-mismatch",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-real-output-keeper-original-archive-mismatch",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-01-real-output-close-original-archive-mismatch",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-real-assessor-static29-distinct23",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-02-real-assessor-withholds-ratios-on-reviewer-counterexample",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-bound-failed-task-projection",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-bound-passing-task-projection",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-exact-public-raw-lines-retained",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-exact-public-line-ordinals",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-header-alone-is-not-completion-proof",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-actual-dictionary-API-failed",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-explicit-status-preserved-FAILED",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-explicit-nonpassing-task-never-green-FAILED",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-explicit-status-preserved-SKIPPED",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-explicit-nonpassing-task-never-green-SKIPPED",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-explicit-status-preserved-UP-TO-DATE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-explicit-nonpassing-task-never-green-UP-TO-DATE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-explicit-status-preserved-FROM-CACHE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-explicit-nonpassing-task-never-green-FROM-CACHE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-explicit-status-preserved-NO-SOURCE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-explicit-nonpassing-task-never-green-NO-SOURCE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-reject-duplicate-failed",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-reject-reversed",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-reject-triple-repeat",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-reject-conflicting-explicit",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-reject-unknown-success-spelling",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-reject-unknown-explicit-executed",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-reject-unknown-terminal",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-reject-trailing-blank-terminal",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-bound-fullcheck41-headers-one-failed",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-fullcheck-original-source-ordinals",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-context-headers-never-extra-invocations",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-repeated-context-before-one-terminal-FAILED",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-repeated-context-before-one-terminal-SKIPPED",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-repeated-context-before-one-terminal-UP-TO-DATE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-repeated-context-before-one-terminal-FROM-CACHE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-repeated-context-before-one-terminal-NO-SOURCE",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-repeated-context-without-terminal-stays-header-only",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-interleaved-independent-task-markers",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-real-build-boundary-header-not-success",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-real-close-boundary-header-only-rejected",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-real-green-build-requires-overall-success-context",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-nonzero-native-never-green-build",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-real-assessor-native0-header-only-evidence-defect",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-real-assessor-native1-does-not-invent-success-marker-defect",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-observed-failed-task-raw-terminal-not-exception",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-actual-evidenced-failed-task-condition-test",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-complete-failed-assessment-not-evidence-corruption-test",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-actual-standard-reconcile-allows-only-clean-known-failure-test",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-clean-failed-task-real-compile0-nonzero-close-test",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-failed-task-cannot-close-green-test",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-blocked-report-no-ratios-or-coverage-claim-test",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-actual-evidenced-failed-task-condition-guidedIncrementalTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-complete-failed-assessment-not-evidence-corruption-guidedIncrementalTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-actual-standard-reconcile-allows-only-clean-known-failure-guidedIncrementalTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-clean-failed-task-real-compile0-nonzero-close-guidedIncrementalTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-failed-task-cannot-close-green-guidedIncrementalTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-blocked-report-no-ratios-or-coverage-claim-guidedIncrementalTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-cross-failure-real-current-XML-and-pages-complete",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-cross-failure-ratios-derived-from-current-XML",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-actual-evidenced-failed-task-condition-crossReplicaTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-complete-failed-assessment-not-evidence-corruption-crossReplicaTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-actual-standard-reconcile-allows-only-clean-known-failure-crossReplicaTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-clean-failed-task-real-compile0-nonzero-close-crossReplicaTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-failed-task-cannot-close-green-crossReplicaTest",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-caseIdentitiesAndSkipsExact",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-xmlCollectorMultisetExact",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-taskCollectionComplete",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-sourceAndTestInputsStable",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-taskOutputEvidenceClean",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-publicProofEvidenceClean",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-ownedObservationClean",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-threeExecsFreshAndCurrent",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-bothCohortBoundariesComplete",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-retentionTasksExecuted",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-testFailureMatchesXml",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-reportObservationComplete",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-uncertain-failed-task-stays-evidence-HOLD-noCurrentReportFiles",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-even-claimed-clean-context-cannot-mask-real-public-defect",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-no-fabricated-ratio-on-blocked-report",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-claimed-current-missing-report-never-downgraded",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-cross-failure-real-current-XML-and-pages-complete",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-cross-failure-ratios-derived-from-current-XML",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-current-report-omission-stays-hard-evidence",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-03-fresh-partial-report-is-not-proven-absent",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-actual-function-rejects-linked-anchor",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-no-target-callback-after-linked-anchor",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-actual-function-rejects-linked-intermediate",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-no-target-callback-after-linked-intermediate",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-actual-function-rejects-linked-report-root",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-no-target-callback-after-linked-report-root",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-actual-function-rejects-wrong-type-intermediate",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-no-target-callback-after-wrong-type-intermediate",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-actual-function-rejects-wrong-type-root",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-no-target-callback-after-wrong-type-root",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-actual-function-rejects-permission-at-intermediate",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-no-target-callback-after-permission-at-intermediate",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-actual-function-rejects-unknown-observation",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-no-target-callback-after-unknown-observation",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-missing-trusted-anchor-is-not-legitimate-report-absence",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-unknown-component-type-stops-before-target",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-incomplete-component-identity-stops-before-target",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-changed-validated-ancestor-rejected-before-deeper-metadata",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-validated-missing-subtree-jacoco",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-no-target-on-valid-missing-jacoco",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-validated-missing-subtree-test",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-no-target-on-valid-missing-test",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-safe-stale-metadata-preserved",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-safe-stale-no-following-or-body",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-child-alias-rejected-before-descending",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-enumeration-failure-no-child-metadata",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-linked-XML-never-enumerated-or-followed",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-changing-leaf-is-hard-observation-failure",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-safe-current-custody-plus-complete-report",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-current-no-following-or-body-callback",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-real-assessor-cannot-flag-and-continue",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-no-report-rglob-or-following-shortcuts-remain",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-body-loop-uses-only-validated-paths",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-unsafe-custody-blocks-standard-reconciliation",
+      "passed": true
+    },
+    {
+      "name": "C8-EXEC-04-unsafe-custody-closing-qualification-no-bypass",
+      "passed": true
+    }
+  ],
+  "boundaryRegressions": {
+    "actualBoundariesOnly": true,
+    "C8_EXEC_01": {
+      "assessmentEvidenceErrors": [
+        "TASK_COLLECTION_INCOMPLETE"
+      ],
+      "actualKeeperAdmissionAccepted": false,
+      "actualFailedCloseErrors": [
+        "STANDARD_RECONCILE_ASSESSMENT_EVIDENCE_HOLD"
+      ],
+      "genericQualificationSupplied": true
+    },
+    "C8_EXEC_02": {
+      "currentDynamicHtmlPages": 0,
+      "actualStaticOutputOccurrences": 29,
+      "actualStaticDistinctResources": 23,
+      "actualRatios": {},
+      "actualCoverageErrors": [
+        "CURRENT_XML_DYNAMIC_INVENTORY_UNPROVEN",
+        "COVERAGE_dynamicArtifactsFresh",
+        "COVERAGE_dynamicInventoryComplete",
+        "COVERAGE_dynamicLinksValid",
+        "COVERAGE_allExpectedDynamicFresh",
+        "MISSING_LINE_RATIO:bundle",
+        "MISSING_LINE_RATIO:compile.gateway",
+        "MISSING_LINE_RATIO:dispatch",
+        "MISSING_LINE_RATIO:internal",
+        "MISSING_LINE_RATIO:recovery",
+        "MISSING_LINE_RATIO:sse",
+        "MISSING_LINE_RATIO:compile"
+      ],
+      "actualDynamicInventoryComplete": false
+    },
+    "completeCurrentSyntheticReport": {
+      "complete": true,
+      "linksValid": true,
+      "allExpectedFresh": true,
+      "errors": [],
+      "expectedPaths": [
+        "html/com.example/P$1.html",
+        "html/com.example/P.java.html",
+        "html/com.example/index.html",
+        "html/com.example/index.source.html",
+        "html/index.html",
+        "html/jacoco-sessions.html",
+        "jacocoTestReport.xml"
+      ],
+      "actualPaths": [
+        "html/com.example/P$1.html",
+        "html/com.example/P.java.html",
+        "html/com.example/index.html",
+        "html/com.example/index.source.html",
+        "html/index.html",
+        "html/jacoco-sessions.html",
+        "jacocoTestReport.xml"
+      ],
+      "currentXmlSha256": "7c053d756235df49b00f193935b250c2d3f5ca58be83f628bb57802bb2f15732",
+      "xmlCounts": {
+        "packages": 1,
+        "classes": 1,
+        "sourcefiles": 1,
+        "sourceIndexes": 1
+      },
+      "layout": "JaCoCo0.8.12/named-Java-packages/dotted-package-directory/binary-dollar-leaf",
+      "sourceIndexRule": "required iff current package XML reports sourcefile children",
+      "requiredLinks": {
+        "html/index.html": [
+          "html/com.example/index.html",
+          "html/jacoco-sessions.html"
+        ],
+        "html/jacoco-sessions.html": [
+          "html/index.html"
+        ],
+        "html/com.example/index.html": [
+          "html/com.example/P$1.html",
+          "html/com.example/index.source.html",
+          "html/index.html"
+        ],
+        "html/com.example/P.java.html": [
+          "html/com.example/index.html"
+        ],
+        "html/com.example/index.source.html": [
+          "html/com.example/P.java.html",
+          "html/com.example/index.html"
+        ],
+        "html/com.example/P$1.html": [
+          "html/com.example/P.java.html",
+          "html/com.example/index.html"
+        ]
+      },
+      "resolvedLinks": {
+        "html/index.html": [
+          "html/com.example/index.html",
+          "html/jacoco-resources/report.css",
+          "html/jacoco-sessions.html"
+        ],
+        "html/jacoco-sessions.html": [
+          "html/index.html"
+        ],
+        "html/com.example/index.html": [
+          "html/com.example/P$1.html",
+          "html/com.example/index.source.html",
+          "html/index.html"
+        ],
+        "html/com.example/index.source.html": [
+          "html/com.example/P.java.html",
+          "html/com.example/index.html"
+        ],
+        "html/com.example/P$1.html": [
+          "html/com.example/P.java.html",
+          "html/com.example/index.html"
+        ],
+        "html/com.example/P.java.html": [
+          "html/com.example/index.html"
+        ]
+      },
+      "linkCount": 12,
+      "originalFacts": [
+        {
+          "path": "jacocoTestReport.xml",
+          "sha256": "7c053d756235df49b00f193935b250c2d3f5ca58be83f628bb57802bb2f15732",
+          "bytes": 441,
+          "mtimeNs": 12000000000,
+          "mode": "0o644",
+          "stable": true,
+          "symlink": false
+        },
+        {
+          "path": "html/index.html",
+          "sha256": "62d2b9e12ddd1482f106be4d6a167aea33fcd25a4ff7794ed4d7486921ce730a",
+          "bytes": 129,
+          "mtimeNs": 12000000000,
+          "mode": "0o644",
+          "stable": true,
+          "symlink": false
+        },
+        {
+          "path": "html/jacoco-sessions.html",
+          "sha256": "1f1849ff8775326af9de0f1b3597f808bad0ac7fd1875479219ba53fd89a1fd5",
+          "bytes": 29,
+          "mtimeNs": 12000000000,
+          "mode": "0o644",
+          "stable": true,
+          "symlink": false
+        },
+        {
+          "path": "html/com.example/index.html",
+          "sha256": "1e12f5eb186bcdedc31e0b132656501e5af453cd1c8aed824b24483de849b068",
+          "bytes": 104,
+          "mtimeNs": 12000000000,
+          "mode": "0o644",
+          "stable": true,
+          "symlink": false
+        },
+        {
+          "path": "html/com.example/index.source.html",
+          "sha256": "f42489ebf3753e10863c3087eb4b84e6f20b3626223ea2bbb2b72c292616e06a",
+          "bytes": 64,
+          "mtimeNs": 12000000000,
+          "mode": "0o644",
+          "stable": true,
+          "symlink": false
+        },
+        {
+          "path": "html/com.example/P$1.html",
+          "sha256": "0851fae4b3435e40b7517e982d44fdca52d16c610452663a47edb359e87fc182",
+          "bytes": 67,
+          "mtimeNs": 12000000000,
+          "mode": "0o644",
+          "stable": true,
+          "symlink": false
+        },
+        {
+          "path": "html/com.example/P.java.html",
+          "sha256": "2d181007c85d337a68f8d9934eb19b691a397ccabcc9f29c5313f2f76720029d",
+          "bytes": 59,
+          "mtimeNs": 12000000000,
+          "mode": "0o644",
+          "stable": true,
+          "symlink": false
+        }
+      ],
+      "copyTimeFreshnessUsed": false,
+      "historicalInventoryUsed": false
+    },
+    "actualNativeOrFilesystemObservationCalls": 0
+  },
+  "taskParserRegressions": {
+    "findingId": "C8-EXEC-03",
+    "findingProjectionOnly": true,
+    "failedProjection": {
+      "statuses": {
+        "testClasses": "EXECUTED",
+        "test": "FAILED"
+      },
+      "states": {
+        "testClasses": "HEADER_ONLY",
+        "test": "FAILED_TERMINAL"
+      },
+      "events": [
+        {
+          "lineOrdinal": 1,
+          "rawLine": "> Task :testClasses",
+          "task": "testClasses",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 2,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 3,
+          "rawLine": "> Task :test FAILED",
+          "task": "test",
+          "marker": "EXPLICIT_TERMINAL_STATUS",
+          "explicitStatus": "FAILED"
+        }
+      ],
+      "unadornedHeadersAreCompletionProof": false,
+      "buildSuccessfulMarker": false,
+      "buildFailedMarker": false,
+      "completionRule": "Require actual native0, BUILD SUCCESSFUL and fresh complete task/output evidence; HEADER_ONLY supplies no terminal-success evidence."
+    },
+    "passingProjection": {
+      "statuses": {
+        "testClasses": "EXECUTED",
+        "test": "EXECUTED"
+      },
+      "states": {
+        "testClasses": "HEADER_ONLY",
+        "test": "HEADER_ONLY"
+      },
+      "events": [
+        {
+          "lineOrdinal": 1,
+          "rawLine": "> Task :testClasses",
+          "task": "testClasses",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 2,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        }
+      ],
+      "unadornedHeadersAreCompletionProof": false,
+      "buildSuccessfulMarker": false,
+      "buildFailedMarker": false,
+      "completionRule": "Require actual native0, BUILD SUCCESSFUL and fresh complete task/output evidence; HEADER_ONLY supplies no terminal-success evidence."
+    },
+    "ambiguousSequencesRejected": 8,
+    "failureFixturesUseInjectedCleanResourcesNotHistoricalAcceptance": true,
+    "fullyEvidencedFailedTaskResults": {
+      "test": {
+        "status": "FAILED",
+        "reportDisposition": "BLOCKED_AFTER_EXPLICIT_FAILED_TEST",
+        "validationErrors": [
+          "CURRENT_XML_DYNAMIC_INVENTORY_UNPROVEN",
+          "REQUIRED_TASK_NOT_EXECUTED",
+          "COVERAGE_mergedSessionsExactExecUnion",
+          "COVERAGE_dynamicArtifactsFresh",
+          "COVERAGE_dynamicInventoryComplete",
+          "COVERAGE_dynamicLinksValid",
+          "COVERAGE_allExpectedDynamicFresh",
+          "COVERAGE_freshReport",
+          "COVERAGE_nativeReportAndVerificationSuccessful",
+          "STATIC_OUTPUT_SCOPE_MISMATCH",
+          "MISSING_LINE_RATIO:bundle",
+          "MISSING_LINE_RATIO:compile.gateway",
+          "MISSING_LINE_RATIO:dispatch",
+          "MISSING_LINE_RATIO:internal",
+          "MISSING_LINE_RATIO:recovery",
+          "MISSING_LINE_RATIO:sse",
+          "MISSING_LINE_RATIO:compile",
+          "CATALOG_STATUS_FAILURE",
+          "ACTUAL_NATIVE_GRADLE_NONZERO",
+          "ACTUAL_COLLECTOR_NONZERO",
+          "ACTUAL_OWNED_FOREGROUND_NONZERO",
+          "COVERAGE_NOT_PRODUCED_AFTER_KNOWN_FAILED_TEST"
+        ],
+        "evidenceErrors": [],
+        "actualCloseErrors": [],
+        "ratios": {},
+        "C8Credit": false
+      },
+      "guidedIncrementalTest": {
+        "status": "FAILED",
+        "reportDisposition": "BLOCKED_AFTER_EXPLICIT_FAILED_TEST",
+        "validationErrors": [
+          "CURRENT_XML_DYNAMIC_INVENTORY_UNPROVEN",
+          "REQUIRED_TASK_NOT_EXECUTED",
+          "COVERAGE_mergedSessionsExactExecUnion",
+          "COVERAGE_dynamicArtifactsFresh",
+          "COVERAGE_dynamicInventoryComplete",
+          "COVERAGE_dynamicLinksValid",
+          "COVERAGE_allExpectedDynamicFresh",
+          "COVERAGE_freshReport",
+          "COVERAGE_nativeReportAndVerificationSuccessful",
+          "STATIC_OUTPUT_SCOPE_MISMATCH",
+          "MISSING_LINE_RATIO:bundle",
+          "MISSING_LINE_RATIO:compile.gateway",
+          "MISSING_LINE_RATIO:dispatch",
+          "MISSING_LINE_RATIO:internal",
+          "MISSING_LINE_RATIO:recovery",
+          "MISSING_LINE_RATIO:sse",
+          "MISSING_LINE_RATIO:compile",
+          "CATALOG_STATUS_FAILURE",
+          "ACTUAL_NATIVE_GRADLE_NONZERO",
+          "ACTUAL_COLLECTOR_NONZERO",
+          "ACTUAL_OWNED_FOREGROUND_NONZERO",
+          "COVERAGE_NOT_PRODUCED_AFTER_KNOWN_FAILED_TEST"
+        ],
+        "evidenceErrors": [],
+        "actualCloseErrors": [],
+        "ratios": {},
+        "C8Credit": false
+      },
+      "crossReplicaTest": {
+        "status": "FAILED",
+        "reportDisposition": "CURRENT_REPORT_CLAIM",
+        "validationErrors": [
+          "REQUIRED_TASK_NOT_EXECUTED",
+          "CATALOG_STATUS_FAILURE",
+          "ACTUAL_NATIVE_GRADLE_NONZERO",
+          "ACTUAL_COLLECTOR_NONZERO",
+          "ACTUAL_OWNED_FOREGROUND_NONZERO"
+        ],
+        "evidenceErrors": [],
+        "actualCloseErrors": [],
+        "ratios": {
+          "bundle": 0.9,
+          "compile.gateway": 0.9,
+          "dispatch": 0.9,
+          "internal": 0.9,
+          "recovery": 0.9,
+          "sse": 0.9,
+          "compile": 0.9
+        },
+        "C8Credit": false
+      }
+    },
+    "fullcheckRepeatedHeaderProjection": {
+      "statuses": {
+        "compileTestJava": "EXECUTED",
+        "crossReplicaTest": "EXECUTED",
+        "test": "FAILED",
+        "guidedIncrementalTest": "EXECUTED"
+      },
+      "states": {
+        "compileTestJava": "HEADER_ONLY",
+        "crossReplicaTest": "HEADER_ONLY",
+        "test": "FAILED_TERMINAL",
+        "guidedIncrementalTest": "HEADER_ONLY"
+      },
+      "events": [
+        {
+          "lineOrdinal": 25,
+          "rawLine": "> Task :compileTestJava",
+          "task": "compileTestJava",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 36,
+          "rawLine": "> Task :crossReplicaTest",
+          "task": "crossReplicaTest",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 50,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 150,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 168,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 269,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 279,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 380,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 416,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 530,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 705,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 824,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 976,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 1104,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 1112,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 1230,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 1342,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 1493,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 1513,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 1778,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 1930,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 1940,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 2167,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 2211,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 2478,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 2532,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 2899,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 2907,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 3175,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 3365,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 3809,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 4555,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 4561,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 4838,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 4868,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 5271,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 5299,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 5457,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 5893,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 5903,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 6138,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 6222,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 6338,
+          "rawLine": "> Task :test",
+          "task": "test",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        },
+        {
+          "lineOrdinal": 6487,
+          "rawLine": "> Task :test FAILED",
+          "task": "test",
+          "marker": "EXPLICIT_TERMINAL_STATUS",
+          "explicitStatus": "FAILED"
+        },
+        {
+          "lineOrdinal": 6493,
+          "rawLine": "> Task :guidedIncrementalTest",
+          "task": "guidedIncrementalTest",
+          "marker": "UNADORNED_HEADER",
+          "explicitStatus": null
+        }
+      ],
+      "unadornedHeadersAreCompletionProof": false,
+      "buildSuccessfulMarker": false,
+      "buildFailedMarker": false,
+      "completionRule": "Require actual native0, BUILD SUCCESSFUL and fresh complete task/output evidence; HEADER_ONLY supplies no terminal-success evidence."
+    },
+    "actualNativeLogReads": 0,
+    "actualNativeOrOSActions": 0
+  },
+  "reportCustodyRegressions": {
+    "actualFunctionASTOnly": true,
+    "unsafeCases": {
+      "linked-anchor": {
+        "error": "UNSAFE_PUBLIC_REPORT_DIRECTORY",
+        "enumeration": [],
+        "targetMetadata": [],
+        "body": []
+      },
+      "linked-intermediate": {
+        "error": "UNSAFE_PUBLIC_REPORT_DIRECTORY",
+        "enumeration": [],
+        "targetMetadata": [],
+        "body": []
+      },
+      "linked-report-root": {
+        "error": "UNSAFE_PUBLIC_REPORT_DIRECTORY",
+        "enumeration": [],
+        "targetMetadata": [],
+        "body": []
+      },
+      "wrong-type-intermediate": {
+        "error": "UNSAFE_PUBLIC_REPORT_DIRECTORY",
+        "enumeration": [],
+        "targetMetadata": [],
+        "body": []
+      },
+      "wrong-type-root": {
+        "error": "UNSAFE_PUBLIC_REPORT_DIRECTORY",
+        "enumeration": [],
+        "targetMetadata": [],
+        "body": []
+      },
+      "permission-at-intermediate": {
+        "error": "PUBLIC_REPORT_OBSERVATION_UNAVAILABLE",
+        "enumeration": [],
+        "targetMetadata": [],
+        "body": []
+      },
+      "unknown-observation": {
+        "error": "PUBLIC_REPORT_OBSERVATION_UNAVAILABLE",
+        "enumeration": [],
+        "targetMetadata": [],
+        "body": []
+      }
+    },
+    "safeMissingStaleCurrentPaired": true,
+    "realAssessorCallStopsOnUnsafe": true,
+    "actualOSOrBodyCalls": 0
+  },
+  "count": 477,
+  "release": false,
+  "readiness": false
+}

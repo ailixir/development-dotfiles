@@ -1,0 +1,97 @@
+{
+  "atUtc": "2026-10-21T00:19:55.641Z",
+  "reader": "existing compiled run/tree.js readProcessTable(5000)/readProcessTableWithArgs(5000)/canEnumerateProcessTree; raw rows never exported",
+  "selfPid": 58195,
+  "selfSignal0": "ALIVE",
+  "processTableReadableSelfVisible": true,
+  "plainRows": 631,
+  "argsRows": 631,
+  "knownRecordedPidProbes": [
+    {
+      "role": "unit-collector",
+      "pid": 69844,
+      "status": "GONE",
+      "presentInPlainTable": false,
+      "presentInArgsTable": false,
+      "ownershipIfNowPresent": "UNRESOLVED_PID_REUSE_OR_OWNED_PRESENCE_NO_SIGNAL_AUTHORITY"
+    },
+    {
+      "role": "native-wrapper",
+      "pid": 76261,
+      "status": "GONE",
+      "presentInPlainTable": false,
+      "presentInArgsTable": false,
+      "ownershipIfNowPresent": "UNRESOLVED_PID_REUSE_OR_OWNED_PRESENCE_NO_SIGNAL_AUTHORITY"
+    },
+    {
+      "role": "caffeinate",
+      "pid": 76260,
+      "status": "GONE",
+      "presentInPlainTable": false,
+      "presentInArgsTable": false,
+      "ownershipIfNowPresent": "UNRESOLVED_PID_REUSE_OR_OWNED_PRESENCE_NO_SIGNAL_AUTHORITY"
+    },
+    {
+      "role": "native-driver",
+      "pid": 75975,
+      "status": "GONE",
+      "presentInPlainTable": false,
+      "presentInArgsTable": false,
+      "ownershipIfNowPresent": "UNRESOLVED_PID_REUSE_OR_OWNED_PRESENCE_NO_SIGNAL_AUTHORITY"
+    }
+  ],
+  "strictSignal0OnlyESRCHMeansGone": true,
+  "resourceSignalsSent": [
+    0
+  ],
+  "rawArgsOrUnrelatedLabelsExported": false,
+  "exactPrivateCwd": {
+    "scopeBinding": "fixtures-start.json/fixtures01-admission-and-command.json cwd; fresh private task namespace only",
+    "scopePath": "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+    "scopeDevice": 16777229,
+    "scopeInode": 220760724,
+    "sourceProof": "launcher.ts221-242 fork has no cwd; tinypool initialize supplies no cwd; Playwright coreBundle.js37098/39803 launchProcess calls have no cwd, spawn9312-9325 passes undefined; inherits initial caller cwd only",
+    "initialInheritedScopeOnly": true,
+    "selfCwdReaderVisible": true,
+    "selfLsofArgv": [
+      "/usr/sbin/lsof",
+      "-nP",
+      "-a",
+      "-p",
+      "58195",
+      "-d",
+      "cwd",
+      "-F",
+      "pfn"
+    ],
+    "targetLsofArgv": [
+      "/usr/sbin/lsof",
+      "-nP",
+      "-a",
+      "-d",
+      "cwd",
+      "-F",
+      "pfn",
+      "--",
+      "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner"
+    ],
+    "readerTimeoutMs": 5000,
+    "readerStatus": {
+      "exit": 1,
+      "errorCode": null,
+      "signal": null,
+      "stderrEmpty": true
+    },
+    "status": "NO_CURRENT_MATCH_IN_EXACT_PRIVATE_CWD_SCOPE",
+    "currentMatches": 0,
+    "currentMatchPidsExported": false
+  },
+  "failedIterationHistoricalCompleteChildDescendantInventory": "UNRETAINED_UNAVAILABLE_UNMEASURED",
+  "failedIterationExactScratchOrLaunchMarkers": "UNBOUND_NOT_READ_OR_GUESSED",
+  "outsideCwdChangedCwdReparentedResources": "UNMEASURED",
+  "allDescendantsGone": "NOT_ESTABLISHED",
+  "cleanupPass": false,
+  "nativeAdmission": false,
+  "cleanupSignalsAuthorized": false,
+  "nextAction": "STOP_FOR_INDEPENDENT_QA_ROOT_SCOPE_DISPOSITION"
+}

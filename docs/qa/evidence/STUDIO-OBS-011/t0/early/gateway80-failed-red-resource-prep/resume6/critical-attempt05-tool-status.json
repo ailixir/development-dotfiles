@@ -1,0 +1,62 @@
+{
+  "statuses": [
+    {
+      "exit_code": null,
+      "session_id": 71470,
+      "outputBytes": 0,
+      "done": []
+    },
+    {
+      "exit_code": null,
+      "session_id": 71470,
+      "outputBytes": 8127,
+      "done": []
+    },
+    {
+      "exit_code": null,
+      "session_id": 71470,
+      "outputBytes": 9172,
+      "done": []
+    },
+    {
+      "exit_code": null,
+      "session_id": 71470,
+      "outputBytes": 6729,
+      "done": []
+    },
+    {
+      "exit_code": null,
+      "session_id": 71470,
+      "outputBytes": 1024,
+      "done": []
+    },
+    {
+      "exit_code": null,
+      "session_id": 71470,
+      "outputBytes": 240102,
+      "done": []
+    },
+    {
+      "exit_code": 1,
+      "session_id": null,
+      "outputBytes": 288,
+      "done": [
+        "FR06_DONE:{\"passed\": 14, \"failure\": {\"type\": \"AssertionError\", \"args\": [\"OPERATOR_REJECTED:FAKE_OPERATOR_TRANSPORT_TRUNCATED_SOURCE_STATE_PROJECTION_CORRECTION\"]}, \"operatorSteps\": 2}"
+      ]
+    }
+  ],
+  "operatorFailure": {
+    "step": 3,
+    "error": "ASCII_ONLY",
+    "helperSha256": "bca72f3b446de486f520d4e9ca6f78379c02c8f7a531e1c5761de01677e429c6",
+    "bad": [
+      {
+        "pid": 990078,
+        "key": "evidence",
+        "value": "/User…5583 tokens truncated…obuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs009-gateway80-offtree03-20261019/failed-red-resource-disposition03/utility-900111-5e3a38bdd111bb47-115.json"
+      }
+    ]
+  },
+  "actualTargetEffects": 0,
+  "correction": "source-produced state pin plus narrow header; reconstruct complete member map before interpretation; preserve full utility journals/rosters"
+}

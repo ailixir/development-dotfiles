@@ -1,0 +1,83 @@
+  private record ItrPublishedFixture(UUID testId, String sessionId, JsonNode receipt) {}
+
+  private void itrEnsureClassFixtures() throws Exception {
+    assertThat(cleanupUnconfirmed).as("prior actual owner cleanup remains unconfirmed").isFalse();
+    coreRole = "owner";
+    forgetCachedCoreIdentity(); // This invocation reads its actual current fixture Core identity.
+    jdbc.update(
+        "INSERT INTO users(id,sso_id,name,email,created_at) VALUES"
+            + " (?,'user-1','Fixture','fixture@example.invalid',now()) ON CONFLICT DO NOTHING",
+        UUID.randomUUID());
+    jdbc.update(
+        "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) VALUES"
+            + " ('CSI-123','Orders','Ops','HIGH','fixture@example.invalid','Production') ON"
+            + " CONFLICT DO NOTHING");
+    if (guidedWorker == null && ordinaryWorker == null) {
+      startWorkers(); // First construction only; no retry of an existing or unknown owner.
+    } else {
+      assertThat(guidedWorker).as("existing guided owner is retained").isNotNull();
+      assertThat(ordinaryWorker).as("existing ordinary owner is retained").isNotNull();
+      assertThat(guidedWorker.isAlive()).as("no implicit guided restart").isTrue();
+      assertThat(ordinaryWorker.isAlive()).as("no implicit ordinary restart").isTrue();
+    }
+    seedGovernedPolicies("CSI-123");
+  }
+
+  private ItrPublishedFixture itrFreshPublishedFixture() throws Exception {
+    itrEnsureClassFixtures();
+    coreRole = "owner";
+    UUID test = createSource(TEXT);
+    String session = startLearning(test);
+    awaitFinalizing(session);
+    JsonNode command = C.object().put("schemaVersion", 3)
+        .put("expectedSourceRevision", "1").put("expectedConfigurationRevision", "1");
+    JsonNode receipt = publicCall("/api/v1/studio/guided-sessions/" + session + "/finalize",
+        command, 200, UUID.randomUUID().toString());
+    assertThat(receipt.path("revisionId").asText()).isNotBlank();
+    p3AwaitTeardown(session); // Original confirmed native-owner acknowledgement, never early cleanup.
+    return new ItrPublishedFixture(test, session, receipt.deepCopy());
+  }
+
+  private void itrEstablishOwnAuditCorpus() throws Exception {
+    // Actual authored source canaries precede this invocation's genuine producers.
+    AUDIT_CANARIES.addAll(TEXT);
+    ItrPublishedFixture fixture = itrFreshPublishedFixture();
+    UUID execution = UUID.fromString(publicCall(
+        "/api/v1/studio/tests/" + fixture.testId() + "/execute", C.object(), 202,
+        UUID.randomUUID().toString()).path("executionId").asText());
+    assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+    JsonNode result = awaitJoinedVideo(execution);
+    assertThat(result.path("status").asText()).isEqualTo("PASSED");
+  }
+
+  private static final java.util.concurrent.atomic.AtomicInteger ITR_AUDIT_CONTENT_SCANS =
+      new java.util.concurrent.atomic.AtomicInteger();
+  private static final java.util.concurrent.atomic.AtomicInteger ITR_AUDIT_CORPUS_CHECKS =
+      new java.util.concurrent.atomic.AtomicInteger();
+  private static final java.util.concurrent.atomic.AtomicInteger ITR_FINAL_CORPUS_CHECKS =
+      new java.util.concurrent.atomic.AtomicInteger();
+
+  private static java.util.Map<String, Long> itrExpectedInvocationMultiset() {
+    var expected = new java.util.TreeMap<String, Long>();
+    for (String method : SINGLETON_METHODS) {
+      if (INCREMENTAL_METHODS.contains(method)
+          == (FIXTURE_PROFILE == FixtureProfile.INCREMENTAL_2048)) {
+        expected.put(method + "/singleton/0", 1L);
+      }
+    }
+    if (FIXTURE_PROFILE == FixtureProfile.INCREMENTAL_2048) {
+      for (int ordinal = 0; ordinal < INCREMENTAL_VARIANTS.size(); ordinal++) {
+        expected.put("incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser/"
+            + INCREMENTAL_VARIANTS.get(ordinal) + "/" + (ordinal + 1), 1L);
+      }
+    }
+    return expected;
+  }
+
+  private static boolean itrExactWholeLaneObserved() {
+    var actual = FIXTURE_INVOCATIONS.stream().collect(java.util.stream.Collectors.groupingBy(
+        invocation -> invocation.method + "/" + invocation.variant + "/" + invocation.variantOrdinal,
+        java.util.TreeMap::new, java.util.stream.Collectors.counting()));
+    return actual.equals(itrExpectedInvocationMultiset());
+  }
+

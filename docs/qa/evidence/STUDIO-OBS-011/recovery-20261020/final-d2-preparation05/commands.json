@@ -1,0 +1,142 @@
+{
+  "kind": "SOURCE_ONLY_D2_BINDING_AND_RUNTIME_PLAN05",
+  "executed": false,
+  "env": {
+    "PATHPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin",
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
+  },
+  "bindingOnly": {
+    "id": "bind-new-measured-D2-packet03",
+    "executed": false,
+    "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "argv": [
+      "python3",
+      "-c",
+      "import sys,json,hashlib,os\nfrom pathlib import Path\nsrc=Path(sys.argv[1]);dst=Path(sys.argv[2]);factsPath=Path(sys.argv[3]);assert not dst.exists()\nh=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()\nexpected={'future-smoke.sh':'2b46b5e901df833ce11f570284516515dac8ca48df0119f6a3c97723fbdbc0ad','fixture.mjs':'4a6c8474c7c609c25b3c40ea3116094eb9e504d5b3da35f66fe730fdf9f89f91','bindings.json':'4087035f5f77c76c53780a44c183f041b55b13ff7a513cc8dee2ddcf6d47736a'}\nfor n,v in expected.items():assert h(src/n)==v\nold=json.loads((src/'bindings.json').read_text());assert all(v is None for v in old['finalBindings'].values())\nfacts=json.loads(factsPath.read_text());values=facts['finalBindings'];assert set(values)==set(old['finalBindings'])\nfor k,v in values.items():\n    assert isinstance(v,str) and v and '<' not in v and v!='UNBOUND'\n    if k=='measuredImmutableImageId':assert v.startswith('sha256:') and len(v)==71 and all(c in '0123456789abcdef' for c in v[7:])\n    elif k=='configuredImageReference':assert v=='put-checks-studio-runner:obs011-recovery-20261020-final01-local'\n    else:assert len(v)==64 and all(c in '0123456789abcdef' for c in v)\nassert isinstance(facts['acceptedFinalDependencyReviewReference'],str) and facts['acceptedFinalDependencyReviewReference']\n# The execution actor verifies the referenced accepted receipts/root release. Shape checks are not approval.\ndst.mkdir()\nfor n in ['future-smoke.sh','fixture.mjs']:\n    (dst/n).write_bytes((src/n).read_bytes());os.chmod(dst/n,(src/n).stat().st_mode&0o777);assert h(dst/n)==expected[n]\nold['finalBindings']=values;old['bindingDisposition']='Measured successor; source scripts unchanged. Separate root execution release remains mandatory.'\nold['finalDependencySuccessor']={'acceptedReviewReference':facts['acceptedFinalDependencyReviewReference'],'measuredFactsSha256':h(factsPath),'originalBindingsSha256':expected['bindings.json']}\n(dst/'bindings.json').write_text(json.dumps(old,indent=2)+'\\n')\ncmd=json.loads((src/'future-command-and-bindings.json').read_text());cmd['argv']=[str(dst/'future-smoke.sh') if x==str(src/'future-smoke.sh') else values['measuredImmutableImageId'] if x=='<MEASURED_FINAL_IMAGE_ID>' else sys.argv[4] if x=='<FRESH_ABSOLUTE_EXECUTION_EVIDENCE_DIRECTORY>' else x for x in cmd['argv']]\ncmd['bindingAndReviewState']='Nine fields measured; scripts byte-exact; root must inspect accepted receipts/dependency succession and separately release. Fresh evidence destination bound; all resource/label freshness guards remain mandatory.'\n(dst/'future-command-and-bindings.json').write_text(json.dumps(cmd,indent=2)+'\\n')\nmanifest={'kind':'D2_MEASURED_BINDING_SUCCESSOR','files':[{'path':n,'sha256':h(dst/n)} for n in ['future-smoke.sh','fixture.mjs','bindings.json','future-command-and-bindings.json']],'originalCorrectionManifestSha256':h(src/'manifest.json'),'measurementFactsSha256':h(factsPath),'executionReleased':False}\n(dst/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\\n')\n",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-correction01",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-final-bound03",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/accepted-final-measured-bindings.json",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/d2-execution01"
+    ],
+    "requires": "Separate root binding release after root exact dependency succession acceptance; all9 fields/root reference must be real; no runtime follows automatically",
+    "finalBindings": {
+      "acceptedSourceDigest": null,
+      "acceptedTestInputDigest": null,
+      "acceptedDistDigest": null,
+      "buildContextSha256": null,
+      "finalBuildReceiptSha256": null,
+      "configuredImageReference": null,
+      "measuredImmutableImageId": null,
+      "finalImagePinsReceiptSha256": null,
+      "finalDeployment722ReceiptSha256": null
+    },
+    "futureRequires": [
+      "actual deployment raw0/exact722P0F0S/10files on exactlyBD83 with all guards",
+      "all nine literal facts and explicit acceptedFinalDependencyReviewReference supplied by root",
+      "same-depth bound03 target absent; original packets/source strings byte-exact",
+      "root review of actual accepted receipts, not shape checks alone"
+    ],
+    "dataOnlyDeltasFrom7133": {
+      "factsPath": [
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-linux-image-execution03/accepted-final-measured-bindings.json",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-d2-execution04/accepted-final-measured-bindings.json"
+      ],
+      "freshD2OutputDirectory": [
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-linux-image-execution03/d2-execution01",
+        "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-d2-execution04/d2-execution01"
+      ],
+      "inlineSourceUnchangedSha256": "de80e4e418f272d645a14b44a6ff53f1d87b24fc6daaa9bc1f1ee9ede31d70df"
+    }
+  },
+  "runtime": {
+    "kind": "UNEXECUTED_D2_CORRECTED_SUCCESSOR_FUTURE_ARGV",
+    "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "env": {
+      "PATHPrefix": "/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin"
+    },
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+      "obs011-recovery-20261020-final-linux-d2-smoke01",
+      "bash",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-final-bound03/future-smoke.sh",
+      "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+      "obs011-d2-final-01",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/d2-execution01"
+    ],
+    "inputBindings": "bindings.json finalBindings must all contain reviewed literals; command placeholder must be replaced with exactly measuredImmutableImageId. Do not invoke while any placeholder/null remains.",
+    "requiredPreconditions": [
+      "Root review of this unexecuted smoke adapter and exact dependency successor hashes",
+      "Sole runtime lane released by gateway and assigned by root; no actual source/dist/build/config writer during collector",
+      "Accepted final image build and image-pins zero failures/zero notAsserted receipt",
+      "Existing final complete deployment722/0fail/0skip on identical immutable image ID; do not repeat already-passing tier",
+      "Fresh collector label, evidence directory and all named container/volume names absent",
+      "Local daemon and exact cached immutable image available; no build/pull/retag/network-provider operation",
+      "Physical open-lid/on-AC readiness maintained for local native execution"
+    ],
+    "filesystemShape": {
+      "root": "read-only",
+      "defaultUser": "pwuser, actual uid=gid=1001",
+      "pid1": "--init, production node PID>1",
+      "tmp": "fresh exact-owned named volume mounted at /tmp (disk-backed emptyDir surrogate)",
+      "journal": "fresh exact-owned named volume /journal, private child /journal/data",
+      "tls": "fresh exact-owned named volume root:1001 files0440, mounted /tls:ro",
+      "fixture": "read-only bind /smoke/fixture.mjs",
+      "network": "production runner --network none; controller companion --network container:<positive runner>; loopback only, no host port",
+      "positiveEnvironment": "fresh private env file from public TLS fixture and real signed worker token; no TMPDIR/debug keys"
+    },
+    "observations": [
+      "exact Linux image ID/CMD/no-entrypoint/pwuser before and after",
+      "real default process UID/GID, production node>1, core soft/hard0",
+      "probe health0; assign200 OWNED fence1; authenticated claim202; context200; one bootstrap initialBlank",
+      "two nonempty journals/two owner markers; one live checks-recording directory; Linux proc-fd directory handle; key0440/gid1001/readable",
+      "/app and /tls write attempts refused EROFS",
+      "no-init raw exit78/exact LAUNCH_TREE/no started; debug raw exit78/exact DEBUG_ENV/no started",
+      "active-session docker stop -t30 -> draining then drained guidedClosed true, actual exit0 and elapsed<30s",
+      "exactly one real STORED recording callback and no rejected/failed fixture event",
+      "post-drain active recording allocation count0; companion exit0; exact owned containers and volumes removed",
+      "collector source/testInput/dist stable; no full Replay credit/no cause or deployed-provider claim",
+      "One live non-stopped/non-zombie browser leader owned by production main at immediate pre-stop snapshot",
+      "No lifecycle or recording in pre-stop fixture log; complete later callback cohort has exactlyone each and arrival strictly after actual runner.draining timestamp",
+      "Both negative containers exit in bounded90 polling window; if running at bound, miss recorded and cleanup invoked, no retry"
+    ],
+    "failurePolicy": "Any setup/schema/auth/compiler-free image/production browser/filesystem/drain failure stops, records command/raw exit/public closed facts and exact owned cleanup. No retry, callback/auth bypass, token-lifetime or timer change, no source repair. Do not treat short-lived companion as Kubernetes one-container proof.",
+    "historicalPreservation": "G9 old14 assertions, missing step6, old residue image and all prior failed evidence remain immutable.",
+    "bindingAndReviewState": "UNEXECUTED; first8 measured; ninth deployment and root acceptedDependencyReviewReference UNBOUND; no bind/copy/launch now.",
+    "corrections": {
+      "D2-QA-01": "Negatives finish before positive/container/context creation. Zero pre-stop lifecycle/recording, fresh live owned browser/recording check immediately before stop. Actual production draining timestamp required, one CONTEXT_LOST lifecycle and one STORED recording must have arrival timestamps strictly later; reject same-ms ambiguity or expired assignment at draining.",
+      "D2-QA-02": "Detached same two owned negatives; at most90 one-second exit polls. Missed exit bound is failure with exit unknown/null, never expected78. EXIT exact-owned cleanup runs without waiting for serving main."
+    },
+    "id": "corrected-D2-same-image",
+    "executed": false,
+    "requires": "bound packet/root release after accepted final deployment722 on exactly measured ID; retain original label unless unused; finalIDplaceholder blocks execution",
+    "futureRequires": [
+      "Root binding release and actual bound03 packet hashes",
+      "Separately issued exact root runtime admission path/SHA with authorizedtrue/soleheavy/sourcefrozen",
+      "Driver all requiredguards0; no pending lookup",
+      "Originallabel/prefix/output/resourcesfresh and sameBD83"
+    ]
+  },
+  "driverArgv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-preparation05/run-d2.py",
+    "<ROOT_ABSOLUTE_RUNTIME_ADMISSION_PATH>",
+    "<EXACT_ROOT_ADMISSION_SHA256>"
+  ],
+  "runtimeDirectory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05",
+  "boundPacketDirectory": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/linux-image-smoke-final-bound03",
+  "expectedLabel": "obs011-recovery-20261020-final-linux-d2-smoke01",
+  "resourcePrefix": "obs011-d2-final-01",
+  "dataOnlyBinderDelta": {
+    "inlineSourceSha256": "de80e4e418f272d645a14b44a6ff53f1d87b24fc6daaa9bc1f1ee9ede31d70df",
+    "factsPath": [
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-d2-execution04/accepted-final-measured-bindings.json",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/accepted-final-measured-bindings.json"
+    ],
+    "outputPath": [
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-deployment-d2-execution04/d2-execution01",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-execution05/d2-execution01"
+    ]
+  },
+  "binderAndRuntimeAreSeparateReleases": true
+}

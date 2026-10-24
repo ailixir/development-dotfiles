@@ -1,0 +1,101 @@
+{
+  "actual": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "test/run/observedBootstrap.test.ts",
+      "--coverage.enabled=false",
+      "--minWorkers=1",
+      "--maxWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-unit01-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-20T16:39:00.296351+00:00",
+    "elapsedSeconds": 0.77,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "45b000bf4de46853728518a43a9362f4c7dfc40b3e2049ec652bb7108fba7d67",
+    "testInputStable": true,
+    "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+    "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+    "vitest": {
+      "success": true,
+      "numPassedTests": 14,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTests": 14,
+      "numPassedTestSuites": 1,
+      "numFailedTestSuites": 0
+    },
+    "vitestReportSha256": "9beb72453aa633b8202205a0818695c56b855c41e15e0fe1fdd669590a890d48"
+  },
+  "allCases": [
+    {
+      "fullName": "authorizes only the exact returned app page after startup removal, with no pending blind window",
+      "status": "passed"
+    },
+    {
+      "fullName": "permanently latches early unexpected page and delivers a late subscription",
+      "status": "passed"
+    },
+    {
+      "fullName": "permanently latches empty unexpected page and delivers a late subscription",
+      "status": "passed"
+    },
+    {
+      "fullName": "permanently latches creation unexpected page and delivers a late subscription",
+      "status": "passed"
+    },
+    {
+      "fullName": "permanently latches wrong-return unexpected page and delivers a late subscription",
+      "status": "passed"
+    },
+    {
+      "fullName": "permanently latches later unexpected page and delivers a late subscription",
+      "status": "passed"
+    },
+    {
+      "fullName": "permanently latches already-closed unexpected page and delivers a late subscription",
+      "status": "passed"
+    },
+    {
+      "fullName": "refuses non-sole startup set {\"pages\":[]}",
+      "status": "passed"
+    },
+    {
+      "fullName": "refuses non-sole startup set {\"pages\":[{},{}]}",
+      "status": "passed"
+    },
+    {
+      "fullName": "refuses an undeleted startup page or unissued app creation",
+      "status": "passed"
+    },
+    {
+      "fullName": "does not extend the absolute deadline across sequential startup work",
+      "status": "passed"
+    },
+    {
+      "fullName": "rejects abort, asynchronous failure and expiry after late work without accepting a page",
+      "status": "passed"
+    },
+    {
+      "fullName": "keeps a strictly earlier operation cap final even when work completes before the absolute deadline",
+      "status": "passed"
+    },
+    {
+      "fullName": "preserves a rejected Error(\"TIMEOUT\") identity and own-property shape",
+      "status": "passed"
+    }
+  ],
+  "all12OriginalNamesRetainedInOrder": true,
+  "all14Passed": true,
+  "zeroSkips": true,
+  "newControls": "Earlier cap stays final afterlatecompletion; ordinaryErrorTIMEOUTsameidentity/ownkeys"
+}

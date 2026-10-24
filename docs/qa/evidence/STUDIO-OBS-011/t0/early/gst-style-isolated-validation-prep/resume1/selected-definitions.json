@@ -1,0 +1,59 @@
+{
+  "docs/qa/evidence/STUDIO-OBS-011/t0/early/fullcheck-harness/resume3/harness.py": {
+    "sha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+    "definitions": [
+      "owned_census_keys",
+      "classify_owned",
+      "pending_owned",
+      "ownership_drain_decision"
+    ],
+    "globals": {
+      "read_xml": [
+        "ET"
+      ],
+      "classify_owned": [
+        "Path"
+      ],
+      "ownership_drain_decision": [
+        "pending_owned"
+      ],
+      "others": []
+    },
+    "forbidden": [
+      "all imports",
+      "all top-level executable statements",
+      "legacy main",
+      "ROOT",
+      "Path.cwd",
+      "git",
+      "helper launch"
+    ]
+  },
+  ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py": {
+    "sha256": "799ead7c9c622b7a8b1500d1e89762a689b11e472a8d2bf16101cb9b54f29cd4",
+    "definitions": [
+      "read_xml"
+    ],
+    "globals": {
+      "read_xml": [
+        "ET"
+      ],
+      "classify_owned": [
+        "Path"
+      ],
+      "ownership_drain_decision": [
+        "pending_owned"
+      ],
+      "others": []
+    },
+    "forbidden": [
+      "all imports",
+      "all top-level executable statements",
+      "legacy main",
+      "ROOT",
+      "Path.cwd",
+      "git",
+      "helper launch"
+    ]
+  }
+}

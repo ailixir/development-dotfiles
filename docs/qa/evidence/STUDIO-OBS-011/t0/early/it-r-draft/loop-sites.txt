@@ -1,0 +1,1053 @@
+### [1, 2] while 740
+while (root.handle.isAlive() && System.nanoTime() < until) {
+      // crash-reaper-diagnosis01: ProcessHandle.info() is a fresh OS snapshot on every call and
+      // may throw on macOS under load; a short-lived /bin/ps or /bin/kill can also exit between
+      // two snapshots. Read identity from ONE snapshot and retry inside the same 500 ms window;
+      // still fail-closed below.
+      ProcessHandle.Info info;
+      try {
+        info = root.handle.info();
+      } catch (RuntimeException unavailable) {
+        Thread.sleep(5);
+        continue;
+      }
+      var observedCommand = info.commandLine();
+      if (info.startInstant().isPresent() && observedCommand.isPresent()) {
+        root.started = info.startInstant().orElseThrow();
+        root.commandHash = ownedCommandHash(observedCommand.orElseThrow());
+        break;
+      }
+      Thread.sleep(5);
+    }
+
+### [3] while 957
+while (!Files.exists(ready) && System.nanoTime() < until) {
+        verifyOwnedRoot(root);
+        Thread.sleep(20);
+      }
+
+### [4] do 1013
+do {
+      closed = true;
+      for (var row :
+          jdbc.queryForList(
+              "SELECT session_id,state,progress::text AS progress FROM studio_guided_sessions")) {
+        String id = String.valueOf(row.get("session_id"));
+        if (generationSessionBaseline.contains(id)) {
+          continue;
+        }
+        JsonNode progress = C.parse(String.valueOf(row.get("progress")));
+        boolean assigned =
+            jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_assignments WHERE session_id=?",
+                    Integer.class,
+                    id)
+                > 0;
+        boolean terminal =
+            List.of(
+                    "SUCCEEDED",
+                    "PUBLICATION_CONFLICT",
+                    "FAILED",
+                    "UNKNOWN_OUTCOME",
+                    "CANCELLED",
+                    "EXPIRED")
+                .contains(String.valueOf(row.get("state")));
+        boolean recording =
+            !progress.has("executionEvidence")
+                || jdbc.queryForObject(
+                        "SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=? AND"
+                            + " state IN ('AVAILABLE','FAILED','UNAVAILABLE')",
+                        Integer.class,
+                        id)
+                    == 1;
+        closed &=
+            terminal
+                && (!assigned || progress.path("teardownStatus").asText().equals("CONFIRMED"))
+                && recording;
+      }
+      for (var row :
+          jdbc.queryForList(
+              "SELECT e.id,e.status,e.error_code,e.video_status,l.state AS"
+                  + " ledger_state,l.attempt_id,l.admission_id FROM ui_test_executions e LEFT JOIN"
+                  + " studio_dispatch_ledger l ON l.execution_id=e.id AND l.execution_accepted_at=e.started_at")) {
+        UUID id = (UUID) row.get("id");
+        if (generationExecutionBaseline.contains(id)) {
+          continue;
+        }
+        boolean noSend = row.get("attempt_id") == null && row.get("admission_id") == null;
+        // A RunningReaper ERROR/STALE close (P6 owner crash) is final with no video: closeByReaper
+        // never settles evidence and findEvidenceUnsettled selects FINALIZING rows only. Live
+        // processes are still checked below.
+        boolean reaperStale =
+            "ERROR".equals(row.get("status"))
+                && "STALE".equals(row.get("error_code"))
+                && row.get("video_status") == null;
+        closed &=
+            List.of("PASSED", "FAILED", "ERROR").contains(String.valueOf(row.get("status")))
+                && "DONE".equals(row.get("ledger_state"))
+                && (noSend
+                    || reaperStale
+                    || row.get("video_status") != null
+                        && !"PROCESSING".equals(row.get("video_status")));
+      }
+      for (OwnedFixtureProcess root : OWNED_FIXTURE_PROCESSES) {
+        if (root.generation == ownedGeneration && root.wrapper != null) {
+          recordOwnedDescendants(root);
+          closed &= root.descendants.stream().noneMatch(child -> child.handle().isAlive());
+        }
+      }
+      if (closed) {
+        return;
+      }
+      Thread.sleep(30); // No database transaction/session lock is held across this wait.
+    } while (System.nanoTime() < until);
+
+### [5] while 2307
+while (fixtureAnnouncement.isBlank() && System.nanoTime() < fixtureDeadline) {
+        if (!SECRET_FIXTURE.isAlive()) {
+          throw new IllegalStateException("Secret fixture exited before readiness");
+        }
+        fixtureAnnouncement = Files.readString(TEMP.resolve("secret-fixture-origin.json")).strip();
+        if (fixtureAnnouncement.isBlank()) {
+          Thread.sleep(20);
+        }
+      }
+
+### [6] do 3935
+do {
+            teardown =
+                sessions.transaction(
+                    () -> sessions.lock(owned.getKey()).progress().path("teardownStatus").asText());
+            if (teardown.equals("CONFIRMED")) {
+              break;
+            }
+            Thread.sleep(30);
+          } while (System.nanoTime() < deadline);
+
+### [7] do 7289
+do {
+      replay = publicCall("/api/v1/studio/executions/" + second, null, 200, null);
+      if (replay.path("streamComplete").asBoolean()) {
+        break;
+      }
+      Thread.sleep(30);
+    } while (System.nanoTime() < deadline);
+
+### [8] do 7598
+do {
+        prefixSyncNoTarget(parent, before);
+        renewed =
+            sessions.transaction(
+                () -> sessions.lock(parent.id).document().path("owner").deepCopy());
+        if (Instant.parse(renewed.path("leaseExpiresAt").asText()).isAfter(lease)) {
+          break;
+        }
+        Thread.sleep(20);
+      } while (System.nanoTime() < end);
+
+### [9] while 8327
+while (!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline) {
+              Thread.sleep(10);
+            }
+
+### [10] while 8393
+while (!"ACKNOWLEDGED"
+                    .equals(
+                        jdbc.queryForObject(
+                            "SELECT status FROM studio_guided_materialization_deliveries"
+                                + " WHERE session_id=?",
+                            String.class,
+                            id))
+                && System.nanoTime() < acked) {
+              Thread.sleep(20);
+            }
+
+### [11] while 9281
+while (!sessions
+            .transaction(() -> plans.state(session).path("continuation").asText())
+            .equals("MATERIALIZE")
+        && System.nanoTime() < accepted) {
+      Thread.sleep(20);
+    }
+
+### [14] while 9315
+while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {
+      Thread.sleep(20);
+    }
+
+### [15] while 9393
+while (!"ACKNOWLEDGED"
+            .equals(
+                jdbc.queryForObject(
+                    "SELECT status FROM studio_guided_materialization_deliveries"
+                        + " WHERE session_id=?",
+                    String.class,
+                    session))
+        && System.nanoTime() < acked) {
+      Thread.sleep(25);
+    }
+
+### [16] do 9524
+do {
+      replay = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+      if (replay.path("streamComplete").asBoolean()) {
+        break;
+      }
+      Thread.sleep(30);
+    } while (System.nanoTime() < end);
+
+### [17] while 9543
+while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {
+      Thread.sleep(20);
+    }
+
+### [18] do 10065
+do {
+      state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+      if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED", "SUCCEEDED", "FINALIZING")
+          .contains(state)) {
+        break;
+      }
+      Thread.sleep(25);
+    } while (System.nanoTime() < end);
+
+### [19] do 10079
+do {
+      state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+      if (!state.equals(from)) {
+        break;
+      }
+      Thread.sleep(25);
+    } while (System.nanoTime() < end);
+
+### [20] do 10095
+do {
+      var matches = new ArrayList<JsonNode>();
+      for (int n = after + 1; n <= FINALIZE_DIAGNOSTICS.get(); n++) {
+        Path file = TEMP.resolve("finalize-exception-" + n + ".json");
+        if (!Files.isRegularFile(file)) {
+          continue; // the counter increment precedes the completed write
+        }
+        JsonNode row;
+        try {
+          row = C.parse(Files.readString(file));
+        } catch (RuntimeException incomplete) {
+          continue;
+        }
+        if (!row.path("exceptionCode").asText().equals("SECRET_USE_REVOKED")) {
+          continue;
+        }
+        boolean access = false;
+        boolean transaction = false;
+        boolean gate = false;
+        for (JsonNode frame : row.path("stackFrames")) {
+          String type = frame.path("class").asText();
+          String method = frame.path("method").asText();
+          access |=
+              type.equals(
+                      "com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess")
+                  && method.equals("checkCurrent");
+          transaction |=
+              type.equals("com.citi.put.checks.studio.guided.session.GuidedSessionService")
+                  && method.startsWith("lambda$translationTransaction");
+          gate |=
+              type.equals("com.citi.put.checks.studio.guided.translation.GuidedTranslationService")
+                  && method.equals("advancePrefix")
+                  && frame.path("line").asInt() == prefixSites().postAck();
+        }
+        if (access && transaction && gate) {
+          matches.add(row);
+        }
+      }
+      if (!matches.isEmpty()) {
+        assertThat(matches.size()).as("one exact post-ACK checkCurrent refusal").isEqualTo(1);
+        return;
+      }
+      Thread.sleep(10);
+    } while (System.nanoTime() < end);
+
+### [21] do 11242
+do {
+      int current = FINALIZE_DIAGNOSTICS.get();
+      var matches = new ArrayList<JsonNode>();
+      for (int n = after + 1; n <= current; n++) {
+        Path file = TEMP.resolve("finalize-exception-" + n + ".json");
+        if (!Files.isRegularFile(file)) {
+          continue;
+        } // Counter increment precedes completed write.
+        JsonNode row;
+        try {
+          row = C.parse(Files.readString(file));
+        } catch (RuntimeException incomplete) {
+          continue;
+        }
+        if (code != null && !row.path("exceptionCode").asText().equals(code)) {
+          continue;
+        }
+        PrefixSites sites = prefixSites();
+        boolean stage = false;
+        for (JsonNode frame : row.path("stackFrames")) {
+          if (frame
+                  .path("class")
+                  .asText()
+                  .equals("com.citi.put.checks.studio.guided.translation.GuidedTranslationService")
+              && frame.path("method").asText().equals("advancePrefix")
+              && frame.path("line").asInt() == (gate ? sites.postAck() : sites.pushContext())) {
+            stage = true;
+          }
+        }
+        if (gate && "STALE_GENERATION".equals(code)) {
+          int predicateLine =
+              parent.cut.mode.equals("CONCURRENT")
+                  ? sites.nextActionRequire()
+                  : sites.evidenceRequire();
+          boolean predicate = false;
+          for (JsonNode frame : row.path("stackFrames")) {
+            if (frame
+                    .path("class")
+                    .asText()
+                    .equals(
+                        "com.citi.put.checks.studio.guided.translation.GuidedTranslationService")
+                && frame.path("method").asText().startsWith("lambda$advancePrefix$")
+                && frame.path("line").asInt() == predicateLine) {
+              predicate = true;
+            }
+          }
+          stage &= predicate;
+        }
+        if (stage) {
+          matches.add(row);
+        }
+      }
+      if (!matches.isEmpty()) {
+        if (gate) {
+          assertThat(matches)
+              .as(
+                  "one isolated fresh case must identify its exact post-ACK gate, not an ambiguous interval")
+              .hasSize(1);
+        }
+        // Uncertain responses may be revisited by the real coordinator; no single-call claim
+        // applies.
+        assertThat(PREFIX_SYNC_CUTS.keySet()).containsExactly(parent.cut.key);
+        assertThat(
+                testOwnedSessions.keySet().stream()
+                    .filter(id -> !id.equals(parent.id))
+                    .allMatch(
+                        id ->
+                            sessions.transaction(
+                                () ->
+                                    List.of(
+                                            "SUCCEEDED",
+                                            "FAILED",
+                                            "CANCELLED",
+                                            "EXPIRED",
+                                            "PUBLICATION_CONFLICT")
+                                        .contains(
+                                            sessions.lock(id).document().path("state").asText()))))
+            .isTrue();
+        return;
+      }
+      Thread.sleep(10);
+    } while (System.nanoTime() < end);
+
+### [22] do 11481
+do {
+      replay = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+      if (replay.path("streamComplete").asBoolean()) {
+        break;
+      }
+      Thread.sleep(30);
+    } while (System.nanoTime() < end);
+
+### [23] while 11849
+while (b1Count("studio_guided_relearn_switches", parent.id) == 0 && System.nanoTime() < end) {
+        Thread.sleep(20);
+      }
+
+### [29] while 14281
+while (!INCREMENTAL_DRIFT_CAPTURE.containsKey(id)) {
+      assertThat(System.nanoTime()).isLessThan(until);
+      Thread.sleep(10);
+    }
+
+### [30] do 14503
+do {
+      state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+      if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED").contains(state)) {
+        break;
+      }
+      Thread.sleep(25);
+    } while (System.nanoTime() < end);
+
+### [31] while 14541
+while (jdbc.queryForObject(sql, Integer.class, id) == 0) {
+      assertThat(System.nanoTime()).as(sql).isLessThan(end);
+      Thread.sleep(20);
+    }
+
+### [32] while 14549
+while (jdbc.queryForObject(
+            "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+                + " AND ordinal=0 AND document->>'state'='SUCCEEDED'",
+            Integer.class,
+            id,
+            b1Step(stepIndex))
+        == 0) {
+      assertThat(System.nanoTime()).as("S(%s)#0 SUCCEEDED", stepIndex).isLessThan(end);
+      Thread.sleep(20);
+    }
+
+### [33] while 14563
+while (!sessions
+        .transaction(() -> sessions.lock(id).document().path("state").asText())
+        .equals("AWAITING_CLARIFICATION")) {
+      assertThat(System.nanoTime()).isLessThan(end);
+      Thread.sleep(25);
+    }
+
+### [34] do 15585
+do {
+          replay = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+          if (replay.path("streamComplete").asBoolean()) {
+            break;
+          }
+          Thread.sleep(30);
+        } while (System.nanoTime() < end);
+
+### [35] do 16022
+do {
+        snapshot = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+        if (snapshot.path("streamComplete").asBoolean()) {
+          break;
+        }
+        Thread.sleep(30);
+      } while (System.nanoTime() < deadline);
+
+### [36] do 16061
+do {
+            replay = publicCall("/api/v1/studio/executions/" + second, null, 200, null);
+            if (replay.path("streamComplete").asBoolean()) {
+              break;
+            }
+            Thread.sleep(30);
+          } while (System.nanoTime() < secondDeadline);
+
+### [37] do 16133
+do {
+      state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+      if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED", "FINALIZING")
+          .contains(state)) {
+        break;
+      }
+      Thread.sleep(25);
+    } while (System.nanoTime() < deadline);
+
+### [38] while 16422
+while (System.nanoTime() < deadline) {
+      String state =
+          sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+      if (state.equals("AWAITING_CLARIFICATION")) {
+        break;
+      }
+      assertThat(List.of("FAILED", "UNKNOWN_OUTCOME", "EXPIRED", "CANCELLED", "FINALIZING"))
+          .doesNotContain(state);
+      Thread.sleep(25);
+    }
+
+### [41] do 16770
+do {
+        outcome = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+        if (List.of("CANCELLED", "UNKNOWN_OUTCOME", "FAILED").contains(outcome)) {
+          break;
+        }
+        Thread.sleep(20);
+      } while (System.nanoTime() < until);
+
+### [42] while 16824
+while (!INCREMENTAL_DRIFT_CAPTURE.containsKey(id) && System.nanoTime() < until) {
+      Thread.sleep(10);
+    }
+
+### [43] while 16947
+while (!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline) {
+      Thread.sleep(10);
+    }
+
+### [44] while 17707
+while (System.nanoTime() < learningEnd) {
+      JsonNode current = sessions.transaction(() -> sessions.lock(id).document().deepCopy());
+      if (current.path("state").asText().equals("FINALIZING")) {
+        break;
+      }
+      if (List.of("FAILED", "EXPIRED", "UNKNOWN_OUTCOME", "CANCELLED")
+          .contains(current.path("state").asText())) {
+        break;
+      }
+      Thread.sleep(50);
+    }
+
+### [45] do 17889
+do {
+          state =
+              jdbc.queryForObject(
+                  "SELECT status FROM ui_test_executions WHERE id=?", String.class, executionId);
+          if (List.of("PASSED", "FAILED", "ERROR").contains(state)) {
+            break;
+          }
+          Thread.sleep(50);
+        } while (System.nanoTime() < end);
+
+### [47] while 18054
+while (!Files.exists(TEMP.resolve("initial-context-check-entered"))
+        && System.nanoTime() < enteredDeadline) {
+      Thread.sleep(20);
+    }
+
+### [48] while 18074
+while (System.nanoTime() < until) {
+      snapshot = publicCall("/api/v1/studio/executions/" + id, null, 200, null);
+      if (snapshot.path("streamComplete").asBoolean()) {
+        break;
+      }
+      Thread.sleep(50);
+    }
+
+### [49] while 18125
+while (RECEIVED_FAILURE_REPORTS.size() < 2 && System.nanoTime() < captureDeadline) {
+      Thread.sleep(10);
+    }
+
+### [50] while 18598
+while (System.nanoTime() < deadline) {
+        JsonNode checkpoint =
+            sessions.transaction(
+                () -> {
+                  var session = sessions.lock(id);
+                  JsonNode progress = session.progress();
+                  JsonNode marker = progress.path("translationAcquisition");
+                  JsonNode active = marker.path("active");
+                  boolean missing = true;
+                  for (JsonNode node : progress.path("observation").path("nodes")) {
+                    if (node.path("name").asText().equals("Confirmation")) {
+                      missing = false;
+                    }
+                  }
+                  for (JsonNode action : sessions.actions(id)) {
+                    if (action.path("coordinate").path("stepId").asText().equals(THREE)
+                        && action.path("coordinate").path("ordinal").asInt() == 0
+                        && action.path("state").asText().equals("SUCCEEDED")
+                        && marker.path("totalExtraPolls").asInt() > 0
+                        && active.path("pending").isNull()
+                        && active.path("lastGeneration").equals(progress.path("generation"))
+                        && progress.path("generation").asInt() > action.path("generation").asInt()
+                        && missing) {
+                      return C.object()
+                          .put("generation", progress.path("generation").asInt())
+                          .put("extraPolls", marker.path("totalExtraPolls").asInt())
+                          .put("observationHash", progress.path("observationHash").asText());
+                    }
+                  }
+                  return null;
+                });
+        var receiptRelease = ASYNC_RECEIPTS.get(beforeNavigations + 1);
+        if (checkpoint != null && receiptRelease != null) {
+          assertThat(RECEIPTS).hasSize(beforeReceipts + 1);
+          missingCheckpoint = checkpoint;
+          receiptRelease.countDown();
+          break;
+        }
+        Thread.sleep(10);
+      }
+
+### [51] do 18688
+do {
+          snapshot = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+          if (snapshot.path("streamComplete").asBoolean()) {
+            break;
+          }
+          Thread.sleep(30);
+        } while (System.nanoTime() < end);
+
+### [52] while 18757
+while (System.nanoTime() < deadline) {
+        state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+        if (state.equals("AWAITING_CLARIFICATION")) {
+          break;
+        }
+        Thread.sleep(20);
+      }
+
+### [54] while 18856
+while (System.nanoTime() < until) {
+          var current = sessions.transaction(() -> sessions.lock(id));
+          JsonNode marker = current.progress().path("translationAcquisition");
+          if (marker.path("totalExtraPolls").asInt() > 0
+              && ASYNC_RECEIPTS.containsKey(navigations + 1)) {
+            checkpoint = marker.deepCopy();
+            break;
+          }
+          Thread.sleep(10);
+        }
+
+### [55] while 18877
+while (System.nanoTime() < until) {
+          state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+          if (state.equals(expected)) {
+            break;
+          }
+          Thread.sleep(20);
+        }
+
+### [58] do 19057
+do {
+          snapshot = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+          if (snapshot.path("streamComplete").asBoolean()) {
+            break;
+          }
+          Thread.sleep(30);
+        } while (System.nanoTime() < end);
+
+### [60] while 19242
+while (System.nanoTime() < end) {
+      String state =
+          sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+      if (state.equals(expected)) {
+        return;
+      }
+      if (List.of("FAILED", "EXPIRED", "UNKNOWN_OUTCOME", "CANCELLED").contains(state)) {
+        throw new AssertionError("Expected " + expected + " but got " + state + "; logs " + TEMP);
+      }
+      Thread.sleep(20);
+    }
+
+### [61] while 19582
+while (System.nanoTime() < deadline) {
+          status =
+              jdbc.queryForObject(
+                  "SELECT status FROM ui_test_executions WHERE id=?", String.class, execution);
+          if (List.of("PASSED", "FAILED", "ERROR").contains(status)) {
+            break;
+          }
+          Thread.sleep(50);
+        }
+
+### [62] do 19829
+do {
+      result =
+          publicCall("/api/v1/studio/guided-sessions/" + sessionId + "/result", null, 200, null);
+      if (!result.path("evidence").path("video").path("status").asText().equals("PROCESSING")) {
+        break;
+      }
+      Thread.sleep(100);
+    } while (System.nanoTime() < deadline);
+
+### [63] while 20159
+while (System.nanoTime() < deadline) {
+      JsonNode launches = p3LaunchCounter();
+      Integer dispatched =
+          jdbc.queryForObject(
+              "SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
+                  + " AND (document->>'dispatchCount')::integer = 1",
+              Integer.class,
+              sessionId);
+      String state =
+          jdbc.queryForObject(
+              "SELECT state FROM studio_guided_sessions WHERE session_id=?",
+              String.class,
+              sessionId);
+      assertThat(state)
+          .as("the recorder produced a live file before the recording was closed; logs %s", TEMP)
+          .isNotIn(
+              "FINALIZING",
+              "SUCCEEDED",
+              "PUBLICATION_CONFLICT",
+              "FAILED",
+              "UNKNOWN_OUTCOME",
+              "CANCELLED",
+              "EXPIRED");
+      if (launches.path("count").asLong() > launchesBefore
+          && launches.path("lastRecordVideoDir").isTextual()
+          && dispatched != null
+          && dispatched > 0) {
+        Path directory = Path.of(launches.path("lastRecordVideoDir").asText());
+        java.util.List<Path> live;
+        try (var files = Files.list(directory)) {
+          live =
+              files
+                  .filter(
+                      file ->
+                          file.getFileName().toString().endsWith(".webm")
+                              && Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS))
+                  .toList();
+        }
+        if (!live.isEmpty()) {
+          stateAtInjection = state;
+          recorderDirectory = directory;
+          for (Path recorded : live) {
+            Files.delete(recorded);
+            removed++;
+          }
+          break;
+        }
+      }
+      Thread.sleep(20);
+    }
+
+### [64] while 21457
+while (System.nanoTime() < stoppedBy
+          && !p6Status(cut.parent.toHandle()).state().startsWith("T")) {
+        Thread.sleep(10);
+      }
+
+### [66] do 21877
+do {
+      boolean complete = true;
+      for (P6OwnedPid pid : owned) {
+        if (pid.handle().isAlive()) {
+          var started = pid.handle().info().startInstant();
+          if (!pid.handle().isAlive()) {
+            continue;
+          }
+          assertThat(started.map(pid.started()::equals).orElse(false)).isTrue();
+          if (gone) {
+            complete = false;
+          } else {
+            String state = p6Status(pid.handle()).state();
+            if (!state.startsWith("Z") && !"X".equals(state)) {
+              complete = false;
+            }
+          }
+        }
+      }
+      if (complete) {
+        return;
+      }
+      Thread.sleep(20);
+    } while (System.nanoTime() < deadline);
+
+### [67] while 22041
+while (!Files.exists(TEMP.resolve("initial-context-check-entered"))
+            && System.nanoTime() < until) {
+          Thread.sleep(20);
+        }
+
+### [69] while 22320
+while (!Files.exists(TEMP.resolve("initial-context-check-entered"))
+          && System.nanoTime() < entered) {
+        Thread.sleep(20);
+      }
+
+### [70] while 22340
+while (System.nanoTime() < stoppedBy
+          && !p6Status(parent.toHandle()).state().startsWith("T")) {
+        Thread.sleep(10);
+      }
+
+### [72] while 22354
+while (System.nanoTime() < selfStopBy) {
+        runnerLines = p8RunnerLines(logStart, execution);
+        if (runnerLines.stream()
+            .anyMatch(line -> "run.cancel_requested".equals(line.path("event").asText()))) {
+          break;
+        }
+        Thread.sleep(20);
+      }
+
+### [73] while 23320
+while (System.nanoTime() < deadline) {
+      ObjectNode current = p14AcquisitionSnapshot(session);
+      String state = current.path("document").path("state").asText();
+      assertThat(List.of("FAILED", "EXPIRED", "CANCELLED", "UNKNOWN_OUTCOME").contains(state))
+          .as("genuine Field acquisition prerequisite before any terminal substitute")
+          .isFalse();
+      JsonNode active = current.path("progress").path("translationAcquisition").path("active");
+      if (active.path("window").isObject()
+          && active.path("extraPolls").asInt() > 0
+          && active.path("pending").isNull()) {
+        p14AssertAcquisitionIdentity(current, recipe);
+        assertThat(
+                Instant.parse(active.path("window").path("deadline").asText())
+                    .isAfter(Instant.now()))
+            .as("real acquisition window is still live at phase anchor")
+            .isTrue();
+        return current;
+      }
+      Thread.sleep(20);
+    }
+
+### [74] while 23721
+while (p3ParentEvents(logStart, receipts, true)[1] == 0
+          && System.nanoTime() < drainingDeadline) {
+        Thread.sleep(10);
+      }
+
+### [75] do 23886
+do {
+      observed = p3ParentEvents(offset, List.of(), false)[0];
+      if (observed != 0) {
+        break;
+      }
+      Thread.sleep(10);
+    } while (System.nanoTime() < deadline);
+
+### [77] do 24943
+do {
+      synchronized (state) {
+        complete =
+            state.active.isEmpty()
+                && state.reasonProved
+                && state.restored
+                && state.residualSettlements == 1
+                && state.residualFulfilled != null
+                && state.ackBracketMicros > 0
+                && (state.path == 2 || state.closed);
+      }
+      if (complete) {
+        break;
+      }
+      Thread.sleep(20);
+    } while (System.nanoTime() < deadline);
+
+### [78] do 25004
+do {
+        p4RequirePrivateProducerRoot(root);
+        if (Files.exists(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+          if (Files.isSymbolicLink(file)
+              || !Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+              || Files.size(file) > 1024
+              || !file.toRealPath().getParent().equals(root.toRealPath())
+              || !Files.getPosixFilePermissions(file)
+                  .equals(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"))) {
+            throw new IOException("Private producer sample confinement failed");
+          }
+          p4RequirePrivateProducerRoot(root);
+          JsonNode sample = C.parse(Files.readString(file, StandardCharsets.UTF_8));
+          if (!sample.isObject()
+              || sample.size()
+                  != (state.c6Kind == 3 && producer == 1 ? 19 : state.c6Kind == 0 ? 10 : 13)
+                      // R10-rev2 I2: producer 2 also carries the control-read numbers.
+                      + (producer == 2 ? P10_PRODUCER2_READ_KEYS.size() : 0)
+              || sample.path("case").asInt(-1) != state.ordinal
+              || sample.path("producer").asInt(-1) != producer
+              || sample.path("epoch").asInt(-1) != state.ordinal
+              || sample.path("role").asInt(-1) != producer
+              || !sample.path("failed").isBoolean()
+              || !sample.path("sealed").isBoolean()) {
+            throw new IOException("Private producer sample identity failed");
+          }
+          if (state.c6Kind == 3 && producer == 1) {
+            for (String field :
+                List.of("highPending", "cdpCreationPending", "nativeActive", "restoreAttempt")) {
+              assertThat(p4Number(sample, field)).isLessThanOrEqualTo(1000000);
+            }
+            assertThat(p4Number(sample, "busy")).isBetween(0, 2);
+            assertThat(p4Number(sample, "restoreRefusal")).isBetween(0, 5);
+          }
+          boolean managedLoss = state.c6Kind == 3 && producer == 1;
+          if (managedLoss
+              ? state.c6NativeClose
+                  && state.restored
+                  && state.closed
+                  && !sample.path("sealed").booleanValue()
+                  && p4Number(sample, "busy") == 0
+                  && p4Number(sample, "restoreAttempt") > 0
+                  && p4Number(sample, "restoreRefusal") == 0
+                  && p4Number(sample, "cdpCreationPending") == 0
+                  && p4Number(sample, "originalPending") == 0
+                  && p4Number(sample, "pending") == p4Number(sample, "highPending")
+                  && p4Number(sample, "sent") == p4Number(sample, "acked")
+              : sample.path("sealed").booleanValue()) {
+            finalSample = sample;
+            break;
+          }
+        }
+        Thread.sleep(20);
+      } while (System.nanoTime() < deadline);
+
+### [79] while 25308
+while (!p4OriginalCloseSettled(P4_PHASE_ORDINAL.get()) && System.nanoTime() < deadline) {
+      Thread.sleep(20);
+    }
+
+### [80] while 26228
+while (System.nanoTime() < deadline) {
+      synchronized (state) {
+        if (state.c6NativeClose
+            && state.restored
+            && (state.c6Kind == 3 || state.active.isEmpty())
+            && (state.path == 2 || state.closed)) {
+          break;
+        }
+      }
+      Thread.sleep(20);
+    }
+
+### [81] while 26300
+while (System.nanoTime() < deadline) {
+      if (Files.exists(samplePath, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+        assertThat(Files.isSymbolicLink(samplePath)).isFalse();
+        assertThat(Files.isRegularFile(samplePath, java.nio.file.LinkOption.NOFOLLOW_LINKS))
+            .isTrue();
+        assertThat(Files.size(samplePath)).isLessThanOrEqualTo(1024);
+        assertThat(Files.getPosixFilePermissions(samplePath))
+            .isEqualTo(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
+        sample = C.parse(Files.readString(samplePath));
+        if (sample.path("contextBound").asBoolean()) {
+          break;
+        }
+      }
+      Thread.sleep(10);
+    }
+
+### [82] do 27162
+do {
+      actual =
+          jdbc.queryForObject(
+              "SELECT status FROM ui_test_executions WHERE id=?", String.class, execution);
+      if (List.of("PASSED", "FAILED", "ERROR").contains(actual)) {
+        break;
+      }
+      Thread.sleep(30);
+    } while (System.nanoTime() < deadline);
+
+### [83] while 27178
+while (report == null && System.nanoTime() < deadline) {
+      Thread.sleep(20);
+      report = P3_FINAL_REPORTS.get(execution);
+    }
+
+### [84] while 27273
+while (true) {
+      var row =
+          jdbc.queryForMap(
+              "SELECT state, progress->>'teardownStatus' AS teardown,"
+                  + " (progress->'teardownRequest') IS NOT NULL AS requested"
+                  + " FROM studio_guided_sessions WHERE session_id=?",
+              id);
+      boolean confirmed = "CONFIRMED".equals(row.get("teardown"));
+      long now = System.nanoTime();
+      if (confirmed || now >= deadline) {
+        long fromExpiryMs = Duration.between(expires, Instant.now()).toMillis();
+        ObjectNode evidence =
+            C.object()
+                .put("story", "STUDIO-OBS-015")
+                .put("item", "H8 confirm-expire teardown")
+                .put("lane", FIXTURE_PROFILE.lane)
+                .put("sessionOrdinal", budgetSessionOrdinal(jdbc, id))
+                .put("outcome", confirmed ? "CONFIRMED" : "TIMEOUT")
+                .put("state", String.valueOf(row.get("state")))
+                .put("teardownStatus", String.valueOf(row.get("teardown")))
+                .put("teardownRequestPresent", Boolean.TRUE.equals(row.get("requested")))
+                .put("expiryToObservationMs", fromExpiryMs)
+                .put("waitElapsedMs", Duration.ofNanos(now - started).toMillis());
+        privateImmutableJson(COHORT_DIRECTORY.resolve("h8-confirm-expire-teardown.json"), evidence);
+        if (!confirmed) {
+          throw new AssertionError("H8: expired teardown not CONFIRMED within 120 s");
+        }
+        assertThat(row.get("state"))
+            .as("H8: CONFIRMED keeps the session EXPIRED")
+            .isEqualTo("EXPIRED");
+        assertThat(row.get("requested"))
+            .as("H8: CONFIRMED removes teardownRequest")
+            .isEqualTo(false);
+        return;
+      }
+      if (now >= renewCredentialsAt) {
+        refreshFixtureCredentials();
+        renewCredentialsAt = now + Duration.ofSeconds(10).toNanos();
+      }
+      Thread.sleep(30); // No transaction or row lock is held across this wait.
+    }
+
+### [85] do 27370
+do {
+      if (sessions
+          .transaction(() -> sessions.lock(id).progress().path("teardownStatus").asText())
+          .equals("CONFIRMED")) {
+        return;
+      }
+      Thread.sleep(30);
+    } while (System.nanoTime() < deadline);
+
+### [86] while 27384
+while (!report.path("streamComplete").asBoolean() && System.nanoTime() < deadline) {
+      Thread.sleep(30);
+      report = p3Call(p3Cookie, "/api/v1/studio/executions/" + execution, null, 200);
+    }
+
+### [87] do 29540
+do {
+      snapshot = publicCall("/api/v1/studio/executions/" + execution, null, 200, null);
+      if (snapshot.path("streamComplete").asBoolean()) {
+        break;
+      }
+      Thread.sleep(30);
+    } while (System.nanoTime() < deadline);
+
+### [89] do 31080
+do {
+        p4RequirePrivateProducerRoot(directory);
+        if (Files.exists(receipt, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+          assertThat(
+                  !Files.isSymbolicLink(receipt)
+                      && Files.isRegularFile(receipt, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+                      && Files.size(receipt) <= 1024
+                      && receipt.toRealPath().getParent().equals(directory.toRealPath())
+                      && Files.getPosixFilePermissions(receipt)
+                          .equals(
+                              java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")))
+              .isTrue();
+          JsonNode current = C.parse(Files.readString(receipt, StandardCharsets.UTF_8));
+          assertThat(
+                  current.isObject()
+                      && current.size() == 13
+                      && current.path("case").asInt(-1) == s2Epoch
+                      && current.path("producer").asInt(-1) == 1
+                      && current.path("epoch").asInt(-1) == s2Epoch)
+              .isTrue();
+          for (String field :
+              List.of("failed", "closed", "restored", "stopFulfilled", "active", "busy")) {
+            assertThat(current.path(field).isBoolean()).isTrue();
+          }
+          assertThat(current.path("failed").booleanValue()).isFalse();
+          if (current.path("closed").booleanValue()) {
+            sample = current;
+            break;
+          }
+        }
+        Thread.sleep(20);
+      } while (System.nanoTime() < deadline);
+
+### [90] while 32314
+while (System.nanoTime() < end) {
+      String state =
+          c5Capture != null
+              ? jdbc.queryForObject(
+                  "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id)
+              : sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+      if (List.of("FINALIZING", "FAILED", "EXPIRED", "UNKNOWN_OUTCOME", "CANCELLED")
+          .contains(state)) {
+        assertThat(state).as("second explicit learning; logs %s", TEMP).isEqualTo("FINALIZING");
+        return;
+      }
+      Thread.sleep(50);
+    }
+
+### [93] while 34142
+while (!((java.util.Set<?>) tracked).isEmpty() && System.nanoTime() < deadline) {
+              Thread.sleep(20);
+            }
+
+### [94] while 34305
+while ((process.isAlive()
+            || root.descendants.stream().anyMatch(child -> child.handle().isAlive()))
+        && System.nanoTime() < deadline) {
+      Thread.sleep(30);
+    }
+
+### [95] while 34326
+while ((process.isAlive()
+              || root.descendants.stream().anyMatch(child -> child.handle().isAlive()))
+          && System.nanoTime() < deadline) {
+        Thread.sleep(20);
+      }

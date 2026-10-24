@@ -1,0 +1,45 @@
+{
+  "kind": "SUPPLEMENTAL_PUBLIC_PROVENANCE_COMPLETE",
+  "primaryAssessmentSha256": "cf837ad88eb9b5aa3a224155f6a9f99fcd6d91bc979d7eaa35e9923448d7daae",
+  "xmlSuiteTimestamps": {
+    "count": 333,
+    "withinNativeInterval": true,
+    "earliestUtc": "2026-10-19T04:03:30+00:00",
+    "latestUtc": "2026-10-19T05:11:34+00:00",
+    "timezoneRule": "Gradle Test XML timestamps are UTC; unzoned values interpreted as UTC"
+  },
+  "actualRetentionTaskStatuses": {
+    "retainOriginalGuidedCohort": "EXECUTED",
+    "retainIncrementalGuidedCohort": "EXECUTED"
+  },
+  "cohortDirectoryAndManifestIdentityBindings": [
+    {
+      "task": "test",
+      "kind": "audit-final.json",
+      "publicDirectoryIdentityEqualsManifest": true,
+      "sha256": "7d9d9498b9a5d17769c800bbf42821f70fee8f889e330ec41728224669f7b0e8"
+    },
+    {
+      "task": "test",
+      "kind": "cohort.json",
+      "publicDirectoryIdentityEqualsManifest": true,
+      "sha256": "3a0d5100763ba7edfd782d82c6826d4f098803b984a209633c36d6c85c23065d"
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "kind": "audit-final.json",
+      "publicDirectoryIdentityEqualsManifest": true,
+      "sha256": "febea023e117927312c4cea994ad507a04625922062cd607bdc1ee75a4518265"
+    },
+    {
+      "task": "guidedIncrementalTest",
+      "kind": "cohort.json",
+      "publicDirectoryIdentityEqualsManifest": true,
+      "sha256": "392e5235772073c1d0c7df0710512eca05ef2d07ccb0c09f232b81b761749140"
+    }
+  ],
+  "privateRuntimeInputsRead": 0,
+  "rawIdentityOrUuidExported": false,
+  "nativeFailureCoverageAndObserverDispositionUnchanged": true,
+  "testOrBuildCalls": 0
+}

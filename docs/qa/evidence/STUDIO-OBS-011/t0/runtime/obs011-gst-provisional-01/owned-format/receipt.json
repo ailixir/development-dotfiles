@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "phase": "format",
+  "status": "NATIVE_PHASE_TERMINAL",
+  "phases": [
+    {
+      "phase": "COLLECTOR_WAIT",
+      "atUtc": "2026-10-19T07:09:16.903180+00:00",
+      "pid": 35500,
+      "ownedIdentityCount": 1
+    },
+    {
+      "phase": "NATIVE_PHASE_TERMINAL",
+      "atUtc": "2026-10-19T07:09:20.999205+00:00",
+      "exit": 1
+    }
+  ],
+  "evidenceErrors": [],
+  "command": [
+    "./gradlew",
+    "--offline",
+    "--no-configuration-cache",
+    "--no-build-cache",
+    "--init-script",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-restricted-unit-prep/gst-three-only.init.gradle",
+    "spotlessJavaApply",
+    "--rerun-tasks",
+    "--no-daemon"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend",
+  "rootUnitAuthorizationSha256": "6e938f0a9a9f2b758813f83a043cac74015f4684664026b0010c923b405a69f1",
+  "phaseKeeperSha256": "c4d1c215a858eb9c2291496ace0527b5c38f882ed2ebd2bcf99ae28ed664fd5c",
+  "ownershipCoreSha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+  "lockPin": {
+    "atUtc": "2026-10-19T07:07:48.645766+00:00",
+    "wrapperPid": 32707,
+    "wrapperStart": "Mon Oct 19 03:07:26 2026",
+    "wrapperArgvSha256": "1d1638cae329a35e35525dbea90f90afea0724722d4b3ae17d673fa8a10670f6",
+    "shellPid": 32708,
+    "shellStart": "Mon Oct 19 03:07:26 2026",
+    "lockDevInode": [
+      16777229,
+      215213569
+    ],
+    "kernelExclusiveLockObserved": true,
+    "toolSession": 51465,
+    "sourceWriterScope": "Only root-authorized complete GS-T three tests, no lane credit"
+  },
+  "sourceWriterScope": "Only the three released GS-T tests",
+  "noLaneCredit": true,
+  "automaticRetry": false,
+  "collectorPid": 35500,
+  "collectorStartedAtUtc": "2026-10-19T07:09:16.823786+00:00",
+  "collectorExit": 1,
+  "ownedJvmTerminalProof": [
+    {
+      "pid": 35500,
+      "start": "Mon Oct 19 03:09:16 2026",
+      "proof": "PID_ABSENT"
+    }
+  ],
+  "remainingOwnedNonJvmFacts": [],
+  "ownedIdentities": [
+    {
+      "pid": 35500,
+      "ppid": 35486,
+      "start": "Mon Oct 19 03:09:16 2026",
+      "argvHash": "f989984ccd413d3aa9694f34371b8969dbfbf1524254c3ccc29cc7db0b2c7698",
+      "projectMarkerCandidate": true,
+      "javaPreviouslyProved": true,
+      "executableState": "JAVA",
+      "identityObservation": "MATCHED",
+      "executableObservation": "JAVA",
+      "observationError": false
+    }
+  ],
+  "collectorTerminatedAtUtc": "2026-10-19T07:09:20.999088+00:00"
+}

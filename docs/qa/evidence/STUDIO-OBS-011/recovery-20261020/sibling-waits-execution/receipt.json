@@ -1,0 +1,1284 @@
+{
+  "completedAt": "2026-10-20T15:48:21.694652+00:00",
+  "status": "CORRECTED_BRIDGE_AND_SIX_SIBLING_WAIT_FILES_APPLIED_COMPLETE_NATIVE_175_GREEN",
+  "story": "STUDIO-OBS-011",
+  "gates": [
+    {
+      "label": "obs011-recovery-20261020-gst2-01",
+      "resultSha256": "0207e5eb145c2a2beb4ebe83fae169d5aab46256132fcf3d413eb598e7806c62",
+      "counts": {
+        "total": 26,
+        "passed": 26,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "classes": {
+        "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest": 10,
+        "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT": 16
+      },
+      "fullTaskQualifiedIdentityMultisetEqual": true,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "elapsedSeconds": 221.97,
+      "sourceDigestBefore": "15fe203475d365596dc602b79e3aab62d3f6ef7d7a8c971f835ac0c21d4aa599",
+      "sourceDigestAfter": "15fe203475d365596dc602b79e3aab62d3f6ef7d7a8c971f835ac0c21d4aa599",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210"
+    },
+    {
+      "label": "obs011-recovery-20261020-its-01",
+      "resultSha256": "05e8dea0fef9f77a6c81cf729182016fd99821178e4bcc0e2a54899519376669",
+      "counts": {
+        "total": 88,
+        "passed": 88,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "classes": {
+        "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest": 13,
+        "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT": 36,
+        "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT": 39
+      },
+      "fullTaskQualifiedIdentityMultisetEqual": true,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "elapsedSeconds": 171.5,
+      "sourceDigestBefore": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "sourceDigestAfter": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210"
+    },
+    {
+      "label": "obs011-recovery-20261020-its-02",
+      "resultSha256": "319b214620d9fb9b61e1e16f9bc34cb2ea420e4f75226595e9c93d986ec2de6f",
+      "counts": {
+        "total": 61,
+        "passed": 61,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "classes": {
+        "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT": 2,
+        "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest": 57,
+        "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT": 2
+      },
+      "fullTaskQualifiedIdentityMultisetEqual": true,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "taskCollectionComplete": true,
+      "elapsedSeconds": 417.2,
+      "sourceDigestBefore": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "sourceDigestAfter": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+      "distDigestBefore": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+      "distDigestAfter": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210"
+    }
+  ],
+  "compileHistory": [
+    {
+      "label": "obs011-recovery-20261020-gst2-compile01",
+      "exit": 1,
+      "elapsedSeconds": 6.9,
+      "resultSha256": "de93f3d22a71826ef449e1e89233c409b4b6dee396e1c3a9312f9d7ace730535",
+      "runtimeCases": 0,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "credit": "HISTORICAL_COMPILE_DEFECT_NOT_PROOF"
+    },
+    {
+      "label": "obs011-recovery-20261020-gst2-compile02",
+      "exit": 0,
+      "elapsedSeconds": 7.3,
+      "resultSha256": "c8b315b0e24aec0222bdf26a912ae86f7d9228fa76c12912925b11eedfa1bf1a",
+      "runtimeCases": 0,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "credit": "STATIC_COMPILE_GREEN_NOT_NATIVE_CREDIT"
+    },
+    {
+      "label": "obs011-recovery-20261020-its-compile01",
+      "exit": 0,
+      "elapsedSeconds": 8.86,
+      "resultSha256": "7ae9657da2cbdeeb0352c84dfdd7354e38a1304d834879b62b17aa7d183e4ff0",
+      "runtimeCases": 0,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "credit": "STATIC_COMPILE_GREEN_NOT_NATIVE_CREDIT"
+    }
+  ],
+  "all175ExactNativeIdentityMultisetPreserved": true,
+  "nativeNames": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "callbackAcceptsValidUnicodeSessionLargerThan64KiB()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "legacyClarificationAnswerCannotResumeObservedV2Session()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "actualRunnerResponseBoundaryRejectsMalformedUtf8DuplicatesTrailingAndTimestampProfiles()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "stopRetryAfterCloseCompletesConfirmsWithSameKey()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "aWedgedGuidedBrowserIsTerminatedInsideTheBackendDeadlineAndTheSlotIsReleased()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "actualApplicationReplacementAfterPrepareNeverActsOnReplacement()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "committedObservationRecoversLostHttpResponseWithoutAnotherCollection()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "lateRenewalResponseAfterStopCannotReviveContextOrOwnership()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "concurrentSameAndNewKeysHaveOneRealDispatch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "nestedRollbackAndLostWinnerNeverManufactureSendAuthority()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "[1] edit=source",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "[2] edit=configuration",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "twoSessionsContendOnActualTestLockOnlyOnePublishes()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "sameOwnerRenewalKeepsOriginalClaimAndStillPublishesOnce()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "[1] change=cancel",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "[2] change=fence",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "[3] change=lease",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "grantExpiringWhileWaitingForTheRealSourceLockRollsBackAllWrites()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "[1] point=revision_and_confirmation",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "[2] point=receipt",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "[3] point=head",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "[4] point=session",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest",
+      "name": "[5] point=deferred_commit",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "concurrentConsumedUnknownWritersAreIdempotentAndCannotInventTwoSummaries()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "productionExistingLeafRepairIsAtomicIdempotentAndDoesNotNeedDefaultOrMutation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "ordinaryGuidedReleaseRequiresConsumedDeclarationMaterializationAndFence()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "productionPartitionFailureRollsBackNewAttachmentAndAllApplicableGuards()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "terminalReceiptOwnerHistoryAndSummariesRollbackTogether()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "earlyConstraintFlushCannotPermitLaterTerminalCauseTimeOrSnapshotMismatch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "committedTerminalCutAllowsLaterGenuineEvidenceMetadataWithoutChangingItsWinner()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "leastWriterCanRecordUsageButCannotRewriteOrPrunePartitions()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "concurrentDuplicateWritersProduceOneRelease()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "waitedTerminalCutUsesFreshCommittedReadEntryInsteadOfStaleNoReadView()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "readEntryAndScopeAreDurableIdempotentAndCannotCertifyMissingDecisionAsUnused()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "consumedWithoutDecisionIsHonestUnlinkedUncertaintyNeverUnreached()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "committedResolutionCannotBeRelabelledNoDecisionAndLateUnknownPreservesPositive()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "emptyCompletedNoSendReceiptStillRequiresActualOwnedClosure()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "actualJavaBootstrapHealthSchedulerAndPrunerManageAuditLifecycle()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "earlyFlushCannotHideLaterSubtransactionWinnerVersion()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "mixedKnownAndUnknownReplayUsageKeepsSparseWireSeparateAndRejectsAckWithoutEvidence()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "terminalSettlementPreservesActualLinkedPositiveAndHasNoRetryAuthority()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "terminalCutRejectsLaterReadReleaseDispatchAndReceiptOnlyRequest()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "rawAndRecorderWritersShareOwnerThenEventOrderWithoutDeadlock()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "terminalWinnerClassifiesExactUnsettledNoReadAndPossibleReadDeclarations()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "terminalNoDecisionCannotAcquireContradictoryLateRelease()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "terminalSavepointReceiptOrWinnerWritesAreExplicitlyProhibited()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "positiveReplayAbsenceCommitsOnlyWithWinningNoSendTransition()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "sameDeclarationCanHaveSeparateRealConsumedCoordinatesWithoutFalseUnused()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "authenticUnreachedReferenceHasNoInventedOrdinalSequenceOrPlan()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "actualProductionPartitionPublishesAllGuardsAtomicallyWithOrWithoutOuterTransaction()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "noSendReceiptAuditAndClosureRollbackTogetherWithoutGrantingRetry()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "terminalReceiptRequiresExactActualWinnerCodeTimeAndPhysicalTransaction()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "releaseUsageAndRevocationAreIdempotentImmutableScopedMetadata()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "terminalReceiptAndUnlinkedSummaryExpireInTheSameRetentionMonth()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "unreachedDeclarationHasOnlyOneTerminalNotUsedWithoutRelease()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "futureEvidencePartitionsKeepDeferredAndDirectTruncateGuards()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "auditAndDispatchStateCommitOrRollbackTogetherAndRequireTransaction()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "ordinaryRuntimeWriterCanSettleButCannotAlterOrTruncateTerminalEvidence()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.secret.SecretUseAuditIT",
+      "name": "consumedScopeRequiresActualAdmissionDeclarationFenceAndAckLossEvidence()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[1] mode=COMPLETE_200_NO_CALLBACK",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[2] mode=COMPLETE_200_OWNER_OK",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[3] mode=COMPLETE_200_OWNER_FAILED",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[4] mode=COMPLETE_503_NO_CALLBACK",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[5] mode=COMPLETE_503_OWNER_OK",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[6] mode=PARTIAL_200_NO_EOF",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[7] mode=PARTIAL_503_NO_EOF",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[8] mode=CALLER_EXPIRY_AFTER_CONSUME",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[9] mode=INTERRUPT_AFTER_HEADERS",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "publicationConflictTeardownIsRedrivenAfterResendsExhausted()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "publicationConflictTeardownTargetsTheAssignmentAndConfirms()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "pendingAppendDeliveryTeardownTargetsTheAssignment()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "noPendingDeliveryKeepsIdentityTarget()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "consumingVerificationStaysRefusedWhilePending()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "pendingAppendPublicationConflictTargetsTheAssignment()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleWithoutPendingDeliveryIsExactlyVerify()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "legacyPendingWithoutRequestIsNotRedriven()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleAtAnyOtherIdentityIsRefusedWhilePending()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "stopWithoutAStopTargetRecordsNoPendingTeardown()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "concurrentAfterCompletionAndSweepSendOneStopAtATime()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "abandonedTeardownReportQueriesOncePerIntervalAndIsSilentWhenNone()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleAtLastAcknowledgedIdentityEndsSession()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "teardownWithoutAckNeverConfirmsAndStopsAfterWindow()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "publicationConflictedIsIdempotentAndFailsClosed()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "expiredTeardownConfirmsOnSweepAfterResendsExhausted()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT",
+      "name": "aSessionEndedWhileAnAppendIsPendingKeepsARecordingThatSettlesPlaysAndSeeks()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT",
+      "name": "aSessionLosingItsBrowserWhileAnAppendIsPendingStillRecordsTheRunnersOwnFact()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "anAuthoredDeleteStillFailsTheGovernedDenyStance()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "optionalChargedVerificationCannotOverrideMissingExecution()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "thoughtAndToolUsageOnStaleReplyRemainInImmutableLateAudit()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "reportedThoughtOutputOverageStopsBeforeMaterializationDespiteSmallVisibleOutput()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] timing=before, loseResponse=false",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] timing=after, loseResponse=false",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] timing=before, loseResponse=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[4] timing=after, loseResponse=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] control=unlabelled-button",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] control=unlabelled-input",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] control=form-attribute",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "sourceChangeDuringProviderCallCannotRestampAndLateUsageRetainsReservation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] chosenIndex=0",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] chosenIndex=1",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "typedUnsupportedOutcomeStopsWithoutInventingAnAction()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] label=Save",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] label=Delete",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] control=button",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] control=input",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "malformedProviderReplyRepairsThroughDurableChargedAttemptsWithoutEcho()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "acknowledgedOlderSnapshotCannotMarkChangedAllocationsReady()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] choice=0",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] choice=1",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] mutation=operation",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] mutation=target",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] mutation=value",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[4] mutation=assertion",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "chosenSourceCannotBeAppendedUnusedWhileTheRejectedDestinationIsUsed()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] boundary=entry",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] boundary=reservation",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] boundary=repair",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] afterEffect=false",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] afterEffect=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] capacity=input",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] capacity=output",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] capacity=proposals",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "futureNonzeroSourceQuestionCannotBeRedefinedByChangingItsOperation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] point=plan",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] point=materialized",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] point=allocation",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[4] point=next",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[5] point=lost-context-response",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[6] point=prior-bootstrap",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT",
+      "name": "aFillWhoseFocusHandlerInsertsHelperTextElsewhereWritesAndTheSessionContinues()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT",
+      "name": "aFocusHandlerThatChangesTheTargetItselfStillStopsTheSessionAndWritesNothing()",
+      "status": "PASS"
+    }
+  ],
+  "allThreeNativeCollectorsFreshCompleteZeroErrorsSkipsStableInputs": true,
+  "all25FoldGsmaFilesUnchanged": true,
+  "onlyNineCapturedSourcePathsChanged": true,
+  "acceptedNineBatonSha256": "1d4bcdcf1247138ca4cd5d0c6ce3ddaefee0996317f218ff2ed6c23ec0d98a46",
+  "sourceDigest": "5f5a33c9f387a6a2cece4127f26dadd99cb015efe75988288c53f04712a2a135",
+  "distDigest": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "waitInventory": {
+    "bridge": 15,
+    "its": 12,
+    "total": 27,
+    "originalDirectScratchSites": 26,
+    "additionalReviewedDonorIsomorphicSite": 1
+  },
+  "preservation": {
+    "bridgeMethods": 26,
+    "itsNamedMethods": 112,
+    "itsInvocationIdentities": 149,
+    "itsOrderedAssertionChains": 1171,
+    "itsDeliberateSleepExpressions": 10,
+    "bridgeOriginalDeliberateRows": 4,
+    "originalReviewedOrphanClosure": {
+      "removedHelpers": [
+        "action",
+        "navigation",
+        "advanceRequest",
+        "race",
+        "proposalByLocator",
+        "refreshRequest",
+        "proposal",
+        "advance",
+        "operationHash"
+      ],
+      "unreachableAssertionStarts": 3,
+      "targetPresenceStarts": 2,
+      "uniquenessStarts": 1,
+      "reachableAssertionDrops": 0,
+      "testMethodDrops": 0
+    },
+    "acceptedStyle03BracesAndSwitch": true,
+    "allOriginalNativeBodyKeyPrivacyDeadlineInterruptAssertionsRetained": true,
+    "originalMethodsOrVariantsRemoved": 0
+  },
+  "qualifiedExistingRuntimeAdoptions": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-wait-234-runtime-root-adoption.json",
+      "sha256": "8a661e5d509fe28b02828b4c666ea1632e47a968dcc81aa3b8e73b2bd564262e",
+      "actual": "26sites x9modes,468pairedmethodinvocations,38compiledclasses,oneJava21compile0/run0; archived complete44files. Realsharedlock/wrapper terminal0, no retry. Original source1808/dist238 unchanged.",
+      "limits": "Synthetic external seams and aggregate oracle; no exhaustive scheduling/branchactivation/native SQL/files/worker cleanup/privacy/cohort/coverage/timing proof. IRQduringintervalaxis independent review stillowed.",
+      "referencesVerified": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/wait-234-runtime-review/review.md",
+          "sha256": "5defd3b2654b65781793f2872dda5659096d0eb83e5ef97d874cf4aa0465f3e6",
+          "matches": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-wait-conformance-20261019-0616-once/root-terminal-archive.json",
+          "sha256": "f7550094da4834cce76e673478fa062fe9e79b84d6a4d804e3a1ff0788d08d5a",
+          "matches": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-wait-conformance-20261019-0616-once/complete-scratch-archive/receipt.json",
+          "sha256": "b4106375c9b3bccaa8ea381014b30becf86449f25ee26f33f53618f37ce44826",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-wait-irq-runtime-root-adoption.json",
+      "sha256": "5c928029d817fc0113f68a63a3fcb0b2803e17c91fce99c8a1fa41b4090dfd4e",
+      "actual": "52actualnativeinterval/ownedinterrupt/joinrecords,26deliveredrealUninterruptiblesresleepack(waitedCount2to3/read1),26pairAssertJpasses,39compiledclasses,Java21compile0/run0; oneactualsharedlock/one-shot/completearchive/no retry. Exactsourceintervals10/20/25/50unchanged.",
+      "limits": "Syntheticseams; noactualproductSQL/transactions/workers/browser/outercleanup/privacy/cohorts/coverage/timing/fullI1orlanegate. Realoriginalfullcheck03failure/coverageabsence/stickygap remain.",
+      "referencesVerified": [
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/wait-irq-runtime-review/review.md",
+          "sha256": "19d78988be868c111d31d2ea033798ba01ebdf991f3e6adef0b4a116518943b3",
+          "matches": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-wait-irq-20261019-0617-once/root-terminal-archive.json",
+          "sha256": "f1d72a2b5924430395b5aba5d47ac4333eb56b08e23d24b3e71b123595547d50",
+          "matches": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-wait-irq-20261019-0617-once/complete-scratch-archive/receipt.json",
+          "sha256": "28fe61980aa8901f5a34d1720ddf7ddd7185522c4ab360b4b874581f8176f95c",
+          "matches": true
+        },
+        {
+          "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-wait-234-runtime-root-adoption.json",
+          "sha256": "8a661e5d509fe28b02828b4c666ea1632e47a968dcc81aa3b8e73b2bd564262e",
+          "matches": true
+        }
+      ]
+    }
+  ],
+  "newSiteEvidence": "Existing BridgePoll3 donor isomorphism independently reviewed; corrected producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay native method passes; no new scratch/IRQ claim for27th site.",
+  "correctionQaSha256": "ffbf38e347f5a6e42897f166021a5d0c8a006a93b6acf81c4f0b4d49504eca87",
+  "compile01FailurePreserved": true,
+  "historicalPacketsUnchanged": true,
+  "timingReceiptSha256": "1ab0fd00412eaf8b0f3caebb5115fabee3771013f51112c141c94673d4293564",
+  "fullClassReplayInvocations": 0,
+  "wholecheckInvocations": 0,
+  "additionalProbesTestsDependenciesOrMutants": false,
+  "formatterExecuted": false,
+  "providerOperations": false,
+  "runnerSandboxSourceOrDistTouched": false,
+  "lifecycleOrReleaseCredit": false,
+  "independentFinalQaVerdict": "NOT_SELF_ISSUED",
+  "remaining": "Root final FOLD composition must rebind exact corrected PlannedIT and allnine accepted hashes. Final formatter/static/integrated Replay/wholecheck/QA/timing acceptance/external lifecycle gates remain root-owned.",
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN",
+  "activeJobs": []
+}

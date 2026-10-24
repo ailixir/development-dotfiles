@@ -1,0 +1,12 @@
+def strict_lock_fields(raw, wrapper_pid, inode, lock_path):
+    require(type(wrapper_pid) is int and wrapper_pid > 0 and type(inode) is int and inode > 0, 'LOCK_BINDING_TYPE')
+    require(isinstance(raw, str) and raw.endswith('\n'), 'LOCK_FIELDS_INCOMPLETE')
+    lines = raw.splitlines()
+    require(len(lines) == 4 and [line[:1] for line in lines] == ['p', 'f', 'i', 'n'], 'LOCK_FIELD_ORDER_OR_DUPLICATE')
+    require(lines[0] == 'p' + str(wrapper_pid), 'LOCK_RETURNED_PID_MISMATCH')
+    descriptor = lines[1][1:]
+    require(bool(descriptor) and descriptor.isdigit(), 'LOCK_DESCRIPTOR_MALFORMED')
+    require(str(int(descriptor)) == descriptor, 'LOCK_DESCRIPTOR_NONCANONICAL')
+    require(lines[2] == 'i' + str(inode), 'LOCK_RETURNED_INODE_MISMATCH')
+    require(lines[3] == 'n' + lock_path, 'LOCK_RETURNED_NAME_MISMATCH')
+    return {'pid': wrapper_pid, 'fd': int(descriptor), 'inode': inode, 'name': lock_path}

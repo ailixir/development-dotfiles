@@ -1,0 +1,34 @@
+"""One independent Bash3.2 public/builtin-only fixed-subset batch; no target tail."""
+import os,json,hashlib,shlex,subprocess,re
+from pathlib import Path
+PID,PPID=os.getpid(),os.getppid()
+H=Path(__file__).absolute().parent;T=H.parents[2];S=T/'early/gateway80-source07-bash32-delivery/resume1';rows=json.loads((S/'input-pins.json').read_bytes())['deliveries'];row=rows[0]
+sha=lambda b:hashlib.sha256(b).hexdigest()
+raw=(S/row['newHelper']).read_bytes();assert sha(raw)==row['newHelperSha256']
+lines=raw.decode('ascii').splitlines(True);stop=next(i for i,v in enumerate(lines) if v.startswith("'/opt/homebrew/"));prefix=''.join(lines[:stop]);assert 'builtin eval' not in prefix and '-B -c' not in prefix
+assert prefix.count('IFS= LC_ALL=C builtin read')==1
+buffer='GATEWAY_S07_META_BUFFER';status='GATEWAY_S07_META_READ_STATUS';cap=row['payloadBytes']+1
+base=b' \t leading\\literal\nsecond line\ntrailing \t\n'
+cases=[('public_metadata',Path(row['payloadPath']),row['payloadBytes'],0)]
+for name,data,want in [('whitespace_eof',base,0),('truncated',base[:-1],1),('extra_byte',base+b'X',1),('nul',base[:7]+b'\0'+base[8:],1)]:
+ p=H/('fixture-'+name+'.bin');p.write_bytes(data);cases.append((name,p,len(base),want))
+results=[]
+for name,path,size,want in cases:
+ value=prefix.replace(shlex.quote(row['payloadPath']),shlex.quote(str(path))).replace('-n '+str(cap)+' ','-n '+str(size+1)+' ').replace('== '+str(row['payloadBytes'])+' ]]','== '+str(size)+' ]]')
+ program='set -- '+shlex.quote('0'*64)+' INERT_UNISSUED_REQUEST\nreader() {\n'+value+'\nreturn 0\n}\nreader "$@"\nresult=$?\n'
+ program+="""builtin printf 'QUINN_VERSION=%s\\nQUINN_PID=%s\\nQUINN_PPID=%s\\nQUINN_READ=%s\\nQUINN_RESULT=%s\\nQUINN_DATA\\n' "$BASH_VERSION" "$$" "$PPID" "${STATUS-SUCCESS_BRANCH}" "$result"
+builtin printf '%s' "$BUFFER"
+exit "$result"
+""".replace('${STATUS-', '${'+status+'-').replace('$BUFFER', '$'+buffer)
+ assert '/opt/homebrew/' not in program or program.count('/opt/homebrew/')==0 # payload path itself has no executable path
+ assert 'builtin eval' not in program and '-B -c' not in program and '$( ' not in program
+ (H/(name+'.bash')).write_text(program)
+ completed=subprocess.run(['/bin/bash','--noprofile','--norc','-c',program],env={'PATH':'','BASH_ENV':'','ENV':'','LC_ALL':'C'},stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False)
+ (H/(name+'.stdout')).write_bytes(completed.stdout);(H/(name+'.stderr')).write_bytes(completed.stderr)
+ head,returned=completed.stdout.split(b'QUINN_DATA\n',1);meta=dict(v.decode('ascii').split('=',1) for v in head.splitlines());ok=completed.returncode==want and meta['QUINN_RESULT']==str(want) and meta['QUINN_VERSION'].startswith('3.2.') and completed.stderr==b''
+ if want==0:ok=ok and returned==path.read_bytes() and meta['QUINN_READ']=='1'
+ else:ok=ok and ((name=='truncated' and meta['QUINN_READ']=='1') or(name in ('extra_byte','nul') and meta['QUINN_READ']=='SUCCESS_BRANCH'))
+ results.append(dict(case=name,pid=int(meta['QUINN_PID']),ppid=int(meta['QUINN_PPID']),version=meta['QUINN_VERSION'],actualExit=completed.returncode,expectedExit=want,readStatus=meta['QUINN_READ'],inputSha256=sha(path.read_bytes()),returnedBytes=len(returned),returnedSha256=sha(returned),positiveExact=returned==path.read_bytes() if want==0 else None,passed=ok,targetTailPresent=False,targetEntries=0))
+ (H/'compatibility-results.json').write_text(json.dumps(dict(results=results,passed=sum(v['passed'] for v in results),actualBashChildren=len(results),fixedSubsetOfDeveloperCases=True,newScenarioMatrix=False,actualVerifierEvalCompileAuthorResourceCalls=0,orchestrator=dict(pid=PID,ppid=PPID,actualOwnCompletion=None,outerCompletionOwed=True)),indent=2)+'\n')
+ if not ok:raise SystemExit(1)
+print(json.dumps(dict(passed=len(results),actualBashChildren=len(results),actualVersion=results[0]['version'],targetEntries=0,orchestratorPid=PID,orchestratorPpid=PPID)))

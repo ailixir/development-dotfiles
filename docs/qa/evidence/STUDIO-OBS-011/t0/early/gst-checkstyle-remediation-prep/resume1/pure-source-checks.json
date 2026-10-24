@@ -1,0 +1,128 @@
+{
+  "kind": "PURE_SOURCE_CHECKS_NOT_NATIVE_EXECUTION",
+  "files": {
+    "GuidedSessionIT.java": {
+      "methods": 44,
+      "assertionEntryPoints": 234,
+      "bracedBodies": 19,
+      "literalAndCommentSequenceExact": true,
+      "allOtherTokensExact": true
+    },
+    "GuidedLifecycleReasonIT.java": {
+      "methods": 5,
+      "assertionEntryPoints": 38,
+      "bracedBodies": 10,
+      "literalAndCommentSequenceExact": true,
+      "allOtherTokensExact": true
+    },
+    "GuidedServiceTransportFaultIT.java": {
+      "methods": 31,
+      "assertionEntryPoints": 541,
+      "bracedBodies": 14,
+      "literalAndCommentSequenceExact": true,
+      "allOtherTokensExact": true
+    }
+  },
+  "testMethods": 80,
+  "assertionEntryPoints": 813,
+  "retainedNativeCaseCohort": 99,
+  "caseCohortRerun": false,
+  "bracedBodies": 43,
+  "switchMappings": 1,
+  "negativeChecks": [
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "condition",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "literal",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "dropped-body",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "extra-operation",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "extra-scope",
+      "rejected": true
+    },
+    {
+      "file": "GuidedSessionIT.java",
+      "mutation": "patch-context",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "condition",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "literal",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "dropped-body",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "extra-operation",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "extra-scope",
+      "rejected": true
+    },
+    {
+      "file": "GuidedLifecycleReasonIT.java",
+      "mutation": "patch-context",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "condition",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "literal",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "dropped-body",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "extra-operation",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "extra-scope",
+      "rejected": true
+    },
+    {
+      "file": "GuidedServiceTransportFaultIT.java",
+      "mutation": "patch-context",
+      "rejected": true
+    }
+  ],
+  "strictForwardReverse": true,
+  "sourcePreimagesStillExact": true,
+  "nativeOrFormatterOrCompilerInvocations": 0,
+  "allExercisedExternalBoundaries": "ABSENT: pure source text and bounded filesystem only; no subprocess/API/observer calls"
+}

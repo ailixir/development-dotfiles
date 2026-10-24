@@ -1,0 +1,122 @@
+// eslint-disable-next-line no-restricted-imports -- Fixed bounded process observation in this fixture-only oracle; no artifact input.
+import { execFileSync } from 'node:child_process';
+import { descendantsOf } from '../../src/run/tree.js';
+
+interface ProcessObservation {
+  readonly pid: number;
+  readonly ppid: number;
+  readonly metadata: { readonly kind: 'KNOWN'; readonly state: string; readonly command: string } |
+    { readonly kind: 'UNKNOWN' };
+}
+export interface BootstrapProcessTree {
+  readonly childPid: number;
+  readonly observedPids: readonly number[];
+  readonly labels: readonly { readonly pid: number; readonly command: string }[];
+}
+export type BootstrapPidStatus = 'ALIVE' | 'GONE' | 'PRESENT_BUT_DENIED';
+const MAX_PID = 2_147_483_647;
+const MAX_TABLE_BYTES = 1024 * 1024;
+const TABLE_ARGS = ['-A', '-ww', '-o', 'pid=,ppid=,stat=,comm='];
+
+function validPid(pid: number): boolean {
+  return Number.isInteger(pid) && pid > 1 && pid <= MAX_PID;
+}
+function liveState(state: string): boolean {
+  return !state.startsWith('Z') && !state.startsWith('X') && !state.slice(1).includes('E');
+}
+/** Strict result: only ESRCH is absence. No command text or raw error is persisted. */
+export function probeBootstrapPid(pid: number): BootstrapPidStatus {
+  if (!validPid(pid)) throw new Error('BOOTSTRAP_PROCESS_IDENTITY');
+  try {
+    process.kill(pid, 0);
+    return 'ALIVE';
+  } catch (error) {
+    const code = error instanceof Error && 'code' in error ? error.code : undefined;
+    if (code === 'ESRCH') return 'GONE';
+    if (code === 'EPERM') return 'PRESENT_BUT_DENIED';
+    throw new Error('BOOTSTRAP_PROCESS_PROBE_UNKNOWN');
+  }
+}
+type TableFailureReason = 'OUTPUT_SHAPE' | 'ROW_IDENTITY' | 'DUPLICATE_PID' | 'REQUIRED_METADATA';
+function invalidTable(reason: TableFailureReason): Error {
+  return new Error('BOOTSTRAP_PROCESS_TABLE_INVALID:' + reason);
+}
+function readSnapshot(childPid: number, originallyObserved: readonly number[] = []): readonly ProcessObservation[] {
+  if (!validPid(childPid) || childPid === process.pid) throw new Error('BOOTSTRAP_PROCESS_IDENTITY');
+  let output: unknown;
+  try {
+    output = execFileSync('ps', TABLE_ARGS, { encoding: 'utf8', timeout: 1000, maxBuffer: MAX_TABLE_BYTES });
+  } catch {
+    throw new Error('BOOTSTRAP_PROCESS_TABLE_UNREADABLE');
+  }
+  if (typeof output !== 'string' || output.length === 0 || !output.endsWith('\n') ||
+      Buffer.byteLength(output, 'utf8') >= MAX_TABLE_BYTES) throw invalidTable('OUTPUT_SHAPE');
+  const rows: ProcessObservation[] = [], seen = new Set<number>();
+  for (const line of output.split('\n')) {
+    if (line.trim() === '') continue;
+    // Membership uses only the two complete horizontal-delimited numeric columns. Keep every row.
+    const match = /^[ \t]*(\d+)[ \t]+(\d+)(?:[ \t]+([\s\S]*))?$/u.exec(line);
+    if (!match) throw invalidTable('ROW_IDENTITY');
+    const pid = Number(match[1]), ppid = Number(match[2]);
+    if (!Number.isInteger(pid) || pid < 0 || pid > MAX_PID ||
+        !Number.isInteger(ppid) || ppid < 0 || ppid > MAX_PID || (pid === 0 && ppid !== 0) ||
+        (pid > 0 && pid === ppid)) throw invalidTable('ROW_IDENTITY');
+    if (seen.has(pid)) throw invalidTable('DUPLICATE_PID');
+    seen.add(pid);
+    const suffix = match[3] ?? '', metadataMatch = /^(\S+)[ \t]+(.+)$/u.exec(suffix);
+    const state = metadataMatch?.[1], command = metadataMatch?.[2];
+    let metadata: ProcessObservation['metadata'] = { kind: 'UNKNOWN' };
+    if (state !== undefined && command !== undefined && /^[RSDITtUWZX][+<>AELNSlsVWX]*$/u.test(state) &&
+        command.trim() !== '' && !Array.from(command).some(character=>{const code=character.charCodeAt(0);return code<=0x1f||code===0x7f;})) {
+      // Preserve the complete trailing command, including spaces; suffixes are state flags, not a liveness substitute.
+      metadata = { kind: 'KNOWN', state, command };
+    }
+    rows.push({ pid, ppid, metadata });
+  }
+  // Compute ownership from all numeric rows, including those whose metadata is UNKNOWN.
+  const required = new Set([process.pid, childPid, ...descendantsOf(childPid, rows), ...originallyObserved]);
+  for (const row of rows) {
+    if (required.has(row.pid) && row.metadata.kind !== 'KNOWN') throw invalidTable('REQUIRED_METADATA');
+  }
+  const self = rows.find(row => row.pid === process.pid), child = rows.find(row => row.pid === childPid);
+  if (self?.metadata.kind !== 'KNOWN' || !liveState(self.metadata.state)) throw new Error('BOOTSTRAP_PROCESS_SELF_MISSING');
+  // The caller supplies its actual fork handle PID. The same table must bind it directly to this observer.
+  if (!child || child.ppid !== process.pid || child.metadata.kind !== 'KNOWN' ||
+      !liveState(child.metadata.state) || probeBootstrapPid(childPid) !== 'ALIVE') {
+    throw new Error('BOOTSTRAP_PROCESS_ROOT_NOT_LIVE');
+  }
+  return rows;
+}
+function freezeObservation(childPid: number, pids: readonly number[], labels: BootstrapProcessTree['labels']): BootstrapProcessTree {
+  if (pids.includes(process.pid)) throw new Error('BOOTSTRAP_PROCESS_SELF_DESCENDANT');
+  return Object.freeze({ childPid, observedPids: Object.freeze([...pids]), labels: Object.freeze(labels.map(row => Object.freeze({ ...row }))) });
+}
+export function captureBootstrapTree(childPid: number): BootstrapProcessTree {
+  const table = readSnapshot(childPid), byPid = new Map(table.map(row => [row.pid, row]));
+  const pids = descendantsOf(childPid, table);
+  const labels = pids.map(pid => {
+    const row = byPid.get(pid);
+    if (row?.metadata.kind !== 'KNOWN') throw invalidTable('REQUIRED_METADATA');
+    return { pid, command: row.metadata.command };
+  });
+  return freezeObservation(childPid, pids, labels);
+}
+/** One fresh confirmation only; this function never sends SIGSTOP, waits, retries or filters the inventory. */
+export function confirmBootstrapTreeSuspended(tree: BootstrapProcessTree): readonly number[] {
+  const table = readSnapshot(tree.childPid, tree.observedPids), byPid = new Map(table.map(row => [row.pid, row]));
+  for (const pid of tree.observedPids) {
+    const row = byPid.get(pid), original = tree.labels.find(label => label.pid === pid);
+    if (!row || !original || row.metadata.kind !== 'KNOWN' || row.metadata.command !== original.command ||
+        !liveState(row.metadata.state) || !row.metadata.state.startsWith('T') ||
+        probeBootstrapPid(pid) !== 'ALIVE') throw new Error('BOOTSTRAP_PROCESS_NOT_CONFIRMED_STOPPED');
+  }
+  return Object.freeze([...tree.observedPids]);
+}
+/** Complete original population, including departed or reparented members. Only exact ESRCH can satisfy every member. */
+export function bootstrapTreeGone(tree: BootstrapProcessTree): boolean {
+  let gone = true;
+  for (const pid of [tree.childPid, ...tree.observedPids]) {
+    if (probeBootstrapPid(pid) !== 'GONE') gone = false;
+  }
+  return gone;
+}

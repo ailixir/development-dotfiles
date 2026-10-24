@@ -1,0 +1,82 @@
+{
+  "protocol": "C8_CHECK01_FAILED_RESOURCE_V1",
+  "authorized": false,
+  "authorizedBy": "UNBOUND",
+  "unit": "obs011-t0-c8-check01",
+  "expectedWrapperExit": 1,
+  "dualException": {
+    "newClosingEntrypoint": false,
+    "noStandaloneCompileZeroRequired": false
+  },
+  "ordinaryRoute": "HARD_HOLD",
+  "compileState": "NOT_STARTED",
+  "newNativeInvocations": 0,
+  "writers": [],
+  "credit": {
+    "C8": false,
+    "main": false,
+    "lane": false,
+    "IR": false,
+    "lifecycle": false
+  },
+  "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+  "originalReleaseSha256": "9f347db3774a785a0b732392b2711976476ac4ae8743fcad839026c121fc3511",
+  "activeLockSha256": "a938fadcc56ddb8b8e86b80cb2a50589c558cb8a135e934c7443d2508b827b24",
+  "terminalIndexSha256": "f3d5b283f86fe0196d570f0a04002c758a292689203ddb93a6fe1a4c8d62ebcb",
+  "retainedContractSha256": "1ded4101bbfa934049e41c12c2139c3d43bf5b0a9d6925a064807ec170c46b09",
+  "retainedContractCanonicalSha256": "57ec82e403d3afb08e7bbd22d5d0a32ccd9ee3be8a3097d089ac28f920df040b",
+  "historicalGapCodes": [
+    "FULLCHECK03_OWNED_IDENTITY_OBSERVATION_GAP",
+    "GST03_FORMAT_IDENTITY_GAP",
+    "GST03_PREMATURE_UNLOCK_INTERVAL",
+    "CHECK01_145_HISTORICAL_UNKNOWN_IDENTITIES",
+    "CHECK01_OPERATIONAL_FINGERPRINT_UNPROVEN",
+    "CHECK01_UNRECORDED_FORK_ABSENCE_UNPROVEN"
+  ],
+  "pins": {
+    "retained-contract.json": "1ded4101bbfa934049e41c12c2139c3d43bf5b0a9d6925a064807ec170c46b09",
+    "input-pins.json": "7731671ed537bd9979a9bace686a36b90a6cb1e0559e0686c22138682da06c6c"
+  },
+  "codePins": {
+    "predicates.py": "f4fabc6f7d91231ce528fe13157a48ed34fa00a62bab1e1756cdcd4d23d5214b",
+    "failed_resource.py": "6a54a404f98e69c3d5e8d3c3116c71144fe73bcea1fbd6ca537ccdcc26f3a96f",
+    "guard-failed-resource.bash": "bb62fc5d5f7b594e7d43081072b0519d6dcaaa91d2072771796dcd59d7e93c2c"
+  },
+  "reviewPins": {
+    "actualQa": "UNBOUND",
+    "architectureCode": "UNBOUND",
+    "qaCode": "UNBOUND",
+    "rootAdoption": "UNBOUND",
+    "terminalDesign": "UNBOUND",
+    "terminalDesignQa": "UNBOUND"
+  },
+  "reviewRecords": {
+    "actualQa": {
+      "path": "UNBOUND",
+      "sha256": "UNBOUND"
+    },
+    "architectureCode": {
+      "path": "UNBOUND",
+      "sha256": "UNBOUND"
+    },
+    "qaCode": {
+      "path": "UNBOUND",
+      "sha256": "UNBOUND"
+    },
+    "rootAdoption": {
+      "path": "UNBOUND",
+      "sha256": "UNBOUND"
+    },
+    "terminalDesign": {
+      "path": "UNBOUND",
+      "sha256": "UNBOUND"
+    },
+    "terminalDesignQa": {
+      "path": "UNBOUND",
+      "sha256": "UNBOUND"
+    }
+  },
+  "pythonExecutable": "UNBOUND_ABSOLUTE_CANONICAL_CURRENT_PYTHON",
+  "pythonExecutableSha256": "UNBOUND",
+  "installationDirectory": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-check01/failed-resource-disposition01"
+}

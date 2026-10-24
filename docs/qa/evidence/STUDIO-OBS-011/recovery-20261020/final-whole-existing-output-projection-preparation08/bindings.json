@@ -1,0 +1,56 @@
+{
+  "kind": "SOURCE_DATA_ONLY_EXACT_CAP_SUCCESSOR08",
+  "parentManifestSha256": "3fd1aa805643d03773d4702f2b37f98b2a3fd985f3f8121050e1b94d7fb7ba16",
+  "independentParentReviewSha256": "f85122d07f768b86968fbe121fa86b5facb2e328df98001dbd4287da8f414924",
+  "correction": {
+    "path": "limits.ordinaryFileBytes",
+    "before": 16777216,
+    "after": 17497021,
+    "cause": "Metadata-only exact largest original pinned XML exceeds prior cap.",
+    "noCapAboveActualMaximum": true
+  },
+  "preserved": {
+    "projectionSourceSha256": "7bda465791290ebec526e048ee6ec95ea96fe1a21e4a0b49c621f1fd9542e00d",
+    "inlineSourceByteExact": true,
+    "all336XmlReferencesByteExact": true,
+    "aggregateXmlBytes": 29479761,
+    "all4CohortAuditReferencesExact": true,
+    "allOtherReadPlanDataExact": true,
+    "allOtherLimitsExact": true,
+    "onlyProspectivePlanRouteAndPlanHashChangesInCommands": true
+  },
+  "references": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation07/manifest.json",
+      "sha256": "3fd1aa805643d03773d4702f2b37f98b2a3fd985f3f8121050e1b94d7fb7ba16"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation07/projection.py.txt",
+      "sha256": "7bda465791290ebec526e048ee6ec95ea96fe1a21e4a0b49c621f1fd9542e00d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation07/input-read-plan.json",
+      "sha256": "2795967540021be06eb4989234e01c5dae0907d796ae026a63faea094ec93482"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation07/commands.json",
+      "sha256": "12d0d2d62c9086fc1d3686ced9ea0af7f6bb3743a43d1c6ed061022e6c648aac"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation07/source-reuse.json",
+      "sha256": "68e9260965ec37b4ca101c18d53496f2d11fc39f8176c163c4b30fd2543c2bea"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/final-whole-projection-cap08-task.txt",
+      "sha256": "22178a7930d9f55ed70556ba889aa44f28904339c88679f75b49ab1118f641bb"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/recovery-20261020/final-whole-projection-cap08-context.txt",
+      "sha256": "85a4a5ff77172fb5e3bebcb57da2eb51ebbe92ff9c6e395290369e23d94a3e58"
+    }
+  ],
+  "projectionParsedImportedExecuted": false,
+  "protectedBodiesRead": false,
+  "nativeTestsBuildSdkLedgerSourceLifecycleWork": false,
+  "noSelfApprovalOrExecutionGo": true
+}

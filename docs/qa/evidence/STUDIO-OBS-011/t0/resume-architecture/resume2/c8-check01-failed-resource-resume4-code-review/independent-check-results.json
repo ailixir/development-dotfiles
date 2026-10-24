@@ -1,0 +1,74 @@
+{
+  "scope": "ACTUAL_EXTRACTED_OBSERVE_AND_CLIENT_INVENTORY_WITH_EXPLICIT_FAKE_BOUNDARIES",
+  "guardProofs": [
+    {
+      "boundary": "os.open",
+      "blocked": "REAL_BOUNDARY_BLOCKED:open"
+    },
+    {
+      "boundary": "fcntl.flock",
+      "blocked": "REAL_BOUNDARY_BLOCKED:flock"
+    },
+    {
+      "boundary": "subprocess.Popen",
+      "blocked": "REAL_BOUNDARY_BLOCKED:Popen"
+    },
+    {
+      "boundary": "Path.read_bytes",
+      "blocked": "REAL_PATH_BODY_BLOCKED"
+    }
+  ],
+  "cases": [
+    {
+      "case": "self reuses old wrapper number",
+      "hold": null,
+      "allowedFinitePostclose": true,
+      "censusCalls": 3,
+      "journalCount": 1,
+      "actualAction": false
+    },
+    {
+      "case": "prior external number reused with listener",
+      "hold": null,
+      "allowedFinitePostclose": true,
+      "censusCalls": 3,
+      "journalCount": 2,
+      "actualAction": false
+    },
+    {
+      "case": "prior exact identity remains live",
+      "hold": "CURRENT_RESOURCE",
+      "allowedFinitePostclose": false,
+      "censusCalls": 3,
+      "journalCount": 2,
+      "actualAction": false
+    },
+    {
+      "case": "current self listener",
+      "hold": "CURRENT_RESOURCE",
+      "allowedFinitePostclose": false,
+      "censusCalls": 3,
+      "journalCount": 1,
+      "actualAction": false
+    },
+    {
+      "case": "new child reuses old shell number",
+      "hold": "CURRENT_RESOURCE",
+      "allowedFinitePostclose": false,
+      "censusCalls": 3,
+      "journalCount": 1,
+      "actualAction": false
+    },
+    {
+      "case": "child appears at final census",
+      "hold": "CURRENT_RESOURCE",
+      "allowedFinitePostclose": false,
+      "censusCalls": 3,
+      "journalCount": 1,
+      "actualAction": false
+    }
+  ],
+  "exactInterpretationMapSites": 13,
+  "actualBaselineBodyReadStatOrHash": false,
+  "actualRuntimeImportsMainsOsFileFcntlProcessNativePrivateActions": 0
+}

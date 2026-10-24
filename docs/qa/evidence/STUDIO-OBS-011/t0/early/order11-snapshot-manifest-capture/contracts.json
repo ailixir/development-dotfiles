@@ -1,0 +1,549 @@
+{
+  "scope": "SOURCE_AND_APPROVED_PUBLIC_PLUS_IN_MEMORY_SYNTHETIC_ONLY",
+  "helperSha256": "a619c4463f6e7f1aa4bcbb0ee8ca21a90b3d01e1de193f1f61029c9473d325cc",
+  "semanticChecks": 40,
+  "semanticAccepted": 14,
+  "semanticRejected": 26,
+  "semanticResults": [
+    {
+      "name": "snapshot-facts-with-no-warning-or-startup",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "snapshot-facts-with-unrelated-warning-and-no-startup",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "source-OTHER-is-not-no-error",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "missing-numeric-values-stay-omitted-not-zero",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "wellformed-opaque-IDs-not-independent-external-join",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "partial-missing-errorCode-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "partial-source-translation-group-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "COMPLETE_SOURCE_TRANSLATION_CAPTURE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "captureFailure-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "wrong-method-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "SNAPSHOT_SOURCE_SCOPE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "wrong-ordinal-control-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "SOURCE_CAPTURE_LOCATOR_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "wrong-invocation-control-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "SOURCE_CAPTURE_LOCATOR_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "malformed-session-identity-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "IDENTITY_SHAPE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "malformed-test-identity-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "IDENTITY_SHAPE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "optional-separately-known-identity-mismatch-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "OPTIONAL_KNOWN_IDENTITY_MISMATCH",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "snapshot-unknown-private-field-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "snapshot-unknown-code-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "SNAPSHOT_NOT_SOURCE_ENUM",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "snapshot-array-bound-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "SNAPSHOT_ARRAY_BOUND",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "snapshot-source-file-byte-bound",
+      "accepted": false,
+      "expected": false,
+      "reason": "SYNTHETIC_ROLE_CAP",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "live-or-unknown-collectorTerminal",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "live-or-unknown-sameStartOwnedJvmTerminal",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "live-or-unknown-ownedUnknownTerminal",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "live-or-unknown-wholeExecutionClosed",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "unreleased-refuses-before-control",
+      "accepted": false,
+      "expected": false,
+      "reason": "NO_EXECUTION_RELEASE",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "root-not-approved",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_INDEPENDENT_APPROVAL",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "quinn-not-approved",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_INDEPENDENT_APPROVAL",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "timeout-is-not-terminal",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "closed-public-assessment-required",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "freshness-expired",
+      "accepted": false,
+      "expected": false,
+      "reason": "AUTHORIZATION_NOT_FRESH",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "terminal-red-qualified-outer-no-C8-pass",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "unique-generation-manifest-with-no-startup-record",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18",
+        "owned_events",
+        "guided_log"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "missing-journal-preserves-independent-snapshot",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18",
+        "owned_events"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "missing-selected-log-preserves-independent-snapshot",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18",
+        "owned_events",
+        "guided_log"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "ambiguous-generation-preserves-independent-snapshot",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18",
+        "owned_events"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "empty-journal-preserves-independent-snapshot",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18",
+        "owned_events"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "unconfirmed-generation-preserves-independent-snapshot",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18",
+        "owned_events"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "unique-earlier-generation-exact-archive-path",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18",
+        "owned_events",
+        "guided_log"
+      ],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "old-purpose-does-not-authorize-new-capture",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG_SCOPE",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "old-no-journal-authority-does-not-authorize-new-structured-read",
+      "accepted": false,
+      "expected": false,
+      "reason": "NEW_EXACT_JOURNAL_AUTHORITY_REQUIRED",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "wrong-closed-public-pin-refuses-before-control",
+      "accepted": false,
+      "expected": false,
+      "reason": "CLOSED_PUBLIC_OR_RAW_BINDING",
+      "syntheticProtectedControlReads": 0,
+      "syntheticNativeRoleReads": [],
+      "actualPrivateIO": 0
+    },
+    {
+      "name": "partial-manifest-validation-preserves-snapshot",
+      "accepted": true,
+      "expected": true,
+      "reason": "SNAPSHOT_FACTS_VALID_CONDITIONAL_SOURCE_PROVENANCE",
+      "syntheticProtectedControlReads": 1,
+      "syntheticNativeRoleReads": [
+        "snapshot_initial18",
+        "owned_events",
+        "guided_log"
+      ],
+      "actualPrivateIO": 0
+    }
+  ],
+  "fdChecks": 8,
+  "fdAccepted": 3,
+  "fdRejected": 5,
+  "fdResults": [
+    {
+      "name": "actual-new-helper-retained-FD-snapshot-positive",
+      "accepted": true,
+      "expected": true,
+      "reason": "NOT_REQUESTED",
+      "syntheticProtectedReadTags": [
+        "control",
+        "control",
+        "snapshot_initial18",
+        "snapshot_initial18"
+      ],
+      "syntheticWriteCalls": 1,
+      "actualOsIO": 0
+    },
+    {
+      "name": "actual-new-helper-retained-FD-full-manifest-positive",
+      "accepted": true,
+      "expected": true,
+      "reason": "COMPLETE_PROTECTED_MANIFEST_PENDING_SEPARATE_REVIEW",
+      "syntheticProtectedReadTags": [
+        "control",
+        "control",
+        "snapshot_initial18",
+        "snapshot_initial18",
+        "owned_events",
+        "owned_events",
+        "guided_log",
+        "guided_log"
+      ],
+      "syntheticWriteCalls": 2,
+      "actualOsIO": 0
+    },
+    {
+      "name": "actual-new-helper-approved-macos-alias-positive",
+      "accepted": true,
+      "expected": true,
+      "reason": "NOT_REQUESTED",
+      "syntheticProtectedReadTags": [
+        "control",
+        "control",
+        "snapshot_initial18",
+        "snapshot_initial18"
+      ],
+      "syntheticWriteCalls": 1,
+      "actualOsIO": 0
+    },
+    {
+      "name": "root-substitution-refuses",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_SYMLINK_OR_TYPE",
+      "syntheticProtectedReadTags": [
+        "control",
+        "control"
+      ],
+      "syntheticWriteCalls": 0,
+      "actualOsIO": 0
+    },
+    {
+      "name": "snapshot-opened-owner-swap-before-content",
+      "accepted": false,
+      "expected": false,
+      "reason": "INPUT_OPENED_IDENTITY_MISMATCH",
+      "syntheticProtectedReadTags": [
+        "control",
+        "control"
+      ],
+      "syntheticWriteCalls": 0,
+      "actualOsIO": 0
+    },
+    {
+      "name": "retained-output-parent-swap-no-alternate-write",
+      "accepted": false,
+      "expected": false,
+      "reason": "DIRECTORY_ENTRY_SUBSTITUTED",
+      "syntheticProtectedReadTags": [
+        "control",
+        "control",
+        "snapshot_initial18",
+        "snapshot_initial18"
+      ],
+      "syntheticWriteCalls": 1,
+      "actualOsIO": 0
+    },
+    {
+      "name": "live-guard-before-protected-control-or-native-read",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "syntheticProtectedReadTags": [],
+      "syntheticWriteCalls": 0,
+      "actualOsIO": 0
+    },
+    {
+      "name": "adapted-fixed-writer-failure-no-success",
+      "accepted": false,
+      "expected": false,
+      "reason": "OUTPUT_WRITE_OR_SYNC_FAILED",
+      "syntheticProtectedReadTags": [
+        "control",
+        "control",
+        "snapshot_initial18",
+        "snapshot_initial18"
+      ],
+      "syntheticWriteCalls": 1,
+      "actualOsIO": 0
+    }
+  ],
+  "oldAuthorLoopsExecuted": false,
+  "actualPrivateEnumerationStatReadGlobCopyExport": 0,
+  "actualHelperMainCli": 0,
+  "actualOsIo": 0,
+  "conditionalSourceFileProvenanceNotExternalUuidJoin": true,
+  "noWarningOrStartupRequiredForSnapshotFacts": true
+}

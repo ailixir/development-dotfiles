@@ -1,0 +1,12 @@
+{
+  "atUtc": "2026-10-21T01:50:31.816623+00:00",
+  "findingSource": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/root-candidate-row-tail-finding-before-fix.json",
+  "findingSourceSha256": "10c94cd00f1c480c31229f3685f09a4cfaa1c421c3246236a64d27cd3656fd86",
+  "upstreamCandidateManifestSha256": "e9df98a0d5a6e92552cc1357587fa5450a6b5041e61e51f46d5276525f38582b",
+  "finding": "Numeric-row regex uses dot-star suffix without dotAll, so valid numeric PID/PPID plus embedded CR or JavaScript line separator metadata fails ROW_IDENTITY. Complete numeric graph must instead retain row; unchanged metadata classifier may mark it UNKNOWN.",
+  "preCodeControls": "Add explicit embedded U+000D and U+2028 metadata variants within existing four-control loops; no new case identities. Unrelated capture/confirmation succeeds, required population fails closed.",
+  "scope": "one numeric-suffix class + CR/U2028 variants inside existing4 cases; no metadata predicate/required union change",
+  "status": "SOURCE_ONLY_CANDIDATE_PENDING_INDEPENDENT_REVIEW",
+  "runtime": "UNEXECUTED",
+  "historicalCause": "UNKNOWN_UNRETAINED"
+}

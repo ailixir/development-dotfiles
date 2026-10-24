@@ -1,0 +1,4 @@
+while (report == null && Clock.nanoTime() < deadline) {
+      Clock.startElapsed(); probeIntervalEntered.countDown(); Thread.sleep(20); if (noAwaitGap) Clock.advance(1_000_000_000L);
+      report = P3_FINAL_REPORTS.get(execution);
+    }

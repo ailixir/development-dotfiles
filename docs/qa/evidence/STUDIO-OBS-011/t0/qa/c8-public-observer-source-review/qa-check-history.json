@@ -1,0 +1,14 @@
+{
+  "attempt1": {
+    "exit": 1,
+    "cause": "Quinn harness assumed swapped b/a reverse-patch labels. The exact packet deliberately labels both directions a/b, with reverse source/hunks correct.",
+    "guardedAuthor311AlreadyCompleted": true,
+    "authorResultPreserved": "author-check-results.json",
+    "packetOrProductChanged": false,
+    "actualRuntimeActions": 0
+  },
+  "resume": {
+    "correction": "Compare reverse direction with actual declared a/b labels and exact reversed bytes; reuse completed guarded311 result and definitions without replaying suite.",
+    "scopeExpanded": false
+  }
+}

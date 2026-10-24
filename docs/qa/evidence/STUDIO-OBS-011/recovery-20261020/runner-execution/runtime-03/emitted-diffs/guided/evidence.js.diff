@@ -1,0 +1,77 @@
+--- before-dist/guided/evidence.js
++++ after-dist/guided/evidence.js
+@@ -53,7 +53,11 @@
+ export const MAX_RECORDING_CALLBACK_ATTEMPTS = 3;
+ export function createGuidedRecorder(ports) {
+     let scratch;
+-    const owned = () => scratch ??= ports.recordingScratch ? Promise.resolve(ports.recordingScratch) : prepareRecordingScratch({ workerId: 'embedded-recorder', journalDirectory: ports.evidenceRoot ?? process.env.TMPDIR ?? tmpdir(), ...(ports.evidenceRoot === undefined ? {} : { evidenceRoot: ports.evidenceRoot }) });
++    const owned = () => scratch ??= ports.recordingScratch ?
++        Promise.resolve(ports.recordingScratch) : prepareRecordingScratch({
++        workerId: 'embedded-recorder', journalDirectory: ports.evidenceRoot ?? process.env.TMPDIR ?? tmpdir(),
++        ...(ports.evidenceRoot === undefined ? {} : { evidenceRoot: ports.evidenceRoot })
++    });
+     return {
+         async open(session) {
+             const keys = guidedRecordingKeys(session.csiId, session.sessionId);
+@@ -97,8 +101,11 @@
+ export function wireTimings(readings) {
+     return [...readings]
+         .map(r => ({ ...r, startMs: Math.round(r.startMs), endMs: r.endMs === null ? null : Math.round(r.endMs) }))
+-        .sort((a, b) => a.startMs - b.startMs || a.ordinal - b.ordinal || compareCodePoints(a.stepId, b.stepId) || compareCodePoints(a.admissionId, b.admissionId))
+-        .map((r) => ({ kind: 'action', stepId: r.stepId, admissionId: r.admissionId, ordinal: r.ordinal, startMs: r.startMs, endMs: r.endMs }));
++        .sort((a, b) => a.startMs - b.startMs || a.ordinal - b.ordinal ||
++        compareCodePoints(a.stepId, b.stepId) || compareCodePoints(a.admissionId, b.admissionId))
++        .map((r) => ({
++        kind: 'action', stepId: r.stepId, admissionId: r.admissionId, ordinal: r.ordinal, startMs: r.startMs, endMs: r.endMs
++    }));
+ }
+ /**
+  * The scale assertion of ADR-002 §11.6 item 4, applied runner-side with the backend's bound
+@@ -107,7 +114,8 @@
+  */
+ export function timingScaleHolds(timings, maxSessionSeconds) {
+     const bound = maxSessionSeconds * 1000;
+-    return timings.every(t => Number.isSafeInteger(t.startMs) && t.startMs >= 0 && t.startMs <= bound && (t.endMs === null || (Number.isSafeInteger(t.endMs) && t.endMs >= t.startMs && t.endMs <= bound)));
++    return timings.every(t => Number.isSafeInteger(t.startMs) && t.startMs >= 0 && t.startMs <= bound &&
++        (t.endMs === null || (Number.isSafeInteger(t.endMs) && t.endMs >= t.startMs && t.endMs <= bound)));
+ }
+ export class GuidedSessionRecording {
+     ports;
+@@ -186,14 +194,21 @@
+         let partial = false;
+         try {
+             const redactor = createRedactor([]);
+-            const ports = { store: this.ports.store, fileSystem: this.ports.fileSystem, bounds: this.ports.bounds, now: this.ports.now, sleep: this.ports.sleep, redactor };
++            const ports = {
++                store: this.ports.store, fileSystem: this.ports.fileSystem, bounds: this.ports.bounds,
++                now: this.ports.now, sleep: this.ports.sleep, redactor
++            };
+             const window = openEvidenceWindow(ports);
+             if (this.keys && this.requested && this.recorded) {
+                 const inspected = await (this.ports.inspect ?? inspectRecordingFile)(input.videoPath, input.orderlyClose)
+-                    .catch(() => ({ attempted: true, path: null, bytes: null, header: false, error: 'RECORDING_FAILED', orderlyClose: input.orderlyClose }));
++                    .catch(() => ({
++                    attempted: true, path: null, bytes: null, header: false, error: 'RECORDING_FAILED', orderlyClose: input.orderlyClose
++                }));
+                 const observed = evidenceFor(inspected);
+                 if (observed.state === 'PENDING') {
+-                    const uploaded = await uploadRecording(ports, window, { videoKey: this.keys.videoKey, path: observed.path, state: 'PENDING', partial: observed.partial });
++                    const uploaded = await uploadRecording(ports, window, {
++                        videoKey: this.keys.videoKey, path: observed.path, state: 'PENDING', partial: observed.partial
++                    });
+                     state = uploaded.state === 'STORED' ? 'STORED' : 'FAILED';
+                     partial = state === 'STORED' && uploaded.partial;
+                 }
+@@ -203,7 +218,11 @@
+             if (!timingScaleHolds(timings, this.maxSessionSeconds))
+                 timings = [];
+             if (this.keys) {
+-                const manifest = buildGuidedRecordingManifest({ sessionId: input.identity.sessionId, recordingId: this.recordingId, workerId: input.identity.workerId, ownerFence: input.identity.ownerFence, evidenceState: state, evidencePartial: partial, videoKey: this.keys.videoKey, manifestKey: this.keys.manifestKey, timings });
++                const manifest = buildGuidedRecordingManifest({
++                    sessionId: input.identity.sessionId, recordingId: this.recordingId, workerId: input.identity.workerId,
++                    ownerFence: input.identity.ownerFence, evidenceState: state, evidencePartial: partial,
++                    videoKey: this.keys.videoKey, manifestKey: this.keys.manifestKey, timings
++                });
+                 // A lost manifest is a diagnostic, never an evidence state (as for replay, §6.1).
+                 await writeResultManifest(ports, window, this.keys.manifestKey, serializeResultManifest(manifest, redactor), RESULT_MANIFEST_CONTENT_TYPE);
+             }

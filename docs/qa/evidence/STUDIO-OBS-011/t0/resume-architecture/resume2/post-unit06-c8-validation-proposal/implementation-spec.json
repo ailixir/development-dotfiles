@@ -1,0 +1,256 @@
+{
+  "status": "DESIGN_DIFF_SPEC_ONLY_NOT_IMPLEMENTED_OR_RELEASED",
+  "proposedFreshLabel": "obs011-t0-c8-check01 (freshness NOT observed; root must verify)",
+  "implementationOwnership": "Dex off-tree preparation, independent Aria+Quinn exact review, new root release",
+  "oldHelpersImmutable": true,
+  "sourceWritesAllowed": false,
+  "nativeInvocationsPerRelease": 1,
+  "nativeCommand": {
+    "collector": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-backend-tasked.py",
+    "tasks": [
+      "test",
+      "guidedIncrementalTest",
+      "crossReplicaTest"
+    ],
+    "requiredFreshExecTasks": [
+      "test",
+      "guidedIncrementalTest",
+      "crossReplicaTest"
+    ],
+    "approvedSkipsPath": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/approved-skips.json",
+    "gradleArgs": [
+      "--continue",
+      "check",
+      "--rerun-tasks",
+      "--no-daemon"
+    ],
+    "methodFilters": [],
+    "sourceExclusions": [],
+    "initScripts": [],
+    "stdin": "DEVNULL for the entire foreground child; prompt/status/flags separately inspected"
+  },
+  "sourcePlanAdapter": {
+    "basePlanSha256": "576ebf9f01c0025cacc3bc6c7d6f4c747f8f84bb1f118a547cf11e21f7c94673",
+    "overlayFile": "source-binding-delta.json",
+    "expectedDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+    "deriveFullOrderedListAndRecompute": true,
+    "futureFreshCaptureExactMatchRequired": true,
+    "wholeSetModesRequired": true,
+    "literalMainReplayDistAuxRequired": true,
+    "authorizationNameChange": "fullS011FreshCheckAuthorized -> fullAcceptedSuccessorFreshCheckAuthorized; bind old ancestry separately",
+    "oldPlanOrCaptureMayBeRewritten": false
+  },
+  "harnessAdapter": {
+    "baseSha256": "a1e7d05ff991965fae636077df1c26d11035c387e9456ff9aa29a6c4709e8aae",
+    "reuseAlgorithmsExact": [
+      "owned_census_keys",
+      "classify_owned",
+      "pending_owned",
+      "ownership_drain_decision",
+      "update_owned",
+      "run_owned finally drain; preserve sticky flags and error records"
+    ],
+    "replaceExactPredicateBlocks": [
+      "stable_inputs original061fc literal -> exact pinned accepted-source overlay",
+      "parent_lock direct-wrapper argv -> exact root-pinned wrapper/shell/child chain and current kernel lock",
+      "main authorization/source ancestry/output namespace only as specifically reviewed",
+      "assess_and_archive add expected2774 status/identity multiset and exact resource classification"
+    ],
+    "parentProof": [
+      "actual wrapper/shell PID+start+argv and current ancestry",
+      "actual wrapper descriptor/dev/inode/kernel EAGAIN",
+      "immutable wrapper hash and active pin authorization hash before/during/after child",
+      "harness itself immediate child of pinned interactive shell"
+    ],
+    "noSignalsNoRetryNoGlobalJVMWait": true,
+    "newNativeProbeNeededForPreparation": false
+  },
+  "staticResourceAdapter": {
+    "catalogPath": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/report-static-assets-review/proposed-static-resource-catalog.json",
+    "catalogSha256": "3be436be6ec4784ee393c16aee0aaf65d7620b4aed9fabfb73c68b4be09e359e",
+    "originalAdoptionScope": "SAME03 only; fresh prospective adoption required",
+    "testReportGenerators": {
+      "Gradle8.10.2": {
+        "roots": [
+          "test",
+          "guidedIncrementalTest",
+          "crossReplicaTest"
+        ],
+        "entriesPerRoot": 3
+      }
+    },
+    "jacocoGenerator": {
+      "JaCoCo0.8.12": {
+        "entries": 20
+      }
+    },
+    "distinctCatalogResources": 23,
+    "expectedOutputOccurrences": 29,
+    "requiredMatch": [
+      "generator",
+      "exact report root/relative path",
+      "pinned dependency JAR hash",
+      "exact JAR resource entry hash+size",
+      "output bytes/hash/size"
+    ],
+    "dynamicFreshnessNotRequiredOnlyForExactProvenStatic": true,
+    "freshCaseRuntimeCoverageCredit": false,
+    "unknownOrMismatchedAsset": "FAIL; no suffix wildcard or blanket directory acceptance",
+    "oldRawErrorsOrTimestampsMayBeChanged": false
+  },
+  "coverage": {
+    "actualExecutedTasks": [
+      "test",
+      "guidedIncrementalTest",
+      "crossReplicaTest",
+      "requireFreshGuidedPartitions",
+      "jacocoTestReport",
+      "jacocoTestCoverageVerification",
+      "check"
+    ],
+    "requiredFreshExecs": 3,
+    "mergedExecTasks": [
+      "test",
+      "guidedIncrementalTest"
+    ],
+    "crossReplicaExecMerged": false,
+    "mergedInternalSessionsCurrentAndJoinedToActualExecsRequired": true,
+    "dynamicXmlHtmlSourceSessionIndexOriginalTimesCurrent": true,
+    "floors": {
+      "bundle.LINE.COVEREDRATIO": 0.7,
+      "compile.gateway.LINE.COVEREDRATIO": 0.8,
+      "dispatch.LINE.COVEREDRATIO": 0.75,
+      "internal.LINE.COVEREDRATIO": 0.75,
+      "recovery.LINE.COVEREDRATIO": 0.75,
+      "sse.LINE.COVEREDRATIO": 0.75,
+      "compile.LINE.COVEREDRATIO": 0.8
+    },
+    "oldReportCopyTimeOr99SubsetSatisfies": false
+  },
+  "closureAdapter": {
+    "existingGST55e5MetadataOnlySuffices": false,
+    "reuseImmutableWrapper": true,
+    "reuseBashExitFunctionIfExactDiffReviewSupports": true,
+    "pythonGatePolicyMustBeNewExactReviewedFullcheckScope": true,
+    "fullcheckSourceWriterRelease": false,
+    "readHoldScope": "entire accepted1808 sources/modes,dist238 and auxiliary pins",
+    "phaseNames": [
+      "full-check",
+      "compile-reconcile"
+    ],
+    "fullcheckReceiptEnvelope": {
+      "phase": "full-check",
+      "status": "NATIVE_PHASE_TERMINAL only after actual foreground and conservative owned drain terminal",
+      "collectorExit": "actual integer, never normalized to passing",
+      "nativeGradleExit": "actual integer",
+      "rawHarnessReceiptSha256": "actual pinned record",
+      "rootAuthorizationSha256": "actual new release",
+      "activeLockSha256": "actual held pin",
+      "ownedIdentities": "complete recorded PID/start union",
+      "gapFlags": "all actual sticky flags retained",
+      "validationErrors": "exact raw native/test/coverage failures retained",
+      "evidenceErrors": "exact raw observer/I/O/metadata failures retained; no deletion to pass closure"
+    },
+    "readinessFields": {
+      "unitLabel": "new fullcheck-specific grammar; never masquerade as GST",
+      "rootReleaseSha256": "actual exact new authorization",
+      "activeLockSha256": "actual exact new held pin",
+      "status": "VERIFIED or separately independently QUALIFIED_VERIFIED",
+      "verificationExit": 0,
+      "verifiedAtEpoch": "actual successful verification time",
+      "expectedWrapperExit": "0 only full actual C8 success with clean current evidence; positive on failed/qualified validation",
+      "phaseState": {
+        "full-check": "TERMINAL",
+        "compile-reconcile": "NOT_STARTED on greenC8; TERMINAL0 for failed/incompleteC8 close"
+      },
+      "source": {
+        "disposition": "UNCHANGED_ACCEPTED_SUCCESSOR",
+        "digest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+        "overrides": {},
+        "expectedPlanSha256": "new exact reviewed successor plan"
+      },
+      "build": {
+        "successfulC8": "native full-check actual0, executed compileTestJava, fullcatalog/cohorts/freshcoverage/tasks/floors; compile-reconcile absent",
+        "failedC8": "separate actual compile-reconcile0 from this unit after native terminal and preserve-before-reconcile disposition",
+        "sourceBeforeAfter": "exact accepted f9c whole-set/modes/dist/aux capture hashes and equality",
+        "taskLogSha256": "actual selected phase log, exact EXECUTED compileTestJava and BUILD SUCCESSFUL",
+        "phaseReceiptSha256": "actual new selected-phase receipt, not prior GST or inferred from failedcheck",
+        "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277"
+      },
+      "validation": {
+        "outcome": "PASS or FAIL/INCOMPLETE from actual receipts",
+        "catalog2774": "exact reviewed comparison result hash",
+        "cohortsCoverage": "actual assessment hashes with full qualified failures retained",
+        "C8Credit": "no automatic credit"
+      },
+      "resources": "foreground terminal, complete recorded-owned+extra union, owned ports, six inherited/current boundary, holder/kernel/source proof",
+      "historicalQualifiers": "all original03 observer and GST03 formatter/premature-unlock gaps + exact custody/root records preserved",
+      "evidencePins": "all actual proof metadata hashed; source/build/case/archive/receipt ancestry coherent; no raw private export",
+      "producerSha256": "exact reviewed installed final-verifier"
+    },
+    "permitFields": [
+      "exact root release hash",
+      "active-lock hash",
+      "readiness hash",
+      "matching phase/source/build/evidence/resource/history states",
+      "explicit expected wrapper exit",
+      "explicit root closing decision; no new source retention override because accepted subject is unchanged",
+      "exact independent QA/root qualifications for any current gap"
+    ],
+    "failureClosure": [
+      "failed/incomplete C8: preserve full actual evidence; prove fullcheck owned terminal and accepted source unchanged",
+      "separate root-authorized compile-reconcile once under SAME hold; exact pre/post source/mode/dist/aux and owned compile0/task/log/provenance",
+      "nonzero failed-unit closure only, preserving every raw native/collector/outer qualification and C8 NOT_MET",
+      "fullcheck unresolved owned identity/source drift/reconcile failure or missing proof => HOLD for new exact reviewed disposition",
+      "no automatic compile invocation, second reconciliation, source rollback, diagnostic or fullcheck retry",
+      "never reuse prior GST build or infer compiler0 from check1"
+    ],
+    "admission": [
+      "new exact release+gate installation inspected",
+      "readiness deliberately absent guarded exit denied",
+      "separate real status",
+      "SAME wrapper/shell/start/dev-inode/kernel proof BEFORE native"
+    ],
+    "finalOrdering": [
+      "standalone final verifier actual0 inspected",
+      "separate explicit bound root permit",
+      "separate guarded exit within60s",
+      "separate controller-absence/kernel-free postclose verification"
+    ],
+    "freshnessSeconds": 60,
+    "automaticRefreshBypassOrQueuedExit": false
+  },
+  "requiredPureNegativeChecks": [
+    "arbitrary source overlay/add/drop outside3",
+    "changed main/Replay/dist/modes",
+    "unrecognized or tampered static resource/path/JAR",
+    "missing2774 identity/extraexecutionError/skip mismatch",
+    "missingexec/stale internal session/stale dynamic coverage/absent or cached task/floorfailure",
+    "UNKNOWN owned after missing comm/start/PID reuse/reparented Java/observer or receipt write failure",
+    "wrong active pin/wrapper/shell/ancestry/FD/inode/kernel/no-readiness admission",
+    "failed C8 requires compile-reconcile actual0 plus same-source proof, closes only nonzero; omitted/failed/cached reconciliation HOLD; green requires reconcile NOT_STARTED",
+    "ready/permit/source/status/hash mismatch/stale60s/currentgap withoutqualification/no automatic phase or source-write fiction"
+  ],
+  "noExecutionRelease": true,
+  "allGeneralW1MainReplayIRF1CreditHoldsRemain": true,
+  "compileReconciliation": {
+    "maximumInvocations": 1,
+    "trigger": "failed/incomplete full C8 after actual full-check owned drain/source proof, preservation of its outputs and separate explicit root decision",
+    "command": [
+      "./gradlew",
+      "--offline",
+      "compileTestJava",
+      "--rerun-tasks",
+      "--no-daemon"
+    ],
+    "cwd": "backend",
+    "testTasksInvoked": [],
+    "productSourceWrites": false,
+    "fullCheckRetry": false,
+    "sameInteractiveImmutableHoldRequired": true,
+    "stdin": "DEVNULL",
+    "successfulC8Branch": "NOT_STARTED with no receipt or phase-exit record",
+    "failedC8Branch": "TERMINAL0 and actual executed compileTestJava/BUILD SUCCESSFUL/log+receipt+exact accepted-source pre/post provenance required before nonzero close",
+    "failedOrUnknownReconciliation": "HOLD, no automatic second invocation or source rollback"
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "status": "SOURCE_ONLY_OWNER07_QA01_FIX_PENDING_ROOT_NONAUTHOR_REREVIEW",
+  "sourcePins": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "5d800923b60c64ecf086a522223254877f23a78cd9abd3fd18fc0275f2c1d5a8"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/runtime-input-binding.json",
+      "sha256": "c72b9a8983664bc09d8fdb11c082f00c1d4a78f5d5f191d552902799bdb271ea"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-diagnostic-bindings06/manifest.json",
+      "sha256": "d677932b965bf663df5d82ee4633fdc3b18067d2910afea3a34e54881865e149"
+    }
+  ],
+  "priorPairProducerRootSupplied": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-pair-execution05/manifest.json",
+    "sha256": "b2b17f29c6d13292bc14ac375e09546b90950bb0b8c58ad758f0d90149145c10",
+    "source": "Saved task context; no protected producer artifacts reopened"
+  },
+  "draftInlineSha256": "7ae01dc39a68e3feff5dca54949854730e16502a7bace1c00f21b38a1c8e628a",
+  "readPlanSha256": "95745d56a4ef44559394ea79f19a3da65d7e2a597d14aa7c24f93843b8815242",
+  "publicSourceRoute": {
+    "finalSinkInventory": "Exact guidedLog/ordinaryLog kind+sinkNameSha256+bytes+sha256",
+    "cohortBodiesRead": "NONE_IN_THIS_TASK",
+    "requiredMatching": "Four distinct target hash pairs; exactly one complete candidate match per lane; complete candidate discovery under the sole designated namespace and finite caps",
+    "ownerProof": "Explicit original ownedTemp equality and contiguous positive guided generations; no PID observation",
+    "laterWrites": "Owner stream may append after final sink scan; no fictitious prior owner-stream hash; exact current terminal-log equality remains mandatory",
+    "sufficiency": "CONDITIONAL_SOURCE_SUPPORTED_ROUTE; actual retained candidates/hashes/owner availability UNMEASURED",
+    "noNewJavaPropertyRequirement": true
+  },
+  "readScope": {
+    "cohorts": 4,
+    "candidateParent": {
+      "lexical": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/",
+      "canonicalExpected": "/private/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T",
+      "source": "Root-designated sole discovery parent, unchanged captured TMPDIR; not a Java/task ownership proof",
+      "environmentSha256": "cb5886e4ce4b01487e374b730319694231aa677bcd455750f37e03dd36ead031",
+      "provenance": {
+        "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/actual-runner-final-gates01/runtime-input-binding.json",
+        "sha256": "c72b9a8983664bc09d8fdb11c082f00c1d4a78f5d5f191d552902799bdb271ea"
+      },
+      "allowedAlias": "Only explicit /var -> /private/var canonical alias; resulting exact parent must match; no other root traversal"
+    },
+    "recursiveDiscovery": false,
+    "maximumParentEntries": 4096,
+    "maximumCandidateDirectories": 128,
+    "ownerBytesSourceBound": 8388608,
+    "ownerRecordSourceBound": 16384,
+    "terminalLogBytesApprovedPayloadBound": 16777216,
+    "originalFinalScanLogByteCap": "NONE; do not mislabel projection cap as producer bound",
+    "temporaryPrivateEnumerationHashOrReadPerformed": false
+  },
+  "closedOutputOnly": [
+    "slot/task and pinned cohort reference",
+    "unique proven TEMP path, if available",
+    "opaque terminal-log byte counts/SHA",
+    "owner-stream byte count/SHA and ownedTemp equality",
+    "role and guided generation numbers/count plus deterministic mapped relative paths",
+    "fixed missing/ambiguous/unstable/unavailable reasons"
+  ],
+  "notExported": [
+    "private body or line text",
+    "PIDs/start times/descendants",
+    "auth/session/readiness values",
+    "command/config values",
+    "messages/stacks/arbitrary error labels",
+    "captures/media/log content"
+  ],
+  "existingPayloadsUnchanged": {
+    "ipc": "6dd83d18a659190bdfbe5c3f51f9d37a08083e03209c14c2daa9d9f9d982e357",
+    "startFailure": "776fd232946cfeaf5c1f4a35006e441d08b320bf00bc9bf164027ff5e88a8094",
+    "projectionExecuted": false
+  },
+  "scopeExhaustion": "Unresolved; never file absence/zero recurrence/task ownership or new gate relaxation",
+  "rootReadReleased": false,
+  "nonAuthorReview": "UNBOUND_REQUIRED",
+  "sourceParsedOrExecuted": false,
+  "runtimeObserverProbeRerunReplayCalls": 0,
+  "classification": "UNCHANGED_UNKNOWN_NOT_COMPUTED",
+  "allStoriesInProgress": true,
+  "sharedUsdCeiling": 500,
+  "headroom": "UNKNOWN",
+  "predecessor": {
+    "manifest": "ed28061fcb4368befba936d70ea049503084a49ad9271e56042d30e1f6bbf070",
+    "inline": "95b3530def75aaa4d49132a3eb2d0fedc8e5cc194e9507d061595a7e4fdc0c98",
+    "preserved": true
+  },
+  "confirmedFindingApplied": "OWNER07-QA-01_ONLY",
+  "newlineFindingWithdrawnAndSourceUnchanged": true,
+  "privateOrCurrentSourceReadsDuringThisCorrection": false,
+  "sourcePinsCarriedFromSealed07NotFreshProductRehash": true,
+  "executionHold": "WHOLE6_TERMINAL_PLUS_SEPARATE_ROOT_READ_RELEASE_AND_NONAUTHOR_REREVIEW_REQUIRED"
+}

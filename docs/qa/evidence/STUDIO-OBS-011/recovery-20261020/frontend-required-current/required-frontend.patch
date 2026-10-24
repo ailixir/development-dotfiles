@@ -1,0 +1,46 @@
+--- a/frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts
++++ b/frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts
+@@ -61,21 +61,3 @@
+ /** Below this length a pinned phrase stops discriminating. `''` would make every `toContain` true. */
+ export const MIN_PINNED_VIDEO_PHRASE_LENGTH = 6;
+ 
+-/**
+- * The stopped-run line, pinned the same way: a second copy, derived from nothing.
+- *
+- * Both codes must say the recording **ends where the run was stopped** (`endsPhrase`), and each must
+- * name its own cause (`causePhrase`), so a rendering that swaps the two codes' lines cannot pass.
+- * `deniedClaims` are what the line must not say: the partial qualifier's claims (partiality is the
+- * recorder's, not the run's — ADR-002 §17.4), the failure states' claims, and the other code's
+- * cause. The key set is written against the contract's own vocabulary, so a code that leaves
+- * `EXECUTION_ERROR_CODES` leaves this record too, as a type-check failure.
+- */
+-export interface PinnedStoppedRunRecordingFacts {
+-  /** Must appear in the rendered line, for both codes alike. */
+-  readonly endsPhrase: string;
+-  /** Must appear in the rendered line, and names this code's cause and no other's. */
+-  readonly causePhrase: string;
+-  /** Must not appear in the rendered line. */
+-  readonly deniedClaims: readonly string[];
+-}
+--- a/frontend/src/components/studio/runs/RunDetailsDrawer.tsx
++++ b/frontend/src/components/studio/runs/RunDetailsDrawer.tsx
+@@ -354,7 +354,7 @@
+               <Typography variant="subtitle2" component="h3">Scheduled execution</Typography>
+               <Typography variant="body2">Scheduled due: {formatAbsoluteTime(snapshot.scheduledAt ?? null)}</Typography>
+               <Typography variant="body2">Schedule {snapshot.scheduleId} · version {snapshot.scheduleVersion} · occurrence {snapshot.occurrenceId}</Typography>
+-              <Typography variant="body2">Confirmed revision: {snapshot.revisionId ?? 'Unavailable'}</Typography>
++              <Typography variant="body2">Learned revision: {snapshot.revisionId ?? 'Unavailable'}</Typography>
+               <Typography variant="body2">Activated by {snapshot.activatedBy ?? 'Unknown'} at {formatAbsoluteTime(snapshot.activatedAt ?? null)}</Typography>
+               <Typography variant="caption">Activation {snapshot.activationId ?? 'Unknown'}. Scheduled due, request acceptance and browser start are separate instants.</Typography>
+             </Box>}
+--- a/frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx
++++ b/frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx
+@@ -27,7 +27,7 @@
+     render(<MemoryRouter><RunDetailsDrawer executionId={scheduled.executionId} pageRuns={[scheduled]} onClose={() => undefined}
+       onNavigateRun={() => undefined} onCopyLink={() => undefined} testHref={id => `/studio/${id}`} /></MemoryRouter>);
+     expect(screen.getByTestId('run-schedule-provenance')).toHaveTextContent('original.operator@citi.com');
+-    expect(screen.getByTestId('run-schedule-provenance')).toHaveTextContent(`Confirmed revision: ${scheduled.revisionId}`);
++    expect(screen.getByTestId('run-schedule-provenance')).toHaveTextContent(`Learned revision: ${scheduled.revisionId}`);
+     expect(screen.getByTestId('run-schedule-provenance')).toHaveTextContent('activation-old');
+   });
+   it('expired deferred work is awaiting settlement, including while capability is off', () => {

@@ -1,0 +1,2066 @@
+{
+  "atUtc": "2026-10-19T06:56:20.319352+00:00",
+  "label": "obs011-gst-provisional-01",
+  "status": "PREPARED_BACKUPS_ONLY_NO_SOURCE_WRITE_OR_COMMAND_RELEASE",
+  "orderingAdoptionSha256": "731a35f94f1ea304be6f833bb3f117ef10d4b1674e78a698e3f4b09ec9ecb100",
+  "sourceBaselineDigest": "061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617",
+  "backups": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "beforeSha256": "4d47ad6f8d67bfd3278b0d3f3930085e90f190d0ea500875272082eb97a7754e",
+      "candidateSha256": "8f84ec18bf522d09e2afbbc1b885b2a98bb58072ced14ba54c9e27497209d70d",
+      "backup": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-01/source-original-backups/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "mode": "0644"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "beforeSha256": "8e5e4473c54e3884008ca63a3c87888ba6dcca514b5165f9dc40f8f20991613b",
+      "candidateSha256": "2213e3884cc81d6ff609257933bf6f7a4e9a3110e80f6a3d94c221d75b42be2d",
+      "backup": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-01/source-original-backups/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "mode": "0644"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "beforeSha256": "97162010003856cdc7f55f411e286a70f381a664c78c2e5b5cde7d5415784db9",
+      "candidateSha256": "10d3706043430730edc921804dd1b8eb06a5326eb690f8c33f2571d7300fe1b5",
+      "backup": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-01/source-original-backups/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "mode": "0644"
+    }
+  ],
+  "mainFiles": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/ChecksApplication.java",
+      "sha256": "2d5925bc037bf51d36c35789aaa7a0399bfca270262281ad404ac335bd7b5580"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/CheckController.java",
+      "sha256": "bf7f90c4dbd159b318ff652237b2dee0e8fbe75122f797559658e4064d4b92ba"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/CheckRepository.java",
+      "sha256": "b21cc2e3cb0be697665aad7c48b4c9129442da4ff00dfc533057894fdb0efb2d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/CheckService.java",
+      "sha256": "4e5144d20794c78e04c5cdc6a18ef796cf571873af614cc8ce613a2828684239"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/CheckSourceDisabledException.java",
+      "sha256": "5b25cbe30eed677aa39dd1d22e22b8b8ce4f230069f930ce7f3c6b73c5929f0a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/CheckSourcesController.java",
+      "sha256": "042d33721d0a294d223ead985a81dd8d65dd918ab6f646829b48756658716d06"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/FeaturesController.java",
+      "sha256": "abd09b0872b2e074519d2863193e48cc10ba59c7e6bcb084d21d892fc20d6a48"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/bulk/BulkController.java",
+      "sha256": "938f000eb4b0b0a9ef0d4ce318804c1a9a10c07cb68713e8430a1c5d212c96cf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/bulk/BulkOperation.java",
+      "sha256": "03eae102044ea355447ddf5e70e1f7b47d92290d70eeabf14c0040da0af52b37"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/bulk/BulkRequestDto.java",
+      "sha256": "08ed1df0a440fe0cd65e9b4422a46d15f44e0126038bbde0bb65fd5f491888d9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/bulk/BulkResponseDto.java",
+      "sha256": "7e39ea45afddea33dca3feba5256206151b45d6a190d6b05bb120d4fa7bd9022"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/bulk/BulkService.java",
+      "sha256": "3b065fffba7f3a112b1a30dd3dc6c85b3d9f88dc7605313b75bad2d862543213"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/dto/CheckDto.java",
+      "sha256": "5e714081df9443a2efcd6cf3ff684a011d60356b891980fa53304ec21c3349b0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/dto/CheckRequest.java",
+      "sha256": "b9282e3a3c623f81a183ce3ca7a14735bfe407e20f217ddefe8a941112f14198"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/dto/CheckSourceDto.java",
+      "sha256": "0470aa4830f3391c3b0b61194f1e9220f3c177ad78a989654ba0099368bc1acc"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/dto/CheckSourcesResponse.java",
+      "sha256": "da99e8ba81a77c12b81cdd8d771f8891939397c77501f712f540ab16df92c373"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/dto/FeatureFlagDto.java",
+      "sha256": "92b4c25fddb2195f3f38abcd3154418e0c5b2061b4df727ea21ae8ad6a6962bf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/dto/FeaturesResponse.java",
+      "sha256": "35e1c60ac9ef932250a4b3f83088cbadf47280627c9b795c152f09be57e58488"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/dto/UpcomingCheckDto.java",
+      "sha256": "1be03f5fae432680c7113808e6e1c5ce3f40fdaa2ef9470ef45ffcd691c4396d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/entity/Check.java",
+      "sha256": "7a27b132804c65e013e19785218bf45c412595b648e6beaa1ea1db198b6f91c9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/execution/CheckExecuteController.java",
+      "sha256": "cf37661c75c049f89892b4a70b908d862560bea51a8e3a0fb911cd9ab9ac23e0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/execution/ExecutionHistoryController.java",
+      "sha256": "f8ef07d33057596feb53d83ecd3ce8a08d54714b726e227d642586728a7bc77a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/execution/ExecutionPersistenceService.java",
+      "sha256": "c6061245387a7c7cbaaa07136f68bd9a0bcff8be6030078dba809a6591be0bf2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/execution/ExecutionResultRepository.java",
+      "sha256": "ab85ea9eeb298f0d723e4888215b2196152bb3f24144167127441947695bc63a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/execution/TestConnectionController.java",
+      "sha256": "69d0fb7d0af3554ea811c14704770229bee4d8fe6c74ef3ada3cfeebc3132b74"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/execution/dto/ExecutionResultDto.java",
+      "sha256": "3abc6f13b5e6f0415d73120d011bf8c1bfb429654f401252255e4893b1cc8049"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/execution/entity/ExecutionResult.java",
+      "sha256": "1e016acbce388e5559abce093848514ab3988bbe073d9ee74d90efb3bea99f72"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/execution/entity/ExecutionResultId.java",
+      "sha256": "189af809555c281b39fe28729d82d4706f904439a2826df95b03ac510b519631"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/executors/CheckExecutor.java",
+      "sha256": "a59ea5eea553296e907195e0c6f2deccd8b749e848c88742d80c4e9cb58c6bbc"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/executors/CheckExecutorDispatcher.java",
+      "sha256": "7e292fee33a7b119e9e1342e841ed79b94644bd5534a582104a6e9dc140b8dd8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/executors/CheckSourceDisabledException.java",
+      "sha256": "f478a919f928e42d2d394ee5acc380fe2266e85ebedd985e6f78cf20df5dcebf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/executors/ExecutionContext.java",
+      "sha256": "faae9421c4dbacc3f37a6d76216b4775962b2b5d04f3841f4da1d15422fb2053"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/executors/ExecutionOutcome.java",
+      "sha256": "1c3d886861924ec79052122cc4e856a62cc4fac343e1c33e687aa23184c6888f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/executors/HttpCheckExecutor.java",
+      "sha256": "5473f616a0dcd642b322a2ce0d83d2c125b063d4a00f89b63720085270dc69e8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/executors/SplunkCheckExecutor.java",
+      "sha256": "30a2b36ec50eb61869163532a4ae28d4d324e2bd3ef61104958bd9bc73af7a52"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/executors/TcpCheckExecutor.java",
+      "sha256": "973e5088b95e289177621c36f44d1434f4bae4338c1377530c43a1182aa8e24b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/executors/UnsupportedCheckTypeException.java",
+      "sha256": "3118539028105cf6ce3e799db354b08af64668161afd9a4f53f1348d4517dde6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/model/CheckConfiguration.java",
+      "sha256": "427e8df4676fbf93423f524157c9c3f22b4139797cfe32e022031aea049fcc9a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/model/CheckType.java",
+      "sha256": "88016b4e4e5318f5cac77800b5067bfd0882abb20e6021e032c4a4fc3e7e424a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/model/HttpConfiguration.java",
+      "sha256": "2b928ebc435e75f68ecea20d0de9f24578f90b44d0a9fbaff1e66bdc71c61543"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/model/SplunkConfiguration.java",
+      "sha256": "3291f6dd27d618400d8a312727646c7b61618899bc10ffdc0c87390bed5296ce"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/checks/model/TcpConfiguration.java",
+      "sha256": "8ce06be284bbbfd8bba61afe8aaf132ada0283047a18ffbc794f0252d20bf74b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/AppPropertiesConfig.java",
+      "sha256": "c26cff60b19e13b8e6adec6d61f742dc5938c1bf72ca170ec98d188b672f9a3b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/AsyncConfig.java",
+      "sha256": "71dd6510f7717d538617b8a1a7202a3462126392a9151b177dfbd77ccec89e25"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/BucketStore.java",
+      "sha256": "981a5696ba81bf4776ca95454050b0cb60fb4e188b4e7dd14776dd85cd9a43f1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/CachedResponse.java",
+      "sha256": "a25f826e20e93afdb63fcffabb58af3c8a9ebfdcd03ce5889e35311834aad5b1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/CheckSourceMetrics.java",
+      "sha256": "45cd55037609c49f5b5826986e4c12274760091a08f78626ce5fbc9e64e051e6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/CheckSourceProperties.java",
+      "sha256": "5161b58c3910004f3a0b412f24a0e87eb776003ea2c8b978f76af4b64a88b8f8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/ChecksExceptionHandler.java",
+      "sha256": "c175e69b6608089f11e4a3214845cda0fb39ce493098b4cf05db3a51c2b71859"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/CoreServiceProperties.java",
+      "sha256": "8e9a132bc7be8b1f327595a9c1e112ffa072b0aa17bb7aa93cfeac3d493395e8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/CorsProperties.java",
+      "sha256": "dd1f759380b10f89680a8b399ad87ea254976f57f5f3bdb97115de7192ca2e0c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/FeatureFlag.java",
+      "sha256": "be5e59fde772e06f74f417aaaf3ce2cbfc6181fe88302614b08e5f6845b51b24"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/FeatureFlagProperties.java",
+      "sha256": "34978289f2daa69353406b9278f1cb861af8acb4fe810bde60cd67d0eb583f05"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/IdempotencyFilter.java",
+      "sha256": "2998efdb0a012f163d73838149e7099e8a2607cf768eb1472698a8f5e68c63d8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/IdentityBypassProfileGuard.java",
+      "sha256": "fd18740435cd7aa38784abcfffca64a1d869097759a4f98fb157bb05803b7243"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/IdentityBypassProperties.java",
+      "sha256": "d78ca84409399fffc35bf824d882c507340032d41663f7782b0fe4d01168d5e1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/InternalCallbackBodyLimitFilter.java",
+      "sha256": "cb1782832cee03bd84efffdf7392f0205b1f982f5a7f040f31a2dbc37ef3775a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/LocalDevAuthFilter.java",
+      "sha256": "69808c84e0aeb20ea099afcd2e9d7cccbe76b5f6e5257cc2aaee7846d74bee98"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/LocalEmbeddedPostgresConfig.java",
+      "sha256": "e62eeed1fc6ff692a50f5f726a3bc7e392567b828f736b788e8a89021753a926"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/MdcTaskDecorator.java",
+      "sha256": "3e7e4446e72f755483d8a6bb6991bed0968b16698f8867c62bbcdc0f51029578"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/OpenApiConfig.java",
+      "sha256": "1c6d847329298c24934d524e5f15ee51b6d222df5eede6f938f6e4a24cace0d3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/RateLimitClassifier.java",
+      "sha256": "2ccc1174788d631017d961d8773f0d855d7f6b1736398cf8b281d08a4db3f020"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/RateLimitFilter.java",
+      "sha256": "807dde5b3f91f3f8936b99ff768782963c161d51377022f216362e0d9ec0e474"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/RateLimitProperties.java",
+      "sha256": "291db17d99ab5440f88d508daaaa3c8d7572001025325d2f499e97216eed0436"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/SecurityConfig.java",
+      "sha256": "126355c3bb8b98a406ba5870a073690065760c16f02d4b1fb0f5d383f53403f2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/SemaphoreBoundedExecutor.java",
+      "sha256": "91f12b767308a5517864eeab260692ca6532c81724b82f53d77c2ba507ac66f1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/ShedLockConfig.java",
+      "sha256": "410bedaaeef5167b89f149c02bc26c8aaaa83f095f0301c37cd07e3fc68be7db"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/SourceConcurrencyProperties.java",
+      "sha256": "f4e58209bbaa5de8fd4a986ec9717899652e03bc70e0afc4819737cb46582f85"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/StudioInternalSecurityConfig.java",
+      "sha256": "7a5e836b567cc46ebd8ec48f495dc5b5d3c5a2332268e59e031941d36b03ae67"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/WorkerSecurityConfig.java",
+      "sha256": "3f2ce73f9e0878afbb3217ef7ffb8199ee571c606649ca31374ced53cbad5806"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/logging/MaskingMessageJsonProvider.java",
+      "sha256": "ea02ab1f17fec7fd0bb006ce83219f768844bfe6bf1d23be892db0f33f7d87f0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/logging/SecretMasker.java",
+      "sha256": "a40ca381f0b67e8ea57d6705f7c5c6b14eea6718df444ce3814757442c59ee0f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/CsiApiClient.java",
+      "sha256": "a9235d615a2ef477b77f909d3651c175966ffa3ab42bfcdd063a74ef1fb2b516"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/CsiApiProperties.java",
+      "sha256": "00f701e39b24366f6b9a7d9b6946439b6ed7db4c29c07f2dcddc3c264d9f6f57"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/CsiController.java",
+      "sha256": "e125ab9a6531e994d742b490f020e315249ba0fb0c8fb330c257965285abe591"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/CsiRepository.java",
+      "sha256": "9a21fbb4fb5b0fa8c102cc68c6d24372fa0d7493c62313f7abe9eacac9d37efb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/CsiService.java",
+      "sha256": "c14107efd02fe297c8b1fc7e0bae8556427ce8c734fd64ee21e52007e2573cbb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/JpaCsiApiClient.java",
+      "sha256": "2981436542080905be1a2394c591f0e0ef8ae7a989629b47d7a265c031b7558b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/RemoteCsiApiClient.java",
+      "sha256": "7a31935a860ddfe96f34c1b949e20eaa91986cb86c275429b9fb99b4a6d0eb8c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/dto/CsiDto.java",
+      "sha256": "2fdff4a5ad90a06fcdaf20ba2f67c5f1cda426a991265eb855696cf23b758ed2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/dto/CsiHealthSummary.java",
+      "sha256": "1adefb9aab0fe5d79ca89d36051dd90e15beb21e0b5f38ea62c34c23b715d046"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/dto/CsiSearchResult.java",
+      "sha256": "c0c20ec387e05e5d035965d6ced4632f4857d38601ea622ee7626c7b109ba2a2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/csi/entity/CsiSystem.java",
+      "sha256": "852bacb19e69f0d33a521bdf0f05879940e28c07638c6dfa2f9e4f5509d57d99"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dashboard/DashboardController.java",
+      "sha256": "fe0c5e9e7947d18fd7b3870c7dca499fd832400a38a7bcdfe397949268b01561"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dashboard/DashboardService.java",
+      "sha256": "b08a9eb590e35f1b6f2a928780f8fa22cd56e4d0038d4fef092bf19308ff2ddc"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dashboard/dto/ActivityItemDto.java",
+      "sha256": "8fe2029e20171e803aa9870f8e7269d856d2ff9091050979a8f4ebc1d5f11337"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dashboard/dto/AttentionItemDto.java",
+      "sha256": "a9ca255183473d446dbb6d08eda036bf25db8fe8a5fff871ba9a1938a19547fc"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dashboard/dto/DashboardSummaryDto.java",
+      "sha256": "36056516a7b717e69cb2287547a5c36b10e5395d893f1e6aea8ac4f8a5259571"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dashboard/dto/ReportSnapshotDto.java",
+      "sha256": "e90381253348f564806f7c55983ebc310d97036ba948cc9513f4d318e0150c3a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dashboard/dto/SearchResultDto.java",
+      "sha256": "645df195d56e34e0b1a67765dea3d5a1d3f72188f1ed5fa69dfadc3cb6272318"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dashboard/dto/UpcomingItemDto.java",
+      "sha256": "402fb8f764f460d4a8c7c5dd4d28694b5db4d2357a15eebc95c9e1a591defc69"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dc/DailyChecksAdapter.java",
+      "sha256": "3e4b3c5e19ec7d3f6f09263f6dfd71a1daa936a70f83172dca4583913b6ed5a5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dc/DcClient.java",
+      "sha256": "e70693bdbcb543dc7858902778c34e7a51ec1faeaa0706bed81cb56cf378f02b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dc/DcErrorMapper.java",
+      "sha256": "0ed9dc9cd460006afcf4c43484948f4aba15a06605a295fa8411b9abd082d2cf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dc/DcProperties.java",
+      "sha256": "ed9161941789651d9c9f3ec1628ef0280fb29be30a951156d55171eaf4848e97"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dc/DcRequest.java",
+      "sha256": "8769250e5e9e1139387c6ab57962728ef4c18f6f81d5a0e2a0274a8d517ce119"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dc/DcResponse.java",
+      "sha256": "c75ab35a0e65138ea05cfdfcd11774f5222807bd78bfbd89d4dcde8bda9ffa51"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/dc/mapping/SplunkMapping.java",
+      "sha256": "93a0ae24196a688be1084f8aca65f9a1b36a063e8aa1c4499c19eea9be005836"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/ReportDeliveryService.java",
+      "sha256": "cece4c70d2668fb94ac2fe46b99988069518b0cbcf334a92c667dec34c5733fc"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/ReportExecutionRepository.java",
+      "sha256": "c208b721c040860c202fb5ff2921880b76d036e6802e79e826b3c9e5bba70176"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/ReportNotFoundException.java",
+      "sha256": "767b08e6cee89aea52f8a1648fa54dca9d6d0a156808d0063e924a713dde8ea2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/ReportsController.java",
+      "sha256": "682e967893d09de913f75e1458a8f2391be396fb94f9296c1729062525857c70"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/ReportsRepository.java",
+      "sha256": "a4725e35ebd3267639207e8aed8482631fbfc50eaf4006e5329ad142c753553c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/ReportsService.java",
+      "sha256": "39f63b18a33f3983c763fdba545fa84cb48048f7b9d4bf613a5f2eb633fdc4f7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/dto/ReportDto.java",
+      "sha256": "6a493cbe07ace045e9d2fae8e35021cb82b75b447c76a280e06dd8e814834f2b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/dto/ReportExecutionDto.java",
+      "sha256": "10ade612eaa99de711cad7a425d0614d90672ae5dc4af611ea5736828198e33e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/dto/ReportRequest.java",
+      "sha256": "80c4285d06b42dd22c4fe9b1c6e8ce6a166b4a5b6c7ef78af633f41c45b4c0f0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/entity/Report.java",
+      "sha256": "07d6345e879c5243046b94ab7382d3613837ef4d9a5dbfe1d739f34be728a6e7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/entity/ReportExecution.java",
+      "sha256": "f789cbfcb4b1d1a4acaa570f72f63fe05e9cbf44e400bd8f7b4926574a12a158"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/mail/ReportMailSender.java",
+      "sha256": "e48636522c2d4630d3c9cc28d792b77b6009c3061268e6685b6a2913c8aa24e9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/mail/SendResult.java",
+      "sha256": "378cf833da370ac14d2f1c2e5048e18ac143a5539fca5c56707176d18d808370"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/render/ReportRenderer.java",
+      "sha256": "bf19afb863cab824803d30f52bbef6fc2ac61678e3c25a25c6ecec2db4ed00d6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/render/ResolvedSection.java",
+      "sha256": "985ae5e992c5c0ed699cef6028e9ccb55bc9b963d5729a0fbf219979831ed39e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/schedule/ReportScheduleResolver.java",
+      "sha256": "d4799aa8d466efda962a1699f9432467fe76f47fcc0b607f7e816f2ccb1dff01"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/section/ManualSection.java",
+      "sha256": "f5ebf33da37eaa91fa934a0a8a0d2ceaace9aa4bf4c80ffefaa71fce18165e54"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/section/ReportSection.java",
+      "sha256": "1783b5c41d38b2acfead5b199d3533c0aff802b4eb95a3466c07a21c5ce87766"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/section/RuleSection.java",
+      "sha256": "4d53c5357052af2e8b13b5bf554bcfb5cdeb5970f2e84b9699ec9de83aa51a49"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/reports/section/SectionResolver.java",
+      "sha256": "2df67307df191df3c022a49c32b394552cdbbcf615cb1cbb89be6a95143ada41"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/CronDispatcher.java",
+      "sha256": "580ba79e5eb07eee90bc3a5e0faf2823b88456f396a3d618dc8cb35ee97d4073"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/CronRecurrence.java",
+      "sha256": "ce1edad0e3db239e22e10439a6eccbfed8295d1899db6810e9bb3fd2d64edde9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/CsiMetricsRefreshScheduler.java",
+      "sha256": "6b496c0ae3057173e1e2ebde070a1bf19cb8e7c644f2f1460ff6422c8ea51286"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/DispatcherHealthIndicator.java",
+      "sha256": "7d51bfaeaa58b40ad89235669ed02d9e887b7b4ecfdf84744773c4dbe759dff3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/FailedDispatchRepository.java",
+      "sha256": "b06f27fe807a52146033d827c16910228940a9e25049b4e651028806150f0d50"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/ReportDeliveryDispatcher.java",
+      "sha256": "0ae6dc45d304360f48c05794c8ac6a56114faaa4e744be7ed2df6110d1bccb7f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/RetryDispatcher.java",
+      "sha256": "36233264b950b4be0d1449ab6f702dcc27dbcf1aca5c6975799b155ed9a585a6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/ScheduleConflictException.java",
+      "sha256": "c3986b3c694196f09ec2f0ffe28976ed1ce810327f42d6d50333682d593f1c8d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/ScheduleController.java",
+      "sha256": "6d8e5950bfaaf06e42bef6f3c1f2c6a2d8ef49cd0abb128c3cd82e06b7867334"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/ScheduleNotFoundException.java",
+      "sha256": "734e065873ae43bdd69e71d3c8d179d9c3ee19b52047686283441b3b6471404a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/ScheduleRepository.java",
+      "sha256": "f2f3d6c06d181c1578d13810c163e5bb18a122364c11a0b16c3dcda152bc486f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/ScheduleService.java",
+      "sha256": "93d8c1881acee4985524869ebcea2e38a1216cceb0d31894dd80ecdecb7f9224"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/ScheduleValidationException.java",
+      "sha256": "b4634fc72801be3e672c29168fd52614eabbb32864b8f2d97fd3a2029e1c40de"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/ScheduledTarget.java",
+      "sha256": "7d30b5ff4cea6024312c8cce4cf68bfa9adb21dfb66e01e1abfb5adeb59d0540"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingConfiguration.java",
+      "sha256": "544dc2794fa680416d125655598cd34d50e842be1bbb68ff0f1c2d8726b8e28d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingCoordinator.java",
+      "sha256": "1dcfb4b076ab1dae897b3b2fd092a67601a2874825009bf9b8087c08d7e49d51"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingCoordinatorProperties.java",
+      "sha256": "e058ff0a6be3b1b1de058a40429630277d23899b06ec242849f73e90a77c9c48"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingDelays.java",
+      "sha256": "71bb5ff18998b2025f5e9f555a0527253cb23fb75b411433c890fccd71d7af7c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingHeartbeat.java",
+      "sha256": "857615c80f1b15ed80584f78115967e4999e3a7130c79f4d95ef8ad1cbad66e0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingTargetWorker.java",
+      "sha256": "f51c95036c586d64ecd929463ed740d28a40bc347a343ca300a202782f47e077"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/SchedulingTicker.java",
+      "sha256": "281ff08fddfb46aa45901cd035805444c7d4005767c10b8de6d5be3b7375e091"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/dto/EnableRequest.java",
+      "sha256": "25f13e6fcfd56e976c4ababfe94ee7727a1f2b36688dc57a37808fea49f01c40"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/dto/ScheduleDto.java",
+      "sha256": "39e2ca65c7eb6707f135c332f2ecbac1b222bbcbd9edf69209da4a805b3b0bce"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/dto/ScheduleRequest.java",
+      "sha256": "4da066eb2a29666143273521980c424123e55a32e083bb3121108ffdcd7aecbf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/entity/FailedDispatch.java",
+      "sha256": "7862096a6c5229c417460ec36519f9c6781a08c2a34a97475a4dc8180350fc43"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/entity/Schedule.java",
+      "sha256": "a1249675f4e3e95fb567291a25d65c60a6b0e75ed84ed8931c06151dd453218d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionBootstrap.java",
+      "sha256": "31518e41580281ce9d1123c15b8ada54e4e5b8f4640996e61595ae6e89c632b0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionHealthIndicator.java",
+      "sha256": "a9e824e48781e6dacb225f5591edb6b56409b337e87aa2a482c1806348bf3232"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionManager.java",
+      "sha256": "92c33abf1f453fcd941c435c2eb32348a91b440e0e920ee82e979849da42dc72"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/PartitionScheduler.java",
+      "sha256": "19b21872f027e28ee52becdbc1621725713752fc4b3d2e5b24d482d50ff83ba1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/scheduling/partitioning/RetentionPruner.java",
+      "sha256": "01d2387d355d44e5c81051fe4306bd807b17d093947102483d328cef0270ed5d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/BffAuthenticationToken.java",
+      "sha256": "8c862495cabbe1a1f9f1719ddcf79792a34ec012b1e841728e4a0b9e1573680a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/BffSessionAuthenticationFilter.java",
+      "sha256": "316e55bd24f1df49d6e61e4459ae82351fc3b4d9ae9a005bf6b55835603eb6a9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/CoreServiceClient.java",
+      "sha256": "e689d64d6fb473dcec0dd76b0b3e554dc8a042a72d35ac912c0bb7fe5a06c7fd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/CoreServiceUnauthorizedException.java",
+      "sha256": "1041777b9fd968c6d767a63f2455f976d543b9f346c7a9b83dbf4180b9b7f7cf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/CoreServiceUnavailableException.java",
+      "sha256": "51c4b59c1777796e7021bd904a7cbd35a1845597f2cea0b2f7d8cbb8c1b3904e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/CsiOwnershipEntry.java",
+      "sha256": "02809d0b21010fdbf4c066114431cbeadab2ad7e885033d4ad14c51cd64a00c6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/CsiOwnershipEvaluator.java",
+      "sha256": "94a3643a86f74acca9f47bb4333e50153a7ebfccbb8b947618abfda82b2fed2e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/PermissionAspect.java",
+      "sha256": "414e370c8a55cefe2420e2aba674652b41c24c515e375036190141f09e4be577"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/RequiresPermission.java",
+      "sha256": "c822f9e3cfb058e6d0506f32a78cc2030f307f8d5d67af4427ec556d245992d1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/ServiceIdentityAuthenticationFilter.java",
+      "sha256": "f83ddb5c5a7d6540879616a1498e02a8890aa25551b2d0c4889baeb9ee43aca5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/UserIdentity.java",
+      "sha256": "f471cee30f38b0536ce779dce29668376ba864cf6353728f4bc6b8e0edf3f190"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/event/UserAuthenticatedEvent.java",
+      "sha256": "5e9489aeec1b09b43cf8c38334a580c78dada7dd4336b3fcfe610dc1e6da9f94"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/ExecutionSnapshotMapper.java",
+      "sha256": "ee92952b18f87ac113bb42867d1bbe43fd4062276f1afdf125caa2fa48a427e1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/ExecutionVideoController.java",
+      "sha256": "dbca1f880ccbc7126603c46c1485a6d8877bf288ca36841da6daa27baec3c755"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioAccessDeniedException.java",
+      "sha256": "36f2bdea6e8ff531cbc34c677026311782bcd8b5f6ee6636bf61681b65b52dbb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioConflictException.java",
+      "sha256": "0203f758c72958b33da3a2163aa84dea87b5f8adf22554045358a1f87bc57d20"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioController.java",
+      "sha256": "1fcc4d82f2f2a71f5118cb0fafcd21b1872978c435ea743bfcec72df75a1fb0e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioDispatchLedgerRepository.java",
+      "sha256": "697fe7f720b6cf2cfff6cfefc0ccb06992df33fd75fbf543652bf3abcc7abe36"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioExecutionProperties.java",
+      "sha256": "526d8792b6c0b7f7b806d4d4577b4934757b230cd18b82515b75f911123f3ea2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioListQuery.java",
+      "sha256": "8b92c349b8f6ad88e138b1e97f73512f52e5397415f4cf3b9c3a2069d1389844"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioRepository.java",
+      "sha256": "916e93478dffc798eeac77018a16ac3d3ff8f15a60e10a3f59ff22f407a634a3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioRepositoryCustom.java",
+      "sha256": "10a94657fd4d65f2fff6cfb6bf2a283dc7ad68087580256468059208af8f0984"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioRepositoryCustomImpl.java",
+      "sha256": "84ba078becfb38d0c024edce04ceb862a7eca86401b6c8c79fae96629f796712"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+      "sha256": "c9b8019dfc341633b8647fdce492814b31682a9ed2d5fd61a8516384ffafbfab"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/StudioValidationException.java",
+      "sha256": "8b7533ae58a5fdd5c10c560b1e6a82b47a446f072f7dee1120e73e8cb1305dd6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/UITestExecutionRepository.java",
+      "sha256": "ead3823130c255ee9905baf9a7fcf6c9f51953e4508ce418e0707a885af32e45"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/UITestExecutionRepositoryCustom.java",
+      "sha256": "9fb26333cea721490def90e1127c7635ab01edac85b19a3c695b13edc957a999"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/UITestExecutionRepositoryCustomImpl.java",
+      "sha256": "71a5c134d73fe28c07dc6dd3b869e33ab3f9dcf3f6b306462f0264f961c9fb14"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/UITestRevisionRepository.java",
+      "sha256": "f3a942519bce9d569ef0136647136574275e0f3155911c3a43391967cc3be84e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringLimits.java",
+      "sha256": "53c422f9f029eee325f3fd32ad6d0731677eb88ce8e54925da8f1e3eaf951d14"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/AuthoringRevisionIdentity.java",
+      "sha256": "aaad4bb7ce2f20090a3c32ae0360b86fd28514455f179ea53b1eb39dbd12cbd8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/ConfigurationChangeClassifier.java",
+      "sha256": "8f0ab9bb6c1a3391a322f346ef131b41ffb5249afe8212fc723ff0c0295eb231"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalAuthoringIdentity.java",
+      "sha256": "80b943dc3b707ed46fecae75ff5a910971a2d6343e9f4da35dfa46f7cedfd45a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/IncrementalChangeService.java",
+      "sha256": "095342033d94a68102785690c1bb6520fd6126e6b91c03f0a3e15413878ac117"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/StudioAuthoringConfiguration.java",
+      "sha256": "c9a0288f3a1197d759ba85937c7baac4436d1dd8bd3fd6a8ab9d8508ff5531f7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/authoring/StudioAuthoringProperties.java",
+      "sha256": "a9cd434b12668ac31f81a9fdc15ced4ce2f1422a8bfe12c0b9f2c69cf1f76622"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchAuthorization.java",
+      "sha256": "29eb7654f173c097929f5a32dcf8d6eb092e859e1fc41a59628adfc223ade44e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchOutcome.java",
+      "sha256": "420a2b8393b02b29bc897a1053646d6da70cdc5c0fb79f32616ea6341713793a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/DispatchState.java",
+      "sha256": "522648f65e8b427dea7fa674d9de89bd06c019b00c17b11021223a67d12fa124"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ExecutionReadiness.java",
+      "sha256": "def9a73ce241db09adc9408b205fcc6eb497aef013a54a0599f331ee01235ca4"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ExecutionReferences.java",
+      "sha256": "75b6ec153d608bcd14e4b4a4b81c3983758673c462ec5b45ff686ecaf25d2912"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "sha256": "7eeaa3b49107bc1436adf7d0107dedede12f6ad364a756bc41c716ad828c99ae"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java",
+      "sha256": "3da9f5b25e98f28097c587488a408abb149deee2496a9cb440d9710fa27111b0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/README.md",
+      "sha256": "5617838b77d2b5ae1aff1024339bc9cf357d50e9eb43a95386b976171349212e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/ReferenceDeclarations.java",
+      "sha256": "eb96d80bb23ec4aab53779f7c79e542bce026cb6ef11c793831cf45c41216fcb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunJob.java",
+      "sha256": "4f36a985bd75b8cc54cd605ed38e3aac11d76eec5fc0600d2ec01394476412c6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunnerDispatchClient.java",
+      "sha256": "a40e1af0361615e6271304f6b218f341e0f6ae8c26b180be3bc016b8922a89c7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+      "sha256": "d8cfb9fc4dcf4fb30119867a358c138f302be862b71f4d7b26fa5229b5a6e1a7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchDisabledException.java",
+      "sha256": "a44f76eb74c33afb51ae3b9e8f2d6bef6aab6e929961e00dd3bb6f81370826ee"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+      "sha256": "ebb679fc8ccf3e2e5df0252c1e27b54471e22388541bd3e35b82f90f007ed86f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchMetrics.java",
+      "sha256": "7bcd366e1f43d0933ea9a248579ed81540fbf22d73bd2ade6b855c255cefa624"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchScheduler.java",
+      "sha256": "68c044e2066c5903fa40888477eab9cfe3ff732473c53fb14d1cecca01af0f07"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+      "sha256": "de7b12c556eb5a4a32862484f34d8de4cf16b1942ad079b33dc2743f9c76e05f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioQuotaExceededException.java",
+      "sha256": "43cf9c80944fe1ddfa33808b5d81badf7f4767c643d9149fb4c344a50fdea0f2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java",
+      "sha256": "7c7647decdba421b96cea9baa1f7ca1cdc0fcabf3b55213bc6a0ea636170a233"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerConfiguration.java",
+      "sha256": "24c4c76fed7a4bb71e3773ed744f3507cf25f9762d227da6df2f6ded46bf2278"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerProperties.java",
+      "sha256": "47ac8e9f5ddb383cfe26575261cd71581d3cca98db5512c5756016bf6afc4004"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioRunnerTls.java",
+      "sha256": "aeb3973501558664b2446a40afa760a92b6e4eb45ba0397448c9ad0d5fab4b75"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringDiagnostic.java",
+      "sha256": "bf8890d0fae49c1ec573794e278a3b956a8de9594856632a0e0b2b2104243b3a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringEvidenceReference.java",
+      "sha256": "014dc5bcd3b55425dcc4119018eb076c570889678eb9c8d3412f9b36f591c319"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringRevisionInputs.java",
+      "sha256": "c5c164bbfc55f8136db5c467522d0f5498e77bbb477f672ec5f74341116e85dd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringStep.java",
+      "sha256": "6aa873ed1f1d6c9c4cfe985203b8be9c58b2c52f90be9e53d096a6e382dce2da"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringV2Request.java",
+      "sha256": "455275e8da934aa7092ee81917cd97d472cfbd980fc45e65f048cc407acfa211"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/AuthoringV2Response.java",
+      "sha256": "d6ee203f6213f45925fc689b13566b5e02673bca2ab122e9faaf97ef81e77327"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/CanonicalStudioCodec.java",
+      "sha256": "c229a6c9fdf3ab54156459d5feed68f51fc03ee069513832971671152d417a15"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ContextProvenance.java",
+      "sha256": "c71011185b33ddc81d1b0cc279544d4391fd544d46cf265564f76e143a3b2f0c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ContextText.java",
+      "sha256": "665b4b69cc10e6cee6a4b4a2c449f683f10ddc556eeeae68c13e108fa2179079"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ContextualDefault.java",
+      "sha256": "f627d4daf30431bc54c5d515f160845666b6f82372887e65e413a8ed9d542e05"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/DefaultLiteralValue.java",
+      "sha256": "21e7fbc060cbaecc3812b0e46239224f20b18022395ae2959392c374017cbc51"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/DefaultValue.java",
+      "sha256": "0084511b3045d97f892180863b5fc4ba962b0d1a6a63c4b4291abc88887d5a04"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/DefaultVariableValue.java",
+      "sha256": "6a6794a53ef8703792fa2501daa710b0ea676b2f7d400e918e5aff85f667db6a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionErrorCode.java",
+      "sha256": "75fd0a9e77dbc10486fe49adb67630c71786203dc5fc620246f0ffb0acbd0011"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionLogEntry.java",
+      "sha256": "977f737a2d9e13f35f74bf1efea5ac682424b8afab040b766e26472b0b88fabb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionSnapshotDto.java",
+      "sha256": "03518ffd48efeac2f92ef6f754a617ca3f5a1eb80a854519e2a1aea0d2f5f34d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java",
+      "sha256": "bb207af39e66f2681d9096ccdf6c61d8b4297c5ab0a0d02d03a1b5ba3d08731a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/GlobalAuthoringContext.java",
+      "sha256": "39e97dea4eed7ce551cb2b2a316b143eb5f5cad2e561588547fc5374c59f02c6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/GlobalContextEntry.java",
+      "sha256": "e1570d65be0017f209cdb92c4d51d949c4a87d97a71e4c493a000508e835d467"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/LiteralInput.java",
+      "sha256": "1654887f043840b63d25de6c90cd041f463aca70f1a471bca21c6ffb675aa5f5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ReplayFailure.java",
+      "sha256": "51a5a4189bd80d3e7a7a48a624a5dfc489c2130b9a7b3a84617257ffaaafad53"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ResolvedInput.java",
+      "sha256": "398f4faef332f0a211839845dc0340a7508b482513138a0bf96f6d705b65f78e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ResolvedLiteralInput.java",
+      "sha256": "fb0dd427c6b1130818c3d0d6fd249aa3e5578dcc463ac921f32a127d53719dfb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ResolvedOperation.java",
+      "sha256": "06b018f4d2f4202b76c8a4583cd600937cec46b4de41c375e105e029ef77e731"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ResolvedReferenceInput.java",
+      "sha256": "b86921e8d41512062ee60b1acb21a447d5bec9efc1524308f7f65f8455ab1ed7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ResolvedStepReview.java",
+      "sha256": "bd989e29cff12783892b367b3ced3ea6eddad5028fa73dbdbce5b5979f4e1967"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/ResolvedTarget.java",
+      "sha256": "5de06c842daa0b878c6a17b7c794414fc696c169290b45c7af425451f8911504"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/RuntimeVersions.java",
+      "sha256": "6a13398d1a265b2e46ad2d12eca604a831d392de0fa22972bbbbcc8554cfcd4d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/SecretReference.java",
+      "sha256": "4400e71c397edb2a8fb4ff0bbfb0b607272079405aefad222ad92a673fb86ebb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/StepAuthoringContext.java",
+      "sha256": "012581ffd2d3c682aee3950f351208bf9fa6376d09a5f39f6dad56c05b366ac4"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/StepContextEntry.java",
+      "sha256": "95b04b1db81ad059be8bee5e617e4831d7977448ebafc2b59b1d89fe94d5a7bb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/StepResult.java",
+      "sha256": "8f7d0f3769fe6c26739405c0c41e221e695b55e9842357412a4d4202a7043bd7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringMapper.java",
+      "sha256": "cab429e5f122f984d93100bb9ca27e7426b6acdcf9b4fb9c15e2fd9fbe1a0ee4"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/StudioAuthoringValidation.java",
+      "sha256": "c1809f99dfec785598b5ca11dd36a76f424b550cbb4657e35fc85da17d3b8527"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/StudioVariable.java",
+      "sha256": "db588856e4138219f453c5f7cc22d99f50b0d76d2e54d9ce481439424981a41c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/TargetHint.java",
+      "sha256": "d7542aa8ccf73b475c69431bafe4bad14492822f3fa4bb51a4db7393c0df3f52"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/TestConfiguration.java",
+      "sha256": "5ac4482712d94037fafeeeddf224ff5c1b3ce411dca0742e95802ed725ea63ea"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/UITestDto.java",
+      "sha256": "0d85b45e091c2d2c37959ba558c337cf034ff5483c60a47e188136f684891980"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/UITestRequest.java",
+      "sha256": "74ea309153bbfb18432bcf6d4091db1fb9a0b5c4f6c6a15fa918f323319fa64f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/VariableReference.java",
+      "sha256": "f4dd5e30b401af2673d963bd4c5af84270b1a4cdd980b7f440f2233bf74ee42f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/VideoEvidence.java",
+      "sha256": "ce259347e387c2ecf842479ebe269abbec483e2eae23fb7bf17bcd3d0be72f16"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dto/Viewport.java",
+      "sha256": "dcf2bcf8b5a2a4c33dfbb08750814c6b92e56fb04ebd73056df147f32310b7a7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/entity/StudioDispatchLedger.java",
+      "sha256": "149fe8a8972d9ddbb6de7f13adfac0945d1d2f186d6c7c8756271f63df7fe44d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/entity/UITest.java",
+      "sha256": "f32a2df648cf793ffc5c9e5886c5d3831dcf0a5043a3d232dac6d6f732482d65"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java",
+      "sha256": "bdce2a9c4e4fa3f668349b79b016ebc7879b901dd11b9ed461696b42a0506d16"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecutionId.java",
+      "sha256": "b91554ac1dbd6906931a8e9fbc7848fc85c94b3e5da6e1762568fb04f6544f35"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/entity/UITestRevision.java",
+      "sha256": "3e18f9a31e09032e609953753c81914b4a71aa5ec553c0022eee035264075dbf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/ByteRangeRequest.java",
+      "sha256": "d8aecc1b3c5faa1fa4b6c6ace633acaaa84eb652f1a68251a4c34604781b5a50"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/ExecutionVideoException.java",
+      "sha256": "6127cc3dc0cf8c5ef073ec5f5c225362fae5d2421a800e143bfcae03be2c79cf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/ExecutionVideoService.java",
+      "sha256": "396aca5eb79cb0a59ceafb7d8b63cd57c2dbbfadc7960a061c08baaa8be47b89"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/LocalVideoObjectStore.java",
+      "sha256": "13bc203dd4bc27d53dabf31cfe491f38b4cb771bcace7cb6535fe8fab7219f4e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/S3VideoObjectStore.java",
+      "sha256": "ce41edd67dc53b171887584a36c618cecc9ef4eb1bc95a1eb3342bb311d4b642"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/StudioEvidenceConfig.java",
+      "sha256": "7300fe78551b590f06351b1f633c1761e0e0097899c67f6016acc5ca13730299"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/UnavailableVideoObjectStore.java",
+      "sha256": "e1cd5004319964deacafb2f0becb1845f8fa390a7313cd593941215452a57c19"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/VideoObjectMetadata.java",
+      "sha256": "9480fdaeb5e50ee031e8cb6132970540e49098c142561ee3e85c749061cd6be5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/VideoObjectServer.java",
+      "sha256": "28f34dde03953b0cc40a71bd297da624bb1419b0a10dbeec3d3f8b20a7c4bb37"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/VideoObjectStore.java",
+      "sha256": "c3809de34218cfe48264d377c2009c97cc7ede05832733596363b1e6a0b64fe9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/VideoObjectStoreUnavailableException.java",
+      "sha256": "dd7ff807a1d829a071a0aa7a846b7f32d756c3265e1a31da278145b15c609d11"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/evidence/VideoStoreProperties.java",
+      "sha256": "86736118732cb6e8135f1e6f0966bb66b296b007f749c059b4a5bcf551ca71f0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/BoundedCredentialProvider.java",
+      "sha256": "9210530ba851e917f982c56c71a97271f828b1dacdef103237e182dd12c60334"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/BudgetedAuthTransport.java",
+      "sha256": "5056216b5848901973ff104a73af86edb5abdf0d1ebfa0846b0d5d201a70fba6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/CredentialBudget.java",
+      "sha256": "79e1da2fa08c0f4ddb8f40ea37b07e3c98b5ecf3cdeed32059e1a9f2f54753f9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/GatewayErrorCode.java",
+      "sha256": "7b40e0d8e3aa251ed2031c976eb6554f2762392057f2ebe30ab99bf6b4a7165b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/GatewayFailureClassifier.java",
+      "sha256": "ab9bfada2ae3a099de77b1f51695bf48e794ddce56e7e135d46b2af1126a30f5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/GatewayOutcome.java",
+      "sha256": "d863ea8561185a4413de51103d1ae3c61ed92ec9d12f387864d01a9c65aba72e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/GenAiGatewayTransport.java",
+      "sha256": "63607bbac5c3146604586b143edf7ec70196a68e2a59f9a06cee96dc75571688"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewayConfig.java",
+      "sha256": "dbbd1f7b5f5883ab0f831e1eb78bff2511757c97b9df04b2a081813e6e88c2dc"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewayProperties.java",
+      "sha256": "44b1a118ce320d1e1a2e132409025e1070cd70846baf1e1fd142bb3a44daf0b4"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/gateway/StudioGatewaySelectionProperties.java",
+      "sha256": "7e2828989313dfaadd3eeb383e2935c5a41c2830d6f960158ce032a578752b3b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/audit/StudioActionAudit.java",
+      "sha256": "b073385dd3e9886e2a30b61cd339252e446594a7e7316bb16a6eb2bc32133192"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedAssignmentStore.java",
+      "sha256": "a08c61a0006ca586f06c8ef2d8e1938a43263b5559e78093844512f46db30ea6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java",
+      "sha256": "6dbf5e4f99b3625fee709029d33c28048225e16066340867f2bef67ca4d42862"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "sha256": "b1ae740ad17255f8c2d80aaaf3edbb621227858996c8aa4dfd1ef313f58fbe50"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+      "sha256": "0be7b180d7ea483a0b99abca38a03a63f6518d6e3f23f5d833c5e12b67b26cc2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+      "sha256": "b55a5224cfaf90dc7776c244142e048a52ea23f63b92ca0ff4f7c29afa367dda"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "sha256": "9823a4d4c907fdb4a7b64449cc8a727b2de9b1160897058f5a6823590f42987d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedSourceReferenceValidator.java",
+      "sha256": "f611158fcecb2eb6d3a5bc10a94b57424c65aa7557d0c68a1cdefc49abeade95"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedEvidenceConfiguration.java",
+      "sha256": "27f9415d7a763f45f8297e1dec841953e41f3922ee8ffa1126110fe16ba9f639"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedEvidenceProjection.java",
+      "sha256": "da7005da481e1be68df4659d824e95434da2666a12b090610d0b69adaf381f4a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingKeys.java",
+      "sha256": "e2de2c3d16541423409d5b37f184c1357266d117d067c57448df8e5e873a6534"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingProperties.java",
+      "sha256": "de7c37d709c6311bb9356e5f9f0dcba1302b20a670e3bb30696e06e158b6abfe"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedRecordingTimings.java",
+      "sha256": "cdf6810fc574471de8af23c4abe6d4505c8305ac953e5b633aa4d82a1a14c6a3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceInternalController.java",
+      "sha256": "2b631635bfca63f9251350da06658817cd41b30a57436d06570ca5ea3aaeb4b3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceRepository.java",
+      "sha256": "14e16d0aa3987aff1abab64fa540c7a6e494c6ee7d9a263beb3de3f445f20563"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionEvidenceService.java",
+      "sha256": "19578626f97f05314dd3b7ec9bd91f79e1011d70838df425653b0d2f2f9cb5a2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/GuidedSessionVideoController.java",
+      "sha256": "d955e98f1c1f6e2a0ab62523e69a84dc4639e0aadf05f2c90bfc16ae69ea921c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/evidence/RecordedGuidedEvidenceProjection.java",
+      "sha256": "c2bd439f8d47e1b9d6589cb9e84296750a430e7df4dbacea65f7f036db1d0a7a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/GuidedPolicyConfiguration.java",
+      "sha256": "987b2f74f37281e75930dd78d25f911a21247bdaf0ca9aa61de5d793cb4206a0"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/GuidedPolicyNotFoundException.java",
+      "sha256": "bd58b5e9732496bc679fb58c0edfe45ec1e4cc2947a196bab6a653b71ff63f49"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/GuidedPolicyProperties.java",
+      "sha256": "39004e5386e970499181ef992a75c8e2f16549ca172fd663906c269a9cadafc8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/GuidedPolicyReason.java",
+      "sha256": "35ed9ef0643a0b05cbfda797c54cbc26411b46ae31ed394c22f9ec42a0f18ed3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyController.java",
+      "sha256": "44d896b6338f96c6be210167ed891f904a0fbdaecbeb68b9bc125c6192ec349a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyDocuments.java",
+      "sha256": "5d66bf8ac4a2fe66f38bf2458624f3dac6bba1df75292ae8a7a8733740a4f952"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyRepository.java",
+      "sha256": "e4d2c994c9e60bd779f6112c872c2853ded236fbf063735d33b11b9f484c40d9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/policy/ObservationPolicyService.java",
+      "sha256": "0f5e4a3b1ba0769338c1a8433edf9ce07da01af919793b7b4e4f102839578452"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/DatabaseClock.java",
+      "sha256": "7cffcd144671e2c82cb9645818905fb17688997b8893687b1afa6ad7ec4d505c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedBasisValidator.java",
+      "sha256": "5a4cc3f65bbc0c3d039f82aff21e2d66d239406ba7694e6159e40b2d91030d11"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedEffectiveGraph.java",
+      "sha256": "02151dc07fe3d03cc8e14b46ad33ecdfbba7acb6299218004558480be7a886f3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedMaterializationEvidence.java",
+      "sha256": "64476094a334fbeeeb22ee4c942fd5b0576c14fdd9b97d1b289335b96d822fa4"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "sha256": "6cdf6392ecb0a34fdbe9c17cea14e7f56eaaa1c5caf134ae8f2fd8ea30bffb1b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "sha256": "07e6d6cb8043fbd7541a5db39ef2aac5c4747d0129fb8d66f16114db09dbbdc1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java",
+      "sha256": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java",
+      "sha256": "0a42e670e6b92f651c0b9839e5bd9ea6f18af3ce384f5731577113ce9aaf132b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "sha256": "c06279a35213c8b1eea5aca1e84b3b968cba20392e7cb06d6bae21a4d66b967b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationController.java",
+      "sha256": "125063244c9c6ac88e3963e030a3c0de85d6b4013716d65947e61291a30187cf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "sha256": "a9f8bb521dc8797cafd06fb4edca1ce86e016f19b9a31f99b0d012d0489398c9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationProperties.java",
+      "sha256": "7428e20aee6d252a66852041be252532d1489729244aeb5353037dfa304d7d51"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "sha256": "a7f3114799e6dfb7238f4393af2b84929926316ab761a43d8db55bcfddef74ac"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "sha256": "72cdc69c1471eb37f388946619fb5770226ed5512e8a8f5caf5ec8606d560835"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedSnapshotDeriver.java",
+      "sha256": "e05e51f887e29a789595a27f23592b8b0c00a01853164e894d4fc1e2487421eb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java",
+      "sha256": "473e326ad9e9823bf19a71ff6ddc63adddaf6ae856762036e0092132fa095251"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReferencePolicyDeriver.java",
+      "sha256": "d67a888d42350afe432aab31e9082a8a25b705902b53db1f034628f6497cbb46"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "sha256": "8ac947325e24a16590710eb77ba949c02328f97f0227dac0355f796a0798b90a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizer.java",
+      "sha256": "ec6448d6baef417ffb69366be9f01bd5da13fa87859a2d8c73a1e83956ce6792"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "sha256": "9fd10e4414ecbfc1835e8c82a41f56a9dee36e3580169464d922ec4fa938f871"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java",
+      "sha256": "da4dcec91b65cc4d44e0212c06632b6c90c7199b5297c93fcaaac0aa022212fa"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayProperties.java",
+      "sha256": "48fc17f4589e4ef3bc8110eaf579bccf2d11c119159d0c993c688840774a6744"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayRuntimeConfiguration.java",
+      "sha256": "541aa215d3a9779a13e5089951df678b54fc101cc2178256e5ce4de8ead44819"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java",
+      "sha256": "a01cb7a0856261548fc2c9f19c279f7f661e4409dd1b63c265b4f4d7c9210299"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "sha256": "073df52e01eb0336d5080d9a0c5eb133457b5a3119e1cc7e170e79c33e68a3fd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationBudget.java",
+      "sha256": "ccababf7de7f83f6b516496962dd6c1ee419855782a4606fc2bc284a64be4437"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java",
+      "sha256": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/retention/GuidedObservationPruner.java",
+      "sha256": "1078e56f4bdaa79a5a8aa67773bdac45de29d3577c9ebaa01858856b8225b84f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/retention/GuidedRetentionConfiguration.java",
+      "sha256": "3baffe6d70212ed3d3e89133ab269aaecb19857e3efaaeab21d5cc26183dd248"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/retention/GuidedRetentionProperties.java",
+      "sha256": "d41c59a262f132039ca7e60bc6a6c8185d3f88d37936f0601736aaf1ffd20800"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java",
+      "sha256": "651a876be01403a7ddaf56e1921667ff22392eb29d5f9c01b281221d56477796"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "sha256": "350a3f22f4cd9a5baa3b2907e9ad9aa3865ca60d08c960b1a6f77fcbb68dfd5a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedCsiBudget.java",
+      "sha256": "e1212163f873232361b3f4a6c968e7cce9685ef3e93f25013e30a9be1c098d10"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedCsiBudgetProperties.java",
+      "sha256": "f0a6a742e12ab3941e7765d4293558a3adc85077fba80b2eee16ee864a45ff0e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedIncrementalStore.java",
+      "sha256": "070b77bbb82559892e8ef742ed20448b7a0a78de38217d7e04933b7bd18e777b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java",
+      "sha256": "80f9c30ab8fca649432535c2c562cc0b05570347ce8343c0dc19c47da49a2475"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java",
+      "sha256": "2c44c6a50a42b3c654aa87f6ed0b3fd32a60e4946a4cb772ac3632851a99f3df"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedPublicPresentationProjector.java",
+      "sha256": "2e2431dcf6d498d8a773a16200b19c26b97790499b506f994bd38c6906fc8005"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionAccess.java",
+      "sha256": "6b1140f9682bdf9ecbd138b6f9804902a3cf7a6ca1e86cda6447cc1e3e160274"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "sha256": "a804847fd6e695627a23446eafe4081fbb9579104fa973ceb1c1de080b9e7660"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "sha256": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionException.java",
+      "sha256": "38a200c1a637ca88d534c91d22b850aa06993ff8fba759031e14e3612ba33c77"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java",
+      "sha256": "cc792aefee5fe3afa6477ec91570069a922ac968bee8258a06ee1f7681098704"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+      "sha256": "886889ee7634bf67500f9511ac8647f294721fb6cd8a581bb50fcd7a5bcec7eb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+      "sha256": "bfd853f2af0c409f396bac9c5c466c347ad86a4e400736f12bdc1680e4f17b16"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedWireBodyAdvice.java",
+      "sha256": "99343715c7c35bc45fd4c7a2f673e925068757af1c2cf892256262c9f2daf58d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+      "sha256": "6d96bb1525ab19828f18d872c375851812923e165b6d40bc0f3b36f4af745cb2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/CredentialPatternScreen.java",
+      "sha256": "2f4df57641892592fff11625682ebfa7a7b8dce8eab34d840f94c5aadcedf96f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GenAiGuidedLlmGatewayClient.java",
+      "sha256": "f23f273bc9d5e975c61795bf663f3b3afeb6d6cac05571db0cc096e23ef58ff7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedAcceptedPlan.java",
+      "sha256": "6576e4e42efe3d78f0df751f1951ada95c9d6fb797c70089204a60ec5a394eb2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedActionGuard.java",
+      "sha256": "bb8617b0dc3043c2f24f0c81a874a5908bd7b71b95f0cb5d61ef47fad55a47e2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedCallBudget.java",
+      "sha256": "d8d143de1420124b7eca9461e030a3594eb4787a31fc0ddcab9def5717a9d6ec"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+      "sha256": "6e13ce0398ef27a2b5f704af511477228eaba574b4b898fea055495e818021ab"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+      "sha256": "1f658b72dc83bfaa4f8f7f11cb4f0f7f963673198f7df1ec7bb35ad086d0eb4c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedLlmGatewayClient.java",
+      "sha256": "6f79b05ce7219488a85ced0e795264b48641303575894a1a43fdf4fed737f356"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelProjection.java",
+      "sha256": "5561f8414e827d8691315dd73445b044faa2b5a6234df670cc81d6f767e0184f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelRequest.java",
+      "sha256": "d1f8fcf17832230928a1a702fd0dba5a42f8b9d371d329867c5d0d87adbc61f5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelResponse.java",
+      "sha256": "a8278fe92905a4a9d81694f12b32faa8728222426a49156785c3c958340cae15"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanHistoryAudit.java",
+      "sha256": "7c428eefd4896d6db05d6eb6733d9cb28e18d6f0c7f27c8dff72e810f4dc2f9e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningController.java",
+      "sha256": "554179db4185238b69add376330941a1a5e0e76a5ed5635cc4a140b868222cf6"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "sha256": "ee9330d9e8f47a7822d8709cb4b9a0d99bf639fca2b8acc3ac98daf473b5e133"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+      "sha256": "d3ef363c54561f290c3d9629a7a7f9cdbdafdafd3bd0e1211a08853184ccd3a2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+      "sha256": "4bba4ee7fba97452cbaa6aa7b1e30c7752ad0f4e8e5f66ead884930782e347fb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedResponseParser.java",
+      "sha256": "458e6ecabcdba54e643a151d04ff7fa6b6748c0d2822db13e6e7066142ac0f44"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java",
+      "sha256": "33b05b67c68293cfbb430c7fe54edd92b2b2453761bca14f3f52e1662c75cdf9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+      "sha256": "970e028452274874b6e55f15c8e7b2e4b06740405d14529c0222b94f60eb32fe"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java",
+      "sha256": "442addeea22bf3e996448c282ff13145cd3d41dc7f4ea3d4fb6e4332f73d1b2b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedStepVerifier.java",
+      "sha256": "77cd0b15eeac4a220f785d6f68d960b54dd1104a44cd91a9efb81023a95e732a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java",
+      "sha256": "b14e638d3dc0074c8ed44ad5023b702026ad1d3b62bcd5b5a73240c38e07df8d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+      "sha256": "d0e365d51ab5b612300a0a39f9a707c27329a2ae3b8bf22c01c9706f524aed6e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationProperties.java",
+      "sha256": "86097f7dc0c5da294b4e151e5c221907a9f0eddab888726a3ed5d8c6b4c14a76"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "58c846b4f5a0a0029cddcc49a7b46431f2f44d4dedb9a86102c4684064944b86"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "32968d0b2e214a9710e92069a8139ef2bd28776665688327ff9dbd55e0837c3f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/LoginRequiredSignature.java",
+      "sha256": "d618408f0d6db639ac66f29312b256708369cc0b204d4bbb9ba8600d446130e9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java",
+      "sha256": "b769c3532b4b3c26b97f53c7a48fd831a9d53dd5e8ce248d56c27abcb0468d16"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/ExecutionControlService.java",
+      "sha256": "1ecc7135423f45b6832095c370f6faaeeefbbf845d728c59beec5743ff041e02"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/InternalCallbackCodes.java",
+      "sha256": "76788d752cf0275ed61ab47815b02b994f24462cdbc5761ecaf8513d9464c050"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/InternalCallbackException.java",
+      "sha256": "fb5704e23d2fa41f821a33359b981774de988d5788fb6c384b61ee9545cc4d9d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java",
+      "sha256": "fc17ee639dee403a461bc454a794569b01c44f9c880dbb9d74b2e46c091bb78a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+      "sha256": "7e994ec1bcc7542f7cab05e7e8f448d542713ef90940fe018bf424864b993ebd"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java",
+      "sha256": "66a3dd75faabd8a4645e8df6d7767e1ed274d8a698ab3e750c945fde7d12bd66"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/StrictInternalBodyReader.java",
+      "sha256": "e58026a6d2d1407b8bec6292614b9935cdbd3f0e1700dbda43ed7be0438737b1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/StudioInternalController.java",
+      "sha256": "f568de2cf3bfe65fe2530d34995ac1a98493e3b36cb782a5c15cf39251288fc5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/dto/AdmissionRequest.java",
+      "sha256": "34f0293e99113e08cfc8b3a66b6e36513197f2d0cbf2306ac2e29d3cf6db330d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/dto/AdmissionResponse.java",
+      "sha256": "70a1bfb55dfc160af356751d4c00528cd45959e29ec2a626768cc4c9ddeff245"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/dto/ExecutionControl.java",
+      "sha256": "4e9d83ead4c389aa133748969df19f344d02c280091734a79d1c9ec258b4846b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/dto/ProgressAck.java",
+      "sha256": "34fe7c7b682c1fbc02729ea798c3f13c3bdf6efd47d3bb6c8c15b25418300e1e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunOutcome.java",
+      "sha256": "ea88cd50482cac526c0f20938b8a8e9b3b90b6fcd1ab0a059282eded7ef5556d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerEvidence.java",
+      "sha256": "657ee26f62639637e75fc4eab9fa04711ffe386ac2aa8c6074cf7d6bd018e795"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerLogEntry.java",
+      "sha256": "80e251a1d8b1e4097ee8130c261d315c38e2b4022b763e7e33c605b1b7e6441b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerReport.java",
+      "sha256": "83fa61064c60ad78f3d526946865a46388145e2f8a0cbc2634f420bb71876b99"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerStepState.java",
+      "sha256": "758aa58af160d2eeb4cfcabd53d94c58fede19d4e2af7d34286377cfe207ec25"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+      "sha256": "5f08f595be87f807c236cab86d4996852afb2291b83038c490d888f2053f4b38"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/readiness/ReadinessVerdict.java",
+      "sha256": "299311c35fa90fd0de222593ee8c2ef23bc7f35495a50de9744b3cf8875e0630"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/readiness/StudioReadiness.java",
+      "sha256": "825e6e524fc2fab1179338644d6215a9105e2c3c258364b5fa07aec2b291ff5f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/FinalizationReconciler.java",
+      "sha256": "10322fe0cd4bce6ef3b8ab4a2c1f78a01233c0eca4dbf7eb1b1d1099d0c62c2e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/LocalResultManifestStore.java",
+      "sha256": "c279e0b620be3c7c2ba0328fc532d0fe9654e6da06c62c7bf5c9f13267a5bce7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/ManifestKeys.java",
+      "sha256": "36cee45ece05593a29ea4796e38a86442513878984410d6e1df9a428a712c177"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/PendingReaper.java",
+      "sha256": "4f643583b8739682a3482f13396d47b461fc41f2b67fddcfcde583abf3d8caff"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/ResultManifest.java",
+      "sha256": "24edd6dfe5911f8d32b4225bcb86f8cb005bf0389c1c1629bb4432cc82f3c9e5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/ResultManifestStore.java",
+      "sha256": "9dabe36a7b4a8ab8e4f164f41ec92924367a3c4eeb9408e0670b4fc48fd54629"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/RunnerCancelBudget.java",
+      "sha256": "05d777ffdc7a648586ed80b37ea2d98aa6a0d7f012139f68341c17dc2ab5dd6b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/RunningReaper.java",
+      "sha256": "37cec126c9581dff3c16f030b49bdfdf8eee9babc8437a11a407266b8139da68"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/S3ResultManifestStore.java",
+      "sha256": "8e35f4a0d469a85b7a1b31779103209a21687880d17e67aeff91af71fd4f1208"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/StudioRecoveryScheduler.java",
+      "sha256": "7cd30d7888a553197c610e07396b620fabdefe73a61d2bae376ee04a60f219c3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/UnavailableResultManifestStore.java",
+      "sha256": "9c2dc2eccec7e21a6f4f6e62f8d74f65e3bf9122dc181088b2b76189997287e3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/ConfiguredBackgroundAuthorization.java",
+      "sha256": "c6df57434e9f0889bd311cc6e08cca79a821deddb78a46c9d8c2e2f4b7421926"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioBackgroundAuthorization.java",
+      "sha256": "84c2b6203236e7aa6c887fa6eb5978cc32313ec06859988b92ca9d575185bc61"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioCronResolver.java",
+      "sha256": "a11f655f79961637015161fbfeabe99583c74af71a2dcbabf6cd5b29c2362fde"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleController.java",
+      "sha256": "16740822336d9e02e46d1df585953067f0a06e663cd66bc987c06f9a15e0c6d5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleDtos.java",
+      "sha256": "d79f6428f1f9dfe45fccf46e55f262a99e10d847bff13b9e385ddafac0dde065"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleException.java",
+      "sha256": "9f084febfab66fc0ba6626713459b99ff54ffa9b95a6ed1db85bfdbd491ccd63"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleInvalidation.java",
+      "sha256": "44c6ac4b299944d40b585b0f3b100a4c1a04a9ba6d00f93fc1499573b69a60f1"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+      "sha256": "2a93cf9456d3f9dff981cf4f3becc486e3cd0ec4acbc6629b34b62c7a562d166"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleRepository.java",
+      "sha256": "4cb6d01d3616c352c1e261fe5c1fc0f08edef10304917df6f07fa8e69ab42b2f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleService.java",
+      "sha256": "75ca902e3b29bdce422728a191ebf60749903508dd6cd16498851f0886de59d7"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledDispatchAuthorization.java",
+      "sha256": "8b6ac8699306d4edd6dc8c87c3a49c4852f576662de128ae44ed45bc349d93f4"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduledTarget.java",
+      "sha256": "bfc41be264f5abdd54571277d1da5791f7076031f29cd78d0a927b226253d3ef"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingHealthIndicator.java",
+      "sha256": "b5a524e3cd1249079146631adcbee8cd8d43ee33d0fb2d8b4dd91d7d10c74e3a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioSchedulingProperties.java",
+      "sha256": "b8fd37d224a076b1b277d6b180aa7e72aaf03bfdbbea1d9c31a74c9fe7d06d42"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/ConfiguredSecretUseAuthorization.java",
+      "sha256": "a9a3fb16cfe87cc9cb0ee020dc3fd8301b0a1a68b05f2194fcb5e0a92509eba5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/CreateStudioSecretRequest.java",
+      "sha256": "705fcb8bc32480e6948cf67c1e0a15896dd5bbe112e5712b5a55b65068d921a3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/DisabledStudioVaultProvider.java",
+      "sha256": "5290faccc1d7a31f9a241977d009608855ae5b75ac6902728c38d1b11cb3f1bf"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/HashicorpStudioVaultProvider.java",
+      "sha256": "eece9d6189ea877952b8a883e8940b11452931335e4ddfc6a6ee7d00a6aae966"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/ObservedProgressSecretEvidence.java",
+      "sha256": "fe88bd79cc13b184a00ee762b0d7774b5b4a4c6dca1d554a456c5856e419a72c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAlreadyExistsException.java",
+      "sha256": "90592f2c96dbf603276c3324ace67fcc3a78d7ca05c2d49410838a29308f8246"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretAuditLifecycle.java",
+      "sha256": "af4633e91e6edb0642ee968f72d48d2be078f4f08c81d8c5e09c6c9cabad684d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretOrigins.java",
+      "sha256": "b9e1a821d6cefd6273969404d148694f669dc64e1be05eee3413e3cc64418c89"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretRevocationSweep.java",
+      "sha256": "884ddb3c7bc119998b91eb6b7649b148bc3054222c56f1c880c92aa5da9b66a8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretUseAuditRecorder.java",
+      "sha256": "cb3329c3f290e7a409c3c2da98f890da2cf070e8c8102c4d1683f38abbc22ab2"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretValue.java",
+      "sha256": "d1663040d620f4998ae205e7a61c3c22756b66a9367946cbff486453978ec601"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/SecretWireWriter.java",
+      "sha256": "14dfb2bee9f4c1fcff936a5e89a392b0c33c0f48dab3eb51fca4c71baed1c954"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioCapabilitiesService.java",
+      "sha256": "9548beded8d3fcc2961130264fa90ddc323327a7c4a5c60a58e8f90ed9aacdf8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretDto.java",
+      "sha256": "5dc77c5dab97b6e4761782fe49c5e9f384db9f10b895e510802bde270002ed9b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretListDto.java",
+      "sha256": "5f2648f9667e5b9a59c7be03841d1337dae9acca8fac41d4e66bb3885ca44015"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretNameDto.java",
+      "sha256": "f7122d548373572ad77a785b84b9e5d0694b0ec6f14c92f37329e898db57df19"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretUseAuthorization.java",
+      "sha256": "92db7b8d7e894463d6e5b40b6b08a0e98a2490493337d1b4129e91bf829ae1c8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsCapabilityController.java",
+      "sha256": "40fa32d69319bc093a39ea4e99266ef2c67aebc53cc896b81d0ef7c6ac649f20"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsController.java",
+      "sha256": "4599af285e3f4e8f51cf3570a4dc83f9bbf1a80123ff053d3047ffafc3a1c827"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsProperties.java",
+      "sha256": "9115811a016ec5d69fdf5256f9f00768e6d90570b2dc4c7dc97609151a5f23b8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioSecretsService.java",
+      "sha256": "2178e6099b492978166c38b25a0b3893caf966bc070631d0c8eee1e8fc36de0f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioVaultConfiguration.java",
+      "sha256": "747ce5cb7db678a0badc19592e8c78c5f83e673ac71ee7479fc632ff66620e80"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/StudioVaultProvider.java",
+      "sha256": "666abdd7cf385dd76337f82aebc013bd237af676ceb5a6c3eec10008d17e31de"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultNotConfiguredException.java",
+      "sha256": "0045e342d5d88964de8ef27d12bdd78a0e3e434619cdc825f6073441edacb082"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultProviderUnavailableException.java",
+      "sha256": "321b8c87b74195370eab24a2bba3da3c1506613cf0b190b8af9ab17b14f6cc10"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultScope.java",
+      "sha256": "5400f3f25f3020fde741c2d4a7ee116a2d336cca1dfff93d726980e9ef2782ba"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/VaultStudioReferenceResolver.java",
+      "sha256": "88ddd68e15fba59505e2856305f91fb5acfdc17c00af64b329e2a9bb01a8a52a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/sse/BoundedSenders.java",
+      "sha256": "9ed071561df903ab167433a2c83028e36572c04634c34955e7050916608885fc"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/sse/ExecutionEventsController.java",
+      "sha256": "54e0d55bc15ca0b858753b875a7baaa6e20fc3f41531809f68f1a5f55810a236"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/sse/SnapshotBroadcaster.java",
+      "sha256": "ffc5a20f529fd0c42801b7a2d44e1472e0d5a8d58b9aa1b5eb76ab4eeae8c65e"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/sse/StreamAuthorization.java",
+      "sha256": "dd5268c4612b13ea8a4346302fdd0cc8754146fb82cb743c973c9641048e4d7f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/sse/StreamSubscription.java",
+      "sha256": "4d7e687032ad925add5bccc1873a8df14d1bf471265f87d85828dec937f5ed51"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/sse/WatchedExecutionRegistry.java",
+      "sha256": "b406d4eb6c087d02a9b346bf440c7ed0bb4d12d9dae89a72cd21ed5d3cde4760"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/validation/VariableReferenceValidator.java",
+      "sha256": "1bdc3eb56153c8b34386677e8f712c78808b9928deee3246501eb957c51ea6df"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/tags/CheckTagService.java",
+      "sha256": "c9258962509dc14f6dfd2840bd4f8be653ec3ee859dfe0d04ca5567eebe91a31"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/tags/TagsController.java",
+      "sha256": "3f2de3f4d39203342b06f1148e69c5fab1c755706f07e0c28612dc238720cb1b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/tags/TagsService.java",
+      "sha256": "419cf1913a5e258315ff68f2af7bbb3062e4fadc55335a478bf37288aa9f5c00"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/tags/dto/TagStatsDto.java",
+      "sha256": "7abafebab28711dbb91a69a63dc01dd0c17c81d49fa45552214a3286c3714ea8"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/tags/dto/TagSuggestionsRequest.java",
+      "sha256": "faa86b589e3937761b1b727b15b8833d474b9a37961ac42e302805ad71ca739c"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/templates/TemplatesController.java",
+      "sha256": "8f5ebae4ca59c7fa8e43c1536d08ef277ecc29e6b1ec2b3929879524b3d68f29"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/templates/TemplatesRepository.java",
+      "sha256": "58aaaf1f2102118cc7737b4623dd67d09cf792629090e17edcbbd6ee64f3797b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/templates/TemplatesService.java",
+      "sha256": "0d5c2ebcf6fffae2827260927eb175e172f4fcf1a8e52458f2f52299b135e6ff"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/templates/dto/CheckTemplateDto.java",
+      "sha256": "b5f7841a3f01e502b08647b876b0f002eb7f0eae22598587d7888cf26f149be9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/templates/entity/CheckTemplate.java",
+      "sha256": "7111e64ec9e9f531e75efb0a1bf056a4f1c9b579470e9f92ab80dffb9cd01a0f"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/users/RateLimitedProvisioningWrapper.java",
+      "sha256": "9d21fcae0115974a25b2d28e1a8387433349e5e77f909ebb6c95c8cc9aa08d08"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/users/UserProvisioningService.java",
+      "sha256": "fcc159490b94f498cee2b6f0fd464a75df266411ed8afbe15a1bbf21223fcfca"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/users/UserRepository.java",
+      "sha256": "bdeaab62dacf2b50157228dcd76a8eed0da216295002817115bfa9fb06d34e80"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/users/UsersController.java",
+      "sha256": "3bb59dabc3c043ff16291396696d28acee86915ccb61a12c03f7b32f3d6042eb"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/users/dto/UserDto.java",
+      "sha256": "1acf4d5788017e24b00f2bce8d05939ace86ad726ed7c218b68093399f8e1e23"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/users/entity/User.java",
+      "sha256": "273ebab06fac4a9e7ea608edb1f58240061022dc0d648a65f8f88b9692ef784b"
+    },
+    {
+      "path": "backend/src/main/resources/application-api.yml",
+      "sha256": "dc64f398da2c84d75c7f2a470ee47c50ebef5103ebba4fa138a38ae3aa1d210a"
+    },
+    {
+      "path": "backend/src/main/resources/application-dev.yml",
+      "sha256": "096248359497109d1f0f5afbc1e64e8f468aa3a480425595daa8167e3d6af251"
+    },
+    {
+      "path": "backend/src/main/resources/application-local.yml",
+      "sha256": "e89396c3c714c441b051a062fa04ad994a1e9041e02eecae3e4c4f8b3190f281"
+    },
+    {
+      "path": "backend/src/main/resources/application-prod.yml",
+      "sha256": "7e4f389822263caac8258c7f6447c5ece995123b8c1ce85ae2443ed72d148d00"
+    },
+    {
+      "path": "backend/src/main/resources/application-staging.yml",
+      "sha256": "533d530c57e47a9898b758a11c8b15647d9238bdcf6c24141068dc6dcd5d7b0a"
+    },
+    {
+      "path": "backend/src/main/resources/application-test.yml",
+      "sha256": "c99ac391f0a29211cb254bc0c95d298f8c3ab4de647d7ce1b02b431f295683a2"
+    },
+    {
+      "path": "backend/src/main/resources/application-worker.yml",
+      "sha256": "bf0c42d16bfdfbb1f7d5f7a5d9206f6ce98fe58e4c3bddd0f5bfff64160c3a65"
+    },
+    {
+      "path": "backend/src/main/resources/application.yml",
+      "sha256": "271fac527d075f996173e6cf1ef52d409d4416d3d6a46114fc541097b3a25f75"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V10__uppercase_status_standardization.sql",
+      "sha256": "714ea331197e4b30000b5f5706262172ee1b17ba0f7b13f6c7c33cb44abdba26"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V11__check_acknowledge_assign.sql",
+      "sha256": "13a95eb5154cc4f3bc037bbfcd1c498faf5b0ecd62473857fab0a2a181179732"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V12__tests_revisions.sql",
+      "sha256": "274c26c4d41fbd991e157ec6372d08ca5c53ebe0a9e2d7a7252838228057d0d7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V13__executions_ledger.sql",
+      "sha256": "f258e01be9963e58b47d6dfef7171e4cd36043e82e4c0f2ea78ec439f47abeb7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V14__guided_sessions.sql",
+      "sha256": "bc28e43835aefe152ccf3654105a17b1ebe547ced4127a93146a18570c149357"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V15__publication.sql",
+      "sha256": "ef092dfff93a24c4a05dc9afee6ba4a3b9a054f6cf39ca4059c186ff10777b40"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V16__scheduling.sql",
+      "sha256": "6d7f4888aabf4a7206bfff9bd242ee15037121e74ed2c3fa32156a4ed862ab72"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V17__secret_use_audit.sql",
+      "sha256": "a5b6a89525f3b53769678361c204ba3a78564f9f108aeb0979c184a702bc3ba7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V18__drop_plaintext_secrets.sql",
+      "sha256": "febfd5eb1624240e58d87bd92bdb2d4b82c762a7cf6fd94de8077eb6f2fc7c9f"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V19__guided_governance.sql",
+      "sha256": "628b47efbb656aef8a3260f03e7dc77d988555a306652b4d433b8796e3424855"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V1__init.sql",
+      "sha256": "2e010e6e1e6f01706acb0f644ad37a3ba0340363979a994de34a4b33ba750e29"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V20__guided_session_recording.sql",
+      "sha256": "e26da3077ca90fc0f3c6d7f4fc7156d416c39b66482330acb24d62d61514acc2"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V21__guided_session_replaying_prefix.sql",
+      "sha256": "b012ddddb44b599c4f8699be39281dd6f407b2cb93b41386a79eb22c06c4d179"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V22__execution_replay_failure.sql",
+      "sha256": "29437d3bda6479fafdbdad0fc3d53e0a1bcbd8c4ed3bf23fe144e18cc0259cef"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V2__schedule_next_execution.sql",
+      "sha256": "7a36462fcceb86d2ccb533c0743c20bcfedadb819f9674c0d1e8eb847830ca7f"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V3__check_templates_seed.sql",
+      "sha256": "8c356f1081df490cbc213f31330883f8be477de722fc737d588f52e2ef8b48ee"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V4__secrets_encrypted_value.sql",
+      "sha256": "91662e9f2c8f07e24d85d15d5ce7e5508d4f20ddfc78fdfd1dbfa083f30b24a7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V5__story_3_schema_additions.sql",
+      "sha256": "b930941c1b7ba06b8e34b67021425cffedd3264b225607ff3f170ba4545f0477"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V6__report_next_delivery.sql",
+      "sha256": "d4669fed42d82824f278364845540ee4318ee9ab243bc0780a68c5092695d913"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V7__partition_remaining_tables_and_defaults.sql",
+      "sha256": "ee6f50fe699f70af713a7c739acb4eb358a562837e8c43ffb130a6604fb62174"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V8__failed_dispatches_and_report_failures.sql",
+      "sha256": "78ad49e718124c78f6e7a3a5a64b203f175c73642f2754a01647166c89ec89be"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V9__schedules_check_type_column.sql",
+      "sha256": "9c91a6b11df2f9b012a638cbf1e0ae921d4dd09c0710a22db9d3c5a18c412f0d"
+    },
+    {
+      "path": "backend/src/main/resources/db/seed/R__sample_data.sql",
+      "sha256": "e222161e66517bdbade0a3337250dca6ed5bc1dfb60f47c7202a4b11cf079138"
+    },
+    {
+      "path": "backend/src/main/resources/logback-spring.xml",
+      "sha256": "a5ed56e2bfc45b2ae0b547faaeea1cab927c7a1fcb244a7e02ccaa1d46ec002b"
+    },
+    {
+      "path": "backend/src/main/resources/studio/guided-output-contract.md",
+      "sha256": "a33eba248fb967db2bcf5274f62483cb02227b8fbd07c2eaa443a1a67593cb26"
+    }
+  ],
+  "mainJavaCount": 471,
+  "mainResourceCount": 35,
+  "originalReplaySha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+  "patchSha256": "95290e1b7b383f6d2fceb1ae06874e5f8dae61969356bdf6100b879973d43cda",
+  "sourceWriterReleased": false,
+  "nativeCommandReleased": false,
+  "privateDependencyDispositionPending": true,
+  "recipeRootReviewPending": true,
+  "freshChecksRequiredAgainInsideLock": true,
+  "nativeOrLaneCredit": false
+}

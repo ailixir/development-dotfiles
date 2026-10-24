@@ -1,0 +1,2404 @@
+{
+  "allActualBoundariesNowExecuted": false,
+  "imports": [
+    {
+      "file": "entry.py",
+      "module": "import os, sys, stat, json, re, hashlib, types, time"
+    },
+    {
+      "file": "entry.py",
+      "module": "from pathlib import PurePosixPath"
+    },
+    {
+      "file": "profile.py",
+      "module": "import json, re, hashlib"
+    },
+    {
+      "file": "qualification_custody.py",
+      "module": "import os, stat, json, re"
+    },
+    {
+      "file": "qualification_custody.py",
+      "module": "from pathlib import Path"
+    },
+    {
+      "file": "storage.py",
+      "module": "import os, stat, hashlib, json"
+    },
+    {
+      "file": "storage.py",
+      "module": "from pathlib import Path"
+    },
+    {
+      "file": "runtime.py",
+      "module": "import os, sys, time, json, hashlib, stat, subprocess, socket, selectors, struct, fcntl, errno, threading, base64"
+    },
+    {
+      "file": "runtime.py",
+      "module": "from pathlib import Path"
+    },
+    {
+      "file": "mode_predicates.py",
+      "module": "import json, re"
+    },
+    {
+      "file": "controls.py",
+      "module": "import json, hashlib"
+    }
+  ],
+  "kind": "FINITE_SOURCE_AST_MAP",
+  "loaderOrder": [
+    "external readonly shell first-read cap/EOF/hash/same buffer",
+    "entry literal",
+    "manifest raw SHA/metadata",
+    "all six CODE buffers raw SHA/metadata",
+    "release and decision raw SHA/metadata",
+    "compile consumed buffers only",
+    "wire verified modules",
+    "release/control/ruling/decision validation",
+    "operation dispatch",
+    "outer finalizer",
+    "typed private inherited operator sink",
+    "external actual completion OWED"
+  ],
+  "localImportPathsUsed": false,
+  "methods": [
+    {
+      "calls": [
+        "ValueError"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 15,
+      "name": "need"
+    },
+    {
+      "calls": [
+        "hashlib.sha256",
+        "hashlib.sha256(raw).hexdigest"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 17,
+      "name": "digest"
+    },
+    {
+      "calls": [
+        "(_ for _ in ()).throw",
+        "ValueError",
+        "json.loads",
+        "len",
+        "need",
+        "raw.decode",
+        "type"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 18,
+      "name": "decode"
+    },
+    {
+      "calls": [],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 25,
+      "name": "key"
+    },
+    {
+      "calls": [],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 26,
+      "name": "identity"
+    },
+    {
+      "calls": [
+        "BOOT_OWNED.append",
+        "dict",
+        "os.open"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 27,
+      "name": "opened"
+    },
+    {
+      "calls": [
+        "need",
+        "token['closer']"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 31,
+      "name": "closed"
+    },
+    {
+      "calls": [
+        "PurePosixPath",
+        "len",
+        "need",
+        "path.startswith",
+        "re.fullmatch",
+        "set",
+        "str",
+        "type"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 34,
+      "name": "pin"
+    },
+    {
+      "calls": [
+        "BOOT_RETAINED.append",
+        "PurePosixPath",
+        "b''.join",
+        "chain.append",
+        "chunks.append",
+        "closed",
+        "digest",
+        "identity",
+        "key",
+        "len",
+        "min",
+        "need",
+        "opened",
+        "os.fstat",
+        "os.getuid",
+        "os.read",
+        "os.stat",
+        "pin",
+        "reversed",
+        "stat.S_IMODE",
+        "stat.S_ISDIR",
+        "stat.S_ISREG",
+        "tokens.append",
+        "type"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 43,
+      "name": "read"
+    },
+    {
+      "calls": [
+        "BOOT_RETAINED.extend",
+        "time.sleep"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 73,
+      "name": "foreground_boot_hold"
+    },
+    {
+      "calls": [
+        "compile",
+        "exec",
+        "types.ModuleType"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 78,
+      "name": "modules"
+    },
+    {
+      "calls": [
+        "hasattr",
+        "len",
+        "need",
+        "os.write",
+        "p.claim",
+        "p.wire",
+        "result.get",
+        "type",
+        "unit.P.reason",
+        "unit.child.closed_projection",
+        "unit.dispatch",
+        "unit.finish",
+        "unit.latch",
+        "unit.owner.blockers",
+        "unit_profile",
+        "unit_reason"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 87,
+      "name": "execute"
+    },
+    {
+      "calls": [],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 113,
+      "name": "unit_profile"
+    },
+    {
+      "calls": [
+        "unit_profile",
+        "unit_profile(unit).reason"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 114,
+      "name": "unit_reason"
+    },
+    {
+      "calls": [
+        "BOOT_RETAINED.append",
+        "CONSumed_value",
+        "decision.items",
+        "decision['inputs'].values",
+        "decode",
+        "dict",
+        "digest",
+        "execute",
+        "identity",
+        "len",
+        "manifest.get",
+        "modules",
+        "need",
+        "os.fstat",
+        "os.getppid",
+        "os.getuid",
+        "os.stat",
+        "p.decision",
+        "p.decode",
+        "p.fields",
+        "p.pin",
+        "p.release",
+        "pin",
+        "r.Unit",
+        "read",
+        "set",
+        "stat.S_IMODE",
+        "stat.S_ISREG",
+        "type"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 116,
+      "name": "launch"
+    },
+    {
+      "calls": [],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 149,
+      "name": "CONSumed_value"
+    },
+    {
+      "calls": [
+        "BOOT_RETAINED.append",
+        "any",
+        "arguments[0].encode",
+        "closed",
+        "foreground_boot_hold",
+        "int",
+        "launch",
+        "len",
+        "need",
+        "os.write",
+        "reversed",
+        "type"
+      ],
+      "file": "entry.py",
+      "kind": "FunctionDef",
+      "line": 151,
+      "name": "main"
+    },
+    {
+      "calls": [],
+      "file": "profile.py",
+      "kind": "ClassDef",
+      "line": 23,
+      "name": "Hold"
+    },
+    {
+      "calls": [
+        "Hold"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 24,
+      "name": "need"
+    },
+    {
+      "calls": [
+        "len",
+        "type"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 26,
+      "name": "reason"
+    },
+    {
+      "calls": [
+        "re.fullmatch",
+        "type"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 28,
+      "name": "hash_value"
+    },
+    {
+      "calls": [
+        "type"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 29,
+      "name": "integer"
+    },
+    {
+      "calls": [
+        "need",
+        "set",
+        "type"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 30,
+      "name": "fields"
+    },
+    {
+      "calls": [
+        "json.dumps",
+        "json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 31,
+      "name": "wire"
+    },
+    {
+      "calls": [
+        "hashlib.sha256",
+        "hashlib.sha256(raw).hexdigest"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 32,
+      "name": "digest"
+    },
+    {
+      "calls": [
+        "(_ for _ in ()).throw",
+        "Hold",
+        "json.loads",
+        "len",
+        "need",
+        "raw.decode",
+        "type"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 33,
+      "name": "decode"
+    },
+    {
+      "calls": [
+        "dict"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 42,
+      "name": "claim"
+    },
+    {
+      "calls": [
+        "all",
+        "need",
+        "type",
+        "value.get"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 46,
+      "name": "validate_claim"
+    },
+    {
+      "calls": [
+        "all",
+        "type",
+        "value.split",
+        "value.startswith"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 54,
+      "name": "safe_absolute"
+    },
+    {
+      "calls": [
+        "fields",
+        "hash_value",
+        "integer",
+        "need",
+        "safe_absolute"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 55,
+      "name": "pin"
+    },
+    {
+      "calls": [
+        "all",
+        "bool",
+        "fields",
+        "hash_value",
+        "integer",
+        "len",
+        "need",
+        "safe_absolute",
+        "type"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 60,
+      "name": "holder"
+    },
+    {
+      "calls": [
+        "all",
+        "bool",
+        "dict",
+        "expected_owners.items",
+        "expected_reviews.items",
+        "fields",
+        "hash_value",
+        "holder",
+        "integer",
+        "item['path'].endswith",
+        "item['path'].startswith",
+        "len",
+        "need",
+        "pin",
+        "re.fullmatch",
+        "safe_absolute",
+        "set",
+        "type",
+        "value['cwd'].startswith",
+        "value['evidenceRoot'].startswith",
+        "value['phaseInputs'].values",
+        "value['roles'].items",
+        "value['workRoot'].startswith",
+        "value[field].values",
+        "x.split",
+        "x.startswith"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 73,
+      "name": "release"
+    },
+    {
+      "calls": [
+        "fields",
+        "need",
+        "type"
+      ],
+      "file": "profile.py",
+      "kind": "FunctionDef",
+      "line": 114,
+      "name": "decision"
+    },
+    {
+      "calls": [],
+      "file": "qualification_custody.py",
+      "kind": "ClassDef",
+      "line": 6,
+      "name": "Hold"
+    },
+    {
+      "calls": [
+        "Hold"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 10,
+      "name": "need"
+    },
+    {
+      "calls": [
+        "re.fullmatch",
+        "type"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 15,
+      "name": "hash_value"
+    },
+    {
+      "calls": [
+        "bool",
+        "type"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 19,
+      "name": "member"
+    },
+    {
+      "calls": [
+        "need"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 23,
+      "name": "pairs"
+    },
+    {
+      "calls": [
+        "(_ for _ in ()).throw",
+        "Hold",
+        "json.loads",
+        "len",
+        "need",
+        "raw.decode",
+        "type"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 31,
+      "name": "decode"
+    },
+    {
+      "calls": [],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 37,
+      "name": "identity_key"
+    },
+    {
+      "calls": [
+        "identity_key"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 41,
+      "name": "file_key"
+    },
+    {
+      "calls": [],
+      "file": "qualification_custody.py",
+      "kind": "ClassDef",
+      "line": 45,
+      "name": "Ownership"
+    },
+    {
+      "calls": [],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 47,
+      "name": "Ownership.__init__"
+    },
+    {
+      "calls": [
+        "any",
+        "self.owners.append"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 50,
+      "name": "Ownership.owner"
+    },
+    {
+      "calls": [
+        "dict",
+        "len",
+        "self.tokens.append"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 54,
+      "name": "Ownership.acquire"
+    },
+    {
+      "calls": [
+        "need",
+        "token.update"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 60,
+      "name": "Ownership.transfer"
+    },
+    {
+      "calls": [
+        "need",
+        "self.retain",
+        "token['closer']"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 64,
+      "name": "Ownership.close"
+    },
+    {
+      "calls": [
+        "any",
+        "getattr"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 77,
+      "name": "Ownership.blockers"
+    },
+    {
+      "calls": [
+        "RETAINED_OWNERSHIP.append",
+        "any",
+        "self.references.append"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 83,
+      "name": "Ownership.retain"
+    },
+    {
+      "calls": [
+        "owner.close",
+        "self.blockers",
+        "self.retain",
+        "tuple"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 90,
+      "name": "Ownership.finish"
+    },
+    {
+      "calls": [
+        "dict"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 106,
+      "name": "Ownership.summary"
+    },
+    {
+      "calls": [
+        "View",
+        "ownership.blockers",
+        "ownership.retain"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 109,
+      "name": "Ownership.view"
+    },
+    {
+      "calls": [],
+      "file": "qualification_custody.py",
+      "kind": "ClassDef",
+      "line": 117,
+      "name": "Custody"
+    },
+    {
+      "calls": [
+        "Ownership",
+        "Path",
+        "api.fstat",
+        "api.getuid",
+        "identity_key",
+        "need",
+        "self.chain.append",
+        "self.check",
+        "self.close",
+        "self.open_fd",
+        "self.ownership.owner",
+        "self.ownership.retain",
+        "self.path.is_absolute",
+        "stat.S_IMODE",
+        "str"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 119,
+      "name": "Custody.__init__"
+    },
+    {
+      "calls": [
+        "self.os.open",
+        "self.owned.append",
+        "self.ownership.acquire"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 144,
+      "name": "Custody.open_fd"
+    },
+    {
+      "calls": [
+        "len",
+        "need"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 150,
+      "name": "Custody.token"
+    },
+    {
+      "calls": [
+        "self.ownership.close"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 155,
+      "name": "Custody.close_fd"
+    },
+    {
+      "calls": [
+        "identity_key",
+        "need",
+        "self.os.fstat",
+        "self.os.stat",
+        "stat.S_ISDIR"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 158,
+      "name": "Custody.check"
+    },
+    {
+      "calls": [
+        "all",
+        "len",
+        "member",
+        "need",
+        "self.check",
+        "self.os.listdir",
+        "set",
+        "sorted"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 164,
+      "name": "Custody.members"
+    },
+    {
+      "calls": [
+        "member",
+        "need",
+        "self.check",
+        "self.os.stat"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 171,
+      "name": "Custody.info"
+    },
+    {
+      "calls": [
+        "self.info"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 178,
+      "name": "Custody.absent"
+    },
+    {
+      "calls": [
+        "b''.join",
+        "bool",
+        "file_key",
+        "len",
+        "member",
+        "min",
+        "need",
+        "pieces.append",
+        "self.check",
+        "self.close_fd",
+        "self.info",
+        "self.open_fd",
+        "self.os.fstat",
+        "self.os.getuid",
+        "self.os.read",
+        "stat.S_IMODE",
+        "stat.S_ISREG"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 185,
+      "name": "Custody.read"
+    },
+    {
+      "calls": [
+        "identity_key",
+        "member",
+        "need",
+        "self.check",
+        "self.close_fd",
+        "self.info",
+        "self.open_fd",
+        "self.os.fstat",
+        "self.os.getuid",
+        "self.ownership.transfer",
+        "stat.S_IMODE",
+        "stat.S_ISREG"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 207,
+      "name": "Custody.create_fd"
+    },
+    {
+      "calls": [
+        "identity_key",
+        "len",
+        "need",
+        "self.check",
+        "self.close_fd",
+        "self.create_fd",
+        "self.info",
+        "self.os.fstat",
+        "self.os.fsync",
+        "self.os.write",
+        "self.token",
+        "type"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 222,
+      "name": "Custody.write"
+    },
+    {
+      "calls": [
+        "Hold",
+        "any",
+        "reversed",
+        "self.close_fd",
+        "self.ownership.retain"
+      ],
+      "file": "qualification_custody.py",
+      "kind": "FunctionDef",
+      "line": 240,
+      "name": "Custody.close"
+    },
+    {
+      "calls": [
+        "RuntimeError"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 6,
+      "name": "need"
+    },
+    {
+      "calls": [
+        "hashlib.sha256",
+        "hashlib.sha256(raw).hexdigest"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 8,
+      "name": "digest"
+    },
+    {
+      "calls": [
+        "json.dumps",
+        "json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 9,
+      "name": "encoded"
+    },
+    {
+      "calls": [
+        "all",
+        "type",
+        "value.split",
+        "value.startswith"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 10,
+      "name": "absolute"
+    },
+    {
+      "calls": [
+        "absolute",
+        "all",
+        "len",
+        "need",
+        "set",
+        "type"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 12,
+      "name": "pin"
+    },
+    {
+      "calls": [],
+      "file": "storage.py",
+      "kind": "ClassDef",
+      "line": 18,
+      "name": "Budget"
+    },
+    {
+      "calls": [],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 19,
+      "name": "Budget.__init__"
+    },
+    {
+      "calls": [
+        "need"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 21,
+      "name": "Budget.reserve"
+    },
+    {
+      "calls": [
+        "need",
+        "type"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 23,
+      "name": "Budget.allowed"
+    },
+    {
+      "calls": [
+        "need",
+        "type"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 25,
+      "name": "Budget.consume"
+    },
+    {
+      "calls": [],
+      "file": "storage.py",
+      "kind": "ClassDef",
+      "line": 28,
+      "name": "Storage"
+    },
+    {
+      "calls": [
+        "need"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 29,
+      "name": "Storage.__init__"
+    },
+    {
+      "calls": [
+        "self.owner.retain"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 32,
+      "name": "Storage.failed"
+    },
+    {
+      "calls": [
+        "closer",
+        "self.cleanup.append"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 35,
+      "name": "Storage.finalize"
+    },
+    {
+      "calls": [
+        "K.Custody",
+        "absolute",
+        "need",
+        "path.rsplit",
+        "self.directories.append"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 43,
+      "name": "Storage.parent"
+    },
+    {
+      "calls": [
+        "c.close",
+        "c.info",
+        "self.parent"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 49,
+      "name": "Storage.info"
+    },
+    {
+      "calls": [
+        "self.info"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 53,
+      "name": "Storage.absent"
+    },
+    {
+      "calls": [
+        "Budget",
+        "K.file_key",
+        "attempt.update",
+        "b''.join",
+        "budget.allowed",
+        "budget.consume",
+        "budget.reserve",
+        "c.info",
+        "c.open_fd",
+        "dict",
+        "digest",
+        "len",
+        "min",
+        "need",
+        "os.fstat",
+        "os.getuid",
+        "os.read",
+        "pieces.append",
+        "pin",
+        "self.attempts.append",
+        "self.failed",
+        "self.finalize",
+        "self.owner.close",
+        "self.parent",
+        "stat.S_IMODE",
+        "stat.S_ISREG",
+        "type"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 57,
+      "name": "Storage.read"
+    },
+    {
+      "calls": [
+        "pin",
+        "self.read"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 90,
+      "name": "Storage.verified"
+    },
+    {
+      "calls": [
+        "K.Custody",
+        "c.absent",
+        "c.close",
+        "child.close",
+        "dict",
+        "need",
+        "os.fstat",
+        "os.getuid",
+        "os.mkdir",
+        "record.update",
+        "self.created.append",
+        "self.directories.append",
+        "self.parent",
+        "stat.S_IMODE",
+        "stat.S_ISDIR"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 93,
+      "name": "Storage.mkdir"
+    },
+    {
+      "calls": [
+        "K.identity_key",
+        "attempt.update",
+        "c.info",
+        "c.open_fd",
+        "dict",
+        "need",
+        "os.fstat",
+        "os.fsync",
+        "os.getuid",
+        "reversed",
+        "self.attempts.append",
+        "self.failed",
+        "self.finalize",
+        "self.owner.close",
+        "self.owner.retain",
+        "self.owner.transfer",
+        "self.parent",
+        "stat.S_IMODE",
+        "stat.S_ISREG"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 106,
+      "name": "Storage.create"
+    },
+    {
+      "calls": [
+        "len",
+        "need",
+        "os.fsync",
+        "os.write",
+        "type"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 128,
+      "name": "Storage.write_fd"
+    },
+    {
+      "calls": [
+        "self.owner.close"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 134,
+      "name": "Storage.close_sink"
+    },
+    {
+      "calls": [
+        "len",
+        "need",
+        "os.getuid",
+        "self.close_sink",
+        "self.create",
+        "self.read",
+        "self.write_fd",
+        "type"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 135,
+      "name": "Storage.write"
+    },
+    {
+      "calls": [
+        "encoded",
+        "self.write"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 142,
+      "name": "Storage.document"
+    },
+    {
+      "calls": [
+        "Budget",
+        "K.Custody",
+        "absolute",
+        "c.close",
+        "c.info",
+        "c.members",
+        "dict",
+        "need",
+        "os.getuid",
+        "result.append",
+        "self.directories.append",
+        "self.read",
+        "sorted",
+        "stat.S_IMODE",
+        "stat.S_ISDIR",
+        "stat.S_ISREG",
+        "visit"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 143,
+      "name": "Storage.inventory"
+    },
+    {
+      "calls": [
+        "Budget",
+        "all",
+        "copied.append",
+        "created.add",
+        "dict",
+        "need",
+        "parent.split",
+        "relative.rsplit",
+        "relative.split",
+        "self.mkdir",
+        "self.read",
+        "self.write",
+        "type"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 161,
+      "name": "Storage.archive"
+    },
+    {
+      "calls": [
+        "RuntimeError",
+        "directory.close",
+        "reversed",
+        "self.owner.blockers",
+        "self.owner.retain"
+      ],
+      "file": "storage.py",
+      "kind": "FunctionDef",
+      "line": 176,
+      "name": "Storage.finish"
+    },
+    {
+      "calls": [
+        "P.Hold"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 12,
+      "name": "need"
+    },
+    {
+      "calls": [
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 14,
+      "name": "scalar_pid"
+    },
+    {
+      "calls": [
+        "F.digest",
+        "dict",
+        "len",
+        "type",
+        "value.encode"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 15,
+      "name": "self_text"
+    },
+    {
+      "calls": [],
+      "file": "runtime.py",
+      "kind": "ClassDef",
+      "line": 22,
+      "name": "ChildOwner"
+    },
+    {
+      "calls": [
+        "dict",
+        "threading.get_ident"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 24,
+      "name": "ChildOwner.__init__"
+    },
+    {
+      "calls": [
+        "need",
+        "threading.get_ident"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 30,
+      "name": "ChildOwner.serial"
+    },
+    {
+      "calls": [
+        "F.digest",
+        "F.encoded",
+        "dict",
+        "need",
+        "scalar_pid",
+        "self.record.update",
+        "self.serial",
+        "self.token.update",
+        "self.unit.event",
+        "self.unit.latch",
+        "self.unit.owner.acquire",
+        "self.unit.owner.retain",
+        "self.unit.refs.append",
+        "subprocess.Popen"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 31,
+      "name": "ChildOwner.launch"
+    },
+    {
+      "calls": [
+        "dict",
+        "need",
+        "self.child.poll",
+        "self.record['pollFacts'].append",
+        "self.serial",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 47,
+      "name": "ChildOwner.poll"
+    },
+    {
+      "calls": [
+        "need",
+        "self.poll"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 53,
+      "name": "ChildOwner.live"
+    },
+    {
+      "calls": [
+        "need",
+        "self.child.wait",
+        "self.poll",
+        "self.record.update",
+        "self.serial",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 54,
+      "name": "ChildOwner.wait_terminal"
+    },
+    {
+      "calls": [
+        "need"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 66,
+      "name": "ChildOwner.confirm"
+    },
+    {
+      "calls": [
+        "M.native_projection",
+        "dict"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 68,
+      "name": "ChildOwner.closed_projection"
+    },
+    {
+      "calls": [],
+      "file": "runtime.py",
+      "kind": "ClassDef",
+      "line": 75,
+      "name": "Inspector"
+    },
+    {
+      "calls": [
+        "dict",
+        "os.getpid",
+        "os.getppid"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 77,
+      "name": "Inspector.__init__"
+    },
+    {
+      "calls": [
+        "F.digest",
+        "F.encoded",
+        "attempt.update",
+        "child.communicate",
+        "dict",
+        "getattr",
+        "h.close",
+        "len",
+        "need",
+        "out.decode",
+        "pipes.append",
+        "record.update",
+        "scalar_pid",
+        "self.pending.append",
+        "self.records.append",
+        "subprocess.Popen",
+        "type",
+        "u.fs.verified",
+        "u.latch",
+        "u.owner.acquire",
+        "u.owner.close",
+        "u.owner.retain",
+        "u.refs.append"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 79,
+      "name": "Inspector.utility"
+    },
+    {
+      "calls": [
+        "need",
+        "scalar_pid",
+        "self.utility",
+        "str",
+        "text.strip"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 111,
+      "name": "Inspector.scoped"
+    },
+    {
+      "calls": [
+        "(self.scoped(expected['pid'], 'command') or '').encode",
+        "(self.scoped(os.getpid(), 'command') or '').encode",
+        "F.digest",
+        "bool",
+        "c.close",
+        "c.open_fd",
+        "fcntl.flock",
+        "len",
+        "need",
+        "os.fstat",
+        "os.getpid",
+        "os.getppid",
+        "raw.splitlines",
+        "self.client.update",
+        "self.scoped",
+        "self.utility",
+        "stat.S_ISREG",
+        "str",
+        "type",
+        "u.fs.parent",
+        "u.owner.close"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 115,
+      "name": "Inspector.controller_lock"
+    },
+    {
+      "calls": [
+        "' '.join",
+        "F.digest",
+        "P.Hold",
+        "allowed.add",
+        "dict",
+        "int",
+        "len",
+        "line.split",
+        "need",
+        "os.getpid",
+        "parts[0].isdigit",
+        "parts[1].isdigit",
+        "parts[7].encode",
+        "self.relevance.get",
+        "self.relevance.items",
+        "self.utility",
+        "text.splitlines",
+        "u.event"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 141,
+      "name": "Inspector.sample"
+    },
+    {
+      "calls": [
+        "P.fields",
+        "dict",
+        "need",
+        "scalar_pid",
+        "type",
+        "value.get"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 161,
+      "name": "Inspector.restore"
+    },
+    {
+      "calls": [],
+      "file": "runtime.py",
+      "kind": "ClassDef",
+      "line": 167,
+      "name": "RelayLoop"
+    },
+    {
+      "calls": [
+        "dict"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 170,
+      "name": "RelayLoop.__init__"
+    },
+    {
+      "calls": [
+        "h.close",
+        "self.tokens.append",
+        "self.unit.owner.acquire"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 176,
+      "name": "RelayLoop.own"
+    },
+    {
+      "calls": [
+        "actual.close",
+        "factory",
+        "self.tokens.append",
+        "self.unit.owner.acquire",
+        "self.unit.owner.retain",
+        "token.update"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 178,
+      "name": "RelayLoop.construct"
+    },
+    {
+      "calls": [
+        "actual.close",
+        "self.listener.accept",
+        "self.tokens.append",
+        "self.unit.owner.acquire",
+        "self.unit.owner.retain",
+        "token.update"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 184,
+      "name": "RelayLoop.accepted"
+    },
+    {
+      "calls": [
+        "P.Hold",
+        "P.claim",
+        "dict",
+        "need",
+        "os.getuid",
+        "self.accepted",
+        "self.construct",
+        "self.listener.bind",
+        "self.listener.listen",
+        "self.listener.set_inheritable",
+        "self.listener.setblocking",
+        "self.receipt.update",
+        "socket.socket",
+        "stat.S_ISSOCK",
+        "u.fs.info",
+        "u.fs.mkdir",
+        "u.output"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 193,
+      "name": "RelayLoop.prepare"
+    },
+    {
+      "calls": [
+        "len",
+        "need",
+        "os.getuid",
+        "self.accepted",
+        "self.child.live",
+        "self.connection.getsockopt",
+        "self.connection.set_inheritable",
+        "self.connection.setblocking",
+        "struct.unpack",
+        "struct.unpack_from",
+        "time.monotonic_ns",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 207,
+      "name": "RelayLoop.accept"
+    },
+    {
+      "calls": [
+        "max",
+        "min",
+        "need",
+        "self.selector.modify",
+        "self.selector.register",
+        "self.selector.select",
+        "time.monotonic_ns"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 221,
+      "name": "RelayLoop.io"
+    },
+    {
+      "calls": [
+        "bytearray",
+        "bytes",
+        "len",
+        "need",
+        "out.extend",
+        "self.connection.recv",
+        "self.io",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 227,
+      "name": "RelayLoop.exact"
+    },
+    {
+      "calls": [
+        "P.decode",
+        "need",
+        "self.exact",
+        "struct.unpack"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 235,
+      "name": "RelayLoop.frame"
+    },
+    {
+      "calls": [
+        "json.dumps",
+        "json.dumps(value, separators=(',', ':'), allow_nan=False).encode",
+        "len",
+        "need",
+        "self.connection.send",
+        "self.io",
+        "struct.pack",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 238,
+      "name": "RelayLoop.send"
+    },
+    {
+      "calls": [
+        "C.network_not_started",
+        "C.validate_record",
+        "F.digest",
+        "P.Hold",
+        "P.fields",
+        "dict",
+        "json.dumps",
+        "json.dumps(observation, separators=(',', ':'), allow_nan=False).encode",
+        "need",
+        "os.getuid",
+        "self.accepted",
+        "self.connection.recv",
+        "self.frame",
+        "self.io",
+        "self.receipt.update",
+        "self.send",
+        "time.monotonic_ns",
+        "type",
+        "u.fs.read",
+        "u.fs.write"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 246,
+      "name": "RelayLoop.exchange"
+    },
+    {
+      "calls": [
+        "all",
+        "need",
+        "reversed",
+        "self.unit.owner.close"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 275,
+      "name": "RelayLoop.finish"
+    },
+    {
+      "calls": [],
+      "file": "runtime.py",
+      "kind": "ClassDef",
+      "line": 281,
+      "name": "Unit"
+    },
+    {
+      "calls": [
+        "ChildOwner",
+        "F.Storage",
+        "Inspector",
+        "K.Ownership",
+        "P.release",
+        "self.owner.owner"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 283,
+      "name": "Unit.__init__"
+    },
+    {
+      "calls": [],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 290,
+      "name": "Unit.latch"
+    },
+    {
+      "calls": [
+        "F.encoded",
+        "dict",
+        "len",
+        "need",
+        "self.events.append"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 292,
+      "name": "Unit.event"
+    },
+    {
+      "calls": [
+        "name.endswith",
+        "need",
+        "self.fs.document",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 295,
+      "name": "Unit.output"
+    },
+    {
+      "calls": [
+        "P.decode",
+        "self.fs.verified"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 298,
+      "name": "Unit.document"
+    },
+    {
+      "calls": [
+        "dict",
+        "getattr",
+        "need",
+        "self_text",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 299,
+      "name": "Unit.self_roles"
+    },
+    {
+      "calls": [
+        "F.Budget",
+        "F.digest",
+        "F.encoded",
+        "dict",
+        "facts.append",
+        "len",
+        "self.event",
+        "self.fs.read",
+        "self.fs.verified",
+        "self.release['phaseInputs'].values",
+        "self.release['roles'].values"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 307,
+      "name": "Unit.verify_inputs"
+    },
+    {
+      "calls": [
+        "F.digest",
+        "F.encoded",
+        "P.fields",
+        "P.validate_claim",
+        "dict",
+        "doc.get",
+        "gateway.get",
+        "need",
+        "self.document",
+        "self.fs.info",
+        "self.release['codeReviews'].items",
+        "self.release['ownerRulings'].items",
+        "self.scope.get",
+        "self.self_roles",
+        "self.verify_inputs",
+        "stat.S_IMODE",
+        "time.time",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 315,
+      "name": "Unit.owners"
+    },
+    {
+      "calls": [
+        "need",
+        "self.child.poll",
+        "self.inspector.controller_lock",
+        "self.inspector.sample",
+        "self.verify_inputs"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 346,
+      "name": "Unit.current"
+    },
+    {
+      "calls": [
+        "P.validate_claim",
+        "need",
+        "self.document",
+        "value.get"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 353,
+      "name": "Unit.matched"
+    },
+    {
+      "calls": [
+        "P.claim",
+        "list",
+        "need",
+        "self.current",
+        "self.inspector.relevance.values",
+        "self.owners"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 359,
+      "name": "Unit.capture"
+    },
+    {
+      "calls": [
+        "captures.get",
+        "completion.get",
+        "dict",
+        "item.get",
+        "need",
+        "prior.get",
+        "scalar_pid",
+        "self.document",
+        "self.inspector.restore",
+        "self.inspector.sample",
+        "self.matched",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 366,
+      "name": "Unit.history"
+    },
+    {
+      "calls": [
+        "P.claim",
+        "self.current",
+        "self.history",
+        "self.owners"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 383,
+      "name": "Unit.negative"
+    },
+    {
+      "calls": [
+        "need",
+        "negative.get",
+        "self.current",
+        "self.document",
+        "self.fs.absent",
+        "self.history",
+        "self.matched",
+        "self.owners",
+        "status.get",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 389,
+      "name": "Unit.preadmit"
+    },
+    {
+      "calls": [
+        "':'.join",
+        "P.fields",
+        "P.pin",
+        "P.safe_absolute",
+        "all",
+        "authorization.get",
+        "env.get",
+        "env.items",
+        "expected.extend",
+        "item['path'].endswith",
+        "item['path'].startswith",
+        "len",
+        "mode.startswith",
+        "need",
+        "os.getuid",
+        "password.decode",
+        "prior.get",
+        "self.document",
+        "self.fs.inventory",
+        "self.fs.verified",
+        "set",
+        "set(env).issubset",
+        "type",
+        "validate_launch_control"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 397,
+      "name": "Unit.phase"
+    },
+    {
+      "calls": [
+        "F.digest",
+        "P.reason",
+        "all",
+        "any",
+        "child.communicate",
+        "child.poll",
+        "len",
+        "need",
+        "record.update",
+        "self.child.poll",
+        "self.child.wait_terminal",
+        "self.latch",
+        "self.owner.close",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 452,
+      "name": "Unit.drain_step"
+    },
+    {
+      "calls": [
+        "RETAINED.append",
+        "self.drain_step",
+        "self.owner.retain",
+        "time.sleep"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 480,
+      "name": "Unit.retain_foreground"
+    },
+    {
+      "calls": [
+        "M.mode_evidence",
+        "P.Hold",
+        "P.claim",
+        "P.reason",
+        "RelayLoop",
+        "all",
+        "bool",
+        "dict",
+        "list",
+        "need",
+        "os.getuid",
+        "row['path'].endswith",
+        "self.child.closed_projection",
+        "self.child.launch",
+        "self.child.poll",
+        "self.child.record.update",
+        "self.child.wait_terminal",
+        "self.current",
+        "self.drain_step",
+        "self.fs.close_sink",
+        "self.fs.create",
+        "self.fs.finish",
+        "self.fs.inventory",
+        "self.fs.mkdir",
+        "self.fs.read",
+        "self.fs.verified",
+        "self.fs.write",
+        "self.inspector.relevance.values",
+        "self.latch",
+        "self.output",
+        "self.owner.blockers",
+        "self.phase",
+        "self.preadmit",
+        "self.relay.accept",
+        "self.relay.exchange",
+        "self.relay.finish",
+        "self.relay.prepare",
+        "self.retain_foreground",
+        "synthetic_relay_qualified",
+        "time.monotonic_ns",
+        "time.sleep",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 491,
+      "name": "Unit.native"
+    },
+    {
+      "calls": [
+        "F.Budget",
+        "F.digest",
+        "F.encoded",
+        "M.native_projection",
+        "P.claim",
+        "P.safe_absolute",
+        "bool",
+        "destination.startswith",
+        "dict",
+        "native.pop",
+        "need",
+        "os.getuid",
+        "outer.get",
+        "self.current",
+        "self.document",
+        "self.fs.archive",
+        "self.fs.inventory",
+        "self.fs.mkdir",
+        "self.fs.read",
+        "self.matched",
+        "self.output",
+        "self.owner.blockers",
+        "self.owners",
+        "sorted",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 558,
+      "name": "Unit.archive"
+    },
+    {
+      "calls": [
+        "archive.get",
+        "need",
+        "self.fs.inventory"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 579,
+      "name": "Unit.archive_equal"
+    },
+    {
+      "calls": [
+        "P.claim",
+        "need",
+        "qa.get",
+        "self.archive_equal",
+        "self.current",
+        "self.document",
+        "self.matched",
+        "self.owner.blockers",
+        "self.owners",
+        "time.time_ns"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 587,
+      "name": "Unit.final"
+    },
+    {
+      "calls": [
+        "P.fields",
+        "P.integer",
+        "dict",
+        "need",
+        "self.event",
+        "time.time_ns",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 595,
+      "name": "Unit.permit_check"
+    },
+    {
+      "calls": [
+        "P.claim",
+        "inspected.get",
+        "need",
+        "qa.get",
+        "ready.get",
+        "self.archive_equal",
+        "self.current",
+        "self.document",
+        "self.matched",
+        "self.owners",
+        "self.permit_check",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 604,
+      "name": "Unit.gate"
+    },
+    {
+      "calls": [
+        "P.claim",
+        "need",
+        "outer.get",
+        "self.archive_equal",
+        "self.current",
+        "self.document",
+        "self.matched",
+        "self.owner.blockers",
+        "self.owners",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 619,
+      "name": "Unit.postclose"
+    },
+    {
+      "calls": [
+        "getattr",
+        "getattr(self, operation)",
+        "need",
+        "self.capture",
+        "self.native"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 631,
+      "name": "Unit.dispatch"
+    },
+    {
+      "calls": [
+        "P.reason",
+        "need",
+        "self.drain_step",
+        "self.fs.finish",
+        "self.latch",
+        "self.retain_foreground"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 634,
+      "name": "Unit.finish"
+    },
+    {
+      "calls": [
+        "P.fields",
+        "P.hash_value",
+        "all",
+        "dict",
+        "limits.items",
+        "need",
+        "type"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 640,
+      "name": "validate_launch_control"
+    },
+    {
+      "calls": [
+        "P.hash_value",
+        "all",
+        "need",
+        "type",
+        "value.get"
+      ],
+      "file": "runtime.py",
+      "kind": "FunctionDef",
+      "line": 654,
+      "name": "synthetic_relay_qualified"
+    },
+    {
+      "calls": [],
+      "file": "mode_predicates.py",
+      "kind": "ClassDef",
+      "line": 18,
+      "name": "Hold"
+    },
+    {
+      "calls": [
+        "Hold"
+      ],
+      "file": "mode_predicates.py",
+      "kind": "FunctionDef",
+      "line": 22,
+      "name": "need"
+    },
+    {
+      "calls": [
+        "len",
+        "type"
+      ],
+      "file": "mode_predicates.py",
+      "kind": "FunctionDef",
+      "line": 27,
+      "name": "reason"
+    },
+    {
+      "calls": [
+        "re.fullmatch",
+        "type"
+      ],
+      "file": "mode_predicates.py",
+      "kind": "FunctionDef",
+      "line": 33,
+      "name": "hash_value"
+    },
+    {
+      "calls": [
+        "all",
+        "dict",
+        "dict.items",
+        "hash_value",
+        "known.get",
+        "len",
+        "set",
+        "type"
+      ],
+      "file": "mode_predicates.py",
+      "kind": "FunctionDef",
+      "line": 37,
+      "name": "native_projection"
+    },
+    {
+      "calls": [
+        "type"
+      ],
+      "file": "mode_predicates.py",
+      "kind": "FunctionDef",
+      "line": 71,
+      "name": "positive"
+    },
+    {
+      "calls": [
+        "need",
+        "set",
+        "type"
+      ],
+      "file": "mode_predicates.py",
+      "kind": "FunctionDef",
+      "line": 75,
+      "name": "fields"
+    },
+    {
+      "calls": [
+        "(_ for _ in ()).throw",
+        "Hold",
+        "json.loads",
+        "len",
+        "need",
+        "raw.decode",
+        "type"
+      ],
+      "file": "mode_predicates.py",
+      "kind": "FunctionDef",
+      "line": 79,
+      "name": "strict"
+    },
+    {
+      "calls": [
+        "all",
+        "contract.network_not_started",
+        "dict",
+        "fields",
+        "mode.startswith",
+        "need",
+        "strict",
+        "type"
+      ],
+      "file": "mode_predicates.py",
+      "kind": "FunctionDef",
+      "line": 90,
+      "name": "mode_evidence"
+    },
+    {
+      "calls": [
+        "ValueError"
+      ],
+      "file": "controls.py",
+      "kind": "FunctionDef",
+      "line": 17,
+      "name": "need"
+    },
+    {
+      "calls": [
+        "all",
+        "len",
+        "need",
+        "set",
+        "type",
+        "value['path'].startswith"
+      ],
+      "file": "controls.py",
+      "kind": "FunctionDef",
+      "line": 19,
+      "name": "pin"
+    },
+    {
+      "calls": [
+        "dict",
+        "group.items",
+        "need",
+        "pin",
+        "set"
+      ],
+      "file": "controls.py",
+      "kind": "FunctionDef",
+      "line": 26,
+      "name": "owner_paths"
+    },
+    {
+      "calls": [
+        "dict",
+        "inputs.values",
+        "need",
+        "pin",
+        "set",
+        "type"
+      ],
+      "file": "controls.py",
+      "kind": "FunctionDef",
+      "line": 32,
+      "name": "decision"
+    },
+    {
+      "calls": [
+        "dict",
+        "need",
+        "package.startswith",
+        "pin",
+        "type"
+      ],
+      "file": "controls.py",
+      "kind": "FunctionDef",
+      "line": 38,
+      "name": "descriptor"
+    },
+    {
+      "calls": [
+        "owner_paths",
+        "profile.release"
+      ],
+      "file": "controls.py",
+      "kind": "FunctionDef",
+      "line": 45,
+      "name": "release"
+    },
+    {
+      "calls": [
+        "dict",
+        "need",
+        "pin",
+        "type"
+      ],
+      "file": "controls.py",
+      "kind": "FunctionDef",
+      "line": 50,
+      "name": "permit"
+    }
+  ],
+  "providerInjected": false,
+  "receiverThreadCreated": false,
+  "serializedPollWaitOwner": "ChildOwner.thread / in_wait"
+}

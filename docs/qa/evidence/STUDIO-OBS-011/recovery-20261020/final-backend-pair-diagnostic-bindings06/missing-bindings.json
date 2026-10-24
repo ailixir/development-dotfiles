@@ -1,0 +1,95 @@
+{
+  "bindingComplete": false,
+  "missingBindings": [
+    {
+      "slot": 4,
+      "task": "test",
+      "missing": [
+        "Exact terminal task TEMP root from original owner provenance",
+        "Receipt/task/cohort-to-TEMP owner binding, not inferred from basename/mtime/count",
+        "Guided worker generation ownership and final-root/archive-log mapping with ownedTemp equal to that same root"
+      ],
+      "payloadInputsNotChecked": [
+        "ordinary-ipc-parent.jsonl",
+        "ordinary-ipc-child.jsonl",
+        "owned-worker-generations.jsonl",
+        "guided.log",
+        "owned-generations/generation-N/guided.log"
+      ],
+      "status": "UNBOUND_REQUIRED_OWNER_PROVENANCE_NOT_IN_PERMITTED_CAPTURED_METADATA",
+      "notAClaimFilesAbsent": true
+    },
+    {
+      "slot": 4,
+      "task": "guidedIncrementalTest",
+      "missing": [
+        "Exact terminal task TEMP root from original owner provenance",
+        "Receipt/task/cohort-to-TEMP owner binding, not inferred from basename/mtime/count",
+        "Guided worker generation ownership and final-root/archive-log mapping with ownedTemp equal to that same root"
+      ],
+      "payloadInputsNotChecked": [
+        "ordinary-ipc-parent.jsonl",
+        "ordinary-ipc-child.jsonl",
+        "owned-worker-generations.jsonl",
+        "guided.log",
+        "owned-generations/generation-N/guided.log"
+      ],
+      "status": "UNBOUND_REQUIRED_OWNER_PROVENANCE_NOT_IN_PERMITTED_CAPTURED_METADATA",
+      "notAClaimFilesAbsent": true
+    },
+    {
+      "slot": 5,
+      "task": "test",
+      "missing": [
+        "Exact terminal task TEMP root from original owner provenance",
+        "Receipt/task/cohort-to-TEMP owner binding, not inferred from basename/mtime/count",
+        "Guided worker generation ownership and final-root/archive-log mapping with ownedTemp equal to that same root"
+      ],
+      "payloadInputsNotChecked": [
+        "ordinary-ipc-parent.jsonl",
+        "ordinary-ipc-child.jsonl",
+        "owned-worker-generations.jsonl",
+        "guided.log",
+        "owned-generations/generation-N/guided.log"
+      ],
+      "status": "UNBOUND_REQUIRED_OWNER_PROVENANCE_NOT_IN_PERMITTED_CAPTURED_METADATA",
+      "notAClaimFilesAbsent": true
+    },
+    {
+      "slot": 5,
+      "task": "guidedIncrementalTest",
+      "missing": [
+        "Exact terminal task TEMP root from original owner provenance",
+        "Receipt/task/cohort-to-TEMP owner binding, not inferred from basename/mtime/count",
+        "Guided worker generation ownership and final-root/archive-log mapping with ownedTemp equal to that same root"
+      ],
+      "payloadInputsNotChecked": [
+        "ordinary-ipc-parent.jsonl",
+        "ordinary-ipc-child.jsonl",
+        "owned-worker-generations.jsonl",
+        "guided.log",
+        "owned-generations/generation-N/guided.log"
+      ],
+      "status": "UNBOUND_REQUIRED_OWNER_PROVENANCE_NOT_IN_PERMITTED_CAPTURED_METADATA",
+      "notAClaimFilesAbsent": true
+    }
+  ],
+  "sourceReason": "Original tasked collector inventories task cohorts and selected JSON leaves, not task TEMP roots or owned-worker-generations.jsonl. Public fixture writes ownedTemp in that separate process-owner stream, not in the top-level cohort fields. Closed receipt/reader/postguard metadata do not supply an owner-to-TEMP mapping.",
+  "availableProof": "Four exact task-cohort hashes reconcile to the original readers; this is not task TEMP ownership.",
+  "noInferenceFrom": [
+    "TEMP basename",
+    "mtime",
+    "cohort UUID path",
+    "record counts",
+    "green native or reader exit",
+    "S-W3 similarity"
+  ],
+  "remedyWithinExistingScope": "Root/original owner must identify a genuine retained closed owner map or separately authorize a narrowly bounded extraction from original provenance. Do not add an observer, new native/Replay call, guessed root, or raw body read under this preparation.",
+  "classificationStates": {
+    "R10Attribution": "UNKNOWN",
+    "RELChronology": "UNKNOWN",
+    "D4BootstrapPair": "NOT_COMPUTED",
+    "startupHangAttribution": "UNKNOWN"
+  },
+  "projectionExecuted": false
+}

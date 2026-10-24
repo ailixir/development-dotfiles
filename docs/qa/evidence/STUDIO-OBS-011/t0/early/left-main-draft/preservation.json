@@ -1,0 +1,63 @@
+{
+  "exactSequentialEditsOnly": true,
+  "realSourceFilesStillBeforeHashes": true,
+  "recordComponents": {
+    "StudioExecutionProperties": {
+      "beforeComponents": "Boolean enabled,\n    Duration pendingSla,\n    Duration startDeadline,\n    Duration runDeadline,\n    Duration totalRuntime,\n    Duration admissionTimeout,\n    Duration evidenceRetention,\n    String referenceCanary,\n    Quotas quotas,\n    Dispatcher dispatcher,\n    Callback callback,\n    Sse sse",
+      "afterComponents": "Boolean enabled,\n    Duration pendingSla,\n    Duration startDeadline,\n    Duration runDeadline,\n    Duration totalRuntime,\n    Duration admissionTimeout,\n    Duration evidenceRetention,\n    String referenceCanary,\n    Quotas quotas,\n    Dispatcher dispatcher,\n    Callback callback,\n    Sse sse",
+      "expectedRetainedComponentTypesNamesOrder": true
+    },
+    "Quotas": {
+      "beforeComponents": "Integer perCsi, Integer global, Integer maxStepsPerTest",
+      "afterComponents": "Integer perCsi, Integer global, Integer maxStepsPerTest",
+      "expectedRetainedComponentTypesNamesOrder": true
+    },
+    "Dispatcher": {
+      "beforeComponents": "Boolean enabled, Integer threads, Integer batchSize, Duration lease, Duration pollInterval",
+      "afterComponents": "Boolean enabled, Integer threads, Integer batchSize, Duration lease",
+      "expectedRetainedComponentTypesNamesOrder": true
+    },
+    "Callback": {
+      "beforeComponents": "Integer maxBodyBytes,\n      Integer maxSteps,\n      Integer maxLogEntries,\n      Integer maxLogEntryChars,\n      String serviceToken",
+      "afterComponents": "Integer maxBodyBytes,\n      Integer maxSteps,\n      Integer maxLogEntries,\n      Integer maxLogEntryChars,\n      String serviceToken",
+      "expectedRetainedComponentTypesNamesOrder": true
+    },
+    "Sse": {
+      "beforeComponents": "Duration heartbeat,\n      Duration lifetime,\n      Duration readInterval,\n      Duration authorizationRefresh,\n      Integer maxStreamsPerUser,\n      Integer maxStreamsPerPod,\n      Integer maxWatchedExecutions,\n      Integer senderThreads",
+      "afterComponents": "Duration heartbeat,\n      Duration lifetime,\n      Duration authorizationRefresh,\n      Integer maxStreamsPerUser,\n      Integer maxStreamsPerPod,\n      Integer maxWatchedExecutions,\n      Integer senderThreads",
+      "expectedRetainedComponentTypesNamesOrder": true
+    }
+  },
+  "StudioServiceOutsideAliasByteEqual": true,
+  "StudioSecretsServiceCommentStrippedByteEqual": true,
+  "exceptionConstructorSuperMessageEqual": true,
+  "applicationYmlOnlyOneLeafRemoved": true,
+  "readIntervalMsLinesByteEqual": true,
+  "observedReplayBlockByteEqual": true,
+  "observedReplayBlockSha256": "ab629c88530fb2302fd379ec84f350c16ba3381c9053fe23c1dac9e014030729",
+  "gradleOutsideTwoRulesByteEqual": true,
+  "coverageFloorsAfter": [
+    "0.70",
+    "0.75",
+    "0.75",
+    "0.75",
+    "0.75"
+  ],
+  "coverageTaskWiringByteEqual": true,
+  "killSwitchOnlyFinalNullRemoved": true,
+  "killSwitchTestMethodsUnchanged": [
+    "switchOffRefusesNewExecutions",
+    "switchOnAdmitsNewExecutionsToTheOrdinaryPath",
+    "switchOffClosesQueuedWork",
+    "switchOnDispatchesTheQueuedBatch",
+    "theSwitchDefaultsToEnabled",
+    "theDispatcherDefaultDivergesBetweenYamlAndCode"
+  ],
+  "accountDirectory": {
+    "exists": true,
+    "entries": [],
+    "patchOperation": "none; Git cannot represent an empty directory"
+  },
+  "javaBalancedLexicalDelimiters": true,
+  "notProofOf": "compilation, Spring binding, complete runtime behavior, QA verdict, lane exit"
+}

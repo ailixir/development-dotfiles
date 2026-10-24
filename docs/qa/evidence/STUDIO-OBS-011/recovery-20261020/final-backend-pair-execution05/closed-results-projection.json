@@ -1,0 +1,1440 @@
+{
+  "notIndependentQaVerdict": true,
+  "rawCollectorResults": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final01-results.json",
+      "sha256": "d7a059784339f29206885bc7d434670ee79ab7133c240b22812c97ef857b58f7"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-lean-ir-final02-results.json",
+      "sha256": "6a255df21d864c5c21084ba6ea7b126ef8ce130a886d958f2d9db903bac27542"
+    }
+  ],
+  "runs": [
+    {
+      "counts": {
+        "errors": 0,
+        "failed": 0,
+        "passed": 108,
+        "skipped": 0,
+        "total": 108
+      },
+      "distStable": true,
+      "elapsedSeconds": 3707.88,
+      "guidedCohortFileCount": 546,
+      "htmlFileCount": 12,
+      "jacocoExecFileCount": 2,
+      "label": "obs011-lean-ir-final01",
+      "orderedCases": [
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "queuedAndPreReadyRefusals()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreMayUseDenialStartsNoSessionAndNoBrowser()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedRegistrationPassingAssertRemainsPassed()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedRegistrationPassingAssertRemainsPassed()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedPublicCancelWhileNativePasswordWorldPending()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualSecretControlWindowLossBeforeReadyReachesTerminalError()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalSecretPrefixPreservesEveryVaultFaultOracle()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "prefixProducerContextDefiniteRefusalsStopBeforePreparation()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalDriftAuthorityRejectsEveryExactJoin()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPrefixCallbacksKeepStateAndFenceBothReservations()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPrefixContinuationMatrixDoneAndRefreshRows()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalStartCannotWidenTrustedOriginCeiling()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalFreshPostConsentGuardsDenyDangerousProposals()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined insert4",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined delete4",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined reorder4",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined config",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined tail1",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined tail7",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined append11",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined ready6",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-prefix",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined empty",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined drift2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined admitted-drift2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined unknown2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined assert-fail",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined policy-prefix",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-long-wait",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-cancel",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-expire",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-source-change",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-recover",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-owner-loss",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined append-input",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined deleted-consumers",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined admitted-literal2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined pre-literal2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined same-pair-literal",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined unused-declaration",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined drift-plan-fail",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined drift-first",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-edit4",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-race",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined drift-auth",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined drift-auth-pre",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined before4at2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined equal4",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPartialDriftStepReadPublishesAndReplaysTwice()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalExcludedAttemptCannotHideOtherUnsettledActions()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPrefixPolicyRefusalsNeverBecomeDrift()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        }
+      ],
+      "rawGradleExit": 0,
+      "rawOuterExit": 0,
+      "rawTaskedExit": 0,
+      "readerExit": 0,
+      "readerReconciled": true,
+      "slot": 4,
+      "sourceStable": true,
+      "started": "2026-10-21T05:09:10.424397+00:00",
+      "taskCollectionComplete": true,
+      "taskResults": {
+        "guidedIncrementalTest": {
+          "counts": {
+            "errors": 0,
+            "failed": 0,
+            "passed": 62,
+            "skipped": 0,
+            "total": 62
+          },
+          "execRequired": true,
+          "freshExec": true,
+          "freshHtmlIndex": true,
+          "freshJoinCohorts": 1,
+          "freshXmlFiles": 1,
+          "joinCasesPresent": true
+        },
+        "test": {
+          "counts": {
+            "errors": 0,
+            "failed": 0,
+            "passed": 46,
+            "skipped": 0,
+            "total": 46
+          },
+          "execRequired": true,
+          "freshExec": true,
+          "freshHtmlIndex": true,
+          "freshJoinCohorts": 1,
+          "freshXmlFiles": 1,
+          "joinCasesPresent": true
+        }
+      },
+      "testInputDigestAfter": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+      "testInputDigestBefore": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+      "testInputStable": true,
+      "validationSucceeded": true,
+      "xmlFileCount": 2
+    },
+    {
+      "counts": {
+        "errors": 0,
+        "failed": 0,
+        "passed": 108,
+        "skipped": 0,
+        "total": 108
+      },
+      "distStable": true,
+      "elapsedSeconds": 3713.45,
+      "guidedCohortFileCount": 546,
+      "htmlFileCount": 12,
+      "jacocoExecFileCount": 2,
+      "label": "obs011-lean-ir-final02",
+      "orderedCases": [
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "queuedAndPreReadyRefusals()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreMayUseDenialStartsNoSessionAndNoBrowser()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreGuidedSameSecretIdStaysWithinPersistedScope()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedRegistrationPassingAssertRemainsPassed()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedWrongPasswordAnnotatesEarlierSecretFill()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedRegistrationPassingAssertRemainsPassed()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualPublishedPublicCancelWhileNativePasswordWorldPending()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualSecretControlWindowLossBeforeReadyReachesTerminalError()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalSecretPrefixPreservesEveryVaultFaultOracle()",
+          "status": "PASS",
+          "task": "test"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "prefixProducerContextDefiniteRefusalsStopBeforePreparation()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalDriftAuthorityRejectsEveryExactJoin()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPrefixCallbacksKeepStateAndFenceBothReservations()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPrefixContinuationMatrixDoneAndRefreshRows()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalStartCannotWidenTrustedOriginCeiling()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalFreshPostConsentGuardsDenyDangerousProposals()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined insert4",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined delete4",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined reorder4",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined config",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined tail1",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined tail7",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined append11",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined ready6",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-prefix",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined empty",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined drift2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined admitted-drift2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined unknown2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined assert-fail",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined policy-prefix",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-long-wait",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-cancel",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-expire",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-source-change",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-recover",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-owner-loss",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined append-input",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined deleted-consumers",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined admitted-literal2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined pre-literal2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined same-pair-literal",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined unused-declaration",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined drift-plan-fail",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined drift-first",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-edit4",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined confirm-race",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined drift-auth",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined drift-auth-pre",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined before4at2",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incremental joined equal4",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPartialDriftStepReadPublishesAndReplaysTwice()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalExcludedAttemptCannotHideOtherUnsettledActions()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPrefixPolicyRefusalsNeverBecomeDrift()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        },
+        {
+          "class": "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT",
+          "name": "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution()",
+          "status": "PASS",
+          "task": "guidedIncrementalTest"
+        }
+      ],
+      "rawGradleExit": 0,
+      "rawOuterExit": 0,
+      "rawTaskedExit": 0,
+      "readerExit": 0,
+      "readerReconciled": true,
+      "slot": 5,
+      "sourceStable": true,
+      "started": "2026-10-21T06:11:02.197363+00:00",
+      "taskCollectionComplete": true,
+      "taskResults": {
+        "guidedIncrementalTest": {
+          "counts": {
+            "errors": 0,
+            "failed": 0,
+            "passed": 62,
+            "skipped": 0,
+            "total": 62
+          },
+          "execRequired": true,
+          "freshExec": true,
+          "freshHtmlIndex": true,
+          "freshJoinCohorts": 1,
+          "freshXmlFiles": 1,
+          "joinCasesPresent": true
+        },
+        "test": {
+          "counts": {
+            "errors": 0,
+            "failed": 0,
+            "passed": 46,
+            "skipped": 0,
+            "total": 46
+          },
+          "execRequired": true,
+          "freshExec": true,
+          "freshHtmlIndex": true,
+          "freshJoinCohorts": 1,
+          "freshXmlFiles": 1,
+          "joinCasesPresent": true
+        }
+      },
+      "testInputDigestAfter": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+      "testInputDigestBefore": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+      "testInputStable": true,
+      "validationSucceeded": true,
+      "xmlFileCount": 2
+    }
+  ],
+  "sameIdentityStatusMultiset": true,
+  "sameOrderedCaseArray": true,
+  "source": "Existing original collector results and driver terminal metadata only; no raw logs, leaves or captures read."
+}

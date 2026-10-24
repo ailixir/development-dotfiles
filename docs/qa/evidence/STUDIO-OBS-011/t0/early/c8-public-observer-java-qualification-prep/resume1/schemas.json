@@ -1,0 +1,317 @@
+{
+  "schemaVersion": 1,
+  "kind": "EXACT_CLOSED_PYTHON_OBJECT_AND_JSON_CONTROL_SCHEMAS",
+  "integerRule": "type(value) is int; bool is rejected",
+  "extraFields": "REJECT",
+  "duplicateJsonMembers": "REJECT",
+  "nonfinite": "REJECT",
+  "serialization": "Controls/results are JSON. NativeWait is an internal exact Python object; its modeEvidence is immutable bounded bytes, not a JSON string or archive record.",
+  "definitions": {
+    "Release": {
+      "fields": [
+        "argv",
+        "authorizedBy",
+        "classpathEntries",
+        "codePins",
+        "environmentKeys",
+        "environmentSha256",
+        "gatewayClosedRootSha256",
+        "harnessClass",
+        "inputPins",
+        "javaRole",
+        "launchControlSha256",
+        "limits",
+        "ordinaryAdmissionSha256",
+        "outputPath",
+        "ownerUid",
+        "productionFragmentSha256",
+        "protocol",
+        "purpose",
+        "rootCustody",
+        "schemaVersion",
+        "selectedMode",
+        "sourceManifestSha256"
+      ],
+      "validator": "qualification_controller.validate_release",
+      "version": 1,
+      "modePurpose": "SYNTHETIC_QUALIFICATION_ONLY",
+      "metadata": "All exact pins/roles/paths/aliases/modes/UIDs/class-directory membership must qualify before mutation; no future node/PID/inode values.",
+      "classpathEntryFields": [
+        "kind",
+        "path",
+        "memberRoles"
+      ],
+      "classpathKinds": [
+        "JAR",
+        "CLASS_DIRECTORY"
+      ],
+      "limits": {
+        "workBudgetNs": 12000000000,
+        "networkBudgetNs": 14000000000,
+        "totalBudgetNs": 15000000000,
+        "frameByteCap": 16384,
+        "ackByteCap": 256,
+        "commitByteCap": 512,
+        "receiverJoinSeconds": 5,
+        "selectorPollMs": 100
+      },
+      "inputBounds": {
+        "maxInputs": 128,
+        "totalBytes": 67108864,
+        "perFileBytes": 16777216
+      },
+      "requiredInputRoles": [
+        "ORDINARY_ADAPTER",
+        "JAVA_ROLE",
+        "exact finite classpath/classfiles",
+        "SYNTHETIC_PKCS12 for TLS"
+      ]
+    },
+    "Pin": {
+      "fields": [
+        "aliases",
+        "bytes",
+        "mode",
+        "path",
+        "sha256",
+        "uid"
+      ],
+      "validator": "qualification_controller.pin",
+      "types": {
+        "path": "absolute canonical-form string",
+        "sha256": "lowercase hex64",
+        "bytes": "int1..16777216",
+        "mode": "int0..0777",
+        "uid": "int>=0",
+        "aliases": "finite list max8 unique absolute strings"
+      },
+      "sourcePolicy": "source600or644 from external pin; root controls exactly600; actual owner from explicit external pin"
+    },
+    "Decision": {
+      "fields": [
+        "attempt",
+        "authorizedBy",
+        "cap",
+        "mode",
+        "operation",
+        "protocol",
+        "purpose",
+        "releaseSha256",
+        "schemaVersion"
+      ],
+      "validator": "qualification_controller.validate_decision",
+      "version": 1,
+      "purpose": "ONE_SYNTHETIC_MODE_ONLY",
+      "cap": 1,
+      "attempt": 1,
+      "operation": "invoke"
+    },
+    "StandaloneJvmIdentity": {
+      "fields": [
+        "argvHash",
+        "executableFileHash",
+        "identityComplete",
+        "kernelIdentityComplete",
+        "kernelStartMicroseconds",
+        "kernelStartSeconds",
+        "pid",
+        "ppid",
+        "processImage",
+        "start",
+        "uid"
+      ],
+      "validator": "qualification_controller.identity / PeerBinding",
+      "types": {
+        "pid": "int>0 equals actual owned process.pid",
+        "ppid": "int>0 equals actual controller PID",
+        "uid": "exact admitted int",
+        "kernelStartSeconds": "int>0",
+        "kernelStartMicroseconds": "int0..999999",
+        "processImage": "exact admitted JAVA path",
+        "executableFileHash": "exact admitted JAVA SHA",
+        "start": "nonempty actual start string",
+        "argvHash": "hex64 actual ordinary observation",
+        "identityComplete": "literal True",
+        "kernelIdentityComplete": "literal True"
+      },
+      "source": "existing ordinary observation contract only; unsupported/incomplete HOLD; no new API/provider"
+    },
+    "NativeWait": {
+      "fields": [
+        "archiveSha256",
+        "descriptorsClosed",
+        "directPid",
+        "directWaited",
+        "modeEvidence",
+        "nativeStatus",
+        "ownedWorkTerminated",
+        "requestSha256",
+        "stderrComplete",
+        "stdoutComplete"
+      ],
+      "validator": "qualification_controller.validate_native",
+      "types": {
+        "directPid": "actual int process PID",
+        "directWaited": "literal True",
+        "nativeStatus": "actual int status",
+        "stdoutComplete": "literal True",
+        "stderrComplete": "literal True",
+        "ownedWorkTerminated": "literal True",
+        "descriptorsClosed": "literal True",
+        "requestSha256": "exact canonical request hash",
+        "modeEvidence": "bytes1..16384: complete immutable stdout consumed by strict mode_evidence",
+        "archiveSha256": "hex64 exact actual ordinary archive"
+      },
+      "actualAdapterImplementationReview": "OWED"
+    },
+    "LaunchControl": {
+      "fields": [
+        "ackByteCap",
+        "amendedPlanManifestSha256",
+        "bodyByteCap",
+        "chunkLineByteCap",
+        "class",
+        "commitByteCap",
+        "enrollmentNonce",
+        "frameByteCap",
+        "headerByteCap",
+        "loopback",
+        "method",
+        "networkBudgetNs",
+        "protocolVersion",
+        "relayPath",
+        "schemaVersion",
+        "tlsHost",
+        "totalBudgetNs",
+        "trailerByteCap",
+        "unit",
+        "workBudgetNs"
+      ],
+      "validator": "qualified_relay.validate_control",
+      "version": 1,
+      "protocolVersion": 2,
+      "protectedFields": [
+        "enrollmentNonce"
+      ],
+      "source": "literal source06 production control; raw SHA independently pinned before interpretation"
+    },
+    "ReadyAndDrainRelayReceipt": {
+      "fields": [
+        "ackCount",
+        "callerAckConfirmed",
+        "callerElapsedNs",
+        "closeOutcomes",
+        "codePins",
+        "commitCount",
+        "conservativeElapsedNs",
+        "controlSha256",
+        "custodyConfirmed",
+        "dataCount",
+        "descriptorsClosed",
+        "enrollmentCount",
+        "failure",
+        "fdIdentities",
+        "peerEofObserved",
+        "peerIdentity",
+        "projectionSha256",
+        "protocolVersion",
+        "qualified",
+        "ready",
+        "shortNamespace",
+        "socketNode",
+        "stopRequested",
+        "threadTerminated"
+      ],
+      "validator": "public_contract.relay_qualified plus actual qualified_relay state",
+      "protocolVersion": 2,
+      "note": "READY uses the same closed receipt with pending facts null; complete qualified acceptance requires one enrollment/DATA/ACK/COMMIT/EOF, native/worker/thread/FD close and current custody. No pending receipt is qualified.",
+      "metadataFields": [
+        "dev",
+        "inode",
+        "mode",
+        "uid"
+      ],
+      "closeNames": [
+        "connection",
+        "listener",
+        "selector",
+        "short",
+        "parent"
+      ]
+    },
+    "QualificationResult": {
+      "fields": [
+        "actualQualificationAcceptanceRequiresIndependentQaRoot",
+        "attemptConsumed",
+        "canonicalClosed",
+        "cleanupReason",
+        "codePins",
+        "controlSha256",
+        "inputPostcheckCompleted",
+        "mode",
+        "namespaceMetadataState",
+        "nativeArchiveSha256",
+        "nativeStatus",
+        "nativeWaited",
+        "ownership",
+        "partialShortCreated",
+        "primaryReason",
+        "projectionSha256",
+        "protocol",
+        "relayPrimaryReason",
+        "relayReceipt",
+        "releaseSha256",
+        "requestSha256",
+        "shortNamespace",
+        "socketNode",
+        "status"
+      ],
+      "producer": "Invocation.snapshot",
+      "protocol": "C8_SYNTHETIC_JAVA_QUALIFICATION_V1",
+      "statuses": [
+        "HOLD",
+        "QUALIFICATION_EVIDENCE_COMPLETE_PENDING_QA_ROOT"
+      ],
+      "primaryCleanupSeparate": true,
+      "noRawSecretOrExceptionFields": true,
+      "actualAcceptanceRequiresIndependentQaRoot": true
+    },
+    "Data": {
+      "fields": [
+        "protocolVersion",
+        "controlSha256",
+        "enrollmentNonce",
+        "observation",
+        "networkAccounting"
+      ],
+      "cap": 16384,
+      "validator": "SyntheticRelay.validate_data",
+      "additionalConstraint": "FINALIZING/NOT_REPRODUCED and exact NOT_STARTED zero accounting only"
+    },
+    "Ack": {
+      "fields": [
+        "protocolVersion",
+        "controlSha256",
+        "projectionSha256",
+        "status"
+      ],
+      "cap": 256,
+      "status": "WRITTEN_CUSTODIED"
+    },
+    "Commit": {
+      "fields": [
+        "protocolVersion",
+        "controlSha256",
+        "projectionSha256",
+        "status",
+        "callerElapsedNs"
+      ],
+      "cap": 512,
+      "status": "CALLER_SAW_CUSTODIED_ACK",
+      "validator": "Relay.validate_commit",
+      "elapsed": "exact int0..<15e9 and callerElapsed+full local DATA-to-COMMIT <15e9; exact EOF required"
+    }
+  },
+  "actualQualification": "UNEXECUTED_OWED",
+  "templatesAreAuthority": false
+}

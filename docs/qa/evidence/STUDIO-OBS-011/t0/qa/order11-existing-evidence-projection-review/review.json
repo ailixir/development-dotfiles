@@ -1,0 +1,39 @@
+{
+  "reviewer": "Quinn",
+  "scope": "SEALED_ORDER11_EXISTING_EVIDENCE_PROJECTOR_SOURCE_AND_SYNTHETIC_ONLY",
+  "verdict": "CORRECTION_REQUIRED_BEFORE_PRIVATE_EXECUTION_READINESS",
+  "mandatoryFindings": [
+    {
+      "id": "O11-PROJ-FS-01",
+      "scope": "Existing no-follow/same-opened-handle ownership/output-directory identity contract",
+      "parts": [
+        "substituted TEMP root resolved before no-follow",
+        "manifest pre-open metadata not bound to read handle",
+        "fresh output directory identity lost before pathname write"
+      ],
+      "reproduction": "contracts.py/json synthetic-only actual AST core; no real private IO",
+      "boundedCorrection": "Retain verified directory/file FDs and identity across reads/write; preserve expressly verified macOS /var alias; no new framework/signing/discovery"
+    }
+  ],
+  "manifestSha256": "44afe7ad379bfde9626d43f41879a9db323e41aec854531637f2b70702a4feb3",
+  "parserSha256": "03e64cb7f8155194c614fedca3b47a99f547db2768a38e38984b0e5d4b5d5bd5",
+  "reviewSha256": "d7a95462fde17b78cdce7412fa8eb510180917d90bfae62198009073ccd63bbd",
+  "auditSha256": "71d496bfb9b78d396386c137d11cc821cfddb422aa49df44f786ef66c9346245",
+  "contractsSha256": "ed71c1dce4a62726fa1b34fb3fb3ed06d85f8c006ec07be2ab8f596c7931e7f7",
+  "independentContracts": {
+    "calls": 70,
+    "accepted": 5,
+    "rejected": 65,
+    "extraJsonRejections": 4,
+    "filesystemCounterexamples": 3
+  },
+  "terminalRedQualifiedDiagnosisAllowedAfterActualClosure": true,
+  "rootAndQuinnActualReleaseGranted": false,
+  "privateInventoryOrReadAuthorized": false,
+  "actualPrivateEnumerationReadsGlobs": 0,
+  "entrypointNativeExecuted": false,
+  "sourceOrPlanOrStoryApplied": false,
+  "runtimeLifecycleLaneCredit": false,
+  "sharedCeilingUsd": 500,
+  "aggregateSpendAvailable": false
+}

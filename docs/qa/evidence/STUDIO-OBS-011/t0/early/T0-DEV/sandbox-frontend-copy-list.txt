@@ -1,0 +1,38 @@
+# T0-SB, FRONTEND sandbox ($SANDBOX/repo/), exact copy list at S_011 (T0-DEV, read-only, 2026-10-18)
+# Scope: the verify of 11-FE = frontend type-check, lint, vitest (subset and full suite), production build + 'grep docs/qa/evidence dist'.
+# Method: static scan of every frontend/src and frontend/e2e file for path.resolve/join(__dirname|process.cwd()|REPO_ROOT|FRONTEND_SRC, ...),
+#         new URL(.., import.meta.url) and relative import specifiers that leave frontend/; plus vite/vitest/tsconfig/webpack configs. Nothing was executed.
+# Layout: REPO-SHAPED. guided.test.tsx:50 sets REPO_ROOT = path.resolve(__dirname, '../../../../..') from frontend/src/components/studio/guided
+#         = five levels up = $SANDBOX/repo. (guided -> studio -> components -> src -> frontend -> repo.)  The same depth holds for guidedEvidence, clarification, loginRequired, planExplanation tests.
+# Rules: copies, never symlinks. cwd for vitest/tsc/eslint/build = $SANDBOX/repo/frontend (realStudioStartup.test.ts uses process.cwd()).
+
+# ---- COPY (cp -a) -------------------------------------------------------------------------------------------------------
+COPY frontend                                            # 377 MB apparent (node_modules 329 MB; node_modules/@put/core-components is a real directory, so cp -a is safe). Includes the hidden .env.development, .eslintrc.json, .npmrc that realStudioStartup.test.ts and lint read.
+                                                         # optional to leave out: frontend/coverage, frontend/dist (35 MB; rebuilt by the build step), frontend/.claude
+COPY dev.sh                                              # *** MISSING from lanes.v3.json / brief: src/components/providers/realStudioStartup.test.ts:7 reads resolve(process.cwd(), '..', 'dev.sh') = $SANDBOX/repo/dev.sh
+COPY docs/specs/studio/openapi.yaml                      # 9 contract/handler tests + 2 more via path.resolve(...,'docs/specs/studio'); also the 15th COPY_SOURCE_FILES entry
+COPY docs/specs/studio/examples                          # context-authoring-valid.json, context-authoring-invalid.json (studioContextContract, studioAuthoringTransport, authoringHandlers tests)
+COPY docs/specs/studio-observed-authoring/contracts/v3   # DIRECTORY (24 MB): *.schema.json via readdirSync (guidedHandlers, studioContract, studioEscalation, confirmedRevisionEscalation tests), fixtures.json, publication-fixtures.json
+                                                         # ALSO needed by type-check, lint and build: src/services/mocks/studio/guidedFixtures.ts and fixtures.ts import fixtures.json / publication-fixtures.json by relative path
+COPY docs/specs/studio-observed-authoring/consensus-plan.md                              # COPY_SOURCE_FILES.consensusPlan
+# --- the COPY_SOURCE_FILES table (guidedNarratives.ts:46-62) = the copy-table test reads these through REPO_ROOT (guided.test.tsx:113) ---
+#     14 of the 15 keys are cited by GUIDED_COPY entries (story015 is never cited); copy all 15 so C-OBS008-3 can re-point entries safely.
+COPY docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md
+COPY docs/stories/STUDIO-OBSERVED/STUDIO-OBS-014.story.md
+COPY docs/stories/STUDIO-OBSERVED/STUDIO-OBS-015.story.md                                # uncited at S_011
+COPY docs/qa/evidence/STUDIO-OBS-008/prep-20261016/t0-rulings/ruling.md                  # 1 of FIVE STUDIO-OBS-008 evidence files (lanes.v3.json 11-FE sandbox and the brief say "six": wrong; the record and quoted-docs-s011.sha256 say five)
+COPY docs/qa/evidence/STUDIO-OBS-008/prep-20261016/implementation-plan.md                # 2
+COPY docs/qa/evidence/STUDIO-OBS-008/execution-20261015/ux-implementation-plan.json      # 3
+COPY docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-rulings.json           # 4
+COPY docs/qa/evidence/STUDIO-OBS-008/execution-20261017/rulings/w5-unreadable-and-alias.md   # 5
+COPY docs/architecture/ADR-SC-006-accessibility-scope-functional-only.md
+COPY backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java   # the only backend file any frontend test reads
+# (executeRefusals.ts, ExecutionProgressView.tsx, useGuidedSession.ts, openapi.yaml are inside frontend/ or docs/specs/ above)
+
+# ---- MKDIR --------------------------------------------------------------------------------------------------------------
+MKDIR docs/qa/accessibility                              # optional: studioWcagAudit.test.tsx afterAll does mkdirSync recursive + writes docs/qa/accessibility/axe-results.json INTO THE SANDBOX
+                                                         # (it never touches the real file; 11-MERGE regenerates the real axe-results.json from the full run in the real tree)
+
+# ---- NOT NEEDED by the frontend tiers ---------------------------------------------------------------------------------------
+# docs/qa/accessibility/* content, docs/runbooks, CLAUDE.md/AGENTS.md/ARCH.md, studio-runner/**, helm-chart/**, tools/**, e2e specs (vitest excludes e2e/**)
+# No test reads docs/qa/evidence/STUDIO-OBS-007|013|015 or STUDIO-OBSERVED-NEXT.

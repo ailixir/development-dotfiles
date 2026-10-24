@@ -1,0 +1,35 @@
+{
+  "status": "CONFIRMED_SOURCE_FINDING_APPLIED_PENDING_NONAUTHOR_REVIEW",
+  "finding": "OWNER07-QA-01",
+  "scope": "Initial mandatory guided.log/ordinary.log leaf-stat stage only",
+  "predecessorInlineSha256": "95b3530def75aaa4d49132a3eb2d0fedc8e5cc194e9507d061595a7e4fdc0c98",
+  "candidateInlineSha256": "7ae01dc39a68e3feff5dca54949854730e16502a7bace1c00f21b38a1c8e628a",
+  "singleReplacementBlock": true,
+  "reverseReconstructionExact": true,
+  "allOtherInlineBytesExact": true,
+  "stableMissingExclusion": "Both initial leaf stats attempted. Any present mandatory leaf must be owned regular non-symlink. Missing mandatory leaf excludes only after initial directory signature equals descriptor and parent-entry signatures.",
+  "unchangedUnresolvedCases": [
+    "permission/read errors",
+    "directory disappearance or race",
+    "unsafe/symlink/unowned present mandatory leaf",
+    "changed directory or file",
+    "later missing leaf during actual opaque hash read",
+    "ambiguous inspection or duplicate hash match"
+  ],
+  "readPlanByteExact": true,
+  "futureOriginalExtraction07TargetUnchanged": true,
+  "newlineFinding": {
+    "status": "WITHDRAWN_BY_QA",
+    "rootOriginal07AstCodepoint": 10,
+    "rootVerificationNotRepeated": true,
+    "writerSourceLineByteExact": true
+  },
+  "scopeHold": {
+    "whole6": "LIVE; sole Gateway actor; source-only preparation has no runtime overlap",
+    "boundedReadRelease": "FALSE_REQUIRED_AFTER_WHOLE_TERMINAL",
+    "nonAuthorReview": "REQUIRED_UNBOUND"
+  },
+  "privateTempEnumerationStatHashBodyReads": 0,
+  "sourceParserExecutionTests": 0,
+  "sourceQAApprovalClaimed": false
+}

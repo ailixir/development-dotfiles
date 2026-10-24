@@ -1,0 +1,39 @@
+{
+  "decision": "CHANGES_REQUIRED",
+  "subjectManifestSha256": "6b308963dc623749151daad14d363f2a58899d6687bb3da6a8986e439a6375d9",
+  "findings": [
+    {
+      "id": "G80-LINK-06",
+      "severity": "HIGH",
+      "mandatory": true,
+      "disposition": "NATIVE_REPORT_LEAF_STILL_OPEN",
+      "title": "Dangling workspace report link reaches the native JSON writer",
+      "locations": [
+        "run-private.py:643",
+        "run-private.py:649-653",
+        "run-private.py:732-735",
+        "scope.json:phases[].argv --outputFile",
+        "boundary-controls.py:FP.exists/is_symlink",
+        "studio-runner/node_modules/vitest/dist/chunks/index.VByaPkjc.js:1773-1779"
+      ],
+      "evidence": "Actual run_native checks only not report.exists() before Popen. Real dangling-link semantics are exists=false/is_symlink=true, so native launch is admitted. Vitest resolves outputFile then uses promises.writeFile, which follows the leaf link; later guarded copy to E cannot undo an unapproved earlier write. Independent corrected-fake semantics reproduce launch admission, paired with normal absent/existing regular/existing-target link cases. No real path or process was created.",
+      "requiredCorrection": "Apply the existing fresh leaf AND parent custody guard to each exact W/repo/{red,green}-vitest.json path before native Popen. Reject regular preexisting, valid-link and dangling-link entries before launch; preserve accepted argv/fixture/reporting and no new instrumentation. Correct fake exists/is_symlink semantics and add the paired actual-function prelaunch regression. Preserve the now-supported anchored helper/copy/archive and other custody corrections."
+    },
+    {
+      "id": "G80-DIFF-08",
+      "severity": "MEDIUM",
+      "mandatory": true,
+      "disposition": "GENERATED_PROOF_METADATA_CORRECTION_REQUIRED",
+      "title": "Generated diff artifacts have stale unchanged metadata",
+      "locations": [
+        "successor-diff.json:402-413",
+        "strict-successor.diff.patch",
+        "strict-successor.reverse.patch",
+        "manifest.json"
+      ],
+      "evidence": "sameNameMembers declares strict-successor.diff.patch and successor-diff.json new hashes equal to old resume2 hashes with changed=false; both actual files changed. Actual current hashes are e889b0b958797597426e9704bfed69150e32aa747914ea944aaccfd10315ace5 and25e7e09ebc7a1e3202da589019d8744666f7c684baf72d4c288012c08087c2a6. Independent strict forward/reverse reconstruction succeeds for18 listed deltas, while20 common files actually changed. The authoritative84-member manifest is exact; no subject-corruption finding.",
+      "requiredCorrection": "Give regenerated self/patch proof artifacts explicit generated-role/exclusion semantics and use the final authoritative manifest for their hashes. Do not require a self-hash fixed point or silently label generated artifacts unchanged. Finalize nonself inputs, honestly scope forward/reverse coverage and verify every asserted current hash in the fresh successor. Keep old packets and proofs immutable."
+    }
+  ],
+  "sourceOrNativeOrCreditReleased": false
+}

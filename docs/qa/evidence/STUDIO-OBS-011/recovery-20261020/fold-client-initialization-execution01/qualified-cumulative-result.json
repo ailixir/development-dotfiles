@@ -1,0 +1,2884 @@
+{
+  "kind": "QUALIFIED_CUMULATIVE_RESULT_NOT_ALL_FRESH_SAME_SOURCE_RUNTIME",
+  "priorRaw474OutcomesRemain": {
+    "PASS": 387,
+    "FAIL": 87,
+    "SKIP": 0
+  },
+  "currentFresh98": {
+    "total": 98,
+    "passed": 93,
+    "failed": 5,
+    "errors": 0,
+    "skipped": 0
+  },
+  "previouslyFailed87Now": {
+    "PASS": 82,
+    "FAIL": 5
+  },
+  "affectedPriorPass10AndExistingDeReady1": "All11 current PASS",
+  "sourceQualifiedPriorPassCarry": 377,
+  "uniqueUnion": 475,
+  "qualifiedUnionOutcomes": {
+    "PASS": 470,
+    "FAIL": 5,
+    "SKIP": 0
+  },
+  "currentFreshCaseIdentities": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT$GuidedConnectorInARealContext",
+      "name": "theConnectorServesOnlyTheGuidedPathsAndThePlainPortIsUnchanged()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT$GuidedConnectorInARealContext",
+      "name": "theConnectorBringsTheClientCertificateToTheGuidedChainAndNothingElseDoes()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT$OneIdentityInARealContext",
+      "name": "allFourRunnerFacingClientsHoldTheOneConfiguredContext()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT$OneIdentityInARealContext",
+      "name": "theSpringManagedClientsReachTheRunnerOverMutualTls()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest$ApiRole",
+      "name": "theApiContextHasNeitherScheduledGuidedBean()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest$WorkerRole",
+      "name": "theWorkerContextBuildsTheReaperAndCoordinatorGraphAndRunsAReaperPass()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest",
+      "name": "ChecksApplication publication=false replay=false",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest",
+      "name": "ChecksApplication publication=false replay=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest",
+      "name": "ChecksApplication publication=true replay=false",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest",
+      "name": "ChecksApplication publication=true replay=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "callbackAcceptsValidUnicodeSessionLargerThan64KiB()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "legacyClarificationAnswerCannotResumeObservedV2Session()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "actualRunnerResponseBoundaryRejectsMalformedUtf8DuplicatesTrailingAndTimestampProfiles()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "stopRetryAfterCloseCompletesConfirmsWithSameKey()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "aWedgedGuidedBrowserIsTerminatedInsideTheBackendDeadlineAndTheSlotIsReleased()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "name": "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "actualApplicationReplacementAfterPrepareNeverActsOnReplacement()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "committedObservationRecoversLostHttpResponseWithoutAnotherCollection()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "lateRenewalResponseAfterStopCannotReviveContextOrOwnership()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "concurrentSameAndNewKeysHaveOneRealDispatch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedBridgePlannedIT",
+      "name": "nestedRollbackAndLostWinnerNeverManufactureSendAuthority()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT",
+      "name": "aSessionEndedWhileAnAppendIsPendingKeepsARecordingThatSettlesPlaysAndSeeks()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedEvidencePendingAppendJoinedIT",
+      "name": "aSessionLosingItsBrowserWhileAnAppendIsPendingStillRecordsTheRunnersOwnFact()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "anAuthoredDeleteStillFailsTheGovernedDenyStance()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "optionalChargedVerificationCannotOverrideMissingExecution()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "thoughtAndToolUsageOnStaleReplyRemainInImmutableLateAudit()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "reportedThoughtOutputOverageStopsBeforeMaterializationDespiteSmallVisibleOutput()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] timing=before, loseResponse=false",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] timing=after, loseResponse=false",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] timing=before, loseResponse=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[4] timing=after, loseResponse=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] control=unlabelled-button",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] control=unlabelled-input",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] control=form-attribute",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "sourceChangeDuringProviderCallCannotRestampAndLateUsageRetainsReservation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] chosenIndex=0",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] chosenIndex=1",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "typedUnsupportedOutcomeStopsWithoutInventingAnAction()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] label=Save",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] label=Delete",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] control=button",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] control=input",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "malformedProviderReplyRepairsThroughDurableChargedAttemptsWithoutEcho()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "acknowledgedOlderSnapshotCannotMarkChangedAllocationsReady()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] choice=0",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] choice=1",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] mutation=operation",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] mutation=target",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] mutation=value",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[4] mutation=assertion",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "chosenSourceCannotBeAppendedUnusedWhileTheRejectedDestinationIsUsed()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] boundary=entry",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] boundary=reservation",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] boundary=repair",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] afterEffect=false",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] afterEffect=true",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] capacity=input",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] capacity=output",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] capacity=proposals",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "futureNonzeroSourceQuestionCannotBeRedefinedByChangingItsOperation()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[1] point=plan",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[2] point=materialized",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[3] point=allocation",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[4] point=next",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[5] point=lost-context-response",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "[6] point=prior-bootstrap",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "name": "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend()",
+      "status": "PASS"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT",
+      "name": "aFillWhoseFocusHandlerInsertsHelperTextElsewhereWritesAndTheSessionContinues()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedFocusMutationJoinedIT",
+      "name": "aFocusHandlerThatChangesTheTargetItselfStillStopsTheSessionAndWritesNothing()",
+      "status": "FAIL"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.readiness.DeReadyCarryForwardTest",
+      "name": "ordinaryAcceptanceReadinessAndRealHttpDispatchCallNeitherProvider()",
+      "status": "PASS"
+    }
+  ],
+  "sourceQualifiedCarryIdentities": [
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(a) softDeleteTest(id, auth) never reads findCsiIdIncludingWithheld",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(a) updateTest never reads findCsiIdIncludingWithheld: owner, stranger, absent",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(b) authorized, then the locked read comes back empty: 403, never 400",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(c) internal delete, absent draft: still 'UI Test not found'",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(d) findAuthoringV2ById refuses a caller who may not read it, and locks nothing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(e) a draft gone or moved to an unreadable CSI by the time the lock is taken is 403",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(e) readAuthoringDraft refuses a caller who may not read it, and locks nothing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "(e) readAuthoringDraft: visible read, lock, then flush and refresh of the locked copy",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "AC-8 step 3: the CSI authorized is the stored draft's, never the request body's",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.StudioServiceWriteAuthorizationTest",
+      "name": "the locked copy is flushed then refreshed after the lock, and nothing is detached",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+      "name": "changedPrincipalCannotUseCachedOriginalOwner()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+      "name": "expiredCookieAndUnavailableCoreNeverFallBackToCachedIdentity()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+      "name": "historicalReceiptNeedsFreshReadButNoExecuteSessionOrAccountAuthority()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+      "name": "observedTimeUsesExactMillisecondsAndFloorsAuthorityDeadlines()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+      "name": "packagedObservedArtifactsResolveDefinitionsWithoutRecursingOrRelaxingClosure()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+      "name": "publishGrantIsBoundToOriginalCapturedDeadlineAndNeverExtendedByRenewal()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+      "name": "revokedReadAndMissingCookieRefuseWithoutCookiePersistence()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.DispatchAuthorizationIT",
+      "name": "workerWithoutPublicationCollaboratorRefusesEveryPublicationOperation()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "a202IsTheAdmittedPathAnd429IsDefiniteNonAcceptance()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "aCancelWithoutAServiceIdentitySendsNothing()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "aJobWithoutAnObservedBindingIsATerminalNamedRefusalAndSendsNothing()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "aJobWithoutOriginsSendsAnEmptyMapWhichTheRunnerReadsAsBoundToNone()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "aMissingServiceIdentityIsATerminalNamedRefusalAndSendsNothing()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "absentRunnerOriginDoesNotBorrowDispatchBaseUrlForGuidedOperations()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "anUnconfiguredRunnerIsATerminalNamedRefusalAndSendsNothing()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "dispatchCarriesTheRunnerIdentityAndMissingIdentitySendsNothing()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "eachSecretsAllowedOriginsAreSentBesideButApartFromItsValue()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "exactlyOneRequestLeavesTheProcessForEachOfTheFourAmbiguousCases()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "foldedClientPreservesEachTransportConnectTimeoutAndHttpVersion()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "foldedValidationUsesItsOwnEndpointCredentialAndPerCallByteLimit()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "immutableReferencePolicyIsSentWithoutAnyResolvedValueInIt()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "ownedBytePublisherAndSecretArraysAreErasedAcrossAcceptedRefusedAndAmbiguousResponses()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "redirectsAreNotFollowed()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "theCancelClassificationSettlesOnlyOn202And409()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "theCancelRelayIsOneDeleteCarryingTheSameBearer()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "theClassificationTableHasNoFourthOutcome()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClientTest",
+      "name": "theDispatchPresentsTheRunnerServiceIdentityAsABearer()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.JobBodyLeakTest",
+      "name": "closeRunsOnTheRefusalPathTooAndEmptiesTheVersionIdentifiers()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.JobBodyLeakTest",
+      "name": "closeZeroesBothMapsArraysAndNotMerelyTheMapsThatHeldThem()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.JobBodyLeakTest",
+      "name": "noAmbiguousOrRefusedPathPutsAValueInALogLineAnExceptionOrAnOutcome()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.JobBodyLeakTest",
+      "name": "theAppenderIsLiveBeforeAnyDoesNotContainIsTrusted()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.JobBodyLeakTest",
+      "name": "theValuesTravelOnTheWireAndAppearInNoLogLineAtAnyLevel()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "aBackendCertificateWithoutServerAuthCannotServeTheConnector()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "aCertificateForAnotherHostIsRefusedByTheDispatchAndTheBridgeClients()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "aClientCertificateTheCaDidNotIssueIsRefusedAndNothingReachesTheRunner()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "aClientWithNoCertificateIsRefusedByTheHandshakeAndNothingReachesTheRunner()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "aServerTheCaDidNotIssueIsRefusedByTheClientAndNothingReachesIt()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "bridgeTrafficGetsThroughOnlyWithTheBackendCertificate()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "plaintextIsRefusedInBothDirections()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "submissionAndCancelSucceedOnlyWithTheBackendCertificateAndTheRunnerIssuer()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "theBearerIsStillRequiredOverTls()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "theCoordinatorsControllerHopPresentsTheBackendCertificateAndRefusesAStrayServer()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "theDenyAllIdentityHoldsNoCertificateNoTrustAndNoSecret()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.RunnerTlsClientCertIT",
+      "name": "theGuidedConnectorDemandsAClientCertificateAndServesTheBackendCertificate()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "FINDING: the dispatcher's code default and its yaml default DISAGREE",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "switch OFF: accept() refuses with DISPATCH_DISABLED and never looks the test up",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "switch OFF: dispatchOnce() closes queued work instead of dispatching it",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "switch ON: accept() proceeds past the switch and does the lookup \u2014 INVERTED",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "switch ON: dispatchOnce() claims queued work instead \u2014 INVERTED",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.dispatch.StudioKillSwitchWiringTest",
+      "name": "the default is ON \u2014 the switch is a kill switch, not an enable switch",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "bothGatesUseTheExpressionOfTheSchedulingCoordinator()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under api,dev: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under api,prod: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under api,staging: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under api,test: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under api: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under dev: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under local,api: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under local: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under prod: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under test: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under worker,api: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under worker,prod: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under worker,staging: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "coordinator under worker: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "noNotWorkerBeanWasWidened()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under api,dev: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under api,prod: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under api,staging: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under api,test: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under api: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under dev: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under local,api: present=false",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under local: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under prod: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under test: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under worker,api: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under worker,prod: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under worker,staging: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "reaper under worker: present=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "theCoordinatorGateIsOnTheBeanMethodBecauseTheClassIsNotScanned()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.GuidedScheduledBeansProfileTest",
+      "name": "theMatrixIsNotVacuous()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextDeadlineTest",
+      "name": "keyedAppendIsSentWithTheFrozenLeaseAsCallerDeadline()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextDeadlineTest",
+      "name": "unkeyedContextPushPassesNoCallerDeadline()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextRefusalTest",
+      "name": "aDefiniteContextRefusalFailsTheSessionBeforePrepare()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchContextRefusalTest",
+      "name": "anUncertainContextReplyKeepsUnknownOutcomeAndFailsNothing()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchStopKeyTest",
+      "name": "assignmentStopKeyIsTheTeardownHashOfTheUnchangedBodyOnEveryCall()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedDispatchStopKeyTest",
+      "name": "contextStopKeyFollowsTheIdentityBodyAndItsReason()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "name": "closeBeforeSubscriptionRefusesLateChunksWithoutConsumingThem()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "name": "exactResponseLimitCompletesAndAllOwnedArraysAreErased()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "name": "oneByteBeyondLimitCancelsAndOwnerCloseErasesAccumulation()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "name": "refusalReplyLimitCompletesExactlyAndCancelsOneByteBeyond()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedOwnedBufferBoundaryTest",
+      "name": "requestCloseWaitsForOwnedReadMonitorAndRefusesSubsequentReads()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerContextRefusalTest",
+      "name": "aPrepareRefusalIsNeverWidenedIntoADefiniteOne()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerContextRefusalTest",
+      "name": "anyOtherContextReplyStaysAnUnknownOutcome()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedRunnerContextRefusalTest",
+      "name": "identityMismatchAndSchemaRefusalsOfAContextAreDefinite()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "name": "[1] status=200",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "name": "[2] status=503",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "name": "actualProductionHttpsDefaultFifteenSecondBoundIncludesTheResponseBody()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "name": "actualProductionHttpsInterruptionClosesPartialResponseAndErasesOwnedBuffers()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.bridge.GuidedSecretByteBodyTest",
+      "name": "guidedPublisherUsesOwnedBytesAndErasesBothBuffersAfterAckAndLostAck()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "aCsiOutsideTheKeyAlphabetFailsClosed()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "aDuplicateNeverBypassesCallerFenceScopeOrMaterializationIdentity()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "aTerminalSessionWithinTheWindowIsAcceptedAndNotRevived()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "anIdenticalDuplicateAfterTheWindowEchoesWithoutChangingAnyFact()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "contractRefusalsBeforeAnyRead()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "everySessionStateIsAcceptedIncludingNonTerminal()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "identityRefusals()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "noPublicProjectionCarriesAKeyBucketOrEndpoint()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "projectionAbsentRowFlipsFromProcessingToUnavailableAtTheDeadline()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "projectionExpiredIsJudgedOnTheDatabaseClock()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "projectionStoredRows()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "requireRoleIsTheSharedCheck()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "semanticTimingRefusalsWriteNoRow()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "theWindowIsJudgedOnTheDatabaseClockAgainstExpiresAtPlusGrace()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceTest",
+      "name": "writeOnceAndSameKeyIdempotency()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[10] field=currentPolicyHash",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[10] field=startedAt, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[11] field=grantId",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[11] field=startedAt, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[12] field=startedAt",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[12] field=startedAt, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[13] field=attemptId, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[14] field=attemptId, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[15] field=attemptId, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[16] field=runnerInstanceId, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[17] field=runnerInstanceId, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[18] field=runnerInstanceId, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[19] field=admissionId, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] credential=null, status=401, code=SERVICE_IDENTITY_REQUIRED",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] field=attemptId",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] field=principalId",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] field=profile",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] field=schemaVersion, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[1] invalid=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[20] field=admissionId, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[21] field=admissionId, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[22] field=revisionId, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[23] field=revisionId, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[24] field=revisionId, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[25] field=revisionDigest, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[26] field=revisionDigest, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[27] field=revisionDigest, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[28] field=artifactHash, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[29] field=artifactHash, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] credential=, status=401, code=SERVICE_IDENTITY_REQUIRED",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] field=account",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] field=build",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] field=revisionId",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] field=schemaVersion, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[2] invalid=[]",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[30] field=artifactHash, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[31] field=configurationHash, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[32] field=configurationHash, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[33] field=configurationHash, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[34] field=learnedPlanHash, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[35] field=learnedPlanHash, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[36] field=learnedPlanHash, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[37] field=referencePolicyHash, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[38] field=referencePolicyHash, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[39] field=referencePolicyHash, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[3] credential=Bearer, status=401, code=SERVICE_IDENTITY_REQUIRED",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[3] field=credential",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[3] field=revisionDigest",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[3] field=schemaVersion, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[3] invalid=true",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[40] field=publicationEvidenceHash, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[41] field=publicationEvidenceHash, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[42] field=publicationEvidenceHash, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[43] field=scopeHash, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[44] field=scopeHash, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[45] field=scopeHash, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[46] field=currentPolicyHash, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[47] field=currentPolicyHash, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[48] field=currentPolicyHash, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[49] field=grantId, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[4] credential=Bearer , status=401, code=SERVICE_IDENTITY_REQUIRED",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[4] field=artifactHash",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[4] field=kind, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[4] field=resolvedValues",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[4] invalid={",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[50] field=grantId, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[51] field=grantId, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[52] field=profile, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[53] field=profile, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[54] field=profile, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[55] field=build, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[56] field=build, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[57] field=build, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[5] credential=Bearer synthetic-private-metadata-canary, status=403, code=SERVICE_IDENTITY_REJECTED",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[5] field=certificateIdentity",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[5] field=configurationHash",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[5] field=kind, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[5] invalid={\"schemaVersion\":2,\"schemaVersion\":2}",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[6] credential=Basic synthetic-ordinary-service-token-only, status=401, code=SERVICE_IDENTITY_REQUIRED",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[6] field=accountGrantId",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[6] field=kind, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[6] field=learnedPlanHash",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[7] credential=Bearer synthetic-guided-only-credential-canary, status=403, code=SERVICE_IDENTITY_REJECTED",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[7] field=executionId, mutation=missing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[7] field=referencePolicyHash",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[8] field=executionId, mutation=null",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[8] field=publicationEvidenceHash",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[9] field=executionId, mutation=wrong-type",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "[9] field=scopeHash",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "bffCookieAndForgedCertificateOrForwardedIdentityGrantNothing()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "crossExecutionRequestRefusesBeforeDatabaseLookup()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "expiredGrantAndCancelledExecutionStopBeforeAccountOrCas()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "malformedUtf8CannotTurnIntoReplacementCharacterAuthority()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "observedByteBoundDoesNotExposeTheBodyAndUnauthenticatedCallerStillGetsIdentityRefusal()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "ordinaryProgressCallbackRetainsRealTokenAndStrictReaderBoundary()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "otherwiseValidTupleReachesTheLockedAdmissionTransactionButNeverCasOrSecretResolution()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "queryCredentialIsNotAnOrdinaryServiceCredential()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "storedActorGrantMismatchIsNotOverriddenByRequestHeaders()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "strictParserMustNotQuotePrivateMalformedIdentityValues()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedAdmissionSecurityIT",
+      "name": "unknownBindingDoesNotReturnExecutionOrAccountMetadata()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[1] mode=matched",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[1] name=fresh-order-reference",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[2] mode=build",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[2] name=control-value-reference",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[3] mode=representation",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[4] mode=invalid",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[5] mode=runtime",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[6] mode=fatal",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "[7] mode=ambient",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "choiceCanonicalHashesPreserveUnicodeAndOriginalInstantWithoutNormalization()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "compiledNodeIndependentlyValidatesChoiceAgainstCurrentPackagedBuild()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "correctedCompleteBasisPreimagesKeepExactlyTheOriginalEvidenceEnvelope()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "defensiveCandidateCannotBeChangedThroughCallerJson()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "exact tuple array and final plan commitments 0",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "exact tuple array and final plan commitments 1",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "exact tuple array and final plan commitments 2",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: answer after expiry by one nanosecond",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: coherent alternative authored input",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: coherent changed operation",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: coherently resealed singleton original question",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: exact locator kind differs with same text",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: fresh duplicate locator on hidden unrelated node",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: meaning cannot replace authored argument with binding",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: missing original question observation",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: missing prospective choice witness",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: old duplicate locator on hidden unrelated node",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: old generation equals fresh preparation with coherent snapshot",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: original question plan changed meaning despite resealing",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: provider meanings order changed",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independent Java/Node original proof: unapproved original question origin coherently resealed",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "independentUtf8LimitsDoNotBorrowTheLargerTransportAllowance()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "lawfulJoinedSemanticBasisAcceptsExactlySixMiBBeforeOneLegalByteIsRefused()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "originalZeroAndSourceOnlyProofsOmitChoiceAndKeepReferenceBytes()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "providerAuditLabelsAndIdsNeverBecomeExecutableSelectors()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "recipeBoundariesAndAuthoritativePlacementAreNotSilentlyNormalized()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "reproducesIndependentCanonicalUnicodeAndNumericVectors()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "reproducesIndependentPythonObservedChoiceArtifactAndAllHashes()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "separateOwnedLoweringCopiesRetainCutAndIndependentArtifact()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "unsupportedNullCanonicalDependencyRetainsOriginalValidationAndBudgetOrder()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest",
+      "name": "validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedGrantClockIT",
+      "name": "aGrantExpiredByTheDatabaseClockIsRefusedBeforeTheWrite()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedGrantClockIT",
+      "name": "acceptanceSucceedsWhateverTheApplicationClockSays()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedGrantClockIT",
+      "name": "theDatabaseClockReadsClockTimestampInAndOutOfATransaction()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedGrantClockIT",
+      "name": "theGrantIsMintedFromAClockTimestampReadAfterAccountFreshness()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.ObservedGrantClockIT",
+      "name": "theTriggerJudgesGrantsOnTheDatabaseClockWithoutTolerance()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+      "name": "databaseExpiredPublicationGrantRefusesDespiteJvmBehind()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+      "name": "publicationMintAndJudgeReadDatabaseClockWithJvmAheadAndBehind()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.publication.PublicationGrantClockIT",
+      "name": "publisherClaimsWithExactDatabaseReadingAndGivesValidationADatabaseBudget()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[1] mode=COMPLETE_200_NO_CALLBACK",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[2] mode=COMPLETE_200_OWNER_OK",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[3] mode=COMPLETE_200_OWNER_FAILED",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[4] mode=COMPLETE_503_NO_CALLBACK",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[5] mode=COMPLETE_503_OWNER_OK",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[6] mode=PARTIAL_200_NO_EOF",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[7] mode=PARTIAL_503_NO_EOF",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[8] mode=CALLER_EXPIRY_AFTER_CONSUME",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "[9] mode=INTERRUPT_AFTER_HEADERS",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "abandonedTeardownReportQueriesOncePerIntervalAndIsSilentWhenNone()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualConsumedGuidedControllerJvmCrashBeforeResolutionReconcilesWithoutReadOrPost()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualConsumedGuidedControllerJvmCrashBeforeSecretDecisionReconcilesWithoutRereadOrPost()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualHeldSetupObservationFailureAfterPreparedAssignmentStopsUnclaimedIntent()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualHeldSetupObservationFailureAfterStartClosesWithoutNotifyWork()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipDrainsObservationFailureBeforePrivateRouteClose()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipDrainsObservationInterruptBeforePrivateRouteClose()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipRecordsRealConfirmationRefusalBeforePrivateRouteClose()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "actualStopOwnershipRecordsRealSenderRefusalWithoutConfirmation()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "composedClaimRevocationCommitsBeforeRefusalAndOriginalStop()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "concurrentAfterCompletionAndSweepSendOneStopAtATime()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "consumingVerificationStaysRefusedWhilePending()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "expiredTeardownConfirmsOnImmediateResendAfterAckTimeout()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "expiredTeardownConfirmsOnSweepAfterResendsExhausted()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "legacyPendingWithoutRequestIsNotRedriven()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleAtAnyOtherIdentityIsRefusedWhilePending()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleAtLastAcknowledgedIdentityEndsSession()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleAtPendingAppendIdentityEndsSessionAndChangesNothing()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "lifecycleWithoutPendingDeliveryIsExactlyVerify()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "noPendingDeliveryKeepsIdentityTarget()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "pendingAppendDeliveryTeardownTargetsTheAssignment()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "pendingAppendPublicationConflictTargetsTheAssignment()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "publicationConflictTeardownIsRedrivenAfterResendsExhausted()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "publicationConflictTeardownTargetsTheAssignmentAndConfirms()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "publicationConflictedIsIdempotentAndFailsClosed()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "stopWithoutAStopTargetRecordsNoPendingTeardown()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedServiceTransportFaultIT",
+      "name": "teardownWithoutAckNeverConfirmsAndStopsAfterWindow()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "accessIsolationRechecksPrincipalCsiAccountAndScope()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "actionBudgetAndFalseAssertionReportsFailClosed()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "canonicalUnicodeParityAndClosedSchema()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "clarificationIsBoundToGenerationChoiceAndOriginalDeadline()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "clarificationSelectionAndPauseChangeRollBackTogether()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "concurrentConflictingStartsHaveOneWinner()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "concurrentIdenticalStartsAndChangedDigestAreDurable()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "conflictingAdmissionAndUniqueCoordinatesFail()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "entireSessionBudgetsAreReservedAndMissingUsageIsConservative()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "evidenceReferencesAreScopedAndDoNotClaimReplay()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "expiryCannotBeExtendedAndTrustedReaperRevokes()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "gatewayOverrunIsDurablyChargedAndStopsFurtherWork()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "liveOwnerRenewalPreservesAdmittedAndDispatchedActions()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "lostAckNeverRetriesAndDelayedCallbackCannotRevive()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "migrationPreservesExistingDataAndFreshInstallWorks()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "noStateCanPublishWithoutExactVerifier()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "observationBudgetAndGenerationAreSharedAcrossActions()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "successfulLedgerStillCannotPublishWithoutExactPlanVerifier()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "takeoverCannotReopenFinalizingAfterExecutedEffects()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "unavailableObservationPreparationFallsBackAndFatalRemainsEarly()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "unsupportedObservationEnvelopeUsesOriginalLockedValidation()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "name": "workerSubjectFenceAndLeaseAreIndependent()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "acknowledgedAppendMovesToRefresh()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "appendAtOrAfterFrozenLeaseFailsWithoutSending()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "appendIsPrecededBySameVersionSync()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "closedNonDefiniteAppendRefusalIsTerminalOnFirstReceipt()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "definiteAppendRefusalIsTerminal()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "presyncDefiniteRefusalIsTerminal()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "retriedContinuationWithPendingDeliverySkipsSync()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedSuffixMaterializationTest",
+      "name": "uncertainAppendResendsSameDeliveryAtMostThreeTimes()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "aBodyNamingACsiEnvironmentOrAnOldFieldIsRefusedAndNothingIsWritten()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "aDuplicateIsAlreadyExistsAndTheStoredEntryIsUnchanged()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "aReaderMayListButNotCreate()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "aStrangerAndAnAbsentTestGetTheSameRefusalOnBothOperations()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "anOversizedBodyIsARequestErrorAfterAuthorization()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "anOwnerCreatesUnderTheRowsCsiEnvironmentAndTestIdAndGetsNoValueBack()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "anUnauthorizedMalformedBodyIsRefusedAsForbiddenWithoutBeingParsed()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "eachRuleHasItsOwnCodeAndNoMessageCarriesTheValueOrAParserFragment()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "theBodyAndTheValueAreErasedAfterSuccessValidationFailureAndProviderFailure()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "theDefaultOffProviderIsNotConfiguredOnBothOperations()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    },
+    {
+      "task": "test",
+      "class": "com.citi.put.checks.studio.secrets.StudioSecretsServiceTest",
+      "name": "theRequestRecordNeverRendersOrComparesTheValue()",
+      "status": "PRIOR_PASS_QUALIFIED_SOURCE_CARRY"
+    }
+  ],
+  "carryQualification": "Only the one reviewed constructor initialization file changed. Five old constructor bodies and helper body/signatures remain byte-identical; explicit/direct/pure/clock/authorization paths retained per root98 plan. Carry remains source-qualified, not a new475-case same-source runtime. Final whole gate remains owed.",
+  "oldFailedFold03Preserved": true,
+  "gatePass": false
+}

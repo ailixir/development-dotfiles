@@ -1,0 +1,10 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -34534,7 +34534,6 @@
+   }
+ 
+   private static void itrAssertAuditCorpus() {
+-    AUDIT_CANARIES.clear();
+     var events = new java.util.ArrayList<>(AUDIT_EVENTS.list);
+     assertThat(AUDIT_CANARIES).as("the OBS-007 case registered its canaries").isNotEmpty();
+     assertThat(events)

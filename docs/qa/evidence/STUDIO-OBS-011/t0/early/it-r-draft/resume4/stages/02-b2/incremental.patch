@@ -1,0 +1,2713 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -7779,16 +7779,115 @@
+       Instant lease = Instant.parse(before.session().path("owner").path("leaseExpiresAt").asText());
+       long end = System.nanoTime() + Duration.ofSeconds(12).toNanos();
+       JsonNode renewed;
+-      do {
+-        prefixSyncNoTarget(parent, before);
+-        renewed =
++      {
++      // IT-R POLL 8: exact original transitions; one old interval owed at most.
++      final var itrRead008_before = before; final var itrRead008_lease = lease; final var itrRead008_end = end;
++      class ItrState008 { JsonNode renewed; boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr008 = new ItrState008();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll008 = () -> {
++        if (itr008.firstException != null) throw itr008.firstException;
++        if (itr008.firstError != null) throw itr008.firstError;
++        if (itr008.terminal) return true;
++        try {
++        if (itr008.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr008.owedUntil) return false;
++          itr008.intervalOwed = false;
++        }
++        if (!itr008.firstIteration && !(System.nanoTime() < itrRead008_end)) { itr008.terminal = true; return true; }
++        itr008.firstIteration = false;
++        prefixSyncNoTarget(parent, itrRead008_before);
++        itr008.renewed =
+             sessions.transaction(
+                 () -> sessions.lock(parent.id).document().path("owner").deepCopy());
+-        if (Instant.parse(renewed.path("leaseExpiresAt").asText()).isAfter(lease)) {
+-          break;
+-        }
+-        Thread.sleep(20);
+-      } while (System.nanoTime() < end);
++        if (Instant.parse(itr008.renewed.path("leaseExpiresAt").asText()).isAfter(itrRead008_lease)) {
++          itr008.terminal = true; return true;
++        }
++        itr008.intervalOwed = true; itr008.owedUntil = System.nanoTime() + Duration.ofMillis(20).toNanos();
++        return false;
++        } catch (Exception itrFailure008) {
++          if (itr008.firstException == null && itr008.firstError == null) {
++            itr008.firstException = itrFailure008; itr008.terminal = true;
++          }
++          throw itr008.firstException;
++        } catch (Error itrFailure008) {
++          if (itr008.firstException == null && itr008.firstError == null) {
++            itr008.firstError = itrFailure008; itr008.terminal = true;
++          }
++          throw itr008.firstError;
++        }
++      };
++      try {
++        while (!itr008.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone008 = itrPoll008.call();
++          if (itrDone008) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow008 = System.nanoTime();
++          long itrRemaining008 = itrRead008_end - itrNow008;
++          long itrOwed008 = itr008.intervalOwed ? itr008.owedUntil - itrNow008 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound008 = Math.max(itrRemaining008, itrOwed008);
++          if (itrBound008 > 0) {
++            final boolean[] itrFirstTick008 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 8")
++                  .atMost(Duration.ofNanos(itrBound008))
++                  .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr008.firstException != null) throw itr008.firstException;
++                    if (itr008.firstError != null) throw itr008.firstError;
++                    if (itr008.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick008[0]) {
++                      itrFirstTick008[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved008 = itrPoll008.call();
++                    if (!itrObserved008 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved008;
++                    } catch (Exception itrFailure008) {
++                      if (itr008.firstException == null && itr008.firstError == null) {
++            itr008.firstException = itrFailure008; itr008.terminal = true;
++          }
++                      if (itr008.firstError != null) throw itr008.firstError;
++                      throw itr008.firstException;
++                    } catch (Error itrFailure008) {
++                      if (itr008.firstException == null && itr008.firstError == null) {
++            itr008.firstError = itrFailure008; itr008.terminal = true;
++          }
++                      if (itr008.firstException != null) throw itr008.firstException;
++                      throw itr008.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout008) {
++              if (itr008.firstException != null) throw itr008.firstException;
++              if (itr008.firstError != null) throw itr008.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure008) {
++        if (itr008.firstException == null && itr008.firstError == null) {
++            itr008.firstException = itrFailure008; itr008.terminal = true;
++          }
++        if (itr008.firstError != null) throw itr008.firstError;
++        throw itr008.firstException;
++      } catch (Error itrFailure008) {
++        if (itr008.firstException == null && itr008.firstError == null) {
++            itr008.firstError = itrFailure008; itr008.terminal = true;
++          }
++        if (itr008.firstException != null) throw itr008.firstException;
++        throw itr008.firstError;
++      } finally {
++        renewed = itr008.renewed;
++      }
++      
++    }
+       assertThat(Instant.parse(renewed.path("leaseExpiresAt").asText()))
+           .as(
+               "a real same-owner renewal must occur before the unchanged context transport deadline")
+@@ -8508,9 +8607,108 @@
+                     .asText();
+             final String id = mixed;
+             long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+-            while (!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline) {
+-              Thread.sleep(10);
++            {
++      // IT-R POLL 9: exact original transitions; one old interval owed at most.
++      final var itrRead009_id = id; final var itrRead009_deadline = deadline;
++      class ItrState009 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr009 = new ItrState009();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll009 = () -> {
++        if (itr009.firstException != null) throw itr009.firstException;
++        if (itr009.firstError != null) throw itr009.firstError;
++        if (itr009.terminal) return true;
++        try {
++        if (itr009.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr009.owedUntil) return false;
++          itr009.intervalOwed = false;
++        }
++        if (!(!INCREMENTAL_ACK_ENTERED.contains(itrRead009_id) && System.nanoTime() < itrRead009_deadline)) { itr009.terminal = true; return true; }
++        itr009.firstIteration = false;
++        itr009.intervalOwed = true; itr009.owedUntil = System.nanoTime() + Duration.ofMillis(10).toNanos();
++        return false;
++        } catch (Exception itrFailure009) {
++          if (itr009.firstException == null && itr009.firstError == null) {
++            itr009.firstException = itrFailure009; itr009.terminal = true;
++          }
++          throw itr009.firstException;
++        } catch (Error itrFailure009) {
++          if (itr009.firstException == null && itr009.firstError == null) {
++            itr009.firstError = itrFailure009; itr009.terminal = true;
++          }
++          throw itr009.firstError;
++        }
++      };
++      try {
++        while (!itr009.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone009 = itrPoll009.call();
++          if (itrDone009) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow009 = System.nanoTime();
++          long itrRemaining009 = itrRead009_deadline - itrNow009;
++          long itrOwed009 = itr009.intervalOwed ? itr009.owedUntil - itrNow009 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound009 = Math.max(itrRemaining009, itrOwed009);
++          if (itrBound009 > 0) {
++            final boolean[] itrFirstTick009 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 9")
++                  .atMost(Duration.ofNanos(itrBound009))
++                  .pollInterval(Duration.ofMillis(10)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr009.firstException != null) throw itr009.firstException;
++                    if (itr009.firstError != null) throw itr009.firstError;
++                    if (itr009.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick009[0]) {
++                      itrFirstTick009[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved009 = itrPoll009.call();
++                    if (!itrObserved009 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved009;
++                    } catch (Exception itrFailure009) {
++                      if (itr009.firstException == null && itr009.firstError == null) {
++            itr009.firstException = itrFailure009; itr009.terminal = true;
++          }
++                      if (itr009.firstError != null) throw itr009.firstError;
++                      throw itr009.firstException;
++                    } catch (Error itrFailure009) {
++                      if (itr009.firstException == null && itr009.firstError == null) {
++            itr009.firstError = itrFailure009; itr009.terminal = true;
++          }
++                      if (itr009.firstException != null) throw itr009.firstException;
++                      throw itr009.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout009) {
++              if (itr009.firstException != null) throw itr009.firstException;
++              if (itr009.firstError != null) throw itr009.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
+             }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure009) {
++        if (itr009.firstException == null && itr009.firstError == null) {
++            itr009.firstException = itrFailure009; itr009.terminal = true;
++          }
++        if (itr009.firstError != null) throw itr009.firstError;
++        throw itr009.firstException;
++      } catch (Error itrFailure009) {
++        if (itr009.firstException == null && itr009.firstError == null) {
++            itr009.firstError = itrFailure009; itr009.terminal = true;
++          }
++        if (itr009.firstException != null) throw itr009.firstException;
++        throw itr009.firstError;
++      } finally {
++        
++      }
++      
++    }
+             assertThat(INCREMENTAL_ACK_ENTERED.contains(id))
+                 .as("actual runner applied v2 on the original browser before its ACK returned")
+                 .isTrue();
+@@ -8574,16 +8772,115 @@
+                 COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
+             INCREMENTAL_ACK_RELEASE.get(id).countDown();
+             long acked = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-            while (!"ACKNOWLEDGED"
++            {
++      // IT-R POLL 10: exact original transitions; one old interval owed at most.
++      final var itrRead010_id = id; final var itrRead010_acked = acked;
++      class ItrState010 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr010 = new ItrState010();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll010 = () -> {
++        if (itr010.firstException != null) throw itr010.firstException;
++        if (itr010.firstError != null) throw itr010.firstError;
++        if (itr010.terminal) return true;
++        try {
++        if (itr010.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr010.owedUntil) return false;
++          itr010.intervalOwed = false;
++        }
++        if (!(!"ACKNOWLEDGED"
+                     .equals(
+                         jdbc.queryForObject(
+                             "SELECT status FROM studio_guided_materialization_deliveries"
+                                 + " WHERE session_id=?",
+                             String.class,
+-                            id))
+-                && System.nanoTime() < acked) {
+-              Thread.sleep(20);
++                            itrRead010_id))
++                && System.nanoTime() < itrRead010_acked)) { itr010.terminal = true; return true; }
++        itr010.firstIteration = false;
++        itr010.intervalOwed = true; itr010.owedUntil = System.nanoTime() + Duration.ofMillis(20).toNanos();
++        return false;
++        } catch (Exception itrFailure010) {
++          if (itr010.firstException == null && itr010.firstError == null) {
++            itr010.firstException = itrFailure010; itr010.terminal = true;
++          }
++          throw itr010.firstException;
++        } catch (Error itrFailure010) {
++          if (itr010.firstException == null && itr010.firstError == null) {
++            itr010.firstError = itrFailure010; itr010.terminal = true;
++          }
++          throw itr010.firstError;
++        }
++      };
++      try {
++        while (!itr010.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone010 = itrPoll010.call();
++          if (itrDone010) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow010 = System.nanoTime();
++          long itrRemaining010 = itrRead010_acked - itrNow010;
++          long itrOwed010 = itr010.intervalOwed ? itr010.owedUntil - itrNow010 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound010 = Math.max(itrRemaining010, itrOwed010);
++          if (itrBound010 > 0) {
++            final boolean[] itrFirstTick010 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 10")
++                  .atMost(Duration.ofNanos(itrBound010))
++                  .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr010.firstException != null) throw itr010.firstException;
++                    if (itr010.firstError != null) throw itr010.firstError;
++                    if (itr010.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick010[0]) {
++                      itrFirstTick010[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved010 = itrPoll010.call();
++                    if (!itrObserved010 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved010;
++                    } catch (Exception itrFailure010) {
++                      if (itr010.firstException == null && itr010.firstError == null) {
++            itr010.firstException = itrFailure010; itr010.terminal = true;
++          }
++                      if (itr010.firstError != null) throw itr010.firstError;
++                      throw itr010.firstException;
++                    } catch (Error itrFailure010) {
++                      if (itr010.firstException == null && itr010.firstError == null) {
++            itr010.firstError = itrFailure010; itr010.terminal = true;
++          }
++                      if (itr010.firstException != null) throw itr010.firstException;
++                      throw itr010.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout010) {
++              if (itr010.firstException != null) throw itr010.firstException;
++              if (itr010.firstError != null) throw itr010.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
+             }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure010) {
++        if (itr010.firstException == null && itr010.firstError == null) {
++            itr010.firstException = itrFailure010; itr010.terminal = true;
++          }
++        if (itr010.firstError != null) throw itr010.firstError;
++        throw itr010.firstException;
++      } catch (Error itrFailure010) {
++        if (itr010.firstException == null && itr010.firstError == null) {
++            itr010.firstError = itrFailure010; itr010.terminal = true;
++          }
++        if (itr010.firstException != null) throw itr010.firstException;
++        throw itr010.firstError;
++      } finally {
++        
++      }
++      
++    }
+             JsonNode ack =
+                 C.parse(
+                     jdbc.queryForObject(
+@@ -9462,11 +9759,110 @@
+     assertThat(hold.failure).as("plan hold released within its bound").isNull();
+     long accepted = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+     // GuidedTranslationStore.state requires an actual transaction (RUNTIME_INCOMPATIBLE otherwise).
+-    while (!sessions
++    {
++      // IT-R POLL 11: exact original transitions; one old interval owed at most.
++      final var itrRead011_accepted = accepted;
++      class ItrState011 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr011 = new ItrState011();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll011 = () -> {
++        if (itr011.firstException != null) throw itr011.firstException;
++        if (itr011.firstError != null) throw itr011.firstError;
++        if (itr011.terminal) return true;
++        try {
++        if (itr011.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr011.owedUntil) return false;
++          itr011.intervalOwed = false;
++        }
++        if (!(!sessions
+             .transaction(() -> plans.state(session).path("continuation").asText())
+             .equals("MATERIALIZE")
+-        && System.nanoTime() < accepted) {
+-      Thread.sleep(20);
++        && System.nanoTime() < itrRead011_accepted)) { itr011.terminal = true; return true; }
++        itr011.firstIteration = false;
++        itr011.intervalOwed = true; itr011.owedUntil = System.nanoTime() + Duration.ofMillis(20).toNanos();
++        return false;
++        } catch (Exception itrFailure011) {
++          if (itr011.firstException == null && itr011.firstError == null) {
++            itr011.firstException = itrFailure011; itr011.terminal = true;
++          }
++          throw itr011.firstException;
++        } catch (Error itrFailure011) {
++          if (itr011.firstException == null && itr011.firstError == null) {
++            itr011.firstError = itrFailure011; itr011.terminal = true;
++          }
++          throw itr011.firstError;
++        }
++      };
++      try {
++        while (!itr011.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone011 = itrPoll011.call();
++          if (itrDone011) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow011 = System.nanoTime();
++          long itrRemaining011 = itrRead011_accepted - itrNow011;
++          long itrOwed011 = itr011.intervalOwed ? itr011.owedUntil - itrNow011 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound011 = Math.max(itrRemaining011, itrOwed011);
++          if (itrBound011 > 0) {
++            final boolean[] itrFirstTick011 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 11")
++                  .atMost(Duration.ofNanos(itrBound011))
++                  .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr011.firstException != null) throw itr011.firstException;
++                    if (itr011.firstError != null) throw itr011.firstError;
++                    if (itr011.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick011[0]) {
++                      itrFirstTick011[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved011 = itrPoll011.call();
++                    if (!itrObserved011 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved011;
++                    } catch (Exception itrFailure011) {
++                      if (itr011.firstException == null && itr011.firstError == null) {
++            itr011.firstException = itrFailure011; itr011.terminal = true;
++          }
++                      if (itr011.firstError != null) throw itr011.firstError;
++                      throw itr011.firstException;
++                    } catch (Error itrFailure011) {
++                      if (itr011.firstException == null && itr011.firstError == null) {
++            itr011.firstError = itrFailure011; itr011.terminal = true;
++          }
++                      if (itr011.firstException != null) throw itr011.firstException;
++                      throw itr011.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout011) {
++              if (itr011.firstException != null) throw itr011.firstException;
++              if (itr011.firstError != null) throw itr011.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure011) {
++        if (itr011.firstException == null && itr011.firstError == null) {
++            itr011.firstException = itrFailure011; itr011.terminal = true;
++          }
++        if (itr011.firstError != null) throw itr011.firstError;
++        throw itr011.firstException;
++      } catch (Error itrFailure011) {
++        if (itr011.firstException == null && itr011.firstError == null) {
++            itr011.firstError = itrFailure011; itr011.terminal = true;
++          }
++        if (itr011.firstException != null) throw itr011.firstException;
++        throw itr011.firstError;
++      } finally {
++        
++      }
++      
+     }
+     assertThat(sessions.transaction(() -> plans.state(session).path("continuation").asText()))
+         .isEqualTo("MATERIALIZE");
+@@ -9496,8 +9892,107 @@
+       Thread.sleep(100);
+     }
+     long held = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+-    while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {
+-      Thread.sleep(20);
++    {
++      // IT-R POLL 14: exact original transitions; one old interval owed at most.
++      final var itrRead014_held = held;
++      class ItrState014 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr014 = new ItrState014();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll014 = () -> {
++        if (itr014.firstException != null) throw itr014.firstException;
++        if (itr014.firstError != null) throw itr014.firstError;
++        if (itr014.terminal) return true;
++        try {
++        if (itr014.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr014.owedUntil) return false;
++          itr014.intervalOwed = false;
++        }
++        if (!(!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < itrRead014_held)) { itr014.terminal = true; return true; }
++        itr014.firstIteration = false;
++        itr014.intervalOwed = true; itr014.owedUntil = System.nanoTime() + Duration.ofMillis(20).toNanos();
++        return false;
++        } catch (Exception itrFailure014) {
++          if (itr014.firstException == null && itr014.firstError == null) {
++            itr014.firstException = itrFailure014; itr014.terminal = true;
++          }
++          throw itr014.firstException;
++        } catch (Error itrFailure014) {
++          if (itr014.firstException == null && itr014.firstError == null) {
++            itr014.firstError = itrFailure014; itr014.terminal = true;
++          }
++          throw itr014.firstError;
++        }
++      };
++      try {
++        while (!itr014.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone014 = itrPoll014.call();
++          if (itrDone014) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow014 = System.nanoTime();
++          long itrRemaining014 = itrRead014_held - itrNow014;
++          long itrOwed014 = itr014.intervalOwed ? itr014.owedUntil - itrNow014 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound014 = Math.max(itrRemaining014, itrOwed014);
++          if (itrBound014 > 0) {
++            final boolean[] itrFirstTick014 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 14")
++                  .atMost(Duration.ofNanos(itrBound014))
++                  .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr014.firstException != null) throw itr014.firstException;
++                    if (itr014.firstError != null) throw itr014.firstError;
++                    if (itr014.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick014[0]) {
++                      itrFirstTick014[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved014 = itrPoll014.call();
++                    if (!itrObserved014 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved014;
++                    } catch (Exception itrFailure014) {
++                      if (itr014.firstException == null && itr014.firstError == null) {
++            itr014.firstException = itrFailure014; itr014.terminal = true;
++          }
++                      if (itr014.firstError != null) throw itr014.firstError;
++                      throw itr014.firstException;
++                    } catch (Error itrFailure014) {
++                      if (itr014.firstException == null && itr014.firstError == null) {
++            itr014.firstError = itrFailure014; itr014.terminal = true;
++          }
++                      if (itr014.firstException != null) throw itr014.firstException;
++                      throw itr014.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout014) {
++              if (itr014.firstException != null) throw itr014.firstException;
++              if (itr014.firstError != null) throw itr014.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure014) {
++        if (itr014.firstException == null && itr014.firstError == null) {
++            itr014.firstException = itrFailure014; itr014.terminal = true;
++          }
++        if (itr014.firstError != null) throw itr014.firstError;
++        throw itr014.firstException;
++      } catch (Error itrFailure014) {
++        if (itr014.firstException == null && itr014.firstError == null) {
++            itr014.firstError = itrFailure014; itr014.terminal = true;
++          }
++        if (itr014.firstException != null) throw itr014.firstException;
++        throw itr014.firstError;
++      } finally {
++        
++      }
++      
+     }
+     assertThat(INCREMENTAL_ACK_ENTERED.contains(session))
+         .as("append retried after natural expiry; otherwise a liveness finding, never a relaxation")
+@@ -9574,15 +10069,114 @@
+             session);
+     INCREMENTAL_ACK_RELEASE.get(session).countDown();
+     long acked = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+-    while (!"ACKNOWLEDGED"
++    {
++      // IT-R POLL 15: exact original transitions; one old interval owed at most.
++      final var itrRead015_acked = acked;
++      class ItrState015 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr015 = new ItrState015();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll015 = () -> {
++        if (itr015.firstException != null) throw itr015.firstException;
++        if (itr015.firstError != null) throw itr015.firstError;
++        if (itr015.terminal) return true;
++        try {
++        if (itr015.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr015.owedUntil) return false;
++          itr015.intervalOwed = false;
++        }
++        if (!(!"ACKNOWLEDGED"
+             .equals(
+                 jdbc.queryForObject(
+                     "SELECT status FROM studio_guided_materialization_deliveries"
+                         + " WHERE session_id=?",
+                     String.class,
+                     session))
+-        && System.nanoTime() < acked) {
+-      Thread.sleep(25);
++        && System.nanoTime() < itrRead015_acked)) { itr015.terminal = true; return true; }
++        itr015.firstIteration = false;
++        itr015.intervalOwed = true; itr015.owedUntil = System.nanoTime() + Duration.ofMillis(25).toNanos();
++        return false;
++        } catch (Exception itrFailure015) {
++          if (itr015.firstException == null && itr015.firstError == null) {
++            itr015.firstException = itrFailure015; itr015.terminal = true;
++          }
++          throw itr015.firstException;
++        } catch (Error itrFailure015) {
++          if (itr015.firstException == null && itr015.firstError == null) {
++            itr015.firstError = itrFailure015; itr015.terminal = true;
++          }
++          throw itr015.firstError;
++        }
++      };
++      try {
++        while (!itr015.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone015 = itrPoll015.call();
++          if (itrDone015) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow015 = System.nanoTime();
++          long itrRemaining015 = itrRead015_acked - itrNow015;
++          long itrOwed015 = itr015.intervalOwed ? itr015.owedUntil - itrNow015 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound015 = Math.max(itrRemaining015, itrOwed015);
++          if (itrBound015 > 0) {
++            final boolean[] itrFirstTick015 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 15")
++                  .atMost(Duration.ofNanos(itrBound015))
++                  .pollInterval(Duration.ofMillis(25)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr015.firstException != null) throw itr015.firstException;
++                    if (itr015.firstError != null) throw itr015.firstError;
++                    if (itr015.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick015[0]) {
++                      itrFirstTick015[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved015 = itrPoll015.call();
++                    if (!itrObserved015 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved015;
++                    } catch (Exception itrFailure015) {
++                      if (itr015.firstException == null && itr015.firstError == null) {
++            itr015.firstException = itrFailure015; itr015.terminal = true;
++          }
++                      if (itr015.firstError != null) throw itr015.firstError;
++                      throw itr015.firstException;
++                    } catch (Error itrFailure015) {
++                      if (itr015.firstException == null && itr015.firstError == null) {
++            itr015.firstError = itrFailure015; itr015.terminal = true;
++          }
++                      if (itr015.firstException != null) throw itr015.firstException;
++                      throw itr015.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout015) {
++              if (itr015.firstException != null) throw itr015.firstException;
++              if (itr015.firstError != null) throw itr015.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure015) {
++        if (itr015.firstException == null && itr015.firstError == null) {
++            itr015.firstException = itrFailure015; itr015.terminal = true;
++          }
++        if (itr015.firstError != null) throw itr015.firstError;
++        throw itr015.firstException;
++      } catch (Error itrFailure015) {
++        if (itr015.firstException == null && itr015.firstError == null) {
++            itr015.firstError = itrFailure015; itr015.terminal = true;
++          }
++        if (itr015.firstException != null) throw itr015.firstException;
++        throw itr015.firstError;
++      } finally {
++        
++      }
++      
+     }
+     var delivery =
+         jdbc.queryForMap(
+@@ -9823,8 +10417,107 @@
+       throws Exception {
+     hold.release.countDown(); // this sibling never holds its suffix plan
+     long held = System.nanoTime() + Duration.ofSeconds(90).toNanos();
+-    while (!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < held) {
+-      Thread.sleep(20);
++    {
++      // IT-R POLL 17: exact original transitions; one old interval owed at most.
++      final var itrRead017_held = held;
++      class ItrState017 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr017 = new ItrState017();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll017 = () -> {
++        if (itr017.firstException != null) throw itr017.firstException;
++        if (itr017.firstError != null) throw itr017.firstError;
++        if (itr017.terminal) return true;
++        try {
++        if (itr017.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr017.owedUntil) return false;
++          itr017.intervalOwed = false;
++        }
++        if (!(!INCREMENTAL_ACK_ENTERED.contains(session) && System.nanoTime() < itrRead017_held)) { itr017.terminal = true; return true; }
++        itr017.firstIteration = false;
++        itr017.intervalOwed = true; itr017.owedUntil = System.nanoTime() + Duration.ofMillis(20).toNanos();
++        return false;
++        } catch (Exception itrFailure017) {
++          if (itr017.firstException == null && itr017.firstError == null) {
++            itr017.firstException = itrFailure017; itr017.terminal = true;
++          }
++          throw itr017.firstException;
++        } catch (Error itrFailure017) {
++          if (itr017.firstException == null && itr017.firstError == null) {
++            itr017.firstError = itrFailure017; itr017.terminal = true;
++          }
++          throw itr017.firstError;
++        }
++      };
++      try {
++        while (!itr017.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone017 = itrPoll017.call();
++          if (itrDone017) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow017 = System.nanoTime();
++          long itrRemaining017 = itrRead017_held - itrNow017;
++          long itrOwed017 = itr017.intervalOwed ? itr017.owedUntil - itrNow017 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound017 = Math.max(itrRemaining017, itrOwed017);
++          if (itrBound017 > 0) {
++            final boolean[] itrFirstTick017 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 17")
++                  .atMost(Duration.ofNanos(itrBound017))
++                  .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr017.firstException != null) throw itr017.firstException;
++                    if (itr017.firstError != null) throw itr017.firstError;
++                    if (itr017.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick017[0]) {
++                      itrFirstTick017[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved017 = itrPoll017.call();
++                    if (!itrObserved017 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved017;
++                    } catch (Exception itrFailure017) {
++                      if (itr017.firstException == null && itr017.firstError == null) {
++            itr017.firstException = itrFailure017; itr017.terminal = true;
++          }
++                      if (itr017.firstError != null) throw itr017.firstError;
++                      throw itr017.firstException;
++                    } catch (Error itrFailure017) {
++                      if (itr017.firstException == null && itr017.firstError == null) {
++            itr017.firstError = itrFailure017; itr017.terminal = true;
++          }
++                      if (itr017.firstException != null) throw itr017.firstException;
++                      throw itr017.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout017) {
++              if (itr017.firstException != null) throw itr017.firstException;
++              if (itr017.firstError != null) throw itr017.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure017) {
++        if (itr017.firstException == null && itr017.firstError == null) {
++            itr017.firstException = itrFailure017; itr017.terminal = true;
++          }
++        if (itr017.firstError != null) throw itr017.firstError;
++        throw itr017.firstException;
++      } catch (Error itrFailure017) {
++        if (itr017.firstException == null && itr017.firstError == null) {
++            itr017.firstError = itrFailure017; itr017.terminal = true;
++          }
++        if (itr017.firstException != null) throw itr017.firstException;
++        throw itr017.firstError;
++      } finally {
++        
++      }
++      
+     }
+     assertThat(INCREMENTAL_ACK_ENTERED.contains(session)).as("v2 ACK pending").isTrue();
+     long fence =
+@@ -10345,27 +11038,225 @@
+   private String b2AwaitSettled(String id, int seconds) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(seconds).toNanos();
+     String state;
+-    do {
+-      state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
++    {
++      // IT-R POLL 18: exact original transitions; one old interval owed at most.
++      final var itrRead018_end = end;
++      class ItrState018 { String state; boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr018 = new ItrState018();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll018 = () -> {
++        if (itr018.firstException != null) throw itr018.firstException;
++        if (itr018.firstError != null) throw itr018.firstError;
++        if (itr018.terminal) return true;
++        try {
++        if (itr018.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr018.owedUntil) return false;
++          itr018.intervalOwed = false;
++        }
++        if (!itr018.firstIteration && !(System.nanoTime() < itrRead018_end)) { itr018.terminal = true; return true; }
++        itr018.firstIteration = false;
++        itr018.state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+       if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED", "SUCCEEDED", "FINALIZING")
+-          .contains(state)) {
+-        break;
+-      }
+-      Thread.sleep(25);
+-    } while (System.nanoTime() < end);
++          .contains(itr018.state)) {
++        itr018.terminal = true; return true;
++      }
++      itr018.intervalOwed = true; itr018.owedUntil = System.nanoTime() + Duration.ofMillis(25).toNanos();
++        return false;
++        } catch (Exception itrFailure018) {
++          if (itr018.firstException == null && itr018.firstError == null) {
++            itr018.firstException = itrFailure018; itr018.terminal = true;
++          }
++          throw itr018.firstException;
++        } catch (Error itrFailure018) {
++          if (itr018.firstException == null && itr018.firstError == null) {
++            itr018.firstError = itrFailure018; itr018.terminal = true;
++          }
++          throw itr018.firstError;
++        }
++      };
++      try {
++        while (!itr018.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone018 = itrPoll018.call();
++          if (itrDone018) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow018 = System.nanoTime();
++          long itrRemaining018 = itrRead018_end - itrNow018;
++          long itrOwed018 = itr018.intervalOwed ? itr018.owedUntil - itrNow018 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound018 = Math.max(itrRemaining018, itrOwed018);
++          if (itrBound018 > 0) {
++            final boolean[] itrFirstTick018 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 18")
++                  .atMost(Duration.ofNanos(itrBound018))
++                  .pollInterval(Duration.ofMillis(25)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr018.firstException != null) throw itr018.firstException;
++                    if (itr018.firstError != null) throw itr018.firstError;
++                    if (itr018.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick018[0]) {
++                      itrFirstTick018[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved018 = itrPoll018.call();
++                    if (!itrObserved018 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved018;
++                    } catch (Exception itrFailure018) {
++                      if (itr018.firstException == null && itr018.firstError == null) {
++            itr018.firstException = itrFailure018; itr018.terminal = true;
++          }
++                      if (itr018.firstError != null) throw itr018.firstError;
++                      throw itr018.firstException;
++                    } catch (Error itrFailure018) {
++                      if (itr018.firstException == null && itr018.firstError == null) {
++            itr018.firstError = itrFailure018; itr018.terminal = true;
++          }
++                      if (itr018.firstException != null) throw itr018.firstException;
++                      throw itr018.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout018) {
++              if (itr018.firstException != null) throw itr018.firstException;
++              if (itr018.firstError != null) throw itr018.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure018) {
++        if (itr018.firstException == null && itr018.firstError == null) {
++            itr018.firstException = itrFailure018; itr018.terminal = true;
++          }
++        if (itr018.firstError != null) throw itr018.firstError;
++        throw itr018.firstException;
++      } catch (Error itrFailure018) {
++        if (itr018.firstException == null && itr018.firstError == null) {
++            itr018.firstError = itrFailure018; itr018.terminal = true;
++          }
++        if (itr018.firstException != null) throw itr018.firstException;
++        throw itr018.firstError;
++      } finally {
++        state = itr018.state;
++      }
++      
++    }
+     return state;
+   }
+ 
+   private String b2AwaitLeft(String id, String from, int seconds) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(seconds).toNanos();
+     String state;
+-    do {
+-      state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+-      if (!state.equals(from)) {
+-        break;
+-      }
+-      Thread.sleep(25);
+-    } while (System.nanoTime() < end);
++    {
++      // IT-R POLL 19: exact original transitions; one old interval owed at most.
++      final var itrRead019_end = end;
++      class ItrState019 { String state; boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr019 = new ItrState019();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll019 = () -> {
++        if (itr019.firstException != null) throw itr019.firstException;
++        if (itr019.firstError != null) throw itr019.firstError;
++        if (itr019.terminal) return true;
++        try {
++        if (itr019.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr019.owedUntil) return false;
++          itr019.intervalOwed = false;
++        }
++        if (!itr019.firstIteration && !(System.nanoTime() < itrRead019_end)) { itr019.terminal = true; return true; }
++        itr019.firstIteration = false;
++        itr019.state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
++      if (!itr019.state.equals(from)) {
++        itr019.terminal = true; return true;
++      }
++      itr019.intervalOwed = true; itr019.owedUntil = System.nanoTime() + Duration.ofMillis(25).toNanos();
++        return false;
++        } catch (Exception itrFailure019) {
++          if (itr019.firstException == null && itr019.firstError == null) {
++            itr019.firstException = itrFailure019; itr019.terminal = true;
++          }
++          throw itr019.firstException;
++        } catch (Error itrFailure019) {
++          if (itr019.firstException == null && itr019.firstError == null) {
++            itr019.firstError = itrFailure019; itr019.terminal = true;
++          }
++          throw itr019.firstError;
++        }
++      };
++      try {
++        while (!itr019.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone019 = itrPoll019.call();
++          if (itrDone019) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow019 = System.nanoTime();
++          long itrRemaining019 = itrRead019_end - itrNow019;
++          long itrOwed019 = itr019.intervalOwed ? itr019.owedUntil - itrNow019 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound019 = Math.max(itrRemaining019, itrOwed019);
++          if (itrBound019 > 0) {
++            final boolean[] itrFirstTick019 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 19")
++                  .atMost(Duration.ofNanos(itrBound019))
++                  .pollInterval(Duration.ofMillis(25)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr019.firstException != null) throw itr019.firstException;
++                    if (itr019.firstError != null) throw itr019.firstError;
++                    if (itr019.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick019[0]) {
++                      itrFirstTick019[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved019 = itrPoll019.call();
++                    if (!itrObserved019 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved019;
++                    } catch (Exception itrFailure019) {
++                      if (itr019.firstException == null && itr019.firstError == null) {
++            itr019.firstException = itrFailure019; itr019.terminal = true;
++          }
++                      if (itr019.firstError != null) throw itr019.firstError;
++                      throw itr019.firstException;
++                    } catch (Error itrFailure019) {
++                      if (itr019.firstException == null && itr019.firstError == null) {
++            itr019.firstError = itrFailure019; itr019.terminal = true;
++          }
++                      if (itr019.firstException != null) throw itr019.firstException;
++                      throw itr019.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout019) {
++              if (itr019.firstException != null) throw itr019.firstException;
++              if (itr019.firstError != null) throw itr019.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure019) {
++        if (itr019.firstException == null && itr019.firstError == null) {
++            itr019.firstException = itrFailure019; itr019.terminal = true;
++          }
++        if (itr019.firstError != null) throw itr019.firstError;
++        throw itr019.firstException;
++      } catch (Error itrFailure019) {
++        if (itr019.firstException == null && itr019.firstError == null) {
++            itr019.firstError = itrFailure019; itr019.terminal = true;
++          }
++        if (itr019.firstException != null) throw itr019.firstException;
++        throw itr019.firstError;
++      } finally {
++        state = itr019.state;
++      }
++      
++    }
+     return state;
+   }
+ 
+@@ -10375,8 +11266,25 @@
+    */
+   private void b2AwaitCheckCurrentGate(int after) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-    do {
+-      var matches = new ArrayList<JsonNode>();
++    {
++      // IT-R POLL 20: exact original transitions; one old interval owed at most.
++      final var itrRead020_end = end;
++      class ItrState020 { boolean methodReturned; boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr020 = new ItrState020();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll020 = () -> {
++        if (itr020.firstException != null) throw itr020.firstException;
++        if (itr020.firstError != null) throw itr020.firstError;
++        if (itr020.terminal) return true;
++        try {
++        if (itr020.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr020.owedUntil) return false;
++          itr020.intervalOwed = false;
++        }
++        if (!itr020.firstIteration && !(System.nanoTime() < itrRead020_end)) { itr020.terminal = true; return true; }
++        itr020.firstIteration = false;
++        var matches = new ArrayList<JsonNode>();
+       for (int n = after + 1; n <= FINALIZE_DIAGNOSTICS.get(); n++) {
+         Path file = TEMP.resolve("finalize-exception-" + n + ".json");
+         if (!Files.isRegularFile(file)) {
+@@ -10415,10 +11323,92 @@
+       }
+       if (!matches.isEmpty()) {
+         assertThat(matches.size()).as("one exact post-ACK checkCurrent refusal").isEqualTo(1);
+-        return;
+-      }
+-      Thread.sleep(10);
+-    } while (System.nanoTime() < end);
++        itr020.methodReturned = true; itr020.terminal = true; return true;
++      }
++      itr020.intervalOwed = true; itr020.owedUntil = System.nanoTime() + Duration.ofMillis(10).toNanos();
++        return false;
++        } catch (Exception itrFailure020) {
++          if (itr020.firstException == null && itr020.firstError == null) {
++            itr020.firstException = itrFailure020; itr020.terminal = true;
++          }
++          throw itr020.firstException;
++        } catch (Error itrFailure020) {
++          if (itr020.firstException == null && itr020.firstError == null) {
++            itr020.firstError = itrFailure020; itr020.terminal = true;
++          }
++          throw itr020.firstError;
++        }
++      };
++      try {
++        while (!itr020.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone020 = itrPoll020.call();
++          if (itrDone020) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow020 = System.nanoTime();
++          long itrRemaining020 = itrRead020_end - itrNow020;
++          long itrOwed020 = itr020.intervalOwed ? itr020.owedUntil - itrNow020 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound020 = Math.max(itrRemaining020, itrOwed020);
++          if (itrBound020 > 0) {
++            final boolean[] itrFirstTick020 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 20")
++                  .atMost(Duration.ofNanos(itrBound020))
++                  .pollInterval(Duration.ofMillis(10)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr020.firstException != null) throw itr020.firstException;
++                    if (itr020.firstError != null) throw itr020.firstError;
++                    if (itr020.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick020[0]) {
++                      itrFirstTick020[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved020 = itrPoll020.call();
++                    if (!itrObserved020 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved020;
++                    } catch (Exception itrFailure020) {
++                      if (itr020.firstException == null && itr020.firstError == null) {
++            itr020.firstException = itrFailure020; itr020.terminal = true;
++          }
++                      if (itr020.firstError != null) throw itr020.firstError;
++                      throw itr020.firstException;
++                    } catch (Error itrFailure020) {
++                      if (itr020.firstException == null && itr020.firstError == null) {
++            itr020.firstError = itrFailure020; itr020.terminal = true;
++          }
++                      if (itr020.firstException != null) throw itr020.firstException;
++                      throw itr020.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout020) {
++              if (itr020.firstException != null) throw itr020.firstException;
++              if (itr020.firstError != null) throw itr020.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure020) {
++        if (itr020.firstException == null && itr020.firstError == null) {
++            itr020.firstException = itrFailure020; itr020.terminal = true;
++          }
++        if (itr020.firstError != null) throw itr020.firstError;
++        throw itr020.firstException;
++      } catch (Error itrFailure020) {
++        if (itr020.firstException == null && itr020.firstError == null) {
++            itr020.firstError = itrFailure020; itr020.terminal = true;
++          }
++        if (itr020.firstException != null) throw itr020.firstException;
++        throw itr020.firstError;
++      } finally {
++        
++      }
++      if (itr020.methodReturned) return;
++    }
+     throw new AssertionError(
+         "post-ACK worker checkCurrent SECRET_USE_REVOKED not observed; no other observer credited");
+   }
+@@ -11522,8 +12512,25 @@
+   private void prefixSyncAwaitDiagnostic(
+       PrefixSyncParent parent, int after, String code, boolean gate) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-    do {
+-      int current = FINALIZE_DIAGNOSTICS.get();
++    {
++      // IT-R POLL 21: exact original transitions; one old interval owed at most.
++      final var itrRead021_end = end;
++      class ItrState021 { boolean methodReturned; boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr021 = new ItrState021();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll021 = () -> {
++        if (itr021.firstException != null) throw itr021.firstException;
++        if (itr021.firstError != null) throw itr021.firstError;
++        if (itr021.terminal) return true;
++        try {
++        if (itr021.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr021.owedUntil) return false;
++          itr021.intervalOwed = false;
++        }
++        if (!itr021.firstIteration && !(System.nanoTime() < itrRead021_end)) { itr021.terminal = true; return true; }
++        itr021.firstIteration = false;
++        int current = FINALIZE_DIAGNOSTICS.get();
+       var matches = new ArrayList<JsonNode>();
+       for (int n = after + 1; n <= current; n++) {
+         Path file = TEMP.resolve("finalize-exception-" + n + ".json");
+@@ -11600,10 +12607,92 @@
+                                         .contains(
+                                             sessions.lock(id).document().path("state").asText()))))
+             .isTrue();
+-        return;
+-      }
+-      Thread.sleep(10);
+-    } while (System.nanoTime() < end);
++        itr021.methodReturned = true; itr021.terminal = true; return true;
++      }
++      itr021.intervalOwed = true; itr021.owedUntil = System.nanoTime() + Duration.ofMillis(10).toNanos();
++        return false;
++        } catch (Exception itrFailure021) {
++          if (itr021.firstException == null && itr021.firstError == null) {
++            itr021.firstException = itrFailure021; itr021.terminal = true;
++          }
++          throw itr021.firstException;
++        } catch (Error itrFailure021) {
++          if (itr021.firstException == null && itr021.firstError == null) {
++            itr021.firstError = itrFailure021; itr021.terminal = true;
++          }
++          throw itr021.firstError;
++        }
++      };
++      try {
++        while (!itr021.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone021 = itrPoll021.call();
++          if (itrDone021) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow021 = System.nanoTime();
++          long itrRemaining021 = itrRead021_end - itrNow021;
++          long itrOwed021 = itr021.intervalOwed ? itr021.owedUntil - itrNow021 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound021 = Math.max(itrRemaining021, itrOwed021);
++          if (itrBound021 > 0) {
++            final boolean[] itrFirstTick021 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 21")
++                  .atMost(Duration.ofNanos(itrBound021))
++                  .pollInterval(Duration.ofMillis(10)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr021.firstException != null) throw itr021.firstException;
++                    if (itr021.firstError != null) throw itr021.firstError;
++                    if (itr021.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick021[0]) {
++                      itrFirstTick021[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved021 = itrPoll021.call();
++                    if (!itrObserved021 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved021;
++                    } catch (Exception itrFailure021) {
++                      if (itr021.firstException == null && itr021.firstError == null) {
++            itr021.firstException = itrFailure021; itr021.terminal = true;
++          }
++                      if (itr021.firstError != null) throw itr021.firstError;
++                      throw itr021.firstException;
++                    } catch (Error itrFailure021) {
++                      if (itr021.firstException == null && itr021.firstError == null) {
++            itr021.firstError = itrFailure021; itr021.terminal = true;
++          }
++                      if (itr021.firstException != null) throw itr021.firstException;
++                      throw itr021.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout021) {
++              if (itr021.firstException != null) throw itr021.firstException;
++              if (itr021.firstError != null) throw itr021.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure021) {
++        if (itr021.firstException == null && itr021.firstError == null) {
++            itr021.firstException = itrFailure021; itr021.terminal = true;
++          }
++        if (itr021.firstError != null) throw itr021.firstError;
++        throw itr021.firstException;
++      } catch (Error itrFailure021) {
++        if (itr021.firstException == null && itr021.firstError == null) {
++            itr021.firstError = itrFailure021; itr021.terminal = true;
++          }
++        if (itr021.firstException != null) throw itr021.firstException;
++        throw itr021.firstError;
++      } finally {
++        
++      }
++      if (itr021.methodReturned) return;
++    }
+     throw new AssertionError(
+         "PFXSYNC intended Java context/gate stage not observed; no earlier refusal or timeout is credited");
+   }
+@@ -12228,9 +13317,108 @@
+       assertThat(b1ConsumeCommands(parent.id, consumeKey)).isEqualTo(1);
+       cut.release.countDown(); // the original sender: same key/digest, no second runner send
+       long end = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-      while (b1Count("studio_guided_relearn_switches", parent.id) == 0 && System.nanoTime() < end) {
+-        Thread.sleep(20);
+-      }
++      {
++      // IT-R POLL 23: exact original transitions; one old interval owed at most.
++      final var itrRead023_end = end;
++      class ItrState023 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr023 = new ItrState023();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll023 = () -> {
++        if (itr023.firstException != null) throw itr023.firstException;
++        if (itr023.firstError != null) throw itr023.firstError;
++        if (itr023.terminal) return true;
++        try {
++        if (itr023.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr023.owedUntil) return false;
++          itr023.intervalOwed = false;
++        }
++        if (!(b1Count("studio_guided_relearn_switches", parent.id) == 0 && System.nanoTime() < itrRead023_end)) { itr023.terminal = true; return true; }
++        itr023.firstIteration = false;
++        itr023.intervalOwed = true; itr023.owedUntil = System.nanoTime() + Duration.ofMillis(20).toNanos();
++        return false;
++        } catch (Exception itrFailure023) {
++          if (itr023.firstException == null && itr023.firstError == null) {
++            itr023.firstException = itrFailure023; itr023.terminal = true;
++          }
++          throw itr023.firstException;
++        } catch (Error itrFailure023) {
++          if (itr023.firstException == null && itr023.firstError == null) {
++            itr023.firstError = itrFailure023; itr023.terminal = true;
++          }
++          throw itr023.firstError;
++        }
++      };
++      try {
++        while (!itr023.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone023 = itrPoll023.call();
++          if (itrDone023) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow023 = System.nanoTime();
++          long itrRemaining023 = itrRead023_end - itrNow023;
++          long itrOwed023 = itr023.intervalOwed ? itr023.owedUntil - itrNow023 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound023 = Math.max(itrRemaining023, itrOwed023);
++          if (itrBound023 > 0) {
++            final boolean[] itrFirstTick023 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 23")
++                  .atMost(Duration.ofNanos(itrBound023))
++                  .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr023.firstException != null) throw itr023.firstException;
++                    if (itr023.firstError != null) throw itr023.firstError;
++                    if (itr023.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick023[0]) {
++                      itrFirstTick023[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved023 = itrPoll023.call();
++                    if (!itrObserved023 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved023;
++                    } catch (Exception itrFailure023) {
++                      if (itr023.firstException == null && itr023.firstError == null) {
++            itr023.firstException = itrFailure023; itr023.terminal = true;
++          }
++                      if (itr023.firstError != null) throw itr023.firstError;
++                      throw itr023.firstException;
++                    } catch (Error itrFailure023) {
++                      if (itr023.firstException == null && itr023.firstError == null) {
++            itr023.firstError = itrFailure023; itr023.terminal = true;
++          }
++                      if (itr023.firstException != null) throw itr023.firstException;
++                      throw itr023.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout023) {
++              if (itr023.firstException != null) throw itr023.firstException;
++              if (itr023.firstError != null) throw itr023.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure023) {
++        if (itr023.firstException == null && itr023.firstError == null) {
++            itr023.firstException = itrFailure023; itr023.terminal = true;
++          }
++        if (itr023.firstError != null) throw itr023.firstError;
++        throw itr023.firstException;
++      } catch (Error itrFailure023) {
++        if (itr023.firstException == null && itr023.firstError == null) {
++            itr023.firstError = itrFailure023; itr023.terminal = true;
++          }
++        if (itr023.firstException != null) throw itr023.firstException;
++        throw itr023.firstError;
++      } finally {
++        
++      }
++      
++    }
+       assertThat(b1NativeCount(parent.id, admission, "NATIVE_COMPLETED")).isEqualTo(1);
+       assertThat(b1NativeCount(parent.id, admission, "DISPATCH_ENTER")).isEqualTo(1);
+       assertThat(b1ConsumeCommands(parent.id, consumeKey)).isEqualTo(1);
+@@ -14660,9 +15848,108 @@
+ 
+   private ObjectNode b1AwaitDriftCapture(String id) throws Exception {
+     long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+-    while (!INCREMENTAL_DRIFT_CAPTURE.containsKey(id)) {
+-      assertThat(System.nanoTime()).isLessThan(until);
+-      Thread.sleep(10);
++    {
++      // IT-R POLL 29: exact original transitions; one old interval owed at most.
++      final var itrRead029_until = until;
++      class ItrState029 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr029 = new ItrState029();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll029 = () -> {
++        if (itr029.firstException != null) throw itr029.firstException;
++        if (itr029.firstError != null) throw itr029.firstError;
++        if (itr029.terminal) return true;
++        try {
++        if (itr029.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr029.owedUntil) return false;
++          itr029.intervalOwed = false;
++        }
++        if (!(!INCREMENTAL_DRIFT_CAPTURE.containsKey(id))) { itr029.terminal = true; return true; }
++        itr029.firstIteration = false;
++        assertThat(System.nanoTime()).isLessThan(itrRead029_until);
++      itr029.intervalOwed = true; itr029.owedUntil = System.nanoTime() + Duration.ofMillis(10).toNanos();
++        return false;
++        } catch (Exception itrFailure029) {
++          if (itr029.firstException == null && itr029.firstError == null) {
++            itr029.firstException = itrFailure029; itr029.terminal = true;
++          }
++          throw itr029.firstException;
++        } catch (Error itrFailure029) {
++          if (itr029.firstException == null && itr029.firstError == null) {
++            itr029.firstError = itrFailure029; itr029.terminal = true;
++          }
++          throw itr029.firstError;
++        }
++      };
++      try {
++        while (!itr029.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone029 = itrPoll029.call();
++          if (itrDone029) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow029 = System.nanoTime();
++          long itrRemaining029 = itrRead029_until - itrNow029;
++          long itrOwed029 = itr029.intervalOwed ? itr029.owedUntil - itrNow029 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound029 = Math.max(itrRemaining029, itrOwed029);
++          if (itrBound029 > 0) {
++            final boolean[] itrFirstTick029 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 29")
++                  .atMost(Duration.ofNanos(itrBound029))
++                  .pollInterval(Duration.ofMillis(10)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr029.firstException != null) throw itr029.firstException;
++                    if (itr029.firstError != null) throw itr029.firstError;
++                    if (itr029.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick029[0]) {
++                      itrFirstTick029[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved029 = itrPoll029.call();
++                    if (!itrObserved029 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved029;
++                    } catch (Exception itrFailure029) {
++                      if (itr029.firstException == null && itr029.firstError == null) {
++            itr029.firstException = itrFailure029; itr029.terminal = true;
++          }
++                      if (itr029.firstError != null) throw itr029.firstError;
++                      throw itr029.firstException;
++                    } catch (Error itrFailure029) {
++                      if (itr029.firstException == null && itr029.firstError == null) {
++            itr029.firstError = itrFailure029; itr029.terminal = true;
++          }
++                      if (itr029.firstException != null) throw itr029.firstException;
++                      throw itr029.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout029) {
++              if (itr029.firstException != null) throw itr029.firstException;
++              if (itr029.firstError != null) throw itr029.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure029) {
++        if (itr029.firstException == null && itr029.firstError == null) {
++            itr029.firstException = itrFailure029; itr029.terminal = true;
++          }
++        if (itr029.firstError != null) throw itr029.firstError;
++        throw itr029.firstException;
++      } catch (Error itrFailure029) {
++        if (itr029.firstException == null && itr029.firstError == null) {
++            itr029.firstError = itrFailure029; itr029.terminal = true;
++          }
++        if (itr029.firstException != null) throw itr029.firstException;
++        throw itr029.firstError;
++      } finally {
++        
++      }
++      
+     }
+     return INCREMENTAL_DRIFT_CAPTURE.get(id);
+   }
+@@ -14882,13 +16169,112 @@
+   private JsonNode b1AwaitTerminal(String id, Duration limit) throws Exception {
+     long end = System.nanoTime() + limit.toNanos();
+     String state;
+-    do {
+-      state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+-      if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED").contains(state)) {
+-        break;
+-      }
+-      Thread.sleep(25);
+-    } while (System.nanoTime() < end);
++    {
++      // IT-R POLL 30: exact original transitions; one old interval owed at most.
++      final var itrRead030_end = end;
++      class ItrState030 { String state; boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr030 = new ItrState030();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll030 = () -> {
++        if (itr030.firstException != null) throw itr030.firstException;
++        if (itr030.firstError != null) throw itr030.firstError;
++        if (itr030.terminal) return true;
++        try {
++        if (itr030.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr030.owedUntil) return false;
++          itr030.intervalOwed = false;
++        }
++        if (!itr030.firstIteration && !(System.nanoTime() < itrRead030_end)) { itr030.terminal = true; return true; }
++        itr030.firstIteration = false;
++        itr030.state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
++      if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED").contains(itr030.state)) {
++        itr030.terminal = true; return true;
++      }
++      itr030.intervalOwed = true; itr030.owedUntil = System.nanoTime() + Duration.ofMillis(25).toNanos();
++        return false;
++        } catch (Exception itrFailure030) {
++          if (itr030.firstException == null && itr030.firstError == null) {
++            itr030.firstException = itrFailure030; itr030.terminal = true;
++          }
++          throw itr030.firstException;
++        } catch (Error itrFailure030) {
++          if (itr030.firstException == null && itr030.firstError == null) {
++            itr030.firstError = itrFailure030; itr030.terminal = true;
++          }
++          throw itr030.firstError;
++        }
++      };
++      try {
++        while (!itr030.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone030 = itrPoll030.call();
++          if (itrDone030) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow030 = System.nanoTime();
++          long itrRemaining030 = itrRead030_end - itrNow030;
++          long itrOwed030 = itr030.intervalOwed ? itr030.owedUntil - itrNow030 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound030 = Math.max(itrRemaining030, itrOwed030);
++          if (itrBound030 > 0) {
++            final boolean[] itrFirstTick030 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 30")
++                  .atMost(Duration.ofNanos(itrBound030))
++                  .pollInterval(Duration.ofMillis(25)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr030.firstException != null) throw itr030.firstException;
++                    if (itr030.firstError != null) throw itr030.firstError;
++                    if (itr030.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick030[0]) {
++                      itrFirstTick030[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved030 = itrPoll030.call();
++                    if (!itrObserved030 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved030;
++                    } catch (Exception itrFailure030) {
++                      if (itr030.firstException == null && itr030.firstError == null) {
++            itr030.firstException = itrFailure030; itr030.terminal = true;
++          }
++                      if (itr030.firstError != null) throw itr030.firstError;
++                      throw itr030.firstException;
++                    } catch (Error itrFailure030) {
++                      if (itr030.firstException == null && itr030.firstError == null) {
++            itr030.firstError = itrFailure030; itr030.terminal = true;
++          }
++                      if (itr030.firstException != null) throw itr030.firstException;
++                      throw itr030.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout030) {
++              if (itr030.firstException != null) throw itr030.firstException;
++              if (itr030.firstError != null) throw itr030.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure030) {
++        if (itr030.firstException == null && itr030.firstError == null) {
++            itr030.firstException = itrFailure030; itr030.terminal = true;
++          }
++        if (itr030.firstError != null) throw itr030.firstError;
++        throw itr030.firstException;
++      } catch (Error itrFailure030) {
++        if (itr030.firstException == null && itr030.firstError == null) {
++            itr030.firstError = itrFailure030; itr030.terminal = true;
++          }
++        if (itr030.firstException != null) throw itr030.firstException;
++        throw itr030.firstError;
++      } finally {
++        state = itr030.state;
++      }
++      
++    }
+     return publicCall("/api/v1/studio/guided-sessions/" + id + "/result", null, 200, null);
+   }
+ 
+@@ -14920,33 +16306,330 @@
+ 
+   private void b1AwaitRow(String sql, String id, Duration limit) throws Exception {
+     long end = System.nanoTime() + limit.toNanos();
+-    while (jdbc.queryForObject(sql, Integer.class, id) == 0) {
+-      assertThat(System.nanoTime()).as(sql).isLessThan(end);
+-      Thread.sleep(20);
++    {
++      // IT-R POLL 31: exact original transitions; one old interval owed at most.
++      final var itrRead031_end = end;
++      class ItrState031 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr031 = new ItrState031();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll031 = () -> {
++        if (itr031.firstException != null) throw itr031.firstException;
++        if (itr031.firstError != null) throw itr031.firstError;
++        if (itr031.terminal) return true;
++        try {
++        if (itr031.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr031.owedUntil) return false;
++          itr031.intervalOwed = false;
++        }
++        if (!(jdbc.queryForObject(sql, Integer.class, id) == 0)) { itr031.terminal = true; return true; }
++        itr031.firstIteration = false;
++        assertThat(System.nanoTime()).as(sql).isLessThan(itrRead031_end);
++      itr031.intervalOwed = true; itr031.owedUntil = System.nanoTime() + Duration.ofMillis(20).toNanos();
++        return false;
++        } catch (Exception itrFailure031) {
++          if (itr031.firstException == null && itr031.firstError == null) {
++            itr031.firstException = itrFailure031; itr031.terminal = true;
++          }
++          throw itr031.firstException;
++        } catch (Error itrFailure031) {
++          if (itr031.firstException == null && itr031.firstError == null) {
++            itr031.firstError = itrFailure031; itr031.terminal = true;
++          }
++          throw itr031.firstError;
++        }
++      };
++      try {
++        while (!itr031.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone031 = itrPoll031.call();
++          if (itrDone031) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow031 = System.nanoTime();
++          long itrRemaining031 = itrRead031_end - itrNow031;
++          long itrOwed031 = itr031.intervalOwed ? itr031.owedUntil - itrNow031 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound031 = Math.max(itrRemaining031, itrOwed031);
++          if (itrBound031 > 0) {
++            final boolean[] itrFirstTick031 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 31")
++                  .atMost(Duration.ofNanos(itrBound031))
++                  .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr031.firstException != null) throw itr031.firstException;
++                    if (itr031.firstError != null) throw itr031.firstError;
++                    if (itr031.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick031[0]) {
++                      itrFirstTick031[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved031 = itrPoll031.call();
++                    if (!itrObserved031 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved031;
++                    } catch (Exception itrFailure031) {
++                      if (itr031.firstException == null && itr031.firstError == null) {
++            itr031.firstException = itrFailure031; itr031.terminal = true;
++          }
++                      if (itr031.firstError != null) throw itr031.firstError;
++                      throw itr031.firstException;
++                    } catch (Error itrFailure031) {
++                      if (itr031.firstException == null && itr031.firstError == null) {
++            itr031.firstError = itrFailure031; itr031.terminal = true;
++          }
++                      if (itr031.firstException != null) throw itr031.firstException;
++                      throw itr031.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout031) {
++              if (itr031.firstException != null) throw itr031.firstException;
++              if (itr031.firstError != null) throw itr031.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure031) {
++        if (itr031.firstException == null && itr031.firstError == null) {
++            itr031.firstException = itrFailure031; itr031.terminal = true;
++          }
++        if (itr031.firstError != null) throw itr031.firstError;
++        throw itr031.firstException;
++      } catch (Error itrFailure031) {
++        if (itr031.firstException == null && itr031.firstError == null) {
++            itr031.firstError = itrFailure031; itr031.terminal = true;
++          }
++        if (itr031.firstException != null) throw itr031.firstException;
++        throw itr031.firstError;
++      } finally {
++        
++      }
++      
+     }
+   }
+ 
+   private void b1AwaitSucceeded(String id, int stepIndex, Duration limit) throws Exception {
+     long end = System.nanoTime() + limit.toNanos();
+-    while (jdbc.queryForObject(
++    {
++      // IT-R POLL 32: exact original transitions; one old interval owed at most.
++      final var itrRead032_end = end;
++      class ItrState032 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr032 = new ItrState032();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll032 = () -> {
++        if (itr032.firstException != null) throw itr032.firstException;
++        if (itr032.firstError != null) throw itr032.firstError;
++        if (itr032.terminal) return true;
++        try {
++        if (itr032.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr032.owedUntil) return false;
++          itr032.intervalOwed = false;
++        }
++        if (!(jdbc.queryForObject(
+             "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+                 + " AND ordinal=0 AND document->>'state'='SUCCEEDED'",
+             Integer.class,
+             id,
+             b1Step(stepIndex))
+-        == 0) {
+-      assertThat(System.nanoTime()).as("S(%s)#0 SUCCEEDED", stepIndex).isLessThan(end);
+-      Thread.sleep(20);
++        == 0)) { itr032.terminal = true; return true; }
++        itr032.firstIteration = false;
++        assertThat(System.nanoTime()).as("S(%s)#0 SUCCEEDED", stepIndex).isLessThan(itrRead032_end);
++      itr032.intervalOwed = true; itr032.owedUntil = System.nanoTime() + Duration.ofMillis(20).toNanos();
++        return false;
++        } catch (Exception itrFailure032) {
++          if (itr032.firstException == null && itr032.firstError == null) {
++            itr032.firstException = itrFailure032; itr032.terminal = true;
++          }
++          throw itr032.firstException;
++        } catch (Error itrFailure032) {
++          if (itr032.firstException == null && itr032.firstError == null) {
++            itr032.firstError = itrFailure032; itr032.terminal = true;
++          }
++          throw itr032.firstError;
++        }
++      };
++      try {
++        while (!itr032.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone032 = itrPoll032.call();
++          if (itrDone032) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow032 = System.nanoTime();
++          long itrRemaining032 = itrRead032_end - itrNow032;
++          long itrOwed032 = itr032.intervalOwed ? itr032.owedUntil - itrNow032 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound032 = Math.max(itrRemaining032, itrOwed032);
++          if (itrBound032 > 0) {
++            final boolean[] itrFirstTick032 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 32")
++                  .atMost(Duration.ofNanos(itrBound032))
++                  .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr032.firstException != null) throw itr032.firstException;
++                    if (itr032.firstError != null) throw itr032.firstError;
++                    if (itr032.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick032[0]) {
++                      itrFirstTick032[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved032 = itrPoll032.call();
++                    if (!itrObserved032 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved032;
++                    } catch (Exception itrFailure032) {
++                      if (itr032.firstException == null && itr032.firstError == null) {
++            itr032.firstException = itrFailure032; itr032.terminal = true;
++          }
++                      if (itr032.firstError != null) throw itr032.firstError;
++                      throw itr032.firstException;
++                    } catch (Error itrFailure032) {
++                      if (itr032.firstException == null && itr032.firstError == null) {
++            itr032.firstError = itrFailure032; itr032.terminal = true;
++          }
++                      if (itr032.firstException != null) throw itr032.firstException;
++                      throw itr032.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout032) {
++              if (itr032.firstException != null) throw itr032.firstException;
++              if (itr032.firstError != null) throw itr032.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure032) {
++        if (itr032.firstException == null && itr032.firstError == null) {
++            itr032.firstException = itrFailure032; itr032.terminal = true;
++          }
++        if (itr032.firstError != null) throw itr032.firstError;
++        throw itr032.firstException;
++      } catch (Error itrFailure032) {
++        if (itr032.firstException == null && itr032.firstError == null) {
++            itr032.firstError = itrFailure032; itr032.terminal = true;
++          }
++        if (itr032.firstException != null) throw itr032.firstException;
++        throw itr032.firstError;
++      } finally {
++        
++      }
++      
+     }
+   }
+ 
+   private JsonNode b1AwaitQuestion(String id) throws Exception {
+     long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+-    while (!sessions
++    {
++      // IT-R POLL 33: exact original transitions; one old interval owed at most.
++      final var itrRead033_end = end;
++      class ItrState033 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr033 = new ItrState033();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll033 = () -> {
++        if (itr033.firstException != null) throw itr033.firstException;
++        if (itr033.firstError != null) throw itr033.firstError;
++        if (itr033.terminal) return true;
++        try {
++        if (itr033.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr033.owedUntil) return false;
++          itr033.intervalOwed = false;
++        }
++        if (!(!sessions
+         .transaction(() -> sessions.lock(id).document().path("state").asText())
+-        .equals("AWAITING_CLARIFICATION")) {
+-      assertThat(System.nanoTime()).isLessThan(end);
+-      Thread.sleep(25);
++        .equals("AWAITING_CLARIFICATION"))) { itr033.terminal = true; return true; }
++        itr033.firstIteration = false;
++        assertThat(System.nanoTime()).isLessThan(itrRead033_end);
++      itr033.intervalOwed = true; itr033.owedUntil = System.nanoTime() + Duration.ofMillis(25).toNanos();
++        return false;
++        } catch (Exception itrFailure033) {
++          if (itr033.firstException == null && itr033.firstError == null) {
++            itr033.firstException = itrFailure033; itr033.terminal = true;
++          }
++          throw itr033.firstException;
++        } catch (Error itrFailure033) {
++          if (itr033.firstException == null && itr033.firstError == null) {
++            itr033.firstError = itrFailure033; itr033.terminal = true;
++          }
++          throw itr033.firstError;
++        }
++      };
++      try {
++        while (!itr033.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone033 = itrPoll033.call();
++          if (itrDone033) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow033 = System.nanoTime();
++          long itrRemaining033 = itrRead033_end - itrNow033;
++          long itrOwed033 = itr033.intervalOwed ? itr033.owedUntil - itrNow033 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound033 = Math.max(itrRemaining033, itrOwed033);
++          if (itrBound033 > 0) {
++            final boolean[] itrFirstTick033 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 33")
++                  .atMost(Duration.ofNanos(itrBound033))
++                  .pollInterval(Duration.ofMillis(25)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr033.firstException != null) throw itr033.firstException;
++                    if (itr033.firstError != null) throw itr033.firstError;
++                    if (itr033.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick033[0]) {
++                      itrFirstTick033[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved033 = itrPoll033.call();
++                    if (!itrObserved033 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved033;
++                    } catch (Exception itrFailure033) {
++                      if (itr033.firstException == null && itr033.firstError == null) {
++            itr033.firstException = itrFailure033; itr033.terminal = true;
++          }
++                      if (itr033.firstError != null) throw itr033.firstError;
++                      throw itr033.firstException;
++                    } catch (Error itrFailure033) {
++                      if (itr033.firstException == null && itr033.firstError == null) {
++            itr033.firstError = itrFailure033; itr033.terminal = true;
++          }
++                      if (itr033.firstException != null) throw itr033.firstException;
++                      throw itr033.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout033) {
++              if (itr033.firstException != null) throw itr033.firstException;
++              if (itr033.firstError != null) throw itr033.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure033) {
++        if (itr033.firstException == null && itr033.firstError == null) {
++            itr033.firstException = itrFailure033; itr033.terminal = true;
++          }
++        if (itr033.firstError != null) throw itr033.firstError;
++        throw itr033.firstException;
++      } catch (Error itrFailure033) {
++        if (itr033.firstException == null && itr033.firstError == null) {
++            itr033.firstError = itrFailure033; itr033.terminal = true;
++          }
++        if (itr033.firstException != null) throw itr033.firstException;
++        throw itr033.firstError;
++      } finally {
++        
++      }
++      
+     }
+     return publicCall("/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null);
+   }
+@@ -16809,14 +18492,113 @@
+     String expected = variant.equals("unknown2") ? "UNKNOWN_OUTCOME" : "FAILED";
+     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+     String state;
+-    do {
+-      state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
++    {
++      // IT-R POLL 37: exact original transitions; one old interval owed at most.
++      final var itrRead037_deadline = deadline;
++      class ItrState037 { String state; boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr037 = new ItrState037();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll037 = () -> {
++        if (itr037.firstException != null) throw itr037.firstException;
++        if (itr037.firstError != null) throw itr037.firstError;
++        if (itr037.terminal) return true;
++        try {
++        if (itr037.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr037.owedUntil) return false;
++          itr037.intervalOwed = false;
++        }
++        if (!itr037.firstIteration && !(System.nanoTime() < itrRead037_deadline)) { itr037.terminal = true; return true; }
++        itr037.firstIteration = false;
++        itr037.state = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+       if (List.of("FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED", "FINALIZING")
+-          .contains(state)) {
+-        break;
+-      }
+-      Thread.sleep(25);
+-    } while (System.nanoTime() < deadline);
++          .contains(itr037.state)) {
++        itr037.terminal = true; return true;
++      }
++      itr037.intervalOwed = true; itr037.owedUntil = System.nanoTime() + Duration.ofMillis(25).toNanos();
++        return false;
++        } catch (Exception itrFailure037) {
++          if (itr037.firstException == null && itr037.firstError == null) {
++            itr037.firstException = itrFailure037; itr037.terminal = true;
++          }
++          throw itr037.firstException;
++        } catch (Error itrFailure037) {
++          if (itr037.firstException == null && itr037.firstError == null) {
++            itr037.firstError = itrFailure037; itr037.terminal = true;
++          }
++          throw itr037.firstError;
++        }
++      };
++      try {
++        while (!itr037.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone037 = itrPoll037.call();
++          if (itrDone037) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow037 = System.nanoTime();
++          long itrRemaining037 = itrRead037_deadline - itrNow037;
++          long itrOwed037 = itr037.intervalOwed ? itr037.owedUntil - itrNow037 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound037 = Math.max(itrRemaining037, itrOwed037);
++          if (itrBound037 > 0) {
++            final boolean[] itrFirstTick037 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 37")
++                  .atMost(Duration.ofNanos(itrBound037))
++                  .pollInterval(Duration.ofMillis(25)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr037.firstException != null) throw itr037.firstException;
++                    if (itr037.firstError != null) throw itr037.firstError;
++                    if (itr037.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick037[0]) {
++                      itrFirstTick037[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved037 = itrPoll037.call();
++                    if (!itrObserved037 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved037;
++                    } catch (Exception itrFailure037) {
++                      if (itr037.firstException == null && itr037.firstError == null) {
++            itr037.firstException = itrFailure037; itr037.terminal = true;
++          }
++                      if (itr037.firstError != null) throw itr037.firstError;
++                      throw itr037.firstException;
++                    } catch (Error itrFailure037) {
++                      if (itr037.firstException == null && itr037.firstError == null) {
++            itr037.firstError = itrFailure037; itr037.terminal = true;
++          }
++                      if (itr037.firstException != null) throw itr037.firstException;
++                      throw itr037.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout037) {
++              if (itr037.firstException != null) throw itr037.firstException;
++              if (itr037.firstError != null) throw itr037.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure037) {
++        if (itr037.firstException == null && itr037.firstError == null) {
++            itr037.firstException = itrFailure037; itr037.terminal = true;
++          }
++        if (itr037.firstError != null) throw itr037.firstError;
++        throw itr037.firstException;
++      } catch (Error itrFailure037) {
++        if (itr037.firstException == null && itr037.firstError == null) {
++            itr037.firstError = itrFailure037; itr037.terminal = true;
++          }
++        if (itr037.firstException != null) throw itr037.firstException;
++        throw itr037.firstError;
++      } finally {
++        state = itr037.state;
++      }
++      
++    }
+     assertThat(state).as("prefix refusal retains factual terminal outcome").isEqualTo(expected);
+     assertThat(MODEL_WIRE).hasSize(model);
+     assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
+@@ -17098,15 +18880,114 @@
+   private JsonNode confirmIncrementalPrefix(
+       String id, String variant, UUID test, int model, int legacy, int effects) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
+-    while (System.nanoTime() < deadline) {
+-      String state =
++    {
++      // IT-R POLL 38: exact original transitions; one old interval owed at most.
++      final var itrRead038_deadline = deadline;
++      class ItrState038 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr038 = new ItrState038();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll038 = () -> {
++        if (itr038.firstException != null) throw itr038.firstException;
++        if (itr038.firstError != null) throw itr038.firstError;
++        if (itr038.terminal) return true;
++        try {
++        if (itr038.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr038.owedUntil) return false;
++          itr038.intervalOwed = false;
++        }
++        if (!(System.nanoTime() < itrRead038_deadline)) { itr038.terminal = true; return true; }
++        itr038.firstIteration = false;
++        String state =
+           sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+       if (state.equals("AWAITING_CLARIFICATION")) {
+-        break;
++        itr038.terminal = true; return true;
+       }
+       assertThat(List.of("FAILED", "UNKNOWN_OUTCOME", "EXPIRED", "CANCELLED", "FINALIZING"))
+           .doesNotContain(state);
+-      Thread.sleep(25);
++      itr038.intervalOwed = true; itr038.owedUntil = System.nanoTime() + Duration.ofMillis(25).toNanos();
++        return false;
++        } catch (Exception itrFailure038) {
++          if (itr038.firstException == null && itr038.firstError == null) {
++            itr038.firstException = itrFailure038; itr038.terminal = true;
++          }
++          throw itr038.firstException;
++        } catch (Error itrFailure038) {
++          if (itr038.firstException == null && itr038.firstError == null) {
++            itr038.firstError = itrFailure038; itr038.terminal = true;
++          }
++          throw itr038.firstError;
++        }
++      };
++      try {
++        while (!itr038.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone038 = itrPoll038.call();
++          if (itrDone038) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow038 = System.nanoTime();
++          long itrRemaining038 = itrRead038_deadline - itrNow038;
++          long itrOwed038 = itr038.intervalOwed ? itr038.owedUntil - itrNow038 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound038 = Math.max(itrRemaining038, itrOwed038);
++          if (itrBound038 > 0) {
++            final boolean[] itrFirstTick038 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 38")
++                  .atMost(Duration.ofNanos(itrBound038))
++                  .pollInterval(Duration.ofMillis(25)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr038.firstException != null) throw itr038.firstException;
++                    if (itr038.firstError != null) throw itr038.firstError;
++                    if (itr038.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick038[0]) {
++                      itrFirstTick038[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved038 = itrPoll038.call();
++                    if (!itrObserved038 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved038;
++                    } catch (Exception itrFailure038) {
++                      if (itr038.firstException == null && itr038.firstError == null) {
++            itr038.firstException = itrFailure038; itr038.terminal = true;
++          }
++                      if (itr038.firstError != null) throw itr038.firstError;
++                      throw itr038.firstException;
++                    } catch (Error itrFailure038) {
++                      if (itr038.firstException == null && itr038.firstError == null) {
++            itr038.firstError = itrFailure038; itr038.terminal = true;
++          }
++                      if (itr038.firstException != null) throw itr038.firstException;
++                      throw itr038.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout038) {
++              if (itr038.firstException != null) throw itr038.firstException;
++              if (itr038.firstError != null) throw itr038.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure038) {
++        if (itr038.firstException == null && itr038.firstError == null) {
++            itr038.firstException = itrFailure038; itr038.terminal = true;
++          }
++        if (itr038.firstError != null) throw itr038.firstError;
++        throw itr038.firstException;
++      } catch (Error itrFailure038) {
++        if (itr038.firstException == null && itr038.firstError == null) {
++            itr038.firstError = itrFailure038; itr038.terminal = true;
++          }
++        if (itr038.firstException != null) throw itr038.firstException;
++        throw itr038.firstError;
++      } finally {
++        
++      }
++      
+     }
+     JsonNode waiting = publicCall("/api/v1/studio/guided-sessions/" + id, null, 200, null);
+     assertThat(waiting.path("session").path("state").asText()).isEqualTo("AWAITING_CLARIFICATION");
+@@ -17446,13 +19327,112 @@
+       }
+       long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+       String outcome;
+-      do {
+-        outcome = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+-        if (List.of("CANCELLED", "UNKNOWN_OUTCOME", "FAILED").contains(outcome)) {
+-          break;
+-        }
+-        Thread.sleep(20);
+-      } while (System.nanoTime() < until);
++      {
++      // IT-R POLL 41: exact original transitions; one old interval owed at most.
++      final var itrRead041_until = until;
++      class ItrState041 { String outcome; boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr041 = new ItrState041();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll041 = () -> {
++        if (itr041.firstException != null) throw itr041.firstException;
++        if (itr041.firstError != null) throw itr041.firstError;
++        if (itr041.terminal) return true;
++        try {
++        if (itr041.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr041.owedUntil) return false;
++          itr041.intervalOwed = false;
++        }
++        if (!itr041.firstIteration && !(System.nanoTime() < itrRead041_until)) { itr041.terminal = true; return true; }
++        itr041.firstIteration = false;
++        itr041.outcome = sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
++        if (List.of("CANCELLED", "UNKNOWN_OUTCOME", "FAILED").contains(itr041.outcome)) {
++          itr041.terminal = true; return true;
++        }
++        itr041.intervalOwed = true; itr041.owedUntil = System.nanoTime() + Duration.ofMillis(20).toNanos();
++        return false;
++        } catch (Exception itrFailure041) {
++          if (itr041.firstException == null && itr041.firstError == null) {
++            itr041.firstException = itrFailure041; itr041.terminal = true;
++          }
++          throw itr041.firstException;
++        } catch (Error itrFailure041) {
++          if (itr041.firstException == null && itr041.firstError == null) {
++            itr041.firstError = itrFailure041; itr041.terminal = true;
++          }
++          throw itr041.firstError;
++        }
++      };
++      try {
++        while (!itr041.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone041 = itrPoll041.call();
++          if (itrDone041) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow041 = System.nanoTime();
++          long itrRemaining041 = itrRead041_until - itrNow041;
++          long itrOwed041 = itr041.intervalOwed ? itr041.owedUntil - itrNow041 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound041 = Math.max(itrRemaining041, itrOwed041);
++          if (itrBound041 > 0) {
++            final boolean[] itrFirstTick041 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 41")
++                  .atMost(Duration.ofNanos(itrBound041))
++                  .pollInterval(Duration.ofMillis(20)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr041.firstException != null) throw itr041.firstException;
++                    if (itr041.firstError != null) throw itr041.firstError;
++                    if (itr041.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick041[0]) {
++                      itrFirstTick041[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved041 = itrPoll041.call();
++                    if (!itrObserved041 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved041;
++                    } catch (Exception itrFailure041) {
++                      if (itr041.firstException == null && itr041.firstError == null) {
++            itr041.firstException = itrFailure041; itr041.terminal = true;
++          }
++                      if (itr041.firstError != null) throw itr041.firstError;
++                      throw itr041.firstException;
++                    } catch (Error itrFailure041) {
++                      if (itr041.firstException == null && itr041.firstError == null) {
++            itr041.firstError = itrFailure041; itr041.terminal = true;
++          }
++                      if (itr041.firstException != null) throw itr041.firstException;
++                      throw itr041.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout041) {
++              if (itr041.firstException != null) throw itr041.firstException;
++              if (itr041.firstError != null) throw itr041.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure041) {
++        if (itr041.firstException == null && itr041.firstError == null) {
++            itr041.firstException = itrFailure041; itr041.terminal = true;
++          }
++        if (itr041.firstError != null) throw itr041.firstError;
++        throw itr041.firstException;
++      } catch (Error itrFailure041) {
++        if (itr041.firstException == null && itr041.firstError == null) {
++            itr041.firstError = itrFailure041; itr041.terminal = true;
++          }
++        if (itr041.firstException != null) throw itr041.firstException;
++        throw itr041.firstError;
++      } finally {
++        outcome = itr041.outcome;
++      }
++      
++    }
+       assertThat(outcome).isIn("CANCELLED", "UNKNOWN_OUTCOME", "FAILED");
+       assertThat(
+               jdbc.queryForObject(
+@@ -17500,8 +19480,107 @@
+ 
+   private void assertActualDriftCallbackAuthorityThenRelease(String id) throws Exception {
+     long until = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-    while (!INCREMENTAL_DRIFT_CAPTURE.containsKey(id) && System.nanoTime() < until) {
+-      Thread.sleep(10);
++    {
++      // IT-R POLL 42: exact original transitions; one old interval owed at most.
++      final var itrRead042_until = until;
++      class ItrState042 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr042 = new ItrState042();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll042 = () -> {
++        if (itr042.firstException != null) throw itr042.firstException;
++        if (itr042.firstError != null) throw itr042.firstError;
++        if (itr042.terminal) return true;
++        try {
++        if (itr042.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr042.owedUntil) return false;
++          itr042.intervalOwed = false;
++        }
++        if (!(!INCREMENTAL_DRIFT_CAPTURE.containsKey(id) && System.nanoTime() < itrRead042_until)) { itr042.terminal = true; return true; }
++        itr042.firstIteration = false;
++        itr042.intervalOwed = true; itr042.owedUntil = System.nanoTime() + Duration.ofMillis(10).toNanos();
++        return false;
++        } catch (Exception itrFailure042) {
++          if (itr042.firstException == null && itr042.firstError == null) {
++            itr042.firstException = itrFailure042; itr042.terminal = true;
++          }
++          throw itr042.firstException;
++        } catch (Error itrFailure042) {
++          if (itr042.firstException == null && itr042.firstError == null) {
++            itr042.firstError = itrFailure042; itr042.terminal = true;
++          }
++          throw itr042.firstError;
++        }
++      };
++      try {
++        while (!itr042.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone042 = itrPoll042.call();
++          if (itrDone042) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow042 = System.nanoTime();
++          long itrRemaining042 = itrRead042_until - itrNow042;
++          long itrOwed042 = itr042.intervalOwed ? itr042.owedUntil - itrNow042 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound042 = Math.max(itrRemaining042, itrOwed042);
++          if (itrBound042 > 0) {
++            final boolean[] itrFirstTick042 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 42")
++                  .atMost(Duration.ofNanos(itrBound042))
++                  .pollInterval(Duration.ofMillis(10)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr042.firstException != null) throw itr042.firstException;
++                    if (itr042.firstError != null) throw itr042.firstError;
++                    if (itr042.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick042[0]) {
++                      itrFirstTick042[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved042 = itrPoll042.call();
++                    if (!itrObserved042 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved042;
++                    } catch (Exception itrFailure042) {
++                      if (itr042.firstException == null && itr042.firstError == null) {
++            itr042.firstException = itrFailure042; itr042.terminal = true;
++          }
++                      if (itr042.firstError != null) throw itr042.firstError;
++                      throw itr042.firstException;
++                    } catch (Error itrFailure042) {
++                      if (itr042.firstException == null && itr042.firstError == null) {
++            itr042.firstError = itrFailure042; itr042.terminal = true;
++          }
++                      if (itr042.firstException != null) throw itr042.firstException;
++                      throw itr042.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout042) {
++              if (itr042.firstException != null) throw itr042.firstException;
++              if (itr042.firstError != null) throw itr042.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure042) {
++        if (itr042.firstException == null && itr042.firstError == null) {
++            itr042.firstException = itrFailure042; itr042.terminal = true;
++          }
++        if (itr042.firstError != null) throw itr042.firstError;
++        throw itr042.firstException;
++      } catch (Error itrFailure042) {
++        if (itr042.firstException == null && itr042.firstError == null) {
++            itr042.firstError = itrFailure042; itr042.terminal = true;
++          }
++        if (itr042.firstException != null) throw itr042.firstException;
++        throw itr042.firstError;
++      } finally {
++        
++      }
++      
+     }
+     assertThat(INCREMENTAL_DRIFT_CAPTURE).containsKey(id);
+     ObjectNode actual = INCREMENTAL_DRIFT_CAPTURE.get(id);
+@@ -17623,8 +19702,107 @@
+ 
+   private void assertPendingContextGuardsThenRelease(String id) throws Exception {
+     long deadline = System.nanoTime() + Duration.ofSeconds(20).toNanos();
+-    while (!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < deadline) {
+-      Thread.sleep(10);
++    {
++      // IT-R POLL 43: exact original transitions; one old interval owed at most.
++      final var itrRead043_deadline = deadline;
++      class ItrState043 { boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr043 = new ItrState043();
++      
++      java.util.concurrent.Callable<Boolean> itrPoll043 = () -> {
++        if (itr043.firstException != null) throw itr043.firstException;
++        if (itr043.firstError != null) throw itr043.firstError;
++        if (itr043.terminal) return true;
++        try {
++        if (itr043.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr043.owedUntil) return false;
++          itr043.intervalOwed = false;
++        }
++        if (!(!INCREMENTAL_ACK_ENTERED.contains(id) && System.nanoTime() < itrRead043_deadline)) { itr043.terminal = true; return true; }
++        itr043.firstIteration = false;
++        itr043.intervalOwed = true; itr043.owedUntil = System.nanoTime() + Duration.ofMillis(10).toNanos();
++        return false;
++        } catch (Exception itrFailure043) {
++          if (itr043.firstException == null && itr043.firstError == null) {
++            itr043.firstException = itrFailure043; itr043.terminal = true;
++          }
++          throw itr043.firstException;
++        } catch (Error itrFailure043) {
++          if (itr043.firstException == null && itr043.firstError == null) {
++            itr043.firstError = itrFailure043; itr043.terminal = true;
++          }
++          throw itr043.firstError;
++        }
++      };
++      try {
++        while (!itr043.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone043 = itrPoll043.call();
++          if (itrDone043) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow043 = System.nanoTime();
++          long itrRemaining043 = itrRead043_deadline - itrNow043;
++          long itrOwed043 = itr043.intervalOwed ? itr043.owedUntil - itrNow043 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound043 = Math.max(itrRemaining043, itrOwed043);
++          if (itrBound043 > 0) {
++            final boolean[] itrFirstTick043 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 43")
++                  .atMost(Duration.ofNanos(itrBound043))
++                  .pollInterval(Duration.ofMillis(10)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr043.firstException != null) throw itr043.firstException;
++                    if (itr043.firstError != null) throw itr043.firstError;
++                    if (itr043.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick043[0]) {
++                      itrFirstTick043[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved043 = itrPoll043.call();
++                    if (!itrObserved043 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved043;
++                    } catch (Exception itrFailure043) {
++                      if (itr043.firstException == null && itr043.firstError == null) {
++            itr043.firstException = itrFailure043; itr043.terminal = true;
++          }
++                      if (itr043.firstError != null) throw itr043.firstError;
++                      throw itr043.firstException;
++                    } catch (Error itrFailure043) {
++                      if (itr043.firstException == null && itr043.firstError == null) {
++            itr043.firstError = itrFailure043; itr043.terminal = true;
++          }
++                      if (itr043.firstException != null) throw itr043.firstException;
++                      throw itr043.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout043) {
++              if (itr043.firstException != null) throw itr043.firstException;
++              if (itr043.firstError != null) throw itr043.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure043) {
++        if (itr043.firstException == null && itr043.firstError == null) {
++            itr043.firstException = itrFailure043; itr043.terminal = true;
++          }
++        if (itr043.firstError != null) throw itr043.firstError;
++        throw itr043.firstException;
++      } catch (Error itrFailure043) {
++        if (itr043.firstException == null && itr043.firstError == null) {
++            itr043.firstError = itrFailure043; itr043.terminal = true;
++          }
++        if (itr043.firstException != null) throw itr043.firstException;
++        throw itr043.firstError;
++      } finally {
++        
++      }
++      
+     }
+     assertThat(INCREMENTAL_ACK_ENTERED)
+         .as("actual runner accepted version2 on the original browser before returning ACK")
+@@ -28653,8 +30831,25 @@
+     long started = System.nanoTime();
+     long deadline = started + Duration.ofSeconds(120).toNanos();
+     long renewCredentialsAt = started + Duration.ofSeconds(10).toNanos();
+-    while (true) {
+-      var row =
++    {
++      // IT-R POLL 84: exact original transitions; one old interval owed at most.
++      final var itrRead084_started = started; final var itrRead084_deadline = deadline;
++      class ItrState084 { long renewCredentialsAt; boolean methodReturned; boolean firstIteration = true; boolean terminal; boolean intervalOwed; long owedUntil; Exception firstException; Error firstError; }
++      final var itr084 = new ItrState084();
++      itr084.renewCredentialsAt = renewCredentialsAt;
++      java.util.concurrent.Callable<Boolean> itrPoll084 = () -> {
++        if (itr084.firstException != null) throw itr084.firstException;
++        if (itr084.firstError != null) throw itr084.firstError;
++        if (itr084.terminal) return true;
++        try {
++        if (itr084.intervalOwed) {
++          if (Thread.interrupted()) throw new InterruptedException();
++          if (System.nanoTime() < itr084.owedUntil) return false;
++          itr084.intervalOwed = false;
++        }
++        if (!(true)) { itr084.terminal = true; return true; }
++        itr084.firstIteration = false;
++        var row =
+           jdbc.queryForMap(
+               "SELECT state, progress->>'teardownStatus' AS teardown,"
+                   + " (progress->'teardownRequest') IS NOT NULL AS requested"
+@@ -28662,7 +30857,7 @@
+               id);
+       boolean confirmed = "CONFIRMED".equals(row.get("teardown"));
+       long now = System.nanoTime();
+-      if (confirmed || now >= deadline) {
++      if (confirmed || now >= itrRead084_deadline) {
+         long fromExpiryMs = Duration.between(expires, Instant.now()).toMillis();
+         ObjectNode evidence =
+             C.object()
+@@ -28675,7 +30870,7 @@
+                 .put("teardownStatus", String.valueOf(row.get("teardown")))
+                 .put("teardownRequestPresent", Boolean.TRUE.equals(row.get("requested")))
+                 .put("expiryToObservationMs", fromExpiryMs)
+-                .put("waitElapsedMs", Duration.ofNanos(now - started).toMillis());
++                .put("waitElapsedMs", Duration.ofNanos(now - itrRead084_started).toMillis());
+         privateImmutableJson(COHORT_DIRECTORY.resolve("h8-confirm-expire-teardown.json"), evidence);
+         if (!confirmed) {
+           throw new AssertionError("H8: expired teardown not CONFIRMED within 120 s");
+@@ -28686,13 +30881,95 @@
+         assertThat(row.get("requested"))
+             .as("H8: CONFIRMED removes teardownRequest")
+             .isEqualTo(false);
+-        return;
+-      }
+-      if (now >= renewCredentialsAt) {
++        itr084.methodReturned = true; itr084.terminal = true; return true;
++      }
++      if (now >= itr084.renewCredentialsAt) {
+         refreshFixtureCredentials();
+-        renewCredentialsAt = now + Duration.ofSeconds(10).toNanos();
+-      }
+-      Thread.sleep(30); // No transaction or row lock is held across this wait.
++        itr084.renewCredentialsAt = now + Duration.ofSeconds(10).toNanos();
++      }
++      itr084.intervalOwed = true; itr084.owedUntil = System.nanoTime() + Duration.ofMillis(30).toNanos(); // No transaction or row lock is held across this wait.
++        return false;
++        } catch (Exception itrFailure084) {
++          if (itr084.firstException == null && itr084.firstError == null) {
++            itr084.firstException = itrFailure084; itr084.terminal = true;
++          }
++          throw itr084.firstException;
++        } catch (Error itrFailure084) {
++          if (itr084.firstException == null && itr084.firstError == null) {
++            itr084.firstError = itrFailure084; itr084.terminal = true;
++          }
++          throw itr084.firstError;
++        }
++      };
++      try {
++        while (!itr084.terminal) {
++          // First invocation is manual. Reentry serves only the original pending transition.
++          boolean itrDone084 = itrPoll084.call();
++          if (itrDone084) break;
++          if (Thread.interrupted()) throw new InterruptedException();
++          long itrNow084 = System.nanoTime();
++          long itrRemaining084 = itrRead084_deadline - itrNow084;
++          long itrOwed084 = itr084.intervalOwed ? itr084.owedUntil - itrNow084 : 0;
++          // Semantic deadline is unchanged. Only the already-entered old interval may extend this bound.
++          long itrBound084 = Math.max(itrRemaining084, itrOwed084);
++          if (itrBound084 > 0) {
++            final boolean[] itrFirstTick084 = {true};
++            try {
++              org.awaitility.Awaitility.await("ReplayIT POLL 84")
++                  .atMost(Duration.ofNanos(itrBound084))
++                  .pollInterval(Duration.ofMillis(30)).pollDelay(Duration.ZERO)
++                  .pollInSameThread().dontCatchUncaughtExceptions().ignoreNoExceptions()
++                  .until(() -> {
++                    try {
++                    if (itr084.firstException != null) throw itr084.firstException;
++                    if (itr084.firstError != null) throw itr084.firstError;
++                    if (itr084.terminal) return true;
++                    if (Thread.interrupted()) throw new InterruptedException();
++                    if (itrFirstTick084[0]) {
++                      itrFirstTick084[0] = false;
++                      return false; // Cached tick: no second immediate condition/read/effect.
++                    }
++                    boolean itrObserved084 = itrPoll084.call();
++                    if (!itrObserved084 && Thread.interrupted()) throw new InterruptedException();
++                    return itrObserved084;
++                    } catch (Exception itrFailure084) {
++                      if (itr084.firstException == null && itr084.firstError == null) {
++            itr084.firstException = itrFailure084; itr084.terminal = true;
++          }
++                      if (itr084.firstError != null) throw itr084.firstError;
++                      throw itr084.firstException;
++                    } catch (Error itrFailure084) {
++                      if (itr084.firstException == null && itr084.firstError == null) {
++            itr084.firstError = itrFailure084; itr084.terminal = true;
++          }
++                      if (itr084.firstException != null) throw itr084.firstException;
++                      throw itr084.firstError;
++                    }
++                  });
++            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout084) {
++              if (itr084.firstException != null) throw itr084.firstException;
++              if (itr084.firstError != null) throw itr084.firstError;
++              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body order.
++            }
++          }
++          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal replay.
++        }
++      } catch (Exception itrFailure084) {
++        if (itr084.firstException == null && itr084.firstError == null) {
++            itr084.firstException = itrFailure084; itr084.terminal = true;
++          }
++        if (itr084.firstError != null) throw itr084.firstError;
++        throw itr084.firstException;
++      } catch (Error itrFailure084) {
++        if (itr084.firstException == null && itr084.firstError == null) {
++            itr084.firstError = itrFailure084; itr084.terminal = true;
++          }
++        if (itr084.firstException != null) throw itr084.firstException;
++        throw itr084.firstError;
++      } finally {
++        renewCredentialsAt = itr084.renewCredentialsAt;
++      }
++      if (itr084.methodReturned) return;
+     }
+   }
+ 

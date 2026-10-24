@@ -1,0 +1,135 @@
+{
+  "kind": "ARIA_JAVA_QUALIFICATION_SOURCE01_TARGETED_CONTROLLER_LOADER_PAIRS",
+  "checks": 18,
+  "results": [
+    {
+      "name": "REMOVE_ONLY_YIELD_RESTORES_SERVE_AST",
+      "passed": true
+    },
+    {
+      "name": "ARIA_COMPLETE_PARSER_POSITIVE",
+      "passed": true
+    },
+    {
+      "name": "ARIA_POSITIVE_TYPED_NATIVE_FIELDS",
+      "passed": true
+    },
+    {
+      "name": "ARIA_MALFORMED_CONTAINER_FINAL_SNAPSHOT_ESCAPES",
+      "passed": true
+    },
+    {
+      "name": "ARIA_MALFORMED_CONTAINER_REJECTED_PRIMARY",
+      "passed": true
+    },
+    {
+      "name": "ARIA_MALFORMED_CONTAINER_CLEANUP_UNKNOWN_RETAINED",
+      "passed": true
+    },
+    {
+      "name": "ARIA_MALFORMED_CONTAINER_NO_CLOSED_RESULT",
+      "passed": true
+    },
+    {
+      "name": "ARIA_ALL_CLOSED_BEFORE_FOUR_COMPILES_O0",
+      "passed": true
+    },
+    {
+      "name": "ARIA_BOOTSTRAP_NO_RETRY_O0_False",
+      "passed": true
+    },
+    {
+      "name": "ARIA_LAST_CLOSE_DENIES_ALL_INTERPRETATION_O0",
+      "passed": true
+    },
+    {
+      "name": "ARIA_LAST_CLOSE_ACTUAL_UNKNOWN_RETAINED_O0",
+      "passed": true
+    },
+    {
+      "name": "ARIA_BOOTSTRAP_NO_RETRY_O0_True",
+      "passed": true
+    },
+    {
+      "name": "ARIA_ALL_CLOSED_BEFORE_FOUR_COMPILES_O2",
+      "passed": true
+    },
+    {
+      "name": "ARIA_BOOTSTRAP_NO_RETRY_O2_False",
+      "passed": true
+    },
+    {
+      "name": "ARIA_LAST_CLOSE_DENIES_ALL_INTERPRETATION_O2",
+      "passed": true
+    },
+    {
+      "name": "ARIA_LAST_CLOSE_ACTUAL_UNKNOWN_RETAINED_O2",
+      "passed": true
+    },
+    {
+      "name": "ARIA_BOOTSTRAP_NO_RETRY_O2_True",
+      "passed": true
+    },
+    {
+      "name": "ARIA_PERSISTENT_AUDIT_ZERO_REAL_CALLS",
+      "passed": true
+    }
+  ],
+  "cases": [
+    {
+      "case": "positive_parser",
+      "escapedExceptionClass": null,
+      "typedResultReturned": true,
+      "primary": "NONE",
+      "cleanup": "NONE",
+      "actualNativeActions": 0
+    },
+    {
+      "case": "invalid_native_container",
+      "escapedExceptionClass": "AttributeError",
+      "typedResultReturned": false,
+      "primary": "SCHEMA",
+      "cleanup": "CLEANUP_UNCONFIRMED",
+      "actualNativeActions": 0
+    },
+    {
+      "case": "clean_bootstrap",
+      "optimize": 0,
+      "compileCalls": 4,
+      "exceptionClass": null,
+      "primary": "NONE",
+      "cleanup": "NONE"
+    },
+    {
+      "case": "late_bootstrap_close_unknown",
+      "optimize": 0,
+      "compileCalls": 0,
+      "exceptionClass": "BootstrapHold",
+      "primary": "NONE",
+      "cleanup": "BOOTSTRAP_CLOSE_UNCONFIRMED"
+    },
+    {
+      "case": "clean_bootstrap",
+      "optimize": 2,
+      "compileCalls": 4,
+      "exceptionClass": null,
+      "primary": "NONE",
+      "cleanup": "NONE"
+    },
+    {
+      "case": "late_bootstrap_close_unknown",
+      "optimize": 2,
+      "compileCalls": 0,
+      "exceptionClass": "BootstrapHold",
+      "primary": "NONE",
+      "cleanup": "BOOTSTRAP_CLOSE_UNCONFIRMED"
+    }
+  ],
+  "whole357Replayed": false,
+  "fixturePrefixReverseProof": true,
+  "fixtureSingleReadyYield": true,
+  "subjectSafetyAstEdited": false,
+  "actualJavaCompilerTlsUnixPeerPlatformActions": 0,
+  "forbiddenBoundaryCalls": [],
+  "limitations": "Synthetic ordinary adapter/source/input/identity authority and cooperative READY scheduling only; no real threads or platform/native qualification."
+}

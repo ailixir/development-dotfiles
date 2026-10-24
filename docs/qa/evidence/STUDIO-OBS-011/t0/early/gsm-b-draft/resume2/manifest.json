@@ -1,0 +1,252 @@
+{
+  "status": "RESUME2_DRIVER_CORRECTION_PREPARED_UNEXECUTED",
+  "actualApplication": false,
+  "compileExecuted": false,
+  "runtimeExecuted": false,
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "baseSha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8",
+      "baseOrigin": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/repo/backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "S011Sha256": "72cdc69c1471eb37f388946619fb5770226ed5512e8a8f5caf5ec8606d560835",
+      "draftSha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8",
+      "bytes": 6768,
+      "forwardedUnchanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "baseSha256": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd",
+      "baseOrigin": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/repo/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "S011Sha256": "176c6cbb7a089a68a59008bd19d6f36fe88667d2a6aead53246e3488b378d795",
+      "draftSha256": "a33cbefe1eb2e41f630610f94c94e2d3889fcc9098b2817360e6944293029fbd",
+      "bytes": 4324,
+      "forwardedUnchanged": true
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "baseSha256": "40a3b099bad65b36eabded37ed2312aadaee578af314298d350d5908deb28f8e",
+      "baseOrigin": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/repo/backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "S011Sha256": "cad1efa342710c084c241b746538b9189c41416eacfa5cac2fb1b4726f0b4be5",
+      "draftSha256": "fd218317bc08494168ede5ee88644182d5b2a59a1d63478e9672a66e24bcdedb",
+      "bytes": 126531,
+      "forwardedUnchanged": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedAdmissionWithoutTranslationIT.java",
+      "baseSha256": null,
+      "baseOrigin": null,
+      "S011Sha256": null,
+      "draftSha256": "6cd0084316b26fa2ef3073c5d55551b626b3ba8a55a57fba6f75c88b9dc77d01",
+      "bytes": 19320,
+      "forwardedUnchanged": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "baseSha256": "f480ce7be1a36985332286052768e62cb065090526e04e6a5f31a801a6345195",
+      "baseOrigin": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/repo/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedResultPublicationDisabledIT.java",
+      "S011Sha256": null,
+      "draftSha256": "f480ce7be1a36985332286052768e62cb065090526e04e6a5f31a801a6345195",
+      "bytes": 18147,
+      "forwardedUnchanged": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "baseSha256": "8f84ec18bf522d09e2afbbc1b885b2a98bb58072ced14ba54c9e27497209d70d",
+      "baseOrigin": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/repo/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "S011Sha256": "4d47ad6f8d67bfd3278b0d3f3930085e90f190d0ea500875272082eb97a7754e",
+      "draftSha256": "7e58a455aa98d5f036cda36f109d4a0fcd49b90b8e769a7799f8ddafcfb84804",
+      "bytes": 105269,
+      "forwardedUnchanged": false
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "baseSha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a",
+      "baseOrigin": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gsm-a-draft/resume2/repo/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedTeardownShedTest.java",
+      "S011Sha256": null,
+      "draftSha256": "516de17503e177bc4b7920f438b9d36dd19e72230b116e03c63f8c442d63e92a",
+      "bytes": 10065,
+      "forwardedUnchanged": true
+    }
+  ],
+  "mutants": {
+    "delete-side-effect": {
+      "serviceSha256": "ee7fac747561bd1b75c1ed2d71f7215606d07559b33a9cdf908407ab4299fcd8",
+      "expected": "SURVIVAL_CONFLICT_PENDING_ARCHITECT_QA_RULING",
+      "operation": "side-effect"
+    },
+    "delete-clarify": {
+      "serviceSha256": "12bf5c2a151206799fb43011dfe662fe2379f04f5554e214cd05e3a8b6b80cf6",
+      "expected": "ASSERTION_RED_WITH_FULL_FRESH_DISCOVERY",
+      "operation": "clarify"
+    },
+    "delete-admit": {
+      "serviceSha256": "9e7d30f05294c2649da177e2c6528630b7e754c4a8639c9a4bb33f6f7069b7da",
+      "expected": "ASSERTION_RED_WITH_FULL_FRESH_DISCOVERY",
+      "operation": "admit"
+    },
+    "delete-bootstrap": {
+      "serviceSha256": "f390f6def62e744caf75f1ef773ddd54570442ad9c56af094b36dd9010ff2085",
+      "expected": "ASSERTION_RED_WITH_FULL_FRESH_DISCOVERY",
+      "operation": "bootstrap"
+    },
+    "admit-after-authorize": {
+      "serviceSha256": "b27149816cde4b42caec1938a9335c38ce097870c75f70e017e26b898e349722",
+      "expected": "ASSERTION_RED_ON_AUTHORIZE_ACTION_NEVER",
+      "operation": "admit"
+    }
+  },
+  "proofFiles": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+      "S011Sha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+      "currentSha256": "398e5734290c4e1b1f7c0ac0fce03760ce2189ac551aa5edb8ee99fa5864037c",
+      "mustEqualOriginalBeforeFreeze": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgePlannedIT.java",
+      "S011Sha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+      "currentSha256": "37f035d3a28ea6c6601eaf8371534f7ae788656f3338a3b64440067ea604c1f4",
+      "mustEqualOriginalBeforeFreeze": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+      "S011Sha256": "9c68ac5bcdc79fba476177cf6bbbab12ee5583e9bfd3fe2c9449fb3a92d41aa9",
+      "currentSha256": "9c68ac5bcdc79fba476177cf6bbbab12ee5583e9bfd3fe2c9449fb3a92d41aa9",
+      "mustEqualOriginalBeforeFreeze": true
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "S011Sha256": "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475",
+      "currentSha256": "d5cafe9818f29587cd646d2ac96c70c9b2c9c47c6433645fc0b80ec84d880d6d",
+      "mustEqualOriginalBeforeFreeze": true
+    }
+  ],
+  "unchangedGsTBatons": [
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+      "sha256": "10d3706043430730edc921804dd1b8eb06a5326eb690f8c33f2571d7300fe1b5",
+      "origin": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/repo/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java",
+      "sha256": "2213e3884cc81d6ff609257933bf6f7a4e9a3110e80f6a3d94c221d75b42be2d",
+      "origin": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/repo/backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java"
+    }
+  ],
+  "newCaseNames": [
+    "sideEffectConfirmationWithoutTranslationIsAlreadyRefusedByWrapper",
+    "clarifyConfirmationWithoutTranslationRefusesBeforeRefreshContinuation",
+    "clarifyChoiceWithoutTranslationRefusesBeforeAnswerContinuation",
+    "admissionWithoutTranslationRefusesBeforeAnyActionAuthorizationOrWrite",
+    "bootstrapWithoutTranslationRefusesBeforeEvidenceReceiptOrStateWrite"
+  ],
+  "sessionBeforeNames": [
+    "migrationPreservesExistingDataAndFreshInstallWorks",
+    "canonicalUnicodeParityAndClosedSchema",
+    "concurrentIdenticalStartsAndChangedDigestAreDurable",
+    "concurrentConflictingStartsHaveOneWinner",
+    "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch",
+    "conflictingAdmissionAndUniqueCoordinatesFail",
+    "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge",
+    "accessIsolationRechecksPrincipalCsiAccountAndScope",
+    "workerSubjectFenceAndLeaseAreIndependent",
+    "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown",
+    "lostAckNeverRetriesAndDelayedCallbackCannotRevive",
+    "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence",
+    "expiryCannotBeExtendedAndTrustedReaperRevokes",
+    "entireSessionBudgetsAreReservedAndMissingUsageIsConservative",
+    "observationBudgetAndGenerationAreSharedAcrossActions",
+    "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent",
+    "noStateCanPublishWithoutExactVerifier",
+    "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed",
+    "clarificationIsBoundToGenerationChoiceAndOriginalDeadline",
+    "successfulLedgerStillCannotPublishWithoutExactPlanVerifier",
+    "actionBudgetAndFalseAssertionReportsFailClosed",
+    "gatewayOverrunIsDurablyChargedAndStopsFurtherWork",
+    "evidenceReferencesAreScopedAndDoNotClaimReplay",
+    "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping",
+    "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState",
+    "clarificationSelectionAndPauseChangeRollBackTogether",
+    "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer",
+    "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery",
+    "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot",
+    "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate",
+    "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit",
+    "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand",
+    "liveOwnerRenewalPreservesAdmittedAndDispatchedActions",
+    "takeoverCannotReopenFinalizingAfterExecutedEffects",
+    "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict",
+    "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack",
+    "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal",
+    "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults",
+    "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation",
+    "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority",
+    "unsupportedObservationEnvelopeUsesOriginalLockedValidation",
+    "unavailableObservationPreparationFallsBackAndFatalRemainsEarly",
+    "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite",
+    "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash"
+  ],
+  "sessionAfterNames": [
+    "migrationPreservesExistingDataAndFreshInstallWorks",
+    "canonicalUnicodeParityAndClosedSchema",
+    "concurrentIdenticalStartsAndChangedDigestAreDurable",
+    "concurrentConflictingStartsHaveOneWinner",
+    "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch",
+    "conflictingAdmissionAndUniqueCoordinatesFail",
+    "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge",
+    "accessIsolationRechecksPrincipalCsiAccountAndScope",
+    "workerSubjectFenceAndLeaseAreIndependent",
+    "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown",
+    "lostAckNeverRetriesAndDelayedCallbackCannotRevive",
+    "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence",
+    "expiryCannotBeExtendedAndTrustedReaperRevokes",
+    "entireSessionBudgetsAreReservedAndMissingUsageIsConservative",
+    "observationBudgetAndGenerationAreSharedAcrossActions",
+    "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent",
+    "noStateCanPublishWithoutExactVerifier",
+    "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed",
+    "clarificationIsBoundToGenerationChoiceAndOriginalDeadline",
+    "successfulLedgerStillCannotPublishWithoutExactPlanVerifier",
+    "actionBudgetAndFalseAssertionReportsFailClosed",
+    "gatewayOverrunIsDurablyChargedAndStopsFurtherWork",
+    "evidenceReferencesAreScopedAndDoNotClaimReplay",
+    "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping",
+    "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState",
+    "clarificationSelectionAndPauseChangeRollBackTogether",
+    "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer",
+    "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery",
+    "atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot",
+    "atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate",
+    "atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit",
+    "atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand",
+    "liveOwnerRenewalPreservesAdmittedAndDispatchedActions",
+    "takeoverCannotReopenFinalizingAfterExecutedEffects",
+    "sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict",
+    "completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack",
+    "contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal",
+    "observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults",
+    "preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation",
+    "preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority",
+    "unsupportedObservationEnvelopeUsesOriginalLockedValidation",
+    "unavailableObservationPreparationFallsBackAndFatalRemainsEarly",
+    "outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite",
+    "theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash"
+  ],
+  "rootBarriers": [
+    "Diagnostic terminal and original Replay exact bytes/mode/restored compile",
+    "Root+QA fresh full-check and coverage disposition; tree open",
+    "Full five-class GS-T gate with every backend/src/main byte S011",
+    "Corrected GSMa applied/verified; exact GS-T test batons accepted",
+    "Aria/Quinn resolve existing-wrapper control and redundant-guard mutant; no fake red",
+    "Root announces F1 proof freeze; no capture-root or chart writer until end"
+  ],
+  "budgetCeilingUSD": 500,
+  "actualSpend": "UNAVAILABLE",
+  "originalManifestSha256": "26846de0e95d62959c310b195237ca632afc4419a4ee01c900a2e5b350b4a73c",
+  "driverCorrections": [
+    "GSMB-DRIVER-01",
+    "GSMB-DRIVER-02",
+    "GSMB-DRIVER-03"
+  ],
+  "wrapperRuling": "GSMB-WRAPPER-1 architecture disposition awaiting independent Quinn/root adoption"
+}

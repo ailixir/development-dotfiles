@@ -1,0 +1,51 @@
+{
+  "status": "SOURCE_AND_DATA_CLEAN_FOR_SEPARATELY_RELEASED_ORIGINAL_WHOLE_OUTPUT_PROJECTION",
+  "scope": "Exact WHOLE07-QA-01 DATA-only cap correction; previous bounded source review carried",
+  "candidateManifest": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation08/manifest.json",
+    "sha256": "90fa43230797c26ba83e9598ab4c13cb7d0beac6211710187464b7ce4b0b511e",
+    "bytes": 915
+  },
+  "source": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation08/projection.py.txt",
+    "sha256": "7bda465791290ebec526e048ee6ec95ea96fe1a21e4a0b49c621f1fd9542e00d",
+    "bytes": 11541
+  },
+  "plan": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation08/input-read-plan.json",
+    "sha256": "632432a736dbe1559da487418296e333de28c5528e91ca7b8ca94e375e379713",
+    "bytes": 132992
+  },
+  "commands": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-whole-existing-output-projection-preparation08/commands.json",
+    "sha256": "8a53a566e96a0c8774d9bedc303e19de02f563651f93311b7909237ca2f0d059",
+    "bytes": 12654
+  },
+  "priorNotReadyReview": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-backend-whole-execution06/execution-qa/whole-projection07-source-review.json",
+    "sha256": "f85122d07f768b86968fbe121fa86b5facb2e328df98001dbd4287da8f414924",
+    "bytes": 3168
+  },
+  "equivalence": {
+    "sourceByteExact7bda": true,
+    "onlySemanticPlanChange": {
+      "ordinaryFileBytesBefore": 16777216,
+      "ordinaryFileBytesAfter": 17497021
+    },
+    "newCapEqualsActualMaximumPinnedInputBytes": true,
+    "xml336PathsHashesSizesModesUnchanged": true,
+    "aggregateXmlBytes29479761Unchanged": true,
+    "cohortAudit4RefsUnchanged": true,
+    "allOtherPinsPredicatesMarkers7TimingRows10Unchanged": true,
+    "commandsOnlyProspectivePlanPathAndHash": true
+  },
+  "findingResolved": "WHOLE07-QA-01",
+  "previous07AndFailureHistoryPreserved": true,
+  "noOtherConcreteFindingsInBoundedScope": true,
+  "sourceParsedImportedOrExecutedByQa": false,
+  "rawXmlLogCohortAuditPrivateTempCurrentSourceReads": 0,
+  "rootReleaseStillRequired": true,
+  "reviewGrantsExecutionAuthority": false,
+  "wholeVerdict": "PENDING_ACTUAL_CLOSED_PROJECTION",
+  "lifecycleAuthority": false
+}

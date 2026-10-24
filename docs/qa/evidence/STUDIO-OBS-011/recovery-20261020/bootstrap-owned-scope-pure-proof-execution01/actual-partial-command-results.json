@@ -1,0 +1,57 @@
+[
+  {
+    "id": "types-green-pre01",
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+      "obs009-recovery-20261020-bootstrap-owned-scope-types-green-pre01",
+      "pnpm",
+      "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/typescript/bin/tsc",
+      "-p",
+      "tsconfig.json",
+      "--noEmit"
+    ],
+    "collectorPid": 39447,
+    "rawOuterExit": 0,
+    "rawChildExit": 0,
+    "sourceStable": true,
+    "testInputStable": true,
+    "actualDistStable": true,
+    "privateProductStable": true,
+    "elapsedSeconds": 7.56,
+    "resultSha256": "8a70eb95056f5e3121eecc71eee4c6117259b1f8675a7a092c7332bb03476dd3",
+    "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+    "startedAtUtc": "2026-10-21T01:58:42.418100+00:00",
+    "endedAtUtc": "2026-10-21T01:58:50.301785+00:00"
+  },
+  {
+    "id": "lint-green-pre01",
+    "argv": [
+      "python3",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+      "obs009-recovery-20261020-bootstrap-owned-scope-lint-green-pre01",
+      "pnpm",
+      "--dir=/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs009-bootstrap-observation-20261020-proof01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+      "test/helpers/bootstrapProcessTreeObservation.ts",
+      "test/run/bootstrapProcessTreeObservation.test.ts"
+    ],
+    "collectorPid": 39891,
+    "rawOuterExit": 1,
+    "rawChildExit": 1,
+    "sourceStable": true,
+    "testInputStable": true,
+    "actualDistStable": true,
+    "privateProductStable": true,
+    "elapsedSeconds": 2.24,
+    "resultSha256": "0fc8a5afe2b66315abd31cde4bdb5309cae474ecff4c7e2907a555b9f13eb865",
+    "logSha256": "d702f31d6a93d8c8ccda42b77ffa744a11cecd167bd2965ccf4ee29cafac8562",
+    "startedAtUtc": "2026-10-21T01:58:59.395137+00:00",
+    "endedAtUtc": "2026-10-21T01:59:01.803114+00:00"
+  }
+]

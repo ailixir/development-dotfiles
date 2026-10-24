@@ -1,0 +1,230 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -20600,15 +20600,7 @@
+   @Test
+   @org.junit.jupiter.api.Order(17)
+   void actualPublishedWrongPasswordAnnotatesEarlierSecretFill() throws Exception {
+-    p3Case(
+-        () -> {
+-          p3PublicObservation = new P3PublicObservation();
+-          try {
+-            p3PublishedLogin(P3Mode.LOGIN, true);
+-          } finally {
+-            p3PublicObservation = null;
+-          }
+-        });
++    p3Case(() -> p3PublishedLogin(P3Mode.LOGIN, true));
+   }
+ 
+   @Test
+@@ -26828,190 +26820,6 @@
+             .put("protectedRequests", P3_REPORT_REQUESTS.get()));
+   }
+ 
+-
+-  // Temporary, selected Order17 public observation only. No ordinary C5/raw sink is called.
+-  private P3PublicObservation p3PublicObservation;
+-
+-  private final class P3PublicObservation {
+-    private final java.util.concurrent.atomic.AtomicBoolean consumed =
+-        new java.util.concurrent.atomic.AtomicBoolean();
+-    private String subject;
+-    private String cookie;
+-    private boolean ambiguous;
+-
+-    void bind(String id, String ownerCookie) {
+-      if (subject != null) {
+-        ambiguous = true;
+-      } else {
+-        subject = id;
+-        cookie = ownerCookie;
+-      }
+-    }
+-
+-    void observe(String id, String state) {
+-      if (subject == null || !subject.equals(id) || !consumed.compareAndSet(false, true)) {
+-        return;
+-      }
+-      ObjectNode record = p3PublicRecord(state);
+-      try {
+-        if (ambiguous || p3OwnedGuidedCookies.size() != 1) {
+-          record.put("captureStatus", "AMBIGUOUS");
+-        } else if (cookie == null || !cookie.equals(p3Cookie)
+-            || !cookie.equals(p3OwnedGuidedCookies.get(id))) {
+-          record.put("captureStatus", "INVALID");
+-        } else if ("FINALIZING".equals(state)) {
+-          record.put("captureStatus", "NOT_REPRODUCED");
+-        } else if (!Set.of("FAILED", "EXPIRED", "UNKNOWN_OUTCOME", "CANCELLED")
+-            .contains(state)) {
+-          record.put("captureStatus", "NO_DECISION");
+-        } else {
+-          UUID.fromString(id); // Only the already-owned subject; no identifier is exported.
+-          HttpRequest request =
+-              HttpRequest.newBuilder(
+-                      URI.create("https://localhost:" + port
+-                          + "/api/v1/studio/guided-sessions/" + id + "/result"))
+-                  .timeout(Duration.ofSeconds(15))
+-                  .header("Cookie", "put_session=" + cookie)
+-                  .GET()
+-                  .build();
+-          // One application send, no retry/poll, redirect or p3Call/C5 recordHttp path.
+-          HttpResponse<byte[]> response =
+-              HttpClient.newBuilder()
+-                  .sslContext(TLS)
+-                  .connectTimeout(Duration.ofSeconds(15))
+-                  .followRedirects(HttpClient.Redirect.NEVER)
+-                  .build()
+-                  .send(request, HttpResponse.BodyHandlers.ofByteArray());
+-          if ((response.statusCode() != 200 && response.statusCode() != 202)
+-              || response.body().length > 262144) {
+-            record.put("captureStatus", "UNAVAILABLE");
+-          } else {
+-            ObjectMapper parser =
+-                JSON.copy()
+-                    .enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+-                    .enable(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+-            String text = StandardCharsets.UTF_8.newDecoder()
+-                .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+-                .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+-                .decode(java.nio.ByteBuffer.wrap(response.body())).toString();
+-            JsonNode body = parser.readTree(text);
+-            if (body == null || !body.isObject()
+-                || !body.path("schemaVersion").isIntegralNumber()
+-                || !body.path("schemaVersion").canConvertToInt()
+-                || body.path("schemaVersion").intValue() != 3
+-                || !body.path("sessionId").isTextual()
+-                || !id.equals(body.path("sessionId").textValue())
+-                || (response.statusCode() == 200
+-                    && (!body.path("executionId").isTextual()
+-                        || !id.equals(body.path("executionId").textValue())
+-                        || !body.path("mode").isTextual()
+-                        || !"guided".equals(body.path("mode").textValue())
+-                        || body.has("state")))
+-                || (response.statusCode() == 202
+-                    && (body.has("outcome") || body.has("executionId") || body.has("mode")))) {
+-              record.put("captureStatus", "INVALID");
+-            } else {
+-              String outcome = p3PublicEnum(
+-                  body.path(response.statusCode() == 200 ? "outcome" : "state"), P3_PUBLIC_STATES);
+-              record.put("publicOutcomeOrState", outcome);
+-              if (!state.equals(outcome)) {
+-                record.put("captureStatus", "MISMATCH");
+-              } else if (response.statusCode() == 202) {
+-                // A nonterminal view agreeing with the terminal poll is not a qualified result.
+-                record.put("captureStatus", "INVALID");
+-                record.put("publicOutcomeOrState", "UNKNOWN");
+-              } else {
+-                record.put("captureStatus", "CAPTURED");
+-                if ("FAILED".equals(state)) {
+-                  String code = p3PublicEnum(body.path("errorCode"), P3_PUBLIC_CODES);
+-                  record.put("errorCode", code);
+-                  record.put("codeQualified", !"UNKNOWN".equals(code));
+-                }
+-              }
+-            }
+-          }
+-        }
+-      } catch (InterruptedException observerFailure) {
+-        Thread.currentThread().interrupt();
+-        record.put("captureStatus", "UNAVAILABLE");
+-        record.put("publicOutcomeOrState", "UNKNOWN");
+-        record.put("errorCode", "UNKNOWN");
+-        record.put("codeQualified", false);
+-      } catch (Exception | AssertionError observerFailure) {
+-        record.put("captureStatus", "UNAVAILABLE");
+-        record.put("publicOutcomeOrState", "UNKNOWN");
+-        record.put("errorCode", "UNKNOWN");
+-        record.put("codeQualified", false);
+-      }
+-      try {
+-        p3WritePublicObservation(record);
+-      } catch (Exception | AssertionError observerOutputFailure) {
+-        // Missing/unwritable output is UNAVAILABLE to the closed collector, never an oracle change.
+-      }
+-    }
+-  }
+-
+-  private static final Set<String> P3_PUBLIC_STATES = Set.of("FINALIZING", "FAILED", "EXPIRED", "UNKNOWN_OUTCOME", "CANCELLED", "UNKNOWN");
+-  private static final Set<String> P3_PUBLIC_CODES = Set.of("OK", "PENDING", "INVALID_CONTRACT", "UNAUTHENTICATED", "FORBIDDEN_SCOPE", "REVISION_CONFLICT", "STALE_GENERATION", "TARGET_MISMATCH", "AMBIGUOUS_TARGET", "MISSING_SOURCE", "BINDING_ORDER", "SENSITIVE_SOURCE", "ORIGIN_NOT_ALLOWED", "UNSUPPORTED_SURFACE", "BUDGET_EXCEEDED", "STALE_FENCE", "IDEMPOTENCY_CONFLICT", "UNKNOWN_OUTCOME", "PUBLICATION_CONFLICT", "RUNTIME_INCOMPATIBLE", "ASSERTION_FAILED", "CANCELLED", "EXPIRED", "SECRET_UNAVAILABLE", "SECRET_USE_NOT_AUTHORIZED", "SECRET_USE_REVOKED", "VAULT_UNAVAILABLE", "LOGIN_REQUIRED", "SECRET_TOO_LONG", "ACK_LOST", "TIMEOUT", "TARGET_CHANGED", "POLICY_DENIED", "REFERENCE_MISMATCH", "UNKNOWN");
+-
+-  private static String p3PublicEnum(JsonNode value, Set<String> allowed) {
+-    return value != null && value.isTextual() && allowed.contains(value.textValue())
+-        ? value.textValue() : "UNKNOWN";
+-  }
+-
+-  private static ObjectNode p3PublicRecord(String state) {
+-    ObjectNode record = JSON.createObjectNode();
+-    record.put("schemaVersion", 1);
+-    record.put("unit", "obs011-t0-c8-public-error-observe01");
+-    record.put("class", "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT");
+-    record.put("method", "actualPublishedWrongPasswordAnnotatesEarlierSecretFill");
+-    record.put("baseSourceDigest", "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277");
+-    record.put("replayPreimageSha256", "b8b10df42b739d07d1abbd70ae1e54488f8a7587058a488e268445a396ac2475");
+-    record.put("planManifestSha256", "190235dc5dec26fb3603deed1f9147b25778a6668dd9fb1828a067965f0ed30a");
+-    record.put("captureStatus", "UNAVAILABLE");
+-    record.put("pollState", P3_PUBLIC_STATES.contains(state) ? state : "UNKNOWN");
+-    record.put("publicOutcomeOrState", "UNKNOWN");
+-    record.put("errorCode", "UNKNOWN");
+-    record.put("codeQualified", false);
+-    return record;
+-  }
+-
+-  private static void p3WritePublicObservation(ObjectNode record) throws IOException {
+-    // Root must create this one fresh directory0700 before the attempted selected invocation.
+-    Path output = Path.of("/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-t0-c8-public-error-observe01/public-observation.json");
+-    // SecureDirectoryStream keeps every ancestor open; reject links and unsupported providers.
+-    try (java.nio.file.DirectoryStream<Path> first = Files.newDirectoryStream(output.getRoot())) {
+-      if (!(first instanceof java.nio.file.SecureDirectoryStream<Path>)) {
+-        throw new IOException("PUBLIC_OUTPUT_CUSTODY_UNAVAILABLE");
+-      }
+-      java.util.ArrayList<java.nio.file.SecureDirectoryStream<Path>> opened = new java.util.ArrayList<>();
+-      java.nio.file.SecureDirectoryStream<Path> current =
+-          (java.nio.file.SecureDirectoryStream<Path>) first;
+-      try {
+-        for (Path component : output.getParent()) {
+-          current = current.newDirectoryStream(component, java.nio.file.LinkOption.NOFOLLOW_LINKS);
+-          opened.add(current);
+-        }
+-        var permissions = java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
+-            java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
+-        try (java.nio.channels.SeekableByteChannel channel = current.newByteChannel(
+-            output.getFileName(),
+-            Set.of(java.nio.file.StandardOpenOption.CREATE_NEW,
+-                java.nio.file.StandardOpenOption.WRITE, java.nio.file.LinkOption.NOFOLLOW_LINKS),
+-            permissions)) {
+-          java.nio.ByteBuffer bytes = StandardCharsets.UTF_8.encode(record.toString() + "\n");
+-          while (bytes.hasRemaining()) {
+-            channel.write(bytes);
+-          }
+-        }
+-      } finally {
+-        for (int index = opened.size() - 1; index >= 0; index--) {
+-          opened.get(index).close();
+-        }
+-      }
+-    }
+-  }
+-
+   private void p3PublishedLogin(P3Mode mode, boolean password) throws Exception {
+     p3Mode = mode;
+     UUID test = p3CreateSource(primaryCsi, "fixture", password);
+@@ -27021,9 +26829,6 @@
+       p3Seed(scope, correct);
+     }
+     String id = p3Start(test, "fixture");
+-    if (p3PublicObservation != null) {
+-      p3PublicObservation.bind(id, p3Cookie);
+-    }
+     awaitFinalizing(id);
+     P3Publication publication = p3Publish(id);
+     int models = MODEL_WIRE.size();
+@@ -32514,9 +32319,6 @@
+               : sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+       if (List.of("FINALIZING", "FAILED", "EXPIRED", "UNKNOWN_OUTCOME", "CANCELLED")
+           .contains(state)) {
+-        if (p3PublicObservation != null) {
+-          p3PublicObservation.observe(id, state);
+-        }
+         assertThat(state).as("second explicit learning; logs %s", TEMP).isEqualTo("FINALIZING");
+         return;
+       }

@@ -1,0 +1,72 @@
+{
+  "method": "patch --dry-run -p1 --batch --forward",
+  "sourceWrites": false,
+  "checks": [
+    {
+      "path": "frontend/src/components/studio/guided/guidedCopySources.test-support.ts",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/src/components/studio/guided/guidedCopySources.test-support.ts'\n",
+      "stderr": ""
+    },
+    {
+      "path": "frontend/src/components/studio/guided/guidedNarratives.ts",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/src/components/studio/guided/guidedNarratives.ts'\n",
+      "stderr": ""
+    },
+    {
+      "path": "frontend/src/components/studio/guided/guided.test.tsx",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/src/components/studio/guided/guided.test.tsx'\n",
+      "stderr": ""
+    },
+    {
+      "path": "frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/src/components/studio/evidence/pinnedVideoEvidenceFacts.ts'\n",
+      "stderr": ""
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/handlers.ts",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/src/services/mocks/studio/handlers.ts'\n",
+      "stderr": ""
+    },
+    {
+      "path": "frontend/src/services/mocks/studio/studioHandlers.test.ts",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/src/services/mocks/studio/studioHandlers.test.ts'\n",
+      "stderr": ""
+    },
+    {
+      "path": "frontend/src/test/a11y/studioWcagAudit.test.tsx",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/src/test/a11y/studioWcagAudit.test.tsx'\n",
+      "stderr": ""
+    },
+    {
+      "path": "frontend/README.md",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/README.md'\n",
+      "stderr": ""
+    },
+    {
+      "path": "frontend/src/components/studio/runs/RunDetailsDrawer.tsx",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/src/components/studio/runs/RunDetailsDrawer.tsx'\n",
+      "stderr": ""
+    },
+    {
+      "path": "frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx'\n",
+      "stderr": ""
+    },
+    {
+      "path": "frontend/src/components/studio/guided/index.ts",
+      "returncode": 0,
+      "stdout": "patching file 'frontend/src/components/studio/guided/index.ts'\n",
+      "stderr": ""
+    }
+  ]
+}

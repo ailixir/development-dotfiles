@@ -1,0 +1,19 @@
+{
+  "decision": "NOT_READY_MANDATORY_SINGLETON_FIXTURE_PREREQUISITE",
+  "mandatoryFindings": [
+    {
+      "id": "C6-QA-01",
+      "summary": "Standalone synthetic control lacks genuine worker/log setup while original class finalizer unconditionally reads both worker logs.",
+      "correction": "Bound and review real existing worker fixture prerequisite; do not weaken sink reads or cleanup acceptance."
+    }
+  ],
+  "reviewSha256": "a69472c20e9fbde3f69ac443fb59935b51144739f63f6772568c52c6cc7fb4c3",
+  "checksSha256": "33b2a6eddbb5fd30719d6cdd8632ff7bf19d9954532e4dce75c76fc13344a774",
+  "verifierSha256": "0c3f83e60e787b03debf4d020070390d0e3f02db917d688c7d6fdfdc3b0b2369",
+  "sourceApplied": false,
+  "runtimeExecuted": false,
+  "historicalCauseProved": false,
+  "gateOrLifecycleCredit": false,
+  "sharedBudgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

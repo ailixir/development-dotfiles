@@ -1,0 +1,202 @@
+  // SOURCE ONLY: compile/run requires a separate exact native qualification release.
+  private static final java.util.concurrent.atomic.AtomicInteger ACCEPTS = new java.util.concurrent.atomic.AtomicInteger();
+  private static final java.util.concurrent.atomic.AtomicInteger REQUESTS = new java.util.concurrent.atomic.AtomicInteger();
+
+  private static final class FakeTls extends javax.net.ssl.SSLSocket {
+    final java.io.InputStream input;
+    FakeTls(byte[] bytes) { input = new java.io.ByteArrayInputStream(bytes); }
+    @Override public java.io.InputStream getInputStream() { return input; }
+    @Override public void setSoTimeout(int value) { if (value <= 0) { throw new AssertionError("INFINITE_TIMEOUT"); } }
+    @Override public String[] getSupportedCipherSuites() { return new String[0]; }
+    @Override public String[] getEnabledCipherSuites() { return new String[0]; }
+    @Override public void setEnabledCipherSuites(String[] value) { }
+    @Override public String[] getSupportedProtocols() { return new String[0]; }
+    @Override public String[] getEnabledProtocols() { return new String[0]; }
+    @Override public void setEnabledProtocols(String[] value) { }
+    @Override public javax.net.ssl.SSLSession getSession() { return null; }
+    @Override public void addHandshakeCompletedListener(javax.net.ssl.HandshakeCompletedListener value) { }
+    @Override public void removeHandshakeCompletedListener(javax.net.ssl.HandshakeCompletedListener value) { }
+    @Override public void startHandshake() { }
+    @Override public void setUseClientMode(boolean value) { }
+    @Override public boolean getUseClientMode() { return true; }
+    @Override public void setNeedClientAuth(boolean value) { }
+    @Override public boolean getNeedClientAuth() { return false; }
+    @Override public void setWantClientAuth(boolean value) { }
+    @Override public boolean getWantClientAuth() { return false; }
+    @Override public void setEnableSessionCreation(boolean value) { }
+    @Override public boolean getEnableSessionCreation() { return false; }
+  }
+
+  private static void parserCase(String name, byte[] response, boolean accepted, int expectedBytes) throws Exception {
+    P3PublicExchange owner = new P3PublicExchange(System.nanoTime(),null,1,"synthetic","synthetic","FAILED");
+    boolean passed = false;
+    try {
+      byte[] actual = new P3HttpEntity(new FakeTls(response),owner).read();
+      passed = accepted && actual.length == expectedBytes;
+    } catch (IOException failure) { passed = !accepted; }
+    if (!passed) { throw new AssertionError(name); }
+  }
+  private static byte[] bytes(String text) { return text.getBytes(StandardCharsets.US_ASCII); }
+  private static void parserCases() throws Exception {
+    parserCase("length",bytes("HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\n{}"),true,2);
+    parserCase("chunked",bytes("HTTP/1.1 202 Accepted\r\nTransfer-Encoding: chunked\r\n\r\n2\r\n{}\r\n0\r\n\r\n"),true,2);
+    parserCase("close",bytes("HTTP/1.0 200 OK\r\n\r\n{}"),true,2);
+    parserCase("short",bytes("HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\n{}"),false,0);
+    parserCase("duplicate",bytes("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nContent-Length: 2\r\n\r\n{}"),false,0);
+    parserCase("ambiguous",bytes("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nTransfer-Encoding: chunked\r\n\r\n{}"),false,0);
+    parserCase("gzip",bytes("HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\n\r\n{}"),false,0);
+    parserCase("redirect",bytes("HTTP/1.1 307 Redirect\r\nContent-Length: 2\r\n\r\n{}"),false,0);
+    parserCase("chunk-over",bytes("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n40001\r\n"),false,0);
+    parserCase("header-over",bytes("HTTP/1.1 200 OK\r\nX: "+"x".repeat(16384)+"\r\n\r\n"),false,0);
+    parserCase("trailer-over",bytes("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n0\r\nX: "+"x".repeat(8192)+"\r\n\r\n"),false,0);
+    byte[] cap = new byte[262144]; java.util.Arrays.fill(cap,(byte) 'x');
+    byte[] prefix=bytes("HTTP/1.1 200 OK\r\nContent-Length: 262144\r\n\r\n");
+    byte[] exact=new byte[prefix.length+cap.length]; System.arraycopy(prefix,0,exact,0,prefix.length);System.arraycopy(cap,0,exact,prefix.length,cap.length);
+    parserCase("exact-cap-length",exact,true,262144);
+    parserCase("length-over",bytes("HTTP/1.1 200 OK\r\nContent-Length: 262145\r\n\r\n"),false,0);
+    prefix=bytes("HTTP/1.1 200 OK\r\n\r\n");exact=new byte[prefix.length+cap.length];System.arraycopy(prefix,0,exact,0,prefix.length);System.arraycopy(cap,0,exact,prefix.length,cap.length);
+    parserCase("exact-cap-close",exact,true,262144);
+    byte[] over=java.util.Arrays.copyOf(exact,exact.length+1);over[over.length-1]='x';parserCase("close-over",over,false,0);
+    for (byte[] malformed : new byte[][] {bytes("{\"x\":1,\"x\":2}"),bytes("{}{}"),new byte[] {(byte) 0xff}}) {
+      boolean rejected=false;try { p3StrictJson(malformed); } catch(IOException failure) { rejected=true; }
+      if (!rejected) { throw new AssertionError("STRICT_JSON"); }
+    }
+    parserCase("chunk-line129",bytes("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n"+"0".repeat(129)+"\r\n"),false,0);
+    parserCase("chunk-data-bad-CRLF",bytes("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n2\r\n{}X\n0\r\n\r\n"),false,0);
+    parserCase("bare-LF-header",bytes("HTTP/1.1 200 OK\n\n"),false,0);
+    parserCase("header-exact16384",bytes("HTTP/1.1 200 OK\r\nX: "+"x".repeat(16360)+"\r\n\r\n"),true,0);
+    parserCase("trailer-exact8192",bytes("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n0\r\nX: "+"x".repeat(8185)+"\r\n\r\n"),true,0);
+    parserCase("trailer-bad-CRLF",bytes("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n0\r\nX: x\rX"),false,0);
+    System.out.println("{\"case\":\"parser\",\"status\":\"PASS\",\"originalChecks\":18,\"addedChecks\":6,\"checks\":24,\"nativeBusinessRequests\":0}");
+  }
+
+  private static void context(String store, char[] password) throws Exception {
+    java.security.KeyStore keys=java.security.KeyStore.getInstance("PKCS12");
+    try (java.io.InputStream input=java.nio.file.Files.newInputStream(java.nio.file.Path.of(store))) { keys.load(input,password); }
+    javax.net.ssl.KeyManagerFactory km=javax.net.ssl.KeyManagerFactory.getInstance(javax.net.ssl.KeyManagerFactory.getDefaultAlgorithm());km.init(keys,password);
+    javax.net.ssl.TrustManagerFactory tm=javax.net.ssl.TrustManagerFactory.getInstance(javax.net.ssl.TrustManagerFactory.getDefaultAlgorithm());tm.init(keys);
+    TLS=javax.net.ssl.SSLContext.getInstance("TLS");TLS.init(km.getKeyManagers(),tm.getTrustManagers(),null);
+    java.util.Arrays.fill(password,'\0');
+  }
+
+  // Synthetic-driver evidence only. Production fragment above is byte identical.
+  private static final java.util.Set<Object> SYNTHETIC_RETAINED = java.util.concurrent.ConcurrentHashMap.newKeySet();
+  private static final class SyntheticServer {
+    volatile javax.net.ssl.SSLServerSocket listener;
+    volatile javax.net.ssl.SSLSocket peer;
+    volatile String listenerClose="NOT_ACQUIRED",peerClose="NOT_ACQUIRED",stage="CREATED",failure="NONE";
+    void closeOwned() {
+      if(peer!=null && peerClose.equals("OPEN")) {
+        peerClose="UNKNOWN";try { peer.close();peerClose="CLOSED"; } catch(Exception failure) { SYNTHETIC_RETAINED.add(this); }
+      }
+      if(listener!=null && listenerClose.equals("OPEN")) {
+        listenerClose="UNKNOWN";try { listener.close();listenerClose="CLOSED"; } catch(Exception failure) { SYNTHETIC_RETAINED.add(this); }
+      }
+      if(!closed()) { SYNTHETIC_RETAINED.add(this); }
+    }
+    boolean closed() { return listener!=null && listenerClose.equals("CLOSED") && (peer==null || peerClose.equals("CLOSED")); }
+  }
+  private static void tlsCase(String name) throws Exception {
+    String id="00000000-0000-0000-0000-000000000001";
+    SyntheticServer owned=new SyntheticServer();SYNTHETIC_RETAINED.add(owned);
+    owned.listener=(javax.net.ssl.SSLServerSocket)TLS.getServerSocketFactory().createServerSocket(0,1,java.net.InetAddress.getByAddress(new byte[] {127,0,0,1}));
+    owned.listenerClose="OPEN";
+    Thread serverThread=Thread.ofVirtual().name("synthetic-public-tls-server").unstarted(() -> {
+      try {
+        owned.stage="ACCEPT_WAIT";owned.peer=(javax.net.ssl.SSLSocket)owned.listener.accept();owned.peerClose="OPEN";
+        ACCEPTS.incrementAndGet();owned.stage="ACCEPTED";
+        if(name.equals("tls-stall-handshake")) { owned.stage="STALL_HANDSHAKE";Thread.sleep(20000);return; }
+        owned.peer.startHandshake();owned.peer.setSoTimeout(16000);owned.stage="HANDSHAKE_COMPLETE";
+        if(name.equals("tls-stall-write")) { owned.stage="STALL_WRITE_FIXTURE";Thread.sleep(20000);return; }
+        java.io.InputStream input=owned.peer.getInputStream();int tail=0,headerBytes=0;
+        while(tail!=0x0d0a0d0a) { int b=input.read();if(b<0 || ++headerBytes>16384) { throw new IOException("REQUEST"); } tail=(tail<<8)|b; }
+        REQUESTS.incrementAndGet();owned.stage="REQUEST_RECEIVED";
+        java.io.OutputStream output=owned.peer.getOutputStream();
+        if(name.equals("tls-stall-body")) { output.write(bytes("HTTP/1.1 200 OK\r\nContent-Length: 10\r\n\r\n"));output.flush();owned.stage="STALL_BODY";Thread.sleep(20000);return; }
+        if(name.equals("tls-stall-trailers")) { output.write(bytes("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n2\r\n{}\r\n0\r\n"));output.flush();owned.stage="STALL_TRAILERS";Thread.sleep(20000);return; }
+        if(name.equals("tls-dribble")) {
+          output.write(bytes("HTTP/1.1 200 OK\r\nContent-Length: 100\r\n\r\n"));output.flush();
+          for(int i=0;i<100;i++) { output.write('x');output.flush();owned.stage="DRIBBLE_BODY";Thread.sleep(500); } return;
+        }
+        if(name.equals("tls-oversize")) { output.write(bytes("HTTP/1.1 200 OK\r\nContent-Length: 262145\r\n\r\n"));output.flush();owned.stage="OVERSIZE_LENGTH_SENT";return; }
+        String body="{\"schemaVersion\":3,\"sessionId\":\""+id+"\",\"executionId\":\""+id+"\",\"mode\":\"guided\",\"outcome\":\"FAILED\",\"errorCode\":\"LOGIN_REQUIRED\"}";
+        output.write(bytes("HTTP/1.1 200 OK\r\nContent-Length: "+body.length()+"\r\n\r\n"+body));output.flush();owned.stage="GOOD_RESPONSE_SENT";
+      } catch(InterruptedException failure) { owned.failure="SERVER_INTERRUPTED";Thread.currentThread().interrupt(); }
+      catch(Exception failure) { owned.failure="SERVER_IO_OR_TLS_FAILURE"; }
+      finally { owned.closeOwned(); }
+    });
+    long start=System.nanoTime();P3PublicExchange exchange=new P3PublicExchange(start,null,owned.listener.getLocalPort(),id,"SYNTHETIC_TOKEN","FAILED");
+    Thread worker=Thread.ofVirtual().name("synthetic-exact-public-worker").unstarted(exchange);exchange.worker=worker;
+    boolean cancellationRequested=false;int cancellationCount=0;String controllerFailure="NONE";long serverJoinStart=0;
+    boolean terminatedAtNetworkJoin=false;long networkCompletionUpperNs=Long.MAX_VALUE;ObjectNode accounting=null;
+    try {
+      serverThread.start();exchange.started=true;P3_PUBLIC_OWNED.add(exchange);worker.start();
+      p3JoinUntil(worker,start,12000000000L);
+      if(worker.isAlive()) { cancellationRequested=true;cancellationCount=1;exchange.cancel(); }
+      p3JoinUntil(worker,start,14000000000L);
+      terminatedAtNetworkJoin=!worker.isAlive();networkCompletionUpperNs=System.nanoTime()-start;
+      accounting=exchange.accounting(terminatedAtNetworkJoin,false);
+    } catch(Exception failure) { controllerFailure="CONTROLLER_JOIN_OR_START_FAILURE"; }
+    finally {
+      if(worker.isAlive() && !cancellationRequested) { cancellationRequested=true;cancellationCount=1;exchange.cancel(); }
+      serverJoinStart=System.nanoTime();serverThread.interrupt();
+      try { serverThread.join(5000); } catch(InterruptedException failure) { controllerFailure="CONTROLLER_INTERRUPTED";Thread.currentThread().interrupt(); }
+      if(serverThread.getState()==Thread.State.NEW) { owned.closeOwned(); }
+    }
+    // Snapshot actual network join/accounting BEFORE separate server drain. A later worker
+    // termination during server join cannot retroactively satisfy the14s obligation.
+    boolean terminated=terminatedAtNetworkJoin && !worker.isAlive();
+    if(accounting==null) { accounting=exchange.accounting(false,false); }
+    if(terminated && networkCompletionUpperNs<=14000000000L) { accounting.put("networkCompletionElapsedNs",networkCompletionUpperNs); }
+    else { accounting.putNull("networkCompletionElapsedNs"); }
+    accounting.put("deadlineExceeded",networkCompletionUpperNs>12000000000L);
+    boolean captured=exchange.result!=null && "CAPTURED".equals(exchange.result.path("captureStatus").textValue())
+        && "FAILED".equals(exchange.result.path("publicOutcomeOrState").textValue())
+        && "LOGIN_REQUIRED".equals(exchange.result.path("errorCode").textValue()) && exchange.result.path("codeQualified").booleanValue();
+    String expectedStage=switch(name) {
+      case "tls-good" -> "GOOD_RESPONSE_SENT";case "tls-oversize" -> "OVERSIZE_LENGTH_SENT";
+      case "tls-stall-handshake" -> "STALL_HANDSHAKE";case "tls-stall-write" -> "STALL_WRITE_FIXTURE";
+      case "tls-stall-body" -> "STALL_BODY";case "tls-stall-trailers" -> "STALL_TRAILERS";default -> "DRIBBLE_BODY";
+    };
+    boolean handshakeStall=name.equals("tls-stall-handshake");boolean writeStall=name.equals("tls-stall-write");
+    boolean counts=exchange.connects==1 && ACCEPTS.get()==1 &&
+        (handshakeStall ? exchange.requests==0 && !exchange.completed && REQUESTS.get()==0 :
+         writeStall ? exchange.requests==1 && !exchange.completed && REQUESTS.get()==0 : exchange.requests==1 && exchange.completed && REQUESTS.get()==1);
+    boolean expected=name.equals("tls-good") ? captured && networkCompletionUpperNs<=12000000000L : exchange.result==null;
+    boolean stall=name.startsWith("tls-stall-") || name.equals("tls-dribble");
+    boolean deadlinePath=!stall || cancellationRequested || accounting.path("deadlineExceeded").booleanValue();
+    boolean passed=expected && counts && deadlinePath && owned.stage.equals(expectedStage) && controllerFailure.equals("NONE") && terminated
+        && networkCompletionUpperNs<=14000000000L && !serverThread.isAlive() && owned.closed()
+        && exchange.acquired==exchange.closes && System.nanoTime()-start<20000000000L;
+    ObjectNode result=JSON.createObjectNode();result.put("case",name);result.put("status",passed?"PASS":"HOLD");
+    result.put("connects",exchange.connects);result.put("accepted",ACCEPTS.get());result.put("requests",REQUESTS.get());
+    result.put("stage",owned.stage);result.put("serverFailure",owned.failure);result.put("controllerFailure",controllerFailure);
+    result.put("serverListenerAcquired",owned.listener!=null);result.put("serverPeerAcquired",owned.peer!=null);
+    result.put("serverListenerClose",owned.listenerClose);result.put("serverPeerClose",owned.peerClose);
+    result.put("cancellationRequested",cancellationRequested);result.put("cancellationCount",cancellationCount);
+    result.put("productionCancellationSet",exchange.cancellation.get());result.put("networkTerminated",terminated);
+    result.put("serverTerminated",!serverThread.isAlive());result.put("serverDrainElapsedNs",System.nanoTime()-serverJoinStart);
+    result.set("networkAccounting",accounting);result.put("elapsedNs",System.nanoTime()-start);
+    ObjectNode projection=JSON.createObjectNode();
+    if(exchange.result!=null) { for(String field: new String[]{"captureStatus","publicOutcomeOrState","errorCode","codeQualified"}) { projection.set(field,exchange.result.path(field)); } }
+    result.set("closedProjection",projection);System.out.println(result);
+    if(owned.closed() && !serverThread.isAlive()) { SYNTHETIC_RETAINED.remove(owned); }
+    if(!passed) { throw new AssertionError("SYNTHETIC_TLS_UNQUALIFIED"); }
+  }
+
+  public static void main(String[] args) throws Exception {
+    if(args.length==1 && args[0].equals("parser")) { parserCases();return; }
+    if(args.length==3 && Set.of("tls-good","tls-oversize","tls-stall-handshake","tls-stall-write","tls-stall-body","tls-stall-trailers","tls-dribble").contains(args[0])) {
+      String password=System.getenv("SYNTHETIC_PUBLIC_KEYSTORE_PASSWORD");if(password==null) { throw new AssertionError("SYNTHETIC_KEYSTORE_PASSWORD_REQUIRED"); }
+      if(!args[2].equals("ROOT_QUALIFIED_LOCAL_SYNTHETIC_ONLY")) { throw new AssertionError("QUALIFICATION_REQUIRED"); }
+      context(args[1],password.toCharArray());tlsCase(args[0]);return;
+    }
+    if(args.length==1 && args[0].equals("relay")) {
+      ObserverBoundaryHarness harness=new ObserverBoundaryHarness();harness.p3Cookie="SYNTHETIC_TOKEN";
+      String id="00000000-0000-0000-0000-000000000001";harness.p3OwnedGuidedCookies.put(id,harness.p3Cookie);
+      P3PublicObservation observer=harness.new P3PublicObservation();observer.bind(id,harness.p3Cookie);observer.observe(id,"FINALIZING");
+      // Actual root ACK/COMMIT/peer ABI/custody/drain must be independently inspected.
+      System.out.println("{\"case\":\"relay\",\"status\":\"ROOT_RECEIPT_REQUIRED\",\"nativeBusinessRequests\":0}");return;
+    }
+    throw new AssertionError("EXACT_ONE_SYNTHETIC_MODE_REQUIRED");
+  }

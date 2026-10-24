@@ -1,0 +1,61 @@
+# T0-SB, RUNNER sandbox ($SANDBOX/repo/), exact copy list at S_011 (T0-DEV, read-only, 2026-10-18)
+# Scope: the verify of 11-RT = studio-runner type-check, lint, full unit tier, full fixtures tier (vitest.config.ts, vitest.fixtures.config.ts).
+# Not in scope: the deployment tier (vitest.deployment.config.ts) and check:pins: root runs them in the real tree (B4, B5, G4, G5).
+# Method: static reads of studio-runner/{test,src,scripts,evaluation,ci} and the vitest/tsconfig/eslint configs. Nothing was executed.
+# Rules: copies, never symlinks. Paths are relative to the repo root and keep the same relative layout in the sandbox.
+# Every COPY path below was checked to exist at S_011 (sizes in bytes of the real tree).
+
+# ---- COPY (cp -a) -------------------------------------------------------------------------------------------------------
+COPY studio-runner                                                         # 140 MB incl. node_modules (131.6 MB), dist, fixtures, evaluation, test, scripts, ci, Dockerfile, package*.json, configs
+                                                                           # dist/ MUST come along: unit tests read dist/runtime-versions.json, dist/observed-reference.json, dist/validator, dist/run (runtime-versions, pins, print-observed-catalog, no-dynamic-evaluation, observed-secret-control)
+                                                                           # optional to leave out: studio-runner/coverage, studio-runner/short.webm (stray, untracked), studio-runner/.claude
+COPY docs/specs/studio/openapi.yaml                                        # contract, contract-integrity, errors, confinement (sha pin), observedReplayRoutes tests; tools/check-studio-observed-contracts.cjs
+COPY docs/specs/studio-observed-authoring/contracts/v3                     # DIRECTORY (24 MB): readdirSync of *.schema.json (helpers/openapi.ts, tools builder) + publication-fixtures.json (23 files), fixtures.json, wire-parity.fixtures.json, timing-order-vectors.json, current-synthetic-worlds.json, publication-canonical-vectors.json, observation.schema.json
+COPY tools/build-studio-observed-schemas.cjs                               # test/generated-contracts.test.ts; rewrites/compares studio-runner/src/{guided,validator,executor} generated files relative to __dirname/..
+COPY tools/check-studio-observed-contracts.cjs                             # test/helpers/incrementalNegativeBoundaries.ts and helpers/currentWorlds.ts (6 unit test files use them: controlReferencePreservation, currentWorldFactories, observedIncrementalValidation, observedReplayValidation, server/observedReplayAdmission, server/observedReplayAuthorization), fixtures-tier/observed-authoring-snapshot.test.ts
+COPY tools/studio-current-vector-factory.cjs                               # test/helpers/currentWorlds.ts
+COPY tools/studio-snapshot-contract-oracle.cjs                             # required by check-studio-observed-contracts.cjs:584
+                                                                           # (copying the whole tools/ directory, 304 KB, is equivalent and simpler)
+COPY node_modules/ajv                                                      # *** ROOT node_modules, not studio-runner/node_modules. tools/*.cjs resolve ajv, ajv-formats, yaml from <repo>/node_modules
+COPY node_modules/ajv-formats                                              #     (studio-runner/node_modules holds ajv 6.15.0; the tools need ajv 8.20.0 from the root). Without these 7 packages the tools tests fail with "Cannot find module 'ajv'".
+COPY node_modules/yaml
+COPY node_modules/fast-deep-equal
+COPY node_modules/fast-uri
+COPY node_modules/json-schema-traverse
+COPY node_modules/require-from-string                                      # ajv 8.20.0 / ajv-formats 3.0.1 / yaml 2.9.0 closure (checked in package.json 'dependencies', all hoisted at the root)
+COPY helm-chart/put-checks/values-uat.yaml                                 # unit tier: test/disclosure.test.ts:41
+COPY helm-chart/put-checks/values-prod.yaml                                # unit tier: test/disclosure.test.ts:42
+                                                                           # (the lane plan says "helm-chart (post-residue)"; the whole chart, 268 KB, is also fine but only these two files are read outside the deployment tier)
+COPY docs/runbooks/studio-runner.md                                        # *** MISSING from lanes.v3.json / brief: unit tier test/disclosure.test.ts:40,64 asserts ~30 needles in it (see item2_disclosure_needles.txt)
+COPY docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/results.jsonl    # *** MISSING from lanes.v3.json / brief: test/evaluation/corpusManifest.test.ts:27,88 hash-checks the repo-based pins in
+COPY docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/summary.json     #     studio-runner/evaluation/observed-authoring/manifest.json (base:'repo'; the other two repo pins are inside studio-runner/test/fixtures)
+
+# ---- MKDIR (empty directories only; NO evidence content is read) ----------------------------------------------------------
+# The fixtures tier WRITES oracle/fact JSON to '../docs/qa/evidence/...' resolved against the process cwd (= $SANDBOX/repo/studio-runner).
+# 8 writers use writeFile without mkdir, so their parent directory must exist; 3 helpers mkdir -p themselves.
+# No test in either runner tier READS anything under docs/qa/evidence (grep of every literal and join(); see check.md item 2).
+MKDIR docs/qa/evidence/STUDIO-OBS-007                                      # runner-bootstrap-capability-oracle.json, runner-chromium-profile.json, runner-diagnostics-<mode>.json
+MKDIR docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair
+MKDIR docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution-2
+MKDIR docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate
+MKDIR docs/qa/evidence/STUDIO-OBS-007/runner-control-focus-candidate
+MKDIR docs/qa/evidence/STUDIO-OBS-007/runner-login-collision-candidate
+MKDIR docs/qa/evidence/STUDIO-OBS-013/r13                                  # sec001-guided-video-oracle.json
+MKDIR docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation   # kill-facts-<n>.json (the other two native-runs dirs below it are mkdir -p by the tests)
+# created by the tests themselves, listed for the record (do NOT pre-create or copy):
+#   .../runner-remediation/profile-safety-fixture/native-runs   (browser-profile-safety.test.ts:69, mkdir recursive)
+#   .../runner-remediation/padding-correction/native-runs       (fixtures-tier/nativeBlankVideo.ts:12, mkdir recursive)
+#   docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1          (helpers/observedNativeEvidence.ts prepareExportRoot(): mkdir chain from the repo root; the repo root and docs/qa/evidence must be real directories, not symlinks)
+
+# ---- run conditions the commands must keep ---------------------------------------------------------------------------------
+# cwd = $SANDBOX/repo/studio-runner for every vitest/tsc/eslint call (RF / RFX macros already say so): the evidence writers use resolve('../docs/...').
+# Playwright's pinned Chromium comes from the user cache, not from the repo (PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 in vitest.fixtures.config.ts).
+# fixtures globalSetup re-emits studio-runner/dist inside the sandbox; the real dist is untouched.
+
+# ---- NOT NEEDED by the runner unit + fixtures tiers --------------------------------------------------------------------------
+# backend/**                 (only the deployment tier reads it: backend/src/main/resources/application.yml [backend-env.test.ts:380, cancel-budget-env.test.ts:51],
+#                             backend/src/main/resources/logback-spring.xml and backend/src/main/java/com/citi/put/checks/studio/guided/audit/StudioActionAudit.java [backend-env.test.ts:262-273],
+#                             backend/src/main/java/com/citi/put/checks/config/SecurityConfig.java [edge.test.ts:449], backend/src/main/java/com/citi/put/checks/studio/sse/ExecutionEventsController.java [edge.test.ts:464])
+#                             => lanes.v3.json 11-RT 'sandboxT0Note' (application.yml in the runner sandbox) is only true if the DEPLOYMENT tier is run in the sandbox. 11-RT does not run it.
+# docs/qa/evidence/** content (STUDIO-OBS-007 is 1.2 GB; no reads)
+# frontend/**, .github/**, root package*.json

@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "rows": [
+    {
+      "id": "USER-C8",
+      "path": "docs/qa/evidence/STUDIO-OBS-009/execution-20261018/w0/decisions.md",
+      "sha256": "8d7332f1417c67ca0e5a3225f3d8694f69d47516b5d61c4e9601420faf89e6d3",
+      "quotes": [
+        {
+          "line": 64,
+          "text": "The user chose **\"Targeted backend run\"**. Root stopped the full G9b `check` (`obs009-g9b-check01`) a few minutes after it started; it credits nothing. In its place, `local-gate-20261018b/g9b-c8t.sh` runs:"
+        },
+        {
+          "line": 69,
+          "text": "**Waived here, by the user:** the full backend regression and the JaCoCo coverage gate at the G9b digest. Coverage stays at G9's informational reading (bundle 91.66% line, every package floor met), which is not a gate result."
+        },
+        {
+          "line": 71,
+          "text": "**Owed:** a full fresh `check`, at the 011 T0 fresh baseline, before any 011 lane claims credit."
+        }
+      ]
+    },
+    {
+      "id": "START-TRIGGER",
+      "path": "docs/qa/evidence/STUDIO-OBS-009/local-gate-20261018/qa-local-validation-record.md",
+      "sha256": "bca21f5393d4c80df49842f805ddd3b3928fff559b09919720b349962f65633a",
+      "quotes": [
+        {
+          "line": 24,
+          "text": "**Targets:** the OBS-011 T0 start and the OBS-010 T2 start. This is a start trigger, not a quality verdict. It does not say 009 can be Done: 009 still needs T4 (U17/U18/U7, ED-01), the deployed stack (DEPLOY-OBSERVED-01, U24) and U3."
+        },
+        {
+          "line": 62,
+          "text": "- A red in the 011 T0 fresh full check at the same bytes reopens the case it names; the waiver defers that evidence, it does not replace it."
+        },
+        {
+          "line": 316,
+          "text": "Bound to source digest `061fc41feb02ac4cf12fd5f696257682994e11671b8def3cf31bd1f5c9ce1617`, dist `698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210` and helm `4607090747e4fef31713ff90db5545eb243bdcff67c3b9acfd5fff2e8e01ada8`. A later edit to any file in that source set, to `studio-runner/dist` or to `helm-chart/` voids the binding; a later edit to a file owned by a row voids that row. OBS-011's own edits, once 011 T0 has started on this digest, do not void a trigger already given. The trigger is MET under the user's waiver of 2026-10-18 and lapses with it: the full fresh `check` at the 011 T0 baseline is owed before any 011 lane claims credit. Before any 009 Done review this addendum must be current, and C10, the residue-image smoke and the full regression must have been run at the digest being reviewed."
+        }
+      ]
+    },
+    {
+      "id": "STORY-START",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "faa2224dc39dcc341df84b3596007fb0a60fbe819613659c38b0d82ad2f64e8d",
+      "quotes": [
+        {
+          "line": 237,
+          "text": "**Start-condition amendment (2026-10-15, user decision; coordinator relayed it to Pax).** In the GO conditions, \"starts only after OBS-009 is Done\" is replaced by a two-part start condition:"
+        },
+        {
+          "line": 250,
+          "text": "- **Who validates (S-2).** \"Implemented and validated\" means an independent @qa review record of the listed local halves. That record is not a Done verdict. The coordinator confirms that the condition holds before T0."
+        },
+        {
+          "line": 513,
+          "text": "**Both parts of the start condition (2026-10-15 amendment, S-2 clarification) are now satisfied on the evidence.**"
+        },
+        {
+          "line": 521,
+          "text": "- **Full regression plus JaCoCo at T0.** The user's C8 waiver owes a **full fresh `check --rerun-tasks` with the JaCoCo coverage gate** at the 011 T0 fresh baseline, **before any 011 lane claims credit** (record \u00a79, \u00a711). In the T0 draft this is baseline **B1** (`obs011-t0-baseline-check01`, `t0-record-draft.md` \u00a73) plus T0-JC. A red there reopens the case it names in 009 (record \u00a71.4). The trigger lapses with the waiver, and if the user says the waiver stops at `fd793c95\u2026`, it reverts to NOT_MET."
+        }
+      ]
+    },
+    {
+      "id": "T0-OUTCOMES",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/t0-record.md",
+      "sha256": "870046f592b620d3645e7857b26ae568482464646d9baeea3709713e88ace90c",
+      "quotes": [
+        {
+          "line": 78,
+          "text": "**B1 outcome rules [ruled here].** These decide whether W1 starts."
+        },
+        {
+          "line": 84,
+          "text": "| Red in a test file that a lane owns, where the cause is in the test. Example: Quinn's R7 watch, a `SHARED-CSI-DAY` 429 in a bridge, focus-mutation, evidence-pending or lifecycle class that G9b did not re-run | Starts. The red is recorded by name, the owning lane stabilises it (brief, hard rules), and it must be green at 11-G | the lane: GS-T2 (bridge ITs), IT-S (Focus/EvidencePending), GS-T (LifecycleReasonIT/SessionIT/TransportFaultIT), IT-R (ReplayIT) |"
+        },
+        {
+          "line": 85,
+          "text": "| Red in main code, or in a test no lane owns | **Root rules before W1.** Per the 009 record \u00a71.4 and Pax, a B1 red reopens the 009 case it names | root (+ @qa) |"
+        },
+        {
+          "line": 86,
+          "text": "| `jacocoTestCoverageVerification` fails, or the coverage tasks did not execute | **Root rules before W1.** This is the 009-owed gate (C8 waiver) | root (+ @qa) |"
+        },
+        {
+          "line": 322,
+          "text": "**B1 green** = collector exit 0, `sourceStable`/`distStable` true, the 3 coverage tasks EXECUTED and passed. Under option A, B2\u2013B7 then run, and root announces \"tree open\". The \u00a73.1 outcome rules decide the other cases."
+        },
+        {
+          "line": 158,
+          "text": "| K-19 | **\"Tree open\"** is a root announcement after B1 (and B2\u2013B7 under option A). W1 agents may be dispatched at B1 green, but their first write under a capture root, under `helm-chart/` or to a quoted doc waits for it. | It keeps every T0 baseline at one digest without idling the W1 agents. |"
+        },
+        {
+          "line": 382,
+          "text": "- **Root measurement reconciliation:** Orion, 2026-10-19T02:25:23.652923+00:00. Actual B1/B7/source identities filled; optionB recorded; current planv6 adopts v4/v5 constraints. **W1/tree-open signature WITHHELD** for unresolved B1 native cause and missing executed coverage. Only status-only011unit completed and prospective reviewed diagnostic remediation is considered; no general source write permission."
+        }
+      ]
+    },
+    {
+      "id": "V7-T0-START",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/lanes.v7.json",
+      "sha256": "68f69cc8652d695f920f2f28ec178205c84cb70bd9b80b5d27f38585e0a2165c",
+      "quotes": [
+        {
+          "line": 184,
+          "text": "        \"root: run the FRESH baseline set below in order, nothing else running (AC-5 before timing); a red is recorded by name and must be green at 11-G (never waived there)\","
+        },
+        {
+          "line": 202,
+          "text": "      \"exit\": \"S_011 recorded; B1-B7 named with digests and counts (or NOT_MET by name); T0 checks recorded; Live-surface intersection = 0 or items stopped by name; t0-record signed by root\","
+        },
+        {
+          "line": 206,
+          "text": "      \"id\": \"11-GS-T\","
+        },
+        {
+          "line": 2142,
+          "text": "      \"Run complete GS-T gate against byte-identical S_011 backend/src/main\","
+        },
+        {
+          "line": 2146,
+          "text": "      \"Any src/main change, including neutral test seam\","
+        },
+        {
+          "line": 2181,
+          "text": "    \"quality\": \"No runtime/lane/W1 approval; all baseline/native/coverage/main barriers remain\""
+        }
+      ]
+    },
+    {
+      "id": "QA-REDS",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/qa-cosign.md",
+      "sha256": "f84e852c745a491dae0c06ca844a12221cb44250ea35e832139ade8fa8f2fc00",
+      "quotes": [
+        {
+          "line": 96,
+          "text": "2. **G9 C8 green, or each failure ruled.** C8 is not green: two FAILED cases are already in its console. \"Ruled\" means: the failure text from the XML is recorded; a same-digest re-run decides it. For ReplayIT a single-test run is never credited (D-14), so a ReplayIT failure is cleared only by a full-class rerun, and the clean basis for the 011 baseline is then **the green full `check` rerun at the same digest** (the red run's XML stays as evidence). If a fix lands, the digest changes and the baseline is the new G9 run. A failure the user or @po waives is not mine to rule and does not make the baseline green. A red that is still red when 011 starts is recorded in the baseline by name and must be green at 11-G; it is never waived there."
+        },
+        {
+          "line": 96,
+          "text": "2. **G9 C8 green, or each failure ruled.** C8 is not green: two FAILED cases are already in its console. \"Ruled\" means: the failure text from the XML is recorded; a same-digest re-run decides it. For ReplayIT a single-test run is never credited (D-14), so a ReplayIT failure is cleared only by a full-class rerun, and the clean basis for the 011 baseline is then **the green full `check` rerun at the same digest** (the red run's XML stays as evidence). If a fix lands, the digest changes and the baseline is the new G9 run. A failure the user or @po waives is not mine to rule and does not make the baseline green. A red that is still red when 011 starts is recorded in the baseline by name and must be green at 11-G; it is never waived there."
+        },
+        {
+          "line": 18,
+          "text": "I sign the rulings and the lane plan. The signature takes effect when changes **C1-C8** (section 6) are recorded in the 11-T0 record, **before any lane starts**. They are edits to commands, rules and a write set. None changes an AC, a ruling's decision or the wave order, so none needs the user. C1, C2, C3 and C5 are the ones that would make a later credited run dishonest or unrunnable if skipped."
+        }
+      ]
+    },
+    {
+      "id": "QA-B1-LATER",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/b1-terminal/assessment.md",
+      "sha256": "8703bbdbfb9c005aef655a4c9299f8af063cfa047312f515ab36a748b02b145d",
+      "quotes": [
+        {
+          "line": 53,
+          "text": "6. Before W1 or any 011 lane claims credit, root must issue the actual T0 outcome ruling backed by the cause classification/remediation, fresh full-check/coverage evidence satisfying the inherited 009 obligation, reconciled B7, accurate RC10 disposition and signed current-plan baseline record. A test-file-owned red alone is insufficient while its cause is unproved. This audit supplies facts and prerequisite advice, not an implicit waiver or W1 permission."
+        },
+        {
+          "line": 52,
+          "text": "5. Restore the temporary diagnostic source exactly to its recorded pre-diagnostic/S_011 bytes and verify hashes/capture before GS-T/F1 proof. Retain diagnostic evidence off-source. GS-T must then run its complete proof with every backend main byte equal to S_011; no GS-M seam/FOLD main change may precede it. Do not quietly retain diagnostic source in that proof."
+        }
+      ]
+    },
+    {
+      "id": "ARCH-GST",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/review.md",
+      "sha256": "99f1d82fb00171c7c0a6642af6fe44011539ebc860520dc1b85500cf616d9273",
+      "quotes": [
+        {
+          "line": 7,
+          "text": "1. **GS-T: supported for the first locked application after root's baseline/tree-open gates, without an additional design correction identified by this review.** Apply the existing complete three-file draft as one unit and compile/format inside its lock. Its complete five-class v4 gate must run against literal unchanged S_011 `backend/src/main`; GS-M's neutral seam is also barred before that proof. Runtime failures are findings to resolve, not authorization to weaken assertions."
+        },
+        {
+          "line": 73,
+          "text": "Root must first reconcile actual terminal B1/B7 and source identity, then review the author's exact diff/sites, closed enum/call-site map, output confinement and restoration before authorizing one fresh full-class ReplayIT diagnostic under the shared Gradle lock. No per-method retry or repeated full-class trial is pre-authorized. Stop after that run, bind its ledger to label/SHA and let QA identify the earliest event or report unresolved evidence. Test-only cause routes to IT-R; main/runner cause returns to root/architect for explicit lane routing. A diagnostic patch cannot silently become a product behavior fix."
+        }
+      ]
+    },
+    {
+      "id": "ROOT-GST",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/root-resume-decisions.md",
+      "sha256": "269cd586faff0bd79e98ec8643fcae1c97baf11ea3caa7ab7ab796320fba5f57",
+      "quotes": [
+        {
+          "line": 46,
+          "text": "## GS-T unchanged-main order \u2014 2026-10-19 00:56 UTC"
+        },
+        {
+          "line": 48,
+          "text": "Aria confirms that R-T0-7 means byte-identical, including a neutral service seam. Root adopts the literal proof: after B1/B7 and tree-open, apply GS-T's test-only patch and run its complete gate while every `backend/src/main` file remains byte-identical to S_011. Only then may GS-M(a) and FOLD-prep apply main-code units. Their parallel work before that gate is off-tree drafting. `lanes.v4-before-gst-order.json` preserves the prior draft; current v4 and its brief record the order. The prior 10.5-day estimate is conditional and may expand. No assertion of unchanged main is based on logical similarity of edited files."
+        }
+      ]
+    },
+    {
+      "id": "ARCH-REMEDY-LIMIT",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/fullcheck03-order11/barrier-provenance.md",
+      "sha256": "6f2405997daa9c2bcf3fe6227703d6fb7e331f7a5074338185325e994844046e",
+      "quotes": [
+        {
+          "line": 30,
+          "text": "If cause is main/runner or remains unknown, do not label it test stabilization. Report the exact evidence to root; choose a named architecture/QA decision with all main-before-GS-T, source, runner/image and final proof requirements intact. If additional instrumentation, private-derived diagnostic export or a new native experiment is truly necessary, root/Quinn must define a new concrete bounded scope/budget/authorization first; the initial DIAG budget is already used. There is no blanket diagnostic retry authority."
+        },
+        {
+          "line": 14,
+          "text": "| General source hold and signature withheld | `t0-record.md:382,388\u2013400`: W1/tree-open signature WITHHELD; general source held; temporary reviewed DIAG/restoration was separately authorized; executed full coverage still required. `w-brief.v4.md:40\u201347,158` requires root tree-open/quiet window. Current03 binds exact source/dist/quotes/Helm inputs. | Later root execution hold/signature and a live unit's immutable inputs. Only root can release a concrete isolated writer unit after actual terminal/evidence disposition. StatusInProgress or this analysis is not that release. |"
+        },
+        {
+          "line": 25,
+          "text": "4. The same adoption must explicitly resolve v7's pre-F1 Replay lock and IT-R sequencing. Aria/Quinn/root can propose a **minimal test-only T0 stabilization exception**, distinct from later IT-R cleanup, and bind the resulting exact Replay as the before/after F1 proof subject. That requires a durable reviewed amendment and input/driver/catalog/baton revalidation; absent it, originalb8 Replay remains required through F1. It cannot be done merely by changing the draft manifest's \u201coriginal\u201d field. PO should reconcile any story/trigger/carry/accounting implication; PO approval is required if ACs, named-case retirement, lifecycle or scope meaning changes. There is no reason to claim all ordinary scheduling/hash bookkeeping inherently requires a new user permission."
+        },
+        {
+          "line": 28,
+          "text": "The full-goal YOLO authorization covers meaningful reversible fixes and evidence collection; it does not supersede the current live hold or manufacture a causal proof. Within that goal, a reviewed cause-proved test-only remediation plus explicit ordering/binding amendment need not ask the user to waive C8, because it preserves the obligation. **A proposal to waive/defer actual full fresh coverage past lane credit, omit/filter cases, relax thresholds/oracles, increase timers to mask a terminal failure, accept a narrower substitute, or change the user's waiver scope needs the actual user's explicit decision and must not be inferred by root/Aria/Quinn/PO.** Such a proposal is not made here."
+        }
+      ]
+    },
+    {
+      "id": "ROOT-HOLD-CURRENT",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-fullcheck03-public-assessment-root-adoption.json",
+      "sha256": "105a50ecf9dfab04cd832021e77960a3478d7678170c598053c21d6d000a9d70",
+      "quotes": [
+        {
+          "line": 4,
+          "text": "  \"atUtc\": \"2026-10-19T06:08:39.334536+00:00\","
+        },
+        {
+          "line": 45,
+          "text": "  \"heldOriginalOutputs\": \"PUBLICreferencearchiveverified originals+authoritativecollectorcopies beforeanynewbuild. Keep originalbackendbuildoutputs held through privateevidence capture; no newbackendbuild/sourcewriter now.\","
+        },
+        {
+          "line": 47,
+          "text": "  \"C8\": \"UNMET; no W1/lane/story/coverage/sourcecredit, no retry/sourcefix. RootAriaQuinn cause-proved requirements-preserving remedy/ordering/binding amendment still required.\","
+        },
+        {
+          "line": 49,
+          "text": "  \"sourceWriterAuthorized\": false,"
+        }
+      ]
+    },
+    {
+      "id": "SNAPSHOT-SCOPE",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-order11-snapshot-only-static-root-adoption.json",
+      "sha256": "78c3246c8c5b8446c881395ab670d170fbc1440a6020d3ef5086fe9ca3699b4f",
+      "quotes": [
+        {
+          "line": 2,
+          "text": "  \"atUtc\": \"2026-10-19T06:26:09.487305+00:00\","
+        },
+        {
+          "line": 4,
+          "text": "  \"decision\": \"Accept exactfirstsnapshot-only false/NONE flow as conditionallystatic-ready; no reachablemandatoryfinding. KeepoptionalmanifestbranchHELD underSNAP-MANIFEST-IO-01.\","
+        },
+        {
+          "line": 11,
+          "text": "  \"actualScopeRootDisposition\": \"Approveexactscope toindependentreview; actualrelease remainsfalse until separatelyindependentQuinnapprovalandfinalrootchecks. NoactualprivateIOyet.\","
+        },
+        {
+          "line": 12,
+          "text": "  \"sourceWritesNativeLaneLifecycleCredit\": false,"
+        }
+      ]
+    }
+  ]
+}

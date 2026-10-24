@@ -1,0 +1,57 @@
+--- a/docs/runbooks/studio-inference-rollout.md
++++ b/docs/runbooks/studio-inference-rollout.md
+@@ -130,10 +130,18 @@
+ 
+ ## Configuration and local verification
+ 
++> **Dated correction — 2026-10-18, STUDIO-OBS-011 CLN-49 (G11).** The following flag paragraph
++> records the retired v1/v2 rollout; it is not an enablement procedure for the single observed
++> path. Its UI selector and authoring/incremental feature flags no longer exist. Current local
++> wiring is documented in [Studio integrations](studio-integrations.md), and guided/replay
++> deployment inputs in [the runner runbook §14](studio-runner.md#14-one-entrypoint-tls-everywhere-the-one-pod-guard-and-the-new-secrets-studio-obs-009).
++> Gateway configuration remains a separate deployment decision; this note authorizes no provider
++> call or shared-environment enablement.
++
+ Keep `STUDIO_GATEWAY_PROVIDER=disabled`, `STUDIO_AUTHORING_V2_ENABLED=false`, and `STUDIO_INCREMENTAL_ENABLED=false` until their respective prerequisites pass. `STUDIO_GATEWAY_MAX_OUTPUT_TOKENS` defaults to 32768. After V19 and compatible API/runner deployment, the v2 authoring UI is separately selected by `window.__CHECKS_CONFIG__.studioAuthoringV2=true` before the bundle loads; the default UI remains compatible with v1. Enabling v2 authoring alone does not enable a model or incremental eligibility.
+ 
+ The maintained Google Gen AI adapter pins1.71.0 and bounds service-account, user ADC and compute ADC credential transport. Service-account/user stalled refresh and socket cancellation have local wire evidence; compute was source-inspected. External/executable/impersonated credential providers fail closed until separately supported. Live R2D2 auth/model/schema/quota evidence remains SPK-01.
+ 
+-Run development evaluation through `studio-runner/evaluation/README.md`. Its CLI executes the complete API lifecycle and independent fixture oracles, but always reports release readiness false. The sample corpus and scripted lifecycle tests do not substitute for a frozen held-out release corpus. Typed assertion-failure origin is not exposed by the current execution API; intended-failure live cases cannot claim correctness without that evidence.
++Run development evaluation through `studio-runner/evaluation/README.md`. Its CLI provides independent fixture oracles, but always reports release readiness false. The sample corpus and scripted lifecycle tests do not substitute for a frozen held-out release corpus. Typed assertion-failure origin is not exposed by the current execution API; intended-failure live cases cannot claim correctness without that evidence.
+ 
+ The existing frontend local dependency is `file:../../put-core-components`; ensure it resolves to the real built PUT core-components checkout before typecheck/build. This session repaired only the local node_modules symlink to the existing built checkout, without changing the package dependency or adding a replacement library.
+--- a/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md
++++ b/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md
+@@ -165,3 +165,32 @@
+ | CLN-54 | `studio-runner/evaluation/oracle.mjs` and `oracle.test.mjs` | compile-era oracle (Story 10.26) | **C** | Imported by `evaluation/cli.mjs:7` (`validateManifest`, `validate-manifest` command at `:35`), `report.mjs:1` (`summarize`), `oracle.test.mjs:4` and `browser-oracle.test.mjs:10`. | V (@po grep) | Medium: the `validate-manifest` and `oracle-self-test` CLI commands depend on it | Needs a decision before any edit (G2), owner @dev with @qa: retire the compile-era `validate-manifest` / `oracle-self-test` / `summarize` commands from `cli.mjs` and the README, or keep them. Deletion only after that decision and after T4 (guard above). `oracle.test.mjs` is a named drop under G5. |
+ | CLN-55 | `studio-runner/evaluation/report.mjs`, `report.d.mts`, and `studio-runner/test/evaluation/report.test.ts` | compile-era report layer (Story 10.26) | **C** | Imported by `evaluation/cli.mjs:8` (`summarize` at `:44-48`) and `test/evaluation/report.test.ts:9`. | V (@po grep) | Medium: same CLI dependency as CLN-54 | Decided together with CLN-54. `report.test.ts` is a named drop under G5. The EP harness's own report path (`observed-authoring/evaluate.mjs`) is not this file. Confirm that at G1. |
+ | CLN-56 | `studio-runner/evaluation/fixture-server.mjs` and `fixture-server.d.mts` | compile-era fixture server, now a test oracle input | **C** | Imported by `test/evaluation/corpusPages.test.ts:7`, the C04 port-fidelity test that lane EP added on purpose (EP receipt §7 deviation 2): the re-authored C04 page must keep the event vocabulary that `fixture-server.mjs` emits (`corpusPages.test.ts:121-134`). | V (@po grep; EP receipt) | Medium: removing it removes the C04 fidelity proof | Keep unless @qa (corpus owner) agrees to re-home the C04 vocabulary check, for example as a frozen event list in the manifest. Then delete it with that test change named under G5. Not before T4 (guard above). |
++
++
++## 7. Dated static re-verification addendum — 2026-10-18 (STUDIO-OBS-011 11-DOC)
++
++This append-only note preserves §1–§6, all historical row text and totals. It records static
++re-verification and the corresponding 11-DOC correction proposal; application and lifecycle/QA
++acceptance belong to the root's gated merge. Exact source/output hashes and patch applicability
++are in `docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/manifest.json`.
++
++| Item | Current static evidence | Disposition and remaining owner |
++|---|---|---|
++| CLN-44 / Gage X-9 | Post-residue chart scan: **61 distinct `STUDIO_RUNNER_*` tokens** across `helm-chart/` (including comment/prefix tokens and backend aliases); the exact `acceptedEnvKeys` block has **53 complete keys**, all in the loader's **57-key** `KEY_SPECS` set. The remaining four loader keys are INSTANCE_ID, SERVICE_IDENTITY, CALLBACK_IDENTITY and CALLBACK_BASE_URL. | **K remains.** These are three different counts, not 61 rendered runner variables. Static subset proof is not a fresh rendered/deployment test; the final gate remains @devops/@qa's. |
++| CLN-49 / RC-8 | Retired UI selector/authoring/incremental flags survive only in the rollout runbook's historical paragraph; `evaluation/lifecycle.mjs` is absent. The CLI still imports `oracle.mjs`/`report.mjs`, and R-EP v2 carries that layer. | Dated historical flag note and removal of only the live complete-lifecycle claim proposed. **Independent fixture-oracle wording stays.** Actual benchmark/release evidence remains with 009/010. |
++| CLN-51 | No browser worker or studio browser mock module; `server.ts` imports `msw/node`; Playwright uses `e2e/mswProxy.ts`. Vite reads `VITE_API_URL`; active Webpack derives its proxy target from `REACT_APP_API_BASE_URL` with the literal `.replace('/api', '')` transform in `frontend/webpack.config.js`. Each uses localhost:8080 as its unset/empty fallback; this is not a suffix-normalization claim. | Matching CLAUDE/AGENTS wording proposed, ARCH live mechanism corrected and its recorded plan retained with a dated note. Root must confirm the accurate variable distinction; accessibility scope is byte-preserved. |
++| C-OBS009-3 | Artifact-1 Bounds/Accepted language/role-equivalence/visible-only/Fixture corpora/reference-example sections and parser text remain in the current README. Runbook §§1–3/5–13 were source-audited; §2 lacks the guided connector port. | Scoped README removal and dated runbook corrections proposed; §4/§14 byte-identical. §14.4 already contains the UAT upgrade note. Actual TLS/Secret/issuer/cluster prerequisites remain external, not new 11-DOC preconditions. |
++| R-AI | The plan requires archive-first reconciliation of `.ai/` by root/DevOps; this off-tree documentation preparation has no ownership of `.ai/` or git staging. | **Pending root/DevOps archive receipt.** No archive, ignore decision execution or historical closure is claimed here. |
++
++Commands and positive controls, exact key sets, unchanged dated-text checks and named residual
++documentation findings are retained with the patch package. No source, contracts, migrations,
++story lifecycle, historic gate verdict or actual deployment was changed by this addendum.
++
++
++## 8. Current integration disposition - 2026-10-20
++
++The preparation note in section 7 is historical. R-AI was ratified as **keep tracked as-is**, with no archive or ignore change and nothing removed (T0 PO ratification P-4, `docs/qa/evidence/STUDIO-OBS-011/t0-prep-20261018/po-ratification.md`). Archive-first applies if anything is later removed.
++
++The current gateway chart guard now rejects eight normalized override tokens for the seven dedicated gateway facts and the credential placeholder. Its local deployment tier passed 722 cases; independent copied-chart recursion and normalization controls failed at the intended refusal assertions. Receipts are under `docs/qa/evidence/STUDIO-OBS-009/recovery-20261020/`. This supplies local guard evidence only. Shared deployment, provider, pilot and release requirements remain open.
++
++F-1, F-2, optional secret-limit Javadoc, remaining narrative metadata extraction and optional authoring-mirror validation remain carried forward under the recorded 2026-10-19 lean decision. This note grants no completion or QA verdict.

@@ -1,0 +1,41 @@
+{
+  "kind": "LIGHTWEIGHT_STATIC_ONLY",
+  "runtime": "UNVERIFIED",
+  "isQaVerdict": false,
+  "checks": {
+    "sourceHashesStillMatch": true,
+    "exact17Main3TestScope": true,
+    "draftHashesStillMatch": true,
+    "prepPatchApplicable": {
+      "exit": 0,
+      "output": ""
+    },
+    "proposedFinalWiringPatchApplicable": {
+      "exit": 0,
+      "output": ""
+    },
+    "mutationsPatchApplicable": {
+      "exit": 0,
+      "output": ""
+    },
+    "clientOriginalBodiesByteIdentical": {
+      "count": 16,
+      "equal": true
+    },
+    "authorityOriginalBodiesByteIdentical": {
+      "count": 7,
+      "equal": true
+    },
+    "dispatchSendBodyByteIdentical": true,
+    "singleSecretSerializerImplementation": true,
+    "legacyClassesUnmodified": true,
+    "noGuidedSessionServiceDraft": true,
+    "shapeOnlyRunnerValidateGone": true,
+    "tlsSecurityCodeByteIdenticalExceptJavadoc": true,
+    "finalClockOnlyCleanupPatchApplicable": {
+      "exit": 0,
+      "output": "",
+      "against": "complete corrected proposed-final-wiring set"
+    }
+  }
+}

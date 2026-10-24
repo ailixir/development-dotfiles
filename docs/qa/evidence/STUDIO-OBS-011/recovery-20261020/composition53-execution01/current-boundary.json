@@ -1,0 +1,58 @@
+{
+  "status": "SOURCE_APPLICATION_AND_APPROVED_FORMAT_COMPLETE_STATIC_TEST_STYLE_BLOCKER_ROUTED",
+  "all53ExactPostApplicationProof": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/source-transaction.json",
+  "all53ProofSha256": "c18ddd73f09c6765ee24786844635991548ed8aca825b6418100e7b8a6263893",
+  "actualFormattedBindingPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/post-format-bindings.json",
+  "actualFormattedBindingSha256": "06e27d10a353a943120d0e12d49d02068c3955dd8d2ee9823c884d1a4dbd4138",
+  "source": "1f7ce1b1012b91913044b4bffaa30989d705c73e870bd8e7a8a214b116dd329e",
+  "Replay": "5a39eb2689b66dead773ea31c44f4ab6e62b9f17d65389158271908c0e1f522e",
+  "dist": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "actualRuns": [
+    {
+      "label": "obs011-recovery-20261020-final-compose-format-check01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-final-compose-format-check01-results.json",
+      "resultSha256": "b2a80f82a644dd4c2c785f115e3883f213a19b09400357ec4806946b0678c871",
+      "childExit": 1,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "elapsedSeconds": 19.3
+    },
+    {
+      "label": "obs011-recovery-20261020-final-compose-format-apply01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-final-compose-format-apply01-results.json",
+      "resultSha256": "63613a04bd9544bc8e92fc5e9cb1a7797ac5b36e815db394fe7d033a60c0bc04",
+      "childExit": 0,
+      "sourceStable": false,
+      "testInputStable": false,
+      "distStable": true,
+      "elapsedSeconds": 4.57
+    },
+    {
+      "label": "obs011-recovery-20261020-final-compose-compile-static01",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-final-compose-compile-static01-results.json",
+      "resultSha256": "01807926ad8f755cb1a4a698b3c443f76036f12d0038b0bdcba65162d091417a",
+      "childExit": 1,
+      "sourceStable": true,
+      "testInputStable": true,
+      "distStable": true,
+      "elapsedSeconds": 31.34
+    }
+  ],
+  "formatApplyRawOuterExit": 2,
+  "formatApplyActualChangedSetEqualsApproved38": true,
+  "staticFailureDiagnosticPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/composition53-execution01/static01-closed-diagnostics.json",
+  "staticFailureDiagnosticSha256": "33e036849a7141dd582b99f14c8ca58be48bcd245cf4bc34ac1168f900087938",
+  "onlyFailedStaticTask": "checkstyleTest",
+  "noFocusedOrNativeTestsStarted": true,
+  "originalLockReleasedAfterAllTerminalCommands": true,
+  "noRuntimeActiveByThisLane": true,
+  "styleFixApplied": false,
+  "remaining": [
+    "Root-routed exact style-only source correction and fresh current-source bindings",
+    "Invalidated compile/static checks on corrected actual bytes",
+    "LEFT02,FOLD01,FOLD02,FOLD03 complete subjects once, exact name/count audit"
+  ],
+  "fullReplayOrMutationsOrFEOrRunnerBuildOrImageRun": false,
+  "lifecycleOrReleaseCredit": false
+}

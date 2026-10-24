@@ -1,0 +1,236 @@
+"""One lean changed-path fake composition; interactive PURE V8 operator steps.
+
+Only fake machine definitions are reused; no historical suite is replayed. Actual
+corrected CLI/author/guard/loader bodies are compiled and called under the unchanged
+inherited persistent deny audit. Root-like tool facts below are explicitly FAKE.
+"""
+from pathlib import Path
+import ast,builtins,copy,ctypes,errno,fcntl,hashlib,io,json,os,socket,stat,subprocess,sys,time,types
+from contextlib import ExitStack
+from unittest.mock import patch
+HERE=Path(__file__).absolute().parent
+RAW=(HERE.parent/'resume5/source05_checks.py').read_bytes();PREFIX=RAW.split(b"\nsys.addaudithook(ns['audit'])",1)[0]
+PREFIX=PREFIX.replace(b'gateway80-failed-red-resource-prep/resume5',b'gateway80-failed-red-resource-prep/resume6').replace(b'code05-exact-review',b'code06-exact-review')
+G={'__name__':'_source06_fake_definitions','__file__':str(HERE/'source05_checks.py')};exec(compile(PREFIX,'<source05-fake-definitions-only-current-targets>','exec'),G)
+A,P,C,F,I,CLI,MemPath=[G[n] for n in ('A','P','C','F','I','CLI','MemPath')]
+TARGET={n:(HERE/n).read_bytes() for n in ('failed_gateway.py','custody.py','protocol.py','entry.py','contract.json','guard-failed-red.bash','factory.py','installer.py','install-cli.py','control-author.py','control-author-cli.py','control-author-loader.bash','operator-completion.js')}
+BODY=TARGET['guard-failed-red.bash'].decode().split("-B -c '",1)[1].split("' \"$GATEWAY_FR04_ENTRY\"",1)[0]
+AUTH_BODY=next(n.value.value for n in ast.parse('x='+TARGET['control-author-loader.bash'].decode().split('readonly GATEWAY_FR04_AUTHOR_BODY= ',1)[1].split('\n# Own actual',1)[0]).body if isinstance(n,ast.Assign)) if False else None
+# Shell single-quote concatenation is decoded with the already preloaded shlex,
+# never evaluated by Bash or passed to a real target interpreter.
+import shlex
+AUTH_BODY=shlex.split(TARGET['control-author-loader.bash'].decode().split('readonly GATEWAY_FR04_AUTHOR_BODY= ',1)[1].split('\n# Own actual',1)[0])[0]
+RESULT_FD=os.open(str(HERE/'critical-attempt08.json'),os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o644)
+SNAPSHOT=(HERE/'critical_check.py').read_bytes();(HERE/'critical-attempt08.py.txt').write_bytes(SNAPSHOT)
+CHECKS=[];HISTORY=[];DIAGNOSTICS=[];LAST_STATE=None;LAST_TOOL=None;COUNTER=0;CREATED=[];FAULT=None
+REAL_EXEC=exec
+
+def check(name,value):
+ if value is not True:raise AssertionError(name)
+ CHECKS.append(dict(id=name,passed=True))
+def expect(name,call,reason=None):
+ try:call()
+ except BaseException as error:
+  if isinstance(error,(AssertionError,SystemExit)):raise
+  check(name,reason is None or error.args==(reason,));return error
+ raise AssertionError('EXPECTED_DENIAL:'+name)
+def operator(kind,**value):
+ global COUNTER
+ COUNTER+=1;request=dict(kind=kind,step=COUNTER,**value)
+ print('FR06_OPERATOR:'+json.dumps(request,separators=(',',':')),flush=True)
+ parts=[];total=0
+ for _ in range(4096):
+  line=sys.stdin.readline()
+  if not line:raise AssertionError('OPERATOR_RESPONSE_REQUIRED')
+  if line.rstrip('\r\n')=='FR06_END':break
+  piece=line.rstrip('\r\n');total+=len(piece)
+  if len(piece)>1024 or total>2097152:raise AssertionError('OPERATOR_REPLY_CAP')
+  parts.append(piece)
+ else:raise AssertionError('OPERATOR_REPLY_CAP')
+ result=json.loads(''.join(parts))
+ if result.get('ok') is not True:raise AssertionError('OPERATOR_REJECTED:'+str(result.get('error')))
+ HISTORY.append(dict(step=COUNTER,kind=kind,sourceHelperSha256=result['helperSha256']))
+ return result['value']
+def fake_tool(s,status):return dict(pid=s.pid(),ppid=s.ppid(),toolCallId='FAKE_ROOT_'+str(len(HISTORY)+1),actualStatus=status,separateStatusCaptured=True)
+def all_source_graph(s,k,a,b):
+ b['contract.json']=P.packed(k)
+ for n,data in b.items():s.fs.put(A.N/n,data)
+ a['codePins']={n:P.sha(data) for n,data in b.items()}
+ payload={**TARGET,**b}
+ for n,data in payload.items():s.fs.put(MemPath(HERE)/n,data,0o644)
+ source=P.packed(dict(files=[dict(path=n,sha256=P.sha(data),bytes=len(data),mode=0o644) for n,data in payload.items()]))
+ sourcepath=str(MemPath(HERE)/'manifest.json');s.fs.put(sourcepath,source,0o644)
+ a['newCodeRecordPins']={sourcepath:P.sha(source)}
+ for rel in ('resume-architecture/resume2/gateway80-failed-red-resource-code06-exact-review/manifest.json','qa/gateway80-failed-red-resource-code06-exact-review/manifest.json'):
+  path=str(A.R/'docs/qa/evidence/STUDIO-OBS-011/t0'/rel);raw=P.packed(dict(subjectManifestSha256=P.sha(source),mandatoryFindingCount=0,verdict='SOURCE_ONLY_SUPPORT'));s.fs.put(path,raw,0o644);a['newCodeRecordPins'][path]=P.sha(raw)
+ G['populate_owners'](s,k,a)
+ return source
+
+def build_install():
+ s,k,a,oldauth,b=G['build']();s.current=900100;s.parent=17932
+ a.update(freshnessProofSubject=k['freshnessProofSubject'],parentSchedulingIntervalProved=False)
+ source=all_source_graph(s,k,a,b)
+ a['newDirectoryPins']={}
+ # The old fake builder's fabricated setup is removed in memory before the actual
+ # corrected installer is called. No host or inherited evidence is removed.
+ s.fs.nodes={p:n for p,n in s.fs.nodes.items() if p!=str(A.N) and not p.startswith(str(A.N)+'/')}
+ for name in ('binaryHashes','binaryModes','binaryWitnesses','codePins','newCodeRecordPins','typedOwnerRecordPins','designatedControlAuthor','typedPriorActors','typedActorRosterComplete','typedActorEvidencePins'):a.pop(name,None)
+ outside=MemPath(next(iter(k['typedOwnerPaths'].values()))).parent;s.fs.nodes[str(outside)]['mode']=0o700
+ def fact(path):
+  st=s.fs.info(str(path));return dict(path=str(path),uid=st.st_uid,dev=st.st_dev,ino=st.st_ino,mode=stat.S_IMODE(st.st_mode))
+ sourcepath=str(MemPath(HERE)/'manifest.json');reviews={sourcepath:P.sha(source)}
+ for rel in ('resume-architecture/resume2/gateway80-failed-red-resource-code06-exact-review/manifest.json','qa/gateway80-failed-red-resource-code06-exact-review/manifest.json'):
+  path=str(A.R/'docs/qa/evidence/STUDIO-OBS-011/t0'/rel);reviews[path]=P.sha(s.fs.nodes[path]['raw'])
+ # Regenerate raw owner records against the full source graph before narrow scope.
+ temp=dict(a,newCodeRecordPins=reviews,typedOwnerRecordPins={});G['populate_owners'](s,k,temp)
+ scope=dict(role='FAILED_RESOURCE_SOURCE06_INSTALL_ONLY',authorizedBy='root',authorized=True,cleanup=False,nativeInvocations=0,
+  sourceDirectory=str(HERE),destination=str(A.N),outsideDirectory=str(outside),outsideDirectoryFact=fact(outside),oldEDirectory=fact(A.E),
+  sourceManifestSha256=P.sha(source),reviewPins=reviews,ownerPins=temp['typedOwnerRecordPins'],readsetPolicy='EXACT_FAILED_RESOURCE_SOURCE06_CONTRACT_REVIEWS_OWNERS_TYPED_METADATA_BOTH_PRIORS_AND_SEVEN_CANONICAL_BINARIES',candidate=a)
+ path=outside/'root-install-scope.json';raw=P.packed(scope);s.fs.put(path,raw)
+ result=CLI.execute(str(path),P.sha(raw),system=s,verified_self_sha=P.sha(TARGET['install-cli.py']))
+ check('REAL_INSTALLER_DERIVES_SEVEN_AND_PENDING_AUTHOR',result['installationExit']==0 and result['installerClient']['pid']==900100)
+ a=P.decode(s.fs.nodes[str(A.N/'root-authorization.json')]['raw']);auth=P.sha(s.fs.nodes[str(A.N/'root-authorization.json')]['raw'])
+ check('INSTALL_AUTH_AUTHOR_PENDING_LITERAL_NULL',a['designatedControlAuthor']['actualStatus'] is None and len(a['binaryWitnesses'])==7)
+ return s,k,a,auth,b,result['namespaceState'],fake_tool(s,0)
+
+def creator(s,k,a,auth,b,state,actual,role,facts):
+ global LAST_STATE,LAST_TOOL
+ name={'SETUP_OWNERSHIP_ADMISSION':'root-setup-ownership.json','NEGATIVE_ACTUAL_STATUS':'root-negative-status.json','FAILED_GUARD_ADMISSION':'root-guard-admission.json','ARCHIVE_FAILED_STATE':'root-archive-decision.json','ACTUAL_ARCHIVE_REVIEW':'root-actual-review-adoption.json','FAILED_EXIT_PERMIT':'root-close-permit.json','ACTUAL_WRAPPER_RESULT':'root-wrapper-result.json'}[role]
+ root=dict(kind='SOURCE06_CURRENT_CONTROL_AUTHOR_REQUEST',authorizedBy='root',authorized=True,role=role,releaseSha256=auth,sourceManifestSha256=P.source_subject(a),operatorFacts=facts)
+ response=operator('author_request',state=state,actual=actual,base=root,controlPath=str(A.N/name),setupHelper=role=='SETUP_OWNERSHIP_ADMISSION')
+ s.current+=10;s.parent=17932
+ if role=='SETUP_OWNERSHIP_ADMISSION':
+  bad=P.decode(response['buffer'].encode());bad['approvedStateSha256']='0'*64;bad['stateAdoption']['stateSha256']='0'*64
+  author=types.ModuleType('_actual_pure_author_bad_state');author.__dict__.update(P=P,A=A,I=I,F=F,R=A.R,E=A.E,N=A.N,SOURCE=MemPath(HERE))
+  REAL_EXEC(compile(TARGET['control-author.py'],'<actual-author-state-adverse>','exec'),author.__dict__)
+  records={p:s.fs.nodes[p]['raw'] for p in set(a['newCodeRecordPins'])|set(a['typedOwnerRecordPins'])};before_nodes=copy.deepcopy(s.fs.nodes)
+  expect('DERIVED_STATE_RAW_MISMATCH_PREWRITE_DENIES',lambda:author.assemble(s,a,k,bad,b,s.fs.nodes[str(MemPath(HERE)/'manifest.json')]['raw'],records,P.sha(TARGET['control-author-cli.py'])),'AUTHOR_STATE_RAW_PIN')
+  check('DERIVED_STATE_DENIAL_NO_MUTATION',s.fs.nodes==before_nodes)
+ before=s.fs.events[:];outputs=[];env={};real=REAL_EXEC
+ def track(code,ns):
+  ns['__builtins__']=dict(vars(builtins),exec=track,print=lambda value,**kw:outputs.append(json.loads(value)));real(code,ns)
+  if code.co_filename=='<verified-control-author-system>':ns['System']=lambda:s
+ env.update(__name__='_actual_corrected_control_author_loader',__builtins__=dict(vars(builtins),exec=track,print=lambda value,**kw:outputs.append(json.loads(value))))
+ argv=['-c',P.sha(TARGET['control-author-cli.py']),P.source_subject(a),auth,response['sha256'],response['buffer']]
+ with ExitStack() as stack:
+  for n in ('open','fstat','stat','close','read','getuid','getpid','getppid'):stack.enter_context(patch.object(os,n,getattr(s.api,n)))
+  stack.enter_context(patch.object(sys,'argv',argv))
+  try:real(compile(AUTH_BODY,'<actual-source06-control-loader>','exec'),env)
+  except SystemExit as end:status=end.code
+  else:raise AssertionError('AUTHOR_LOADER_EXIT_REQUIRED')
+ check('AUTHOR_'+role+'_ACTUAL_CORRECTED_CALLER_ZERO',status==0)
+ result=next(row for row in outputs if row.get('kind')=='SOURCE06_CURRENT_CONTROL_AUTHOR_RESULT')
+ control=P.decode(s.fs.nodes[str(A.N/name)]['raw']);check('AUTHOR_'+role+'_PENDING_SELF_AND_DERIVED_MAP',control['designatedControlAuthor']['pid']==s.current and control['designatedControlAuthor']['actualStatus'] is None and len(control['inputPins'])>=7)
+ LAST_STATE=result['namespaceState'];LAST_TOOL=fake_tool(s,0)
+ return control,P.sha(s.fs.nodes[str(A.N/name)]['raw']),LAST_STATE,LAST_TOOL
+
+def phase(s,k,a,auth,b,mode,control,h,fault=None):
+ global LAST_STATE,LAST_TOOL
+ s.current+=1;s.parent=900000 if mode=='postclose' else 3749;s.post=mode=='postclose'
+ if s.post:
+  for pid in (3720,3749):s.rows_base.pop(pid,None)
+ response=operator('completion',actualAuthor=LAST_TOOL,unit=k['subject']['label'],controlSha256=h,sourceManifestSha256=P.source_subject(a),roleContractSha256=a['roleContractSha256'],pendingActors=[row for row in control['typedPriorActors'] if row['actualStatus'] is None])
+ env={};outputs=[];outer=[];active=[False];opening=s.api.open;closing=s.api.close;writing=s.api.write;emit=s.operator_emit;real=REAL_EXEC
+ def opened(name,flags,mode=0o600,dir_fd=None):
+  fd=opening(name,flags,mode,dir_fd)
+  if not active[0] and not outer and s.fs.fds[fd]['path']==str(A.N/'entry.py'):outer.append(fd)
+  return fd
+ def closed(fd):
+  owner=env.get('sink').owner if env.get('sink') is not None else None
+  path=s.fs.fds[fd]['path'];value=closing(fd)
+  if fault=='outer_close' and active[0] and outer and fd==outer[0]:s.epoch=1062
+  if fault=='unit_close' and active[0] and owner is not None and hasattr(owner,'c') and fd==owner.c.fd:s.epoch=1062
+  return value
+ def write(fd,raw):
+  path=s.fs.fds[fd]['path'];value=writing(fd,raw)
+  if fault=='allow_io' and path==str(A.N/'gate-allow.json'):s.epoch=1062
+  return value
+ def emitting(value):
+  emit(value)
+  if fault=='delivery' and value.get('kind')=='SOURCE06_UNIT_STATE_PUBLICATION' and value['namespaceState']['header']['mode']=='gate':s.epoch=1062
+ def track(code,ns):
+  ns['__builtins__']=dict(vars(builtins),exec=track);real(code,ns)
+  if code.co_filename=='<verified-failed-gateway>':ns['System']=lambda:s;ns['MANIFEST06']=s.package_sha;active[0]=True
+ s.api.open=opened;s.api.close=closed;s.api.write=write;s.operator_emit=emitting
+ argv=['-c',str(A.N/'entry.py'),P.sha(b['entry.py']),mode,auth,h,response['sha256'],response['buffer']]
+ env.update(__name__='_actual_source06_guard',__builtins__=dict(vars(builtins),exec=track,print=lambda value,**kw:outputs.append(json.loads(value))))
+ try:
+  with ExitStack() as stack:
+   for n in ('open','fstat','stat','close','read','getuid','getpid','getppid'):stack.enter_context(patch.object(os,n,getattr(s.api,n)))
+   stack.enter_context(patch.object(sys,'argv',argv));stack.enter_context(patch.object(fcntl,'flock',G['held']))
+   try:real(compile(BODY,'<actual-source06-guard>','exec'),env)
+   except SystemExit as end:status=end.code
+   else:raise AssertionError('GUARD_EXIT_REQUIRED')
+ finally:s.api.open=opening;s.api.close=closing;s.api.write=writing;s.operator_emit=emit
+ DIAGNOSTICS.append(dict(mode=mode,status=status,fault=fault,primary=env['sink'].primary_failure,cleanup=env['sink'].cleanup_failures))
+ if fault:
+  check('ORIGINAL_PERMIT_LATE_'+fault+'_DENIES',status==1 and env['sink'].primary_failure is not None and env['sink'].finalized is True)
+  check('ORIGINAL_PERMIT_LATE_'+fault+'_UNCHANGED',control['issuedAtEpoch']==1001 and s.epoch==1062 and str(A.N/'gate-attempt.json') in s.fs.nodes)
+ else:
+  check('REAL_GUARD_'+mode+'_EXPECTED_STATUS',status==(1 if mode=='negative' else 0))
+  state=next(row['namespaceState'] for row in reversed(s.operator_records) if row.get('kind')=='SOURCE06_UNIT_STATE_PUBLICATION')
+  LAST_STATE=state;LAST_TOOL=fake_tool(s,status)
+ check('OUTER_FINAL_TRACE_AFTER_CLEANUP_'+mode+('_'+fault if fault else ''),env['sink'].finalized is True and not env['sink'].bootstrap_fds)
+ return status,LAST_STATE,LAST_TOOL
+
+def tests():
+ global LAST_STATE,LAST_TOOL
+ s,k,a,auth,b,state,actual=build_install();sourcepath=str(MemPath(HERE)/'manifest.json');source=P.decode(s.fs.nodes[sourcepath]['raw'])
+ # Pair1: actual common owner consumer through pure factory, typed positive vs1/0.
+ base=copy.deepcopy(a);base['newDirectoryPins']={}
+ witnesses=base.pop('binaryWitnesses');base.pop('binaryHashes');base.pop('binaryModes')
+ records={p:s.fs.nodes[p]['raw'] for p in set(a['newCodeRecordPins'])|set(a['typedOwnerRecordPins'])}
+ F.preflight(base,k,b,witnesses,records);check('OWNER_EXACT_TYPES_POSITIVE',True)
+ wrong=copy.deepcopy(base);rr=dict(records);path=next(iter(a['typedOwnerRecordPins']));record=P.decode(rr[path]);record['authorized']=1;record['legacyReportedCanonicalPredicateSatisfied']=0
+ rr[path]=P.packed(record);wrong['typedOwnerRecordPins'][path]=P.sha(rr[path]);expect('OWNER_NUMERIC_BOOL_DENIES',lambda:F.preflight(wrong,k,b,witnesses,rr),'TYPED_OWNER_EXACT_SCALAR_SCHEMA')
+ setupfacts=dict(separatelyCaptured=True,oldBindingsUnchanged=True,newBindingsReadonly=True,setupHelperRosterComplete=True,readEofStatus=1,actualBufferVerificationExit=0,actualEvalExit=0,
+  successfulSetupHelpers=[dict(pid=900101,ppid=3749,start=None,fullFingerprint=None,requestedLaunch=a['physicalPythonRoles']['requestedLaunchBIN'],actualForegroundWaitStatus=0,separatelyCaptured=True,toolEvidence=['FAKE_CAPTURED_HELPER0'])],actualToolEvidence=['FAKE_SETUP_ACTUAL0'])
+ control,h,state,actual=creator(s,k,a,auth,b,state,actual,'SETUP_OWNERSHIP_ADMISSION',setupfacts)
+ # Pair2: required author, pending null, wrongsource/omission/precompletion reject.
+ for variation in ('omitted','precompleted','wrongsource'):
+  bad=copy.deepcopy(control);d=bad['designatedControlAuthor']
+  if variation=='omitted':bad['typedPriorActors']=[r for r in bad['typedPriorActors'] if r['pid']!=d['pid']]
+  if variation=='precompleted':next(r for r in bad['typedPriorActors'] if r['pid']==d['pid'])['actualStatus']=0
+  if variation=='wrongsource':d['sourceManifestSha256']='0'*64
+  expect('PENDING_DESIGNATION_'+variation+'_DENIES',lambda:P.designated_author(bad,a,k,str(A.N/'root-setup-ownership.json'),'SETUP_OWNERSHIP_ADMISSION',{r['path']:r['sha256'] for r in source['files']}))
+ check('PENDING_DISK_STAYS_NULL',P.decode(s.fs.nodes[str(A.N/'root-setup-ownership.json')]['raw'])['designatedControlAuthor']['actualStatus'] is None)
+ status,state,actual=phase(s,k,a,auth,b,'negative',control,h)
+ control,h,state,actual=creator(s,k,a,auth,b,state,actual,'NEGATIVE_ACTUAL_STATUS',dict(actualNegativeStatus=1,separatelyCaptured=True,oldNormalBindingsUnchanged=True,actualToolEvidence=['FAKE_NEGATIVE1']))
+ status,state,actual=phase(s,k,a,auth,b,'held-proof',control,h)
+ control,h,state,actual=creator(s,k,a,auth,b,state,actual,'FAILED_GUARD_ADMISSION',dict(setupActualStatus=0,negativeActualStatus=1,heldProofActualStatus=0,setupInspected=True,negativeSeparateStatusCaptured=True,heldSeparateStatusCaptured=True,sameHolderAfterDenial=True,oldNormalBindingsUnchanged=True,newReadonlyBindingInspected=True,requestedLaunchOperatorTrace=['FAKE_PARENT_TRACE']))
+ control,h,state,actual=creator(s,k,a,auth,b,state,actual,'ARCHIVE_FAILED_STATE',dict(maximumInvocations=1,actualPriorToolEvidence=['FAKE_ADMISSION0']))
+ status,state,actual=phase(s,k,a,auth,b,'archive',control,h)
+ qapath=str(A.R/'docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway80-failed-red-resource-actual-archive-review/manifest.json');s.fs.put(qapath,b'FAKE_ACTUAL_ARCHIVE_QA',0o644)
+ control,h,state,actual=creator(s,k,a,auth,b,state,actual,'ACTUAL_ARCHIVE_REVIEW',dict(actualArchiveExit=0,actualQaReviewed=True,archiveInspected=True,separatelyCaptured=True,actualToolEvidence=['FAKE_QA0'],independentQaRecord=dict(path=qapath,sha256=P.sha(b'FAKE_ACTUAL_ARCHIVE_QA'))))
+ status,state,actual=phase(s,k,a,auth,b,'final',control,h)
+ # Pair3 real author/map production was exercised for all current roles above;
+ # source/state crossbinding fails before any new author write.
+ check('BOTH_PRIOR_NS_PRESERVED',all(P.sha(s.fs.nodes[str(MemPath(p['directory']['path'])/r['path'])]['raw'])==r['sha256'] for p in k['priorNamespaces'] for r in p['members']))
+ # Pair4 original permit across each demonstrated selected late suffix.
+ saved_nodes=copy.deepcopy(s.fs.nodes);saved_current=s.current;original_rows=copy.deepcopy(s.rows_base);saved_state=copy.deepcopy(state);saved_actual=copy.deepcopy(actual)
+ for fault in ('allow_io','unit_close','outer_close','delivery',None):
+  s.fs.nodes=copy.deepcopy(saved_nodes);s.fs.fds={};s.current=saved_current;s.rows_base=copy.deepcopy(original_rows);s.epoch=1002
+  control,h,current,tool=creator(s,k,a,auth,b,saved_state,saved_actual,'FAILED_EXIT_PERMIT',dict(expectedWrapperExit=1,actualFinalStatus=0,finalSeparateStatusCaptured=True,readinessInspected=True,oldNormalBindingsUnchanged=True,issuedAtEpoch=1001,actualToolEvidence=['FAKE_FINAL0']))
+  status,state,actual=phase(s,k,a,auth,b,'gate',control,h,fault)
+ control,h,state,actual=creator(s,k,a,auth,b,state,actual,'ACTUAL_WRAPPER_RESULT',dict(actualWrapperExit=1,separatelyCaptured=True,actualToolEvidence=['FAKE_WRAPPER_ACTUAL1']))
+ status,state,actual=phase(s,k,a,auth,b,'postclose',control,h)
+ check('ALL_KNOWN11_AND_DYNAMIC_ACTORS_RETAINED',len(P.decode(s.fs.nodes[str(A.N/'root-wrapper-result.json')]['raw'])['typedPriorActors'])>11)
+ check('NO_TARGET_HOST_BOUNDARY',G['ns']['BLOCKED']==[])
+
+failure=None
+sys.addaudithook(G['ns']['audit'])
+try:
+ with ExitStack() as stack:
+  for obj,names in ((builtins,('open',)),(io,('open',)),(Path,('open','read_bytes','read_text','stat','lstat','mkdir','iterdir','resolve','unlink','rglob','write_bytes','write_text')),(os,('open','read','write','close','fstat','stat','lstat','listdir','mkdir','symlink','readlink','fdopen','fsync','fchmod','kill','fork','system','getpid','getppid','getuid','umask')),(socket,('socket','create_connection')),(subprocess,('Popen','run','call','check_output','check_call')),(fcntl,('flock','fcntl','ioctl')),(ctypes,('CDLL',)),(time,('time','sleep','monotonic_ns'))):
+   for n in names:
+    if hasattr(obj,n):stack.enter_context(patch.object(obj,n,G['ns']['blocked']))
+  tests()
+except BaseException as error:failure=dict(type=type(error).__name__,args=[str(v)[:256] for v in error.args])
+result=dict(kind='SOURCE06_LEAN_CHANGED_PATH_COMPOSITION',checks=CHECKS,passed=len(CHECKS),failure=failure,diagnostics=DIAGNOSTICS,operatorSteps=HISTORY,sourceHashes={n:hashlib.sha256(raw).hexdigest() for n,raw in TARGET.items()},
+ fixtureSourceSha256=hashlib.sha256(RAW).hexdigest(),fixturePrefixAdaptation='source/review destinations only; definition-only preload; no old test tail',persistentDenyAuditUnchanged=True,
+ actualTargetEffects=0,realBoundaryCalls=G['ns']['BLOCKED'],parentSchedulingIntervalProved=False,actualWrapperBuiltinExecuted=False)
+encoded=json.dumps(result,indent=2).encode()+b'\n';offset=0
+while offset<len(encoded):offset+=os.write(RESULT_FD,encoded[offset:])
+os.close(RESULT_FD)
+print('FR06_DONE:'+json.dumps(dict(passed=len(CHECKS),failure=failure,operatorSteps=len(HISTORY))),flush=True)
+raise SystemExit(1 if failure else 0)

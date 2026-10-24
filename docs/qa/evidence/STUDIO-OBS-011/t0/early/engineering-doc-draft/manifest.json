@@ -1,0 +1,105 @@
+{
+  "story": "STUDIO-OBS-011",
+  "lane": "11-DOC",
+  "mode": "off-tree-only",
+  "declaredBudgetUsd": 500,
+  "actualSpend": "unavailable",
+  "applicationGates": [
+    "original B1 terminal reconciliation",
+    "fresh B7/root tree-open",
+    "quoted-writer and file ownership handover",
+    "root confirms CLN51 wording",
+    "root11MERGE for AGENTS/runner README"
+  ],
+  "targets": [
+    {
+      "target": "CLAUDE.md",
+      "originalSha256": "2c2bd08ad1b9ee4833b440a92d7479991069708870e90ab9e5a54a33258c23d1",
+      "outputSha256": "92c5aaa61867b618f28357dec2b6528621f26e043258a3f6fdba356695158f99",
+      "originalBytes": 8192,
+      "outputBytes": 8344,
+      "patch": "patches/CLAUDE.md.patch",
+      "preview": "preview/CLAUDE.md",
+      "original": "originals/CLAUDE.md",
+      "rootMergeOnly": false,
+      "change": "scoped documentation correction"
+    },
+    {
+      "target": "AGENTS.md",
+      "originalSha256": "848e102c199e0497ce006528b25c71396c34ed7490f0b822569b000b9bf17d43",
+      "outputSha256": "f705de4a41f26d3a97aa5d11576da08a16922e69459f7229536c2dd5b5e35248",
+      "originalBytes": 8185,
+      "outputBytes": 8337,
+      "patch": "patches/AGENTS.md.patch",
+      "preview": "preview/AGENTS.md",
+      "original": "originals/AGENTS.md",
+      "rootMergeOnly": true,
+      "change": "scoped documentation correction"
+    },
+    {
+      "target": "ARCH.md",
+      "originalSha256": "79a053edfc4dd9167baeea01358fda2ecde85c1abb042e366e3d2576f30d5c44",
+      "outputSha256": "0b37ca95c218f4d519188989dd91aad6f2b97dc528a449d94265ca1967081b46",
+      "originalBytes": 43255,
+      "outputBytes": 43811,
+      "patch": "patches/ARCH.md.patch",
+      "preview": "preview/ARCH.md",
+      "original": "originals/ARCH.md",
+      "rootMergeOnly": false,
+      "change": "scoped documentation correction"
+    },
+    {
+      "target": "docs/runbooks/studio-inference-rollout.md",
+      "originalSha256": "28f789258453fcfdec2af56f4580046d8cd4f8350cb5b5ef1e1586f61c3d6e4f",
+      "outputSha256": "10ab0f1361689a2737c8dff3c339a6e58a2f55b57c327daf2ac445e7f6c891f9",
+      "originalBytes": 20794,
+      "outputBytes": 21434,
+      "patch": "patches/docs__runbooks__studio-inference-rollout.md.patch",
+      "preview": "preview/docs/runbooks/studio-inference-rollout.md",
+      "original": "originals/docs/runbooks/studio-inference-rollout.md",
+      "rootMergeOnly": false,
+      "change": "scoped documentation correction"
+    },
+    {
+      "target": "docs/runbooks/studio-runner.md",
+      "originalSha256": "8971ca6b0f5f08b3b35041abe960065d1b6f4fdf4e5fa3b9557a30dd9c16223b",
+      "outputSha256": "7465f8d012ab38ce43541fb12cbceda2c1dd91943da84058bd588afe89a657fe",
+      "originalBytes": 76808,
+      "outputBytes": 85277,
+      "patch": "patches/docs__runbooks__studio-runner.md.patch",
+      "preview": "preview/docs/runbooks/studio-runner.md",
+      "original": "originals/docs/runbooks/studio-runner.md",
+      "rootMergeOnly": false,
+      "change": "scoped documentation correction"
+    },
+    {
+      "target": "studio-runner/README.md",
+      "originalSha256": "1b8891f988234b4f8e875df644332e69ac2f57efe720a86af63878ef5ada92d2",
+      "outputSha256": "819887fe9281f69c85451b9d059704b22d82ce75c3345152df302a325d266677",
+      "originalBytes": 61445,
+      "outputBytes": 53495,
+      "patch": "patches/studio-runner__README.md.patch",
+      "preview": "preview/studio-runner/README.md",
+      "original": "originals/studio-runner/README.md",
+      "rootMergeOnly": true,
+      "change": "scoped documentation correction"
+    },
+    {
+      "target": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md",
+      "originalSha256": "3f0d3a53f113d5bb17855cb60e38d1081d2f1dbccd824e1cec0d56702e91221d",
+      "outputSha256": "adf999bc91c9eeff63c092557159d9b936736362ae1710c9d5f244ae4d01b45e",
+      "originalBytes": 64359,
+      "outputBytes": 67440,
+      "patch": "patches/docs__stories__STUDIO-OBSERVED__STUDIO-OBS-011-cleanup-inventory.md.patch",
+      "preview": "preview/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md",
+      "original": "originals/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md",
+      "rootMergeOnly": false,
+      "change": "append-only dated addendum"
+    }
+  ],
+  "patchSets": {
+    "authoredDocsAfterRootTreeOpen": "patches/authored-docs.patch",
+    "root11MERGEOnly": "patches/root-merge-only.patch",
+    "allSevenForStaticApplicability": "patches/all-documentation.patch"
+  }
+}

@@ -1,0 +1,2117 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/support/GuidedPublicationEvidenceFixture.java
+@@ -41,53 +41,40 @@
+    */
+   public static ObjectNode freezeSource(
+       JdbcTemplate jdbc, TransactionTemplate tx, JsonNode supplied) {
+-    return freezeSource(jdbc, tx, supplied, false);
+-  }
+-
+-  /** Explicit V18-only test adapter: no policy approval/table existed in this historical schema. */
+-  public static ObjectNode freezeHistoricalV18Source(
+-      JdbcTemplate jdbc, TransactionTemplate tx, JsonNode supplied) {
+-    requireV18(jdbc);
+-    return freezeSource(jdbc, tx, supplied, true);
+-  }
+-
+-  private static ObjectNode freezeSource(
+-      JdbcTemplate jdbc, TransactionTemplate tx, JsonNode supplied, boolean historical) {
+     JsonNode scope = supplied.path("scope");
+     List<String> origins = new ArrayList<>();
+     scope.path("approvedOrigins").forEach(origin -> origins.add(origin.asText()));
+     if (origins.isEmpty()) {
+       throw new IllegalArgumentException("Fixture must declare its governed origins");
+     }
+-    if (!historical) {
+-      var policyRepository = new ObservationPolicyRepository(jdbc, C);
+-      var currentPolicy =
+-          tx.execute(
++    var policyRepository = new ObservationPolicyRepository(jdbc, C);
++    var currentPolicy =
++        tx.execute(
++            status ->
++                policyRepository.active(
++                    scope.path("csiId").asText(),
++                    scope.path("applicationId").asText(),
++                    scope.path("environmentId").asText()));
++    if (currentPolicy.isEmpty()) {
++      if (tx.execute(
+               status ->
+-                  policyRepository.active(
++                  policyRepository.state(
+                       scope.path("csiId").asText(),
+                       scope.path("applicationId").asText(),
+-                      scope.path("environmentId").asText()));
+-      if (currentPolicy.isEmpty()) {
+-        if (tx.execute(
+-                status ->
+-                    policyRepository.state(
+-                        scope.path("csiId").asText(),
+-                        scope.path("applicationId").asText(),
+-                        scope.path("environmentId").asText()))
+-            .isPresent()) {
+-          throw new IllegalStateException("Fixture must not replace an existing unapproved policy");
+-        }
+-        ObservedPublicationFixture.ensurePolicy(
+-            jdbc,
+-            scope.path("csiId").asText(),
+-            scope.path("applicationId").asText(),
+-            scope.path("environmentId").asText(),
+-            origins,
+-            null,
+-            "ALLOW");
++                      scope.path("environmentId").asText()))
++          .isPresent()) {
++        throw new IllegalStateException("Fixture must not replace an existing unapproved policy");
+       }
++      ObservedPublicationFixture.ensurePolicy(
++          jdbc,
++          scope.path("csiId").asText(),
++          scope.path("applicationId").asText(),
++          scope.path("environmentId").asText(),
++          origins,
++          null,
++          "ALLOW");
+     }
++
+     return tx.execute(
+         status -> {
+           var sessions = new GuidedSessionRepository(jdbc, tx, C);
+@@ -139,23 +126,22 @@
+           jdbc.update(
+               "INSERT INTO studio_guided_translation_state(session_id) VALUES (?) ON CONFLICT(session_id) DO NOTHING",
+               id);
+-          if (!historical) {
+-            var policies = new ObservationPolicyRepository(jdbc, C);
+-            var active =
+-                policies
+-                    .active(
+-                        scope.path("csiId").asText(),
+-                        scope.path("applicationId").asText(),
+-                        scope.path("environmentId").asText())
+-                    .orElseThrow();
+-            if (jdbc.queryForObject(
+-                    "SELECT count(*) FROM studio_guided_session_policies WHERE session_id=?",
+-                    Integer.class,
+-                    id)
+-                == 0) {
+-              policies.freeze(id, active);
+-            }
+-          }
++          var policies = new ObservationPolicyRepository(jdbc, C);
++          var active =
++              policies
++                  .active(
++                      scope.path("csiId").asText(),
++                      scope.path("applicationId").asText(),
++                      scope.path("environmentId").asText())
++                  .orElseThrow();
++          if (jdbc.queryForObject(
++                  "SELECT count(*) FROM studio_guided_session_policies WHERE session_id=?",
++                  Integer.class,
++                  id)
++              == 0) {
++            policies.freeze(id, active);
++          }
++
+           return manifest;
+         });
+   }
+@@ -301,24 +287,6 @@
+    */
+   public static ObjectNode completeExistingSession(
+       JdbcTemplate jdbc, TransactionTemplate tx, String id, PublicationContracts.Base base) {
+-    return completeExistingSession(jdbc, tx, id, base, false);
+-  }
+-
+-  /**
+-   * Ordinary one-step navigation only; real V18 rows, complete current pure evidence projection.
+-   */
+-  public static ObjectNode completeHistoricalV18Session(
+-      JdbcTemplate jdbc, TransactionTemplate tx, String id, PublicationContracts.Base base) {
+-    requireV18(jdbc);
+-    return completeExistingSession(jdbc, tx, id, base, true);
+-  }
+-
+-  private static ObjectNode completeExistingSession(
+-      JdbcTemplate jdbc,
+-      TransactionTemplate tx,
+-      String id,
+-      PublicationContracts.Base base,
+-      boolean historical) {
+     return tx.execute(
+         status -> {
+           var sessions = new GuidedSessionRepository(jdbc, tx, C);
+@@ -341,12 +309,6 @@
+                           "SELECT manifest::text FROM studio_guided_source_manifests WHERE session_id=?",
+                           String.class,
+                           id)));
+-          if (historical
+-              && (manifest.path("sourceSteps").size() != 1
+-                  || !manifest.path("configurationReferences").isEmpty())) {
+-            throw new IllegalArgumentException(
+-                "Historical V18 adapter only supports its explicit one-step literal URL fixture");
+-          }
+           String worker = session.path("owner").path("workerId").asText();
+           int fence = session.path("owner").path("fence").asInt();
+           if (worker.equals("unclaimed") || fence < 1) {
+@@ -641,24 +603,15 @@
+           context.putArray("producers");
+           context.putArray("consumerEdges");
+           context.set("limits", session.path("limits"));
+-          // This test-only structural context on V18 is synthetic input, not a V19
+-          // approval/backfill.
+-          ObjectNode historicalPolicy =
+-              C.object()
+-                  .put("policyRuleId", "historical-v18-structural-fixture")
+-                  .put("allowStructuralDiscovery", true);
+-          historicalPolicy.putArray("readGrants");
+           JsonNode applicationPolicy =
+-              historical
+-                  ? historicalPolicy
+-                  : C.parse(
+-                          jdbc.queryForObject(
+-                              "SELECT v.document::text FROM studio_guided_session_policies s JOIN "
+-                                  + "studio_guided_policy_versions v ON v.policy_id=s.policy_id AND "
+-                                  + "v.version=s.policy_version WHERE s.session_id=?",
+-                              String.class,
+-                              id))
+-                      .path("applicationPolicy");
++              C.parse(
++                      jdbc.queryForObject(
++                          "SELECT v.document::text FROM studio_guided_session_policies s JOIN "
++                              + "studio_guided_policy_versions v ON v.policy_id=s.policy_id AND "
++                              + "v.version=s.policy_version WHERE s.session_id=?",
++                          String.class,
++                          id))
++                  .path("applicationPolicy");
+           context.set("applicationPolicy", applicationPolicy);
+           context.put("policyHash", GuidedContracts.hash(applicationPolicy));
+           ObjectNode identity =
+@@ -799,41 +752,18 @@
+                     session.path("runAuthorization").path("authorizationId").asText())
+                 .put("admittedAt", PublicationContracts.time(Instant.now()))
+                 .put("policyDecisionHash", GuidedContracts.hash(decision));
+-            if (historical) {
+-              // V18 has no SQL attempt_ordinal column. Validate the complete current pure document,
+-              // then insert through its actual historical table with every installed guard active.
+-              C.validate("v3/action", proposal);
+-              C.validate("v3/ledger", ledger);
+-              if (!GuidedContracts.hash(proposal).equals(ledger.path("requestDigest").asText())) {
+-                throw new IllegalStateException("Historical action digest mismatch");
+-              }
+-              jdbc.update(
+-                  "INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordinal,document,"
+-                      + "proposal) VALUES (?,?,?,?,?::jsonb,?::jsonb)",
+-                  admission,
+-                  id,
+-                  exercise.coordinate().path("stepId").asText(),
+-                  exercise.coordinate().path("ordinal").asInt(),
+-                  ledger.toString(),
+-                  proposal.toString());
+-            } else {
+-              sessions.insertAction(ledger, proposal);
+-            }
++            sessions.insertAction(ledger, proposal);
++
+             jdbc.update(
+                 "UPDATE studio_guided_preparations SET admission_id=? WHERE session_id=? AND preparation_id=?",
+                 admission,
+                 id,
+                 preparation);
+             JsonNode meaning = obligations.get(i);
+-            String attemptColumn = historical ? "" : ",attempt_ordinal",
+-                attemptValue = historical ? "" : ",0";
+             jdbc.update(
+                 "INSERT INTO studio_guided_obligation_admissions(session_id,obligation_id,plan_revision,"
+-                    + "meaning,proposal,proposal_digest,admission_key,admission_id"
+-                    + attemptColumn
+-                    + ") VALUES (?,?,1,?::jsonb,?::jsonb,?,?,?"
+-                    + attemptValue
+-                    + ")",
++                    + "meaning,proposal,proposal_digest,admission_key,admission_id,attempt_ordinal"
++                    + ") VALUES (?,?,1,?::jsonb,?::jsonb,?,?,?,0)",
+                 id,
+                 meaning.path("obligationId").asText(),
+                 meaning.toString(),
+@@ -864,222 +794,12 @@
+               builder.basis(
+                   base,
+                   source,
+-                  historical ? readHistoricalV18(jdbc, id, manifest) : evidence.read(id),
++                  evidence.read(id),
+                   current.document(),
+                   builder.learningProvenance(manifest));
+           jdbc.execute("SET CONSTRAINTS ALL IMMEDIATE");
+           return result;
+         });
+-  }
+-
+-  public static void requireV18(JdbcTemplate jdbc) {
+-    if (!jdbc.queryForObject(
+-            "SELECT count(*)=18 AND count(*) FILTER (WHERE success)=18 AND min(version::int)=1 AND "
+-                + "max(version::int)=18 AND count(DISTINCT version::int)=18 FROM flyway_schema_history WHERE "
+-                + "version IS NOT NULL",
+-            Boolean.class)
+-        || !jdbc.queryForObject(
+-            "SELECT current_setting('server_version_num')::integer BETWEEN 150000 AND 159999 AND "
+-                + "current_setting('session_replication_role')='origin' AND NOT EXISTS(SELECT 1 FROM pg_trigger "
+-                + "WHERE NOT tgisinternal AND tgenabled<>'O' AND tgrelid IN (SELECT oid FROM pg_class WHERE "
+-                + "relnamespace=current_schema()::regnamespace))",
+-            Boolean.class)
+-        || jdbc.queryForObject(
+-            "SELECT to_regprocedure('studio_015_relearned_from(text)') IS NOT NULL OR "
+-                + "to_regclass('studio_guided_policies') IS NOT NULL OR "
+-                + "to_regclass('studio_guided_materialization_versions') IS NOT NULL OR "
+-                + "to_regclass('studio_guided_materialization_inputs') IS NOT NULL OR "
+-                + "to_regclass('studio_guided_relearn_plans') IS NOT NULL OR "
+-                + "to_regclass('studio_guided_relearn_switches') IS NOT NULL",
+-            Boolean.class)) {
+-      throw new IllegalArgumentException(
+-          "Historical publication adapter requires actual V18 and no later stores");
+-    }
+-  }
+-
+-  private static PublicationContracts.Evidence readHistoricalV18(
+-      JdbcTemplate jdbc, String id, ObjectNode manifest) {
+-    requireV18(jdbc);
+-    ObjectNode raw = C.object(), safeManifest = manifest.deepCopy();
+-    safeManifest.remove("configurationValues");
+-    raw.set("sourceManifest", safeManifest);
+-    ObjectNode snapshot = raw.putObject("snapshotEvidence").put("schemaVersion", 3);
+-    ObjectNode identity = snapshot.putObject("current").put("authoringIdentityVersion", 1);
+-    identity.set("authoring", manifest.path("authoringSnapshot"));
+-    identity.set("authoredDeclarations", manifest.path("authoredDeclarations"));
+-    snapshot.putNull("pinnedBase").putNull("baseProof");
+-    var plan =
+-        jdbc.queryForMap(
+-            "SELECT p.plan_revision,p.plan::text,p.plan_hash FROM studio_guided_translation_state s JOIN "
+-                + "studio_guided_translation_plans p USING(session_id,plan_revision) WHERE s.session_id=?",
+-            id);
+-    JsonNode planBody = C.parse((String) plan.get("plan"));
+-    com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlan.validate(C, planBody);
+-    if (!GuidedContracts.hash(planBody).equals(plan.get("plan_hash"))) {
+-      throw new IllegalStateException("Historical plan preimage mismatch");
+-    }
+-    raw.put("translationRevision", plan.get("plan_revision").toString())
+-        .put("translationHash", (String) plan.get("plan_hash"));
+-    raw.set("translationPlan", planBody);
+-    var m =
+-        jdbc.queryForMap(
+-            "SELECT context_id,context_revision,materialization_revision,worker_id,owner_fence,"
+-                + "source_revision,configuration_revision,authored_inputs_hash,authored_inputs::text,scope_hash "
+-                + "FROM studio_guided_materializations WHERE session_id=?",
+-            id);
+-    JsonNode full = C.parse((String) m.get("authored_inputs"));
+-    C.validate("v3/authored-inputs", full);
+-    if (!GuidedContracts.hash(full).equals(m.get("authored_inputs_hash"))
+-        || ((Number) m.get("context_revision")).intValue() != 1) {
+-      throw new IllegalStateException("Historical materialization preimage mismatch");
+-    }
+-    ObjectNode material =
+-        raw.putObject("materialization")
+-            .put("contextId", (String) m.get("context_id"))
+-            .put("contextRevision", 1)
+-            .put("materializationRevision", ((Number) m.get("materialization_revision")).intValue())
+-            .put("workerId", (String) m.get("worker_id"))
+-            .put("ownerFence", ((Number) m.get("owner_fence")).intValue())
+-            .put("authoredInputsHash", (String) m.get("authored_inputs_hash"));
+-    ArrayNode safeInputs = material.putArray("inputs");
+-    ObjectNode materialEvidence = raw.putObject("materializationEvidence");
+-    ObjectNode version =
+-        materialEvidence
+-            .putArray("versions")
+-            .addObject()
+-            .put("schemaVersion", 3)
+-            .put("sessionId", id)
+-            .put("scopeHash", (String) m.get("scope_hash"))
+-            .put("contextId", (String) m.get("context_id"))
+-            .put("contextRevision", 1)
+-            .put("workerId", (String) m.get("worker_id"))
+-            .put("ownerFence", ((Number) m.get("owner_fence")).intValue())
+-            .put("sourceRevision", (String) m.get("source_revision"))
+-            .put("configurationRevision", (String) m.get("configuration_revision"))
+-            .put("authoredInputsHash", (String) m.get("authored_inputs_hash"))
+-            .put(
+-                "birthMaterializationRevision",
+-                ((Number) m.get("materialization_revision")).intValue())
+-            .put("inputCount", full.path("inputs").size())
+-            .putNull("previousInputsHash");
+-    ArrayNode entries = materialEvidence.putArray("entries");
+-    int ordinal = 0;
+-    for (JsonNode input : full.path("inputs")) {
+-      ObjectNode safe = PublicationContracts.copy(input);
+-      safe.remove("value");
+-      safeInputs.add(safe);
+-      entries
+-          .addObject()
+-          .put("inputOrdinal", ordinal++)
+-          .put("inputId", input.path("inputId").asText())
+-          .put("introducedContextRevision", 1)
+-          .put("inputHash", GuidedContracts.hash(input))
+-          .set("metadata", safe);
+-    }
+-    C.validate("v3/replay-validation#/definitions/MaterializationEvidence", materialEvidence);
+-    ArrayNode preps = raw.putArray("preparations");
+-    jdbc.query(
+-            "SELECT preparation_id,proposal::text,proof::text,execution_evidence::text,observation_hash,"
+-                + "materialization_revision FROM studio_guided_publication_preparations WHERE session_id=? ORDER BY "
+-                + "preparation_id",
+-            (rs, n) -> {
+-              ObjectNode out =
+-                  C.object()
+-                      .put("preparationId", rs.getString(1))
+-                      .put("observationHash", rs.getString(5))
+-                      .put("materializationRevision", rs.getInt(6));
+-              out.set("proposal", C.parse(rs.getString(2)));
+-              out.set("proof", C.parse(rs.getString(3)));
+-              out.set("executionEvidence", C.parse(rs.getString(4)));
+-              return out;
+-            },
+-            id)
+-        .forEach(preps::add);
+-    ArrayNode admissions = raw.putArray("admissionAssociations");
+-    jdbc.query(
+-            "SELECT obligation_id,preparation_id,admission_id,proposal_hash FROM "
+-                + "studio_guided_publication_admissions WHERE session_id=? ORDER BY admission_id",
+-            (rs, n) ->
+-                C.object()
+-                    .put("obligationId", rs.getString(1))
+-                    .put("preparationId", rs.getString(2))
+-                    .put("admissionId", rs.getString(3))
+-                    .put("proposalHash", rs.getString(4)),
+-            id)
+-        .forEach(admissions::add);
+-    ArrayNode obligations = raw.putArray("obligationAssociations");
+-    jdbc.query(
+-            "SELECT obligation_id,meaning::text,proposal::text,proposal_digest,admission_id,plan_revision "
+-                + "FROM studio_guided_obligation_admissions WHERE session_id=? ORDER BY obligation_id",
+-            (rs, n) -> {
+-              ObjectNode out =
+-                  C.object()
+-                      .put("obligationId", rs.getString(1))
+-                      .put("proposalDigest", rs.getString(4))
+-                      .put("admissionId", rs.getString(5))
+-                      .put("planRevision", rs.getLong(6));
+-              out.set("meaning", C.parse(rs.getString(2)));
+-              out.set("proposal", C.parse(rs.getString(3)));
+-              return out;
+-            },
+-            id)
+-        .forEach(obligations::add);
+-    for (String[] table :
+-        new String[][] {
+-          {"actions", "studio_guided_actions"},
+-          {"allocations", "studio_guided_allocations"},
+-          {"producers", "studio_guided_producers"},
+-          {"consumerEdges", "studio_guided_consumer_edges"}
+-        }) {
+-      ArrayNode array = raw.putArray(table[0]);
+-      jdbc.queryForList(
+-              "SELECT document::text FROM "
+-                  + table[1]
+-                  + " WHERE session_id=? ORDER BY document::text",
+-              String.class,
+-              id)
+-          .forEach(json -> array.add(C.parse(json)));
+-    }
+-    // The adapter deliberately supports exactly the one initial-blank navigation persisted above.
+-    if (raw.path("actions").size() != 1
+-        || preps.size() != 1
+-        || admissions.size() != 1
+-        || obligations.size() != 1
+-        || jdbc.queryForObject(
+-                "SELECT count(*) FROM studio_guided_publication_observations WHERE session_id=?",
+-                Integer.class,
+-                id)
+-            != 0) {
+-      throw new IllegalStateException("Historical V18 fixture scope exceeded");
+-    }
+-    raw.putArray("observations");
+-    raw.putArray("sourceSelections");
+-    raw.putNull("incrementalEvidence");
+-    JsonNode progress =
+-        C.parse(
+-            jdbc.queryForObject(
+-                "SELECT progress::text FROM studio_guided_sessions WHERE session_id=?",
+-                String.class,
+-                id));
+-    ObjectNode bootstrap = raw.putObject("bootstrap");
+-    bootstrap.set("marker", progress.path("translationBootstrap").deepCopy());
+-    bootstrap.set("receipt", progress.path("translationBootstrapEvidence").deepCopy());
+-    JsonNode initial = null;
+-    for (JsonNode prepared : preps) {
+-      if (prepared.path("executionEvidence").path("kind").asText().equals("initialBlank")) {
+-        if (initial != null && !initial.equals(prepared.path("executionEvidence"))) {
+-          throw new IllegalStateException(
+-              "Historical fixture has inconsistent original blank evidence");
+-        }
+-        initial = prepared.path("executionEvidence");
+-      }
+-    }
+-    if (initial == null) {
+-      throw new IllegalStateException("Historical fixture lacks captured original blank evidence");
+-    }
+-    C.validate("v3/execution-evidence", initial);
+-    bootstrap.set("initialEvidence", initial.deepCopy());
+-    return new PublicationContracts.Evidence(raw);
+   }
+ 
+   private static boolean contains(JsonNode values, String expected) {
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java
+@@ -1,6 +1,5 @@
+ package com.citi.put.checks.studio.guided.publication;
+ 
+-import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.assertj.core.api.Assertions.assertThatThrownBy;
+ 
+@@ -14,7 +13,6 @@
+ import com.fasterxml.jackson.databind.node.ObjectNode;
+ import java.nio.file.Files;
+ import java.nio.file.Path;
+-import java.sql.Timestamp;
+ import java.time.Instant;
+ import java.util.List;
+ import java.util.Map;
+@@ -72,8 +70,8 @@
+     }
+ 
+     /**
+-     * A fresh database at the forward migration head (core V1–V11, observed V12–V21). Historical
+-     * V11/V18 upgrade assertions below retain their explicit targets.
++     * A fresh database at the forward migration head (core V1–V11, observed V12–V22).
++     * Explicit core V11 upgrade assertions below retain their target.
+      */
+     Database(List<String> secretIds) {
+       for (String id : secretIds) {
+@@ -1598,6 +1596,31 @@
+       verdict.set("admissionProvenanceHash", hashes.path("admissionProvenanceHash"));
+       verdict.set("profile", profile);
+       verdict.set("build", build);
++      ObjectNode badVerdict = verdict.deepCopy().put("basisHash", "0".repeat(64));
++      assertThatThrownBy(
++              () ->
++                  db.tx.executeWithoutResult(
++                      t -> {
++                        t.setRollbackOnly();
++                        db.sessions.lock("session");
++                        db.publications.finish(
++                            "session",
++                            attempt.attemptId(),
++                            attempt.claimId(),
++                            snapshot.hash(),
++                            PublicationContracts.AttemptStatus.VALIDATED,
++                            badVerdict,
++                            null,
++                            Instant.now());
++                      }))
++          .hasMessageContaining("EVIDENCE_MISMATCH");
++      assertThat(
++              db.jdbc.queryForObject(
++                  "SELECT status FROM studio_guided_publication_attempts WHERE session_id=? AND attempt_id=?",
++                  String.class,
++                  "session",
++                  attempt.attemptId()))
++          .isEqualTo("VALIDATING");
+       db.tx.executeWithoutResult(
+           t -> {
+             db.sessions.lock("session");
+@@ -1630,9 +1653,6 @@
+               snapshot,
+               candidate,
+               grant);
+-      assertThatThrownBy(() -> commitHistoricalV18(db.jdbc, db.tx, command, HistoricalFault.NONE))
+-          .isInstanceOf(IllegalArgumentException.class)
+-          .hasMessageContaining("actual V18");
+       assertThatThrownBy(
+               () ->
+                   db.tx.executeWithoutResult(
+@@ -1831,9 +1851,7 @@
+    * publication: the base, receipt and origin constraints make a hand-written revision row
+    * impossible. Current-head tests therefore go through the production writers — session insert,
+    * base capture, reserve/claim/finish/commit — with every SQL guard active, exactly as {@link
+-   * GuidedSecretLoginMigrationTest#publishedRetry()} does. The explicitly named historical V18
+-   * helper retains reserve/claim/finish and uses its reviewed test-only historical SQL commit; it
+-   * does not claim current Java commit compatibility with V18. The validator verdict is synthetic
++   * GuidedSecretLoginMigrationTest#publishedRetry()} does. The validator verdict is synthetic
+    * (no browser, no live validator); nothing here is a runner or replay claim. Creates the draft
+    * (with v2 authoring), the user and the CSI if absent, and commits in its own transactions.
+    */
+@@ -1860,40 +1878,6 @@
+       String csiId,
+       String environment,
+       String principal) {
+-    return prepareObserved(source, sessionId, existingTestId, csiId, environment, principal, false);
+-  }
+-
+-  /** Explicit historical V18 test fixture; current runtime compatibility is not claimed. */
+-  public static Published publishHistoricalV18Observed(
+-      javax.sql.DataSource source,
+-      String sessionId,
+-      String csiId,
+-      String environment,
+-      String principal) {
+-    return publishObserved(
+-        source,
+-        prepareObserved(source, sessionId, null, csiId, environment, principal, true),
+-        true);
+-  }
+-
+-  public static Prepared prepareHistoricalV18Observed(
+-      javax.sql.DataSource source,
+-      String sessionId,
+-      UUID existingTestId,
+-      String csiId,
+-      String environment,
+-      String principal) {
+-    return prepareObserved(source, sessionId, existingTestId, csiId, environment, principal, true);
+-  }
+-
+-  private static Prepared prepareObserved(
+-      javax.sql.DataSource source,
+-      String sessionId,
+-      UUID existingTestId,
+-      String csiId,
+-      String environment,
+-      String principal,
+-      boolean historicalV18) {
+     var jdbc = new JdbcTemplate(source);
+     var tx = new TransactionTemplate(new DataSourceTransactionManager(source));
+     var sessions = new GuidedSessionRepository(jdbc, tx, C);
+@@ -1915,8 +1899,7 @@
+           first.path("text").asText(),
+           csiId,
+           environment,
+-          principal,
+-          historicalV18);
++          principal);
+     }
+     UUID testId = UUID.randomUUID(), stepId = UUID.randomUUID();
+     String sourceText = "Open https://orders.example.test/start";
+@@ -1959,8 +1942,7 @@
+         sourceText,
+         csiId,
+         environment,
+-        principal,
+-        historicalV18);
++        principal);
+   }
+ 
+   private static Prepared prepare(
+@@ -1974,8 +1956,7 @@
+       String sourceText,
+       String csiId,
+       String environment,
+-      String principal,
+-      boolean historicalV18) {
++      String principal) {
+     String sourceRevision =
+         jdbc.queryForObject(
+             "SELECT source_revision::text FROM ui_tests WHERE id=?", String.class, testId);
+@@ -2018,13 +1999,9 @@
+         status -> {
+           completeSessionMetadata(session);
+           sessions.insert(session);
+-          if (historicalV18) {
+-            com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture
+-                .freezeHistoricalV18Source(jdbc, tx, session);
+-          } else {
+-            com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.freezeSource(
+-                jdbc, tx, session);
+-          }
++          com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.freezeSource(
++              jdbc, tx, session);
++
+         });
+     var requirements =
+         C.object()
+@@ -2054,11 +2031,13 @@
+ 
+   /** Finalizes and commits {@code prepared} through reserve/claim/finish/commit. */
+   public static Published publishObserved(javax.sql.DataSource source, Prepared prepared) {
+-    return publishObserved(source, prepared, false);
++    return publishObserved(source, prepared, command -> {});
+   }
+ 
+   private static Published publishObserved(
+-      javax.sql.DataSource source, Prepared prepared, boolean historicalV18) {
++      javax.sql.DataSource source,
++      Prepared prepared,
++      java.util.function.Consumer<PublicationContracts.Commit> beforeCommit) {
+     var jdbc = new JdbcTemplate(source);
+     var tx = new TransactionTemplate(new DataSourceTransactionManager(source));
+     var sessions = new GuidedSessionRepository(jdbc, tx, C);
+@@ -2081,11 +2060,8 @@
+                   .put("leaseExpiresAt", Instant.now().plusSeconds(120).toString());
+               sessions.save(current);
+               ObjectNode exercised =
+-                  historicalV18
+-                      ? com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture
+-                          .completeHistoricalV18Session(jdbc, tx, sessionId, base)
+-                      : com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture
+-                          .completeExistingSession(jdbc, tx, sessionId, base);
++                  com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture
++                      .completeExistingSession(jdbc, tx, sessionId, base);
+               current = sessions.lock(sessionId);
+               current.document().put("state", "FINALIZING");
+               sessions.save(current);
+@@ -2160,32 +2136,7 @@
+     verdict.set("admissionProvenanceHash", hashes.path("admissionProvenanceHash"));
+     verdict.set("profile", profile);
+     verdict.set("build", build);
+-    if (historicalV18) {
+-      ObjectNode badVerdict = verdict.deepCopy().put("basisHash", "0".repeat(64));
+-      assertThatThrownBy(
+-              () ->
+-                  tx.executeWithoutResult(
+-                      status -> {
+-                        sessions.lock(sessionId);
+-                        publications.finish(
+-                            sessionId,
+-                            attempt.attemptId(),
+-                            attempt.claimId(),
+-                            snapshot.hash(),
+-                            PublicationContracts.AttemptStatus.VALIDATED,
+-                            badVerdict,
+-                            null,
+-                            Instant.now());
+-                      }))
+-          .hasMessageContaining("EVIDENCE_MISMATCH");
+-      assertThat(
+-              jdbc.queryForObject(
+-                  "SELECT status FROM studio_guided_publication_attempts WHERE session_id=? AND attempt_id=?",
+-                  String.class,
+-                  sessionId,
+-                  attempt.attemptId()))
+-          .isEqualTo("VALIDATING");
+-    }
++
+     tx.executeWithoutResult(
+         status -> {
+           sessions.lock(sessionId);
+@@ -2211,703 +2162,164 @@
+             new PublicationContracts.Candidate(learned, artifact, policy, hashes),
+             new PublicationContracts.Grant(
+                 sessionId, principal, csiId, snapshot.hash(), attempt.validationDeadline()));
+-    if (historicalV18) {
+-      probeHistoricalAdapter(jdbc, tx, command);
+-    }
++
++    beforeCommit.accept(command);
+     tx.executeWithoutResult(
+         status -> {
+           sessions.lock(sessionId);
+-          if (historicalV18) {
+-            commitHistoricalV18(jdbc, tx, command, HistoricalFault.NONE);
+-          } else {
+-            publications.commit(command, Instant.now());
+-          }
++          publications.commit(command, Instant.now());
++
+           jdbc.execute("SET CONSTRAINTS ALL IMMEDIATE");
+         });
+-    if (historicalV18) {
+-      System.out.println(
+-          "[historical-v18-installed-authority] "
+-              + jdbc.queryForObject(
+-                  "SELECT jsonb_agg(jsonb_build_object('function',proname,'definition',pg_get_functiondef(oid)) ORDER"
+-                      + " BY proname)::text FROM pg_proc WHERE pronamespace=current_schema()::regnamespace AND"
+-                      + " proname IN"
+-                      + " ('capture_ui_test_revision_authoring','ui_test_revisions_write_once',"
+-                      + "'studio_publication_receipt_guard','studio_publication_step_metadata_guard',"
+-                      + "'studio_execution_scope_immutable','studio_publication_epoch')",
+-                  String.class));
+-      System.out.println(
+-          "[historical-v18-enabled-guards] "
+-              + jdbc.queryForObject(
+-                  "SELECT jsonb_agg(jsonb_build_object('trigger',tgname,'enabled',tgenabled) ORDER BY tgname)::text"
+-                      + " FROM pg_trigger WHERE NOT tgisinternal AND tgrelid IN"
+-                      + " ('ui_test_revisions'::regclass,'ui_test_executions'::regclass,"
+-                      + "'studio_guided_publications'::regclass,'studio_guided_publication_attempts'::regclass)",
+-                  String.class));
+-      System.out.println(
+-          "[historical-v18-constraints] "
+-              + jdbc.queryForObject(
+-                  "SELECT jsonb_agg(jsonb_build_object('constraint',conname,'definition',pg_get_constraintdef(oid),"
+-                      + "'validated',convalidated) ORDER BY conname)::text FROM pg_constraint WHERE conrelid IN"
+-                      + " ('ui_test_revisions'::regclass,'ui_test_executions'::regclass,"
+-                      + "'studio_guided_publications'::regclass,"
+-                      + "'studio_guided_publication_attempts'::regclass)",
+-                  String.class));
+-      System.out.println(
+-          "[historical-v18-flyway] "
+-              + jdbc.queryForObject(
+-                  "SELECT jsonb_build_object('serverVersion',current_setting('server_version'),'migrations',(SELECT"
+-                      + " jsonb_agg(jsonb_build_object('version',version,'description',description,'checksum',"
+-                      + "checksum,'success',success) ORDER BY installed_rank) FROM flyway_schema_history))::text",
+-                  String.class));
+-      assertThat(
+-              jdbc.queryForObject(
+-                  "SELECT count(*) FROM ui_test_revisions r JOIN studio_guided_publications p ON p.revision_id=r.id"
+-                      + " AND p.session_id=r.guided_session_id JOIN studio_guided_publication_attempts a ON"
+-                      + " a.session_id=p.session_id AND a.attempt_id=p.attempt_id AND a.claim_id=p.claim_id WHERE"
+-                      + " r.id=? AND a.status='VALIDATED' AND p.snapshot_hash=? AND p.basis_hash=?",
+-                  Integer.class,
+-                  command.revisionId(),
+-                  snapshot.hash(),
+-                  GuidedContracts.hash(basis)))
+-          .isEqualTo(1);
+-      assertThat(
+-              C.parse(
+-                      jdbc.queryForObject(
+-                          "SELECT document::text FROM studio_guided_publications WHERE session_id=?",
+-                          String.class,
+-                          sessionId))
+-                  .path("publicReceipt")
+-                  .has("relearnedFrom"))
+-          .isFalse();
+-    }
++
+     return new Published(
+         testId, command.revisionId(), sessionId, csiId, prepared.environment(), principal);
+   }
+ 
+-  private static PublicationContracts.Commit changedHistoricalCommand(
++  /** Ports the retired adapter's Java-held negatives through the real head writer. */
++  @Test
++  void headCommitRejectsPolicyBasisAuthorityAndDeletedDraftWithoutAnyWrite() {
++    try (var db = new Database()) {
++      javax.sql.DataSource source = db.jdbc.getDataSource();
++      var prior = publishObserved(source, "left-prior", "CSI", "Development", "owner@example.test");
++      var next =
++          prepareObserved(
++              source, "left-next", prior.testId(), "CSI", "Development", "owner@example.test");
++      var published =
++          publishObserved(
++              source,
++              next,
++              command -> {
++                assertThat(command.snapshot().identity().path("base").path("confirmedRevisionId").asText())
++                    .as("pointer-clear probe starts from a genuine nonnull published revision")
++                    .isEqualTo(prior.revisionId().toString());
++                String before = commandRows(db.jdbc, command);
++                ObjectNode wrongPolicy =
++                    PublicationContracts.copy(command.candidate().policy()).put("unexpectedMutation", true);
++                var badPolicy =
++                    new PublicationContracts.Candidate(
++                        command.candidate().learnedPlan(),
++                        command.candidate().artifact(),
++                        wrongPolicy,
++                        command.candidate().hashes());
++                ObjectNode wrongBasis =
++                    PublicationContracts.copy(command.snapshot().basis()).put("translationRevision", "999");
++                for (var bad :
++                    List.of(
++                        changedCommand(command, command.snapshot(), badPolicy),
++                        changedCommand(
++                            command,
++                            new PublicationContracts.Snapshot(command.snapshot().identity(), wrongBasis),
++                            command.candidate()))) {
++                  assertThatThrownBy(
++                          () ->
++                              db.tx.executeWithoutResult(
++                                  t -> {
++                                    t.setRollbackOnly();
++                                    db.publications.commit(bad, Instant.now());
++                                  }))
++                      .hasMessageContaining("EVIDENCE_MISMATCH");
++                  assertThat(commandRows(db.jdbc, command)).isEqualTo(before);
++                }
++                for (String mutation :
++                    List.of(
++                        "UPDATE ui_tests SET confirmed_revision_id=NULL WHERE id=?",
++                        "UPDATE studio_guided_sessions SET state='OBSERVING',"
++                            + "document=jsonb_set(document,'{state}','\"OBSERVING\"') WHERE session_id=?",
++                        "UPDATE studio_guided_sessions SET document=jsonb_set(document,"
++                            + "'{owner,workerId}','\"wrong-worker\"') WHERE session_id=?")) {
++                  assertThatThrownBy(
++                          () ->
++                              db.tx.executeWithoutResult(
++                                  t -> {
++                                    t.setRollbackOnly();
++                                    db.jdbc.update(
++                                        mutation,
++                                        mutation.startsWith("UPDATE ui_tests") ? prior.testId() : command.sessionId());
++                                    db.publications.commit(command, Instant.now());
++                                  }))
++                      .isInstanceOf(com.citi.put.checks.studio.guided.session.GuidedSessionException.class);
++                  assertThat(commandRows(db.jdbc, command)).as(mutation).isEqualTo(before);
++                }
++                // J8 SQL tier: immutable expiry UPDATE is refused before any writer call.
++                // The original probe also stopped here; this is not Java expiry-branch proof.
++                assertThatThrownBy(
++                        () ->
++                            db.tx.executeWithoutResult(
++                                t -> {
++                                  t.setRollbackOnly();
++                                  db.jdbc.update(
++                                      "UPDATE studio_guided_sessions SET expires_at='2000-01-01',"
++                                          + "document=jsonb_set(document,'{expiresAt}',"
++                                          + "'\"2000-01-01T00:00:00Z\"') WHERE session_id=?",
++                                      command.sessionId());
++                                }))
++                    .as("J8 SQL immutable-expiry guard rejects the UPDATE before commit")
++                    .isInstanceOf(org.springframework.dao.DataAccessException.class)
++                    .hasMessageContaining("guided identity is immutable")
++                    .satisfies(
++                        error -> {
++                          Throwable cause =
++                              ((org.springframework.dao.DataAccessException) error)
++                                  .getMostSpecificCause();
++                          assertThat(cause).isInstanceOf(org.postgresql.util.PSQLException.class);
++                          var sql = (org.postgresql.util.PSQLException) cause;
++                          assertThat(sql.getSQLState()).isEqualTo("P0001");
++                          assertThat(sql.getServerErrorMessage()).isNotNull();
++                          assertThat(sql.getServerErrorMessage().getMessage())
++                              .isEqualTo("guided identity is immutable");
++                        });
++                assertThat(commandRows(db.jdbc, command))
++                    .as("J8 SQL expiry mutation rolls back every authority row")
++                    .isEqualTo(before);
++                // A transaction-local receipt trigger deletes only after early authority checks.
++                // This pins deleted_at IS NULL in the final CAS, not an earlier reader refusal.
++                assertThatThrownBy(
++                        () ->
++                            db.tx.executeWithoutResult(
++                                t -> {
++                                  t.setRollbackOnly();
++                                  db.jdbc.execute(
++                                      "CREATE FUNCTION left_delete_before_cas() RETURNS trigger LANGUAGE plpgsql AS $$ "
++                                          + "BEGIN UPDATE ui_tests SET deleted_at=clock_timestamp() WHERE id=NEW.test_id; "
++                                          + "RETURN NEW; END $$");
++                                  db.jdbc.execute(
++                                      "CREATE TRIGGER left_delete_before_cas AFTER INSERT ON studio_guided_publications "
++                                          + "FOR EACH ROW EXECUTE FUNCTION left_delete_before_cas()");
++                                  db.publications.commit(command, Instant.now());
++                                }))
++                    .hasMessageContaining("PUBLICATION_CONFLICT");
++                assertThat(commandRows(db.jdbc, command)).isEqualTo(before);
++                assertThat(
++                        db.jdbc.queryForObject(
++                            "SELECT to_regprocedure('left_delete_before_cas()') IS NULL", Boolean.class))
++                    .as("the fault trigger and function are rolled back with the failed write")
++                    .isTrue();
++              });
++      assertThat(published.testId()).isEqualTo(prior.testId());
++      assertThat(published.revisionId()).isNotEqualTo(prior.revisionId());
++    }
++  }
++
++  private static PublicationContracts.Commit changedCommand(
+       PublicationContracts.Commit c,
+-      UUID attempt,
+-      UUID claim,
+       PublicationContracts.Snapshot snapshot,
+       PublicationContracts.Candidate candidate) {
+     return new PublicationContracts.Commit(
+-        c.sessionId(),
+-        c.revisionId(),
+-        attempt,
+-        claim,
+-        c.finalizeKey(),
+-        c.finalizeDigest(),
+-        snapshot,
+-        candidate,
+-        c.grant());
+-  }
+-
+-  private static String historicalRows(JdbcTemplate jdbc, PublicationContracts.Commit c) {
++        c.sessionId(), c.revisionId(), c.attemptId(), c.claimId(), c.finalizeKey(),
++        c.finalizeDigest(), snapshot, candidate, c.grant());
++  }
++
++  private static String commandRows(JdbcTemplate jdbc, PublicationContracts.Commit c) {
+     return jdbc.queryForObject(
+-        "SELECT jsonb_build_object('draft',(SELECT to_jsonb(t) FROM ui_tests t WHERE id=?), 'session',(SELECT"
+-            + " to_jsonb(s) FROM studio_guided_sessions s WHERE session_id=?), 'revision',(SELECT to_jsonb(r) FROM"
+-            + " ui_test_revisions r WHERE id=?), 'receipt',(SELECT to_jsonb(p) FROM studio_guided_publications p"
+-            + " WHERE session_id=?),'attempt',(SELECT to_jsonb(a) FROM studio_guided_publication_attempts a"
+-            + " WHERE session_id=? AND attempt_id=?))::text",
++        "SELECT jsonb_build_object('draft',(SELECT to_jsonb(t) FROM ui_tests t WHERE id=?),"
++            + "'session',(SELECT to_jsonb(s) FROM studio_guided_sessions s WHERE session_id=?),"
++            + "'revision',(SELECT to_jsonb(r) FROM ui_test_revisions r WHERE id=?),"
++            + "'receipt',(SELECT to_jsonb(p) FROM studio_guided_publications p WHERE session_id=?),"
++            + "'attempt',(SELECT to_jsonb(a) FROM studio_guided_publication_attempts a WHERE session_id=? AND attempt_id=?))::text",
+         String.class,
+         UUID.fromString(c.snapshot().identity().path("base").path("testId").asText()),
+-        c.sessionId(),
+-        c.revisionId(),
+-        c.sessionId(),
+-        c.sessionId(),
+-        c.attemptId());
+-  }
+-
+-  /** Each negative invokes actual prechecks or installed SQL guards and proves full rollback. */
+-  private static void probeHistoricalAdapter(
+-      JdbcTemplate jdbc, TransactionTemplate tx, PublicationContracts.Commit c) {
+-    String before = historicalRows(jdbc, c);
+-    ObjectNode wrongPolicy =
+-        PublicationContracts.copy(c.candidate().policy()).put("unexpectedHistoricalMutation", true);
+-    var wrongCandidate =
+-        new PublicationContracts.Candidate(
+-            c.candidate().learnedPlan(),
+-            c.candidate().artifact(),
+-            wrongPolicy,
+-            c.candidate().hashes());
+-    ObjectNode wrongIdentity =
+-        PublicationContracts.copy(c.snapshot().identity()).put("basisHash", "0".repeat(64));
+-    ObjectNode wrongBasis =
+-        PublicationContracts.copy(c.snapshot().basis()).put("translationRevision", "999");
+-    var invalid =
+-        List.of(
+-            changedHistoricalCommand(c, c.attemptId(), c.claimId(), c.snapshot(), wrongCandidate),
+-            changedHistoricalCommand(
+-                c, c.attemptId(), UUID.randomUUID(), c.snapshot(), c.candidate()),
+-            changedHistoricalCommand(
+-                c,
+-                c.attemptId(),
+-                c.claimId(),
+-                new PublicationContracts.Snapshot(wrongIdentity, c.snapshot().basis()),
+-                c.candidate()),
+-            changedHistoricalCommand(
+-                c,
+-                c.attemptId(),
+-                c.claimId(),
+-                new PublicationContracts.Snapshot(c.snapshot().identity(), wrongBasis),
+-                c.candidate()));
+-    for (var bad : invalid) {
+-      assertThatThrownBy(
+-              () ->
+-                  tx.executeWithoutResult(
+-                      status -> commitHistoricalV18(jdbc, tx, bad, HistoricalFault.NONE)))
+-          .hasMessageContaining("EVIDENCE_MISMATCH");
+-      assertThat(historicalRows(jdbc, c)).isEqualTo(before);
+-    }
+-    var absentAttempt =
+-        changedHistoricalCommand(c, UUID.randomUUID(), c.claimId(), c.snapshot(), c.candidate());
+-    assertThatThrownBy(
+-            () ->
+-                tx.executeWithoutResult(
+-                    status -> commitHistoricalV18(jdbc, tx, absentAttempt, HistoricalFault.NONE)))
+-        .isInstanceOf(org.springframework.dao.EmptyResultDataAccessException.class);
+-    assertThat(historicalRows(jdbc, c)).isEqualTo(before);
+-    var expiredGrant =
+-        new PublicationContracts.Grant(
+-            c.sessionId(),
+-            c.grant().principalId(),
+-            c.grant().csiId(),
+-            c.snapshot().hash(),
+-            Instant.parse("2000-01-01T00:00:00Z"));
+-    var expired =
+-        new PublicationContracts.Commit(
+-            c.sessionId(),
+-            c.revisionId(),
+-            c.attemptId(),
+-            c.claimId(),
+-            c.finalizeKey(),
+-            c.finalizeDigest(),
+-            c.snapshot(),
+-            c.candidate(),
+-            expiredGrant);
+-    assertThatThrownBy(
+-            () ->
+-                tx.executeWithoutResult(
+-                    status -> commitHistoricalV18(jdbc, tx, expired, HistoricalFault.NONE)))
+-        .hasMessageContaining("FORBIDDEN_SCOPE");
+-    assertThat(historicalRows(jdbc, c)).isEqualTo(before);
+-    var previous =
+-        jdbc.queryForList("SELECT id FROM ui_test_revisions ORDER BY created_at,id", UUID.class);
+-    if (!previous.isEmpty()) {
+-      assertThatThrownBy(
+-              () ->
+-                  tx.executeWithoutResult(
+-                      status -> {
+-                        jdbc.update(
+-                            "UPDATE ui_tests SET confirmed_revision_id=? WHERE id=?",
+-                            previous.getFirst(),
+-                            UUID.fromString(
+-                                c.snapshot().identity().path("base").path("testId").asText()));
+-                        commitHistoricalV18(jdbc, tx, c, HistoricalFault.NONE);
+-                      }))
+-          .hasMessageContaining("PUBLICATION_CONFLICT");
+-      assertThat(historicalRows(jdbc, c)).isEqualTo(before);
+-    }
+-    for (HistoricalFault fault :
+-        List.of(
+-            HistoricalFault.MISSING_RECEIPT,
+-            HistoricalFault.WRONG_RECEIPT_HASH,
+-            HistoricalFault.EXTRA_PUBLIC_FIELD,
+-            HistoricalFault.STALE_CAS,
+-            HistoricalFault.POST_WRITE)) {
+-      var failure =
+-          assertThatThrownBy(
+-              () -> tx.executeWithoutResult(status -> commitHistoricalV18(jdbc, tx, c, fault)));
+-      switch (fault) {
+-        case MISSING_RECEIPT ->
+-            failure
+-                .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class)
+-                .hasMessageContaining("fk_observed_revision_receipt")
+-                .satisfies(
+-                    error ->
+-                        assertThat(
+-                                ((java.sql.SQLException)
+-                                        ((org.springframework.dao.DataAccessException) error)
+-                                            .getMostSpecificCause())
+-                                    .getSQLState())
+-                            .isEqualTo("23503"));
+-        case WRONG_RECEIPT_HASH, EXTRA_PUBLIC_FIELD ->
+-            failure
+-                .isInstanceOf(org.springframework.dao.DataAccessException.class)
+-                .hasMessageContaining("publication receipt shape invalid")
+-                .satisfies(
+-                    error ->
+-                        assertThat(
+-                                ((java.sql.SQLException)
+-                                        ((org.springframework.dao.DataAccessException) error)
+-                                            .getMostSpecificCause())
+-                                    .getSQLState())
+-                            .isEqualTo("P0001"));
+-        case STALE_CAS -> failure.hasMessageContaining("PUBLICATION_CONFLICT");
+-        case POST_WRITE -> failure.hasMessage("historical-fault-after-write");
+-        default -> throw new AssertionError(fault);
+-      }
+-      assertThat(historicalRows(jdbc, c)).isEqualTo(before);
+-    }
+-    // All real authority mutations remain rollback-scoped. Immutable attempt facts are never
+-    // edited.
+-    for (String mutation :
+-        List.of(
+-            "UPDATE ui_tests SET source_revision=source_revision+1 WHERE id=?",
+-            "UPDATE ui_tests SET configuration_revision=configuration_revision+1 WHERE id=?",
+-            "UPDATE ui_tests SET confirmed_revision_id=NULL WHERE id=?",
+-            "UPDATE studio_guided_sessions SET"
+-                + " state='OBSERVING',document=jsonb_set(document,'{state}','\"OBSERVING\"') WHERE session_id=?",
+-            "UPDATE studio_guided_sessions SET document=jsonb_set(document,'{owner,workerId}','\"wrong-worker\"')"
+-                + " WHERE session_id=?",
+-            "UPDATE studio_guided_sessions SET document=jsonb_set(document,'{owner,fence}','2') WHERE session_id=?",
+-            "UPDATE studio_guided_sessions SET"
+-                + " document=jsonb_set(document,'{owner,leaseExpiresAt}','\"2000-01-01T00:00:00Z\"') WHERE"
+-                + " session_id=?",
+-            "UPDATE studio_guided_sessions SET"
+-                + " expires_at='2000-01-01',document=jsonb_set(document,'{expiresAt}','\"2000-01-01T00:00:00Z\"')"
+-                + " WHERE session_id=?")) {
+-      // A null->null pointer mutation is intentionally excluded when there is no prior pointer.
+-      if (mutation.contains("confirmed_revision_id=NULL")
+-          && c.snapshot().identity().path("base").path("confirmedRevisionId").isNull()) {
+-        continue;
+-      }
+-      assertThatThrownBy(
+-              () ->
+-                  tx.executeWithoutResult(
+-                      status -> {
+-                        jdbc.update(
+-                            mutation,
+-                            mutation.startsWith("UPDATE ui_tests")
+-                                ? UUID.fromString(
+-                                    c.snapshot().identity().path("base").path("testId").asText())
+-                                : c.sessionId());
+-                        commitHistoricalV18(jdbc, tx, c, HistoricalFault.NONE);
+-                      }))
+-          .isInstanceOf(RuntimeException.class);
+-      assertThat(historicalRows(jdbc, c)).isEqualTo(before);
+-    }
+-  }
+-
+-  private enum HistoricalFault {
+-    NONE,
+-    MISSING_RECEIPT,
+-    WRONG_RECEIPT_HASH,
+-    EXTRA_PUBLIC_FIELD,
+-    STALE_CAS,
+-    POST_WRITE
+-  }
+-
+-  /** Exact V18 installed-SQL fixture writer. Never entered by any current-head publication. */
+-  private static PublicationContracts.Receipt commitHistoricalV18(
+-      JdbcTemplate jdbc,
+-      TransactionTemplate tx,
+-      PublicationContracts.Commit commit,
+-      HistoricalFault fault) {
+-    com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.requireV18(jdbc);
+-    require(
+-        org.springframework.transaction.support.TransactionSynchronizationManager
+-            .isActualTransactionActive(),
+-        "RUNTIME_INCOMPATIBLE",
+-        409);
+-    var sessions = new GuidedSessionRepository(jdbc, tx, C);
+-    var locked = sessions.lock(commit.sessionId());
+-    JsonNode session = locked.document();
+-    var bases = new GuidedPublicationBaseRepository(jdbc, C);
+-    JsonNode draft = bases.lockCurrent(UUID.fromString(session.path("testId").asText())).document();
+-    JsonNode captured =
+-        C.parse(
+-            jdbc.queryForObject(
+-                "SELECT document::text FROM studio_guided_publication_bases WHERE session_id=? FOR UPDATE",
+-                String.class,
+-                commit.sessionId()));
+-    var a =
+-        jdbc.queryForObject(
+-            "SELECT attempt_id,claim_id,attempt_number,status,validation_deadline,identity::text,"
+-                + "validator_receipt::text,failure_code FROM studio_guided_publication_attempts WHERE session_id=?"
+-                + " AND attempt_id=? FOR UPDATE",
+-            (rs, n) ->
+-                new PublicationContracts.Attempt(
+-                    commit.sessionId(),
+-                    rs.getObject(1, UUID.class),
+-                    rs.getObject(2, UUID.class),
+-                    rs.getInt(3),
+-                    PublicationContracts.AttemptStatus.valueOf(rs.getString(4)),
+-                    rs.getTimestamp(5).toInstant(),
+-                    C.parse(rs.getString(6)),
+-                    rs.getString(7) == null ? null : C.parse(rs.getString(7)),
+-                    rs.getString(8)),
+-            commit.sessionId(),
+-            commit.attemptId());
+-    require(
+-        a != null
+-            && a.status() == PublicationContracts.AttemptStatus.VALIDATED
+-            && a.claimId().equals(commit.claimId())
+-            && a.identity().path("snapshotHash").asText().equals(commit.snapshot().hash())
+-            && a.identity().path("finalizeKey").asText().equals(commit.finalizeKey())
+-            && a.identity().path("finalizeDigest").asText().equals(commit.finalizeDigest()),
+-        "EVIDENCE_MISMATCH",
+-        422);
+-    var fields = commit.snapshot().identity().fields();
+-    while (fields.hasNext()) {
+-      var field = fields.next();
+-      require(a.identity().path(field.getKey()).equals(field.getValue()), "EVIDENCE_MISMATCH", 422);
+-    }
+-    Instant wall =
+-        jdbc.queryForObject("SELECT clock_timestamp()", (rs, n) -> rs.getTimestamp(1).toInstant());
+-    require(
+-        session.path("state").asText().equals("FINALIZING")
+-            && session.path("testId").equals(captured.path("testId"))
+-            && session.path("scopeHash").equals(captured.path("scopeHash"))
+-            && session.path("runAuthorization").equals(captured.path("runAuthorization"))
+-            && session.path("scope").path("csiId").equals(captured.path("csiId"))
+-            && session.path("owner").path("workerId").equals(a.identity().path("ownerWorkerId"))
+-            && session.path("owner").path("fence").equals(a.identity().path("ownerFence"))
+-            && Instant.parse(session.path("owner").path("leaseExpiresAt").asText()).isAfter(wall)
+-            && Instant.parse(session.path("expiresAt").asText()).isAfter(wall)
+-            && a.validationDeadline().isAfter(wall),
+-        "PUBLICATION_CONFLICT",
+-        409);
+-    require(
+-        captured.equals(a.identity().path("base"))
+-            && captured.equals(commit.snapshot().identity().path("base")),
+-        "EVIDENCE_MISMATCH",
+-        422);
+-    bases.requireCurrent(
+-        new PublicationContracts.Base(captured), new PublicationContracts.CurrentSource(draft));
+-    require(
+-        jdbc.queryForObject(
+-                "SELECT p.plan_hash FROM studio_guided_translation_state s JOIN studio_guided_translation_plans p"
+-                    + " USING(session_id,plan_revision) WHERE s.session_id=?",
+-                String.class,
+-                commit.sessionId())
+-            .equals(a.identity().path("translationHash").asText()),
+-        "EVIDENCE_MISMATCH",
+-        422);
+-    require(
+-        jdbc.queryForObject(
+-                    "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND"
+-                        + " (document->>'state'<>'SUCCEEDED' OR document->>'dispatchCount'<>'1')",
+-                    Integer.class,
+-                    commit.sessionId())
+-                == 0
+-            && jdbc.queryForObject(
+-                    "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND status IN"
+-                        + " ('RESERVED','CALLING')",
+-                    Integer.class,
+-                    commit.sessionId())
+-                == 0
+-            && !commit.snapshot().basis().path("actions").isEmpty(),
+-        "EVIDENCE_MISMATCH",
+-        422);
+-    verifyHistoricalVerdict(a, a.verdict());
+-    JsonNode base = captured;
+-    var grant = commit.grant();
+-    require(
+-        grant.sessionId().equals(commit.sessionId())
+-            && grant.snapshotHash().equals(commit.snapshot().hash())
+-            && grant.principalId().equals(base.path("originalPrincipalId").asText())
+-            && grant.csiId().equals(base.path("csiId").asText())
+-            && grant.expiresAt().isAfter(wall)
+-            && !grant.expiresAt().isAfter(a.validationDeadline()),
+-        "FORBIDDEN_SCOPE",
+-        403);
+-    var candidate = commit.candidate();
+-    verifyHistoricalCandidate(commit.snapshot(), candidate, a.verdict());
+-    jdbc.execute("SET CONSTRAINTS ALL DEFERRED");
+-    JsonNode current = bases.lockCurrent(UUID.fromString(base.path("testId").asText())).document();
+-    JsonNode basis = commit.snapshot().basis();
+-    var source = C.object().putArray("items");
+-    for (JsonNode step : basis.path("sourceSteps")) {
+-      source.add(step.path("source"));
+-    }
+-    require(
+-        basis
+-                .path("snapshotEvidence")
+-                .path("current")
+-                .path("authoring")
+-                .equals(current.path("authoring"))
+-            && basis
+-                .path("snapshotEvidence")
+-                .path("current")
+-                .path("authoredDeclarations")
+-                .equals(current.path("authoredDeclarations")),
+-        "PUBLICATION_CONFLICT",
+-        409);
+-    jdbc.update(
+-        "UPDATE ui_tests SET authoring_revision_inputs=?::jsonb WHERE id=?",
+-        current.path("authoringRevisionInputs").toString(),
+-        UUID.fromString(base.path("testId").asText()));
+-    ObjectNode references = C.object().put("authoringIdentityVersion", 1);
+-    references.set("authoredDeclarations", current.path("authoredDeclarations"));
+-    var variables = references.putArray("variables");
+-    var secrets = references.putArray("secrets");
+-    var seen =
+-        new java.util.TreeSet<String>(
+-            com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.UTF8);
+-    var secretNames =
+-        new java.util.TreeSet<String>(
+-            com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.UTF8);
+-    for (JsonNode ref : basis.path("configurationReferences")) {
+-      if (ref.path("kind").asText().equals("secretRef")) {
+-        secretNames.add(ref.path("referenceName").asText());
+-      } else {
+-        seen.add(ref.path("referenceName").asText());
+-      }
+-    }
+-    seen.forEach(variables::add);
+-    secretNames.forEach(secrets::add);
+-    ObjectNode provenance = PublicationContracts.copy(candidate.hashes());
+-    provenance.set("profile", candidate.artifact().path("profile"));
+-    provenance.put("guidedSessionId", commit.sessionId()).put("publicationKind", "GUIDED_RUN");
+-    provenance.set("runAuthorization", base.path("runAuthorization"));
+-    jdbc.update(
+-        "INSERT INTO"
+-            + " ui_test_revisions(id,test_id,csi_id,source_revision,configuration_revision,"
+-            + "source,source_hash,artifact,artifact_hash,artifact_schema_version,configuration,"
+-            + "\"references\",provenance,created_by,confirmed_by,confirmed_at,confirmation_source,"
+-            + "reference_policy,publication_kind,guided_session_id,learned_plan_hash,"
+-            + "revision_digest,step_snapshot_hashes,step_reuse_provenance)"
+-            + " VALUES"
+-            + " (?,?,?,?,?,?::jsonb,?,?::jsonb,?,3,?::jsonb,?::jsonb,?::jsonb,?,"
+-            + "?,?,'GUIDED_RUN',?::jsonb,'GUIDED_RUN',?,?,?,?::jsonb,?::jsonb)",
+-        commit.revisionId(),
+-        UUID.fromString(base.path("testId").asText()),
+-        base.path("csiId").asText(),
+-        Long.parseLong(base.path("sourceRevision").asText()),
+-        Long.parseLong(base.path("configurationRevision").asText()),
+-        source.toString(),
+-        candidate.hashes().path("sourceHash").asText(),
+-        candidate.artifact().toString(),
+-        candidate.hashes().path("artifactHash").asText(),
+-        current.path("configuration").toString(),
+-        references.toString(),
+-        provenance.toString(),
+-        grant.principalId(),
+-        grant.principalId(),
+-        Timestamp.from(PublicationContracts.millisecond(wall)),
+-        candidate.policy().toString(),
+-        commit.sessionId(),
+-        candidate.hashes().path("learnedPlanHash").asText(),
+-        candidate.hashes().path("revisionDigest").asText(),
+-        candidate.learnedPlan().path("stepSnapshotHashes").toString(),
+-        candidate.learnedPlan().path("reusedFrom").toString());
+-    JsonNode inserted =
+-        C.parse(
+-            jdbc.queryForObject(
+-                "SELECT authoring::text FROM ui_test_revisions WHERE id=?",
+-                String.class,
+-                commit.revisionId()));
+-    require(inserted.equals(current.path("authoring")), "PUBLICATION_CONFLICT", 409);
+-    ObjectNode document =
+-        C.object()
+-            .put("sessionId", commit.sessionId())
+-            .put("revisionId", commit.revisionId().toString())
+-            .put("testId", base.path("testId").asText())
+-            .put("csiId", base.path("csiId").asText())
+-            .put("originalPrincipalId", grant.principalId())
+-            .put("finalizeKey", a.identity().path("finalizeKey").asText())
+-            .put("finalizeDigest", commit.finalizeDigest())
+-            .put("attemptId", commit.attemptId().toString())
+-            .put("claimId", commit.claimId().toString())
+-            .put("snapshotHash", commit.snapshot().hash())
+-            .put("basisHash", a.identity().path("basisHash").asText())
+-            .put("publishedAt", PublicationContracts.time(wall));
+-    for (String key :
+-        List.of(
+-            "learnedPlanHash",
+-            "artifactHash",
+-            "referencePolicyHash",
+-            "operationEquivalenceHash",
+-            "admissionProvenanceHash",
+-            "publicationEvidenceHash",
+-            "revisionDigest",
+-            "profileHash")) {
+-      document.set(key, candidate.hashes().path(key));
+-    }
+-    ObjectNode publicReceipt =
+-        document
+-            .putObject("publicReceipt")
+-            .put("schemaVersion", 3)
+-            .put("sessionId", commit.sessionId())
+-            .put("revisionId", commit.revisionId().toString())
+-            .put("publishedAt", PublicationContracts.time(wall))
+-            .put("learnedFromThisRun", true)
+-            .put("replayVerified", false);
+-    for (String key :
+-        List.of("revisionDigest", "learnedPlanHash", "artifactHash", "publicationEvidenceHash")) {
+-      publicReceipt.set(key, candidate.hashes().path(key));
+-    }
+-    if (fault == HistoricalFault.WRONG_RECEIPT_HASH) {
+-      document.put("artifactHash", "0".repeat(64));
+-    }
+-    if (fault == HistoricalFault.EXTRA_PUBLIC_FIELD) {
+-      publicReceipt.putNull("relearnedFrom");
+-    }
+-    if (fault != HistoricalFault.MISSING_RECEIPT) {
+-      jdbc.update(
+-          "INSERT INTO"
+-              + " studio_guided_publications(session_id,revision_id,test_id,csi_id"
+-              + ",attempt_id,claim_id,snapshot_hash,basis_hash,document,learned_pl"
+-              + "an,published_at)"
+-              + " VALUES (?,?,?,?,?,?,?,?,?::jsonb,?::jsonb,?)",
+-          commit.sessionId(),
+-          commit.revisionId(),
+-          UUID.fromString(base.path("testId").asText()),
+-          base.path("csiId").asText(),
+-          commit.attemptId(),
+-          commit.claimId(),
+-          commit.snapshot().hash(),
+-          a.identity().path("basisHash").asText(),
+-          document.toString(),
+-          candidate.learnedPlan().toString(),
+-          Timestamp.from(PublicationContracts.millisecond(wall)));
+-    }
+-    if (fault == HistoricalFault.STALE_CAS) {
+-      jdbc.update(
+-          "UPDATE ui_tests SET deleted_at=clock_timestamp() WHERE id=?",
+-          UUID.fromString(base.path("testId").asText()));
+-    }
+-    int changed =
+-        jdbc.update(
+-            "UPDATE ui_tests SET confirmed_revision_id=?"
+-                + " WHERE id=? AND source_revision=? AND configuration_revision=? AND"
+-                + " publication_epoch=? AND"
+-                + " confirmed_revision_id IS NOT DISTINCT FROM ?::uuid AND deleted_at IS NULL AND"
+-                + " quarantined_at IS NULL AND clock_timestamp()<? AND EXISTS(SELECT 1 FROM"
+-                + " studio_guided_sessions WHERE session_id=? AND state='FINALIZING' AND"
+-                + " expires_at>clock_timestamp() AND"
+-                + " (document->'owner'->>'leaseExpiresAt')::timestamptz>clock_timestamp())",
+-            commit.revisionId(),
+-            UUID.fromString(base.path("testId").asText()),
+-            Long.parseLong(base.path("sourceRevision").asText()),
+-            Long.parseLong(base.path("configurationRevision").asText()),
+-            Long.parseLong(base.path("publicationEpoch").asText()),
+-            base.path("confirmedRevisionId").isNull()
+-                ? null
+-                : base.path("confirmedRevisionId").asText(),
+-            Timestamp.from(grant.expiresAt()),
+-            commit.sessionId());
+-    require(changed == 1, "PUBLICATION_CONFLICT", 409);
+-    require(
+-        jdbc.update(
+-                "UPDATE studio_guided_sessions SET"
+-                    + " state='SUCCEEDED',document=jsonb_set(document,'{state}','\"SUCCE"
+-                    + "EDED\"'),progress=progress||jsonb_build_object('publicationRevisi"
+-                    + "onId',?::text,'publicationRevisionDigest',?::text)"
+-                    + " WHERE session_id=? AND state='FINALIZING'",
+-                commit.revisionId().toString(),
+-                candidate.hashes().path("revisionDigest").asText(),
+-                commit.sessionId())
+-            == 1,
+-        "PUBLICATION_CONFLICT",
+-        409);
+-    jdbc.execute("SET CONSTRAINTS ALL IMMEDIATE");
+-    if (fault == HistoricalFault.POST_WRITE) {
+-      throw new IllegalStateException("historical-fault-after-write");
+-    }
+-    return new PublicationContracts.Receipt(document);
+-  }
+-
+-  private static void verifyHistoricalCandidate(
+-      PublicationContracts.Snapshot snapshot, PublicationContracts.Candidate c, JsonNode verdict) {
+-    PublicationContracts.Candidate recomputed =
+-        new ObservedArtifactLowerer(C).lower(snapshot.basis(), c.artifact().path("profile"));
+-    require(
+-        recomputed.learnedPlan().equals(c.learnedPlan())
+-            && recomputed.artifact().equals(c.artifact())
+-            && recomputed.policy().equals(c.policy())
+-            && recomputed.hashes().equals(c.hashes()),
+-        "EVIDENCE_MISMATCH",
+-        422);
+-    JsonNode h = c.hashes(), b = snapshot.basis();
+-    require(
+-        GuidedContracts.hash(b).equals(snapshot.identity().path("basisHash").asText())
+-            && GuidedContracts.hash(c.artifact()).equals(h.path("artifactHash").asText())
+-            && GuidedContracts.hash(c.learnedPlan()).equals(h.path("learnedPlanHash").asText())
+-            && GuidedContracts.hash(c.policy()).equals(h.path("referencePolicyHash").asText())
+-            && c.artifact().path("learnedPlan").equals(c.learnedPlan())
+-            && c.artifact().path("replayPolicy").equals(c.policy()),
+-        "EVIDENCE_MISMATCH",
+-        422);
+-    for (String key :
+-        List.of(
+-            "artifactHash",
+-            "learnedPlanHash",
+-            "referencePolicyHash",
+-            "operationEquivalenceHash",
+-            "publicationEvidenceHash")) {
+-      require(
+-          h.path(key).equals(verdict.path(key))
+-              && h.path(key).equals(snapshot.identity().path(key)),
+-          "EVIDENCE_MISMATCH",
+-          422);
+-    }
+-    for (String key :
+-        List.of("sourceHash", "configurationHash", "authoringHash", "runAuthorizationHash")) {
+-      require(
+-          h.path(key).equals(snapshot.identity().path("base").path(key)), "EVIDENCE_MISMATCH", 422);
+-    }
+-    require(
+-        h.path("admissionProvenanceHash").equals(verdict.path("admissionProvenanceHash")),
+-        "EVIDENCE_MISMATCH",
+-        422);
+-    require(
+-        GuidedContracts.hash(c.artifact().path("profile")).equals(h.path("profileHash").asText()),
+-        "PROFILE_MISMATCH",
+-        409);
+-    ObjectNode digest = C.object().put("version", 1);
+-    for (String key : List.of("testId", "csiId", "sourceRevision", "configurationRevision")) {
+-      digest.set(key, b.path(key));
+-    }
+-    for (String key :
+-        List.of(
+-            "sourceHash",
+-            "configurationHash",
+-            "authoringHash",
+-            "learnedPlanHash",
+-            "artifactHash",
+-            "referencePolicyHash",
+-            "operationEquivalenceHash",
+-            "admissionProvenanceHash",
+-            "publicationEvidenceHash",
+-            "runAuthorizationHash",
+-            "profileHash")) {
+-      digest.set(key, h.path(key));
+-    }
+-    require(
+-        GuidedContracts.hash(digest).equals(h.path("revisionDigest").asText()),
+-        "EVIDENCE_MISMATCH",
+-        422);
+-  }
+-
+-  private static void verifyHistoricalVerdict(PublicationContracts.Attempt a, JsonNode v) {
+-    require(
+-        v != null
+-            && v.path("ok").isBoolean()
+-            && v.path("ok").asBoolean()
+-            && v.path("errorCode").isNull()
+-            && v.path("attemptId").asText().equals(a.attemptId().toString())
+-            && v.path("claimId").asText().equals(a.claimId().toString()),
+-        "EVIDENCE_MISMATCH",
+-        422);
+-    for (String key :
+-        List.of(
+-            "snapshotHash",
+-            "basisHash",
+-            "artifactHash",
+-            "learnedPlanHash",
+-            "referencePolicyHash",
+-            "operationEquivalenceHash",
+-            "publicationEvidenceHash")) {
+-      require(v.path(key).equals(a.identity().path(key)), "EVIDENCE_MISMATCH", 422);
+-    }
+-    require(
+-        GuidedContracts.hash(v.path("profile")).equals(a.identity().path("profileHash").asText())
+-            && GuidedContracts.hash(v.path("build"))
+-                .equals(a.identity().path("validationBuildHash").asText()),
+-        "PROFILE_MISMATCH",
+-        409);
++        c.sessionId(), c.revisionId(), c.sessionId(), c.sessionId(), c.attemptId());
+   }
+ 
+   private static void completeSessionMetadata(ObjectNode session) {
+--- a/backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationIT.java
++++ /dev/null
+@@ -1,406 +0,0 @@
+-package com.citi.put.checks.studio;
+-
+-import static org.assertj.core.api.Assertions.assertThat;
+-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+-
+-import com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest;
+-import java.sql.Connection;
+-import java.sql.DriverManager;
+-import java.sql.ResultSet;
+-import java.sql.SQLException;
+-import java.sql.Statement;
+-import java.util.UUID;
+-import org.flywaydb.core.Flyway;
+-import org.junit.jupiter.api.AfterAll;
+-import org.junit.jupiter.api.BeforeAll;
+-import org.junit.jupiter.api.Test;
+-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+-import org.testcontainers.containers.PostgreSQLContainer;
+-import org.testcontainers.junit.jupiter.Testcontainers;
+-
+-/**
+- * The revision and execution-evidence half of the former inference migrations (V18/V19), on the
+- * STUDIO-OBS-012A / ADR-SC-005 D-B re-baseline: fresh install and a populated core V11 upgrade
+- * reach V18 without compile state or invented history; observed revisions capture their authoring
+- * and are wholly immutable; per-step reuse stays inside its own test; the truthful FULL index
+- * survives execution retention. The compile request/outcome/step registries and the staged V19
+- * cutover are retired with the compile path (their tests are deleted by name in the Lane M ledger).
+- */
+-@Testcontainers(disabledWithoutDocker = true)
+-class InferenceMigrationIT {
+-
+-  private static final PostgreSQLContainer<?> POSTGRES =
+-      new PostgreSQLContainer<>("postgres:15-alpine").withDatabaseName("inference_migration");
+-  private static final UUID TEST_ID = UUID.randomUUID();
+-  private static final UUID LEGACY_EXECUTION = UUID.randomUUID();
+-  private static final String HASH = "a".repeat(64);
+-  private static final String SOURCE = "[\"Click save\"]";
+-  private static final String CSI = "71023";
+-  private static final String OWNER = "inference@citi.com";
+-
+-  @BeforeAll
+-  static void upgrade() throws SQLException {
+-    POSTGRES.start();
+-    // A populated, untouched core database is the supported starting point (D-B).
+-    migrate(POSTGRES.getJdbcUrl(), "11");
+-    try (Connection c = connect();
+-        Statement s = c.createStatement()) {
+-      s.executeUpdate(
+-          "INSERT INTO users(id,sso_id,name,email,is_active) VALUES"
+-              + "(gen_random_uuid(),'inference-author','Inference','"
+-              + OWNER
+-              + "',true)");
+-      s.executeUpdate(
+-          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment,status)"
+-              + " VALUES('"
+-              + CSI
+-              + "','Inference','Ops','HIGH','"
+-              + OWNER
+-              + "','Production','OPERATIONAL')");
+-      s.executeUpdate(draft(TEST_ID));
+-      s.executeUpdate(
+-          "INSERT INTO ui_test_executions(id,ui_test_id,status,started_at,ended_at,duration_ms)"
+-              + " VALUES('"
+-              + LEGACY_EXECUTION
+-              + "','"
+-              + TEST_ID
+-              + "','PASSED',NOW(),NOW(),0)");
+-    }
+-    migrate(POSTGRES.getJdbcUrl(), "18");
+-  }
+-
+-  @AfterAll
+-  static void stop() {
+-    POSTGRES.stop();
+-  }
+-
+-  @Test
+-  void freshInstallStopsAtAdditiveVersionAndUpgradeInventsNoHistory() throws SQLException {
+-    String freshUrl = POSTGRES.getJdbcUrl().replace("inference_migration", "inference_fresh");
+-    try (Connection c = connect();
+-        Statement s = c.createStatement()) {
+-      s.execute("CREATE DATABASE inference_fresh");
+-    }
+-    // Historical migrations assume one application schema per database.
+-    migrate(freshUrl, "18");
+-    try (Connection c =
+-        DriverManager.getConnection(freshUrl, POSTGRES.getUsername(), POSTGRES.getPassword())) {
+-      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("18");
+-      assertThat(
+-              scalar(
+-                  c,
+-                  "SELECT count(*) FROM pg_class WHERE relname IN ('ui_test_compile_requests',"
+-                      + "'ui_test_compile_outcomes','ui_test_step_identities')"))
+-          .isEqualTo("0");
+-      assertThat(
+-              scalar(
+-                  c,
+-                  "SELECT count(*) FROM information_schema.columns WHERE table_name IN"
+-                      + " ('ui_tests','ui_test_revisions') AND column_name IN ('compile_status',"
+-                      + "'compile_request_id','compile_error','compile_diagnostics',"
+-                      + "'compile_started_at','current_candidate_revision_id','authoring_snapshot',"
+-                      + "'authoring_hash','scope_reviewed_by','scope_reviewed_at',"
+-                      + "'compilation_fingerprint','baseline_revision_id','expected_intent',"
+-                      + "'intent_derivation_version')"))
+-          .isEqualTo("0");
+-    }
+-    try (Connection c = connect()) {
+-      // Other cases publish their own drafts; the upgraded draft gains nothing.
+-      assertThat(
+-              scalar(c, "SELECT count(*) FROM ui_test_revisions WHERE test_id='" + TEST_ID + "'"))
+-          .isEqualTo("0");
+-      assertThat(
+-              scalar(
+-                  c,
+-                  "SELECT count(*) FROM ui_tests WHERE id='"
+-                      + TEST_ID
+-                      + "' AND confirmed_revision_id IS NULL"))
+-          .isEqualTo("1");
+-      assertThat(
+-              scalar(
+-                  c,
+-                  "SELECT execution_scope FROM ui_test_executions WHERE id='"
+-                      + LEGACY_EXECUTION
+-                      + "'"))
+-          .isNull();
+-      assertThat(
+-              scalar(
+-                  c,
+-                  "SELECT revision_id::text FROM ui_test_executions WHERE id='"
+-                      + LEGACY_EXECUTION
+-                      + "'"))
+-          .isNull();
+-    }
+-  }
+-
+-  @Test
+-  void revisionMustMatchCaptureAndProtectsEveryNewColumn() throws SQLException {
+-    var published = publish("inference-capture");
+-    UUID revision = published.revisionId();
+-    try (Connection c = transaction();
+-        Statement s = c.createStatement()) {
+-      String captured =
+-          scalar(c, "SELECT authoring::text FROM ui_test_revisions WHERE id='" + revision + "'");
+-      assertThat(captured)
+-          .isNotNull()
+-          .isEqualTo(
+-              scalar(
+-                  c, "SELECT authoring::text FROM ui_tests WHERE id='" + published.testId() + "'"));
+-      // The capture is the publication's own: a later draft edit cannot reach the revision.
+-      s.executeUpdate(
+-          "UPDATE ui_tests SET authoring=jsonb_set(authoring,'{steps,0,text}','\"edited\"')"
+-              + " WHERE id='"
+-              + published.testId()
+-              + "'");
+-      assertThat(
+-              scalar(
+-                  c, "SELECT authoring::text FROM ui_test_revisions WHERE id='" + revision + "'"))
+-          .isEqualTo(captured);
+-      for (String assignment :
+-          new String[] {
+-            "authoring=NULL",
+-            "authoring_revision_inputs='{}'::jsonb",
+-            "reference_policy='{}'::jsonb",
+-            "confirmed_by='other@citi.com'",
+-            "confirmed_at=confirmed_at+INTERVAL '1 second'",
+-            "learned_plan_hash='" + "b".repeat(64) + "'",
+-            "revision_digest='" + "c".repeat(64) + "'",
+-            "step_snapshot_hashes='{}'::jsonb,step_reuse_provenance='{}'::jsonb",
+-            "artifact_hash='" + HASH + "'",
+-            "source_revision=source_revision+1"
+-          }) {
+-        reject(
+-            c,
+-            "UPDATE ui_test_revisions SET " + assignment + " WHERE id='" + revision + "'",
+-            "ui_test_revisions is immutable");
+-      }
+-      c.rollback();
+-    }
+-  }
+-
+-  @Test
+-  void reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot() throws SQLException {
+-    var other = publish("inference-other-test");
+-    var owner = publish("inference-reuse-owner");
+-    var ds = dataSource();
+-    var first =
+-        GuidedPublicationMigrationTest.prepareHistoricalV18Observed(
+-            ds, "inference-reuse-1", owner.testId(), CSI, "Production", OWNER);
+-    var second =
+-        GuidedPublicationMigrationTest.prepareHistoricalV18Observed(
+-            ds, "inference-reuse-2", owner.testId(), CSI, "Production", OWNER);
+-    String step = first.stepId().toString();
+-    String snapshot = "{\"" + step + "\":\"" + "d".repeat(64) + "\"}";
+-    try (Connection c = transaction();
+-        Statement s = c.createStatement()) {
+-      UUID prior = UUID.randomUUID();
+-      s.executeUpdate(revisionWithStepMetadata(prior, owner.testId(), first, snapshot, "{}", "1"));
+-      s.execute("SET CONSTRAINTS tr_publication_step_metadata_guard IMMEDIATE");
+-      // Same test and CSI, identical snapshot: the reuse is accepted by the guard.
+-      var beforeReuse = c.setSavepoint();
+-      UUID reused = UUID.randomUUID();
+-      s.executeUpdate(
+-          revisionWithStepMetadata(
+-              reused,
+-              owner.testId(),
+-              second,
+-              snapshot,
+-              "{\"" + step + "\":{\"revisionId\":\"" + prior + "\",\"stepId\":\"" + step + "\"}}",
+-              "2"));
+-      assertThat(
+-              scalar(
+-                  c,
+-                  "SELECT step_reuse_provenance->'"
+-                      + step
+-                      + "'->>'revisionId' FROM ui_test_revisions WHERE id='"
+-                      + reused
+-                      + "'"))
+-          .isEqualTo(prior.toString());
+-      c.rollback(beforeReuse);
+-      c.releaseSavepoint(beforeReuse);
+-      // Same test, same authored coordinate and same prior revision; only the hash differs.
+-      // These are rollback-only deferred metadata probes, not committed publications.
+-      reject(
+-          c,
+-          revisionWithStepMetadata(
+-              UUID.randomUUID(),
+-              owner.testId(),
+-              second,
+-              "{\"" + step + "\":\"" + "e".repeat(64) + "\"}",
+-              "{\"" + step + "\":{\"revisionId\":\"" + prior + "\",\"stepId\":\"" + step + "\"}}",
+-              "3"),
+-          "step reuse must preserve same-scope published snapshot hash");
+-      c.rollback();
+-    }
+-    try (Connection c = transaction();
+-        Statement s = c.createStatement()) {
+-      s.execute("SET CONSTRAINTS tr_publication_step_metadata_guard IMMEDIATE");
+-      // The same reuse pointed at another test's published revision is refused.
+-      reject(
+-          c,
+-          revisionWithStepMetadata(
+-              UUID.randomUUID(),
+-              owner.testId(),
+-              first,
+-              snapshot,
+-              "{\""
+-                  + step
+-                  + "\":{\"revisionId\":\""
+-                  + other.revisionId()
+-                  + "\",\"stepId\":\""
+-                  + step
+-                  + "\"}}",
+-              "4"),
+-          "step reuse must preserve same-scope published snapshot hash");
+-      reject(
+-          c,
+-          revisionWithStepMetadata(
+-              UUID.randomUUID(),
+-              owner.testId(),
+-              first,
+-              "{\"" + UUID.randomUUID() + "\":\"" + "d".repeat(64) + "\"}",
+-              "{}",
+-              "5"),
+-          "step snapshot authored coordinate mismatch");
+-      c.rollback();
+-    }
+-  }
+-
+-  @Test
+-  void baselineIndexRequiresTruthfulFullMarkerAndSurvivesExecutionRetention() throws SQLException {
+-    var published = publish("inference-retention");
+-    try (Connection c = transaction();
+-        Statement s = c.createStatement()) {
+-      assertThat(
+-              scalar(
+-                  c,
+-                  "SELECT count(*) FROM ui_test_executions WHERE status='PASSED' AND execution_scope='FULL'"))
+-          .isEqualTo("0");
+-      assertThat(
+-              scalar(
+-                  c,
+-                  "SELECT count(*) FROM pg_indexes WHERE schemaname='public'"
+-                      + " AND indexname='idx_ui_test_exec_full_baseline'"
+-                      + " AND indexdef LIKE '%execution_scope)::text = ''FULL''%'"))
+-          .isEqualTo("1");
+-      reject(
+-          c,
+-          "UPDATE ui_test_executions SET execution_scope='FULL' WHERE id='"
+-              + LEGACY_EXECUTION
+-              + "'",
+-          "execution_scope is immutable");
+-      s.executeUpdate("DELETE FROM ui_test_executions WHERE id='" + LEGACY_EXECUTION + "'");
+-      assertThat(
+-              scalar(
+-                  c,
+-                  "SELECT count(*) FROM ui_test_revisions WHERE id='"
+-                      + published.revisionId()
+-                      + "'"))
+-          .isEqualTo("1");
+-      c.rollback();
+-    }
+-  }
+-
+-  private static GuidedPublicationMigrationTest.Published publish(String session) {
+-    return GuidedPublicationMigrationTest.publishHistoricalV18Observed(
+-        dataSource(), session, CSI, "Production", OWNER);
+-  }
+-
+-  /**
+-   * A raw revision row for a prepared (uncommitted) session that passes every row check, so that
+-   * only the deferred per-step metadata guard (or the publication receipt at commit) decides it.
+-   */
+-  private static String revisionWithStepMetadata(
+-      UUID id,
+-      UUID testId,
+-      GuidedPublicationMigrationTest.Prepared session,
+-      String snapshot,
+-      String reuse,
+-      String digestSeed) {
+-    return "INSERT INTO ui_test_revisions(id,test_id,csi_id,source_revision,configuration_revision,"
+-        + "source,source_hash,artifact,artifact_hash,artifact_schema_version,configuration,"
+-        + "\"references\",provenance,created_by,confirmed_by,confirmed_at,confirmation_source,"
+-        + "reference_policy,publication_kind,guided_session_id,learned_plan_hash,revision_digest,"
+-        + "step_snapshot_hashes,step_reuse_provenance) VALUES('"
+-        + id
+-        + "','"
+-        + testId
+-        + "','"
+-        + CSI
+-        + "',1,1,'[]','"
+-        + HASH
+-        + "','{\"profile\":{\"contract\":3}}','"
+-        + HASH
+-        + "',3,'{}','{}','{}','"
+-        + OWNER
+-        + "','"
+-        + OWNER
+-        + "',NOW(),'GUIDED_RUN','{}','GUIDED_RUN','"
+-        + session.sessionId()
+-        + "','"
+-        + HASH
+-        + "','"
+-        + digestSeed.repeat(64)
+-        + "','"
+-        + snapshot
+-        + "'::jsonb,'"
+-        + reuse
+-        + "'::jsonb)";
+-  }
+-
+-  private static DriverManagerDataSource dataSource() {
+-    return new DriverManagerDataSource(
+-        POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+-  }
+-
+-  private static void migrate(String jdbcUrl, String target) {
+-    Flyway.configure()
+-        .dataSource(jdbcUrl, POSTGRES.getUsername(), POSTGRES.getPassword())
+-        .locations("classpath:db/migration")
+-        .target(target)
+-        .load()
+-        .migrate();
+-  }
+-
+-  private static Connection connect() throws SQLException {
+-    return DriverManager.getConnection(
+-        POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+-  }
+-
+-  private static Connection transaction() throws SQLException {
+-    Connection c = connect();
+-    c.setAutoCommit(false);
+-    return c;
+-  }
+-
+-  private static void reject(Connection c, String sql, String message) throws SQLException {
+-    var savepoint = c.setSavepoint();
+-    try (Statement s = c.createStatement()) {
+-      assertThatThrownBy(() -> s.execute(sql))
+-          .isInstanceOf(SQLException.class)
+-          .hasMessageContaining(message);
+-    } finally {
+-      c.rollback(savepoint);
+-    }
+-  }
+-
+-  private static String scalar(Connection c, String sql) throws SQLException {
+-    try (Statement s = c.createStatement();
+-        ResultSet r = s.executeQuery(sql)) {
+-      r.next();
+-      return r.getString(1);
+-    }
+-  }
+-
+-  private static String draft(UUID id) {
+-    return "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,created_by) VALUES('"
+-        + id
+-        + "','Inference','"
+-        + CSI
+-        + "','Production','chrome','"
+-        + SOURCE
+-        + "','"
+-        + OWNER
+-        + "')";
+-  }
+-}
+--- a/backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java
+@@ -272,6 +272,49 @@
+     }
+   }
+ 
++  private static String revisionWithStepMetadata(
++      UUID id,
++      UUID testId,
++      GuidedPublicationMigrationTest.Prepared session,
++      String snapshot,
++      String reuse,
++      String digestSeed) {
++    return "INSERT INTO ui_test_revisions(id,test_id,csi_id,source_revision,configuration_revision,"
++        + "source,source_hash,artifact,artifact_hash,artifact_schema_version,configuration,"
++        + "\"references\",provenance,created_by,confirmed_by,confirmed_at,confirmation_source,"
++        + "reference_policy,publication_kind,guided_session_id,learned_plan_hash,revision_digest,"
++        + "step_snapshot_hashes,step_reuse_provenance) VALUES('"
++        + id
++        + "','"
++        + testId
++        + "','"
++        + CSI
++        + "',1,1,'[]','"
++        + HASH
++        + "','{\"profile\":{\"contract\":3}}','"
++        + HASH
++        + "',3,'{}','{}','{}','"
++        + OWNER
++        + "','"
++        + OWNER
++        + "',NOW(),'GUIDED_RUN','{}','GUIDED_RUN','"
++        + session.sessionId()
++        + "','"
++        + HASH
++        + "','"
++        + digestSeed.repeat(64)
++        + "','"
++        + snapshot
++        + "'::jsonb,'"
++        + reuse
++        + "'::jsonb)";
++  }
++
++  private static DriverManagerDataSource dataSource() {
++    return new DriverManagerDataSource(
++        POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
++  }
++
+   private static String tamperValue(String dataType) {
+     return switch (dataType) {
+       case "uuid" -> "gen_random_uuid()";
+@@ -286,9 +329,104 @@
+   }
+ 
+   @Test
++  void reusedStepCannotBelongToAnotherTestAndNeedsTheSameSnapshot() throws SQLException {
++    var other = publish("latest-other-test");
++    var owner = publish("latest-reuse-owner");
++    var ds = dataSource();
++    var first =
++        GuidedPublicationMigrationTest.prepareObserved(
++            ds, "latest-reuse-1", owner.testId(), CSI, "Production", OWNER);
++    var second =
++        GuidedPublicationMigrationTest.prepareObserved(
++            ds, "latest-reuse-2", owner.testId(), CSI, "Production", OWNER);
++    String step = first.stepId().toString();
++    String snapshot = "{\"" + step + "\":\"" + "d".repeat(64) + "\"}";
++    try (Connection c = transaction();
++        Statement s = c.createStatement()) {
++      UUID prior = UUID.randomUUID();
++      s.executeUpdate(revisionWithStepMetadata(prior, owner.testId(), first, snapshot, "{}", "1"));
++      s.execute("SET CONSTRAINTS tr_publication_step_metadata_guard IMMEDIATE");
++      // Same test and CSI, identical snapshot: the reuse is accepted by the guard.
++      var beforeReuse = c.setSavepoint();
++      UUID reused = UUID.randomUUID();
++      s.executeUpdate(
++          revisionWithStepMetadata(
++              reused,
++              owner.testId(),
++              second,
++              snapshot,
++              "{\"" + step + "\":{\"revisionId\":\"" + prior + "\",\"stepId\":\"" + step + "\"}}",
++              "2"));
++      assertThat(
++              scalar(
++                  c,
++                  "SELECT step_reuse_provenance->'"
++                      + step
++                      + "'->>'revisionId' FROM ui_test_revisions WHERE id='"
++                      + reused
++                      + "'"))
++          .isEqualTo(prior.toString());
++      c.rollback(beforeReuse);
++      c.releaseSavepoint(beforeReuse);
++      // Same test, same authored coordinate and same prior revision; only the hash differs.
++      // These are rollback-only deferred metadata probes, not committed publications.
++      reject(
++          c,
++          revisionWithStepMetadata(
++              UUID.randomUUID(),
++              owner.testId(),
++              second,
++              "{\"" + step + "\":\"" + "e".repeat(64) + "\"}",
++              "{\"" + step + "\":{\"revisionId\":\"" + prior + "\",\"stepId\":\"" + step + "\"}}",
++              "3"),
++          "step reuse must preserve same-scope published snapshot hash");
++      c.rollback();
++    }
++    try (Connection c = transaction();
++        Statement s = c.createStatement()) {
++      s.execute("SET CONSTRAINTS tr_publication_step_metadata_guard IMMEDIATE");
++      // The same reuse pointed at another test's published revision is refused.
++      reject(
++          c,
++          revisionWithStepMetadata(
++              UUID.randomUUID(),
++              owner.testId(),
++              first,
++              snapshot,
++              "{\""
++                  + step
++                  + "\":{\"revisionId\":\""
++                  + other.revisionId()
++                  + "\",\"stepId\":\""
++                  + step
++                  + "\"}}",
++              "4"),
++          "step reuse must preserve same-scope published snapshot hash");
++      reject(
++          c,
++          revisionWithStepMetadata(
++              UUID.randomUUID(),
++              owner.testId(),
++              first,
++              "{\"" + UUID.randomUUID() + "\":\"" + "d".repeat(64) + "\"}",
++              "{}",
++              "5"),
++          "step snapshot authored coordinate mismatch");
++      c.rollback();
++    }
++  }
++
++  @Test
+   void historicalExecutionCannotBeRelabelledAsFullEvidence() throws SQLException {
+     UUID revision = publish("latest-retained-publication").revisionId();
+     try (Connection c = transaction()) {
++      assertThat(
++              scalar(
++                  c,
++                  "SELECT count(*) FROM pg_indexes WHERE schemaname='public'"
++                      + " AND indexname='idx_ui_test_exec_full_baseline'"
++                      + " AND indexdef LIKE '%execution_scope)::text = ''FULL''%'"))
++          .isEqualTo("1");
+       boolean guarded =
+           rejected(
+               c,
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/GuidedReplayingPrefixMigrationIT.java
+@@ -3032,6 +3032,9 @@
+       ObjectNode extra = good.deepCopy();
+       ((ObjectNode) extra.path("publicReceipt")).put("unexpected", true);
+       reject(f.c, publicationSql(f, extra, artifact), "publication receipt shape invalid");
++      ObjectNode wrongHash = good.deepCopy();
++      wrongHash.put("artifactHash", "0".repeat(64));
++      reject(f.c, publicationSql(f, wrongHash, artifact), "publication receipt shape invalid");
+       exec(f.c, publicationSql(f, good, artifact));
+       f.immediate();
+       assertThat(f.count("studio_guided_publications")).isEqualTo("1");

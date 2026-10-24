@@ -1,0 +1,575 @@
+{
+  "schemaVersion": 3,
+  "status": "PREPARED_RESUME3_SEALED_PENDING_EXACT_REVIEWS_NOT_RELEASED_NOT_EXECUTED",
+  "story": "STUDIO-OBS-009",
+  "label": "obs009-gateway80-offtree03-20261019",
+  "prospectiveScopeNeverConsumed": true,
+  "supersedesWithoutMutating": "ed5057fa38bbeeda3982503382f65fe8fbb2b637167094846fdf8e6969f3f4e3",
+  "originalResume1Preserved": "d8021489e0938166fc4779105964a971e7c015ffaaaf7bab7c149541b4432c0e",
+  "rootCombinedFindingsAdoptionSha256": "6702a0dc430009d3a99ce6f18a77dcc12e39c2896826748607cb725c35cc18a4",
+  "architectureReviewSha256": "6a2b54a95d053213a5f16d0c0b1917b9c4c126272dca698281da23dc63cbd21f",
+  "qaReviewSha256": "231820d054ae970c90e3547fc1f8d94b05b34d9c41f9547d93aa12f38aaac01d",
+  "files": [
+    {
+      "path": "CHECKPOINT.json",
+      "sha256": "bc035b151aae8b70fb07605f18b7330a63035ce6369cd6b661f381d01ecfd86f",
+      "bytes": 1685,
+      "mode": 420
+    },
+    {
+      "path": "README.md",
+      "sha256": "bc46bbe50db1761aaac900656116b7c0edd6bb90ba0e841deec613240317e1e9",
+      "bytes": 4492,
+      "mode": 420
+    },
+    {
+      "path": "RECIPE.md",
+      "sha256": "aec66dd8373c9cd1fca88af2a0ef0a7c73f39f72c459a6f02ddd21194ff43e9f",
+      "bytes": 15230,
+      "mode": 420
+    },
+    {
+      "path": "actual-review.root-adoption.template.json",
+      "sha256": "0f5e9a522315f0207fa04ca92862a7ff90e60a5d83b14dbd4f2104c3f0f25034",
+      "bytes": 270,
+      "mode": 420
+    },
+    {
+      "path": "archive-and-close.json",
+      "sha256": "f2d14fb92cbe9f1fa30dd797555f04355f77a9d17f0849818bc95cedfd49a5b5",
+      "bytes": 3441,
+      "mode": 420
+    },
+    {
+      "path": "banks/fixed-helper.tpl",
+      "sha256": "a5cd97461ef1320a73d9a36b4ababcf343fee79007df8b0a28f569b0c381d73e",
+      "bytes": 44353,
+      "mode": 420
+    },
+    {
+      "path": "banks/integrations.test.ts",
+      "sha256": "38c101be9a0d466d12ac7fc6c08b4614b4e918e189feabce7059ac6ca7d29907",
+      "bytes": 16086,
+      "mode": 420
+    },
+    {
+      "path": "banks/original-helper.tpl",
+      "sha256": "976cc0e8cd9a97240fa18651481172d89354fbd59b8131bb47437973ad45962f",
+      "bytes": 43936,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/.helmignore",
+      "sha256": "78de72013f6064b5b01e524a172af3ecf800bea996f63d3751ad3472d0ed73a6",
+      "bytes": 86,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/Chart.yaml",
+      "sha256": "529d7115a0a5c72d032948fcdf845a355bc619ae3d9030a96207fddc9a5dcdd4",
+      "bytes": 263,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/NOTES.txt",
+      "sha256": "68d0da5e190ab3fd2ce9de7738a7c8920ed5461f806945050197f1e34714013b",
+      "bytes": 989,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "976cc0e8cd9a97240fa18651481172d89354fbd59b8131bb47437973ad45962f",
+      "bytes": 43936,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/api-guided-tls-networkpolicy.yaml",
+      "sha256": "d34344cc3a264f2de71cc65693a31a606f3f14e7cd2a85279267a799587c76e9",
+      "bytes": 2789,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/configmap.yaml",
+      "sha256": "6ea290fb3b98d582748cf0c9ac2000e8e30c32a099c6cbede8a89348f19fd260",
+      "bytes": 6068,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/deployment.yaml",
+      "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+      "bytes": 39697,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/hpa.yaml",
+      "sha256": "3bb66fff3c03bc515e4b878313d0038d4cd185a0fab6fe5a9b7bcc53773be958",
+      "bytes": 778,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/ingress.yaml",
+      "sha256": "27f7db6543703347fdeb0c5a82cab2ec2774c217a88b6f422c2622b48877aabe",
+      "bytes": 2276,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/pdb.yaml",
+      "sha256": "3d5e77c81eccbbf90e181c852b498644bd623fea1968d0de9112b8ec910aac26",
+      "bytes": 1566,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/service.yaml",
+      "sha256": "3b80e6c53136e530bbcc49e6b284246bf807dda529b639e4428f914b3e8171bc",
+      "bytes": 1544,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/serviceaccount.yaml",
+      "sha256": "3182a386e41fae23bd69d1749bb1cf1dc5de5c985dabc549974e2888e2fc2f95",
+      "bytes": 1440,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/studio-object-store-pvc.yaml",
+      "sha256": "46c3ea74c9abe70342e859b200e9e6ad6bc389c2fa709b70d4de7bfad0ebd114",
+      "bytes": 1189,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/studio-runner-deployment.yaml",
+      "sha256": "aa4a96d5922f6a01558c3785712e56c9017b1b62139bd20e812e777d1190c0c7",
+      "bytes": 26332,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/studio-runner-networkpolicy.yaml",
+      "sha256": "c3bc1ac53c224ffb88448a9015f5d77d8e141c268c804efe28310149191ec59e",
+      "bytes": 4483,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/studio-runner-scaledobject.yaml",
+      "sha256": "11bd0472999a2adfe5fc70629514254688b6c5bee95911f6f8e6208dad769172",
+      "bytes": 2732,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/studio-runner-service.yaml",
+      "sha256": "945fb9dacff1e99c418a3d7f82ebe83f5a4320495718dbe41b6f01a019f49dd9",
+      "bytes": 2524,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/templates/studio-sse-ingress.yaml",
+      "sha256": "df2be610db0ca3984236810773299041aa3f10728609ed84f2ad19007f882d06",
+      "bytes": 5470,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/values-dev.yaml",
+      "sha256": "cc241dc9394885234c426fa9bf73564d4b69ebdea65cce14c508318c8af78fb1",
+      "bytes": 5488,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/values-prod.yaml",
+      "sha256": "9a330dc518420bc06ab8f63804efff04855ea9a49081dad1502332c0dcda60f9",
+      "bytes": 9186,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/values-uat.yaml",
+      "sha256": "7cb2ef4aaa5a61f3c4599acdcfef4bb757e397e06a922c42cef46beb537cce33",
+      "bytes": 9462,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/helm-chart/put-checks/values.yaml",
+      "sha256": "51c680d4ff1863c43d5138cc10e3a696ae78ba32cb4dbf72b9ab60c3bc9a1a80",
+      "bytes": 50683,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/studio-runner/eslint.config.js",
+      "sha256": "9a90981a969856f3190f82b4bcebf1a04a0fa38abe0a5fc5571f83f01d8e68eb",
+      "bytes": 4410,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/studio-runner/package-lock.json",
+      "sha256": "71d287538cf4659d75b965f57937b41bbe7540bb81a3a8c40a66edbb76e13613",
+      "bytes": 213424,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/studio-runner/package.json",
+      "sha256": "2a7926800745772854c8bcecb9eba8d0136103c4a281e21afa598b347524f19e",
+      "bytes": 1481,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/studio-runner/test/deployment/helm.ts",
+      "sha256": "0a3a32b68b4276bc7da20a1c37d08026d8f9696d1030b479cf93228be13aa3b0",
+      "bytes": 23388,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/studio-runner/test/helpers/corpus.ts",
+      "sha256": "63c091d87319035db1673bfbca75d31a02206697ed454f52b3e8f21093dfab79",
+      "bytes": 438,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/studio-runner/tsconfig.json",
+      "sha256": "723196d470e796a3638c23d794004b30053e0e334a0bb3f1fa270a0a75075046",
+      "bytes": 767,
+      "mode": 420
+    },
+    {
+      "path": "banks/repo/studio-runner/vitest.deployment.config.ts",
+      "sha256": "8e629004020797f3058aa376960125d99bd35ea1f576fb449ffd57bd8e41870b",
+      "bytes": 3063,
+      "mode": 420
+    },
+    {
+      "path": "boundary-control-results.json",
+      "sha256": "258203a6f29f105ec1ad180a4a287fe136aecbf665fe89c55a040cae9f6adf22",
+      "bytes": 17769,
+      "mode": 420
+    },
+    {
+      "path": "boundary-controls.py",
+      "sha256": "77881615c61b75f63c29dd75dd7e5986d155e062388578dbfdbcdfa7f8ab99c8",
+      "bytes": 31402,
+      "mode": 420
+    },
+    {
+      "path": "candidate-baseline.template.json",
+      "sha256": "e1c043bccd0af0130201b384646b52ac22a8f1bc6fa49afc8fea0fc3a923000b",
+      "bytes": 520,
+      "mode": 420
+    },
+    {
+      "path": "case-map.json",
+      "sha256": "5b987de3b8a709d8f0724c6515e2a9b60e6c701a2bdc47000396d3bb358e3065",
+      "bytes": 30581,
+      "mode": 420
+    },
+    {
+      "path": "check-map.json",
+      "sha256": "d1bf8a1f7146917b6282e2129f0092cdf98afac3724195c39a30faee063d17a2",
+      "bytes": 5383,
+      "mode": 420
+    },
+    {
+      "path": "close-permit.template.json",
+      "sha256": "f5a149ebefc0d7e357ee6bba5ed6cd89d59295de9db6c433018507dbda57ac66",
+      "bytes": 366,
+      "mode": 420
+    },
+    {
+      "path": "contracts.py",
+      "sha256": "b345d90f9195d1f5d02107611bd6f98684bd75330339975863a3d1e7ac41a834",
+      "bytes": 4266,
+      "mode": 420
+    },
+    {
+      "path": "exit-gate.py",
+      "sha256": "458f40c6939ee2a81b68ae3d8c5a1926c417169ac75d62aafb6d99428b259e6a",
+      "bytes": 2343,
+      "mode": 420
+    },
+    {
+      "path": "final-controls.py",
+      "sha256": "2e3dada17cc716bd8c00d05f68bc21ae7024cdd1f46398739a6a5a3429688558",
+      "bytes": 13602,
+      "mode": 420
+    },
+    {
+      "path": "final-readiness.schema.json",
+      "sha256": "58d1fbf939f85670ed0e9aca65f20d9542c700611c09e8a231208236b501cd92",
+      "bytes": 1772,
+      "mode": 420
+    },
+    {
+      "path": "guard-exit.bash",
+      "sha256": "2ee592f785cc166c78315b5cefe55e2a3e8b5d7e7e0a63f73e030f54cb01a1f6",
+      "bytes": 794,
+      "mode": 420
+    },
+    {
+      "path": "helper.patch",
+      "sha256": "5b0bb527c18523253d11299ae8a49355387c5ff075cb97f63a02ec9b11db7b5a",
+      "bytes": 1552,
+      "mode": 420
+    },
+    {
+      "path": "history/RECIPE.md",
+      "sha256": "a28db4c80348e16155827e2b90a4ba65de5544ba41e19a5fb36fa2007ff69afc",
+      "bytes": 9508,
+      "mode": 420
+    },
+    {
+      "path": "history/custody-functions.inc",
+      "sha256": "c3455e171c05887e11e873cb8e71b6f71fdb4096862a732a888b37f4018f0a81",
+      "bytes": 7214,
+      "mode": 420
+    },
+    {
+      "path": "history/exit-gate.py",
+      "sha256": "5521f32a2f002e48ec0b97024dfddf49a1186b5b2a35f60e80f6e0886d31c6ef",
+      "bytes": 3983,
+      "mode": 420
+    },
+    {
+      "path": "history/guard-exit.bash",
+      "sha256": "c1d7f53890f5357c60c3758d7dbe86d52dc42da4870a5093a0630366c7820061",
+      "bytes": 794,
+      "mode": 420
+    },
+    {
+      "path": "history/observation-functions.inc",
+      "sha256": "a7a4418494e6929f4fbe923b7a392b41d10cafe08bf70c6e6cce5f9c44046ae3",
+      "bytes": 6633,
+      "mode": 420
+    },
+    {
+      "path": "history/resume2/RECIPE.md",
+      "sha256": "96f7e9b212b5cc784e5d4a94e6f618a6d490437227aebea400bb9e52de660007",
+      "bytes": 13189,
+      "mode": 420
+    },
+    {
+      "path": "history/resume2/boundary-controls.py",
+      "sha256": "074f18fbf6fe0bb962a7bc35bea50fe71f500d1a85065b44217f3450e5d9aceb",
+      "bytes": 25733,
+      "mode": 420
+    },
+    {
+      "path": "history/resume2/final-controls.py",
+      "sha256": "f2f2fa60742206f68fa3040c0b9dc7ecf1ab4ebb04c9f26c7df6fbe50fa62537",
+      "bytes": 12994,
+      "mode": 420
+    },
+    {
+      "path": "history/resume2/run-private.py",
+      "sha256": "b13774a5cd7ad7db5b1de15cd1c888811b6deb9972967fde5142c935273bb88b",
+      "bytes": 26197,
+      "mode": 420
+    },
+    {
+      "path": "history/run-private.py",
+      "sha256": "33171511e367fb025032bd28cc76435c5a8be4199c5c776f3c52f3ab1bb0c541",
+      "bytes": 20057,
+      "mode": 420
+    },
+    {
+      "path": "hold.template.json",
+      "sha256": "a4b670d7040d0d80a531eb28adaa19f34b24f5f47559057630e87e5b7e11d1f7",
+      "bytes": 465,
+      "mode": 420
+    },
+    {
+      "path": "input-manifest.json",
+      "sha256": "0851b9d4eeef623d113ddfc67e9e3cc2f8729be784aab696200d21fbb9437e95",
+      "bytes": 8418,
+      "mode": 420
+    },
+    {
+      "path": "phase-decision.template.json",
+      "sha256": "d179e5da0aaf6434e976e341a81d702d7d5f6108348ddf68e5ebf861fa1fff5a",
+      "bytes": 321,
+      "mode": 420
+    },
+    {
+      "path": "preservation.json",
+      "sha256": "0db116b447bd47ec2cc545f54ac988309e5cbe0d48274a8ecbe707116adfdce4",
+      "bytes": 560,
+      "mode": 420
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "ad343ae5b3f3ec4dc90914df6145180d4895f5d89a4e8dca1cf4526e0e649267",
+      "bytes": 7789,
+      "mode": 420
+    },
+    {
+      "path": "pure-control-results.json",
+      "sha256": "730f3a7248325c80caf3f71386efe59820aab3c17c4c00c22f193279cc6392e5",
+      "bytes": 7158,
+      "mode": 420
+    },
+    {
+      "path": "pure-controls.py",
+      "sha256": "27eca7fbff4d337ce886af747d4e7902e54b96810548eeab109055758afa22a6",
+      "bytes": 5291,
+      "mode": 420
+    },
+    {
+      "path": "receipt-schema.json",
+      "sha256": "ad5bb41ed331ace283c80adb0b9aede9e5e612711e9e71f3d86d042bad8702b1",
+      "bytes": 2898,
+      "mode": 420
+    },
+    {
+      "path": "resume1-ancestry-SHA256SUMS",
+      "sha256": "a196211512e74dccc93e583e6cf0008a14526bf53adabf206d6a6e16942a8ab8",
+      "bytes": 5905,
+      "mode": 420
+    },
+    {
+      "path": "resume1-ancestry-manifest.json",
+      "sha256": "d8021489e0938166fc4779105964a971e7c015ffaaaf7bab7c149541b4432c0e",
+      "bytes": 11944,
+      "mode": 420
+    },
+    {
+      "path": "resume2-ancestry-SHA256SUMS",
+      "sha256": "1389e713a4ce05dae002ce1c41445c893912fbd36879334a4d90bf9c06fea27a",
+      "bytes": 7276,
+      "mode": 420
+    },
+    {
+      "path": "resume2-ancestry-manifest.json",
+      "sha256": "ed5057fa38bbeeda3982503382f65fe8fbb2b637167094846fdf8e6969f3f4e3",
+      "bytes": 15640,
+      "mode": 420
+    },
+    {
+      "path": "revision-control-results.json",
+      "sha256": "9eb2f7f1a980f889a9d1d60f37d267b99658aeac1cd2b26fcb5e345423f36bd6",
+      "bytes": 8761,
+      "mode": 420
+    },
+    {
+      "path": "revision-controls.py",
+      "sha256": "127448fcefa223b8174cbb3b5e62cbaa28ddb0bb5718ae58a290105c703e59a5",
+      "bytes": 16029,
+      "mode": 420
+    },
+    {
+      "path": "root-authorization.template.json",
+      "sha256": "bd6a1ec84f02621a806f6a8459898838f313cc3369705f37a5ba2655eecf9fc2",
+      "bytes": 1182,
+      "mode": 420
+    },
+    {
+      "path": "run-private.py",
+      "sha256": "a8e462005a98ec31cfada631eb63d0ec57a5d1b96fc93016a195e1cab9d2c68f",
+      "bytes": 42747,
+      "mode": 420
+    },
+    {
+      "path": "scope.json",
+      "sha256": "40353fd03dabf7bb0b4c5bd438490ab4e10325cefd30ea9ddcb4b17e833e4915",
+      "bytes": 3963,
+      "mode": 420
+    },
+    {
+      "path": "source-guards.json",
+      "sha256": "b30091735549b3a820c91ac210203fb30b5845794ab73e48cee687e9f9e10e06",
+      "bytes": 399635,
+      "mode": 420
+    },
+    {
+      "path": "static-checks.json",
+      "sha256": "b80921c09fe8ce6c7d438744a2cf1f3c49ec5e4caba1d45425326de65fc373ca",
+      "bytes": 578,
+      "mode": 420
+    },
+    {
+      "path": "strict-successor.diff.patch",
+      "sha256": "e889b0b958797597426e9704bfed69150e32aa747914ea944aaccfd10315ace5",
+      "bytes": 88881,
+      "mode": 420
+    },
+    {
+      "path": "strict-successor.reverse.patch",
+      "sha256": "822561d8d671e401d3c854de305cd7f4abc0db078bce01c46e65c7b0dcd8a1dc",
+      "bytes": 88891,
+      "mode": 420
+    },
+    {
+      "path": "successor-diff.json",
+      "sha256": "25e7e09ebc7a1e3202da589019d8744666f7c684baf72d4c288012c08087c2a6",
+      "bytes": 19148,
+      "mode": 420
+    },
+    {
+      "path": "tests.patch",
+      "sha256": "8533a8f371e367fc56903d7cbc5f3f3a55204d5dfbe7a617913edbc8454dedfb",
+      "bytes": 6697,
+      "mode": 420
+    },
+    {
+      "path": "verify-final.py",
+      "sha256": "e65f01c8a0eccdc9c05e75710988483deafaa4e454b6dc4187c4a202acc94da0",
+      "bytes": 2021,
+      "mode": 420
+    },
+    {
+      "path": "vitest.gateway80.config.mjs",
+      "sha256": "90bcd896cc9f60d28f6cb7ca740c9da8878aaa57a91653b444ff3d56d717bf90",
+      "bytes": 375,
+      "mode": 420
+    }
+  ],
+  "codeMembers": [
+    "contracts.py",
+    "run-private.py",
+    "final-controls.py",
+    "verify-final.py",
+    "exit-gate.py",
+    "guard-exit.bash",
+    "pure-controls.py",
+    "boundary-controls.py",
+    "revision-controls.py"
+  ],
+  "mandatoryCombinedFindings": {
+    "G80-LINK-06": "IMPLEMENTED_PENDING_EXACT_INDEPENDENT_REVIEW",
+    "G80-RESOURCE-02": "IMPLEMENTED_PENDING_EXACT_INDEPENDENT_REVIEW",
+    "G80-RESOURCE-07": "IMPLEMENTED_PENDING_EXACT_INDEPENDENT_REVIEW"
+  },
+  "priorMateriallyConfirmedSourceFixesRetained": [
+    "G80-CONTROL-01",
+    "G80-FREEZE-03",
+    "G80-EVIDENCE-04",
+    "G80-TEST-05"
+  ],
+  "checks": {
+    "retainedMeaningfulControls": 121,
+    "newActualFunctionControls": 70,
+    "totalPureControls": 191,
+    "allExpected": true,
+    "old71And56BytesModesSealsPreserved": true,
+    "acceptedFixtureBanksHarnessConfigPatches95_48AndNativeArgvUnchanged": true,
+    "actualNativeExecutions": 0,
+    "independentSuccessorReviews": "PENDING"
+  },
+  "limits": {
+    "separate48ExpectedRed47FilteredAnd95Green": true,
+    "rawNativeStatusSeparateFromQualification": true,
+    "noActualRenderFrameOrCountClaim": true,
+    "parent077Child022": true,
+    "native300SecondsHOLDNotKillOrTerminality": true,
+    "allImportedObservationCommandsMaxSeconds": 10,
+    "boundedProcessRows": 16384,
+    "boundedNodeRows": 64,
+    "noGlobalNodeWaitOrSignal": true,
+    "unknownObservationAndIdentityGapsSticky": true,
+    "exclusiveFinal0InspectionBeforeSeparatePermitAndGuardedExit": true,
+    "readinessPermitMaxSeconds": 60,
+    "explicitPostcloseRequired": true,
+    "noRetryOrRefreshOrFailureReleaseShortcut": true,
+    "noCleanupAuthority": true
+  },
+  "authorization": {
+    "sourceApplication": false,
+    "nativeExecution": false,
+    "readiness": false,
+    "C8": false,
+    "laneCredit": false,
+    "Done": false
+  }
+}

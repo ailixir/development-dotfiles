@@ -1,0 +1,9 @@
+# Exact buildSrc exception prepared; fresh02 unreleased
+
+Dex corrected only the verified auxiliary callback scope: canonical backend/buildSrc with a non-null Gradle parent returns before Spotless configuration. Canonical backend identity and every exact3 target/staged-output/task-graph guard remain otherwise byte-identical. Unknown/named/prefix/nested-other builds still HOLD. Eight pure source-decision vectors cover the two observed contexts and negatives; no new Groovy/Gradle probe ran.
+
+Phase checker changes only proposal02/unit02 pointers. Exact patch/preimages/candidates/80methods/nine Mode/99cases, primary cached metadata, formatting-delta proof and restoration algorithms are preserved. New recipe uses this resume2 init and label obs011-gst-provisional-02. It requires the full root native phase keeper/direct foreground commands stdin from /dev/null, ONE command at a time, actual prompt/termination, then separate status assignment/recording. The interactive lock shell retains TTY input; keeper source/metadata was not modified.
+
+Original13 sealed artifacts and failed01 evidence remain unchanged. Approved root records show setup failure before any formatting/99 run, complete source restoration, original compile0/UPTODATE with no fresh compile credit, resource/lock closure, and the existing read-only context probe. This author read only approved source/control/cache evidence and ran pure/static checks. No phase main/formatter/native/test/compiler/Gradle/Java/javap/new probe, product/source/story/plan/private TEMP write or delegation.
+
+Fresh02 requires independent bounded correction review and explicit root release; it is not an automatic retry or source/native authorization. No cause remedy, C8/lane/main/Replay/lifecycle credit. USD500 declared; aggregate spend unavailable.

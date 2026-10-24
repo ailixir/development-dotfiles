@@ -1,0 +1,42 @@
+{
+  "id": "PM-010-AC24-CARRIER-20261018",
+  "author": "Morgan / PM",
+  "createdAt": "2026-10-19T01:31:07.154534+00:00",
+  "decision": "Name STUDIO-OBS-008 as carrier of record for superseded 10.34 AC-24 / 10.11 AC-3(b).",
+  "carrierStory": "STUDIO-OBS-008",
+  "successorScope": "Existing OBS-008 AC-6 read-only Steps as learned plan explanation replacing deleted Code tab; no added acceptance criterion or implementation obligation.",
+  "authority": [
+    {
+      "path": "docs/stories/10.34.story.md",
+      "section": "Definition of done and ADR-SC-005 disposition",
+      "basis": "PO delegates named-carrier choice to PM; later disposition expressly recommends OBS-008 for PM confirmation."
+    },
+    {
+      "path": "docs/epics/EPIC-10-SINGLE-PATH-DISPOSITION.md",
+      "section": "10.11 / 10.34 / owner actions",
+      "basis": "Explicitly assigns confirmation or replacement of OBS-008 carrier to PM."
+    },
+    {
+      "path": "docs/architecture/ADR-SC-005-single-path-observed-authoring.md",
+      "section": "D-A / placement map",
+      "basis": "Architectural deletion of CodeTab/review and replacement plan explanation assigned to OBS-008."
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "section": "AC-6",
+      "basis": "Existing successor plan-explanation/honest-evidence scope."
+    }
+  ],
+  "timingBasis": "The later ADR disposition explicitly retains the PM confirmation action; this is the active product placement decision, not retrospective acceptance or proof that the historical same-wave transfer happened.",
+  "isQualityVerdict": false,
+  "isProductAcceptance": false,
+  "isStagingAcceptance": false,
+  "changesExistingCriteria": false,
+  "appliedToQuotedStoryOrRegister": false,
+  "remainingAction": "Independent package review and PO/register-owner application after root opens quoted inputs. Preserve original AC-24 text, checkbox and dissent/history; never mark old Code view passed.",
+  "doesNotDo": [
+    "No new OBS-008 scope or reopening of its Done lifecycle.",
+    "No old Code view restoration, staging pass, external approval or release-readiness claim.",
+    "No actual story/register/runbook edit while frozen."
+  ]
+}

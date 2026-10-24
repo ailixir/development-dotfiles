@@ -1,0 +1,34 @@
+{
+  "attempt01": {
+    "runner": "check_review.py",
+    "sha256": "8e4c0f601d8a50fe2448320ff89117ff6a154d2e710bb76a1495ee9b76f53a09",
+    "actualExit": 1,
+    "tool": "fe802b",
+    "failure": "Reviewer source-pin formatter called relative_to on a relative public reference Path. Read-only bookkeeping failure before fake operational checks; no protected access.",
+    "correction": "Normalize source metadata path to absolute before relative display; unchanged source/audit. Author536 passed suites not repeated."
+  },
+  "authorReplays": {
+    "pure311": {
+      "tool": "fe9b32",
+      "actualExit": 0
+    },
+    "adapter121": {
+      "launch": "de5ae1",
+      "completion": "9b3363",
+      "actualExit": 0
+    },
+    "boundary104": {
+      "tool": "0bb102",
+      "actualExit": 0
+    }
+  },
+  "attempt02": {
+    "runner": "check_review_retry.py",
+    "sha256": "844b4d423ecb5d690611bd05bd2c1b760ef295a7c2e478167d43c03f13aeeaed",
+    "tool": "e568b0",
+    "actualExit": 0,
+    "sourceChecks": 665,
+    "guardedCounterexampleCases": 6,
+    "deniedCalls": []
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "role": "Aria / independent architecture reviewer",
+  "status": "CONDITIONAL_EXACT_UNIT04_ARCHITECTURE_SUPPORT_NO_RELEASE",
+  "savedPins": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/resume5-wording-peer/manifest.json",
+      "sha256": "9b0339e075f55afc0b3acfbc73cda0e9c5c16b8cf6d163bd2b606c12d92a1ca8",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/gst-limited-start-proposal04/proposal.json",
+      "sha256": "0f4eaf555950b74f848fd7fbd4ec6ac17bbbe4869c1ca4495e74a61e29850e26",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-restricted-unit-prep/resume4/manifest.json",
+      "sha256": "7e45e165e057a88bf6104f07417c3c3d6a647ede4b7dffec755706a914a28409",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-lock-release-guard-prep/manifest.json",
+      "sha256": "a7a56f021c4c3f4a4fa15b39d47032e5806dd704a1d9b32f02f79abb836fd5ac",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/owned_native_phase.py",
+      "sha256": "f5b988ccc7f10b2b057866d1cc7f1a1139550477b9f5c46240c1dc3d9b5d0301",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/prepared-inputs-and-backups.json",
+      "sha256": "efa059a0ec2cf39475f8b4e4230007e68f81b8ea0e17c47323283fff62cd334c",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/runtime/obs011-gst-provisional-04/preparation-source-check.json",
+      "sha256": "995c5aca364677053fced9ecb624d02f1a028b97cf855e73daa51287d0fa662d",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gst-unit03-closed-incident-review/review.md",
+      "sha256": "493f5ea07f1901f7b919d489eac5fff9b649026f5b376195443256d98222bf98",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gst-unit03-qualified-incident-root-adoption.json",
+      "sha256": "2b08cbf249626c6bd41fbbfd10d17ee24558dc20cac4dfaab6f8eac9862b926c",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gst-unit03-composed-start-review/review.md",
+      "sha256": "f376bdc3ec80e174ff89695fc2edb3f5877be143ed84c1f636df3f62638b0d9c",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gst-unit03-composed-start-review/review.md",
+      "sha256": "e47ab473561c81c0047eadf2ed3702082955753e595a667755847f79d6c00085",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gst-lifecycle-wording-source-review/review.md",
+      "sha256": "72391c2f794f3cd2d68aea9401c38f0865271d8bba47279eae8adf0b44374269",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gst-peer-observer-source-review/review.md",
+      "sha256": "b9565089871eab8ab84ebc98b2aeaaa83f2f1535a3b2d37708adb3178057b266",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gst-limited-ordering-review/review.md",
+      "sha256": "0277d26fbc33dfbb66aabd704475b33729cf7f382847e172b1d9ce51087258c6",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gst-limited-ordering-root-adoption.json",
+      "sha256": "731a35f94f1ea304be6f833bb3f117ef10d4b1674e78a698e3f4b09ec9ecb100",
+      "matched": true
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/fullcheck-harness/resume3/plan.json",
+      "sha256": "576ebf9f01c0025cacc3bc6c7d6f4c747f8f84bb1f118a547cf11e21f7c94673",
+      "matched": true
+    }
+  ],
+  "pureVerifiers": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gs-t-draft/resume5-wording-peer/verify.py",
+      "sha256": "f9bb388c8f0fd5ce429c849d4af02d002d8964ad02ce1289ee1d2adcbb062e3a",
+      "exit": 0,
+      "output": {
+        "staticOnly": true,
+        "completeCandidates": 3,
+        "methods": 80,
+        "originalAssertions": 751,
+        "unit03AnnotatedTestBodiesExact": true,
+        "sessionNewFixtureLiteralChanges": 2,
+        "lifecycleExactReviewedPredecessor": true,
+        "transportExactSealedPeerPatch": true,
+        "filteredInitExactPeer": true,
+        "ownershipClassBodiesExact": 2,
+        "cases": 99,
+        "modeVariants": 9,
+        "sentinels": 11,
+        "originalGrounding": false,
+        "correctedGrounding": true,
+        "runtimeCodeRecovered": false,
+        "compileNativeOrSqlExecuted": false
+      }
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-restricted-unit-prep/resume4/verify.py",
+      "sha256": "f7df965a39dff253c826723f42b6224af2e571e9f6517d5c0087798a22533ad5",
+      "exit": 0,
+      "output": {
+        "status": "STATIC_PASS",
+        "phaseOnlyThreePointerChanges": true,
+        "phaseSourceAndAstRecovered": true,
+        "spotlessInitAndMetadataExact": true,
+        "allInheritedBindingsRetained": true,
+        "newBindingsChecked": 31,
+        "catalogCases": 99,
+        "nativeArgvOnlyFreshLabelAndFilterPointer": true,
+        "guardCopiedExact": true,
+        "keeperOnlyUnitPointerChange": true,
+        "historicalProtectedOrCachedBodiesFreshlyRead": false,
+        "phaseShellLockJavaNativeInvoked": false
+      }
+    }
+  ],
+  "freshMainSourceMembershipAndBytes": {
+    "files": 506,
+    "matchesOriginalS011": true
+  },
+  "threeCurrentSourcesAndModesOriginal": true,
+  "caseCounts": {
+    "GuidedCommittedRefreshStateTest": 3,
+    "GuidedEvidencePendingAppendIT": 8,
+    "GuidedLifecycleReasonIT": 5,
+    "GuidedServiceTransportFaultIT": 39,
+    "GuidedSessionIT": 44
+  },
+  "keeperOnlyUnitPointerChange": true,
+  "guardSourceContractInspected": true,
+  "guardQaVerdictAssumed": false,
+  "actualGuardOrShellOrLockTest": false,
+  "sourceNativeRetryOrCreditReleased": false,
+  "allHistoricalGapsRetained": true,
+  "sharedBudgetCeilingUsd": 500,
+  "aggregateSpend": "UNAVAILABLE"
+}

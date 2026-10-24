@@ -1,0 +1,57 @@
+--- a/frontend/src/services/mocks/studio/studioHandlers.test.ts
++++ b/frontend/src/services/mocks/studio/studioHandlers.test.ts
+@@ -254,6 +254,54 @@
+     expect(after.variables).toEqual(created.variables);
+   });
+ 
++  it('validate-variables reports a secretRef matched only by name as undeclared when secretId is absent', async () => {
++    const created = await studioApi.createTest({
++      ...baseRequestFor('Name-only secret declaration'),
++      steps: authored('Type <secret PW> into "Password"'),
++      variables: [{ name: 'PW', kind: 'secretRef' }],
++    });
++
++    const report = await studioApi.validateVariables(created.id, {});
++    expect(report).toEqual({
++      testId: created.id,
++      isValid: false,
++      valid: false,
++      hasVariables: true,
++      missing: ['<secret PW>'],
++      undeclared: ['<secret PW>'],
++      unvalued: [],
++      conflicting: [],
++      unused: [],
++    });
++    const after = await studioApi.getTest(created.id);
++    expect(after.sourceRevision).toBe(created.sourceRevision);
++    expect(after.variables).toEqual(created.variables);
++  });
++
++  it('validate-variables matches a secretRef by its actual secretId when its name differs', async () => {
++    const created = await studioApi.createTest({
++      ...baseRequestFor('Actual secretId declaration'),
++      steps: authored('Type <secret PW> into "Password"'),
++      variables: [{ name: 'PASSWORD_ALIAS', kind: 'secretRef', secretId: 'PW' }],
++    });
++
++    const report = await studioApi.validateVariables(created.id, {});
++    expect(report).toEqual({
++      testId: created.id,
++      isValid: true,
++      valid: true,
++      hasVariables: true,
++      missing: [],
++      undeclared: [],
++      unvalued: [],
++      conflicting: [],
++      unused: [],
++    });
++    const after = await studioApi.getTest(created.id);
++    expect(after.sourceRevision).toBe(created.sourceRevision);
++    expect(after.variables).toEqual(created.variables);
++  });
++
+   it('validate-variables refuses an id the caller cannot read with the same 403 as the read', async () => {
+     await expect(studioApi.validateVariables(otherCsiTest.id, {})).rejects.toMatchObject({
+       response: { status: 403, data: { error: 'STUDIO_FORBIDDEN' } },

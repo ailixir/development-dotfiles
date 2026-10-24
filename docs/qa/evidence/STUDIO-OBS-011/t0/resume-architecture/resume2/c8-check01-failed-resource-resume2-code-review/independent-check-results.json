@@ -1,0 +1,114 @@
+{
+  "scope": "ACTUAL_AST_DEFINITIONS_WITH_IN_MEMORY_BOUNDARIES_ONLY",
+  "cases": [
+    {
+      "case": "bootstrap same verified bytes",
+      "hold": null,
+      "marker": [],
+      "readOrder": [
+        "root-disposition-authorization.json",
+        "failed_resource.py",
+        "predicates.py",
+        "guard-failed-resource.bash",
+        "predicates.py"
+      ],
+      "actualAction": false
+    },
+    {
+      "case": "bootstrap wrong first pin",
+      "hold": "CODE_BEFORE_EXECUTION",
+      "marker": [],
+      "readOrder": [
+        "root-disposition-authorization.json",
+        "failed_resource.py",
+        "predicates.py"
+      ],
+      "actualAction": false
+    },
+    {
+      "case": "bootstrap changed second read",
+      "hold": null,
+      "marker": [
+        "unverified policy executed"
+      ],
+      "readOrder": [
+        "root-disposition-authorization.json",
+        "failed_resource.py",
+        "predicates.py",
+        "guard-failed-resource.bash",
+        "predicates.py"
+      ],
+      "actualAction": false
+    },
+    {
+      "case": "CORE same verified bytes",
+      "hold": null,
+      "marker": [],
+      "reads": 2,
+      "actualAction": false
+    },
+    {
+      "case": "CORE wrong first pin",
+      "hold": "CORE_HASH",
+      "marker": [],
+      "reads": 1,
+      "actualAction": false
+    },
+    {
+      "case": "CORE changed second read",
+      "hold": null,
+      "marker": [
+        "unverified core executed"
+      ],
+      "reads": 2,
+      "actualAction": false
+    },
+    {
+      "case": "fresh-per-command complete flow with nonempty utility histories",
+      "events": [
+        {
+          "mode": "gate",
+          "clientPid": 20,
+          "status": 1,
+          "reason": "MISSING_READINESS",
+          "newUtilities": 2
+        },
+        {
+          "mode": "held-proof",
+          "clientPid": 21,
+          "status": 0,
+          "reason": null,
+          "newUtilities": 2
+        },
+        {
+          "mode": "final",
+          "clientPid": 22,
+          "status": 0,
+          "reason": null,
+          "newUtilities": 2
+        },
+        {
+          "mode": "gate",
+          "clientPid": 23,
+          "status": 0,
+          "reason": null,
+          "newUtilities": 2
+        },
+        {
+          "mode": "postclose",
+          "clientPid": 24,
+          "status": 0,
+          "reason": null,
+          "newUtilities": 2
+        }
+      ],
+      "clients": 5,
+      "utilityJournals": 10,
+      "postclosePresent": true,
+      "actualAction": false
+    }
+  ],
+  "actualRuntimeImportMainOsProcessNativeActions": 0,
+  "sourceOrRuntimeEdits": 0,
+  "dependencyPinDefectReproduced": true
+}

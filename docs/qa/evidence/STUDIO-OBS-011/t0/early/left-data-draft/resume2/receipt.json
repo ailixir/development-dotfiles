@@ -1,0 +1,87 @@
+{
+  "capturedAt": "2026-10-19T03:05:53.154984+00:00",
+  "role": "Dara / data-engineer",
+  "scope": "LEFT-DATA-01 correction, complete CLN-F2 five-path off-tree package; unchanged main11 paired atomic16",
+  "budgetUsdDeclared": 500,
+  "actualSpend": "unavailable",
+  "realSourceApplied": false,
+  "runtimeExecuted": false,
+  "isQaOrLifecycleVerdict": false,
+  "patchSha256": "0566bcf43e01f923b2f5e8e48e75eabe07354b91c48dccad7777f5c8f5a00e50",
+  "manifestSha256": "b2674b841e45cc2d91d3b11d522741002b4c4cbf9a9d6c7677918a8badb63066",
+  "staticReviewSha256": "d23e9242847ab42f2fccc0eccdfa6e3f3e325fd0cb399bb3f5699abb90ca4b6f",
+  "combinedPatchSha256": "ae8c32ab789eee4cb38d049b636dc171d1194908acd0da003a03905e664c8c01",
+  "candidatePublicationSha256": "d523ea52ec60e5816553b4eea2bc459e8c47e91f2f9445901702ec22fd06f748",
+  "sourceCounts": {
+    "before": 80,
+    "after": 78,
+    "existingHeadMethodsDropped": 0,
+    "runtimeInvocationCounts": "unexecuted"
+  },
+  "ports": [
+    "P1",
+    "P2",
+    "P3",
+    "J1",
+    "J2",
+    "J4",
+    "J8"
+  ],
+  "mutationPatches": [
+    "P1",
+    "P2",
+    "P3",
+    "J1",
+    "J2"
+  ],
+  "J8": {
+    "rollbackOnlyBeforeWrite": true,
+    "noCommitCalled": true,
+    "exactCauseStateServerMessageAssertions": true,
+    "completeRowSnapshotAssertionRetained": true,
+    "javaExpiryBranchProved": false,
+    "originalJavaExpiryBranchProved": false,
+    "newMandatoryJavaExpiryGate": false
+  },
+  "migrationFilesEqualS011": 22,
+  "grep": {
+    "broadBefore": 78,
+    "broadAfter": 4,
+    "afterMatches": [
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+        "line": 1296,
+        "text": "    verifyHistoricalVerdict(a, a.verdict());"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+        "line": 1309,
+        "text": "    verifyHistoricalCandidate(commit.snapshot(), candidate, a.verdict());"
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+        "line": 1489,
+        "text": "  private static void verifyHistoricalCandidate("
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/support/LegacyV20ConfirmedBaseFixture.java",
+        "line": 1561,
+        "text": "  private static void verifyHistoricalVerdict(PublicationContracts.Attempt a, JsonNode v) {"
+      }
+    ],
+    "allowlistExact": true,
+    "v18Before": 70,
+    "v18After": 0,
+    "V20WholeFileSha256": "0f60fabce9dab238203682de49a031a8ec103e4ac18b1694375059f20ab312df"
+  },
+  "originalDraftPreserved": true,
+  "independentReviewPreserved": true,
+  "mainElevenPathPackagePreserved": true,
+  "requiredNextActions": [
+    "Independent narrow LEFT-DATA-01 re-review; Quinn/root rule preservation and qualified J8 disposition",
+    "Root baseline/native-cause/coverage/tree-open and full unchanged-main GS-T gates",
+    "Exact preimage rebind; apply complete16-path unit under root-held shared lock",
+    "Actual compile/owned-format, named mutant reds with exact restore/greens and all lane/final named classes",
+    "Actual PostgreSQL SQL-tier/refusal/snapshot evidence and independent lane/final QA; no credit from static artifact"
+  ]
+}

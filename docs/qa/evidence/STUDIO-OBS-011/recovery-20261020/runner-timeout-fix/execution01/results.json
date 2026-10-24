@@ -1,0 +1,682 @@
+{
+  "kind": "PENDING009_TIMEOUT_ORIGIN_SANDBOX_CONTROLLED_RED_GREEN_AND_TARGETED_NATIVE_COMPLETE",
+  "recordedAt": "2026-10-20T16:44:25.912980+00:00",
+  "scope": "Exactfourfilecandidate inpristine009sandbox only; noactualcopyback",
+  "sandbox": "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo",
+  "seedReceiptSha256": "dadfbfe2da3255c75a6e7f118a9f4f1e5949ae9c35e1edd1232b8b326a3a0c03",
+  "architectureReviewPath": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-timeout-fix/architecture-review/review.md",
+  "architectureReviewSha256": "383c24c3c1500bb93eea2d154e45c62f2b7cdac29b709147dafb61a755f33d34",
+  "testsPatchSha256": "0571a1c535ae07af8880f91c1151f5897bb45fc95560813d322cb6808f0d1ab7",
+  "productPatchSha256": "1695ca06b6bf6906d55a01e4f84300dd349d5d434ff2837280b31f38357d3a49",
+  "stagedBindingSha256": "47351fd945588b7087418e9ba0821919e24e1c888373d7646fb94aae6896c118",
+  "runs": [
+    {
+      "stage": "redTypes",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-red-types01-results.json",
+      "resultSha256": "ab6602dd853640a43521da54c3e680c0f3d09fac4d4b52907c2a6887678d8e2c",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/typescript/bin/tsc",
+          "-p",
+          "tsconfig.json",
+          "--noEmit"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T16:36:37.854873+00:00",
+        "elapsedSeconds": 8.24,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+        "testInputStable": true,
+        "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1"
+      },
+      "beforeManifestSha256": "2737244393c14150b710f4afb2e94a397945e1d5f2cb0e347eac80f68d434648",
+      "afterManifestSha256": "4481ecc306f8fca14b7116390dc098eee49093a8592aa01e183cbbde405fdc8b"
+    },
+    {
+      "stage": "red",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-red01-results.json",
+      "resultSha256": "0373162baf5722680f704a2231e45d8cd6489dbd8ee271d3f046966ffa6deefd",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+          "run",
+          "--config",
+          "vitest.fixtures.config.ts",
+          "test/fixtures-tier/guided-start-deadline.test.ts",
+          "--testNamePattern=^controlled startup timeout-origin handoff for 009 hands an absolute startup timeout to the caller before pending teardown when the wall sample is still before its deadline$",
+          "--minWorkers=1",
+          "--maxWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-red01-vitest.json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T16:37:04.206193+00:00",
+        "elapsedSeconds": 3.91,
+        "exit": 1,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "670eccde1ab60fc69cf55bb355ce6586ab1752c7170d6302ca93c233d6267d79",
+        "testInputStable": true,
+        "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "vitest": {
+          "success": false,
+          "numPassedTests": 0,
+          "numFailedTests": 1,
+          "numPendingTests": 8,
+          "numTotalTests": 9,
+          "numPassedTestSuites": 1,
+          "numFailedTestSuites": 2
+        },
+        "vitestReportSha256": "5dcf10a7d115d345fa9e74e641af5c2e3b08853ea7fe0dd882db2177d9f081d6"
+      },
+      "beforeManifestSha256": "fd4d40001e3000606a95fec1cceb2302bc63e1c6ce63d9c70425a9062de047dc",
+      "afterManifestSha256": "8f74f6b68c99760757fd2924dfd39cb5609d78e4baad3474f06646011862e010",
+      "allCases": [
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at the deadline with TIMEOUT, and after close() no process, scratch or recording file remains",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a bare abort'), naming 'CANCELLED', with the same teardown",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a CANCELLED reason (a stop)'), naming 'CANCELLED', with the same teardown",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a TIMEOUT reason (the runtime\\'s budg\u2026'), naming 'TIMEOUT', with the same teardown",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down with a recording on disk: kills the encoder as well, and leaves the recorder's files exactly as they were",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down Quinn F5: refuses to confirm the teardown while a process it enumerated is still alive, and leaves the scratch directory in place",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "controlled startup timeout-origin handoff for 009 hands an absolute startup timeout to the caller before pending teardown when the wall sample is still before its deadline",
+          "status": "failed",
+          "durationMs": 87.15116699999999
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "controlled startup timeout-origin handoff for 009 keeps an earlier operation-cap TIMEOUT on the ordinary cleanup-before-response path",
+          "status": "skipped",
+          "durationMs": null
+        }
+      ]
+    },
+    {
+      "stage": "green",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-green01-results.json",
+      "resultSha256": "310a43d485fce9233a1d98d94d9520fa71c43901acbb56d0192c2d4d4cd836ac",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+          "run",
+          "--config",
+          "vitest.fixtures.config.ts",
+          "test/fixtures-tier/guided-start-deadline.test.ts",
+          "--testNamePattern=^controlled startup timeout-origin handoff for 009 ",
+          "--minWorkers=1",
+          "--maxWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-green01-vitest.json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T16:38:15.772503+00:00",
+        "elapsedSeconds": 3.67,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "5429e8c371422278ad4cdc48382a32efb75cdacc91118b5b5856b68573f3b49a",
+        "testInputStable": true,
+        "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "vitest": {
+          "success": true,
+          "numPassedTests": 2,
+          "numFailedTests": 0,
+          "numPendingTests": 7,
+          "numTotalTests": 9,
+          "numPassedTestSuites": 3,
+          "numFailedTestSuites": 0
+        },
+        "vitestReportSha256": "849c52b66840a62ebe27da9e64868ce1cb7450437bd6b4e434efd9cd513ce13d"
+      },
+      "beforeManifestSha256": "3245149c737aa45419ba385ec4eb56687766d61de5ff7a5e4e8b5bf1a8e8156f",
+      "afterManifestSha256": "04bbe762e8d6a9ab1132c9a9bfc337f72c8a2883dea126fbac60996c0d621ec1",
+      "allCases": [
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at the deadline with TIMEOUT, and after close() no process, scratch or recording file remains",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a bare abort'), naming 'CANCELLED', with the same teardown",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a CANCELLED reason (a stop)'), naming 'CANCELLED', with the same teardown",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a TIMEOUT reason (the runtime\\'s budg\u2026'), naming 'TIMEOUT', with the same teardown",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down with a recording on disk: kills the encoder as well, and leaves the recorder's files exactly as they were",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down Quinn F5: refuses to confirm the teardown while a process it enumerated is still alive, and leaves the scratch directory in place",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "controlled startup timeout-origin handoff for 009 hands an absolute startup timeout to the caller before pending teardown when the wall sample is still before its deadline",
+          "status": "passed",
+          "durationMs": 76.40891699999997
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "controlled startup timeout-origin handoff for 009 keeps an earlier operation-cap TIMEOUT on the ordinary cleanup-before-response path",
+          "status": "passed",
+          "durationMs": 71.172417
+        }
+      ]
+    },
+    {
+      "stage": "unit",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-unit01-results.json",
+      "resultSha256": "c056b6f498275b559b399b6d075cd3e77ae4a66183cd7b137c6c09e9c531a6d5",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+          "run",
+          "test/run/observedBootstrap.test.ts",
+          "--coverage.enabled=false",
+          "--minWorkers=1",
+          "--maxWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-unit01-vitest.json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T16:39:00.296351+00:00",
+        "elapsedSeconds": 0.77,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "45b000bf4de46853728518a43a9362f4c7dfc40b3e2049ec652bb7108fba7d67",
+        "testInputStable": true,
+        "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "vitest": {
+          "success": true,
+          "numPassedTests": 14,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTotalTests": 14,
+          "numPassedTestSuites": 1,
+          "numFailedTestSuites": 0
+        },
+        "vitestReportSha256": "9beb72453aa633b8202205a0818695c56b855c41e15e0fe1fdd669590a890d48"
+      },
+      "beforeManifestSha256": "5a72318d9a5592955cc3fb2417e492627c0c45bbd19c862a727d6697076f88b7",
+      "afterManifestSha256": "fa5cac69d095b63d41a5569a2c21d54df2ca4f0975c6ed8e25449ae3a4710b43",
+      "allCases": [
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "authorizes only the exact returned app page after startup removal, with no pending blind window",
+          "status": "passed",
+          "durationMs": 0.9639170000000092
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "permanently latches early unexpected page and delivers a late subscription",
+          "status": "passed",
+          "durationMs": 0.8290830000000255
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "permanently latches empty unexpected page and delivers a late subscription",
+          "status": "passed",
+          "durationMs": 0.13383300000000986
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "permanently latches creation unexpected page and delivers a late subscription",
+          "status": "passed",
+          "durationMs": 0.12399999999999523
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "permanently latches wrong-return unexpected page and delivers a late subscription",
+          "status": "passed",
+          "durationMs": 0.169667000000004
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "permanently latches later unexpected page and delivers a late subscription",
+          "status": "passed",
+          "durationMs": 0.11345799999998007
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "permanently latches already-closed unexpected page and delivers a late subscription",
+          "status": "passed",
+          "durationMs": 0.12162500000002296
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "refuses non-sole startup set {\"pages\":[]}",
+          "status": "passed",
+          "durationMs": 0.07216700000000742
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "refuses non-sole startup set {\"pages\":[{},{}]}",
+          "status": "passed",
+          "durationMs": 0.054000000000002046
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "refuses an undeleted startup page or unissued app creation",
+          "status": "passed",
+          "durationMs": 0.10625000000001705
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "does not extend the absolute deadline across sequential startup work",
+          "status": "passed",
+          "durationMs": 1.515500000000003
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "rejects abort, asynchronous failure and expiry after late work without accepting a page",
+          "status": "passed",
+          "durationMs": 0.3807920000000138
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "keeps a strictly earlier operation cap final even when work completes before the absolute deadline",
+          "status": "passed",
+          "durationMs": 0.5529579999999896
+        },
+        {
+          "file": "test/run/observedBootstrap.test.ts",
+          "fullName": "preserves a rejected Error(\"TIMEOUT\") identity and own-property shape",
+          "status": "passed",
+          "durationMs": 0.24254099999998857
+        }
+      ]
+    },
+    {
+      "stage": "greenTypes",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-green-types01-results.json",
+      "resultSha256": "86f5018a20708e2f38613fee1f2d948148acfbb8b7c5184f78e481b1dd68cd22",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/typescript/bin/tsc",
+          "-p",
+          "tsconfig.json",
+          "--noEmit"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T16:39:34.300978+00:00",
+        "elapsedSeconds": 7.96,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+        "testInputStable": true,
+        "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1"
+      },
+      "beforeManifestSha256": "45f36405ac4212dbd026426e3048020bf477b740bf7695d259e0f823fb2fbb6f",
+      "afterManifestSha256": "d557fd95f8259c074e2e6b99b89cdef13197e29b0d169af8482c5d14b21f3da8"
+    },
+    {
+      "stage": "lint",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-lint01-results.json",
+      "resultSha256": "7b72b555e2245db4502b80a8d24a3093da77af348db5e368af1b8847bed46c30",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+          "src/run/observedBootstrap.ts",
+          "src/run/browser.ts",
+          "test/run/observedBootstrap.test.ts",
+          "test/fixtures-tier/guided-start-deadline.test.ts"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T16:39:49.651894+00:00",
+        "elapsedSeconds": 3.1,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "75292f29980d82090c91e996e74895d0c894716cec06ea0fc743a97207d0b5fc",
+        "testInputStable": true,
+        "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1"
+      },
+      "beforeManifestSha256": "ec8ec2764aa6d3b1ff010ed9e19ec904a23e49c71fdfbc89d91c2fddb3189bb5",
+      "afterManifestSha256": "f34627bc6ac68ea62ccc73b0b8f4b7d8a88ab433de348ed31de82c6c94f0bef8"
+    },
+    {
+      "stage": "nativeDeadline",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-deadline-native01-results.json",
+      "resultSha256": "8e0daea7dc7a53dc8f108caf93d0ebe76d67ef6633eb1fa6033b00f468bd9c6e",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+          "run",
+          "--config",
+          "vitest.fixtures.config.ts",
+          "test/fixtures-tier/guided-start-deadline.test.ts",
+          "--minWorkers=1",
+          "--maxWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-deadline-native01-vitest.json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T16:40:43.457435+00:00",
+        "elapsedSeconds": 16.57,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "e08771d9a2f72855bdbf5bda8218a0b1190c4e6eb42ed26b5cdd3c1e4ae71485",
+        "testInputStable": true,
+        "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "vitest": {
+          "success": true,
+          "numPassedTests": 9,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTotalTests": 9,
+          "numPassedTestSuites": 3,
+          "numFailedTestSuites": 0
+        },
+        "vitestReportSha256": "5a1334ea81be71b354c919d09b05bbc5d5702877af80580b0b282e1b4c3936f0"
+      },
+      "beforeManifestSha256": "f4563197152668b2bc93a74544b468a4e1e4afa9fa2fedf9befc97b3a5d10f6b",
+      "afterManifestSha256": "72acd0d7faf0d61ab438672a2cf32daf63c21b4c02614c5cf24b04c0f18f8b39",
+      "allCases": [
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at the deadline with TIMEOUT, and after close() no process, scratch or recording file remains",
+          "status": "passed",
+          "durationMs": 3098.049875
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a bare abort'), naming 'CANCELLED', with the same teardown",
+          "status": "passed",
+          "durationMs": 107.23666599999979
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a CANCELLED reason (a stop)'), naming 'CANCELLED', with the same teardown",
+          "status": "passed",
+          "durationMs": 108.29458299999988
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down rejects at once when the signal aborts during the launch ('a TIMEOUT reason (the runtime\\'s budg\u2026'), naming 'TIMEOUT', with the same teardown",
+          "status": "passed",
+          "durationMs": 111.16437500000029
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down with a recording on disk: kills the encoder as well, and leaves the recorder's files exactly as they were",
+          "status": "passed",
+          "durationMs": 3551.404834
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down kills a Chrome that spawns after the teardown's first listing, and holds the close open until the launch has settled",
+          "status": "passed",
+          "durationMs": 2906.5144170000003
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "REL-001/D4 \u2014 a launch hung by a frozen browser is cut off and fully torn down Quinn F5: refuses to confirm the teardown while a process it enumerated is still alive, and leaves the scratch directory in place",
+          "status": "passed",
+          "durationMs": 2601.952874999999
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "controlled startup timeout-origin handoff for 009 hands an absolute startup timeout to the caller before pending teardown when the wall sample is still before its deadline",
+          "status": "passed",
+          "durationMs": 83.5707910000001
+        },
+        {
+          "file": "test/fixtures-tier/guided-start-deadline.test.ts",
+          "fullName": "controlled startup timeout-origin handoff for 009 keeps an earlier operation-cap TIMEOUT on the ordinary cleanup-before-response path",
+          "status": "passed",
+          "durationMs": 65.93516699999964
+        }
+      ]
+    },
+    {
+      "stage": "nativeF3",
+      "resultPath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-f3-native01-results.json",
+      "resultSha256": "b188603c69504dfc77b2116ec91c8289ded754a78893ef08ae9ff212ee1b4a69",
+      "actual": {
+        "command": [
+          "pnpm",
+          "--dir=/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner",
+          "--config.package-manager-strict=false",
+          "exec",
+          "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+          "run",
+          "--config",
+          "vitest.fixtures.config.ts",
+          "test/fixtures-tier/guidedCloseBound.test.ts",
+          "--testNamePattern=^KL\\-015\\-D5\\ the\\ close\\ of\\ a\\ guided\\ browser\\ is\\ bounded\\ \\(frozen\\ Chromium,\\ real\\ runner\\)\\ F3\\ \\(iii\\)\\ a\\ non\\-deadline\\ error\\ inside\\ the\\ launch\\ with\\ Chrome\\ frozen:\\ the\\ failed\\ launch\\ takes\\ the\\ hard\\ teardown\\ at\\ once$",
+          "--minWorkers=1",
+          "--maxWorkers=1",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs009-recovery-timeout-origin-f3-native01-vitest.json"
+        ],
+        "cwd": "studio-runner",
+        "started": "2026-10-20T16:41:35.476317+00:00",
+        "elapsedSeconds": 4.68,
+        "exit": 0,
+        "sourceStable": true,
+        "distStable": true,
+        "logSha256": "6c81487ca0ad6b734ddc884faced1d12978b8c1b57a910682f38952bf545710a",
+        "testInputStable": true,
+        "testInputDigestBefore": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "testInputDigestAfter": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+        "vitest": {
+          "success": true,
+          "numPassedTests": 1,
+          "numFailedTests": 0,
+          "numPendingTests": 4,
+          "numTotalTests": 5,
+          "numPassedTestSuites": 3,
+          "numFailedTestSuites": 0
+        },
+        "vitestReportSha256": "687497df75035e3744e44784b72962f3a6271a031dda719fb7da096e2c21f029"
+      },
+      "beforeManifestSha256": "764c14f10a768bc7fa32d9aba9b4b352833cd89bc0a18a8ba147769097b6d264",
+      "afterManifestSha256": "a557b909177a04ffd9d80f387e1ff1016730625eeb0b40afaf10c9389419873a",
+      "allCases": [
+        {
+          "file": "test/fixtures-tier/guidedCloseBound.test.ts",
+          "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F1 (i) frozen after a completed start: the stop replies 200 once the close settled, within the grace plus the teardown",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guidedCloseBound.test.ts",
+          "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F2 (ii) frozen entering WITHHOLD: the start is refused CONTEXT_LOST inside the backend window, after the hard teardown alone",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guidedCloseBound.test.ts",
+          "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F3 (iii) a non-deadline error inside the launch with Chrome frozen: the failed launch takes the hard teardown at once",
+          "status": "passed",
+          "durationMs": 1051.7513749999998
+        },
+        {
+          "file": "test/fixtures-tier/guidedCloseBound.test.ts",
+          "fullName": "KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner) F4 (iv-a) stop before spawn: unchanged, the reply is pinned to the D4 backstop (start + 15 s) and the slot is free after it",
+          "status": "skipped",
+          "durationMs": null
+        },
+        {
+          "file": "test/fixtures-tier/guidedCloseBound.test.ts",
+          "fullName": "KL-015-D5 H: a healthy recorded close finishes far inside the grace H five recorded closes, unfrozen, one navigation each: orderly, a webm header, scratch gone, and the slowest is recorded",
+          "status": "skipped",
+          "durationMs": null
+        }
+      ]
+    }
+  ],
+  "canonicalExecutables": [
+    {
+      "path": "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+      "mode": "0755",
+      "unchangedAfter": true
+    },
+    {
+      "path": "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/typescript/bin/tsc",
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0",
+      "mode": "0755",
+      "unchangedAfter": true
+    },
+    {
+      "path": "/private/tmp/obs009-timeout-origin-20261020-redgreen01/repo/studio-runner/node_modules/eslint/bin/eslint.js",
+      "sha256": "6280b95e2a6ab3b04be45cbd3b1627654be518e6a4da163ec0adcbba9cd5fcd8",
+      "mode": "0755",
+      "unchangedAfter": true
+    }
+  ],
+  "genuineControlledRed": "raw1, exactlyrequiredprimaryfalse\u2192true assertionat266:23; cleanup/setup/type/discovery valid",
+  "greenResults": {
+    "controlledCases": 2,
+    "controlledCompanionFilters": 7,
+    "completeBootstrapUnitCases": 14,
+    "unitSkips": 0,
+    "semanticTypeChecks": 2,
+    "changedFileLint": 4,
+    "fullDeadlineCases": 9,
+    "fullDeadlineSkips": 0,
+    "f3ExecutedCases": 1,
+    "f3CompanionFilters": 4
+  },
+  "oldCasesRetained": {
+    "unit": 12,
+    "deadlineNative": 7,
+    "oldBuffersExactPrefixes": true,
+    "oldAssertionsRetained": true
+  },
+  "green492SourcesStable": true,
+  "actualSourceDigestDuringCollectors": "5fe0e5af1ae619c0afd2c31efdec0dc62d73daf0e1f274bfb23926e0ed5443a1",
+  "actualDistDigestDuringCollectors": "698a936537f3be1de45436c4459390fee5628b31e6790e1aa2b183cfaf814210",
+  "sandboxGreenDistDigest": "9ef78477c75c1dab2410c5671f5ef9495a6788360a18841b668007486a7bc39d",
+  "sandboxChangedDistPaths": [
+    "run/browser.js",
+    "run/browser.js.map",
+    "run/observedBootstrap.d.ts",
+    "run/observedBootstrap.js",
+    "run/observedBootstrap.js.map"
+  ],
+  "actualFourOriginalRt7Protected18StableAtHandback": true,
+  "pristineOriginalD698Stable": true,
+  "actualSourceOrDistApplied": false,
+  "fullFixtureTierRun": false,
+  "fullUnitTierRun": false,
+  "buildOrImageOrPinsGateClaimed": false,
+  "noCodeTestChangesToForceGreen": true,
+  "historicalCauseClaimed": false,
+  "controlledCounterexampleNotHistoricalReproduction": true,
+  "oldRTFullFailuresAndDiagnosticNonreproductionPreserved": true,
+  "rtSuccessorRebaseRequiredAfterAccepted009": true,
+  "independentQaAndRootApplicationRoutingPending": true,
+  "runningJobs": false,
+  "furtherRuntimeReleased": false,
+  "sharedBudgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN",
+  "storyLifecycleOrReleaseCredit": false
+}

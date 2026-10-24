@@ -1,0 +1,58 @@
+{
+  "kind": "ARIA_SOURCE07_BOUNDED_CURRENT_AND_REUSE_EVIDENCE",
+  "currentPython": {
+    "script": "critical_checks.py",
+    "result": "critical-results.json",
+    "transcript": "critical-transcript.txt",
+    "checks": 12,
+    "caseGroups": 3,
+    "operatorExchanges": 3,
+    "session": 51822,
+    "observedTerminalChunkId": "5e0489",
+    "actualExit": 0,
+    "fixtureBookkeepingNotAdded": 5,
+    "allReachedEffects": "FAKE_IN_SAME_COMPILED_NAMESPACE",
+    "persistentDenyAuditUnchanged": true
+  },
+  "currentPureMemoryJS": {
+    "checks": 3,
+    "result": "operator-results.json",
+    "helperSha256": "7e833f19263328126fa8757a1268f91214a4a49a90931b7d370b4da63404624a",
+    "toolsInsideHelper": 0,
+    "nodeProcesses": 0,
+    "driver": "operator-checks.js.txt"
+  },
+  "finite": {
+    "script": "verify_source.py",
+    "result": "static-attempt04.stdout",
+    "stderr": "static-attempt04.stderr",
+    "checks": 511,
+    "uniqueNamedPublicPins": 348,
+    "toolChunkId": "fabdc8",
+    "actualExit": 0,
+    "targetFunctionsExecuted": 0
+  },
+  "authorEvidence": {
+    "source07": "critical-attempt04.json",
+    "checks": 31,
+    "operatorExchanges": 3,
+    "observedActualTool": "cabf06",
+    "actualExit": 0,
+    "currentRuntimeAndCallerHashes": 14,
+    "pureJSChecks": 3,
+    "replayedByAria": false
+  },
+  "reuse": {
+    "source06Manifest": "b751602e38355042033e1a1b86ad0996c30a0377e56fae064f1eb383866e7976",
+    "literalComponents": 14,
+    "generationNormalizedAuthorComponents": 2,
+    "shellArguments": 4,
+    "source06Whole39or13Replayed": false,
+    "historicalTimingDenials": 4,
+    "historicalPureJSChecks": 10,
+    "JSDependencyPrefixBytes": 9627,
+    "JSVariableRenameOnly": "FR06Operator -> FR07Operator",
+    "source05FixtureRawSha256": "62e416a589b6d9b65ff8ec0e6ff99b5f4c9b345970b37f3db2d67557b681d3cf"
+  },
+  "actualTargetEffects": 0
+}

@@ -1,0 +1,103 @@
+{
+  "kind": "ONE_BOUNDED_AFFECTED_CHANGE_REREVIEW",
+  "subjectManifestSha256": "d16d242e523bdc08c779fdd49688c42b2380ac03d34868a5bb5a4188af974ac3",
+  "currentPayloadEntriesVerified": 8,
+  "reusedInventorySha256": "c8e1c9688a97bd9ddda7c5915b997d1cd9171d96e4261b90e2e7e6d0f4c330fb",
+  "reusedInventoryEqualsPredecessor": true,
+  "all108SourcePinsUnchanged": true,
+  "nineCorrectionSourcesReread": [
+    {
+      "path": "backend/src/main/resources/application-worker.yml",
+      "sha256": "bf0c42d16bfdfbb1f7d5f7a5d9206f6ce98fe58e4c3bddd0f5bfff64160c3a65",
+      "bytes": 1203,
+      "lines": [
+        23
+      ]
+    },
+    {
+      "path": "backend/src/main/resources/application.yml",
+      "sha256": "271fac527d075f996173e6cf1ef52d409d4416d3d6a46114fc541097b3a25f75",
+      "bytes": 20992,
+      "lines": [
+        360
+      ]
+    },
+    {
+      "path": "helm-chart/put-checks/templates/_helpers.tpl",
+      "sha256": "976cc0e8cd9a97240fa18651481172d89354fbd59b8131bb47437973ad45962f",
+      "bytes": 43936,
+      "lines": [
+        574
+      ]
+    },
+    {
+      "path": "helm-chart/put-checks/templates/deployment.yaml",
+      "sha256": "9f7fda6a66f5758788fc4ec9c51894cb3c7eee39dcbcaf73730164ee662ab977",
+      "bytes": 39697,
+      "lines": [
+        524
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchScheduler.java",
+      "sha256": "68c044e2066c5903fa40888477eab9cfe3ff732473c53fb14d1cecca01af0f07",
+      "bytes": 3501,
+      "lines": [
+        35
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/StudioRecoveryScheduler.java",
+      "sha256": "7cd30d7888a553197c610e07396b620fabdefe73a61d2bae376ee04a60f219c3",
+      "bytes": 1914,
+      "lines": [
+        22
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/recovery/PendingReaper.java",
+      "sha256": "4f643583b8739682a3482f13396d47b461fc41f2b67fddcfcde583abf3d8caff",
+      "bytes": 4228,
+      "lines": [
+        65
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/security/BffSessionAuthenticationFilter.java",
+      "sha256": "316e55bd24f1df49d6e61e4459ae82351fc3b4d9ae9a005bf6b55835603eb6a9",
+      "bytes": 10031,
+      "lines": [
+        110,
+        165
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/config/IdentityBypassProperties.java",
+      "sha256": "d78ca84409399fffc35bf824d882c507340032d41663f7782b0fe4d01168d5e1",
+      "bytes": 3334,
+      "lines": [
+        43
+      ]
+    }
+  ],
+  "independentExactSevenReplacementProof": true,
+  "independentExactFullPatchReconstruction": {
+    "hunks": 28,
+    "targetCount": 1,
+    "baseSha256": "8971ca6b0f5f08b3b35041abe960065d1b6f4fdf4e5fa3b9557a30dd9c16223b",
+    "previewSha256": "edef74f59e9f1e52f8b1195e90ef99ff900cc35cfb92e1ac1909da7a5e5f3c0c",
+    "patchSha256": "2d79f10c9683e200dc4df8f0b9995b12166d49db2c553af347e2dae3e5b1c3ec"
+  },
+  "historicalPreservation": {
+    "headerRowsEqualBase": true,
+    "section4EqualBase": true,
+    "section12eEqualBase": true,
+    "section14EqualPredecessorPreview": true
+  },
+  "fourEarlierSubjectAndQaPacketsIntact": true,
+  "allEarlierFiveUnaffectedDocsIntact": true,
+  "allEightPriorConditionsExact": true,
+  "broadSourceAuditRepeated": false,
+  "actualActionsPerformed": false,
+  "onlyWrites": "docs/qa/evidence/STUDIO-OBS-011/t0/early/obs011-runbook-audit-resume20261020b-qa-review"
+}

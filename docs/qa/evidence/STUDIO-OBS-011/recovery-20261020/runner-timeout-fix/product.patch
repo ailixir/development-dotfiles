@@ -1,0 +1,67 @@
+--- a/studio-runner/src/run/observedBootstrap.ts
++++ b/studio-runner/src/run/observedBootstrap.ts
+@@ -18,11 +18,38 @@
+   subscribe(listener:()=>void):void{this.listener=listener;if(this.violated)listener();}
+   private fail():void{this.violated=true;for(const page of this.pending)this.closeUnexpected(page);this.listener?.();}
+ }
+-export function boundedStartup<T>(work:()=>Promise<T>,deadline:number,signal?:AbortSignal,maxMs=30000):Promise<T>{
+-  if(signal?.aborted)return Promise.reject(new Error('CANCELLED'));
+-  if(Date.now()>=deadline)return Promise.reject(new Error('TIMEOUT'));
+-  return new Promise<T>((resolve,reject)=>{const abort=()=>{reject(new Error('CANCELLED'));};const timer=setTimeout(()=>{reject(new Error('TIMEOUT'));},Math.max(1,Math.min(maxMs,deadline-Date.now())));signal?.addEventListener('abort',abort,{once:true});
+-    const clear=()=>{clearTimeout(timer);signal?.removeEventListener('abort',abort);};
+-    Promise.resolve().then(work).then(value=>{clear();if(signal?.aborted)reject(new Error('CANCELLED'));else if(Date.now()>=deadline)reject(new Error('TIMEOUT'));else resolve(value);},(error:unknown)=>{clear();reject(error instanceof Error?error:new Error('BOOTSTRAP_FAILED'));});
++// Private identity metadata: no Error property, subtype or wire change.
++const absoluteStartupTimeouts = new WeakMap<Error, number>();
++function absoluteStartupTimeout(error: Error, deadline: number): Error {
++  absoluteStartupTimeouts.set(error, deadline);
++  return error;
++}
++export function isAbsoluteStartupTimeout(error: unknown, deadline: number): boolean {
++  return error instanceof Error && absoluteStartupTimeouts.get(error) === deadline;
++}
++
++export function boundedStartup<T>(work: () => Promise<T>, deadline: number, signal?: AbortSignal, maxMs = 30000): Promise<T> {
++  if (signal?.aborted) return Promise.reject(new Error('CANCELLED'));
++  if (Date.now() >= deadline) return Promise.reject(absoluteStartupTimeout(new Error('TIMEOUT'), deadline));
++  return new Promise<T>((resolve, reject) => {
++    const abort = (): void => { reject(new Error('CANCELLED')); };
++    // Capture the existing delay-selection wall sample once.
++    const remaining = deadline - Date.now();
++    const timer = setTimeout(() => {
++      const error = new Error('TIMEOUT');
++      // A strictly earlier operation cap is not whole-start expiry; equality selects both boundaries.
++      reject(remaining <= maxMs ? absoluteStartupTimeout(error, deadline) : error);
++    }, Math.max(1, Math.min(maxMs, remaining)));
++    signal?.addEventListener('abort', abort, { once: true });
++    const clear = (): void => { clearTimeout(timer); signal?.removeEventListener('abort', abort); };
++    Promise.resolve().then(work).then(value => {
++      clear();
++      if (signal?.aborted) reject(new Error('CANCELLED'));
++      else if (Date.now() >= deadline) reject(absoluteStartupTimeout(new Error('TIMEOUT'), deadline));
++      else resolve(value);
++    }, (error: unknown) => {
++      clear();
++      reject(error instanceof Error ? error : new Error('BOOTSTRAP_FAILED'));
++    });
+   });
+ }
+--- a/studio-runner/src/run/browser.ts
++++ b/studio-runner/src/run/browser.ts
+@@ -46,7 +46,7 @@
+ 
+ import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest } from './browserFactory.js';
+ import {BrowserStartupCleanupFailure} from './browserFactory.js';
+-import {BootstrapPageGuard,boundedStartup} from './observedBootstrap.js';
++import {BootstrapPageGuard,boundedStartup,isAbsoluteStartupTimeout} from './observedBootstrap.js';
+ import {readVersionPaths} from './versionProbe.js';
+ import {validateAppVideoPath} from './appVideoOwnership.js';
+ import { installObservationCollector } from './observationCollector.js';
+@@ -677,7 +677,7 @@
+     const settled=hardClose().then(()=>undefined,()=>undefined);
+     // Past the deadline, or stopped: reject now, the runtime waits for the teardown through `close`. Any other failure rejects once the
+     // teardown has settled, so a launch that rejects has already cleared its scratch (its `close` is then only the memo of that outcome).
+-    if(signal?.aborted!==true&&Date.now()<deadline)await settled;
++    if(signal?.aborted!==true&&!isAbsoluteStartupTimeout(error,deadline)&&Date.now()<deadline)await settled;
+     // A wait the signal ended says CANCELLED; the abort reason says whether that was the deadline or a stop. Any other error is the cause as it is.
+     throw new GuidedLaunchFailure(hardClose,launchFailureCause(error,signal),phase);
+   }

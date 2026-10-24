@@ -1,0 +1,69 @@
+{
+  "kind": "11_RT_SOURCE_ONLY_READINESS_HANDOFF",
+  "createdAt": "2026-10-20T14:45:44.853245+00:00",
+  "status": "READY_FOR_ROOT_SEED_AND_LATER_EXPLICIT_GO_NOT_EXECUTED",
+  "rootAdmissionReview": "Root explicitly reviewed/approved the exact bounded seed-helper.diff; no runtime GO while FOLD owns the heavy lane.",
+  "sandboxPath": "/private/tmp/obs011-rt-recovery-20261020-root01",
+  "sandboxExistedAtPreparation": false,
+  "seedArgv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/runner-execution/prepare-sandbox-current.py",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+    "/private/tmp/obs011-rt-recovery-20261020-root01"
+  ],
+  "seedEnvironment": {
+    "OBS011_RT_ROOT_QUIET_WINDOW": "B1_TERMINAL_B7_COMPLETE_TREE_OPEN"
+  },
+  "exactHelperSha256": "ea698725a437e7b8453e72c0f0d52f0217893aa3f2b3d57adf73252546528f29",
+  "exactBindingSha256": "5edc3d42fa01fc6ae2b7663bbbb76697afdef9cb4c4bec73d20f3137b38506ff",
+  "exactHelperDiffSha256": "07c8658279e232507192521802abe626534ef597e4eb83bc6bbe41da69b3a17d",
+  "exactDataDiffSha256": "3aecf6804a59174a9c5bec7070c0af154f0e96813ae5c35c25cb5ad7485b172d",
+  "activeSevenTargetCount": 7,
+  "protectedCurrentCount": 18,
+  "historicalSelectedUnchanged": 491,
+  "onlyCurrentSeedReplacementCount": 2,
+  "plannedUnitDelta": {
+    "beforeTotal": 2672,
+    "afterTotal": 2668,
+    "passedUnchanged": 2643,
+    "beforeSkipped": 29,
+    "afterSkipped": 25,
+    "removedPointers": 4,
+    "realDeferredRetained": 15
+  },
+  "freshBaselines": {
+    "unit": "obs011-recovery-20261020-b2-unit01-vitest.json",
+    "fixtures": "obs011-recovery-20261020-b3-fixtures01-vitest.json"
+  },
+  "runtimeExecuted": false,
+  "sandboxSeeded": false,
+  "productSourceChanged": false,
+  "oldPacketChanged": false,
+  "sourceHelpersExecuted": false,
+  "next": "Root alone seeds actual sandbox after idle-window GO; then existing selftest/AST/type/lint/unit/emits; root actual-digest acceptance before fixtures and copyback.",
+  "scopeBindings": [
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/lanes.v5.json",
+      "sha256": "5a6984fe988ef75392dfe152be8a8b1509ea3a6ef782e69c8edf17e268149cc2"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/w-brief.v5.md",
+      "sha256": "22953682cd4253ae239a120af1399d70677f504c0aa7315a12ae0e0030a04845"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md",
+      "sha256": "2b5e38a6454ee00487208f188db8f67108ea7bede62fa65e7a00832a2a7181a4"
+    },
+    {
+      "path": ".aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/lean-execution-plan-20261019.json",
+      "sha256": "b92b082d22f81f16c20393974c535541fb448eb74429c6ae3970f07a85dc5b8d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/next-batch.md",
+      "sha256": "6a0909da52cd9e3fc669589f3f8523351c8d04e2acb67360b4980bbe07fb3a9e"
+    }
+  ],
+  "sharedBudgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN",
+  "lifecycleOrReleaseCredit": false
+}

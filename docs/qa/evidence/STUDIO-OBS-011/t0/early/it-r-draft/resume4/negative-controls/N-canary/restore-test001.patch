@@ -1,0 +1,37 @@
+--- a/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
++++ b/backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java
+@@ -34521,21 +34521,6 @@
+   @org.junit.jupiter.api.Order(39)
+   void auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass() throws Exception {
+     itrEstablishOwnAuditCorpus();
+-    var actual = new java.util.ArrayList<>(AUDIT_EVENTS.list).getFirst();
+-    var hostile = new ch.qos.logback.classic.spi.LoggingEvent();
+-    hostile.setMessage(actual.getFormattedMessage());
+-    Object[] arguments = actual.getArgumentArray().clone();
+-    var first = (net.logstash.logback.marker.SingleFieldAppendingMarker) arguments[0];
+-    arguments[0] = net.logstash.logback.argument.StructuredArguments.kv(first.getFieldName(), TEXT.get(0));
+-    hostile.setArgumentArray(arguments);
+-    try {
+-      itrNegativeAuditEvents = java.util.List.of(hostile);
+-      assertThatThrownBy(GuidedPublicationReplayIT::scanAuditContent)
+-          .as("the original content scanner rejects this bounded hostile copy")
+-          .isInstanceOf(AssertionError.class);
+-    } finally {
+-      itrNegativeAuditEvents = null;
+-    }
+     scanAuditContent();
+     itrAssertAuditCorpus();
+   }
+@@ -34559,11 +34544,8 @@
+     ITR_AUDIT_CORPUS_CHECKS.incrementAndGet();
+   }
+ 
+-  private static java.util.List<ch.qos.logback.classic.spi.ILoggingEvent> itrNegativeAuditEvents;
+-
+   private static void scanAuditContent() {
+-    var events = new java.util.ArrayList<>(itrNegativeAuditEvents == null
+-        ? AUDIT_EVENTS.list : itrNegativeAuditEvents);
++    var events = new java.util.ArrayList<>(AUDIT_EVENTS.list);
+     for (var event : events) {
+       var keys = new java.util.ArrayList<String>();
+       var rendered = new StringBuilder(event.getFormattedMessage());

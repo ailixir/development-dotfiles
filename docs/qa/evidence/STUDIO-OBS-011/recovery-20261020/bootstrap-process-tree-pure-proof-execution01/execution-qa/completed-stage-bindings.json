@@ -1,0 +1,77 @@
+{
+  "status": "ACCEPTED_ORIGINAL_COMPLETED_STAGE_BINDINGS_WITH_STATIC_LINT_FAILURE",
+  "fresh13993CatalogAndRegularCopySeedBound": true,
+  "sevenNeutralSourceOverlayThenExactlyThreeTestTierPaths": true,
+  "redOverlayMembership": 13995,
+  "allCompletedStageMetadataGuardsVerified": true,
+  "terminals": [
+    {
+      "id": "emit-after01",
+      "rawExit": 0,
+      "terminalSha256": "a7481cb7e1c8ff3a417ec99d155d1b54949f45b55c1f4e89c834632252f9b459",
+      "actualInputsStable": true,
+      "beforeCopyStable": true
+    },
+    {
+      "id": "stamp-after01",
+      "rawExit": 0,
+      "terminalSha256": "40b3cf3121f5e1fe87ef9a6caa8223c8a6f98dc5f3eb6613f86d1f946b174c7c",
+      "actualInputsStable": true,
+      "beforeCopyStable": true
+    },
+    {
+      "id": "types-red01",
+      "rawExit": 0,
+      "terminalSha256": "7b14c247f4fe3b375b7a76d1546c399b730ca91aaa59f8c41c83762a09c62617",
+      "actualInputsStable": true,
+      "beforeCopyStable": true
+    },
+    {
+      "id": "red01",
+      "rawExit": 1,
+      "terminalSha256": "97805c0d02c29913be1ad73551930e83e8acdda7ffb6b353146d07142a3c8499",
+      "actualInputsStable": true,
+      "beforeCopyStable": true
+    },
+    {
+      "id": "green01",
+      "rawExit": 0,
+      "terminalSha256": "6d2a0b9ace2b397661bc3e8e087ceff3007b1fa2377d1d36ae5c508b2e319fd1",
+      "actualInputsStable": true,
+      "beforeCopyStable": true
+    },
+    {
+      "id": "types-green01",
+      "rawExit": 0,
+      "terminalSha256": "c86021342c8099bc33d1294204d6786d1876a05c03c81f0d809d3cfaab158e6a",
+      "actualInputsStable": true,
+      "beforeCopyStable": true
+    },
+    {
+      "id": "lint01",
+      "rawExit": 1,
+      "terminalSha256": "6fbc8c4bd949a630371f8023fa8ae06a870525514f1fd2067c2aafc1c52aded4",
+      "actualInputsStable": true,
+      "beforeCopyStable": true
+    }
+  ],
+  "helperOnlyGreenDeltaExact": true,
+  "sameFixtureAndUnitAcrossRedGreen": true,
+  "configured238Digest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "unchangedRtCheckerSourceAndCliPinsVerifiedNarrowCarryOnly": true,
+  "lint": {
+    "gate": "FAIL",
+    "rawExit": 1,
+    "errors": 23,
+    "ruleCounts": {
+      "@typescript-eslint/no-unnecessary-condition": 1,
+      "no-control-regex": 1,
+      "@typescript-eslint/restrict-template-expressions": 4,
+      "@typescript-eslint/unbound-method": 17
+    },
+    "noFixOrRetry": true
+  },
+  "finalLiveCatalogOrProducerSealClaim": true,
+  "nativeGo": false,
+  "finalClaimQualification": "Final producer seal and frozen catalogs independently checked; no passing static-gate claim."
+}

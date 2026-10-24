@@ -1,0 +1,58 @@
+{
+  "kind": "EXACT_PROSPECTIVE05_PUBLIC_PROVENANCE_ONLY",
+  "inputs": [
+    {
+      "role": "design02",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway-source04-bin-app-failure-disposition-design02/manifest.json",
+      "sha256": "b170a86598e96a4e50cd398fbc4da6e39b03f3e8693db9b0b53f4c4bb9e94fa8"
+    },
+    {
+      "role": "qa02",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway-source04-bin-app-failure-disposition-design02-review/manifest.json",
+      "sha256": "2764b50a02676499669b8edc7d5e956b85e72a9a2a9a1cea2a54a7ed23609f85"
+    },
+    {
+      "role": "rootAdoption02",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway-bin-app-design02-qa-root-adoption.json",
+      "sha256": "88d1a8379024b9de56f9814b85e3ab37febace17995c9b4a08c6356ab882df3d"
+    },
+    {
+      "role": "consumedScope04",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway-selfrole04-one-metadata-invocation-root-scope.json",
+      "sha256": "2c07515cf3cecb0217fdc0b80538c304134ceabc491a987082161695c12f32dc"
+    },
+    {
+      "role": "actualMetadata04",
+      "path": "docs/qa/evidence/STUDIO-OBS-011/t0/resume2-gateway-selfrole04-actual-metadata-root-inspection.json",
+      "sha256": "7434fed0c03fa3104ecc392aca5b61054f171c29ec39138790d5fc4f3a167ee3"
+    }
+  ],
+  "source04Graph": "Exact prior graph through Design02/QA/root pins only; no underlying current/private/runtime discovery.",
+  "scope04": "CONSUMED_ONCE_NOT_AUTHORITY_FOR05",
+  "actualMetadata04Only": {
+    "kind": "PYTHON_SELF_REPORTED_ROLE_METADATA_V1",
+    "status": "METADATA_ONLY",
+    "reason": "NONE",
+    "pid": 76659,
+    "ppid": 3749,
+    "reportedRole": "OTHER",
+    "origArgv0Role": "APP",
+    "start": null,
+    "argvHash": null,
+    "fullFingerprint": null,
+    "observedProcessImage": null,
+    "timestamp": null,
+    "qualified": false,
+    "NFact": false,
+    "descriptorCompletion": "NOT_OBSERVED",
+    "postExitLeakProof": false,
+    "outerObserverCompletionOwed": true
+  },
+  "actual05Metadata": null,
+  "actualReportedRawText": null,
+  "originalMismatchValuesAndCause": "UNKNOWN",
+  "priorDesignAndQaAndFailureHistories": "IMMUTABLE",
+  "actual05Authority": false,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

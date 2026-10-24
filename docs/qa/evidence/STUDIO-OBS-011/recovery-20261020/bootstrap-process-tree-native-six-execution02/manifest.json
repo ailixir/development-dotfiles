@@ -1,0 +1,212 @@
+{
+  "kind": "NATIVE02_SIX_CASE_RAW_PASS_WITH_DISCLOSED_BOOKKEEPING_FAILURE_FOR_INDEPENDENT_QA",
+  "atUtc": "2026-10-21T02:27:45.593274+00:00",
+  "receiptSha256": "8322d6f5d1ee884b30bd695f455747c0e2d455ca0bea0df15083b6f3296781c8",
+  "assessmentSha256": "aeba60331db763b998378a2bdab8e819071addd649f842b27a0baee0fee1b965",
+  "casesSha256": "24a006cfcd15da2209544ed576af834b923cb0829f16ef432718cecde968b5f6",
+  "closed12ProjectionSha256": "2c9a519587fd1644107b5992db2bbdbf6e2cdb901abef8e914aece8d2fc09fca",
+  "closedCustodyQualificationSha256": "871a5eedd4bc24214a50b6de71a1e89e5b4d3b0a2d4d9a50b4ae6f67414e7d7e",
+  "readerFailureCompletionSha256": "4555aadd1926b505632f2fa18f515f00af10a86d2c591b23e5291addbf6256ac",
+  "preservationSha256": "3101870ef919aaa5fc280b5a443a9605455d34d51920a34a26a2441606d25f7b",
+  "driverTool": 81714,
+  "driverRawExit": 0,
+  "nativeRawExit": 0,
+  "actualSixCounts": {
+    "pass": 6,
+    "fail": 0,
+    "skip": 0
+  },
+  "typedReadsAndRetainedLeaves": 12,
+  "projectorRawExit": 1,
+  "boundedBookkeepingCompletionExit": 0,
+  "postDriver3Signal0Results": "UNRETAINED_NO_CREDIT",
+  "leafPidProbeNativeOrSourceRetry": false,
+  "actualApplication": false,
+  "singleFresh307Pass": false,
+  "qualified301PlusSixAdoption": "PENDING_INDEPENDENT_QA_ROOT",
+  "lane": "RELEASED",
+  "independentQa": "PENDING",
+  "artifactCount": 36,
+  "artifacts": [
+    {
+      "path": "actual-after-fixtures-full-selected.json",
+      "sha256": "b8589ca4c13c8276afd6eb374c6aae2106cb8484ceb4237d0a498881d5b42025",
+      "bytes": 5739445
+    },
+    {
+      "path": "actual-before-fixtures-full-selected.json",
+      "sha256": "b8589ca4c13c8276afd6eb374c6aae2106cb8484ceb4237d0a498881d5b42025",
+      "bytes": 5739445
+    },
+    {
+      "path": "cache-cumulative-binding.json",
+      "sha256": "45e536770fc736575b831e0660ab036875527ea6bcdc8b0169c47fda30ab52e8",
+      "bytes": 1080
+    },
+    {
+      "path": "cache-key-reconciliation.json",
+      "sha256": "ca18b93c42b8c507834d0cd7b861a5cb891accab1bb5c3445bf2371c0e9468f5",
+      "bytes": 182
+    },
+    {
+      "path": "canonical-cli-pins.json",
+      "sha256": "d03c0551a032e321fdbd9dc99bb6a2d27c4ee0ded6512656b1a868b9a9e1de1d",
+      "bytes": 3521
+    },
+    {
+      "path": "closed-native-inventory-projection.json",
+      "sha256": "2c9a519587fd1644107b5992db2bbdbf6e2cdb901abef8e914aece8d2fc09fca",
+      "bytes": 11058
+    },
+    {
+      "path": "execution-qa/binding-checks.json",
+      "sha256": "405c03cbefc56cb5747a883ad0eae515a0baa546ee949aaa8704e3af551f5dfd",
+      "bytes": 4118
+    },
+    {
+      "path": "finish-persisted-metadata.py",
+      "sha256": "a59de397f7f95da8d3990b4e940cd067a7f1c29c446594988b647a05ddd8aea4",
+      "bytes": 5701
+    },
+    {
+      "path": "fixture-host-and-environment.json",
+      "sha256": "f89ff33284ef44dccc97a27c9277854ac27c01c3bfdeaa6229477441f27626a9",
+      "bytes": 2084
+    },
+    {
+      "path": "fixtures-actual-after-capture.log",
+      "sha256": "c2e66a73a64cc11d972fcc16207b5f60ff5c917b7cd30e9caeb38cf9fce87c2b",
+      "bytes": 182
+    },
+    {
+      "path": "fixtures-actual-after.json",
+      "sha256": "4a1c446dc02c0e77278840238ada0cbc64d4f91dde6032ad7bb6fb5d54703edd",
+      "bytes": 359699
+    },
+    {
+      "path": "fixtures-actual-before-capture.log",
+      "sha256": "c2e66a73a64cc11d972fcc16207b5f60ff5c917b7cd30e9caeb38cf9fce87c2b",
+      "bytes": 182
+    },
+    {
+      "path": "fixtures-actual-before.json",
+      "sha256": "33593b5913b37b9eafb235ef892215c325cc486c8920e579ed695b4c5982515f",
+      "bytes": 359699
+    },
+    {
+      "path": "fixtures-generated-cache-delta.json",
+      "sha256": "5a64606a5b9b98490e8acf8cf632c4a112e58b68b09a8494fa96dee5fff125a8",
+      "bytes": 1082
+    },
+    {
+      "path": "fixtures-raw-output-pins.json",
+      "sha256": "60969f5121bb08781d3c5ccbbf87ba31cfea8212cda81d57ce387d58dd4e4503",
+      "bytes": 671
+    },
+    {
+      "path": "fixtures-start.json",
+      "sha256": "246ee48314ccbbfdad609ec651e9b97b501653c687f8d49349ace389fc38b5ba",
+      "bytes": 1657
+    },
+    {
+      "path": "fixtures-terminal.json",
+      "sha256": "80f97966d60dfe7d6dbb7cb2ec5176a77bb50bf622efd7028c150a8ddab24516",
+      "bytes": 1990
+    },
+    {
+      "path": "fixtures02-admission-and-command.json",
+      "sha256": "0e0a28498d41e7c405d40bd369e401283c96aae445ade476da099f70f2087cd6",
+      "bytes": 1489
+    },
+    {
+      "path": "fresh-generated-opaque-hash-inventory.json",
+      "sha256": "b5fa60b0d116f7f6ce32a582825ccdaee142b44de6314226807057c8baf49aa2",
+      "bytes": 5103
+    },
+    {
+      "path": "generated-cache/fixtures-after.json",
+      "sha256": "8f55bb1517fd178d610f26e196416ab8e24bf727993308f94503131b1f2efc77",
+      "bytes": 16208
+    },
+    {
+      "path": "generated-cache/fixtures-before.json",
+      "sha256": "0346365b832790ed5b89cecf242ac1724afbaadb88b5d68c74e3e296533edb4f",
+      "bytes": 16213
+    },
+    {
+      "path": "native-six-case-reconciliation.json",
+      "sha256": "24a006cfcd15da2209544ed576af834b923cb0829f16ef432718cecde968b5f6",
+      "bytes": 4099
+    },
+    {
+      "path": "persisted-closed-leaf-custody-qualification.json",
+      "sha256": "871a5eedd4bc24214a50b6de71a1e89e5b4d3b0a2d4d9a50b4ae6f67414e7d7e",
+      "bytes": 6602
+    },
+    {
+      "path": "private-after-fixtures-full-snapshots.json",
+      "sha256": "495ec392bf2f5c32197de480104d191524447d5cd42ee39b37e44b2b47296a3d",
+      "bytes": 12038566
+    },
+    {
+      "path": "private-before-fixtures-full-snapshots.json",
+      "sha256": "5fed3403d96e6d3b454803a2b254703c73e42d89fd2bff80070b4a1402d26374",
+      "bytes": 12038566
+    },
+    {
+      "path": "project-terminal.py",
+      "sha256": "f830af469663e4af910d369fb9ee707da366d2ac020c52d2b7f8803d44007d6e",
+      "bytes": 10836
+    },
+    {
+      "path": "projection-reader-failure-and-completion.json",
+      "sha256": "4555aadd1926b505632f2fa18f515f00af10a86d2c591b23e5291addbf6256ac",
+      "bytes": 1040
+    },
+    {
+      "path": "projector-reference.diff",
+      "sha256": "68595dbc3985c9c77137c9d5d1af52e6209aa3061b20119527f350b016353f46",
+      "bytes": 8659
+    },
+    {
+      "path": "receipt.md",
+      "sha256": "8322d6f5d1ee884b30bd695f455747c0e2d455ca0bea0df15083b6f3296781c8",
+      "bytes": 4515
+    },
+    {
+      "path": "saved-task-and-admission-bindings.json",
+      "sha256": "c2ea27e6f5b95c1f04c75130a109497d4cea7dda8077149760231a26855af127",
+      "bytes": 656
+    },
+    {
+      "path": "source-and-product-preservation.json",
+      "sha256": "3101870ef919aaa5fc280b5a443a9605455d34d51920a34a26a2441606d25f7b",
+      "bytes": 2144
+    },
+    {
+      "path": "terminal-assessment.json",
+      "sha256": "aeba60331db763b998378a2bdab8e819071addd649f842b27a0baee0fee1b965",
+      "bytes": 1743
+    },
+    {
+      "path": "terminal-host-metadata.json",
+      "sha256": "df13b508caf76d857cac36ee4a2bdae8aa3d5ddfc73b31b0fff744984c5acc28",
+      "bytes": 404
+    },
+    {
+      "path": "terminal-host-owned-closure.json",
+      "sha256": "1202fae80bee8281a098c89507fa26ec920fa0ca5ac97431e519a693c1d1de18",
+      "bytes": 1534
+    },
+    {
+      "path": "tool-terminal-record.json",
+      "sha256": "2027696e62ad69ebb795e1a594b7675cc63b89fc354b99ad2884124292f74736",
+      "bytes": 840
+    },
+    {
+      "path": "verified-prerequisites.json",
+      "sha256": "33b4aaedb45c169c67ff348fabd6eed1e026218ad14f2e8258069692456104da",
+      "bytes": 3542
+    }
+  ]
+}

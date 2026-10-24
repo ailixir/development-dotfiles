@@ -1,0 +1,197 @@
+{
+  "kind": "FINAL_D2_RUNTIME08_PRODUCER_PASS_RECEIPT",
+  "atUtc": "2026-10-21T04:59:48.452387+00:00",
+  "outcome": "LOCAL_D2_ALL_ORIGINAL_ORACLES_PASS_PENDING_INDEPENDENT_QA_ROOT_ADOPTION",
+  "originalToolSession": 78265,
+  "driverExit": 0,
+  "collectorPid": 51510,
+  "rawCollectorAndChildExit": 0,
+  "outerCollectorMonotonicElapsedSeconds": 8.33141416683793,
+  "collectorChildElapsedSeconds": 8.16,
+  "projectionComplete": true,
+  "projectionAttemptComplete": true,
+  "missingFacts": [],
+  "inspectionFailureDiagnostics": [],
+  "allSevenOriginalD2StepsObserved": true,
+  "productionCredit": false,
+  "observedClosedFacts": {
+    "noinit.json": {
+      "exit": 78,
+      "missedRefusalDeadline": false,
+      "pollBoundSeconds": 90,
+      "exactExpectedRefusal": true,
+      "runnerStarted": false
+    },
+    "debug.json": {
+      "exit": 78,
+      "missedRefusalDeadline": false,
+      "pollBoundSeconds": 90,
+      "exactExpectedRefusal": true,
+      "runnerStarted": false
+    },
+    "active.json": {
+      "event": "D2_ACTIVE",
+      "observedAtMs": 1792558667961,
+      "liveOwnedBrowserLeaders": 1,
+      "linux": true,
+      "journals": 2,
+      "nonemptyJournals": 2,
+      "owners": 2,
+      "activeRecordingDirectories": 1,
+      "recordingDirectoryHandles": 1,
+      "tlsMode": "0440",
+      "tlsGid": 1001,
+      "readonlyRefusals": 2,
+      "coreSoft": 0,
+      "coreHard": 0,
+      "nodeMainPidGreaterThanOne": true
+    },
+    "drain.json": {
+      "events": [
+        {
+          "event": "runner.started",
+          "atMs": 1792558666029
+        },
+        {
+          "event": "runner.draining",
+          "atMs": 1792558667991
+        },
+        {
+          "event": "runner.drained",
+          "atMs": 1792558668158,
+          "guidedClosed": true
+        }
+      ],
+      "stopSeconds": 1,
+      "exit": 0,
+      "activeObservedAtMs": 1792558667961,
+      "liveOwnedBrowserLeaders": 1,
+      "lifecycleReceivedAtMs": 1792558668146,
+      "lifecycleReason": "CONTEXT_LOST",
+      "recordingReceivedAtMs": 1792558668154,
+      "settlementAfterActualDraining": true
+    },
+    "after.json": {
+      "event": "D2_AFTER",
+      "activeRecordingDirectories": 0
+    },
+    "result.json": {
+      "allSevenD2StepsObserved": true,
+      "productionCredit": false,
+      "retryCount": 0
+    },
+    "cleanup.json": {
+      "commandExit": 0,
+      "ownedResourcesRemaining": 0
+    },
+    "pre-stop-fixture-events.jsonl": [
+      {
+        "event": "D2_READY_FOR_STOP",
+        "assignStatus": 200,
+        "contextStatus": 200,
+        "claims": 1,
+        "bootstraps": 1,
+        "lifecycles": 0,
+        "recordings": 0,
+        "expiresAtMs": 1792558786812
+      }
+    ],
+    "fixture-events.jsonl": [
+      {
+        "event": "D2_READY_FOR_STOP",
+        "assignStatus": 200,
+        "contextStatus": 200,
+        "claims": 1,
+        "bootstraps": 1,
+        "lifecycles": 0,
+        "recordings": 0,
+        "expiresAtMs": 1792558786812
+      },
+      {
+        "event": "D2_LIFECYCLE",
+        "lifecycles": 1,
+        "reason": "CONTEXT_LOST",
+        "receivedAtMs": 1792558668146
+      },
+      {
+        "event": "D2_RECORDING_STORED",
+        "recordings": 1,
+        "receivedAtMs": 1792558668154
+      },
+      {
+        "event": "D2_FIXTURE_TERMINAL",
+        "claims": 1,
+        "bootstraps": 1,
+        "lifecycles": 1,
+        "recordings": 1
+      }
+    ],
+    "image-before.txt": {
+      "Id": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+      "Os": "linux",
+      "Cmd": [
+        "sh",
+        "-c",
+        "ulimit -c 0 && exec node dist/main.js"
+      ],
+      "Entrypoint": null,
+      "User": "pwuser"
+    },
+    "image-after.txt": {
+      "Id": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+      "Os": "linux",
+      "Cmd": [
+        "sh",
+        "-c",
+        "ulimit -c 0 && exec node dist/main.js"
+      ],
+      "Entrypoint": null,
+      "User": "pwuser"
+    },
+    "pwuserUidGid1001": true
+  },
+  "timingOrder": {
+    "actualDrainingAtMs": 1792558667991,
+    "activeObservationBeforeDrainingMs": 30,
+    "lifecycleAfterDrainingMs": 155,
+    "recordingAfterDrainingMs": 163,
+    "drainedAfterDrainingMs": 167,
+    "assignmentExpiryAfterDrainingMs": 118821,
+    "sameMillisecondAmbiguity": false,
+    "guidedClosed": true,
+    "stopSeconds": 1,
+    "stopUsesOriginalShellWholeSeconds": true,
+    "actualProductionExit": 0,
+    "sameLinuxKernelClockOnly": true
+  },
+  "actualCoreSoftAndHardBothZero": true,
+  "localProofScope": "Current exact Linuxarm64 BD83 production CMD/nonroot/init/RO/browser/fd/TLS/journal/drain/callback/cleanup only; no cluster/internalimage/provider/human/lifecycle acceptance",
+  "cleanupQualification": "Original exact named containers/volumesRemaining0 and postallocation0 observed; no all-OS/process or unobserved scratch absence claim",
+  "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+  "sourceFiles": 1814,
+  "hostDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "hostDistFiles": 238,
+  "allPostSourceInputCache191ImageBashChartQuoteProtectedGuardsPassed": true,
+  "awakeBoundary": {
+    "ownedPid": 51509,
+    "waitExit": -15,
+    "heldThroughAllPostguards": true,
+    "releasedAtUtc": "2026-10-21T04:57:50.993269+00:00",
+    "postguardAtUtc": "2026-10-21T04:57:50.972138+00:00",
+    "projectionFileMtimeUtc": "2026-10-21T04:57:50.990963+00:00",
+    "projectionMtimeIsFileMetadata": true,
+    "postguardsAndProjectionBeforeRelease": true,
+    "continuousAwakeClaim": false
+  },
+  "reviewedFixtureB733Schema9015ScriptEa56Driver1062Unchanged": true,
+  "sourceFormatProofNotSubstitutedForActualCoreMeasurement": true,
+  "historical05And06And07FailuresNoCreditPreserved": true,
+  "historical07KernelRowVersionAndValues": "UNRETAINED_UNKNOWN_NO_RETROACTIVE_CAUSE_CERTAINTY",
+  "noSecondRawLeafLogBodyReadExtraProbeSourceFixOrRetry": true,
+  "rootAdmissionSha256": "3fcd80ac771ac5d40041da30e149b495ae86bb7dfcffc50f2c539067abd2938b",
+  "rootDependencyReference": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-dependency-root-acceptance08.json@sha256:0628109205f87560ce37d35f21f1243126699bc707fa9c3c073a1fa9f96f7292",
+  "heavyAndCurrentRInputReadWindowReleased": true,
+  "sealCapturedMetadataOnly": true,
+  "furtherRuntimeOrBackendReplayAdmission": false,
+  "lifecycle": "All3InProgress_NO_DONE_RELEASE_EXTERNAL_CREDIT"
+}

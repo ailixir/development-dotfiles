@@ -1,0 +1,51 @@
+{
+  "atUtc": "2026-10-19T08:48:45.178480+00:00",
+  "label": "obs011-gst-provisional-03",
+  "status": "CLOSED_FAILED_ABORTED_INCOMPLETE_WITH_STICKY_FORMAT_GAP_AND_PREMATURE_UNLOCK_INCIDENT_POST_RECONCILED",
+  "originalToolSession": 70580,
+  "originalToolExit": 1,
+  "reconciliationToolSession": 29335,
+  "reconciliationToolExit": 1,
+  "wrapperAndShellTerminal": [
+    {
+      "pin": "active-lock.json",
+      "pid": 72960,
+      "start": "Mon Oct 19 04:29:37 2026",
+      "proof": "PID_ABSENT"
+    },
+    {
+      "pin": "active-lock.json",
+      "pid": 72961,
+      "start": "Mon Oct 19 04:29:37 2026",
+      "proof": "PID_ABSENT"
+    },
+    {
+      "pin": "reconciliation-active-lock.json",
+      "pid": 98997,
+      "start": "Mon Oct 19 04:45:00 2026",
+      "proof": "PID_ABSENT"
+    },
+    {
+      "pin": "reconciliation-active-lock.json",
+      "pid": 98998,
+      "start": "Mon Oct 19 04:45:00 2026",
+      "proof": "PID_ABSENT"
+    }
+  ],
+  "kernelLockFreeObservedNow": true,
+  "incidentSha256": "2b1ed44aa74c7930b687d3e760491bef5b8cf817503fe5f471c72ae59a85c937",
+  "qualifiedPostUnlockReconciliationSha256": "edf4d18fdd2b4af419035bae1f3a8c7b4e374655b402406ff238dd14b06afc57",
+  "oldPreunlockProof": false,
+  "oldTemporalGapRepaired": false,
+  "stickyFormatOwnedIdentityObservationGap": true,
+  "sourceOriginalBytesAndModesVerifiedAfterIncident": true,
+  "originalCompilePassedBeforeOldUnlock": true,
+  "recordedOwnedTerminalVerifiedAfterIncident": true,
+  "sourceWriterLeaseClosed": true,
+  "retryReleased": false,
+  "sourceMainOrReplayRelease": false,
+  "C8OrLaneCredit": false,
+  "originalNativeTempNotCleaned": true,
+  "allFailuresAndIncidentQualificationsPreserved": true,
+  "independentIncidentAndClosedUnitReviewOwed": true
+}

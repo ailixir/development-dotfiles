@@ -1,0 +1,22 @@
+{
+  "currentReviewAttempts": [
+    {
+      "attempt": 1,
+      "result": "REVIEW_HARNESS_NAMEERROR_BEFORE_NEW64_REPLAY",
+      "detail": "Removing duplicate prior-harness tree assignment left its tree.body assignment; NameError tree occurred after guarded164 replay, before new64. No real operational boundary was crossed."
+    },
+    {
+      "attempt": 2,
+      "result": "PASS_228_PLUS_4_GUARDS_AND_3_INDEPENDENT_PAIRS",
+      "detail": "Duplicate tree.body setup removed; exact prior h injected. Runtime definitions compiled directly into the same guarded namespace. No runtime module import/main."
+    },
+    {
+      "attempt": 3,
+      "result": "PASS_UNCHANGED_RESULTS_AFTER_GUARD_TIGHTENING",
+      "detail": "Reused CORE utc explicitly replaced with synthetic value and OS/process globals denied before independent function calls; source/control result records unchanged. Existing result files compared for exact equality rather than overwritten."
+    }
+  ],
+  "originalReviewer02FilesystemAttemptHistoryPreservedAt": "docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-check01-failed-resource-resume2-code-review/reviewer-check-history.json",
+  "currentReviewRealFileOsFcntlProcessFallthrough": false,
+  "actualOperationalNativePrivateActions": 0
+}

@@ -1,0 +1,1229 @@
+{
+  "sites": [
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "validate_pending_owner_inputs",
+      "line": 313,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "validate_pending_owner_inputs",
+      "line": 319,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "accepted_receipt",
+      "line": 341,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "accepted_receipt",
+      "line": 341,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['case-map.json']",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "validate_document_links",
+      "line": 377,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "PendingHolder.get",
+      "line": 759,
+      "call": "json.loads",
+      "inputExpression": "self.raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "materialized_holder",
+      "line": 820,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.control",
+      "line": 956,
+      "call": "json.loads",
+      "inputExpression": "self.control_raw[name]",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1016,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['scope.json']",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1021,
+      "call": "ast.parse",
+      "inputExpression": "source",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1024,
+      "call": "exec",
+      "inputExpression": "compile(ast.Module(body=nodes, type_ignores=[]), '<verified-selected06-definitions>', 'exec')",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1024,
+      "call": "compile",
+      "inputExpression": "ast.Module(body=nodes, type_ignores=[])",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy.read_static_or_control",
+      "line": 1029,
+      "call": "json.loads",
+      "inputExpression": "static_map[str(path)]",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "create_workspace",
+      "line": 1095,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['input-manifest.json']",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "install_fixed",
+      "line": 1121,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['input-manifest.json']",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_core",
+      "line": 1182,
+      "call": "ast.parse",
+      "inputExpression": "source",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_core",
+      "line": 1185,
+      "call": "exec",
+      "inputExpression": "compile(ast.Module(body=nodes, type_ignores=[]), '<verified-existing-observation-definitions>', 'exec')",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_core",
+      "line": 1185,
+      "call": "compile",
+      "inputExpression": "ast.Module(body=nodes, type_ignores=[])",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "owner_ruling",
+      "line": 1430,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "previous_closure",
+      "line": 1452,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "inherited_samples",
+      "line": 1500,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "journals",
+      "line": 1515,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "transition",
+      "line": 1554,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "run_native",
+      "line": 1646,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "run_native",
+      "line": 1646,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['case-map.json']",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "capture",
+      "line": 1790,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['source-guards.json']",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "capture",
+      "line": 1809,
+      "call": "json.loads",
+      "inputExpression": "old_raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "immutable_tuple",
+      "line": 1860,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "immutable_tuple",
+      "line": 1860,
+      "call": "json.loads",
+      "inputExpression": "ctx.buffers['case-map.json']",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "dispatch",
+      "line": 2007,
+      "call": "json.loads",
+      "inputExpression": "raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "launch",
+      "line": 95,
+      "call": "json.loads",
+      "inputExpression": "manifest_raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "launch",
+      "line": 105,
+      "call": "json.loads",
+      "inputExpression": "own['external-inputs.json']",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "launch",
+      "line": 107,
+      "call": "json.loads",
+      "inputExpression": "source_raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "launch",
+      "line": 119,
+      "call": "json.loads",
+      "inputExpression": "entry_raw",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "launch",
+      "line": 136,
+      "call": "exec",
+      "inputExpression": "compile(own['runtime.py'], '<verified-source9-runtime>', 'exec')",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "launch",
+      "line": 136,
+      "call": "compile",
+      "inputExpression": "own['runtime.py']",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "launch",
+      "line": 138,
+      "call": "exec",
+      "inputExpression": "compile(buffers['contracts.py'], '<verified-unchanged-report-assessor>', 'exec')",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "launch",
+      "line": 138,
+      "call": "compile",
+      "inputExpression": "buffers['contracts.py']",
+      "barrier": "Externally pinned same verified source/static/control bytes or exact current owned-write bytes. Private controls freshly verify opened-FD UID/mode/link/type/cap and named/FD stability before body/parse. Selected legacy AST definitions only; no old main/provider."
+    },
+    {
+      "source": "SHELL-BINDING.md",
+      "qualifiedOwner": "gateway8_bind_capture_buffer",
+      "line": 36,
+      "call": "documented shell eval",
+      "member": "capture-once.bash",
+      "inputExpression": "G8_CAPTURE_SOURCE_BUFFER",
+      "barrier": "Builtin read once into new readonly buffer; foreground verifier hashes actual variable against independently accepted member SHA; separately inspected component status0 then SAME immutable buffer eval in readonly argument wrapper. Actual shell execution not performed."
+    },
+    {
+      "source": "SHELL-BINDING.md",
+      "qualifiedOwner": "gateway8_bind_guard_buffer",
+      "line": 56,
+      "call": "documented shell eval",
+      "member": "guard-exit.bash",
+      "inputExpression": "G8_GUARD_SOURCE_BUFFER",
+      "barrier": "Builtin read once into new readonly buffer; foreground verifier hashes actual variable against independently accepted member SHA; separately inspected component status0 then SAME immutable buffer eval in readonly argument wrapper. Actual shell execution not performed."
+    },
+    {
+      "source": "SHELL-BINDING.md",
+      "qualifiedOwner": "gateway8_author_from_buffer",
+      "line": 57,
+      "call": "documented shell eval",
+      "member": "author-control.template.bash",
+      "inputExpression": "G8_AUTHOR_SOURCE_BUFFER",
+      "barrier": "Builtin read once into new readonly buffer; foreground verifier hashes actual variable against independently accepted member SHA; separately inspected component status0 then SAME immutable buffer eval in readonly argument wrapper. Actual shell execution not performed."
+    },
+    {
+      "source": "SHELL-BINDING.md",
+      "qualifiedOwner": "gateway8_postclose_from_buffer",
+      "line": 58,
+      "call": "documented shell eval",
+      "member": "postclose.template.bash",
+      "inputExpression": "G8_POSTCLOSE_SOURCE_BUFFER",
+      "barrier": "Builtin read once into new readonly buffer; foreground verifier hashes actual variable against independently accepted member SHA; separately inspected component status0 then SAME immutable buffer eval in readonly argument wrapper. Actual shell execution not performed."
+    }
+  ],
+  "siteCount": 42,
+  "pythonSiteCount": 38,
+  "documentedShellEvalCount": 4,
+  "functionSpans": [
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "require",
+      "line": 47,
+      "endLine": 49
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "digest",
+      "line": 52,
+      "endLine": 54
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "encoded",
+      "line": 57,
+      "endLine": 58
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "claim",
+      "line": 61,
+      "endLine": 67
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "validate_claim",
+      "line": 70,
+      "endLine": 82
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "sha_pin",
+      "line": 85,
+      "endLine": 87
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "private_policy",
+      "line": 90,
+      "endLine": 91
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "public_policy",
+      "line": 94,
+      "endLine": 95
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "check_leaf_policy",
+      "line": 98,
+      "endLine": 101
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "text_field",
+      "line": 104,
+      "endLine": 107
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "absolute_field",
+      "line": 110,
+      "endLine": 114
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "integer_field",
+      "line": 117,
+      "endLine": 120
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "hash_field",
+      "line": 123,
+      "endLine": 124
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "hash_map",
+      "line": 127,
+      "endLine": 131
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "pinned_ref",
+      "line": 134,
+      "endLine": 137
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "code_review_refs",
+      "line": 140,
+      "endLine": 143
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "owner_refs",
+      "line": 146,
+      "endLine": 153
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "directory_bindings",
+      "line": 156,
+      "endLine": 166
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "validate_python_roles",
+      "line": 169,
+      "endLine": 173
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "authorization_factory",
+      "line": 176,
+      "endLine": 219
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "purpose_for_name",
+      "line": 222,
+      "endLine": 229
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "validate_document",
+      "line": 232,
+      "endLine": 298
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "validate_immutable_tuple",
+      "line": 301,
+      "endLine": 307
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "validate_pending_owner_inputs",
+      "line": 310,
+      "endLine": 321
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "referenced_control",
+      "line": 324,
+      "endLine": 326
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "accepted_receipt",
+      "line": 329,
+      "endLine": 342
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "validate_document_links",
+      "line": 345,
+      "endLine": 437
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "validate_operation_entry_state",
+      "line": 440,
+      "endLine": 472
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "safe_relative",
+      "line": 475,
+      "endLine": 479
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Ownership.__init__",
+      "line": 487,
+      "endLine": 491
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Ownership.acquire",
+      "line": 493,
+      "endLine": 497
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Ownership.close",
+      "line": 499,
+      "endLine": 509
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Ownership.finish",
+      "line": 511,
+      "endLine": 519
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Ownership.metadata",
+      "line": 521,
+      "endLine": 525
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "file_key",
+      "line": 528,
+      "endLine": 529
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.__init__",
+      "line": 534,
+      "endLine": 536
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.open",
+      "line": 538,
+      "endLine": 540
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.parent",
+      "line": 542,
+      "endLine": 558
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.info",
+      "line": 560,
+      "endLine": 565
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.absent",
+      "line": 567,
+      "endLine": 572
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.read",
+      "line": 574,
+      "endLine": 599
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.verified",
+      "line": 601,
+      "endLine": 605
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.mkdir",
+      "line": 607,
+      "endLine": 618
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.create",
+      "line": 620,
+      "endLine": 629
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.write_fd",
+      "line": 631,
+      "endLine": 637
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.write",
+      "line": 639,
+      "endLine": 646
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files.copy",
+      "line": 648,
+      "endLine": 687
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Budget.__init__",
+      "line": 691,
+      "endLine": 694
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Budget.reserve_entry",
+      "line": 696,
+      "endLine": 698
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Budget.check_file",
+      "line": 700,
+      "endLine": 702
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Budget.consume",
+      "line": 704,
+      "endLine": 706
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Ledger.__init__",
+      "line": 710,
+      "endLine": 719
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Ledger.append",
+      "line": 721,
+      "endLine": 732
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Ledger.freeze",
+      "line": 734,
+      "endLine": 741
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "PendingHolder.__init__",
+      "line": 745,
+      "endLine": 756
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "PendingHolder.get",
+      "line": 758,
+      "endLine": 760
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "scoped_text",
+      "line": 763,
+      "endLine": 767
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "qualify_controller_lock",
+      "line": 770,
+      "endLine": 813
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "materialized_holder",
+      "line": 816,
+      "endLine": 824
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "holder_fields",
+      "line": 827,
+      "endLine": 837
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "no_signal_process",
+      "line": 840,
+      "endLine": 890
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.__init__",
+      "line": 894,
+      "endLine": 913
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.observe",
+      "line": 915,
+      "endLine": 941
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.output",
+      "line": 943,
+      "endLine": 950
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.control",
+      "line": 952,
+      "endLine": 956
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.start_segment",
+      "line": 958,
+      "endLine": 962
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.event",
+      "line": 964,
+      "endLine": 968
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.finish_segment",
+      "line": 970,
+      "endLine": 972
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.failure",
+      "line": 974,
+      "endLine": 981
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.native_snapshot",
+      "line": 983,
+      "endLine": 991
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context.emit_native_fallback",
+      "line": 993,
+      "endLine": 1007
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1010,
+      "endLine": 1050
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy.read_static_or_control",
+      "line": 1027,
+      "endLine": 1031
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy.get_raw",
+      "line": 1032,
+      "endLine": 1039
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "inventory",
+      "line": 1053,
+      "endLine": 1079
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "stage_buffer",
+      "line": 1082,
+      "endLine": 1087
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "create_workspace",
+      "line": 1090,
+      "endLine": 1116
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "install_fixed",
+      "line": 1119,
+      "endLine": 1146
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "archive_tree",
+      "line": 1149,
+      "endLine": 1175
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_core",
+      "line": 1178,
+      "endLine": 1197
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_core.table_with_current_markers",
+      "line": 1187,
+      "endLine": 1193
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "legacy_identity",
+      "line": 1200,
+      "endLine": 1220
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "sample",
+      "line": 1223,
+      "endLine": 1349
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "remember_relevance",
+      "line": 1352,
+      "endLine": 1358
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "restore_sample_history",
+      "line": 1361,
+      "endLine": 1379
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "episode",
+      "line": 1382,
+      "endLine": 1396
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "boundaries",
+      "line": 1399,
+      "endLine": 1416
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "owner_ruling",
+      "line": 1419,
+      "endLine": 1447
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "previous_closure",
+      "line": 1450,
+      "endLine": 1455
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "bind_entry",
+      "line": 1458,
+      "endLine": 1485
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "fresh_source",
+      "line": 1488,
+      "endLine": 1490
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "source_tuple",
+      "line": 1493,
+      "endLine": 1494
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "inherited_samples",
+      "line": 1497,
+      "endLine": 1507
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "journals",
+      "line": 1510,
+      "endLine": 1534
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "publish_journal",
+      "line": 1537,
+      "endLine": 1542
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "transition",
+      "line": 1545,
+      "endLine": 1561
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "run_native",
+      "line": 1564,
+      "endLine": 1660
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "native_wait",
+      "line": 1663,
+      "endLine": 1678
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "phase_operation",
+      "line": 1681,
+      "endLine": 1740
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "ancestor_custody",
+      "line": 1743,
+      "endLine": 1752
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "capture",
+      "line": 1755,
+      "endLine": 1836
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "immutable_tuple",
+      "line": 1839,
+      "endLine": 1877
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "checked_actual_adoption",
+      "line": 1880,
+      "endLine": 1892
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "fresh_current",
+      "line": 1895,
+      "endLine": 1909
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "final_operation",
+      "line": 1912,
+      "endLine": 1924
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "freshness",
+      "line": 1927,
+      "endLine": 1928
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "gate_operation",
+      "line": 1931,
+      "endLine": 1957
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "held_operation",
+      "line": 1960,
+      "endLine": 1981
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "postclose_operation",
+      "line": 1984,
+      "endLine": 1997
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "dispatch",
+      "line": 2000,
+      "endLine": 2012
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "negative_operation",
+      "line": 2015,
+      "endLine": 2022
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "guard_admission",
+      "line": 2025,
+      "endLine": 2046
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "author_control",
+      "line": 2049,
+      "endLine": 2089
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "need",
+      "line": 27,
+      "endLine": 29
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "open_owned",
+      "line": 32,
+      "endLine": 37
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "close_owned",
+      "line": 40,
+      "endLine": 44
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "bootstrap_read",
+      "line": 47,
+      "endLine": 80
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "launch",
+      "line": 83,
+      "endLine": 143
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "execute_context",
+      "line": 146,
+      "endLine": 168
+    }
+  ],
+  "functionCount": 119,
+  "classes": [
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Ownership",
+      "line": 482,
+      "endLine": 525
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Files",
+      "line": 532,
+      "endLine": 687
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Budget",
+      "line": 690,
+      "endLine": 706
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Ledger",
+      "line": 709,
+      "endLine": 741
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "PendingHolder",
+      "line": 744,
+      "endLine": 760
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "Context",
+      "line": 893,
+      "endLine": 1007
+    }
+  ],
+  "runtimeClasses": 6,
+  "callbackSites": [
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "no_signal_process",
+      "line": 849,
+      "expression": "lambda _: None"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "no_signal_process",
+      "line": 858,
+      "expression": "lambda h: require(ctx.owner.waited.get(id(h)) is True, 'CHILD_COMPLETION_UNCONFIRMED')"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "no_signal_process",
+      "line": 863,
+      "expression": "lambda h: h.close()"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1018,
+      "expression": "lambda: datetime.datetime.now(datetime.timezone.utc).isoformat()"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1040,
+      "expression": "lambda p: digest(get_raw(p))"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1041,
+      "expression": "lambda p: inventory(ctx, p)"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1042,
+      "expression": "lambda p, mode=448: ctx.fs.mkdir(p, mode)"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1043,
+      "expression": "lambda src, dst, mode=420: stage_buffer(ctx, src, dst, mode)"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1044,
+      "expression": "lambda src, dst: archive_tree(ctx, src, dst)"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1045,
+      "expression": "lambda p: ctx.fs.parent(p)['handle']"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_legacy",
+      "line": 1046,
+      "expression": "lambda p, h: ctx.fs.verified(p, h)"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "inventory",
+      "line": 1079,
+      "expression": "lambda r: r['path']"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "archive_tree",
+      "line": 1155,
+      "expression": "lambda r: (len(Path(r['path']).parts), r['path'])"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_core",
+      "line": 1184,
+      "expression": "lambda command, allowed=(0,): ctx.observe(command, absence=1 in allowed)"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "load_core",
+      "line": 1196,
+      "expression": "lambda row: legacy_identity(ctx, row)"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "sample",
+      "line": 1294,
+      "expression": "lambda: C['identity'](row)"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "run_native",
+      "line": 1594,
+      "expression": "lambda _: None"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "run_native",
+      "line": 1608,
+      "expression": "lambda h: require(ctx.owner.waited.get(id(h)) is True, 'NATIVE_NOT_WAITED')"
+    },
+    {
+      "source": "runtime.py",
+      "qualifiedOwner": "immutable_tuple",
+      "line": 1867,
+      "expression": "lambda rows: [{k: v for k, v in r.items() if k not in ('dev', 'ino')} for r in rows]"
+    },
+    {
+      "source": "entry.py",
+      "qualifiedOwner": "bootstrap_read",
+      "line": 73,
+      "expression": "lambda s: (s.st_dev, s.st_ino, s.st_mode, s.st_uid, s.st_size, s.st_mtime_ns, s.st_nlink)"
+    }
+  ],
+  "callbackCount": 20,
+  "scope": "All AST json.load/loads, ast.parse, compile, exec/eval calls in runtime.py and entry.py plus4 prospective documented shell eval wrappers. Tests are separate guarded source controls, not runtime installation.",
+  "selectedLegacyConsumers": "load_legacy exact13 selected definitions with fresh read/hash/inventory/copy overrides; load_core exact existing observation definitions only; unchanged contracts.assess from39 pinned static inputs. No old main/bootstrap/new provider.",
+  "testFixtureAuthority": "Synthetic source/tool/baseline/controller authority; literal bank/profile/case-map/assessor. Persistent same-namespace effect fakes, no AST safety edits."
+}

@@ -1,0 +1,31 @@
+{
+  "unitLabel": "obs011-gst-provisional-05",
+  "rootReleaseSha256": "da402a685c7de417d61263fe78b7fe06992f323397437c6332435f626783252f",
+  "activeLockSha256": "786bab5e8fd7169cf0f1072cd1fd58c4168ea93c123157e9ad72cf82ec4157b4",
+  "expectedWrapperExit": 1,
+  "historicalGapCodes": [
+    "GST03_FORMAT_IDENTITY_GAP",
+    "GST03_PREMATURE_UNLOCK_INTERVAL"
+  ],
+  "phaseState": {
+    "format": "TERMINAL",
+    "native": "TERMINAL",
+    "restore-compile": "TERMINAL"
+  },
+  "evidencePins": {
+    "original-modes.json": "86584b3f710109522709cf0195fdc8f20d30f10988e3ba71f80922e00de96036",
+    "owned-format/receipt.json": "50d06b0586efa48686f5319f1cb33331499cb9132b69e0359a01c53d4b802376",
+    "owned-native/receipt.json": "18389c0f98fbad096ce85fb147b4d8eb76631094395d88d655d428b788cdf6d6",
+    "owned-restore-compile/receipt.json": "cff5593a84faf8ce3ebdaa4a50152e2546bcfa8ed94937e18648ca2106934f42"
+  },
+  "gaps": [],
+  "decision": "AUTHORIZE_LOCK_RELEASE",
+  "atUtc": "2026-10-19T10:22:04.280419+00:00",
+  "signedBy": "root",
+  "readinessSha256": "5a8cf76d9c10c6badf8f16fff40909f1bdc5011df8842651aa060dcf4ca97018",
+  "sourceOverrides": {},
+  "ownedPorts": [],
+  "retainThreeAuthorized": false,
+  "actualFinalVerificationExitInspected": 0,
+  "nativeOrLaneCredit": false
+}

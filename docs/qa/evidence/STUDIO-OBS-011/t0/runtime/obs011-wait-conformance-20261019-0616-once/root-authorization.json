@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "atUtc": "2026-10-19T06:15:22.925541+00:00",
+  "decisionId": "ROOT-WAIT-234-ONE-SHOT-20261019",
+  "authorized": true,
+  "label": "obs011-wait-conformance-20261019-0616-once",
+  "scope": "Single reviewed standalone234-comparison bridge/IT-S partial differential probe. No product source application, no Replay/IR application or clock/full-class use. Interrupt axis belongs to separate already executed IRQ26pair probe. Neither gives native/lane/C8/coverage/timing credit.",
+  "original03": "Terminal failed and public assessment adopted. Original raw failures/gap/coverage absence unchanged. Backend source/build outputs remain held.",
+  "checks": {
+    "sealedPackagesRechecked": [
+      27,
+      57
+    ],
+    "cases": 26,
+    "modes": 9,
+    "plannedComparisons": 234,
+    "allCasesNonReplay": true
+  },
+  "references": {
+    "qa/bridge-its-drafts-rereview/review.md": "bf82f3ee582a0725eb8dc324c42a460dade9e615aa4d933522af3279944584a5",
+    "runtime/obs011-wait-irq-20261019-0617-once/root-authorization.json": "c2078ef37f759c4959ebb662fb050b244a2fdba5086ab74ea0fea50e3eb1aa88",
+    "runtime/obs011-wait-irq-20261019-0617-once/root-terminal-archive.json": "f1d72a2b5924430395b5aba5d47ac4333eb56b08e23d24b3e71b123595547d50"
+  },
+  "launcherSha256": "b98fba0618096c85014cce1dbe07e3f17fda1f527d000e72f15fe05cabff9634",
+  "lockWrapperSha256": "2846314e3ab12926bff6eb458d7058c406b983092fb40b1fb5c2fa087c2366df",
+  "java21Home": "/Users/brunobuger/.gradle/jdks/eclipse_adoptium-21-aarch64-os_x.2/jdk-21.0.10+7/Contents/Home",
+  "jdkFiles": {
+    "release": "c0396ee69271e1a2c323e62c7d38dfd94206acab6def9b3ab6a99f7d75ce509a",
+    "bin/java": "19f2cd660267f4fb79a83debff11e8c3d509cd06beb499297e6558b030b8789a",
+    "bin/javac": "b064bbb7574c97d9e1efaa0200dafcca651bdddb7715f003bca83ef884b29c38"
+  },
+  "scratch": "/private/tmp/obs011-wait-conformance-20261019-0616-once",
+  "umask": "077",
+  "phaseBoundsSeconds": [
+    30,
+    60
+  ],
+  "automaticRetry": false,
+  "retain": "Actual lock-wrapper identity/stdout/stderr, complete compiled scratch tree and phase receipts. Independent review owed.",
+  "remaining": "All staged/native full/source/case/cohort/coverage/AC5 gates still owed."
+}

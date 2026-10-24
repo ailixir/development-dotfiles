@@ -1,0 +1,33 @@
+{
+  "checks": [
+    {
+      "check": "contract exact frozen2263 rows",
+      "passed": true
+    },
+    {
+      "check": "raw archive exact four frozen rows",
+      "passed": true
+    },
+    {
+      "check": "exact frozen failure statuses and flags",
+      "passed": true
+    },
+    {
+      "check": "pure report preserved component equality",
+      "passed": true
+    },
+    {
+      "check": "finite identities unique and correct dimensionality",
+      "passed": true
+    }
+  ],
+  "count": 5,
+  "allExpected": true,
+  "frozenMetadataOnly": true,
+  "oldEOrProcessResourceOrBaselineActions": 0,
+  "initialReadHistory": {
+    "tool": "ada84c",
+    "actualExit": 1,
+    "reason": "Reviewer expected frozen index among declared preparedInputs and got StopIteration. Before any protected read or write. Used the exact two task-named immutable metadata paths/hashes instead; no fallback/discovery/runtime action."
+  }
+}

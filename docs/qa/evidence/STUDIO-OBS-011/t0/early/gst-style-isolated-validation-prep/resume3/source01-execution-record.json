@@ -1,0 +1,49 @@
+{
+  "kind": "SOURCE_ONLY_BOUNDED_BATCH_EXECUTION_RECORD",
+  "designBeforeCodeTool": "54f485",
+  "savedDesignSha256": "a3546570f65257ce9ef6cad78ea47e82764a56609f26d493d419926a88b45e6a",
+  "preflightSuppliedByRoot": {
+    "actualExit": 0,
+    "tool": "3b9e39",
+    "inspection": "e3d01b",
+    "safe": true,
+    "threats": []
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "inspection": "2a6fff",
+      "tool": "254ce3",
+      "actualExit": 1,
+      "cause": "ASTloader rejected inert historical Boolean defaults",
+      "stderr": "fake-flow-attempt1.stderr"
+    },
+    {
+      "attempt": 2,
+      "inspection": "3fe317",
+      "tool": "de4096",
+      "actualExit": 1,
+      "cause": "PHASE_EXCEPTION atfake regression collector; first inner cause UNKNOWN",
+      "stderr": "fake-flow-attempt2.stderr"
+    },
+    {
+      "attempt": 3,
+      "inspection": "a7ecd8",
+      "tool": "038ebd",
+      "actualExit": 0,
+      "passedChecks": 43,
+      "stderr": "fake-flow-attempt3.stderr",
+      "correction": "Preload serialization stdlib before permanent audit; retained closed fake diagnostics. Does not retroactively identify attempt2 inner cause."
+    }
+  ],
+  "currentActualFakeChecks": 43,
+  "oldChecksReusedAsCurrent": 0,
+  "actualJavaOrNativeOrFixtureOrSourceCopyOrOverlay": 0,
+  "actual284ModesOrToolOfflineCurrentSourceFacts": 0,
+  "ordinaryRuntimeAdapterImplemented": false,
+  "operationalCompletenessClaim": false,
+  "runtimeIntegrationArchiveQualification": "OWED",
+  "allPreviousGatesHoldsUnchanged": true,
+  "budgetCeilingUsd": 500,
+  "aggregateSpend": "UNKNOWN"
+}

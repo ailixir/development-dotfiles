@@ -1,0 +1,111 @@
+{
+  "kind": "PRIMARY_APPLE_TAGGED_SOURCE_PROVENANCE",
+  "revision": "xnu-12377.1.9",
+  "revisionMatchesActualHost": false,
+  "fullUpstreamRawBuffersRetainedOrShaVerified": false,
+  "retrieval": "WEB_TOOL_PRIMARY_PUBLIC_SOURCE_ONLY",
+  "sources": [
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/xnu-12377.1.9/bsd/kern/proc_info.c#L1323",
+      "symbol": "proc_pidpathinfo_internal",
+      "lines": [
+        1323,
+        1399
+      ],
+      "establishes": "Obtains p_textvp, resolves a pathname and exports the path. No main-vnode stat object is exported."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/xnu-12377.1.9/bsd/kern/proc_info.c#L1067",
+      "symbol": "proc_pidregionpathinfo",
+      "lines": [
+        1067,
+        1098
+      ],
+      "establishes": "Address-selected VM-region vnode is passed to fill_vnodeinfo and a region/path record is exported. No p_textvp equality is performed."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/xnu-12377.1.9/bsd/kern/proc_info.c#L1100",
+      "symbol": "proc_pidregionpathinfo2",
+      "lines": [
+        1100,
+        1134
+      ],
+      "establishes": "Iterates mapped-vnode regions through address selection; no main executable discriminator."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/xnu-12377.1.9/bsd/kern/proc_info.c#L1173",
+      "symbol": "proc_pidregionpathinfo3",
+      "lines": [
+        1173,
+        1232
+      ],
+      "establishes": "Selects a mapped-vnode region with a filesystem-device filter; no main executable discriminator."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/xnu-12377.1.9/bsd/sys/proc_info.h#L54",
+      "symbol": "proc_bsdinfo",
+      "lines": [
+        54,
+        77
+      ],
+      "establishes": "Typed PID/PPID/UID and start seconds/microseconds fields; ABI/bytecounts on actual provider unqualified."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/xnu-12377.1.9/bsd/sys/proc_info.h#L157",
+      "symbol": "proc_regioninfo; vnode_info_path; proc_regionwithpathinfo",
+      "lines": [
+        157,
+        179,
+        268,
+        315
+      ],
+      "establishes": "Region protection/address/size and vnode stat/path fields. Mapping structure has no main executable tag."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/xnu-12377.1.9/bsd/sys/proc_info.h#L674",
+      "symbol": "PROC_PIDTBSDINFO=3; PROC_PIDREGIONPATHINFO=8; PROC_PIDPATHINFO=11",
+      "lines": [
+        674,
+        704
+      ],
+      "establishes": "Selector declarations only; actual API/provider and struct bytecounts remain unqualified."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/xnu-12377.1.9/bsd/sys/proc_info_private.h#L41",
+      "symbol": "proc_uniqidentifierinfo; PROC_PIDUNIQIDENTIFIERINFO=17",
+      "lines": [
+        41,
+        56,
+        133,
+        139
+      ],
+      "establishes": "Main executable UUID and process identity versions, not a main vnode stat object; declaration gives this structure size56 for that source revision only."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/xnu-12377.1.9/libsyscall/wrappers/libproc/libproc.c#L93",
+      "symbol": "proc_pidinfo",
+      "lines": [
+        93,
+        103
+      ],
+      "establishes": "Kernel failure is returned as0, success returns byte count. Actual errno/shortread behavior requires qualification."
+    }
+  ],
+  "researchFailuresPreserved": [
+    {
+      "url": "https://api.github.com/repos/apple-oss-distributions/xnu/commits/main",
+      "result": "WEB_INTERNAL_ERROR_NO_CONTENT_USED"
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/commits/main/",
+      "result": "WEB_INTERNAL_ERROR_NO_CONTENT_USED"
+    }
+  ],
+  "protocol": "WAITED_NATIVE_WITH_SAMPLED_CLOSURE_V1",
+  "legacyOrdinaryGateSatisfied": false,
+  "intervalCaptureClaimed": false,
+  "ownerRulingPins": null,
+  "platformCertificateSha256": null,
+  "sourceProfileQualified": false,
+  "historicalIdentityUncertainty": "RETAINED_NOT_REPAIRED"
+}

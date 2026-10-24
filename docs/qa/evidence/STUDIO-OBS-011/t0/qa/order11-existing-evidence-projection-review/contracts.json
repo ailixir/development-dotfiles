@@ -1,0 +1,665 @@
+{
+  "scope": "INDEPENDENT_AST_CORE_SYNTHETIC_ONLY",
+  "parserSha256": "03e64cb7f8155194c614fedca3b47a99f547db2768a38e38984b0e5d4b5d5bd5",
+  "checks": 70,
+  "accepted": 5,
+  "rejected": 65,
+  "results": [
+    {
+      "name": "valid-synthetic-terminal-red-release",
+      "accepted": true,
+      "expected": true,
+      "reason": "CLOSED_PROJECTION_NOT_CAUSE",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "qualified-terminal-red-incomplete-collector-positive",
+      "accepted": true,
+      "expected": true,
+      "reason": "CLOSED_PROJECTION_NOT_CAUSE",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-collectorTerminal-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-collectorTerminal-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-sameStartOwnedJvmTerminal-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-sameStartOwnedJvmTerminal-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-ownedUnknownTerminal-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-ownedUnknownTerminal-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-wholeExecutionClosed-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-wholeExecutionClosed-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-sourceHoldVerified-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-sourceHoldVerified-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-quotesHelmHelpersHeld-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-quotesHelmHelpersHeld-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-observationGapSticky-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "terminal-observationGapSticky-missing",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "assessment-wholePublicArchiveFrozen-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "assessment-wholePublicAssessmentComplete-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "assessment-rawFailPreserved-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "assessment-observationGapPreserved-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "assessment-noLaneApproval-false",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_FINAL_ASSESSMENT_REQUIRED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "unreleased",
+      "accepted": false,
+      "expected": false,
+      "reason": "NO_EXECUTION_RELEASE",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "root-refused",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_INDEPENDENT_APPROVAL",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "quinn-refused",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_INDEPENDENT_APPROVAL",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "timeout-inference",
+      "accepted": false,
+      "expected": false,
+      "reason": "WHOLE_OWNED_TERMINAL_NOT_PROVED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "no-closure-artifact-pins",
+      "accepted": false,
+      "expected": false,
+      "reason": "STICKY_GAP_RECOVERY_NOT_BOUND",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "postdated-terminal",
+      "accepted": false,
+      "expected": false,
+      "reason": "RELEASE_PRECEDES_TERMINAL_PROOF",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "expired",
+      "accepted": false,
+      "expected": false,
+      "reason": "AUTHORIZATION_NOT_FRESH",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "future-issued",
+      "accepted": false,
+      "expected": false,
+      "reason": "AUTHORIZATION_NOT_FRESH",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "too-long-approval",
+      "accepted": false,
+      "expected": false,
+      "reason": "AUTHORIZATION_NOT_FRESH",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "changed-source-capture",
+      "accepted": false,
+      "expected": false,
+      "reason": "HELD_CAPTURE_MISMATCH",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "changed-capture-files",
+      "accepted": false,
+      "expected": false,
+      "reason": "HELD_CAPTURE_MISMATCH",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "green-raw-gradle",
+      "accepted": false,
+      "expected": false,
+      "reason": "RAW_FAIL_NOT_RETAINED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "partial-only-default",
+      "accepted": false,
+      "expected": false,
+      "reason": "NOT_WHOLE_COLLECTOR",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "target-not-failed",
+      "accepted": false,
+      "expected": false,
+      "reason": "RAW_ORDER11_FAILURE_NOT_BOUND",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "reused-output",
+      "accepted": false,
+      "expected": false,
+      "reason": "SYNTHETIC_OUTPUT_ALREADY_EXISTS",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "post-signing-authorization-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "APPROVAL_HASH_MISMATCH",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "post-signing-root_approval-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "APPROVAL_HASH_MISMATCH",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "post-signing-quinn_approval-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "APPROVAL_HASH_MISMATCH",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "post-signing-terminal-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_PROOF_BINDING",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "post-signing-assessment-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_PROOF_BINDING",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "post-signing-receipt-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_PROOF_BINDING",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "post-signing-before-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_PROOF_BINDING",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "post-signing-after-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PUBLIC_PROOF_BINDING",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "executing-local-parserSha256-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PARSER_OR_PACKAGE_CHANGED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "executing-local-packageManifestSha256-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PARSER_OR_PACKAGE_CHANGED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "executing-local-sourceBindingsSha256-changed",
+      "accepted": false,
+      "expected": false,
+      "reason": "PARSER_OR_PACKAGE_CHANGED",
+      "privateManifestCalls": 0,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "snapshot-unknown-message",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "snapshot-unknown-code",
+      "accepted": false,
+      "expected": false,
+      "reason": "SNAPSHOT_NOT_SOURCE_ENUM",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "snapshot-unknown-field",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-warning-session",
+      "accepted": false,
+      "expected": false,
+      "reason": "WARNING_ORDINAL18_IDENTITY_UNPROVEN",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-prefix",
+      "accepted": false,
+      "expected": false,
+      "reason": "START_RECORD_MISSING_OR_AMBIGUOUS",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-runtime-phase",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_RUNTIME_PHASE",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "invalid-runtime-phase",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_OR_UNBOUND_START_PHASE",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-launch-phase",
+      "accepted": false,
+      "expected": false,
+      "reason": "MISSING_RUNTIME_PHASE",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-private-message",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "extra-private-path",
+      "accepted": false,
+      "expected": false,
+      "reason": "UNKNOWN_OR_MISSING_FIELDS",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "too-many-links",
+      "accepted": false,
+      "expected": false,
+      "reason": "START_LINK_BOUND",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "noninteger-elapsed",
+      "accepted": false,
+      "expected": false,
+      "reason": "NUMERIC_BOUND",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "negative-elapsed",
+      "accepted": false,
+      "expected": false,
+      "reason": "NUMERIC_BOUND",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "missing-worker-line",
+      "accepted": false,
+      "expected": false,
+      "reason": "START_RECORD_MISSING_OR_AMBIGUOUS",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicate-worker-line",
+      "accepted": false,
+      "expected": false,
+      "reason": "START_RECORD_MISSING_OR_AMBIGUOUS",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-generation",
+      "accepted": false,
+      "expected": false,
+      "reason": "GUIDED_LOG_SOURCE_LOCATOR",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "unconfirmed-producer-exit",
+      "accepted": false,
+      "expected": false,
+      "reason": "GUIDED_EXIT_UNCONFIRMED",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "duplicate-producer-spawn",
+      "accepted": false,
+      "expected": false,
+      "reason": "DUPLICATE_GUIDED_GENERATION",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "manifest-path-traversal",
+      "accepted": false,
+      "expected": false,
+      "reason": "SNAPSHOT_SOURCE_LOCATOR",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "wrong-synthetic-root",
+      "accepted": false,
+      "expected": false,
+      "reason": "WRONG03_TEMP_REFERENCE",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 0,
+      "fakeOnly": true
+    },
+    {
+      "name": "source-shaped-unknown-scalars-redacted",
+      "accepted": true,
+      "expected": true,
+      "reason": "CLOSED_PROJECTION_NOT_CAUSE",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "long-elapsed-not-invented-runtime-timer",
+      "accepted": true,
+      "expected": true,
+      "reason": "CLOSED_PROJECTION_NOT_CAUSE",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    },
+    {
+      "name": "OTHER-not-no-error-empty-numeric-dictionaries-retained",
+      "accepted": true,
+      "expected": true,
+      "reason": "CLOSED_PROJECTION_NOT_CAUSE",
+      "privateManifestCalls": 1,
+      "privateRootCalls": 1,
+      "fakeOnly": true
+    }
+  ],
+  "filesystemCounterexamples": [
+    {
+      "id": "O11-PROJ-FS-01A",
+      "result": "ROOT_SYMLINK_RESOLVED_AND_ACCEPTED_BY_ACTUAL_READ_INPUTS_CORE",
+      "syntheticOnly": true,
+      "actualPrivateReads": 0
+    },
+    {
+      "id": "O11-PROJ-FS-01B",
+      "result": "SWAPPED_OUTPUT_PARENT_FOLLOWED_BY_ACTUAL_OUTPUT_OPEN_STATEMENT",
+      "syntheticOnly": true,
+      "actualWrites": 0
+    },
+    {
+      "id": "O11-PROJ-FS-01C",
+      "result": "MANIFEST_OPENED_HANDLE_UID999_MODE0644_ACCEPTED_AFTER_UID123_MODE0600_LSTAT",
+      "syntheticOnly": true,
+      "actualPrivateReads": 0
+    }
+  ],
+  "extraJsonShapeRejections": 4,
+  "authorLoopExecuted": false,
+  "entrypointExecuted": false,
+  "actualPrivateEnumerationReadsGlobs": 0,
+  "actualOsIoInContracts": false,
+  "rawPrivateExported": false
+}

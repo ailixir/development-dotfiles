@@ -1,0 +1,86 @@
+{
+  "kind": "FINAL_D2_RUNTIME05_INCOMPLETE_PROOF_RECEIPT",
+  "atUtc": "2026-10-21T04:20:29.334195+00:00",
+  "outcome": "STOP_INCOMPLETE_D2_EVIDENCE_NO_GATE_CREDIT",
+  "sourceCause": "UNKNOWN",
+  "originalDriverToolSession": 56688,
+  "driverExit": 1,
+  "originalCollectorPid": 89437,
+  "rawCollectorAndChildExit": 0,
+  "nativeElapsedSeconds": 3.1098542080726475,
+  "qualificationFailureFrame": "run-d2.py:205",
+  "projectionComplete": false,
+  "missingSourceDeclaredFacts": [
+    "noinit.json",
+    "debug.json",
+    "active.json",
+    "drain.json",
+    "after.json",
+    "result.json",
+    "pre-stop-fixture-events.jsonl",
+    "fixture-events.jsonl",
+    "image-after.txt"
+  ],
+  "retainedClosedFacts": {
+    "cleanup.json": {
+      "commandExit": 0,
+      "ownedResourcesRemaining": 0
+    },
+    "image-before.txt": {
+      "Id": "sha256:bd83d49256b5be0d2c8dc60b26ec92bef0bcf063eaa0a49de3d0db1fd154e753",
+      "Os": "linux",
+      "Cmd": [
+        "sh",
+        "-c",
+        "ulimit -c 0 && exec node dist/main.js"
+      ],
+      "Entrypoint": null,
+      "User": "pwuser"
+    },
+    "pwuserUidGid1001": true
+  },
+  "retainedOutputCustodyRows": [
+    {
+      "name": "cleanup.json",
+      "sha256": "f60766acd7d8e0251d80f988b6700abbc3a93af905b7202c956f4e8ba167b572",
+      "bytes": 46
+    },
+    {
+      "name": "image-before.txt",
+      "sha256": "e848320f2120df658d171bf0004b59353234ce3317c967caecca16ead5bc1046",
+      "bytes": 186
+    },
+    {
+      "name": "pwuser.txt",
+      "sha256": "c7ac1f75ce77d677cd32d6138cb72c00cb65ba4ee2ad32ebffa5fc3336ef3a71",
+      "bytes": 65
+    }
+  ],
+  "cleanupQualification": "Only the original source-declared named Docker resource count0 is established. It does not establish active-session smoke/drain callbacks or all-OS/process/scratch absence.",
+  "sourceDigest": "a1f8e1c0eaf02f16834f6c129a2749411ab1bd5462f4daf501dc5182f6ff0ebc",
+  "sourceFiles": 1814,
+  "hostDistDigest": "e19da60efb0a7f5eb1563a932b5b3d69f3c701e0b73e5155726e71970bae30c1",
+  "hostDistFiles": 238,
+  "allAfterGuardsPassedSourceInputs191CacheImageChartQuotesProtectedExact": true,
+  "awakeBoundary": {
+    "ownedPid": 89436,
+    "waitExit": -15,
+    "releasedAtUtc": "2026-10-21T04:18:46.613558+00:00",
+    "persistedAfterGuardAtUtc": "2026-10-21T04:18:46.590773+00:00",
+    "projectionFileMtimeUtc": "2026-10-21T04:18:46.611384+00:00",
+    "projectionMtimeIsFileMetadata": true,
+    "afterGuardsAndProjectionAttemptBeforeRelease": true,
+    "rawHeldThroughAllPostguardsField": false,
+    "fieldQualification": "The raw boolean is gated on overall accepted; it remains false for incomplete proof. Persisted afterguards passed and the projection attempt preceded finally termination; no successful smoke/continuous-awake fact is inferred.",
+    "continuousAwakeClaim": false
+  },
+  "rawRecordsAndReviewedDriverUnchanged": true,
+  "runtimeExecutedOnce": true,
+  "noSecondLeafReadOrOpaqueLogBodyDecodeOrNewProbeOrRetry": true,
+  "rootAdmissionSha256": "76c190111c6c01028059cdefcde3a184af0f721c672f319678d1b0615ec8c723",
+  "rootDependencyReference": "docs/qa/evidence/STUDIO-OBS-011/recovery-20261020/final-d2-dependency-root-acceptance05.json@sha256:855a7ff18815776de5afb3ddcf09293f74cbdcb8ad1bba551f30421bbf2e29e0",
+  "heavyAndCurrentRInputReadWindowReleased": true,
+  "sealCapturedMetadataOnly": true,
+  "noSourceFixOrNativeRehearsal": true,
+  "lifecycle": "All3InProgress_NO_D2_PASS_DONE_RELEASE_OR_EXTERNAL_CREDIT"
+}

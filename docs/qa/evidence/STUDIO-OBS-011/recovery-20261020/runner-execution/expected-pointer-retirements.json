@@ -1,0 +1,52 @@
+{
+  "kind": "EXACT_FOUR_R40_POINTER_NAMES_NOT_RUNTIME_EVIDENCE",
+  "baselinePath": "docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-b2-unit01-vitest.json",
+  "baselineSha256": "d10f84e9ad42333f5a25f9096a6c6c3fa3797080e7ad86f6b67124c9e4e486bf",
+  "beforeTotal": 2672,
+  "beforePassed": 2643,
+  "beforeSkipped": 29,
+  "plannedAfterTotal": 2668,
+  "plannedAfterPassed": 2643,
+  "plannedAfterSkipped": 25,
+  "deferredBefore": 19,
+  "deferredAfter": 15,
+  "removed": [
+    {
+      "suite": [
+        "10.18a \u2014 blocked criteria, recorded as skipped and never passed",
+        "Not skips \u2014 pointers, so nothing is counted twice"
+      ],
+      "name": "AC-17 IS NOT THIS STORY\u2019S and is not a skip here. @po moved it to story 10.19 at wave-6 validation: it depends on sibling story 10.15, it is blocked on ED-06/SPK-02 either way, 10.19\u2019s depends_on already lists both 10.15 and 10.18, and it duplicated story 10.15\u2019s AC-19b (\"deployment owner 10.18, integrated proof 10.19\"). Recorded in the manifest under 10.19\u2019s inherited_deferrals. This entry exists so a reader looking for AC-17 finds the pointer rather than concluding it was dropped. Dependency assumption D-3 is CLOSED.",
+      "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice AC-17 IS NOT THIS STORY\u2019S and is not a skip here. @po moved it to story 10.19 at wave-6 validation: it depends on sibling story 10.15, it is blocked on ED-06/SPK-02 either way, 10.19\u2019s depends_on already lists both 10.15 and 10.18, and it duplicated story 10.15\u2019s AC-19b (\"deployment owner 10.18, integrated proof 10.19\"). Recorded in the manifest under 10.19\u2019s inherited_deferrals. This entry exists so a reader looking for AC-17 finds the pointer rather than concluding it was dropped. Dependency assumption D-3 is CLOSED.",
+      "baselineStatus": "skipped"
+    },
+    {
+      "suite": [
+        "10.18a \u2014 blocked criteria, recorded as skipped and never passed",
+        "Not skips \u2014 pointers, so nothing is counted twice"
+      ],
+      "name": "Story 10.14\u2019s AC-26 is DISCHARGED, not re-opened. It was recorded \"skipped, never passed\" in a merged story for want of an architect\u2019s ruling on promoting RunnerEvidence.partial to required. ADR-002 \u00a720 is that ruling and story 10.18a landed the edit; 10.14\u2019s own checkbox is left exactly as it merged, on the standing rule that a merged, gated story is not re-opened to close a deferral a later ruling unblocked.",
+      "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice Story 10.14\u2019s AC-26 is DISCHARGED, not re-opened. It was recorded \"skipped, never passed\" in a merged story for want of an architect\u2019s ruling on promoting RunnerEvidence.partial to required. ADR-002 \u00a720 is that ruling and story 10.18a landed the edit; 10.14\u2019s own checkbox is left exactly as it merged, on the standing rule that a merged, gated story is not re-opened to close a deferral a later ruling unblocked.",
+      "baselineStatus": "skipped"
+    },
+    {
+      "suite": [
+        "10.18a \u2014 blocked criteria, recorded as skipped and never passed",
+        "Not skips \u2014 pointers, so nothing is counted twice"
+      ],
+      "name": "AC-13a, AC-16a, AC-18, AC-19a, AC-20, AC-21a, AC-22 and AC-23a are STORY 10.18b\u2019s and are IMPLEMENTED, not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check, the three bypass closures with their permit companions, the runbook disclosures, the CSRF finding, the measured backend baseline and the kill switch. This entry was a forward pointer when 10.18a shipped; it is kept, corrected, so that a reader comparing the two halves\u2019 skip counts is not left thinking the edge half deferred its own scope.",
+      "fullName": "10.18a \u2014 blocked criteria, recorded as skipped and never passed Not skips \u2014 pointers, so nothing is counted twice AC-13a, AC-16a, AC-18, AC-19a, AC-20, AC-21a, AC-22 and AC-23a are STORY 10.18b\u2019s and are IMPLEMENTED, not deferred: the streaming Ingress, CORS coherence, the envFrom key-validity check, the three bypass closures with their permit companions, the runbook disclosures, the CSRF finding, the measured backend baseline and the kill switch. This entry was a forward pointer when 10.18a shipped; it is kept, corrected, so that a reader comparing the two halves\u2019 skip counts is not left thinking the edge half deferred its own scope.",
+      "baselineStatus": "skipped"
+    },
+    {
+      "suite": [
+        "10.18b \u2014 blocked criteria, recorded as skipped and never passed",
+        "Not a skip \u2014 resolved configuration-delivery pointer"
+      ],
+      "name": "AC-18 is resolved: test/deployment/envfrom-keys.test.ts is green across all value sets. The chart converts dotted configOverrides keys to Spring-compatible environment names and fails rendering on invalid or colliding names. This historical pointer remains to show that the earlier red escalation was closed rather than allowlisted.",
+      "fullName": "10.18b \u2014 blocked criteria, recorded as skipped and never passed Not a skip \u2014 resolved configuration-delivery pointer AC-18 is resolved: test/deployment/envfrom-keys.test.ts is green across all value sets. The chart converts dotted configOverrides keys to Spring-compatible environment names and fails rendering on invalid or colliding names. This historical pointer remains to show that the earlier red escalation was closed rather than allowlisted.",
+      "baselineStatus": "skipped"
+    }
+  ],
+  "runtimeReconciliationRequired": true
+}

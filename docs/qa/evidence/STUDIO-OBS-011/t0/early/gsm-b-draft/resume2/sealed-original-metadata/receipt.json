@@ -1,0 +1,65 @@
+{
+  "status": "OFF_TREE_PREPARATION_COMPLETE_STATIC_ONLY_WITH_UNRESOLVED_R_F1_PROOF_CONFLICT",
+  "by": "Dex backend admission/transaction specialist",
+  "runtimeExecuted": false,
+  "compiled": false,
+  "actualApplication": false,
+  "sourceWritesOutsideExclusiveEvidence": false,
+  "globalS011EqualityClaim": false,
+  "w1OrLifecycleOrQAVerdict": false,
+  "budgetCeilingUSD": 500,
+  "actualSpend": "UNAVAILABLE",
+  "changedPartBPaths": 3,
+  "ownedCompleteRepoCandidates": 7,
+  "composedDependencyPaths": 9,
+  "sessionCaseNamesPreserved": 44,
+  "negativeCaseNames": [
+    "sideEffectConfirmationWithoutTranslationIsAlreadyRefusedByWrapper",
+    "clarifyConfirmationWithoutTranslationRefusesBeforeRefreshContinuation",
+    "clarifyChoiceWithoutTranslationRefusesBeforeAnswerContinuation",
+    "admissionWithoutTranslationRefusesBeforeAnyActionAuthorizationOrWrite",
+    "bootstrapWithoutTranslationRefusesBeforeEvidenceReceiptOrStateWrite"
+  ],
+  "guardCalls": 7,
+  "guardDeclaration": 1,
+  "translationNonNullPredicates": 1,
+  "formerArmSites": 5,
+  "guardedOperations": 4,
+  "forwardingBatons": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "sha256": "5ce495e53d553660f0fa8a6d05279f79ae2b1184afe8fb7e43a4e7176330e6b8",
+      "from": "11-GS-M(b)",
+      "to": "11-FOLD-final",
+      "status": "PREPARED_NOT_RELEASED",
+      "sourceOrigin": "GSMa resume2 byte-exact forwarding",
+      "runtimeValidation": "UNEXECUTED"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+      "sha256": "7e58a455aa98d5f036cda36f109d4a0fcd49b90b8e769a7799f8ddafcfb84804",
+      "from": "11-GS-M(b)",
+      "to": "11-FOLD-final",
+      "status": "PREPARED_NOT_RELEASED",
+      "sourceOrigin": "GS-T exact baton with only R21 case port",
+      "runtimeValidation": "UNEXECUTED"
+    }
+  ],
+  "proofConflict": "sideEffectConfirmation already gated by translationTransaction; preexisting409 control and deletion-only redundant guard mutant cannot satisfy accepted-red/kill literally; Aria/Quinn ruling required",
+  "newFixtureSeamForReview": "bounded negative-only sideEffectConfirmation progress fixture; no plan/obligation/manifest/translation-state/admission seeding",
+  "remainingWork": [
+    "independent source/fixture/restoration-driver review",
+    "root actual T0/full-check/coverage/GS-T unchanged-main/source releases",
+    "Aria/Quinn resolve documented wrapper-control/mutant conflict without fake red",
+    "compile/format/red/green/exact mutants and credited b01/b02/b03 under root freeze",
+    "final-source hash baton release by root"
+  ],
+  "artifactHashes": {
+    "manifest.json": "26846de0e95d62959c310b195237ca632afc4419a4ee01c900a2e5b350b4a73c",
+    "part-b.patch": "6729ff35ad627152fa1d288858980846f099df6facf5365231ac45d9c4be3898",
+    "S011-composition.patch": "3dc51b6c8d775d0cad6b4de7900d211f59c9b8041de884b9b8ea07a861d77e6b",
+    "S011-owned-seven-paths.patch": "a863fd057b5f39ea6ca36df0f05021e2623589b2edb3f0ed5d32d10fc5dc8dab",
+    "static-audit.json": "547d3b1ffcba177a9b42e9e210d398e6433e6468c321580b02ee1ce7aa6fa32f",
+    "run-unit.py": "c5a935e13ce5c6ce5a8ed8c272ef5ac71a98a8c9f0ce515ea4f16977ac3f95ba"
+  }
+}

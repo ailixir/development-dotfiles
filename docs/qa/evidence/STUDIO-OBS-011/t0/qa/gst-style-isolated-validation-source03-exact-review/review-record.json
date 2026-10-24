@@ -1,0 +1,65 @@
+{
+  "kind": "INDEPENDENT_NAMED_QUINN_EXACT_GST_SOURCE03_QA_REVIEW",
+  "reviewer": {
+    "name": "Quinn",
+    "skill": "aiox-qa",
+    "independentReviewer": true,
+    "subjectAuthor": false,
+    "delegated": false
+  },
+  "subject": {
+    "path": "docs/qa/evidence/STUDIO-OBS-011/t0/early/gst-style-isolated-validation-prep/resume3/manifest.json",
+    "sha256": "35c8502962094fcf16150328e6f4f533f597bbe4674b17d9dd87acd6ce562ec9",
+    "bytes": 17463,
+    "mode": 420
+  },
+  "subjectPayloadCount": 88,
+  "verdict": "CONDITIONAL_EXACT_INACTIVE_PROTOCOL_SUPPORT",
+  "mandatoryFindingCount": 0,
+  "mandatoryFindings": [],
+  "scope": "Entire exact inactive source03 Controller/selected verified-buffer adapter/hooks/schema/control/ownership/source graph/recipe/history/closure/adoption/publication protocol",
+  "protocolAssessment": {
+    "originalScalarPermitFrozenBeforeFirstClock": true,
+    "exactRawPermitPinRetained": true,
+    "soleExistingPortClockAdmission": true,
+    "actualActiveFactsRetainedBeforeValidation": true,
+    "historyNeverReset": true,
+    "strictIntegerOriginalIntervalNondecreasing": true,
+    "noUnobservedIntervalClaim": true,
+    "failedUnknownStickyCap1": true,
+    "rawUnknownNotPublicReceipt": true,
+    "ownedFinalSourcePreserved": true,
+    "guardedPublicationCompletionPreserved": true,
+    "stagedAdoptionPreserved": true
+  },
+  "validation": {
+    "criticalAssertions": 49,
+    "criticalCases": 10,
+    "criticalAttempts": 1,
+    "finiteChecksPassed": 337,
+    "metadataCheckerAttempts": 2,
+    "authorFake84AndStatic27": "EXACT_BOUND_REUSE_NOT_REPLAY",
+    "priorSource02CurrentUnique": 74,
+    "priorSource02HistoricalExecuted": 147,
+    "actualRuntimeActions": 0
+  },
+  "completeConditions": "complete-adopted-conditions.json",
+  "findings": "findings.json",
+  "pinsAndReuse": "pins-and-reuse.json",
+  "checks": "checks.json",
+  "attemptHistory": "check-history.json",
+  "ordinaryIntegration": "OWED_EXPLICIT_PRECONDITION",
+  "currentSourceHolderModeToolFixtureFacts": "NOT_OBSERVED",
+  "authority": {
+    "actualIntegration": false,
+    "policyAmendment": false,
+    "implementation": false,
+    "operation": false,
+    "sourceWindowLeaseCopyOverlayNativeArchiveCleanupCredit": false
+  },
+  "budget": {
+    "sharedCeilingUsd": 500,
+    "aggregateUsage": "UNKNOWN"
+  },
+  "skillActivationConflict": "Node greeting and delegation skipped per exact task; no external activation executed."
+}

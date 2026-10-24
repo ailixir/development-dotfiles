@@ -1,0 +1,45 @@
+{
+  "atUtc": "2026-10-19T11:16:35.595888+00:00",
+  "status": "CLOSED_NATIVE99_PASS_RETAINED_THREE_VERIFIED_GUARDED_RELEASE",
+  "label": "obs011-gst-provisional-06",
+  "actualWrapperExit": 0,
+  "guardToolOutputChunk": "8185b2",
+  "guardDecision": "ALLOW_VERIFIED",
+  "rootReleaseSha256": "fdb83d69f9296ed21a18ba380f8ac642bfd5caeba43138e867774621049d3ef6",
+  "readinessSha256": "7f073840349ef394c074f4c74542df25ca803b4ef9f008af81400a5166810fa0",
+  "unlockPermitSha256": "f1c3e24d3e1c8a812464ab3294583bd1845332ac2c00ee0d0278f5629872ff2e",
+  "postcloseProducerSha256": "ddc911a4a6c0be1dec5df9c4032cf0621976d5c9afabb2c8f4dcdd37f92fdc78",
+  "postcloseResourceBoundarySha256": "98af8acaf379eec9be231a748b53a276a2a5c03e20ff25fa9c56091067763dcb",
+  "sourceDigest": "f9cbe66dd1aa700ebbb578203e84f6b24ec329b092e7f78c7ee9e12ab8dc9277",
+  "sourceFiles": 1808,
+  "mainResourcesLiteral": 506,
+  "distFiles": 238,
+  "modesExact": true,
+  "sourceDisposition": "RETAIN_AUTHORIZED_THREE",
+  "retainedOverrides": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": "0a9cd30bf501089b5cbc17922e1f9809efd5f176c83f42359ad4ba0105a8ac59",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedLifecycleReasonIT.java": "353bc8ebcf75d373203c58b016ead65648661cfdf47fa950d6230ac238ac7aa5",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java": "5317d3805950e562da4530433fcfdf660b1744e3b17cf58c5fa3f047b2176b15"
+  },
+  "actualResultSha256": "55b22af567a893541578ebb1805a2576c2bf29028ac2af21cda57b8f404e34b0",
+  "actualCounts": {
+    "total": 99,
+    "passed": 99,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "recordedOwnedAbsentOrReused": 10,
+  "wrapperAndShellAbsentOrReused": true,
+  "inheritedMatched": 6,
+  "otherProjectFacts": 0,
+  "kernelFree": true,
+  "historicalGapCodes": [
+    "GST03_FORMAT_IDENTITY_GAP",
+    "GST03_PREMATURE_UNLOCK_INTERVAL"
+  ],
+  "historicalGapsRepaired": false,
+  "postcloseIndependentReviewOwed": true,
+  "C8OrLaneCredit": false,
+  "generalMainReplayW1Release": false
+}

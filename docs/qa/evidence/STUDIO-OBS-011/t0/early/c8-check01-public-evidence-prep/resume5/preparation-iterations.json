@@ -1,0 +1,106 @@
+{
+  "kind": "SOURCE05_AUTHOR_PRESEAL_HISTORY",
+  "attempts": [
+    {
+      "stem": "author05-final-boundary03_checks.py",
+      "actualStatus": 0,
+      "reason": "Guarded source-only suite completed0; no actual boundary",
+      "stdoutSha256": "c085fd8064b9a141ea374a0057afecf76e2b048a071538a9b7d5485876c88f27",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author05-final-integration04_checks.py",
+      "actualStatus": 0,
+      "reason": "Guarded source-only suite completed0; no actual boundary",
+      "stdoutSha256": "3cb8cc03ecd0f613af634b39af73cef62d25a21d80f8fbe12f443620a7aa4872",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author05-final-pure_checks.py",
+      "actualStatus": 0,
+      "reason": "Guarded source-only suite completed0; no actual boundary",
+      "stdoutSha256": "3435d086838f8c50cedcdb3edbe92011bac33b662ee7bfaa34072435953a7a64",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author05-final-runtime_adapter_checks.py",
+      "actualStatus": 0,
+      "reason": "Guarded source-only suite completed0; no actual boundary",
+      "stdoutSha256": "00456cd3af27a822589e2807c9b6651a7f95787e778ef618b01d491420878b97",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author05-retained-boundary03_checks.py",
+      "actualStatus": 0,
+      "reason": "Guarded source-only suite completed0; no actual boundary",
+      "stdoutSha256": "d87b24428fda7243d43d87b5cf796f97f8c1661e496365935e5805bf32283bd0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author05-retained-integration04_checks.py",
+      "actualStatus": 0,
+      "reason": "Guarded source-only suite completed0; no actual boundary",
+      "stdoutSha256": "3cb8cc03ecd0f613af634b39af73cef62d25a21d80f8fbe12f443620a7aa4872",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author05-retained-pure_checks.py",
+      "actualStatus": 0,
+      "reason": "Guarded source-only suite completed0; no actual boundary",
+      "stdoutSha256": "4a5eee709986831b92bc25f5510743fa92ea50f8b287dbaf05ef4fffe32b1de6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author05-retained-runtime_adapter_checks.py",
+      "actualStatus": 0,
+      "reason": "Guarded source-only suite completed0; no actual boundary",
+      "stdoutSha256": "e60b09a218e666c40e5b59dbd5bde53e954f52ddebaa809d20fce7d2fd9d0ab7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "stem": "author05-targeted-attempt01",
+      "actualStatus": 0,
+      "reason": "Guarded source-only suite completed0; no actual boundary",
+      "stdoutSha256": "cf532e68a97f34c03a17ea47aa8f596d0ae208f073d007c8d180333683d334a1",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "earlierSource03HistoryRetained": true,
+  "allFailuresPreserved": true,
+  "sourceOnlyFixtureAndImplementationCorrections": true,
+  "nativeRuntimeJavaPlatformNamespaceAttempts": 0,
+  "finalProofInputs": [
+    {
+      "path": "pure-check-results.json",
+      "sha256": "ef481b92c8add8fbde761b8580838016a0df44c0c5710f541dbb18b2c0ec5567",
+      "bytes": 25313,
+      "mode": 420
+    },
+    {
+      "path": "runtime-adapter-check-results.json",
+      "sha256": "50d1f0f982d4510fa2cfb8f21b2e9dfe0036c56c915b89134276166c6ce9e9e8",
+      "bytes": 12629,
+      "mode": 420
+    },
+    {
+      "path": "boundary03-check-results.json",
+      "sha256": "2a145fd4d442e78cb607228089f2980a7f3ae803a7d783e2ff981b3c67250f8b",
+      "bytes": 10448,
+      "mode": 420
+    },
+    {
+      "path": "integration04-check-results.json",
+      "sha256": "ee8ab2c95cf02b3d69f1b58257d3890e09be3bc6e897c2aaa7db26d6e2d80dda",
+      "bytes": 18835,
+      "mode": 420
+    },
+    {
+      "path": "targeted05-check-results.json",
+      "sha256": "041014152d3a7962ffed471f0331f94c4c57c2797a1015910f8e0b3f17b16353",
+      "bytes": 32746,
+      "mode": 420
+    }
+  ],
+  "sourceChecksFinal806": true,
+  "noAuditDisabled": true
+}

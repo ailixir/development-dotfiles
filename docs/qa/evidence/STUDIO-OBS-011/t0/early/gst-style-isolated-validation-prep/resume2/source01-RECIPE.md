@@ -1,0 +1,40 @@
+# Inactive GST isolated source packet
+
+This packet implements the pure explicit-root protocol and its selected-buffer source adapter. It does **not** implement an ordinary OS ownership/custody/native adapter. `OwedPort` fails closed, and there is no CLI, installed runtime or operational admission. A verified caller can exercise this source only with an explicitly supplied, independently reviewed port. Do not substitute Source09's limited local profile for this consumer's ordinary predicate.
+
+Read `IMPLEMENTATION-DESIGN.json`, `adopted-conditions.json`, `unit-plan.json`, `external-pins.json`, `controls.json`, `port-contract.json`, `ownership-map.json` and `review.md` completely. Their exact future review must bind the complete manifest. The current source preparation task is the sole authority for this inactive packet; no source-window, lease, runtime or native authority follows.
+
+## Source loading
+
+The future caller must externally pin and acquire the complete source/plan/control buffers using reviewed retained-FD no-follow custody. Pass those same bytes to `build_controller` in `selected_adapter.py`; its constructor hashes the exact bytes compiled/parsed. Never hash a path and reopen it for execution. Never import these files as a fallback or invoke a historical main.
+
+`selected_namespace` loads only `read_xml` from the full pinned collector buffer and four pure core predicates from the full pinned harness buffer. The complete original public buffers are retained as data in `selected-buffer-0.py.txt` and `selected-buffer-1.py.txt`. The selector compiles only named undecorated definitions with inert primitive defaults and no annotations/import/global declarations. It injects only the explicitly mapped ET/Path globals. It does not execute imports, module assignments, ROOT discovery, Git, capture or launch code. Its source-only fake test uses FakeET and a name-only FakePath; a future real adapter must separately qualify the exact parser/path/custody integration.
+
+## Before any actual prepare
+
+1. Finish the existing Gateway's actual proper failed-resource closure, separate outer postclose, independent actual QA and root adoption.
+2. Obtain the exact new NONCREDIT step6/withheld-signature/root731 qualification from Aria, Quinn and root; preserve C8-before-credit, main/W1/Replay holds, NONIR classification and pre-F1 schedule.
+3. Issue one exclusive maximum12-hour lease for the three exact off-tree destination hashes and all owned control/build/output roots. It must precede copying or overlaying Java files as well as formatting. No shared source writer, renewal, extra phase after expiry or cleanup is implied.
+4. Independently implement/review the missing ordinary port, its complete root-aware custody/ownership/helper journals, private archive contract and installed guard/final/permit/postclose integration. Current source09 policy cannot fill that requirement. Do not discover provider APIs or weaken the predicate.
+5. Separately obtain all284 unknown copy modes, fresh source facts, exact finite offline Gradle8.10.2 seed/closure, current Java21/caffeinate/utility pins and property compatibility, and cached arm64 PostgreSQL image plus Java fixture capability. No home/cache/vendor scan, credentials/init/daemon/JDK-registry copy, symlink, download/pull/retag, Ryuk/skip change or fallback.
+6. Create a new exact scope under immutable wrapper2846 with one heavy job, original held shell/lock identity and a newly reviewed distinct ordinary guard. Require actual missing-readiness denial1, separate status and SAME-holder/kernel admission before prepare. Proposed W/P/E names remain unobserved/unallocated by this packet.
+
+## Future separately decided protocol
+
+The root supplies each externally pinned closed decision separately after the previous actual prompt/status/receipt inspection. The port must reserve each durable phase cap before setup; controller caps also consume on setup/launch/parse failure. No retry or automatic continuation exists.
+
+Prepare copies the finite2092 exact members into P=W/repo using proved modes, exclusive regular leaves and retained-FD parents; R remains read-only. Overlay exactly three accepted candidate postimages after exact preimages/inverses/modes. No .git, fake Git, ignored builds, dependency symlink or node_modules is introduced. `virtual-composition.json` gives a distinct expected source1808+mode digest under a declared encoding; it is not f9 or fresh evidence.
+
+Invoke one format vector (900s acceptance), one verify vector (3600s) and one regression vector (7200s), each separately authorized. The vectors are fixed in unit-plan. Native status is independent from collector and phase status. The missing port must retain full direct child/utility identity/wait/output/FD proofs and must not return unresolved owned native work. Acceptance timeouts never authorize signals, synthetic124, unlock or invented terminality.
+
+Format inventories all finite source/mode/non-target rows. If any target hash changes, pause for new exact equivalence and Aria/Quinn/root adoption plus same-expiry destination-hash lease amendment before any unused later phase; never rerun format. A non-target/mode change is HOLD. Verify requires explicit non-skipped scopedSpotlessJavaCheck/FULLcheckstyleMain/Test/compileTestJava and fresh both XML reports; the new bounded projection exports no arbitrary message. The retained50 source locations are source ancestry, not a current complete diagnostic inventory. Regression requires the exact five whole classes99PASS/0failure/error/skip, fresh task-qualified XML/test.exec and all independent status/source/resource evidence.
+
+Archive exact finite sources/candidates/controls/hooks/private outputs under a separately complete private artifact contract. Independent actual archiveQA/root precedes standalone once final0, real prompt and separate status, root inspection, a distinct root permit, PRE and POST checks within60seconds, actual guarded wrapper0, separate actual outer postclose0 and independent actual QA/root. Controller `status` represents a verified separate status; printing or passing0 without its actual root tool trace is insufficient. There is no shell-exit implementation here and no authority to call a builtin/EOF/exec/signals. Failures retain partials/HOLD and require a new exact independently reviewed disposition. No old C8 no-compile exception or cleanup shortcut is borrowed.
+
+## Source-only verification
+
+The final fake invocation was `python3 -B fake_flow.py`, with stdout/stderr redirected to the exact attempt3 files in this packet, actual tool038ebd exit0. All target copy/inventory/control/native/ownership/clock/archive/final/gate/postclose effects were FakePort methods in the same compiled controller namespace. Selected historical XML/core functions actually ran over synthetic inputs using FakeET/FakePath. Standard library/source reads completed before a persistent deny audit, which remained installed and rejected filesystem/process/socket/FFI/thread/fcntl/import fallthrough. No original main/import/helper ran and no actual Java/native/fixture/current source/resource boundary was reached.
+
+The43 controls include a complete successful protocol, exact three command vectors and synthetic99 XML cases; mandatory pre-mutation inputs; source drift; lease expiry; strict status types; setup caps; native failure/deadline/unknown/wait; primary versus cleanup; publication failure; target-change pause/review; non-target drift; report/case mismatch; final before QA; PRE/POST permit expiry; PID reuse/UNKNOWN; closed XML output and denied effects.
+
+Attempts1 and2 failed and remain retained. Attempt1 rejected historical inert Boolean defaults, corrected to primitive AST constants only. Attempt2 stopped at fake regression collector PHASE_EXCEPTION; its first inner cause remains UNKNOWN. Preloading serialization stdlib before the permanent audit and retaining closed fake diagnostics preceded attempt3 success; that does not retrospectively prove attempt2's cause. Do not rerun old99 native tests or call this a current GST pass.

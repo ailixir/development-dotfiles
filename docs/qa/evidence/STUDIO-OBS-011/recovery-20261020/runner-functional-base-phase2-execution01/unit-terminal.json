@@ -1,0 +1,61 @@
+{
+  "argv": [
+    "python3",
+    "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/.aiox/sdc/STUDIO-OBSERVED-ORCH/execute-011/run-runner.py",
+    "obs011-recovery-20261020-rt-functional-base-unit01",
+    "pnpm",
+    "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+    "--config.package-manager-strict=false",
+    "exec",
+    "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "--coverage.enabled=false",
+    "--minWorkers=1",
+    "--maxWorkers=2"
+  ],
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio",
+  "startedAtUtc": "2026-10-20T23:54:00.593219+00:00",
+  "collectorPid": 69844,
+  "outerExit": 0,
+  "endedAtUtc": "2026-10-20T23:54:52.040364+00:00",
+  "collectorResult": {
+    "command": [
+      "pnpm",
+      "--dir=/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner",
+      "--config.package-manager-strict=false",
+      "exec",
+      "/private/tmp/obs011-rt-functional-base-20261020-root01/repo/studio-runner/node_modules/vitest/vitest.mjs",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "--coverage.enabled=false",
+      "--minWorkers=1",
+      "--maxWorkers=2",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/execution/obs011-recovery-20261020-rt-functional-base-unit01-vitest.json"
+    ],
+    "cwd": "studio-runner",
+    "started": "2026-10-20T23:54:01.055559+00:00",
+    "elapsedSeconds": 50.97,
+    "exit": 0,
+    "sourceStable": true,
+    "distStable": true,
+    "logSha256": "67bd49d1fb2b081327d5d740f697298f3d00d32d294352f87c3b961cef3c0d09",
+    "testInputStable": true,
+    "testInputDigestBefore": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "testInputDigestAfter": "3e1801b434eb8a3a1b096b65bd3701cb76859b5607121c5062631d0377facd4f",
+    "vitest": {
+      "success": true,
+      "numPassedTests": 2651,
+      "numFailedTests": 0,
+      "numPendingTests": 25,
+      "numTotalTests": 2676,
+      "numPassedTestSuites": 416,
+      "numFailedTestSuites": 0
+    },
+    "vitestReportSha256": "0f922e51a923b2e81a0a665b132acedc423496102549b9a26ff2bca78ff7735e"
+  }
+}

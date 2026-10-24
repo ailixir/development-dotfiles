@@ -1,0 +1,106 @@
+{
+  "scope": "STUDIO-OBS-01111-IT-S preparation only",
+  "staticVerified": true,
+  "compileVerified": false,
+  "runtimeVerified": false,
+  "sourceApplied": false,
+  "W1Approved": false,
+  "actualSourceUnchanged": true,
+  "gsTPreimageSha256": "10d3706043430730edc921804dd1b8eb06a5326eb690f8c33f2571d7300fe1b5",
+  "incrementalPatchSha256": "1e5522c93984fcf9b418150b3753eacf3a73b06aaf56e8f5b94d618dab862550",
+  "composedPatchSha256": "e8768cd81ce996cd53cee4488778380b101c877a15d43028c44baee0f572be43",
+  "artifactManifestSha256": "02d8a077d0fb506a9d3155993aee4ceaacec51528271ddb721a0316ea252f813",
+  "counts": [
+    {
+      "file": "GuidedServiceTransportFaultIT",
+      "sleepsBefore": 14,
+      "pollConverted": 6,
+      "deliberateRetained": 8,
+      "sleepsAfter": 8,
+      "originalMethods": 184,
+      "originalMethodSignaturesPreserved": true,
+      "compileVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "file": "GuidedPlanningIntegrationTest",
+      "sleepsBefore": 1,
+      "pollConverted": 1,
+      "deliberateRetained": 0,
+      "sleepsAfter": 0,
+      "originalMethods": 100,
+      "originalMethodSignaturesPreserved": true,
+      "compileVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "file": "SecretUseAuditIT",
+      "sleepsBefore": 1,
+      "pollConverted": 1,
+      "deliberateRetained": 0,
+      "sleepsAfter": 0,
+      "originalMethods": 60,
+      "originalMethodSignaturesPreserved": true,
+      "compileVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "file": "GuidedPublicationRaceTest",
+      "sleepsBefore": 2,
+      "pollConverted": 1,
+      "deliberateRetained": 1,
+      "sleepsAfter": 1,
+      "originalMethods": 14,
+      "originalMethodSignaturesPreserved": true,
+      "compileVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "file": "GuidedFocusMutationJoinedIT",
+      "sleepsBefore": 2,
+      "pollConverted": 1,
+      "deliberateRetained": 1,
+      "sleepsAfter": 1,
+      "originalMethods": 66,
+      "originalMethodSignaturesPreserved": true,
+      "compileVerified": false,
+      "runtimeVerified": false
+    },
+    {
+      "file": "GuidedEvidencePendingAppendJoinedIT",
+      "sleepsBefore": 2,
+      "pollConverted": 2,
+      "deliberateRetained": 0,
+      "sleepsAfter": 0,
+      "originalMethods": 60,
+      "originalMethodSignaturesPreserved": true,
+      "compileVerified": false,
+      "runtimeVerified": false
+    }
+  ],
+  "namedTestMethods": 112,
+  "sourceExpectedInvocations": 149,
+  "assertionExpressions": 1171,
+  "drops": [],
+  "testAdditions": [],
+  "localStepMethodsAdded": 12,
+  "foldBatons": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedServiceTransportFaultIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedFocusMutationJoinedIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedEvidencePendingAppendJoinedIT.java"
+  ],
+  "directRelease": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/secret/SecretUseAuditIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java"
+  ],
+  "runtimeCarries": [
+    "all six compile and full prescribed class runs",
+    "same-thread transaction visibility/exception and interruption behavior",
+    "actual elapsed wall time before/after with exact149 invocation multiset",
+    "all native privacy/cleanup/negative oracles",
+    "root exact runtime-accepted GS-T/GS-M(b) preimage refresh and atomic apply",
+    "four FOLD_TESTS exact batons only",
+    "full11-G evidence; no lane exit or QA/lifecycle claim"
+  ]
+}

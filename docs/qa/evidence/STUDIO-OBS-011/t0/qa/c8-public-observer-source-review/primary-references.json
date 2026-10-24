@@ -1,0 +1,13 @@
+{
+  "retrievedDate": "2026-10-19",
+  "scope": "Public primary documentation/source only; no installed Java runtime or HTTP execution",
+  "references": [
+    {"url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.net.http/java/net/http/HttpRequest.Builder.html#timeout(java.time.Duration)", "basis": "Request response timeout API; not an independent full observer lifecycle deadline."},
+    {"url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.net.http/java/net/http/HttpResponse.BodyHandlers.html#ofByteArray()", "basis": "Default handler returns byte-array subscriber and accepts body irrespective of response status."},
+    {"url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.net.http/java/net/http/HttpResponse.BodySubscribers.html#ofByteArray()", "basis": "Byte-array response is available after entire body read; later length check cannot enforce collection cap."},
+    {"url": "https://raw.githubusercontent.com/openjdk/jdk21u/jdk-21.0.10%2B7/src/java.net.http/share/classes/jdk/internal/net/http/MultiExchange.java", "version": "jdk-21.0.10+7", "basis": "responseAsyncImpl cancels response timer before responseAsync0 invokes readBodyAsync; GET/connection/unprocessed retry paths exist. Source inference only; installed behavior not observed."},
+    {"url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.net.http/java/net/http/HttpClient.html", "basis": "Interruption/cancellation release is asynchronous and not instant; explicit client lifecycle operations have qualified behavior."},
+    {"url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/SecureDirectoryStream.html", "basis": "Operations are bound to opened directories; attributes are available through bound views. No-follow traversal does not itself validate caller's expected directory identity/owner/mode."}
+  ],
+  "actualJavaOrHttpActions": 0
+}

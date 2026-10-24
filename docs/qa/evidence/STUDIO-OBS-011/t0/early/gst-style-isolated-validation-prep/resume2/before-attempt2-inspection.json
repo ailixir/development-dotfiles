@@ -1,0 +1,30 @@
+{
+  "kind": "BEFORE_ATTEMPT2_SAME_FAKE_EFFECT_INSPECTION",
+  "attempt1": {
+    "tool": "254ce3",
+    "actualExit": 1,
+    "stderr": "SELECTED_DEFINITION_EAGER_CODE",
+    "stage": "verified AST selection; no target body ran",
+    "cause": "Loader rejected historical inert literal False/True defaults",
+    "correction": "Allow only primitive ast.Constant defaults; calls/expressions/annotations/decorators/imports/global effects remain rejected"
+  },
+  "files": [
+    {
+      "path": "pure_controller.py",
+      "sha256": "541f17ff017595dd31c36a36c8d5818c6ad60bddd1651c9bf4db2b8b565c7b61",
+      "bytes": 20515
+    },
+    {
+      "path": "selected_adapter.py",
+      "sha256": "4c7abad2b75c1849d0b0f706bb446ef3b6bbd6737e8908871bd20be96fb171c4",
+      "bytes": 5319
+    },
+    {
+      "path": "fake_flow.py",
+      "sha256": "0d2d057c59c71b4a10680a8339a6f13bbc5e1e2f5d586affc5fb6a33f945450c",
+      "bytes": 17486
+    }
+  ],
+  "fakeBoundaryProof": "Unchanged FakePort target effects, FakeET selected XML parser, FakePath name, permanent deny audit, own-source/preloadedstdlib only before audit; no import/main/helper/native fallthrough",
+  "actualRuntimeQualification": false
+}

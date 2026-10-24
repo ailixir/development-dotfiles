@@ -1,0 +1,56 @@
+{
+  "reviewer": "Quinn",
+  "verdict": "HOLD",
+  "subjectManifestSha256": "607859e3f5e43ab4dad52afdcf1f1842801f2abacc197527b819e11668ccf1ab",
+  "mandatoryFindings": [
+    {
+      "id": "GWM05-QA-01", "severity": "HIGH", "status": "OPEN",
+      "title": "Attempt marker precedes current SAME-holder qualification",
+      "source": "capture-admission.py:119-124",
+      "evidence": "Guarded actual capture writes admission-capture-attempt.json before held raises SYNTHETIC_HOLDER_CHANGED.",
+      "requiredCorrection": "Qualify fresh exact holder/controller/observer-parent/FD/dev/inode/kernel and custody/umask before any output; retain exclusive cap1 marker and fail/partial HOLD."
+    },
+    {
+      "id": "GWM05-QA-02", "severity": "HIGH", "status": "OPEN",
+      "title": "Holder lsof output omits returned PID validation",
+      "source": "run-private.py:346-365",
+      "evidence": "Actual held fake accepts correct PID, different PID and missing PID when the inode line matches.",
+      "requiredCorrection": "Require exact returned wrapper PID with associated FD/inode fields, keeping options-first argv and strict zero/nonempty/empty-error rules."
+    },
+    {
+      "id": "GWM05-QA-03", "severity": "HIGH", "status": "OPEN",
+      "title": "Verified hash and interpreted source/JSON use different reads",
+      "source": "run-private.py:327-336,486-489,566-568; imported harness.py:155-157",
+      "evidence": "Second CORE buffer executes added import after expected hash; second candidate read reclassifies unknown resident as inherited. Baseline split independently mapped from source without actual baseline access.",
+      "requiredCorrection": "Use same custody-verified buffer for hash and interpretation across all reachable code/immutable metadata sites; map the reached sites and supply verified baseline in memory to imported reader."
+    },
+    {
+      "id": "GWM05-QA-04", "severity": "HIGH", "status": "OPEN",
+      "title": "Observation timeout implicitly sends kill",
+      "source": "run-private.py:436-438; installed subprocess.run TimeoutExpired branch",
+      "evidence": "Adapter calls run(timeout=10); inspected standard-library branch calls process.kill then wait. No real child/signal used.",
+      "requiredCorrection": "Use no-signal observation timeout/failure handling with honest child identity/completion/UNKNOWN accounting; preserve version adapter no-signal semantics."
+    },
+    {
+      "id": "GWM05-QA-05", "severity": "MEDIUM", "status": "OPEN",
+      "title": "Active scope retains resume4 and uncreated-runtime assertions",
+      "source": "scope.json:97-98",
+      "evidence": "preparationGeneration remains resume4; prospectiveOnly asserts W/E never created despite supplied H-only admission-failed state.",
+      "requiredCorrection": "Correct current generation/runtime metadata only; retain native label/W/E and historical records."
+    }
+  ],
+  "authorControlsExpected": 248,
+  "retainedControls": 215,
+  "newControls": 33,
+  "sourceChecksPassed": 255,
+  "independentRecordedCases": 8,
+  "actualRuntimeOsNativePrivateActions": 0,
+  "actualBaselineBodyReadStatHash": false,
+  "continuationSupported": false,
+  "executionReleased": false,
+  "readiness": false,
+  "permit": false,
+  "C8Credit": false,
+  "sourceMainLaneIRLifecycleCredit": false,
+  "historicalEvidencePreserved": true
+}

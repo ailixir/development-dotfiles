@@ -1,0 +1,31 @@
+{
+  "kind": "SOURCE_REVIEWABLE_NEW_CASE_CLEANUP_ORACLE_NOT_EXECUTED",
+  "newFixtureCases": 2,
+  "newFixtureFinallySteps": [
+    "Reject exactly the original pending mocked launch, on success and intended red.",
+    "Await the same launch outcome and, when GuidedLaunchFailure, its memoized close.",
+    "Assert the private scratch parent is empty; assert no fake timers remain.",
+    "Unconditionally restore real timers, all case-local mocks/Date spy and stubbed environment via nested finally.",
+    "Existing afterEach still removes the caller-created parent; its whole body is byte-identical."
+  ],
+  "setupPromiseGuard": "Race mock-entry against a settled launch outcome so an ordinary pre-mock setup rejection fails instead of waiting indefinitely for entry; no timer/poll added.",
+  "pendingPromiseHandling": "A no-op rejection consumer prevents unhandled setup-path rejection; the same unchanged pending promise goes to the existing launch mock.",
+  "unitFinallySteps": [
+    "Resolve pending work and await its observed outcome before restoring real timers in cap unit.",
+    "Ordinary Error identity unit restores real timers in finally."
+  ],
+  "primaryGreenOracles": [
+    "Response is returned while original launch is pending.",
+    "Failure/cause/PROCESS shape remains exact.",
+    "Scratch remains owned until close.",
+    "Memoized close stays pending until original launch rejection.",
+    "After close and repeated close, parent is empty."
+  ],
+  "capNegativeOracles": [
+    "At virtual30000ms with absolute60000ms and held wall, reply remains pending.",
+    "Only after pending launch rejection may response return, with scratch already empty.",
+    "Repeated memoized close resolves and timer count is zero."
+  ],
+  "cleanupFailureMeans": "No expected-red or green credit; preserve failure and correct only within future root-approved scope.",
+  "executed": false
+}

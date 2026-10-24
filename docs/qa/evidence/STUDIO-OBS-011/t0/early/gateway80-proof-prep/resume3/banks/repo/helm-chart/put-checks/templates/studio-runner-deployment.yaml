@@ -1,0 +1,428 @@
+{{- if .Values.studioRunner.enabled }}
+{{- /* Guards first, so a bad values set dies with a named key before any manifest is produced.
+       The guided guard is the one-replica rule of A2.6 (and PID-1 b); the TLS guard is the
+       required-in-every-deployment rule of A3. */ -}}
+{{- $_ := include "put-checks.studioRunner.guidedGuard" . }}
+{{- $_ := include "put-checks.studioRunner.tlsGuard" . }}
+{{- /* The four observed-replay guards (G-O1..G-O4). Also run from the API Deployment, which renders
+       when the runner does not, so `studioObserved` on with the runner off still fails. */ -}}
+{{- $_ := include "put-checks.studioObserved.guard" . }}
+{{- $name := include "put-checks.studioRunner.fullname" . }}
+{{- $scratch := include "put-checks.studioRunner.scratchDir" . }}
+{{- $guided := include "put-checks.studioRunner.guidedEnabled" . }}
+{{- $isGuided := ne $guided "" }}
+{{- $fileMode := include "put-checks.studioRunner.secretFileMode" . }}
+{{- $tls := .Values.studioRunner.tls }}
+{{- $g := .Values.studioRunner.guided }}
+{{- $observed := include "put-checks.studioObserved.enabled" . }}
+{{- $o := .Values.studioObserved }}
+{{- $trustDir := trimSuffix "/" $o.mountPath }}
+{{- $tlsDir := trimSuffix "/" $tls.mountPath }}
+{{- $journalMount := trimSuffix "/" $g.journal.mountPath }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.studioRunner.selectorLabels" . | nindent 4 }}
+spec:
+  # No CPU-based HorizontalPodAutoscaler anywhere for this component: a saturated runner answers
+  # 429/503 and stays ready, so CPU-driven scaling would fight the capacity gate instead of
+  # relieving it (§5.2, §8.4). The only scaler is the backlog-driven ScaledObject
+  # (studio-runner-scaledobject.yaml), and while it is on it owns the count, so none renders here:
+  # a rendered count would be reapplied by every upgrade and fight the scaler.
+  {{- if not .Values.studioRunner.autoscaling.enabled }}
+  replicas: {{ .Values.studioRunner.replicaCount }}
+  {{- end }}
+  {{- if $guided }}
+  # **Recreate while guided mode is on** (devops co-sign 6.2, ratified in ruling part 1 1.5 a). The
+  # default RollingUpdate with one replica is maxSurge 1 / maxUnavailable 0, so every upgrade would
+  # run TWO Ready pods with the same guided worker id behind one Service; the worker holds sessions
+  # in memory and refuses calls it does not own, so a rollout would produce fail-closed refusals on
+  # live sessions. The cost is the same trade A2.6 d already discloses: replay is down for the
+  # rollout too, for up to the old pod's drain (`terminationGracePeriodSeconds`).
+  strategy:
+    type: Recreate
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "put-checks.studioRunner.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/runner-env: {{ .Values.studioRunner.runnerEnv | toYaml | sha256sum }}
+        {{- if $observed }}
+        # The catalog and policy files are read once at start-up, so a policy or catalog change must
+        # roll the pod. (A catalog change also changes the image reference; a policy change does not.)
+        checksum/studio-observed-trust: {{ list $o.catalog $o.policies | toJson | sha256sum }}
+        {{- end }}
+        {{- if $guided }}
+        # The controller public key is rendered by this chart (configmap.yaml) and mounted as a
+        # directory, so a key rotation must roll the pod: the runner reads the file once.
+        checksum/guided-controller-key: {{ $g.token.publicKey | sha256sum }}
+        {{- end }}
+        {{- if $tls.rotationRevision }}
+        # A certificate rotation is a Secret update, a rollout restart and a fingerprint update in
+        # one release: the process reads key, certificate and CA once, the exec probe on every run.
+        put.citi.com/tls-rotation-revision: {{ $tls.rotationRevision | quote }}
+        {{- end }}
+        {{- with .Values.studioRunner.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "put-checks.labels" . | nindent 8 }}
+        {{- include "put-checks.studioRunner.selectorLabels" . | nindent 8 }}
+    spec:
+      # **Process reaping (AC-5a, architecture §9.3, ADR-001 §1.1), and the mechanism is named
+      # rather than blurred.**
+      #
+      # Node as PID 1 reaps only its own known children, so an orphaned grandchild — a Chromium
+      # helper whose parent died — is re-parented to PID 1 and becomes a zombie. Observed against
+      # the built image by reading `/proc/*/status`: with `node` as PID 1 a zombie `sh` accumulates
+      # within three seconds; with an init as PID 1 none does.
+      #
+      # The alternative was an in-image init, and it is declined: the `Dockerfile`'s CMD keeps
+      # `SIGTERM` reaching the process directly so the drain runs, and adding an ENTRYPOINT wrapper
+      # to the image ED-05 is going to replace would be work thrown away. Since A6 the CMD is
+      # `sh -c "ulimit -c 0 && exec node dist/main.js"`: the `exec` is what keeps that property
+      # (a shell that did not `exec` would sit in front of node and never forward the signal;
+      # `docker stop` would then wait out its full timeout and emit neither `runner.draining` nor
+      # `runner.drained`). That the new CMD still drains is the image smoke's property, owed.
+      #
+      # **PID-1 b (STUDIO-OBS-009, guided mode).** Guided mode refuses to start as PID 1: its kill
+      # selects only direct children of the worker and that selection is unsafe at PID 1. This
+      # field is what keeps node off PID 1 in the pod, so `put-checks.studioRunner.guidedGuard`
+      # fails the render when guided mode is on and this is not true, and the chart test asserts it
+      # for the guided value sets too.
+      #
+      # `shareProcessNamespace` makes the infrastructure pause container PID 1, and the pause
+      # container reaps. **This moves AC-5a's reaping half to AC-5b**, where SPK-04 question 6
+      # already asks it in-cluster: a pause container exists only in a real pod, so the property
+      # cannot be proven here. Stated, not blurred.
+      shareProcessNamespace: {{ .Values.studioRunner.shareProcessNamespace }}
+      serviceAccountName: {{ include "put-checks.studioRunner.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.studioRunner.serviceAccount.automountServiceAccountToken }}
+      # One derivation (AC-6): the browser runtime cap plus the stop, upload and delivery margins
+      # the pod itself is configured with, plus the preStop flip and the configured headroom.
+      terminationGracePeriodSeconds: {{ include "put-checks.studioRunner.derivedGraceSeconds" . }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.studioRunner.podSecurityContext | nindent 8 }}
+        seccompProfile:
+          # SPK-04 / ADR-001 O-4. One key, never Unconfined, and never silently inherited: a
+          # values file that omits it fails the render rather than picking up the backend's.
+          type: {{ required "studioRunner.seccompProfile.type is required and is SPK-04's decision (ADR-001 O-4); it is never inherited and never Unconfined" .Values.studioRunner.seccompProfile.type }}
+      containers:
+        - name: studio-runner
+          {{- if $observed }}
+          # Pinned by the catalog's own digest while observed replay is on: the runner checks
+          # `STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST == catalog.build.executableImageDigest`, and both
+          # come from the same values file, so only the pull reference can bind them to the image
+          # that actually runs. A re-pushed tag would run under a catalog naming a different image.
+          # `studioRunner.image.tag` is ignored here.
+          image: "{{ .Values.studioRunner.image.repository }}@sha256:{{ $o.catalog.build.executableImageDigest }}"
+          {{- else }}
+          image: "{{ .Values.studioRunner.image.repository }}:{{ .Values.studioRunner.image.tag | default .Chart.AppVersion }}"
+          {{- end }}
+          imagePullPolicy: {{ .Values.studioRunner.image.pullPolicy }}
+          # No `command` and no `args`. The image's CMD is `sh -c "ulimit -c 0 && exec node
+          # dist/main.js"` (A6), whose `exec` keeps node as the container's main process so SIGTERM
+          # still reaches it directly and the drain runs; overriding it here — in any form, and with
+          # any flag — is how a sandbox-disabling argument would reach Chromium.
+          #
+          # Startup refusals (exit 78 and 69, `CONFIGURATION_DENIED <reason>`) are ONE value-free
+          # stderr line each, which the launch contract guarantees (no path, no variable value). In
+          # a pod they surface as CrashLoopBackOff, and with this policy `kubectl describe pod`
+          # shows the line, so a pod refusing for PID 1 is not confused with one refusing for
+          # `NODE_OPTIONS`.
+          terminationMessagePolicy: FallbackToLogsOnError
+          securityContext:
+            {{- toYaml .Values.studioRunner.securityContext | nindent 12 }}
+          ports:
+            # The one TLS listener. The port keeps its `https` name together with the Service's
+            # targetPort, so a reviewer cannot read it as plaintext.
+            - name: https
+              containerPort: {{ .Values.studioRunner.service.port }}
+              protocol: TCP
+          env:
+            # The Service port and the container port are the same single key, so the worker's
+            # runner-base-url and the port the runner binds cannot drift apart (AC-1).
+            - name: STUDIO_RUNNER_PORT
+              value: {{ .Values.studioRunner.service.port | quote }}
+            # The scratch path is the single source: this value and the volumeMount below are the
+            # same key, compared to each other in the assertion rather than each to a literal.
+            - name: STUDIO_RUNNER_SCRATCH_DIR
+              value: {{ $scratch | quote }}
+            # The object store follows `objectStore.provider`, the same key the API and worker read:
+            # `local` writes to the shared RWX claim at `objectStore.localDirectory`; `s3` requires a
+            # real endpoint and bucket (the render fails without them) and reads its credentials
+            # from the mounted write-only Secret. No shipped value set selects `s3` yet.
+            #
+            # In s3 mode the directory is a SIBLING of the scratch directory inside the same
+            # `scratch` emptyDir, not a child of it: the loader refuses an object-store directory
+            # nested inside scratch ("Object storage and scratch directories must be disjoint;
+            # scratch is deleted on restart"). `dev.sh` already lays the two out this way.
+            - name: STUDIO_RUNNER_OBJECT_STORE_DIR
+              value: {{ if eq .Values.objectStore.provider "local" }}{{ .Values.objectStore.localDirectory | quote }}{{ else }}{{ printf "%s/objects" (trimSuffix "/" .Values.studioRunner.scratch.mountPath) | quote }}{{ end }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_PROVIDER
+              value: {{ .Values.objectStore.provider | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_ENDPOINT
+              value: {{ if eq .Values.objectStore.provider "s3" }}{{ required "objectStore.endpoint is required for provider=s3" .Values.objectStore.endpoint | quote }}{{ else }}{{ .Values.objectStore.endpoint | quote }}{{ end }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_REGION
+              value: {{ .Values.objectStore.region | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_BUCKET
+              value: {{ if eq .Values.objectStore.provider "s3" }}{{ required "objectStore.bucket is required for provider=s3" .Values.objectStore.bucket | quote }}{{ else }}{{ .Values.objectStore.bucket | quote }}{{ end }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_FORCE_PATH_STYLE
+              value: {{ .Values.objectStore.pathStyleAccess | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_ACCESS_KEY_ID_FILE
+              value: {{ printf "%s/accessKeyId" .Values.studioRunner.objectStore.mountPath | quote }}
+            - name: STUDIO_RUNNER_OBJECT_STORE_SECRET_ACCESS_KEY_FILE
+              value: {{ printf "%s/secretAccessKey" .Values.studioRunner.objectStore.mountPath | quote }}
+            - name: STUDIO_RUNNER_CALLBACK_BASE_URL
+              value: {{ include "put-checks.studioRunner.callbackBaseUrl" . | quote }}
+            - name: STUDIO_RUNNER_SERVICE_IDENTITY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.serviceIdentityKey }}
+            - name: STUDIO_RUNNER_CALLBACK_IDENTITY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.studioRunner.identity.secretName }}
+                  key: {{ .Values.studioRunner.identity.callbackIdentityKey }}
+            # ── The one TLS listener, in every deployment (STUDIO-OBS-009, ruling A3) ───────────────
+            #
+            # File paths come from the same keys as the Secret mount below, so the env value and
+            # the mount cannot drift. The exec probe reads all three files and the port on every
+            # run (a new process, so it sees this container's environment). The fingerprint is
+            # ONE values key with no default and is validated at render time.
+            - name: STUDIO_RUNNER_TLS_KEY_FILE
+              value: {{ printf "%s/%s" $tlsDir $tls.keyFile | quote }}
+            - name: STUDIO_RUNNER_TLS_CERT_FILE
+              value: {{ printf "%s/%s" $tlsDir $tls.certFile | quote }}
+            - name: STUDIO_RUNNER_TLS_CA_FILE
+              value: {{ printf "%s/%s" $tlsDir $tls.caFile | quote }}
+            - name: STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256
+              value: {{ $tls.controllerCertificateFingerprint256 | quote }}
+            # ── Guided mode: a mode of this process, not another process (ruling A2) ──────────────
+            #
+            # The switch is rendered in both directions so the manifest says what it means. The
+            # other seven are rendered ONLY while it is on: with the switch off the runner refuses
+            # any non-empty `STUDIO_RUNNER_GUIDED_*` key ("no half configuration"). Not one of them
+            # may be set through `runnerEnv` (chart-managed), and no `TMPDIR` or `NODE_OPTIONS` is
+            # rendered anywhere: `/tmp` is mounted instead (ruling Q4), and the runner refuses
+            # `NODE_OPTIONS` outright when guided mode is on.
+            - name: STUDIO_RUNNER_GUIDED_ENABLED
+              value: {{ if $guided }}"true"{{ else }}"false"{{ end }}
+            {{- if $guided }}
+            - name: STUDIO_RUNNER_GUIDED_WORKER_ID
+              value: {{ $g.workerId | quote }}
+            - name: STUDIO_RUNNER_GUIDED_JOURNAL_DIR
+              value: {{ printf "%s/%s" $journalMount $g.journal.directory | quote }}
+            - name: STUDIO_RUNNER_GUIDED_CONTROLLER_ISSUER
+              value: {{ $g.token.issuer | quote }}
+            - name: STUDIO_RUNNER_GUIDED_CONTROLLER_SUBJECT
+              value: {{ $g.token.controllerSubject | quote }}
+            - name: STUDIO_RUNNER_GUIDED_CONTROLLER_PUBLIC_KEY_FILE
+              value: {{ printf "%s/%s" (trimSuffix "/" $g.controllerPublicKey.mountPath) $g.controllerPublicKey.file | quote }}
+            - name: STUDIO_RUNNER_GUIDED_CALLBACK_BASE_URL
+              value: {{ include "put-checks.studioRunner.guidedCallbackBaseUrl" . | quote }}
+            - name: STUDIO_RUNNER_GUIDED_CALLBACK_TOKEN_FILE
+              value: {{ printf "%s/%s" (trimSuffix "/" $g.callbackToken.mountPath) $g.callbackToken.key | quote }}
+            {{- end }}
+            # ── Observed replay: chart-managed, single-sourced from `studioObserved` ─────────────────
+            #
+            # Both flags are rendered in both directions (the runner accepts only "true", "false" or
+            # unset). The three file/digest keys render ONLY while either flag is on, like the guided
+            # keys: no half configuration. The digest is DERIVED from the catalog, never a second value.
+            - name: STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED
+              value: {{ $o.validationEnabled | toString | quote }}
+            - name: STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED
+              value: {{ $o.replayEnabled | toString | quote }}
+            {{- if $observed }}
+            - name: STUDIO_RUNNER_OBSERVED_CATALOG_FILE
+              value: {{ printf "%s/catalog.json" $trustDir | quote }}
+            - name: STUDIO_RUNNER_OBSERVED_POLICY_FILE
+              value: {{ printf "%s/policies.json" $trustDir | quote }}
+            - name: STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST
+              value: {{ $o.catalog.build.executableImageDigest | quote }}
+            {{- end }}
+            {{- include "put-checks.studioRunner.env" . | nindent 12 }}
+          # **No envFrom.** A ConfigMap or Secret reference here injects whatever keys it carries,
+          # which is precisely the open half SEC-2 exploits: the enumerated list above is the only
+          # way a variable reaches this container.
+          readinessProbe:
+            exec:
+              command: ["node", "dist/probe.js", {{ .Values.studioRunner.probes.readinessPath | quote }}]
+            timeoutSeconds: 3
+            initialDelaySeconds: {{ .Values.studioRunner.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.studioRunner.probes.periodSeconds }}
+          livenessProbe:
+            exec:
+              command: ["node", "dist/probe.js", {{ .Values.studioRunner.probes.livenessPath | quote }}]
+            timeoutSeconds: 3
+            initialDelaySeconds: {{ .Values.studioRunner.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.studioRunner.probes.periodSeconds }}
+            # A liveness restart destroys the in-memory guided session, so a guided-enabled pod
+            # tolerates more consecutive misses. UNMEASURED in a cluster [I]; owner @devops/@qa.
+            failureThreshold: {{ if $guided }}{{ $g.livenessFailureThreshold }}{{ else }}{{ .Values.studioRunner.probes.livenessFailureThreshold }}{{ end }}
+          resources:
+            # One replay browser, or one replay browser PLUS one guided browser (A2.6 a). The basis
+            # is recorded in values.yaml and the measurement is owed (GA plan G-4).
+            {{- toYaml (ternary $g.resources .Values.studioRunner.resources $isGuided) | nindent 12 }}
+          volumeMounts:
+            # Every writable mount is disjoint from the image's browser registry
+            # (PLAYWRIGHT_BROWSERS_PATH) and from $HOME (/home/pwuser). That disjointness is what
+            # makes readOnlyRootFilesystem a browser-integrity control rather than tidiness.
+            - name: scratch
+              # Mounted at the **parent** of the runner's scratch directory. Mounting at the
+              # directory itself makes it a mount point, and the runner's start-up `clearAll()`
+              # cannot remove a mount point whose parent is read-only — observed as
+              # `EROFS … rmdir` against the built image, before the server ever listened.
+              mountPath: {{ .Values.studioRunner.scratch.mountPath }}
+            - name: dev-shm
+              mountPath: /dev/shm
+            {{- if eq .Values.objectStore.provider "s3" }}
+            - name: object-store-credentials
+              mountPath: {{ .Values.studioRunner.objectStore.mountPath }}
+              readOnly: true
+            {{- end }}
+            {{- if eq .Values.objectStore.provider "local" }}
+            - name: local-object-store
+              mountPath: {{ .Values.objectStore.localDirectory }}
+            {{- end }}
+            # The runner's key, certificate and CA: read-only, a DIRECTORY mount (no `subPath`, so
+            # a Secret update propagates), mode 0440 on the volume below. Required in every
+            # deployment, guided or not.
+            - name: tls
+              mountPath: {{ $tls.mountPath }}
+              readOnly: true
+            {{- if $observed }}
+            # The catalog entry and the trusted policies: read-only, a DIRECTORY mount (no `subPath`).
+            # Public hashes and trust policy, not secrets, so a ConfigMap and not a Secret; this adds
+            # no Secret volume, so the `shareProcessNamespace` one-container bound is untouched.
+            - name: studio-observed-trust
+              mountPath: {{ $o.mountPath }}
+              readOnly: true
+            {{- end }}
+            {{- if $guided }}
+            # Guided-only mounts. `/tmp` is the guided browser profile and the recording scratch
+            # (`os.tmpdir()`, no TMPDIR variable). The journal mount is NOT the journal directory:
+            # the directory is a subdirectory of it. The token mount is a directory the external
+            # issuer refreshes (the file is re-read on every callback). The public key is read once.
+            - name: guided-tmp
+              mountPath: /tmp
+            - name: guided-journal
+              mountPath: {{ $g.journal.mountPath }}
+            - name: guided-callback-token
+              mountPath: {{ $g.callbackToken.mountPath }}
+              readOnly: true
+            - name: guided-controller-key
+              mountPath: {{ $g.controllerPublicKey.mountPath }}
+              readOnly: true
+            {{- end }}
+          lifecycle:
+            preStop:
+              # Flip readiness before the drain: the endpoint leaves the Service while admitted
+              # work finishes, rather than being killed with a browser open (§5.2, §8.4).
+              exec:
+                command: ["sleep", {{ .Values.studioRunner.drain.preStopSleepSeconds | quote }}]
+      volumes:
+        - name: scratch
+          emptyDir:
+            sizeLimit: {{ .Values.studioRunner.scratch.sizeLimit }}
+        - name: dev-shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ if $guided }}{{ $g.devShm.sizeLimit }}{{ else }}{{ .Values.studioRunner.devShm.sizeLimit }}{{ end }}
+        {{- if eq .Values.objectStore.provider "s3" }}
+        - name: object-store-credentials
+          # ⚠ Coupled to `shareProcessNamespace` above (QA MED-1). A second container in this pod
+          # reads this Secret through /proc/1/root whatever its own mounts say, so the one-container
+          # bound is what keeps the write-only store principal where §6.2 puts it. Asserted in
+          # `test/deployment/chart.test.ts` and falsified against a chart copy carrying a sidecar.
+          secret:
+            secretName: {{ .Values.studioRunner.objectStore.credentialsSecret }}
+            items:
+              {{- range .Values.studioRunner.objectStore.keys }}
+              - key: {{ . }}
+                path: {{ . }}
+              {{- end }}
+        {{- end }}
+        {{- if eq .Values.objectStore.provider "local" }}
+        - name: local-object-store
+          persistentVolumeClaim:
+            claimName: {{ include "put-checks.objectStore.localClaim" . }}
+        {{- end }}
+        - name: tls
+          # ⚠ Coupled to `shareProcessNamespace` above, like the object-store credential (QA MED-1):
+          # this Secret holds the runner's PRIVATE KEY, and a second container in this pod would
+          # read it through /proc/1/root whatever its own mounts say. The one-container bound
+          # (`sharedNamespaceViolations`) covers any Secret volume generically and is asserted on
+          # guided sets too. Adding a container here is a security decision, not a convenience.
+          secret:
+            secretName: {{ $tls.secretName }}
+            defaultMode: {{ $fileMode }}
+            items:
+              - key: {{ $tls.keyFile }}
+                path: {{ $tls.keyFile }}
+              - key: {{ $tls.certFile }}
+                path: {{ $tls.certFile }}
+              - key: {{ $tls.caFile }}
+                path: {{ $tls.caFile }}
+        {{- if $observed }}
+        - name: studio-observed-trust
+          configMap:
+            name: {{ include "put-checks.studioObserved.configMapName" . }}
+            defaultMode: {{ $fileMode }}
+            items:
+              - key: catalog.json
+                path: catalog.json
+              - key: policies.json
+                path: policies.json
+        {{- end }}
+        {{- if $guided }}
+        - name: guided-tmp
+          # Disk-backed on purpose: a memory-backed volume would count against the 2Gi container
+          # limit next to Chromium and /dev/shm. Disjoint from the browser registry and $HOME.
+          emptyDir:
+            sizeLimit: {{ $g.tmp.sizeLimit }}
+        - name: guided-journal
+          # Pod lifetime, not a PVC (ruling part 1 1.5 b); its own volume, never under the scratch
+          # directory the drain clears (Q3).
+          emptyDir:
+            sizeLimit: {{ $g.journal.sizeLimit }}
+        - name: guided-callback-token
+          secret:
+            secretName: {{ $g.callbackToken.secretName }}
+            defaultMode: {{ $fileMode }}
+            items:
+              - key: {{ $g.callbackToken.key }}
+                path: {{ $g.callbackToken.key }}
+        - name: guided-controller-key
+          # Public material, rendered by this chart from `guided.token.publicKey` (one source for
+          # the runner file and the backend's `service-public-key`).
+          configMap:
+            name: {{ include "put-checks.fullname" . }}-studio-guided-controller-key
+            defaultMode: {{ $fileMode }}
+            items:
+              - key: {{ $g.controllerPublicKey.file }}
+                path: {{ $g.controllerPublicKey.file }}
+        {{- end }}
+      {{- with .Values.studioRunner.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.studioRunner.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.studioRunner.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

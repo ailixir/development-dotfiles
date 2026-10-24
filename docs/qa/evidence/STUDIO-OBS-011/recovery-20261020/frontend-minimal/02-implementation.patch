@@ -1,0 +1,31 @@
+--- a/frontend/src/services/mocks/studio/handlers.ts
++++ b/frontend/src/services/mocks/studio/handlers.ts
+@@ -161,7 +161,7 @@
+  * `POST /tests/{id}/validate-variables` (`validateTestVariables`, kept by STUDIO-OBS-012A AC-2,
+  * cleanup inventory CLN-12). Mirrors the document's description: `<var NAME>` and `<secret ID>`
+  * references in the steps are matched against the declared variables (a `secretRef` by its
+- * `secretId`, falling back to its name); only a supplied value's presence is read and no value is
++ * `secretId` only); only a supplied value's presence is read and no value is
+  * echoed. Nothing is written.
+  */
+ function validateVariableReferences(
+@@ -174,7 +174,7 @@
+   const secretIds: string[] = [];
+   for (const variable of test.variables) {
+     if (variable.kind === 'secretRef') {
+-      const id = variable.secretId ?? variable.name;
++      const id = variable.secretId;
+       if (id && !secretIds.includes(id)) secretIds.push(id);
+     } else if (variable.name) {
+       plainValues.set(variable.name, variable.value);
+--- a/frontend/src/pages/ReportsPage/ReportsPage.tsx
++++ b/frontend/src/pages/ReportsPage/ReportsPage.tsx
+@@ -141,7 +141,7 @@
+   const [saving, setSaving] = useState(false);
+ 
+ 
+-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
++  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+     setSelectedTab(newValue);
+   };
+ 

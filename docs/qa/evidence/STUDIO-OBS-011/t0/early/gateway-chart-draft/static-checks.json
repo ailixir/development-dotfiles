@@ -1,0 +1,62 @@
+{
+  "kind": "static only",
+  "checks": [
+    {
+      "path": "helm-chart/put-checks/templates/_helpers.tpl",
+      "actualUnchanged": true,
+      "exactPatchReconstruction": true
+    },
+    {
+      "path": "studio-runner/test/deployment/integrations.test.ts",
+      "actualUnchanged": true,
+      "exactPatchReconstruction": true
+    }
+  ],
+  "addedProtectedTokens": [
+    "studiogatewayprovider",
+    "studiogatewayendpoint",
+    "studiogatewayproject",
+    "studiogatewaylocation",
+    "studiogatewaymodel",
+    "studiogatewaycredentialsmode",
+    "studiogatewaycredentialsserviceaccountkeyfile",
+    "studiogatewaycredentialskeyfile"
+  ],
+  "allLegacyAndUnrelatedTokensPreserved": true,
+  "allOriginalTestBodiesUnchanged": true,
+  "wholeHelperDeltaLimitedToCommentAndEightTokens": true,
+  "predictedNewTestCasesNotCollected": {
+    "negativeCurrent": 48,
+    "negativeLegacy": 14,
+    "allowedTuning": 2,
+    "tokenMutations": 8,
+    "validManifestEquality": 8,
+    "total": 80
+  },
+  "patchApplicability": {
+    "command": [
+      "patch",
+      "--dry-run",
+      "--batch",
+      "-p1",
+      "-i",
+      "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/early/gateway-chart-draft/gateway-chart-draft.patch"
+    ],
+    "exit": 0,
+    "stdout": "patching file 'helm-chart/put-checks/templates/_helpers.tpl'\npatching file 'studio-runner/test/deployment/integrations.test.ts'\n",
+    "stderr": "",
+    "noFuzzOrOffset": true
+  },
+  "notExecuted": [
+    "Helm",
+    "Node",
+    "type-check",
+    "lint",
+    "Vitest",
+    "Docker",
+    "runtime binding",
+    "red/green",
+    "template mutations",
+    "valid rendered manifest equality"
+  ]
+}
