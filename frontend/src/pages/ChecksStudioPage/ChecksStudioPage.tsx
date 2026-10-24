@@ -121,7 +121,8 @@ import { declareInsertedSecret, toContractVariables, variableDeclarationIssue, t
 import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
 import { StudioScheduleSummary } from '@/components/studio/scheduling/StudioScheduleSummary';
 import { STUDIO_TEST_ENVIRONMENTS } from '@/components/studio/tests/testListPresentation';
-import { runDetailsPath } from '@/components/studio/runs/runLinks';
+import { StudioUnavailable, TEST_NOT_AVAILABLE_MESSAGE, isUnavailableTestRead } from '@/components/studio/StudioUnavailable';
+import { uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
 
 
 function toEditableVariables(variables: StudioVariable[] | null | undefined): EditableVariable[] {
@@ -166,13 +167,6 @@ const VARIABLE_DECLARATION_MESSAGES: Record<VariableDeclarationIssue, string> = 
   duplicateName: 'Variable names must be unique. Rename or remove the duplicate.',
   secretNameCollision: 'A variable name conflicts with a secret reference. Rename it or select the matching secret.',
 };
-
-const StudioUnavailable: React.FC = () => (
-  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', textAlign: 'center', p: 4 }}>
-    <Typography variant="h5" gutterBottom>Checks Studio</Typography>
-    <Typography variant="body1" color="text.secondary">Checks Studio is not available in this environment.</Typography>
-  </Box>
-);
 
 function formatExecutionTime(durationMs: number): string {
   const totalSeconds = Math.max(0, durationMs) / 1000;
@@ -231,14 +225,9 @@ export interface ChecksStudioPageProps {
   readonly guidedOptions?: UseGuidedSessionOptions;
 }
 
-/** The message for a route id the caller cannot read, or that is not a test (FR-25: 403 and 400 read the same). */
-export const TEST_NOT_AVAILABLE_MESSAGE = "This UI test doesn't exist or you don't have access";
-
-/** A read of `GET /tests/{id}` that no author could ever see: forbidden, or a malformed id. */
-function isUnavailableTestRead(error: unknown): boolean {
-  const status = (error as { response?: { status?: number } } | null)?.response?.status;
-  return status === 403 || status === 400;
-}
+// The unreadable-test message now lives with the shared unavailable state; kept exported here for
+// the page tests that import it from the editor.
+export { TEST_NOT_AVAILABLE_MESSAGE };
 
 /**
  * A list answer that still carries the test the editor has open. The list is a page of tests; the
@@ -409,6 +398,8 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   const navigate = useNavigate();
   const params = useParams();
   const selectedScenarioData = scenarios?.find(s => s.id === selectedScenario) || null;
+  /** The test the editor is open on: the in-page back and the schedule dialog's run links belong to it. */
+  const openTestId = selectedScenarioData?.id ?? params.id ?? null;
   const dispatch = useDispatch();
 
   /** Puts a draft the server returned into the editor. The server's copy is the only draft. */
@@ -1190,7 +1181,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
             <Button
               size="small"
               variant="text"
-              onClick={() => requestNavigation(() => navigate('/checks/studio/tests'))}
+              onClick={() => requestNavigation(() => navigate(openTestId ? uiTestPath(openTestId) : '/checks/all'))}
               sx={{ px: 0, minWidth: 0 }}
             >
               UI Tests
@@ -1281,8 +1272,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
       <StudioScheduleDialog
         test={scheduleOpen ? selectedScenarioData : null}
         dirty={isDirty || hasPendingStep}
-        // Until the Runs page moves under the UI test (increment 2), a run opens on the Runs page.
-        runHref={(executionId) => runDetailsPath('/checks/studio/runs', executionId)}
+        runHref={(executionId) => (openTestId ? uiTestRunPath(openTestId, executionId) : '/checks/all')}
         onClose={() => setScheduleOpen(false)}
       />
 

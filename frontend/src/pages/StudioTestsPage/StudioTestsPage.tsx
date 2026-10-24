@@ -7,7 +7,7 @@ import { hideBelowMd } from '@/components/studio/list/studioListSx';
 import DeleteTestDialog from '@/components/studio/tests/DeleteTestDialog';
 import TestRow from '@/components/studio/tests/TestRow';
 import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
-import { runDetailsPath } from '@/components/studio/runs/runLinks';
+import { uiTestRunPath } from '@/components/studio/uiTestPaths';
 import { useStudioTests } from '@/components/studio/tests/useStudioTests';
 import {
   LAST_RUN_FILTER_LABELS,
@@ -19,8 +19,6 @@ import { TEST_LAST_RUN_FILTERS, type TestDto, type TestLastRunFilter } from '@/t
 
 /** Where the Create Test actions go: Create Check, with the UI Test type preselected. */
 const CREATE_UI_TEST_PATH = '/checks/create?type=UI_TEST';
-/** The Runs page run a schedule dialog link opens. */
-const runHref = (executionId: string): string => runDetailsPath('/checks/studio/runs', executionId);
 
 /** Columns: Test · System · Environment · Readiness · Last run · Updated · actions. */
 const COLUMN_SX = [undefined, hideBelowMd, hideBelowMd, undefined, undefined, hideBelowMd, undefined] as const;
@@ -173,7 +171,10 @@ const StudioTestsPage: React.FC = () => {
           list.reload();
         }}
       />
-      <StudioScheduleDialog test={scheduleTarget} runHref={runHref} onClose={() => setScheduleTarget(null)} />
+      <StudioScheduleDialog
+        test={scheduleTarget}
+        runHref={(executionId) => (scheduleTarget ? uiTestRunPath(scheduleTarget.id, executionId) : '/checks/all')}
+        onClose={() => setScheduleTarget(null)} />
     </Box>
   );
 };

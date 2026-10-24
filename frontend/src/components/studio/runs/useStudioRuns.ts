@@ -16,6 +16,8 @@ export interface StudioRunsQuery {
   status: ExecutionStatusFilter | '';
   csiId: string | null;
   sort: ExecutionSort;
+  /** Restricts the list and the running count to one test's runs. Absent: all runs in scope. */
+  testId?: string;
   /** 1-based, as in the URL. */
   page: number;
   pageSize: number;
@@ -50,7 +52,7 @@ export interface StudioRunsState {
  * refresh never replaces a newer snapshot of a run with an older one.
  */
 export function useStudioRuns(query: StudioRunsQuery): StudioRunsState {
-  const { q, status, csiId, sort, page, pageSize } = query;
+  const { q, status, csiId, sort, testId, page, pageSize } = query;
   const [runs, setRuns] = useState<ExecutionSnapshot[]>([]);
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -58,6 +60,7 @@ export function useStudioRuns(query: StudioRunsQuery): StudioRunsState {
   const [runningCount, setRunningCount] = useState<number | null>(null);
   const sequence = useRef(0);
   const controllerRef = useRef<AbortController | null>(null);
+  const loadedTestId = useRef(testId);
 
   const reload = useCallback(
     async ({ silent = false }: ReloadOptions = {}) => {
@@ -67,6 +70,13 @@ export function useStudioRuns(query: StudioRunsQuery): StudioRunsState {
       const id = ++sequence.current;
       const isCurrent = () => id === sequence.current && !controller.signal.aborted;
 
+      // Another test's rows never stay on screen under this test's id.
+      if (loadedTestId.current !== testId) {
+        loadedTestId.current = testId;
+        setRuns([]);
+        setTotalElements(0);
+        setRunningCount(null);
+      }
       if (!silent) {
         setLoading(true);
         setError(null);
@@ -75,13 +85,17 @@ export function useStudioRuns(query: StudioRunsQuery): StudioRunsState {
         q: q || undefined,
         status: status || undefined,
         csiId: csiId ?? undefined,
+        testId: testId ?? undefined,
         sort,
         page: Math.max(0, page - 1),
         size: pageSize,
       };
       // The header count is secondary: its failure never affects the list.
       const running = studioApi
-        .listExecutions({ status: 'RUNNING', size: 1, csiId: csiId ?? undefined }, { signal: controller.signal })
+        .listExecutions(
+          { status: 'RUNNING', size: 1, csiId: csiId ?? undefined, testId: testId ?? undefined },
+          { signal: controller.signal },
+        )
         .then((result) => result.totalElements)
         .catch(() => null);
 
@@ -104,7 +118,7 @@ export function useStudioRuns(query: StudioRunsQuery): StudioRunsState {
       const count = await running;
       if (isCurrent() && count !== null) setRunningCount(count);
     },
-    [q, status, csiId, sort, page, pageSize],
+    [q, status, csiId, sort, testId, page, pageSize],
   );
 
   useEffect(() => {

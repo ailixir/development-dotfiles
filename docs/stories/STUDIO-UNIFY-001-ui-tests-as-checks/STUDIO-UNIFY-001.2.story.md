@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Story ID | STUDIO-UNIFY-001.2 |
-| Status | **Ready** |
+| Status | **Done** |
 | Epic | STUDIO-UNIFY-001-ui-tests-as-checks — UI tests as checks (Flow 1, frontend-only), increment 2 of 4 |
 | Depends on | STUDIO-UNIFY-001.1 |
 | Dependency notes | Needs story .1 Done. This story reuses what .1 delivers: the UI test path helpers (1.2), the availability hook (1.3), the `runHref` prop on `StudioScheduleDialog` (1.14), the editor framing (1.15) and the per-tree route test (1.21). The plan's phase-2 subtasks depend on 1.3, 1.14, 1.15 and 1.21. Story .3 follows. |
@@ -67,7 +67,7 @@ AC text is copied from [requirements.json](spec/requirements.json). Where the sp
 - **AC-24** *[FR-25; NFR-03, NFR-06; DC-13; spec §8.1]* Given GET /studio/tests/{id} answers 403 (or 400 for a malformed id), when ui-tests/{id} or a runs route under it opens, then 'This UI test doesn't exist or you don't have access' is shown and no request is sent to /checks/{id}. Given the read fails with 500 or no response, then a load error with Retry is shown, nothing from the test or its runs renders, and Retry repeats the read.
 - **AC-25** *[FR-26; RF-06; DC-02; spec §8.4, §10]* Given a replay in progress in the editor, when the user navigates to the detail page's Runs tab, then the editor's live subscription is closed and the replay appears in progress in the Runs tab and updates to its terminal state. Given a learn in progress (the server reports LEARNING), when the user opens the detail page, then the Runs tab lists no entry for the learn, and the status chip and Overview read 'Learning'.
 - **AC-26 (increment 2 part)** *[FR-27; D7; DC-22; spec §11 row 2]* Given the end of increment 2, then studio/runs and studio/runs/{executionId} land on module home too, the Runs page is gone, and the sidebar has no Runs child. There is never a redirect to a ui-tests route.
-- **AC-27 (increment 2 part)** *[FR-28; CON-04; spec §12.5]* Given the Studio WCAG audit, when it runs at the end of increment 2, then it passes. After increment 2, surface 2 is gone. Any baseline move is regenerated, with its reason recorded in that increment ('surfaces deleted'). If a change breaks the audit, the regression is fixed instead (accessibility-scope rule). No surface is added for the new pages.
+- ~~**AC-27 (increment 2 part)**~~ **Removed by user decision 2026-10-23 ("We dont need WCAG, ignore/remove all accessibility tasks").** *[FR-28; CON-04; spec §12.5]* Given the Studio WCAG audit, when it runs at the end of increment 2, then it passes. After increment 2, surface 2 is gone. Any baseline move is regenerated, with its reason recorded in that increment ('surfaces deleted'). If a change breaks the audit, the regression is fixed instead (accessibility-scope rule). No surface is added for the new pages.
 
 ### Traceability: AC to plan subtasks
 
@@ -142,8 +142,8 @@ This story drops WCAG **surface 2** (`StudioRunsPage`) and its pin from `studioW
 - Supporting: @ux-design-expert on request, for layout or interaction questions only (no accessibility review, ADR-SC-006); @devops only for a later, separately authorised push or PR. @dev does not push.
 
 **Quality Gate Tasks**
-- [ ] Pre-Commit (@dev): run the configured CodeRabbit review before marking the story complete. The CLI is WSL-based; if it is unavailable, record that it was not run, apply the configured graceful degradation, and do an independent manual diff review. Never claim a run that did not happen.
-- [ ] Independent review (@qa): implementation evidence, AC-13 and AC-24 cases (no run content without the test), the link walk, route scan S2, and the WCAG guard record.
+- [x] Pre-Commit (@dev) — CodeRabbit NOT RUN (no CLI/WSL on this host); graceful degradation: independent Lean review is the manual diff review. Original text: run the configured CodeRabbit review before marking the story complete. The CLI is WSL-based; if it is unavailable, record that it was not run, apply the configured graceful degradation, and do an independent manual diff review. Never claim a run that did not happen.
+- [x] Independent review (@qa): implementation evidence, AC-13 and AC-24 cases (no run content without the test), the link walk, route scan S2, and the WCAG guard record. — PASS, see QA Results (WCAG items removed by user decision).
 - [ ] Pre-PR (@devops): only if a PR is later authorised. No PR is implied here.
 
 **Self-Healing Configuration** (`.claude/rules/coderabbit-integration.md`)
@@ -168,7 +168,7 @@ This story drops WCAG **surface 2** (`StudioRunsPage`) and its pin from `studioW
 
 The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yaml`, phase-2). Run them **in the listed order**. Ordering matters for D7: routes and links first (2.9–2.11), then WCAG surface 2 (2.12), then the files (2.13) (R14). Run every command from `frontend/`. Use **pnpm only**. Re-read the cited lines before editing: they were verified on 2026-10-23 and may have drifted (ASM-06, R11). The "Plan notes" under each task are copied from the plan and are part of the task. Tick a box only when its verification command passes.
 
-- [ ] **2.1** Extract the editor's local StudioUnavailable into a shared component for the detail page
+- [x] **2.1** Extract the editor's local StudioUnavailable into a shared component for the detail page
   - Service: frontend. Covers: FR-24, AC-23.
   - Files: `frontend/src/components/studio/StudioUnavailable.tsx`, `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx`
   - Verify (from `frontend/`):
@@ -179,28 +179,28 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
   - Plan notes:
     Move L166 unchanged in text and DOM. L1939 imports it.
 
-- [ ] **2.2** Add the shared UI test status mapping (readiness and last run to chip, colour and filter group) per spec §9.3
+- [x] **2.2** Add the shared UI test status mapping (readiness and last run to chip, colour and filter group) per spec §9.3
   - Service: frontend. Covers: FR-16, AC-16, DC-08.
   - Files: `frontend/src/components/studio/tests/uiTestStatus.ts`, `frontend/src/components/studio/tests/uiTestStatus.test.ts`
   - Verify (from `frontend/`): `pnpm exec vitest run src/components/studio/tests/uiTestStatus.test.ts`
   - Plan notes:
     Seven cases. Readiness states belong to their own filter values only. Used by 2.6 and 3.1.
 
-- [ ] **2.3** Add an optional testId to useStudioRuns for the list and running-count requests
+- [x] **2.3** Add an optional testId to useStudioRuns for the list and running-count requests
   - Service: frontend. Covers: FR-11, AC-12.
   - Files: `frontend/src/components/studio/runs/useStudioRuns.ts`
   - Verify (from `frontend/`): `pnpm exec vitest run src/pages/StudioRunsPage/StudioRunsPage.test.tsx && pnpm run type-check`
   - Plan notes:
     StudioRunsQuery (L13-22) gains testId?, passed at L84 and L89. When testId is absent, behaviour is identical.
 
-- [ ] **2.4** Bind RunDetailsDrawer to an expected test id so a mismatched read or live snapshot shows not-found (G3)
+- [x] **2.4** Bind RunDetailsDrawer to an expected test id so a mismatched read or live snapshot shows not-found (G3)
   - Service: frontend. Covers: FR-12, AC-13.
   - Files: `frontend/src/components/studio/runs/RunDetailsDrawer.tsx`
   - Verify (from `frontend/`): `pnpm exec vitest run src/pages/StudioRunsPage/StudioRunsPage.test.tsx && pnpm run type-check`
   - Plan notes:
     On first paint, on the getExecution read and on every snapshot, a testId other than expectedTestId sets the existing 'not-found' state.
 
-- [ ] **2.5** Add the detail page shell with availability gating, the test-read gate and the error states
+- [x] **2.5** Add the detail page shell with availability gating, the test-read gate and the error states
   - Service: frontend. Covers: FR-09, FR-12, FR-24, FR-25, NFR-03, NFR-06, AC-23, AC-24.
   - Files: `frontend/src/pages/UiTestDetailsPage/UiTestDetailsPage.tsx`, `frontend/src/pages/UiTestDetailsPage/useUiTestDetail.ts`, `frontend/src/pages/UiTestDetailsPage/index.ts`
   - Depends on: 2.1, 1.3
@@ -213,7 +213,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
     - Never call /checks/{id}.
     - Tabs (Overview index, Runs) and the header render through Outlet only after the read succeeds.
 
-- [ ] **2.6** Add the detail header (name, status, UI Test chip, CSI, environment, last run) with Edit, Schedule, Run in Studio and Delete
+- [x] **2.6** Add the detail header (name, status, UI Test chip, CSI, environment, last run) with Edit, Schedule, Run in Studio and Delete
   - Service: frontend. Covers: FR-09, FR-13, AC-10, AC-14.
   - Files: `frontend/src/pages/UiTestDetailsPage/UiTestDetailHeader.tsx`
   - Depends on: 2.2, 2.5, 1.14
@@ -225,7 +225,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
     - Delete: DeleteTestDialog, then /checks/all.
     - The CSI shows its name from the store, or the id.
 
-- [ ] **2.7** Add the read-only Overview tab (numbered steps, readiness, variables with secret reference names, schedule summary)
+- [x] **2.7** Add the read-only Overview tab (numbered steps, readiness, variables with secret reference names, schedule summary)
   - Service: frontend. Covers: FR-10, NFR-04, AC-11, AC-25.
   - Files: `frontend/src/pages/UiTestDetailsPage/UiTestOverviewTab.tsx`
   - Depends on: 2.5
@@ -234,7 +234,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
     Variables show name and kind. A secretRef shows only its secretId, and a plain value is never
     rendered. StudioScheduleSummary takes the refreshToken built as at ChecksStudioPage L1142-1143.
 
-- [ ] **2.8** Add the Runs tab (replays only, note, own header, paging, live refresh, test-bound drawer and copy-link)
+- [x] **2.8** Add the Runs tab (replays only, note, own header, paging, live refresh, test-bound drawer and copy-link)
   - Service: frontend. Covers: FR-11, FR-12, FR-26, AC-12, AC-13, AC-25.
   - Files: `frontend/src/pages/UiTestDetailsPage/UiTestRunsTab.tsx`
   - Depends on: 2.3, 2.4, 2.5
@@ -248,7 +248,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
       uiTestRunPath).
     - Rows use RunRow, which becomes single-test in 2.16.
 
-- [ ] **2.9** Add the detail routes and remove studio/runs and studio/runs/:executionId in both trees; extend the route test
+- [x] **2.9** Add the detail routes and remove studio/runs and studio/runs/:executionId in both trees; extend the route test
   - Service: frontend. Covers: FR-09, FR-11, FR-27, CON-09, AC-26.
   - Files: `frontend/src/App.tsx`, `frontend/src/App.routes.test.tsx`
   - Depends on: 2.5, 2.7, 2.8, 1.21
@@ -258,7 +258,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
     STUDIO. Remove L112-113 and L141-142 and the lazy StudioRunsPage import (L22). The route test asserts
     that the detail paths render and the two runs paths land on module home.
 
-- [ ] **2.10** Retarget the editor's in-page back to the detail page and every schedule-dialog host to ui-tests run links
+- [x] **2.10** Retarget the editor's in-page back to the detail page and every schedule-dialog host to ui-tests run links
   - Service: frontend. Covers: FR-07, FR-08, AC-08, AC-09, DC-20.
   - Files: `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx`, `frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx`, `frontend/src/pages/ChecksStudioPage/pageFraming.test.tsx`
   - Depends on: 2.9, 1.15
@@ -269,7 +269,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
   - Plan notes:
     The back goes to uiTestPath(id). The L1144 and Tests-page L173 hosts pass runHref = (e) => uiTestRunPath(test.id, e).
 
-- [ ] **2.11** Update the schedule dialog test's run-link assertions to the ui-tests run path
+- [x] **2.11** Update the schedule dialog test's run-link assertions to the ui-tests run path
   - Service: frontend. Covers: FR-08, AC-09.
   - Files: `frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx`
   - Depends on: 2.10
@@ -277,7 +277,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
   - Plan notes:
     L145, L234 and L252.
 
-- [ ] **2.12** Drop WCAG surface 2 (StudioRunsPage) and its pin, regenerate the baseline and record 'surfaces deleted'
+- [-] **2.12** (REMOVED, user decision 2026-10-23: no WCAG work) Drop WCAG surface 2 (StudioRunsPage) and its pin, regenerate the baseline and record 'surfaces deleted'
   - Service: frontend. Covers: FR-28, CON-04, AC-27.
   - Files: `frontend/src/test/a11y/studioWcagAudit.test.tsx`, `docs/qa/accessibility/axe-results.json`, `docs/qa/accessibility/studio-wcag-audit.md`
   - Depends on: 2.9
@@ -289,13 +289,13 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
     (L63, L75, L87 and the StudioRunsPage mentions at L13, L103, L145) and add a dated entry: "surfaces
     deleted (StudioRunsPage, increment 2); no surface added".
 
-- [ ] **2.13** Delete the Studio Runs page (the cross-test runs list, D3), its barrel and its test
+- [x] **2.13** Delete the Studio Runs page (the cross-test runs list, D3), its barrel and its test
   - Service: frontend. Covers: FR-27, AC-26, D3.
   - Files: `frontend/src/pages/StudioRunsPage/StudioRunsPage.tsx`, `frontend/src/pages/StudioRunsPage/index.ts`, `frontend/src/pages/StudioRunsPage/StudioRunsPage.test.tsx`
   - Depends on: 2.9, 2.12
   - Verify (from `frontend/`): `pnpm run type-check && ! grep -rn "StudioRunsPage" src`
 
-- [ ] **2.14** Remove the sidebar Runs child, its page-id mapping and ChecksLayout's runs clause
+- [x] **2.14** Remove the sidebar Runs child, its page-id mapping and ChecksLayout's runs clause
   - Service: frontend. Covers: FR-27, AC-26.
   - Files: `frontend/src/utils/navigation/navigationSetup.ts`, `frontend/src/utils/navigation/navigationSetup.test.ts`, `frontend/src/components/layout/ChecksLayout/ChecksLayout.tsx`
   - Depends on: 2.13
@@ -303,7 +303,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
   - Plan notes:
     navigationSetup L30 and L73; ChecksLayout L87.
 
-- [ ] **2.15** Remove the remaining Runs-page route references (runLinks builders and their tests, LayoutProvider's runs prefix)
+- [x] **2.15** Remove the remaining Runs-page route references (runLinks builders and their tests, LayoutProvider's runs prefix)
   - Service: frontend. Covers: FR-27.
   - Files: `frontend/src/components/studio/runs/runLinks.ts`, `frontend/src/components/studio/runs/runSnapshots.test.ts`, `frontend/src/components/layout/LayoutProvider/LayoutProvider.tsx`
   - Depends on: 2.13
@@ -313,7 +313,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
     assertions. copyText stays in runLinks.ts. In LayoutProvider, L70 keeps only the
     '/checks/studio/tests' prefix set in 1.22.
 
-- [ ] **2.16** Make RunRow the single-test form (short id link, no 'Open test') now that the Runs tab is its only consumer
+- [x] **2.16** Make RunRow the single-test form (short id link, no 'Open test') now that the Runs tab is its only consumer
   - Service: frontend. Covers: FR-11, DC-17, AC-12.
   - Files: `frontend/src/components/studio/runs/RunRow.tsx`, `frontend/src/components/studio/runs/RunRowMenu.tsx`, `frontend/src/components/studio/scheduling/scheduleProvenance.test.tsx`
   - Depends on: 2.13
@@ -324,7 +324,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
     single-test form, and its href literals change from /studio/runs/... to uiTestRunPath values,
     because the 2.18 scan rejects /studio/runs.
 
-- [ ] **2.17** Add detail-page and Runs-tab component tests (header actions, Overview, gating, errors, test binding, learn vs replay)
+- [x] **2.17** Add detail-page and Runs-tab component tests (header actions, Overview, gating, errors, test binding, learn vs replay)
   - Service: frontend. Covers: AC-10, AC-11, AC-12, AC-13, AC-14, AC-23, AC-24, AC-25.
   - Files: `frontend/src/pages/UiTestDetailsPage/UiTestDetailsPage.test.tsx`, `frontend/src/pages/UiTestDetailsPage/UiTestRunsTab.test.tsx`
   - Depends on: 2.6, 2.7, 2.8, 2.9, 2.16
@@ -342,7 +342,7 @@ The 18 tasks below map 1:1 to plan subtasks 2.1–2.18 (`plan/implementation.yam
     - LEARNING: no row, and the chip reads "Learning".
     - A live replay reaches its terminal state.
 
-- [ ] **2.18** Run the phase-2 gate (type-check, lint, WCAG guard, touched suites, removed-route scan for studio/runs)
+- [x] **2.18** Run the phase-2 gate (type-check, lint, WCAG guard, touched suites, removed-route scan for studio/runs)
   - Service: infra. Covers: FR-27, FR-28, NFR-09, AC-09, AC-26, AC-27.
   - Files: `docs/qa/accessibility/axe-results.json`
   - Depends on: 2.11, 2.12, 2.14, 2.15, 2.16, 2.17
@@ -495,6 +495,9 @@ CON-01 frontend-only. CON-03 one path, no redirects, aliases or fallbacks. CON-0
 |---|---|---|---|
 | 2026-10-23 | 0.1.0 | Draft created from the approved spec (Spec Pipeline critique round 4: APPROVED, 4.38), requirements.json and plan revision 4, phase-2. ClickUp sync not performed (F1). | River (@sm) |
 | 2026-10-23 | 0.1.1 | Validated GO (9/10) — Status: Draft → Ready. Tasks match plan revision 4 phase-2 1:1; F3 (AC-23 detail-route clause) placement confirmed. Starts only after story .1 is Done. | Pax (@po) |
+| 2026-10-23 | 0.2.0 | Status: Ready → InProgress (story .1 Done). Executed as Lean work item STUDIO-UNIFY-001.2. AC-27 and task 2.12 removed; WCAG parts of 2.18 dropped (user decision "We dont need WCAG, ignore/remove all accessibility tasks"). | Claude Code (@dev role) |
+| 2026-10-23 | 0.3.0 | Status: InProgress → InReview. Tasks 2.1–2.18 done (2.12 removed); File List and Dev Agent Record filled; handed to the independent Lean review. | Claude Code (@dev role) |
+| 2026-10-23 | 1.0.0 | Independent Lean review PASS (12/12 criteria, 3 non-blocking findings); Lean acceptance recorded. Status: InReview → Done. | aiox-qa verdict, recorded by Claude Code coordinator |
 
 ## PO Validation (2026-10-23)
 
@@ -520,20 +523,36 @@ CON-01 frontend-only. CON-03 one path, no redirects, aliases or fallbacks. CON-0
 
 ### Agent Model Used
 
-_Populated by @dev during implementation._
+Coordinator and Lean builder: Claude Code main session (Opus 5.5, session 651237b1-faeb-45bb-9d2b-d4fa4eb9a3e7). Contributors: aiox-dev subagents on Sonnet 5.5, effort high, run in parallel waves with one writer per file set: shared pieces (2.1a, 2.2); runs data and drawer (2.3, 2.4, 2.11); detail shell (2.5); header (2.6); Overview (2.7); Runs tab (2.8); routes (2.9); editor retarget (2.1b, 2.10); Runs page deletion (2.13); sidebar (2.14); link cleanup (2.15); RunRow (2.16); detail-page tests and Runs-tab tests (2.17). Wave plan pre-computed by a read-only aiox-analyst. Run under AIOX Lean Delivery (work item STUDIO-UNIFY-001.2).
 
 ### Debug Log References
 
-_Populated by @dev during implementation._
+~/.aiox-lean/put-checks-ui-studio/STUDIO-UNIFY-001.2/ (binding, contract, logs); ~/.aiox-lean/put-checks-ui-studio/WAVES.md; PREPLAN-STUDIO-UNIFY-001.2-3.md.
 
 ### Completion Notes
 
-_Populated by @dev during implementation._
+- User decision "We dont need WCAG, ignore/remove all accessibility tasks": AC-27 and task 2.12 removed; WCAG parts of 2.18 dropped; `docs/qa/accessibility/` untouched.
+- Shared `StudioUnavailable` module also exports `TEST_NOT_AVAILABLE_MESSAGE` and `isUnavailableTestRead` (pre-plan D-2); `ChecksStudioPage` keeps one re-export of the message because `pageLoadById.test.tsx` imports it from the page.
+- Detail page: nested layout route `ui-tests/:id` (index Overview; `runs`, `runs/:executionId` Runs tab) behind FeatureGate STUDIO in both trees; with STUDIO off, FeatureGate's own panel shows on the real route.
+- Header: Delete sits in a "More actions" menu; closing the schedule dialog re-reads the test once; CSI name from the CSI store, id fallback.
+- Runs tab: replays only with the note "Runs lists replays of this test. Learning happens in Studio."; `RunRow` link text is `#shortId`; "Open test" removed.
+- X-1: `ChecksLayout.a11y.test.tsx` mobile-nav test now clicks the Studio "Tests" child (the Runs child is gone); no assertion added.
+- `runLinks.ts` keeps only `copyText` (still used by the Runs tab).
+- AC-25 first clause (editor live subscription closed on navigation) relies on the editor's existing unmount cleanup; not asserted in the new tests.
+- CodeRabbit not run (unavailable on host). Pre-existing out-of-scope failure `realStudioStartup.test.ts` not in the bound suites.
 
 ### File List
 
-_Empty until implementation. @dev lists only files this story creates, modifies or deletes._
+Created: `frontend/src/components/studio/StudioUnavailable.tsx`, `StudioUnavailable.test.tsx`; `frontend/src/components/studio/tests/uiTestStatus.ts`, `uiTestStatus.test.ts`; `frontend/src/components/studio/runs/RunDetailsDrawer.test.tsx`, `useStudioRuns.test.tsx`; `frontend/src/pages/UiTestDetailsPage/` (`UiTestDetailsPage.tsx`, `useUiTestDetail.ts`, `UiTestDetailHeader.tsx`, `UiTestOverviewTab.tsx`, `UiTestRunsTab.tsx`, `index.ts`, `UiTestDetailsPage.test.tsx`, `UiTestRunsTab.test.tsx`).
+
+Modified: `frontend/src/App.tsx`, `App.routes.test.tsx`; `frontend/src/components/layout/ChecksLayout/ChecksLayout.tsx`, `ChecksLayout.a11y.test.tsx`; `frontend/src/components/layout/LayoutProvider/LayoutProvider.tsx`; `frontend/src/components/studio/runs/RunDetailsDrawer.tsx`, `RunRow.tsx`, `RunRowMenu.tsx`, `runLinks.ts`, `runSnapshots.test.ts`, `useStudioRuns.ts`; `frontend/src/components/studio/scheduling/StudioScheduleDialog.test.tsx`, `scheduleProvenance.test.tsx`; `frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx`, `pageFraming.test.tsx`; `frontend/src/pages/StudioTestsPage/StudioTestsPage.tsx`; `frontend/src/utils/navigation/navigationSetup.ts`, `navigationSetup.test.ts`; this story file.
+
+Deleted: `frontend/src/pages/StudioRunsPage/` (`StudioRunsPage.tsx`, `StudioRunsPage.test.tsx`, `index.ts`).
 
 ## QA Results
 
-_Populated by @qa._
+**Verdict: PASS** (independent AIOX Lean review, 2026-10-23). Reviewer: aiox-qa subagent (Sonnet 5.5, effort high; execution 651237b1:a2cef8ca8280a8e22), fresh context, read-only, independent of all authors. Candidate `8f59d4ab7493426d28c59d9ca9c197ed809f8749dc2cd3453ff3027af3bd4e31`; Lean acceptance recorded (engineering acceptance only). Payload: `~/.aiox-lean/put-checks-ui-studio/STUDIO-UNIFY-001.2/review-1.json`.
+
+- All 12 criteria PASS: AC-08, AC-09, AC-10, AC-11, AC-12, AC-13, AC-14, AC-23, AC-24, AC-25, AC-26, DOD (AC-27 removed by user decision).
+- Bound checks on the same candidate: type-check; lint 0 errors; Vitest `src/pages` 314/314, `src/components/studio` + `src/components/layout` 757/757, routes + navigation 36/36; route scan S2 exit 0. Reviewer re-ran 95 tests and S2.
+- Non-blocking findings: (1) stale "SLOTS 2.7 and 2.8" scaffolding comment in `UiTestDetailsPage.tsx` L98 (and the matching note in `useUiTestDetail.ts`); (2) the Tests-page schedule host's ui-tests run link has no test (page is removed in .3), and the sidebar "no Runs child" is only implied by tests; (3) AC-25's editor-subscription-close clause rests on the editor's unmount cleanup and the transport test's unmount cycles rather than a Runs-tab navigation assertion. With STUDIO off the real routes show FeatureGate's panel (same pattern as the editor route), judged acceptable for AC-23.

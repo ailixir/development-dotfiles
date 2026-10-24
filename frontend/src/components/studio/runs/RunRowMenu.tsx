@@ -1,18 +1,16 @@
 import { useState, type MouseEvent } from 'react';
 import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
-import { Link as LinkIcon, MoreVert, OpenInNew, PlayCircleOutline } from '@mui/icons-material';
+import { Link as LinkIcon, MoreVert, PlayCircleOutline } from '@mui/icons-material';
 
 export interface RunRowMenuProps {
-  /** Shown in the button name, e.g. the test name. */
+  /** Shown in the button name, e.g. the run's short id. */
   label: string;
   onOpenRun: () => void;
-  /** Omitted when the test was deleted. */
-  onOpenTest?: () => void;
   onCopyLink: () => void;
 }
 
-/** The row's secondary actions: Open run, Open test, Copy link. */
-export function RunRowMenu({ label, onOpenRun, onOpenTest, onCopyLink }: RunRowMenuProps) {
+/** The row's secondary actions: Open run, Copy link. */
+export function RunRowMenu({ label, onOpenRun, onCopyLink }: RunRowMenuProps) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const close = () => setAnchor(null);
   const run = (action: () => void) => () => {
@@ -45,12 +43,6 @@ export function RunRowMenu({ label, onOpenRun, onOpenTest, onCopyLink }: RunRowM
           <ListItemIcon><PlayCircleOutline fontSize="small" /></ListItemIcon>
           <ListItemText>Open run</ListItemText>
         </MenuItem>
-        {onOpenTest && (
-          <MenuItem onClick={run(onOpenTest)}>
-            <ListItemIcon><OpenInNew fontSize="small" /></ListItemIcon>
-            <ListItemText>Open test</ListItemText>
-          </MenuItem>
-        )}
         <MenuItem onClick={run(onCopyLink)}>
           <ListItemIcon><LinkIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Copy link</ListItemText>

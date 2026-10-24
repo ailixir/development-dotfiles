@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { mockExecutions } from '@/services/mocks/studio/fixtures';
 import { RunRow } from '@/components/studio/runs/RunRow';
 import { RunDetailsDrawer } from '@/components/studio/runs/RunDetailsDrawer';
-import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
+import { uiTestEditorPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
 import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
 import { occurrenceLabel } from './schedulePresentation';
 import type { ScheduleOccurrence } from '@/types/studio/studioScheduling';
@@ -18,11 +18,11 @@ const scheduled: ExecutionSnapshot = { ...known, triggerSource: 'SCHEDULED', sch
 describe('Scheduling evidence presentation', () => {
   it('rows distinguish explicit scheduled source from unknown legacy source', () => {
     render(<MemoryRouter><Table><TableBody>
-      <RunRow run={scheduled} href="/studio/runs/one" onOpenRun={() => undefined} onCopyLink={() => undefined} />
-      <RunRow run={{ ...known, executionId: 'legacy', triggerSource: undefined }} href="/studio/runs/legacy" onOpenRun={() => undefined} onCopyLink={() => undefined} />
+      <RunRow run={scheduled} href={uiTestRunPath(known.testId, 'one')} onOpenRun={() => undefined} onCopyLink={() => undefined} />
+      <RunRow run={{ ...known, executionId: 'legacy', triggerSource: undefined }} href={uiTestRunPath(known.testId, 'legacy')} onOpenRun={() => undefined} onCopyLink={() => undefined} />
     </TableBody></Table></MemoryRouter>);
-    expect(screen.getByText(/· Scheduled/)).toBeInTheDocument();
-    expect(screen.getByText(/· Unknown origin/)).toBeInTheDocument();
+    expect(screen.getByText('Scheduled')).toBeInTheDocument();
+    expect(screen.getByText('Unknown origin')).toBeInTheDocument();
   });
   it('run details retain the actual activation actor and accepted revision', () => {
     render(<MemoryRouter><RunDetailsDrawer executionId={scheduled.executionId} pageRuns={[scheduled]} onClose={() => undefined}

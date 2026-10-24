@@ -14,7 +14,7 @@ import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
 import type { ScheduleOccurrence } from '@/types/studio/studioScheduling';
 import type { TestDto } from '@/types/studio/studioTypes';
 import { renderStudioAt } from '@/test/renderStudioAt';
-import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
+import { uiTestEditorPath, uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
 import checksSlice from '@/store/slices/checksSlice';
 import csiSlice from '@/store/slices/csiSlice';
 import studioSlice from '@/store/slices/studioSlice';
@@ -229,13 +229,13 @@ describe('AC-08: the breadcrumb, the read-only CSI and the leave guard', () => {
     expect(screen.queryByRole('textbox', { name: /CSI|System/ })).toBeNull();
   }, TEST_TIMEOUT_MS);
 
-  it('the in-page back goes to /checks/studio/tests when nothing is unsaved', async () => {
+  it('the in-page back goes to the test\'s detail page when nothing is unsaved', async () => {
     serve();
     const view = renderStudioAt(draft.id, <ChecksStudioPage />, { wrapper: providerFor(settledStore()) });
 
     await screen.findByRole('heading', { level: 1, name: draft.name }, WAIT);
     await user().click(screen.getByRole('button', { name: 'UI Tests' }));
-    expect(view.getLocation().pathname).toBe('/checks/studio/tests');
+    expect(view.getLocation().pathname).toBe(uiTestPath(draft.id));
   }, TEST_TIMEOUT_MS);
 
   it('with unsaved edits the in-page back opens the leave dialog first, and Discard then leaves', async () => {
@@ -252,7 +252,7 @@ describe('AC-08: the breadcrumb, the read-only CSI and the leave guard', () => {
     expect(view.getLocation().pathname).toBe(uiTestEditorPath(draft.id));
 
     await u.click(within(dialog).getByRole('button', { name: 'Discard changes' }));
-    expect(view.getLocation().pathname).toBe('/checks/studio/tests');
+    expect(view.getLocation().pathname).toBe(uiTestPath(draft.id));
   }, TEST_TIMEOUT_MS);
 
   it('with unsaved edits the All Checks crumb asks first too, and Keep editing stays', async () => {
@@ -320,8 +320,8 @@ describe('AC-01 (editor part): the environment select offers UAT', () => {
   }, TEST_TIMEOUT_MS);
 });
 
-describe('AC-09 (editor part): the schedule dialog opened from the editor links to the Runs page run', () => {
-  it('"View run" resolves to /checks/studio/runs/{executionId}', async () => {
+describe('AC-09 (editor part): the schedule dialog opened from the editor links to the ui-tests run', () => {
+  it('"View run" resolves to the ui-tests run path', async () => {
     serve(readyDraft);
     const schedule = await studioSchedulesApi.create(readyDraft.id, {
       cronExpression: '0 */5 * * * *',
@@ -343,6 +343,6 @@ describe('AC-09 (editor part): the schedule dialog opened from the editor links 
     await screen.findByRole('heading', { level: 1, name: readyDraft.name }, WAIT);
     await user().click(await screen.findByRole('button', { name: 'Manage schedule' }, WAIT));
     const table = await screen.findByRole('table', { name: 'Schedule occurrences' }, WAIT);
-    expect(within(table).getByRole('link', { name: 'View run' })).toHaveAttribute('href', '/checks/studio/runs/real-run');
+    expect(within(table).getByRole('link', { name: 'View run' })).toHaveAttribute('href', uiTestRunPath(readyDraft.id, 'real-run'));
   }, TEST_TIMEOUT_MS);
 });

@@ -17,14 +17,15 @@ import TestRow from '@/components/studio/tests/TestRow';
 import type { ExecutionSnapshot, TestDto } from '@/types/studio/studioTypes';
 import { StudioScheduleSummary } from './StudioScheduleSummary';
 import { StudioScheduleDialog } from './StudioScheduleDialog';
+import { uiTestRunPath } from '@/components/studio/uiTestPaths';
 import { scheduleError } from './schedulePresentation';
 
 const BASE = '*/api/v1/studio';
 const write = { cronExpression: '0 */5 * * * *', timeZone: 'UTC', executionPrincipal: 'studio-local' };
 const create = () => studioSchedulesApi.create(readyDraft.id, write);
 const user = () => userEvent.setup({ delay: null });
-const runsPageHref = (executionId: string) => `/checks/studio/runs/${executionId}`;
-const renderDialog = (dirty = false, runHref = runsPageHref) => render(<MemoryRouter initialEntries={['/checks/studio/tests']}><StudioScheduleDialog test={readyDraft} dirty={dirty} runHref={runHref} onClose={() => undefined} /></MemoryRouter>);
+const uiTestRunHref = (executionId: string) => uiTestRunPath(readyDraft.id, executionId);
+const renderDialog = (dirty = false, runHref = uiTestRunHref) => render(<MemoryRouter initialEntries={['/checks/studio/tests']}><StudioScheduleDialog test={readyDraft} dirty={dirty} runHref={runHref} onClose={() => undefined} /></MemoryRouter>);
 const loaded = async () => {
   await screen.findByLabelText('Cron expression');
   await waitFor(() => expect(screen.queryByText('Calculating next runs…')).not.toBeInTheDocument());
@@ -51,7 +52,7 @@ describe('Studio schedule operator flows', { timeout: 15000 }, () => {
     function RowFlow() {
       const [target, setTarget] = useState<TestDto | null>(null);
       return <><Table><TableBody><TestRow test={readyDraft} now={Date.now()} onDelete={() => undefined} onSchedule={setTarget} /></TableBody></Table>
-        <StudioScheduleDialog test={target} runHref={runsPageHref} onClose={() => setTarget(null)} /></>;
+        <StudioScheduleDialog test={target} runHref={uiTestRunHref} onClose={() => setTarget(null)} /></>;
     }
     render(<MemoryRouter initialEntries={['/checks/studio/tests']}><RowFlow /></MemoryRouter>);
     const actions = screen.getByRole('button', { name: `Actions for ${readyDraft.name}` });
@@ -142,7 +143,7 @@ describe('Studio schedule operator flows', { timeout: 15000 }, () => {
     await create(); renderDialog(); await loaded();
     const resume = screen.getByRole('button', { name: 'Resume schedule' });
     expect(resume).toBeDisabled();
-    expect(screen.getByRole('link', { name: 'Inspect run uncertain-start' })).toHaveAttribute('href', '/checks/studio/runs/uncertain-start');
+    expect(screen.getByRole('link', { name: 'Inspect run uncertain-start' })).toHaveAttribute('href', uiTestRunPath(readyDraft.id, 'uncertain-start'));
     await user().click(screen.getByRole('checkbox', { name: /I investigated these uncertain runs/ }));
     await user().click(resume);
     await screen.findByText('Schedule: Active');
@@ -243,7 +244,7 @@ describe('Studio schedule operator flows', { timeout: 15000 }, () => {
     renderDialog(); await loaded();
     const table = screen.getByRole('table', { name: 'Schedule occurrences' });
     expect(within(table).getAllByRole('row')).toHaveLength(11);
-    expect(within(table).getByRole('link', { name: 'View run' })).toHaveAttribute('href', '/checks/studio/runs/real-run');
+    expect(within(table).getByRole('link', { name: 'View run' })).toHaveAttribute('href', uiTestRunPath(readyDraft.id, 'real-run'));
     expect(within(table).getAllByText('No browser run accepted')).toHaveLength(9);
     await user().click(screen.getByRole('button', { name: 'Go to next page' }));
     await waitFor(() => expect(within(table).getAllByRole('row')).toHaveLength(2));

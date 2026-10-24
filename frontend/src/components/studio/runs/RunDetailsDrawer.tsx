@@ -57,6 +57,12 @@ export interface RunDetailsDrawerProps {
   testHref: (testId: string) => string;
   /** Live snapshots flow back to the list row. */
   onSnapshot?: (snapshot: ExecutionSnapshot) => void;
+  /**
+   * The test the drawer is bound to. A list row, a read of the run or a live snapshot that belongs to
+   * another test switches the drawer to its not-found state and nothing of that run is rendered.
+   * Absent: no binding.
+   */
+  expectedTestId?: string;
 }
 
 type LoadState = 'idle' | 'loading' | 'not-found' | 'error';
@@ -155,6 +161,7 @@ function RunDetailsContent({
   onCopyLink,
   testHref,
   onSnapshot,
+  expectedTestId,
 }: RunDetailsContentProps) {
   const listRun = pageRuns.find((run) => run.executionId === executionId) ?? null;
   const [fetched, setFetched] = useState<ExecutionSnapshot | null>(null);
@@ -165,7 +172,12 @@ function RunDetailsContent({
   const [phase, setPhase] = useState<TransportPhase | null>(null);
   const { videoRef, seekToOffset } = useVideoSeek();
 
-  const snapshot = newerSnapshot(newerSnapshot(listRun, fetched), live);
+  // Checked on every source (first paint from the list row, the read, each live snapshot) before
+  // anything of the run renders.
+  const belongsElsewhere = (candidate: ExecutionSnapshot | null) =>
+    expectedTestId !== undefined && candidate !== null && candidate.testId !== expectedTestId;
+  const foreign = belongsElsewhere(listRun) || belongsElsewhere(fetched) || belongsElsewhere(live);
+  const snapshot = foreign ? null : newerSnapshot(newerSnapshot(listRun, fetched), live);
   const hasListRun = listRun !== null;
 
   // Off-page (deep link, other page, filtered out): read the run itself.
@@ -201,16 +213,17 @@ function RunDetailsContent({
 
   const onSnapshotRef = useCallbackRef(onSnapshot);
   useEffect(() => {
-    if (!follow) return undefined;
+    if (!follow || foreign) return undefined;
     const subscription = subscribeToExecution(executionId, {
       onSnapshot: (next) => {
         setLive((current) => newerSnapshot(current, next));
-        onSnapshotRef(next);
+        // A snapshot of another test never reaches the list.
+        if (expectedTestId === undefined || next.testId === expectedTestId) onSnapshotRef(next);
       },
       onStatus: (status) => setPhase(status.phase),
     });
     return () => subscription.close();
-  }, [executionId, follow, onSnapshotRef]);
+  }, [executionId, follow, foreign, expectedTestId, onSnapshotRef]);
 
   const index = pageRuns.findIndex((run) => run.executionId === executionId);
   const previous = index > 0 ? pageRuns[index - 1] : null;
@@ -221,7 +234,8 @@ function RunDetailsContent({
   const queueWait = snapshot ? runQueueWaitMs(snapshot) : null;
   const showLive = follow && phase !== null && phase !== 'closed';
   // A run that could not be loaded has nothing coming: no header placeholders then.
-  const loadFailed = !snapshot && (loadState === 'not-found' || loadState === 'error');
+  const notFound = foreign || loadState === 'not-found';
+  const loadFailed = !snapshot && (notFound || loadState === 'error');
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }} data-testid="run-details" data-execution-id={executionId}>
@@ -325,13 +339,13 @@ function RunDetailsContent({
       </Box>
 
       <Stack spacing={2.5} sx={{ px: { xs: 2, sm: 3 }, py: 2.5, flex: 1 }}>
-        {!snapshot && loadState === 'not-found' && (
+        {!snapshot && notFound && (
           <Alert severity="warning" data-testid="run-details-not-found" action={<Button color="inherit" size="small" onClick={onClose}>Back to runs</Button>}>
             <AlertTitle>Run not found</AlertTitle>
             {RUN_NOT_FOUND_MESSAGE}
           </Alert>
         )}
-        {!snapshot && loadState === 'error' && (
+        {!snapshot && !notFound && loadState === 'error' && (
           <Alert
             severity="error"
             data-testid="run-details-error"
@@ -340,7 +354,7 @@ function RunDetailsContent({
             {RUN_LOAD_ERROR_MESSAGE}
           </Alert>
         )}
-        {!snapshot && (loadState === 'loading' || loadState === 'idle') && (
+        {!snapshot && !notFound && (loadState === 'loading' || loadState === 'idle') && (
           <Stack spacing={1.5} data-testid="run-details-loading">
             <Skeleton variant="rounded" height={56} />
             {Array.from({ length: 4 }, (_, row) => <Skeleton key={row} variant="text" width={`${85 - row * 10}%`} />)}

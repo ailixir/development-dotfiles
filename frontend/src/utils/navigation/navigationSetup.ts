@@ -27,7 +27,6 @@ export const registerChecksNavigation = () => {
             description: 'UI testing studio',
             children: [
               { id: 'studio-tests', label: 'Tests', path: '/checks/studio/tests', icon: 'science' },
-              { id: 'studio-runs', label: 'Runs', path: '/checks/studio/runs', icon: 'movie' },
             ],
           },
         ]
@@ -71,7 +70,6 @@ export const getCurrentPageId = (pathname: string): string => {
   if (pathname.startsWith('/checks/create') || pathname.startsWith('/checks/prototype')) return 'checks';
   // templates removed
   // Studio sub-nav
-  if (pathname.startsWith('/checks/studio/runs')) return 'studio-runs';
   if (pathname.startsWith('/checks/studio/tests')) return 'studio-tests';
   // Reports parent should highlight when in reports area
   if (pathname.startsWith('/checks/reports/new')) return 'reports';

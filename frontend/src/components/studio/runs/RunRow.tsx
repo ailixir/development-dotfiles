@@ -6,7 +6,7 @@ import { formatAbsoluteTime, formatDuration, formatRelativeTime, toIsoDateTime }
 import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
 import { RunStatusChip } from './RunStatusChip';
 import { RunRowMenu } from './RunRowMenu';
-import { runDurationText, runQueueWaitMs, runTestLabel, shortRunId } from './runPresentation';
+import { runDurationText, runQueueWaitMs, shortRunId } from './runPresentation';
 
 export interface RunRowProps {
   run: ExecutionSnapshot;
@@ -16,8 +16,6 @@ export interface RunRowProps {
   href: string;
   selected?: boolean;
   onOpenRun: () => void;
-  /** Omit when the test was deleted. */
-  onOpenTest?: () => void;
   onCopyLink: () => void;
 }
 
@@ -27,9 +25,9 @@ function isFromControl(event: MouseEvent<HTMLElement>): boolean {
   return target?.closest('a, button, [role="menuitem"], [role="menu"]') != null;
 }
 
-/** One run in the history table. The test name is the row's single link (AC-5). */
-export function RunRow({ run, csiName, href, selected = false, onOpenRun, onOpenTest, onCopyLink }: RunRowProps) {
-  const name = runTestLabel(run);
+/** One replay of a single UI test. The run's short id is the row's single link; the trigger sits below it. */
+export function RunRow({ run, csiName, href, selected = false, onOpenRun, onCopyLink }: RunRowProps) {
+  const runLabel = `#${shortRunId(run.executionId)}`;
   const queueWait = runQueueWaitMs(run);
 
   return (
@@ -51,22 +49,15 @@ export function RunRow({ run, csiName, href, selected = false, onOpenRun, onOpen
           sx={{
             color: 'primary.main',
             fontWeight: 600,
+            fontFamily: 'monospace',
             textDecoration: 'none',
-            overflowWrap: 'anywhere',
             '&:hover': { textDecoration: 'underline' },
-            ...(name.deleted ? { color: 'text.secondary', fontStyle: 'italic', fontWeight: 500 } : {}),
           }}
         >
-          {name.text}
+          {runLabel}
         </Typography>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          component="div"
-          sx={{ fontFamily: 'monospace', letterSpacing: 0.2 }}
-        >
-          #{shortRunId(run.executionId)}
-          {' · '}{run.triggerSource === 'SCHEDULED' ? 'Scheduled' : run.triggerSource === 'MANUAL' ? 'Manual' : 'Unknown origin'}
+        <Typography variant="caption" color="text.secondary" component="div">
+          {run.triggerSource === 'SCHEDULED' ? 'Scheduled' : run.triggerSource === 'MANUAL' ? 'Manual' : 'Unknown origin'}
         </Typography>
       </TableCell>
       <TableCell sx={{ whiteSpace: 'nowrap', width: 140 }}>
@@ -99,7 +90,7 @@ export function RunRow({ run, csiName, href, selected = false, onOpenRun, onOpen
         )}
       </TableCell>
       <TableCell align="right" sx={{ width: 56 }}>
-        <RunRowMenu label={name.text} onOpenRun={onOpenRun} onOpenTest={onOpenTest} onCopyLink={onCopyLink} />
+        <RunRowMenu label={`run ${runLabel}`} onOpenRun={onOpenRun} onCopyLink={onCopyLink} />
       </TableCell>
     </TableRow>
   );
