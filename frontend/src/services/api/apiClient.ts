@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { APP_CONFIG } from '@utils/constants/appConfig';
 
 declare module 'axios' {
@@ -11,6 +11,21 @@ declare module 'axios' {
     /** Skip the GET retry below: the caller wants the first answer. */
     __doNotRetry?: boolean;
   }
+}
+
+/**
+ * Normalize error message shape. Preserves the response for callers who need it. For a redacted
+ * request the response keeps no `config.data`, which is the serialized request body.
+ */
+function normalizeError(error: AxiosError<{ error?: string; message?: string }>): Error & { response?: AxiosResponse } {
+  const normalized: Error & { response?: AxiosResponse } = new Error(
+    error.response?.data?.error || error.response?.data?.message || error.message || 'Request failed'
+  );
+  normalized.response =
+    error.config?.redactBody && error.response
+      ? { ...error.response, config: { ...error.response.config, data: undefined } }
+      : error.response;
+  return normalized;
 }
 
 class ApiClient {
@@ -69,6 +84,13 @@ class ApiClient {
         return response;
       },
       async (error) => {
+        // A cancelled request (axios cancel, or an aborted AbortController signal) is the caller's
+        // own decision, not a failure: it has no response, so it must not be logged as an API error
+        // and the GET retry below must not re-send it. It still rejects with the normalized shape.
+        if (axios.isCancel(error) || error?.code === 'ERR_CANCELED') {
+          return Promise.reject(normalizeError(error));
+        }
+
         // Log errors
         console.error('API Error:', {
           url: error.config?.url,
@@ -108,17 +130,7 @@ class ApiClient {
           }
         }
 
-        // Normalize error message shape
-        const normalized = new Error(
-          error.response?.data?.error || error.response?.data?.message || error.message || 'Request failed'
-        );
-        // Preserve response for callers who need it. For a redacted request the response keeps no
-        // `config.data`, which is the serialized request body.
-        (normalized as any).response =
-          error.config?.redactBody && error.response
-            ? { ...error.response, config: { ...error.response.config, data: undefined } }
-            : error.response;
-        return Promise.reject(normalized);
+        return Promise.reject(normalizeError(error));
       }
     );
   }

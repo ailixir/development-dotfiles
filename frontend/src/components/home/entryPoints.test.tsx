@@ -72,34 +72,34 @@ function renderWith(availability: Availability, ui: React.ReactElement) {
 
 afterEach(cleanup);
 
-describe('command palette Studio entry', () => {
+describe('command palette UI tests entry', () => {
   const palette = () => <CommandPalette open onClose={() => undefined} />;
 
   it("opens /checks/all?type=UI_TEST when availability is 'on'", async () => {
     renderWith('on', palette());
-    await userEvent.click(screen.getByText('Studio'));
+    await userEvent.click(screen.getByText('UI tests'));
     expect(screen.getByTestId('location')).toHaveTextContent('/checks/all?type=UI_TEST');
   });
 
   it.each<Availability>(['pending', 'off'])("is absent when availability is '%s'", (availability) => {
     renderWith(availability, palette());
-    expect(screen.queryByText('Studio')).not.toBeInTheDocument();
+    expect(screen.queryByText('UI tests')).not.toBeInTheDocument();
     expect(screen.getByText('All Checks')).toBeInTheDocument();
   });
 
   it("appears once a 'pending' availability resolves to 'on'", () => {
     const store = renderWith('pending', palette());
-    expect(screen.queryByText('Studio')).not.toBeInTheDocument();
+    expect(screen.queryByText('UI tests')).not.toBeInTheDocument();
     act(() => {
       store.dispatch(fetchSources.fulfilled([source('UI_TEST', true)], ''));
       store.dispatch(fetchFeatures.fulfilled({ sources: [], features: [feature('STUDIO', true)] }, ''));
     });
-    expect(screen.getByText('Studio')).toBeInTheDocument();
+    expect(screen.getByText('UI tests')).toBeInTheDocument();
   });
 });
 
-describe('dashboard Open Checks Studio quick action', () => {
-  const name = /open checks studio/i;
+describe('dashboard Open UI tests quick action', () => {
+  const name = /open ui tests/i;
 
   it("opens /checks/all?type=UI_TEST when availability is 'on'", async () => {
     renderWith('on', <DashboardPage />);

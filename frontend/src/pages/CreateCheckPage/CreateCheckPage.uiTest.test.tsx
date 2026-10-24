@@ -636,3 +636,74 @@ describe('Create Check: no Studio test picker on any type (AC-05)', { timeout: 3
     expect(screen.queryByText(/studio test/i)).toBeNull();
   });
 });
+
+// jsdom does not evaluate the `sm` media query, so these tests assert the structure and the toggle state
+// (`data-open`); the 390 px layout assertion is the Playwright pixel check (STUDIO-UNIFY-001.5, task 5.14).
+describe('Create Check -> UI Test: collapsed type cards below sm (AC-12)', { timeout: 20_000 }, () => {
+  const typeCards = () => screen.getByTestId('create-type-cards');
+
+  it('shows a "Type: UI Test" summary with a "Change type" button, and starts collapsed', async () => {
+    await openUiTestForm();
+    await waitForCsis();
+
+    expect(screen.getByText('Type: UI Test')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Change type' })).toBeInTheDocument();
+    expect(typeCards()).toHaveAttribute('data-open', 'false');
+  });
+
+  it('keeps the card grid in the DOM while collapsed, so queries still find it', async () => {
+    renderPage({ url: '/checks/create?type=UI_TEST' });
+    await screen.findByRole('button', { name: 'Create and open Studio' }, WAIT);
+
+    expect(within(typeCards()).getByText(UI_TEST_CARD)).toBeInTheDocument();
+    expect(within(typeCards()).getByText('HTTP/HTTPS Check')).toBeInTheDocument();
+    expect(typeCards()).toHaveAttribute('data-open', 'false');
+  });
+
+  it('"Change type" shows the cards, and the button toggles them away again', async () => {
+    await openUiTestForm();
+    await waitForCsis();
+
+    await user.click(screen.getByRole('button', { name: 'Change type' }));
+    expect(typeCards()).toHaveAttribute('data-open', 'true');
+
+    await user.click(screen.getByRole('button', { name: 'Hide types' }));
+    expect(typeCards()).toHaveAttribute('data-open', 'false');
+    expect(screen.getByRole('button', { name: 'Change type' })).toBeInTheDocument();
+  });
+
+  it('choosing another type through the opened cards leaves the UI Test form, as before', async () => {
+    await openUiTestForm();
+    await waitForCsis();
+    await typeName('Checkout journey');
+
+    await user.click(screen.getByRole('button', { name: 'Change type' }));
+    await user.click(within(typeCards()).getByText('HTTP/HTTPS Check'));
+
+    expect(await screen.findByText('Check Configuration')).toBeInTheDocument();
+    expect(screen.queryByTestId('create-type-summary')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Create and open Studio' })).toBeNull();
+    expect(screen.getByRole('textbox', { name: /check name/i })).toHaveValue('Checkout journey');
+  });
+
+  it('comes back collapsed when UI Test is chosen again after the cards were opened', async () => {
+    await openUiTestForm();
+    await waitForCsis();
+
+    await user.click(screen.getByRole('button', { name: 'Change type' }));
+    await user.click(within(typeCards()).getByText('HTTP/HTTPS Check'));
+    await screen.findByText('Check Configuration');
+
+    await selectUiTestCard();
+    await screen.findByRole('button', { name: 'Create and open Studio' }, WAIT);
+    expect(typeCards()).toHaveAttribute('data-open', 'false');
+  });
+
+  it('shows no summary on the regular four-step form', async () => {
+    renderPage();
+    await user.click(screen.getByText('HTTP/HTTPS Check'));
+
+    expect(screen.queryByTestId('create-type-summary')).toBeNull();
+    expect(screen.queryByTestId('create-type-cards')).toBeNull();
+  });
+});

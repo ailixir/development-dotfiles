@@ -29,7 +29,7 @@ import {
  * `CANCELLED` narrative is shown unchanged, with no user-initiated variant), the `403` refusal and the
  * undeclared-refusal wording (`executeRefusals.ts`; architect P4: "Existing refusal"), and the `READY`
  * chip (`runEnablement.ts`). The guided `RUNTIME_INCOMPATIBLE` start refusal has its own rows
- * (`guidedStartUnavailable`, `reasonShownBelow`): the replay narrative's "Save the test again" is no
+ * (`guidedStartUnavailable`, `startUnavailableCaption`, `referenceLabel`): the replay narrative's "Save the test again" is no
  * remedy for guided learning, and D-11 says it names no cause (W5 UX-01).
  *
  * **Not here, on purpose.**
@@ -60,6 +60,7 @@ export const COPY_SOURCE_FILES = {
   guidedHook: 'frontend/src/components/studio/guided/useGuidedSession.ts',
   w5Ruling: 'docs/qa/evidence/STUDIO-OBS-008/execution-20261017/rulings/w5-unreadable-and-alias.md',
   uxFix067: 'docs/qa/evidence/STUDIO-OBS-009/ux-fix-067/copy.md',
+  storyUnify0015: 'docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/STUDIO-UNIFY-001.5.story.md',
 } as const;
 
 export type CopySourceFile = (typeof COPY_SOURCE_FILES)[keyof typeof COPY_SOURCE_FILES];
@@ -687,15 +688,27 @@ export const GUIDED_COPY = {
     template: 'Studio could not start learning for this test, so nothing was started.',
     basis: 'delegated',
     source: AC3_COPY_BY_UMA,
-    note: "W5 UX-01: guided start refused, or capability unavailable, with RUNTIME_INCOMPATIBLE. Names no cause and no remedy; the code follows. Architect P4 'unavailable/notready copy'. The replay execute narrative is unchanged.",
+    note: "W5 UX-01: guided start refused, or capability unavailable, with RUNTIME_INCOMPATIBLE. Names no cause and no remedy; the reference follows. Architect P4 'unavailable/notready copy'. The replay execute narrative is unchanged.",
     facts: { file: S.story, quote: 'A `RUNTIME_INCOMPATIBLE` start refusal names no cause.' },
   },
-  reasonShownBelow: {
-    template: 'The reason the server gave is shown below exactly as it arrived, so it can be quoted in a ticket.',
-    basis: 'verbatim',
-    source: {
-      file: S.executeRefusals,
-      quote: 'The reason the server gave is shown below exactly as it arrived, so it can be quoted in a ticket.',
+  startUnavailableCaption: {
+    template: 'Nothing was started. Ask your Studio administrator for help and quote the reference shown below.',
+    basis: 'delegated',
+    source: { file: S.storyUnify0015, quote: 'Wording delegated to @ux.' },
+    note: 'STUDIO-UNIFY-001.5 AC-01 / D1 (M1). Shown beside Run (data-testid run-start-unavailable) while a guided-start refusal or an unavailable capability is on screen: Run stays enabled because capabilities are read only after the press, so the caption says what to do next. Names no cause and offers no other remedy (W5 UX-01).',
+    facts: {
+      file: S.storyUnify0015,
+      quote: 'ask your Studio administrator and quote the reference; no cause named',
+    },
+  },
+  referenceLabel: {
+    template: 'Reference:',
+    basis: 'delegated',
+    source: { file: S.storyUnify0015, quote: 'Raw code shown as a "Reference:" line.' },
+    note: 'STUDIO-UNIFY-001.5 AC-01 / D1 (M1). Label of the secondary line that carries the code exactly as it arrived (monospace, selectable), so it can be quoted in a ticket. Replaces the verbatim "reason ... shown below" sentence.',
+    facts: {
+      file: S.storyUnify0015,
+      quote: 'the alert carries the raw code only as a secondary line labelled "Reference"',
     },
   },
 } as const satisfies Readonly<Record<string, GuidedCopy>>;

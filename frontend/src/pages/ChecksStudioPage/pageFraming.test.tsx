@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { act, cleanup, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -206,7 +206,7 @@ describe('AC-23: the editor follows derived availability', () => {
 });
 
 describe('AC-08: the breadcrumb, the read-only CSI and the leave guard', () => {
-  it('shows "All Checks › {name}", with All Checks going to /checks/all', async () => {
+  it('shows "All Checks › {name} › Studio", linking All Checks to /checks/all and the name to the test\'s detail page', async () => {
     serve();
     renderStudioAt(draft.id, <ChecksStudioPage />, { wrapper: providerFor(settledStore()) });
 
@@ -214,8 +214,13 @@ describe('AC-08: the breadcrumb, the read-only CSI and the leave guard', () => {
     const crumbs = screen.getByRole('navigation');
     const link = within(crumbs).getByRole('link', { name: 'All Checks' });
     expect(link).toHaveAttribute('href', '/checks/all');
-    expect(within(crumbs).getByText(draft.name)).toBeInTheDocument();
-    expect(crumbs.textContent).toBe(`All Checks›${draft.name}`);
+    expect(within(crumbs).getByRole('link', { name: draft.name })).toHaveAttribute('href', uiTestPath(draft.id));
+    // "Studio" is the current item: text, not a link.
+    expect(within(crumbs).getByTestId('studio-breadcrumb-current')).toHaveTextContent('Studio');
+    expect(within(crumbs).queryByRole('link', { name: 'Studio' })).toBeNull();
+    expect(crumbs.textContent).toBe(`All Checks›${draft.name}›Studio`);
+    // The separate "UI Tests" button is gone.
+    expect(screen.queryByRole('button', { name: 'UI Tests' })).toBeNull();
   }, TEST_TIMEOUT_MS);
 
   it('shows the CSI as a read-only chip, with no control that edits it', async () => {
@@ -230,23 +235,23 @@ describe('AC-08: the breadcrumb, the read-only CSI and the leave guard', () => {
     expect(screen.queryByRole('textbox', { name: /CSI|System/ })).toBeNull();
   }, TEST_TIMEOUT_MS);
 
-  it('the in-page back goes to the test\'s detail page when nothing is unsaved', async () => {
+  it('the test-name crumb goes to the test\'s detail page when nothing is unsaved', async () => {
     serve();
     const view = renderStudioAt(draft.id, <ChecksStudioPage />, { wrapper: providerFor(settledStore()) });
 
     await screen.findByRole('heading', { level: 1, name: draft.name }, WAIT);
-    await user().click(screen.getByRole('button', { name: 'UI Tests' }));
+    await user().click(within(screen.getByRole('navigation')).getByRole('link', { name: draft.name }));
     expect(view.getLocation().pathname).toBe(uiTestPath(draft.id));
   }, TEST_TIMEOUT_MS);
 
-  it('with unsaved edits the in-page back opens the leave dialog first, and Discard then leaves', async () => {
+  it('with unsaved edits the test-name crumb opens the leave dialog first, and Discard then leaves', async () => {
     serve();
     const view = renderStudioAt(draft.id, <ChecksStudioPage />, { wrapper: providerFor(settledStore()) });
 
     const step = await screen.findByRole('textbox', { name: 'Step 1' }, WAIT);
     const u = user();
     await u.type(step, ' changed');
-    await u.click(screen.getByRole('button', { name: 'UI Tests' }));
+    await u.click(within(screen.getByRole('navigation')).getByRole('link', { name: draft.name }));
 
     const dialog = await screen.findByRole('dialog', {}, WAIT);
     expect(within(dialog).getByText('Save changes before continuing?')).toBeInTheDocument();
@@ -295,16 +300,69 @@ describe('AC-08: the breadcrumb, the read-only CSI and the leave guard', () => {
     expect(dirty.defaultPrevented).toBe(true);
   }, TEST_TIMEOUT_MS);
 
-  it('"Open Tests" (shown when the route test cannot be read) goes to /checks/all?type=UI_TEST', async () => {
+  it.each([403, 400] as const)(
+    'a route test that answers %s shows only the shared not-available state, and its back button goes to /checks/all',
+    async (status) => {
+      serve();
+      studioMockServer.use(
+        http.get(`${STUDIO_BASE}/tests/:id`, () =>
+          HttpResponse.json({ error: 'STUDIO_FORBIDDEN', message: 'No' }, { status }),
+        ),
+      );
+      const view = renderStudioAt('c0000000-0000-0000-0000-00000000ffff', <ChecksStudioPage />, {
+        wrapper: providerFor(settledStore()),
+      });
+
+      expect(await screen.findByText(TEST_NOT_AVAILABLE_MESSAGE, {}, WAIT)).toBeInTheDocument();
+      expect(screen.getByTestId('studio-test-unavailable')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'UI test not available' })).toBeInTheDocument();
+      // None of the editor: title, save state, coach, step guidance, add-a-step, and every header control.
+      expect(screen.queryByRole('heading', { name: 'Checks Studio' })).toBeNull();
+      expect(screen.queryByTestId('studio-save-state')).toBeNull();
+      expect(screen.queryByText('Write your steps')).toBeNull();
+      expect(screen.queryByText('Test setup')).toBeNull();
+      expect(screen.queryByText(/Add a test step/i)).toBeNull();
+      for (const name of ['Templates', 'Save', 'Run Test', 'Manage schedule', 'Variables']) {
+        expect(screen.queryByRole('button', { name }), name).toBeNull();
+      }
+      // Nothing is requested for the check behind the test.
+      expect(observed.filter((entry) => /\/api\/v1\/checks\/(?!sources$)/.test(entry.path))).toEqual([]);
+
+      await user().click(screen.getByRole('button', { name: 'Back to All Checks' }));
+      expect(view.getLocation().pathname).toBe('/checks/all');
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it('a route test that answers 500 keeps the editor and shows no not-available state', async () => {
     serve();
-    const view = renderStudioAt('c0000000-0000-0000-0000-00000000ffff', <ChecksStudioPage />, {
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json({ error: 'INTERNAL', message: 'x' }, { status: 500 })),
+    );
+    renderStudioAt('c0000000-0000-0000-0000-00000000ffff', <ChecksStudioPage />, {
       wrapper: providerFor(settledStore()),
     });
 
-    expect(await screen.findByText(TEST_NOT_AVAILABLE_MESSAGE, {}, WAIT)).toBeInTheDocument();
-    await user().click(screen.getByRole('button', { name: 'Open Tests' }));
-    expect(view.getLocation().pathname).toBe('/checks/all');
-    expect(view.getLocation().search).toBe('?type=UI_TEST');
+    expect(await screen.findByText('Test setup', {}, WAIT)).toBeInTheDocument();
+    expect(screen.queryByTestId('studio-test-unavailable')).toBeNull();
+    expect(screen.queryByText(TEST_NOT_AVAILABLE_MESSAGE)).toBeNull();
+  }, TEST_TIMEOUT_MS);
+});
+
+describe('AC-05: the editor opens without scrolling itself', () => {
+  it('no element is scrolled into view while the editor loads', async () => {
+    serve();
+    const spy = vi.fn();
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = spy as unknown as typeof Element.prototype.scrollIntoView;
+    try {
+      renderStudioAt(draft.id, <ChecksStudioPage />, { wrapper: providerFor(settledStore()) });
+      await screen.findByRole('textbox', { name: 'Step 1' }, WAIT);
+      await act(async () => { await new Promise((resolve) => setTimeout(resolve, 300)); });
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
   }, TEST_TIMEOUT_MS);
 });
 

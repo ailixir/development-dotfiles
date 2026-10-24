@@ -33,6 +33,9 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   useEffect(() => {
     // Detect deployment mode based on environment or indicators
     const detectDeploymentMode = (): DeploymentMode => {
+      // The Vite standalone entry marks itself, whatever port the dev server picked
+      if (window.__CHECKS_STANDALONE__) return 'standalone';
+
       // Check for Module Federation indicators
       const isModuleFederation = 
         // Check if we're running on a different port than the typical host

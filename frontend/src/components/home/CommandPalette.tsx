@@ -10,13 +10,13 @@ interface CommandPaletteProps {
   onClose: () => void;
 }
 
-const STUDIO_PATH = '/checks/all?type=UI_TEST';
+const UI_TESTS_PATH = '/checks/all?type=UI_TEST';
 
 const NAV_ITEMS = [
   { title: 'Home', path: '/checks' },
   { title: 'All Checks', path: '/checks/all' },
   { title: 'Reports', path: '/checks/reports' },
-  { title: 'Studio', path: STUDIO_PATH },
+  { title: 'UI tests', path: UI_TESTS_PATH },
   { title: 'Splunk prototype', path: '/checks/prototype/splunk' },
 ];
 
@@ -26,7 +26,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const { data, loading } = useAppSelector((s) => s.dashboard.search);
   const results = Array.isArray(data) ? data : [];
   const [q, setQ] = useState('');
-  // The Studio entry is shown only when UI tests are available (DC-18, DC-23).
+  // The UI tests entry is shown only when UI tests are available (DC-18, DC-23).
   const uiTestAvailability = useUiTestAvailability();
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const staticMatches = useMemo(() => {
     const term = q.toLowerCase();
     return NAV_ITEMS.filter(
-      (i) => (i.path !== STUDIO_PATH || uiTestAvailability === 'on') && i.title.toLowerCase().includes(term),
+      (i) => (i.path !== UI_TESTS_PATH || uiTestAvailability === 'on') && i.title.toLowerCase().includes(term),
     );
   }, [q, uiTestAvailability]);
 

@@ -3,7 +3,11 @@ import { createPortal } from 'react-dom';
 import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import type { GuidedStartRefusal, GuidedStartRequest } from '@/types/studio/studioGuidedTypes';
-import { GuidedStartFeedback, type GuidedStartFeedbackInput } from '@/components/studio/guided/GuidedCompletion';
+import {
+  GuidedStartFeedback,
+  guidedStartFeedbackView,
+  type GuidedStartFeedbackInput,
+} from '@/components/studio/guided/GuidedCompletion';
 import { ReadinessChip } from '@/components/studio/guided/ReadinessChip';
 import { guidedCopy } from '@/components/studio/guided/guidedNarratives';
 import { useRunGate, type LearnFromRequest, type RunSaveOutcome } from './useRunGate';
@@ -174,6 +178,13 @@ export const RunControl: React.FC<RunControlProps> = ({
         ? { kind: 'refusal', refusal: guidedStartRefusal }
         : null;
 
+  /**
+   * Learning could not start and nothing was started. Run stays enabled, because capabilities are
+   * read only after the press (`useRunGate`), so a caption beside it says what to do next
+   * (STUDIO-UNIFY-001.5 AC-01). It is absent whenever no such refusal is on screen.
+   */
+  const startUnavailable = startFeedback !== null && guidedStartFeedbackView(startFeedback).unavailable;
+
   const busyLabel = (() => {
     switch (gate.phase) {
       case 'saving':
@@ -333,6 +344,17 @@ export const RunControl: React.FC<RunControlProps> = ({
         {isRunning ? stopLabel : (busyLabel ?? RUN_LABEL)}
       </Button>
 
+      {startUnavailable && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          data-testid="run-start-unavailable"
+          sx={{ display: 'block', mt: 1, overflowWrap: 'anywhere' }}
+        >
+          {guidedCopy('startUnavailableCaption')}
+        </Typography>
+      )}
+
       {notPermitted && (
         <Typography
           id={notPermittedId}
@@ -403,7 +425,12 @@ export const RunControl: React.FC<RunControlProps> = ({
         </Typography>
       )}
 
-      {alertsContainer ? createPortal(alerts, alertsContainer) : alerts}
+      {/*
+        A portal is not a ReactNode to the `children` prop type MUI's Box declares, so a bare portal
+        child logged "Failed prop type ... at RunControl" on every editor mount; a Fragment around
+        it is one (STUDIO-UNIFY-001.5 AC-11).
+      */}
+      {alertsContainer ? <>{createPortal(alerts, alertsContainer)}</> : alerts}
     </Box>
   );
 };

@@ -16,6 +16,12 @@ interface OnboardingCoachProps {
    * not mentioned.
    */
   capabilities?: StudioCapabilitiesState;
+  /**
+   * Scroll the coach into view when it mounts. Off by default: the coach mounts on every page load, and
+   * scrolling a phone-sized page to it before the author did anything left the editor opened 342 to 593 px
+   * down (STUDIO-UNIFY-001.5, m3). Set it only when the author asked for the guide ("Show guide").
+   */
+  revealOnMount?: boolean;
 }
 
 const messagesFor = (secretsAvailable: boolean) => [
@@ -40,10 +46,15 @@ const OnboardingCoach: React.FC<OnboardingCoachProps> = ({
   onNext,
   onDismiss,
   capabilities = CAPABILITIES_UNKNOWN,
+  revealOnMount = false,
 }) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
+  /** The step already revealed (or, without `revealOnMount`, the step the coach opened on). */
+  const revealedStep = useRef<number | null>(revealOnMount ? null : step);
   useEffect(() => {
-    // Imperative focus on change
+    // A step change the author made scrolls the coach into view; the first paint does not.
+    if (revealedStep.current === step) return;
+    revealedStep.current = step;
     anchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [step]);
   const messages = messagesFor(vaultSecretsEnabled(capabilities));

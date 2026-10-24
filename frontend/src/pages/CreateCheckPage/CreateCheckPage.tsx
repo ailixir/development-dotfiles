@@ -96,6 +96,8 @@ const CreateCheckPage: React.FC = () => {
   // The UI Test one-form branch: only on the create route, and only while UI tests are available.
   const isUiTest = !editId && availability === 'on' && formData.checkType === UI_TEST_TYPE;
 
+  // Below `sm` the UI Test branch folds the type cards behind a one-line summary; "Change type" opens them again.
+  const [typesOpen, setTypesOpen] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const saveTimeoutRef = useRef<number | null>(null);
   const [saveHint, setSaveHint] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -444,7 +446,19 @@ const CreateCheckPage: React.FC = () => {
         <Card>
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>What are you monitoring?</Typography>
-            <CheckTypeSelector selectedType={formData.checkType} onSelect={(value) => handleFieldChange('checkType', value)} disabledTypes={uiTestDisabledTypes} />
+            <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }} data-testid="create-type-summary">Type: UI Test</Typography>
+              <Button size="small" variant="outlined" onClick={() => setTypesOpen((open) => !open)} data-testid="create-type-toggle">
+                {typesOpen ? 'Hide types' : 'Change type'}
+              </Button>
+            </Box>
+            <Box sx={{ display: { xs: typesOpen ? 'block' : 'none', sm: 'block' } }} data-testid="create-type-cards" data-open={typesOpen}>
+              <CheckTypeSelector
+                selectedType={formData.checkType}
+                onSelect={(value) => { setTypesOpen(false); handleFieldChange('checkType', value); }}
+                disabledTypes={uiTestDisabledTypes}
+              />
+            </Box>
             <Divider sx={{ my: 2 }} />
             <UiTestCreateForm
               values={{ name: formData.name, description: formData.description, csiId: formData.csiId, environment: formData.environment }}

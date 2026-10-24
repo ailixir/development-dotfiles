@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Alert, Box, Button, CircularProgress, Tab, Tabs, Typography } from '@mui/material';
 import { Link as RouterLink, Outlet, useLocation, useParams } from 'react-router-dom';
-import { StudioUnavailable, TEST_NOT_AVAILABLE_MESSAGE } from '@/components/studio/StudioUnavailable';
+import { StudioUnavailable, TestNotAvailable } from '@/components/studio/StudioUnavailable';
 import { useUiTestAvailability } from '@/hooks/useUiTestAvailability';
 import { uiTestPath, uiTestRunsPath } from '@/components/studio/uiTestPaths';
 import { UiTestDetailHeader } from './UiTestDetailHeader';
@@ -19,7 +19,7 @@ import { uiTestDetailTab, useUiTestDetail, type UiTestDetailContext } from './us
  * - availability 'off': the feature-unavailable state, and nothing is requested;
  * - availability 'pending': a loading state, and nothing is requested;
  * - availability 'on': `GET /studio/tests/{id}`, then
- *     403 or 400  -> only the not-available message (no other text from the test, no `/checks/{id}` call),
+ *     403 or 400  -> only the shared not-available state (no other text from the test, no `/checks/{id}` call),
  *     other error -> a load error with Retry,
  *     success     -> header, tabs and the tab content.
  *
@@ -64,11 +64,7 @@ const UiTestDetailsPage: React.FC = () => {
   }
 
   if (!id || state.status === 'unavailable') {
-    return (
-      <Box sx={centered} data-testid="ui-test-detail-unavailable">
-        <Typography variant="body1">{TEST_NOT_AVAILABLE_MESSAGE}</Typography>
-      </Box>
-    );
+    return <TestNotAvailable testId="ui-test-detail-unavailable" />;
   }
 
   if (state.status === 'error') {

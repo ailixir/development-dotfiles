@@ -464,6 +464,44 @@ describe('AC-15: check rows and UI test rows in one table', () => {
     expect(screen.getByTestId('ui-test-last-run-u-2')).toHaveTextContent('Never');
   });
 
+  it('keeps the phone layout in the DOM: last run caption under the name, flask beside the name, Type column hidden by CSS', async () => {
+    const lastRunAt = '2026-10-20T08:30:00Z';
+    const lastExecutionAt = '2026-10-21T09:15:00Z';
+    world.checks = [checkDto('c-1', { name: 'Payments API', type: 'HTTP', lastExecutionAt })];
+    world.uiTests = [
+      uiTest('u-1', { name: 'Checkout smoke', readiness: 'READY', lastRunStatus: 'PASSED', lastRunAt }),
+      uiTest('u-2', { name: 'Login flow' }),
+    ];
+    mountAt('/checks/all', settledStore());
+    await findUiRow('u-1');
+
+    // The same columns as before, and no extra column: the caption lives inside the name cell.
+    const headers = screen.getAllByRole('columnheader').map((cell) => cell.textContent);
+    expect(headers).toEqual(['', 'Check Name', 'Type', 'Status', 'Last Execution', 'Actions']);
+    expect(within(uiRow('u-1')).getAllByRole('cell')).toHaveLength(6);
+
+    // The last-execution value stays in its column (once per row) and also shows as a caption under the name.
+    expect(document.querySelectorAll('[data-testid="ui-test-last-run-u-1"]')).toHaveLength(1);
+    const caption = screen.getByTestId('ui-test-last-run-caption-u-1');
+    expect(caption).toHaveTextContent(new Date(lastRunAt).toLocaleString());
+    expect(caption.closest('td')).toBe(screen.getByRole('link', { name: 'Checkout smoke' }).closest('td'));
+    expect(screen.getByTestId('ui-test-last-run-caption-u-2')).toHaveTextContent('Never');
+    expect(screen.getByTestId('check-last-run-caption-c-1')).toHaveTextContent(new Date(lastExecutionAt).toLocaleString());
+
+    // The flask icon sits in the name cell too, so UI test rows stay recognisable without the Type column.
+    const nameCell = screen.getByRole('link', { name: 'Checkout smoke' }).closest('td');
+    expect(within(nameCell as HTMLElement).getByTestId('ui-test-name-icon-u-1')).toBeInTheDocument();
+    expect(within(uiRow('u-1')).getByText('UI Test')).toBeInTheDocument();
+
+    // The pager and the table container carry the testids the pixel assertion uses.
+    expect(screen.getByTestId('all-checks-table-container')).toBeInTheDocument();
+    expect(screen.getByTestId('all-checks-pagination')).toBeInTheDocument();
+    expect(screen.getByTestId('ui-test-run-u-1')).toBeInTheDocument();
+    expect(screen.getByTestId('ui-test-more-u-1')).toBeInTheDocument();
+    expect(screen.getByTestId('check-execute-c-1')).toBeInTheDocument();
+    expect(screen.getByTestId('check-more-c-1')).toBeInTheDocument();
+  });
+
   it('shows the CSI name from the CSI store, and the CSI id when the store has no entry, without a CSI request', async () => {
     world.uiTests = [
       uiTest('u-known', { name: 'Known system', csiId: '60406' }),

@@ -45,13 +45,24 @@ const UiTestCreateForm: React.FC<UiTestCreateFormProps> = ({ values, onChange, o
   const [error, setError] = useState<string | null>(null);
   // The system field only turns red once the user has used it.
   const [csiTouched, setCsiTouched] = useState(false);
+  // Likewise the name field turns red for an empty name only after it has been left.
+  const [nameTouched, setNameTouched] = useState(false);
 
   const selectedCsiIsRegistered = csiLoading === 'succeeded'
     && !csiError
     && registeredCsis.some((csi) => csi.id === values.csiId);
 
+  const nameMissing = !values.name.trim();
   const nameTooLong = values.name.length > TEST_NAME_MAX_LENGTH;
-  const canSubmit = Boolean(values.name.trim()) && !nameTooLong && selectedCsiIsRegistered && !creating;
+  const systemMissing = !selectedCsiIsRegistered;
+  const canSubmit = !nameMissing && !nameTooLong && !systemMissing && !creating;
+
+  // Names every reason the button is disabled, from the same conditions as canSubmit. Absent while creating.
+  const missingItems: string[] = [];
+  if (nameMissing) missingItems.push('Enter a name to continue.');
+  if (nameTooLong) missingItems.push(`Shorten the name to ${TEST_NAME_MAX_LENGTH} characters or fewer.`);
+  if (systemMissing) missingItems.push('Choose a system to continue.');
+  const disabledReason = creating ? '' : missingItems.join(' ');
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -79,7 +90,9 @@ const UiTestCreateForm: React.FC<UiTestCreateFormProps> = ({ values, onChange, o
           required
           value={values.name}
           onChange={(event) => onChange('name', event.target.value)}
-          error={nameTooLong}
+          onBlur={() => setNameTouched(true)}
+          error={nameTooLong || (nameTouched && nameMissing)}
+          inputProps={{ 'data-testid': 'ui-test-create-name' }}
           helperText={`${values.name.length}/${TEST_NAME_MAX_LENGTH}`}
           FormHelperTextProps={{ sx: { textAlign: 'right', mx: 0 } }}
         />
@@ -134,7 +147,12 @@ const UiTestCreateForm: React.FC<UiTestCreateFormProps> = ({ values, onChange, o
         <Typography variant="caption" color="text.secondary">
           You can add steps and variables in the Studio editor after creating the test.
         </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', gap: 2 }}>
+          {disabledReason && (
+            <Typography variant="caption" color="text.secondary" data-testid="ui-test-create-reason">
+              {disabledReason}
+            </Typography>
+          )}
           <Button variant="contained" disabled={!canSubmit} onClick={() => { void submit(); }}>
             {creating ? 'Creating…' : 'Create and open Studio'}
           </Button>

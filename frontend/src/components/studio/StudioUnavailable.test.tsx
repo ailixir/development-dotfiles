@@ -1,8 +1,11 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import StudioUnavailable, {
   StudioUnavailable as NamedStudioUnavailable,
   TEST_NOT_AVAILABLE_MESSAGE,
+  TestNotAvailable,
   isUnavailableTestRead,
 } from './StudioUnavailable';
 
@@ -37,5 +40,36 @@ describe('isUnavailableTestRead', () => {
 describe('TEST_NOT_AVAILABLE_MESSAGE', () => {
   it('is the single message for an unreadable test', () => {
     expect(TEST_NOT_AVAILABLE_MESSAGE).toBe("This UI test doesn't exist or you don't have access");
+  });
+});
+
+describe('TestNotAvailable', () => {
+  const mount = (testId: string) =>
+    render(
+      <MemoryRouter initialEntries={['/checks/ui-tests/abc']}>
+        <Routes>
+          <Route path="/checks/ui-tests/:id" element={<TestNotAvailable testId={testId} />} />
+          <Route path="/checks/all" element={<div data-testid="all-checks">All checks page</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+  it('shows a heading, the unchanged message and a Back to All Checks button', () => {
+    mount('some-root');
+    expect(screen.getByRole('heading', { name: 'UI test not available' })).toBeInTheDocument();
+    expect(screen.getByText(TEST_NOT_AVAILABLE_MESSAGE)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Back to All Checks' })).toBeInTheDocument();
+  });
+
+  it('puts the given test id on the root, so each screen keeps its own', () => {
+    mount('studio-test-unavailable');
+    expect(screen.getByTestId('studio-test-unavailable')).toHaveTextContent(TEST_NOT_AVAILABLE_MESSAGE);
+  });
+
+  it('goes to /checks/all through the router', async () => {
+    mount('some-root');
+    await userEvent.click(screen.getByRole('button', { name: 'Back to All Checks' }));
+    expect(await screen.findByTestId('all-checks')).toBeInTheDocument();
+    expect(screen.queryByText(TEST_NOT_AVAILABLE_MESSAGE)).toBeNull();
   });
 });

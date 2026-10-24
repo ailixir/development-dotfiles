@@ -513,7 +513,13 @@ describe('GuidedStartFeedback: a refused start is inline feedback, not a session
     'D-3 %s is not-ready start feedback with no action',
     (messageCode) => {
       const view = guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(409, { code: 'REVISION_CONFLICT', messageCode }) });
-      expect(view).toEqual({ title: null, lines: [GUIDED_COPY.revisionNotReady.template], code: null, action: null });
+      expect(view).toEqual({
+        title: null,
+        lines: [GUIDED_COPY.revisionNotReady.template],
+        code: null,
+        action: null,
+        unavailable: false,
+      });
     },
   );
 
@@ -530,9 +536,10 @@ describe('GuidedStartFeedback: a refused start is inline feedback, not a session
     const runtime = EXECUTE_CONFLICT_NARRATIVES.RUNTIME_INCOMPATIBLE;
     const expected = {
       title: null,
-      lines: [GUIDED_COPY.guidedStartUnavailable.template, GUIDED_COPY.reasonShownBelow.template],
+      lines: [GUIDED_COPY.guidedStartUnavailable.template],
       code: 'RUNTIME_INCOMPATIBLE',
       action: null,
+      unavailable: true,
     };
     const refused = guidedStartFeedbackView({
       kind: 'refusal',
@@ -593,6 +600,27 @@ describe('GuidedStartFeedback: a refused start is inline feedback, not a session
     expect(screen.getByTestId('guided-start-feedback')).toHaveTextContent(UNDECLARED_EXECUTE_REFUSAL.title);
     expect(screen.getByTestId('guided-start-feedback-code')).toHaveTextContent('RATE_LIMITED');
     expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('the code is a secondary "Reference:" line, and only RUNTIME_INCOMPATIBLE marks the start unavailable (STUDIO-UNIFY-001.5 AC-01)', () => {
+    render(
+      <GuidedStartFeedback
+        input={{ kind: 'unavailable', code: 'RUNTIME_INCOMPATIBLE' }}
+        onLearnFromFirstStep={noop}
+        onOpenVariables={noop}
+      />,
+    );
+    const code = screen.getByTestId('guided-start-feedback-code');
+    expect(code).toHaveTextContent('Reference: RUNTIME_INCOMPATIBLE');
+    expect(screen.getByTestId('guided-start-feedback')).toHaveTextContent(GUIDED_COPY.guidedStartUnavailable.template);
+    expect(screen.getByTestId('guided-start-feedback')).not.toHaveTextContent('shown below exactly as it arrived');
+
+    expect(guidedStartFeedbackView({ kind: 'unavailable', code: 'FORBIDDEN_SCOPE' }).unavailable).toBe(false);
+    expect(guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(403, null) }).unavailable).toBe(false);
+    expect(
+      guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(409, { code: 'RUNTIME_INCOMPATIBLE', messageCode: 'WORKER_STALE' }) })
+        .unavailable,
+    ).toBe(true);
   });
 });
 

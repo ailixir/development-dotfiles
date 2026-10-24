@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { ReactNode } from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { http, HttpResponse } from 'msw';
@@ -227,7 +227,7 @@ describe('the simple Save and Run workflow', () => {
     expect(run).not.toBeDisabled();
     expect(screen.queryByText('Save your changes before running.')).toBeNull();
 
-    await userEvent.click(screen.getByRole('button', { name: 'UI Tests' }));
+    await userEvent.click(within(screen.getByRole('navigation')).getByRole('link', { name: readyDraft.name }));
     const dialog = await screen.findByRole('dialog', { name: 'Save changes before continuing?' });
     expect(dialog).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save and continue' })).toBeInTheDocument();

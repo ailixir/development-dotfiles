@@ -218,8 +218,9 @@ describe('AC-07: a test the caller cannot read shows one message and loads no ot
     // No other test: the first of the list is neither read nor shown, and nothing can run.
     expect(screen.queryByText(firstOfList.name)).toBeNull();
     expect(reads(firstOfList.id)).toHaveLength(0);
-    expect(screen.getByRole('heading', { level: 1, name: 'Checks Studio' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Run Test' })).toBeDisabled();
+    // Only the not-available state shows: no editor, so nothing can run (STUDIO-UNIFY-001.5 AC-02).
+    expect(screen.getByRole('heading', { level: 1, name: 'UI test not available' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Run Test' })).toBeNull();
     expect(runStarts()).toEqual([]);
   }, TEST_TIMEOUT_MS);
 
@@ -236,7 +237,7 @@ describe('AC-07: a test the caller cannot read shows one message and loads no ot
     expect(await screen.findByText(TEST_NOT_AVAILABLE_MESSAGE, {}, WAIT)).toBeInTheDocument();
     expect(screen.queryByText(target.name)).toBeNull();
     expect(screen.queryByText(`Test Steps (${target.steps.length})`)).toBeNull();
-    expect(screen.getByRole('button', { name: 'Run Test' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Run Test' })).toBeNull();
     expect(runStarts()).toEqual([]);
   }, TEST_TIMEOUT_MS);
 });

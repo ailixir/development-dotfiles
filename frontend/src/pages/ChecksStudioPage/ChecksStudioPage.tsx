@@ -121,7 +121,7 @@ import { declareInsertedSecret, toContractVariables, variableDeclarationIssue, t
 import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
 import { StudioScheduleSummary } from '@/components/studio/scheduling/StudioScheduleSummary';
 import { STUDIO_TEST_ENVIRONMENTS } from '@/components/studio/tests/testListPresentation';
-import { StudioUnavailable, TEST_NOT_AVAILABLE_MESSAGE, isUnavailableTestRead } from '@/components/studio/StudioUnavailable';
+import { StudioUnavailable, TestNotAvailable, isUnavailableTestRead } from '@/components/studio/StudioUnavailable';
 import { uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
 
 
@@ -1134,6 +1134,10 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
     setTestSteps(prev => prev.filter((_, i) => i !== index));
   };
 
+  // The route's test cannot be read (403 or 400): only the shared not-available state, none of the editor.
+  // This sits after the last hook of the component; a hook below it would change the hook order.
+  if (testUnavailable) return <TestNotAvailable testId="studio-test-unavailable" />;
+
   return (
     <Box>
       <Paper
@@ -1170,18 +1174,31 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
               >
                 All Checks
               </Link>
+              {selectedScenarioData ? (
+                <Link
+                  component={RouterLink}
+                  to={uiTestPath(selectedScenarioData.id)}
+                  underline="hover"
+                  color="inherit"
+                  variant="body2"
+                  noWrap
+                  data-testid="studio-breadcrumb-test"
+                  onClick={(event: React.MouseEvent) => {
+                    // The same leave guard as the All Checks crumb and the in-page back.
+                    if (!isDirty) return;
+                    event.preventDefault();
+                    requestNavigation(() => navigate(uiTestPath(selectedScenarioData.id)));
+                  }}
+                >
+                  {selectedScenarioData.name}
+                </Link>
+              ) : (
+                <Typography variant="body2" color="inherit" noWrap data-testid="studio-breadcrumb-test">UI test</Typography>
+              )}
               <Typography variant="body2" color="text.primary" noWrap data-testid="studio-breadcrumb-current">
-                {selectedScenarioData?.name ?? 'Checks Studio'}
+                Studio
               </Typography>
             </Breadcrumbs>
-            <Button
-              size="small"
-              variant="text"
-              onClick={() => requestNavigation(() => navigate(openTestId ? uiTestPath(openTestId) : '/checks/all'))}
-              sx={{ px: 0, minWidth: 0 }}
-            >
-              UI Tests
-            </Button>
             <Typography variant="h5" component="h1" fontWeight={700} noWrap>
               {selectedScenarioData?.name ?? 'Checks Studio'}
             </Typography>
@@ -1317,15 +1334,10 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                       <Typography variant="caption" color="text.secondary">Updated: {new Date((selectedScenarioData.updatedAt || selectedScenarioData.createdAt) as string).toLocaleString()}</Typography>
                     )}
                   </Stack>
-                ) : testUnavailable ? (
-                  <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
-                    <Typography variant="body2" data-testid="studio-test-unavailable">{TEST_NOT_AVAILABLE_MESSAGE}</Typography>
-                    <Button size="small" variant="contained" onClick={() => navigate('/checks/all?type=UI_TEST')}>Open Tests</Button>
-                  </Stack>
                 ) : (
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2">No test selected.</Typography>
-                    <Button size="small" variant="contained" onClick={() => navigate('/checks/all?type=UI_TEST')}>Open Tests</Button>
+                    <Button size="small" variant="contained" onClick={() => navigate('/checks/all?type=UI_TEST')}>Back to UI tests</Button>
                   </Stack>
                 )}
               </Box>
@@ -1341,7 +1353,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     value={environment}
                     disabled={editorLocked || !selectedScenarioData}
                     onChange={(event) => setEnvironment(event.target.value)}
-                    sx={{ flex: '1 1 260px', minWidth: 0 }}
+                    sx={{ flex: { xs: '0 0 auto', sm: '1 1 260px' }, minWidth: 0 }}
                   >
                     {STUDIO_TEST_ENVIRONMENTS.map((option) => (
                       <MenuItem key={option} value={option}>{option}</MenuItem>
@@ -1376,6 +1388,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     onNext={() => setCoachStep(1)}
                     onDismiss={() => setCoachStep(99)}
                     capabilities={capabilities}
+                    revealOnMount={forceCoach}
                   />
                 )}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

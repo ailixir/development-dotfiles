@@ -109,13 +109,15 @@ The module exposes `./ChecksModule` via Module Federation and integrates with th
 
 ### Navigation Structure
 ```
-📁 Checks Module
-├── 🏠 Dashboard - Health overview
-├── 📋 All Checks - Check management, including UI tests
+📁 Checks Module (sidebar)
+├── 🏠 Home - Attention, CSIs, and upcoming
+├── ✅ Checks - Check management, including UI tests
+│   │         (Create Check, including UI Test, opens from this page; it is not a sidebar entry)
 │   └── UI test - Overview and Runs; opens Studio
-├── ➕ Create Check - New check builder (including UI Test)
-└── 📊 Reports - Analytics & reporting
+└── 📊 Reports - Reporting checks (hidden only when the REPORTS feature is explicitly disabled)
 ```
+
+The same registered tree shows in standalone and federated modes. Below 1200 px it opens from the "Navigation" button in standalone mode and comes from the host shell in federated mode.
 
 ## Code Organization
 

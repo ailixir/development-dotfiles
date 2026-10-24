@@ -759,7 +759,7 @@ const DashboardPage: React.FC = () => {
                           py: 1.5
                         }}
                       >
-                        Open Checks Studio
+                        Open UI tests
                       </Button>
                     )}
                     

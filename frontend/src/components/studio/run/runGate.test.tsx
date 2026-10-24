@@ -336,6 +336,77 @@ describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () =
     expect(capabilityReads()).toHaveLength(1);
   });
 
+  it('(g2) STUDIO-UNIFY-001.5 AC-01: a caption beside Run says nothing was started and what to do; the code is a Reference line; a second press replaces the message; Run keeps its name', async () => {
+    setGuidedStartCapability(unlearnedDraft.id, { available: false, code: 'RUNTIME_INCOMPATIBLE' });
+    serve(fixtureDetail(unlearnedDraft));
+    const control = await settledControl();
+    expect(screen.queryByTestId('run-start-unavailable')).toBeNull();
+
+    await userEvent.click(control);
+    const caption = await screen.findByTestId('run-start-unavailable');
+    expect(caption).toHaveTextContent(guidedCopy('startUnavailableCaption'));
+    expect(caption).toHaveTextContent('Nothing was started.');
+    expect(caption).toHaveTextContent('Ask your Studio administrator');
+    expect(screen.getByTestId('guided-start-feedback-code')).toHaveTextContent('Reference: RUNTIME_INCOMPATIBLE');
+
+    // Run stays enabled (capabilities are read only after the press) and keeps its name (Harness B).
+    expect(control).toBeEnabled();
+    expect(control).toHaveAccessibleName(RUN_LABEL);
+    expect(control).toHaveTextContent(RUN_LABEL);
+
+    await userEvent.click(control);
+    await waitFor(() => expect(capabilityReads()).toHaveLength(2));
+    await screen.findByTestId('guided-start-feedback');
+    expect(screen.getAllByTestId('guided-start-feedback')).toHaveLength(1);
+    expect(screen.getAllByTestId('run-start-unavailable')).toHaveLength(1);
+  });
+
+  it('(g3) STUDIO-UNIFY-001.5 AC-01: a RUNTIME_INCOMPATIBLE start refusal shows the caption; another refusal, or none, does not', async () => {
+    const runtime: GuidedStartRefusal = {
+      httpStatus: 409,
+      error: { schemaVersion: 3, code: 'RUNTIME_INCOMPATIBLE', requestId: 'r-2', retryable: false, messageCode: 'RUNTIME_INCOMPATIBLE' },
+      platformCode: null,
+      retryAfterSeconds: null,
+    };
+    const view = serve(fixtureDetail(needsRelearnDraft), { guidedStartRefusal: runtime });
+    await settledControl();
+    expect(await screen.findByTestId('run-start-unavailable')).toHaveTextContent('Nothing was started.');
+    expect(screen.getByTestId('guided-start-feedback-code')).toHaveTextContent('Reference: RUNTIME_INCOMPATIBLE');
+    view.unmount();
+
+    const other: GuidedStartRefusal = {
+      httpStatus: 409,
+      error: { schemaVersion: 3, code: 'MISSING_SOURCE', requestId: 'r-3', retryable: false, messageCode: 'AUTHORING_REFERENCE_MISSING' },
+      platformCode: null,
+      retryAfterSeconds: null,
+    };
+    serve(fixtureDetail(needsRelearnDraft), { guidedStartRefusal: other });
+    await settledControl();
+    await screen.findByTestId('guided-start-feedback');
+    expect(screen.queryByTestId('run-start-unavailable')).toBeNull();
+  });
+
+  it('(g4) STUDIO-UNIFY-001.5 AC-11: mounting with the page\'s alert slot logs no prop-type warning attributed to RunControl', async () => {
+    // The page passes `alertsContainer`, so the alerts render through a portal. A bare portal child of
+    // MUI's Box fails its `children` prop type ("Invalid prop `children` supplied to `ForwardRef(Box)`").
+    const slot = document.createElement('div');
+    document.body.appendChild(slot);
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      setGuidedStartCapability(unlearnedDraft.id, { available: false, code: 'RUNTIME_INCOMPATIBLE' });
+      serve(fixtureDetail(unlearnedDraft), { alertsContainer: slot });
+      await userEvent.click(await settledControl());
+      // The portal is exercised too: the refusal renders in the slot, outside the control.
+      await waitFor(() => expect(slot.querySelector('[data-testid="guided-start-feedback"]')).not.toBeNull());
+
+      const warnings = errors.mock.calls.map((call) => call.map(String).join(' ')).filter((line) => /Failed .*type|prop type/iu.test(line));
+      expect(warnings).toEqual([]);
+    } finally {
+      errors.mockRestore();
+      slot.remove();
+    }
+  });
+
   it('(h) a start context that disagrees with the fresh read starts nothing (P6)', async () => {
     setGuidedStartCapability(unlearnedDraft.id, {
       available: true,

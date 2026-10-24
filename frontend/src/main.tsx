@@ -5,6 +5,10 @@ import { retireLegacyStudioWorker } from './utils/retireLegacyStudioWorker';
 const loadBootstrap = () => import('./bootstrap');
 console.log('Main.tsx loaded');
 
+// This entry runs only in the Vite standalone dev server (a host loads remoteEntry/bootstrap, never
+// main.tsx), so it marks standalone mode on any port. Set before Bootstrap loads; LayoutProvider reads it.
+window.__CHECKS_STANDALONE__ = true;
+
 // Entry point for standalone Vite development
 const container = document.getElementById('root');
 console.log('Root container found:', !!container);

@@ -58,6 +58,10 @@ const TEST_WITH_RUNS_ID = '11111111-1111-1111-1111-111111111111';
 const EXECUTION_ID = '44444444-4444-4444-4444-444444444440';
 
 const NOT_AVAILABLE = "This UI test doesn't exist or you don't have access";
+const NOT_AVAILABLE_HEADING = 'UI test not available';
+const BACK_TO_ALL_CHECKS = 'Back to All Checks';
+/** Everything the shared not-available state renders: heading, message, back button, and nothing else. */
+const NOT_AVAILABLE_TEXT = `${NOT_AVAILABLE_HEADING}${NOT_AVAILABLE}${BACK_TO_ALL_CHECKS}`;
 const FEATURE_UNAVAILABLE = 'Checks Studio is not available in this environment.';
 const PLAIN_VALUE = 'plain-value-that-must-not-render-7c1e';
 const STRAY_SECRET_VALUE = 'resolved-secret-that-must-not-render-4d92';
@@ -633,8 +637,11 @@ describe('AC-24: a test the caller cannot read', () => {
         mountAt(pathOf(TEST_WITH_RUNS_ID), settledStore());
 
         expect(await screen.findByText(NOT_AVAILABLE, {}, WAIT), name).toBeInTheDocument();
-        // The message and nothing else: no header, tabs, table, drawer, Retry or error alert.
-        expect(document.body.textContent, name).toBe(NOT_AVAILABLE);
+        // The shared state and nothing else: no header, tabs, table, drawer, Retry or error alert.
+        expect(document.body.textContent, name).toBe(NOT_AVAILABLE_TEXT);
+        expect(screen.getByRole('heading', { name: NOT_AVAILABLE_HEADING }), name).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: BACK_TO_ALL_CHECKS }), name).toBeInTheDocument();
+        expect(screen.getByTestId('ui-test-detail-unavailable'), name).toBeInTheDocument();
         expect(screen.queryByTestId('ui-test-detail'), name).toBeNull();
         expect(screen.queryByRole('tablist'), name).toBeNull();
         expect(screen.queryByRole('button', { name: 'Retry' }), name).toBeNull();
@@ -662,12 +669,27 @@ describe('AC-24: a test the caller cannot read', () => {
     mountAt(uiTestRunPath(TEST_WITH_RUNS_ID, EXECUTION_ID), settledStore());
 
     expect(await screen.findByText(NOT_AVAILABLE, {}, WAIT)).toBeInTheDocument();
-    expect(document.body.textContent).toBe(NOT_AVAILABLE);
+    expect(document.body.textContent).toBe(NOT_AVAILABLE_TEXT);
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(screen.queryByRole('table')).toBeNull();
     await sleep(300);
     expect(executionRequests()).toEqual([]);
     expect(checksIdRequests()).toEqual([]);
+  }, TEST_TIMEOUT_MS);
+});
+
+describe('AC-08: the not-available state is the shared component', () => {
+  it('shows a heading and a Back to All Checks button that goes to /checks/all', async () => {
+    failRead(403);
+    const view = mountAt(uiTestPath(TEST_WITH_RUNS_ID), settledStore());
+
+    expect(await screen.findByRole('heading', { name: NOT_AVAILABLE_HEADING }, WAIT)).toBeInTheDocument();
+    expect(screen.getByText(NOT_AVAILABLE)).toBeInTheDocument();
+    await user().click(screen.getByRole('button', { name: BACK_TO_ALL_CHECKS }));
+
+    expect(await screen.findByTestId('all-checks-route')).toBeInTheDocument();
+    expect(view.getLocation().pathname).toBe('/checks/all');
+    expect(screen.queryByText(NOT_AVAILABLE)).toBeNull();
   }, TEST_TIMEOUT_MS);
 });
 

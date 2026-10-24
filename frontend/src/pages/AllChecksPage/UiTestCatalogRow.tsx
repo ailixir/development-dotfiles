@@ -29,9 +29,29 @@ export interface UiTestCatalogRowProps {
 type OpenDialog = 'schedule' | 'delete' | null;
 
 /**
+ * Compact cell controls below `sm` so the phone table (checkbox, name, status, actions) fits 390 px.
+ * From `sm` up the values are MUI's own defaults, so the desktop layout is unchanged. Same values as the
+ * check rows in AllChecksPage.tsx.
+ */
+const compactCheckboxSx = { p: { xs: 0.5, sm: 1.125 } } as const;
+const compactIconButtonSx = { p: { xs: '3px', sm: '5px' } } as const;
+const compactChipSx = {
+  fontSize: { xs: '0.6875rem', sm: '0.8125rem' },
+  // Below sm a long label ("Needs re-learn") wraps instead of widening the Status column.
+  height: { xs: 'auto', sm: 24 },
+  '& .MuiChip-label': {
+    px: { xs: 0.75, sm: 1 },
+    py: { xs: '2px', sm: 0 },
+    whiteSpace: { xs: 'normal', sm: 'nowrap' },
+    textAlign: { xs: 'center', sm: 'left' },
+  },
+} as const;
+
+/**
  * One UI test in the All Checks table (spec §9.2, §9.5). The cells follow the check rows' columns:
  * a disabled selection box, the name linking to the detail page with the CSI and description, the
- * type, the status chip, the last run time, and the actions.
+ * type, the status chip, the last run time, and the actions. Below `sm` the Type column is hidden and
+ * the flask icon sits beside the name; below `md` the last run shows as a caption under the name.
  *
  * Execute never sends a run request from here. It opens the editor with `?autorun=1`, and the run
  * starts only if the editor's run gate admits it. The row owns its Schedule and Delete dialogs, which
@@ -50,32 +70,49 @@ const UiTestCatalogRow: React.FC<UiTestCatalogRowProps> = ({ row, onDeleted }) =
       <TableRow hover data-testid={`ui-test-row-${test.id}`}>
         <TableCell padding="checkbox">
           {/* UI tests never join a bulk selection (FR-17). */}
-          <Checkbox disabled checked={false} inputProps={{ 'aria-label': `select ${test.name}` }} />
+          <Checkbox sx={compactCheckboxSx} disabled checked={false} inputProps={{ 'aria-label': `select ${test.name}` }} />
         </TableCell>
         <TableCell>
-          <Stack>
-            <Typography
-              component={RouterLink}
-              to={uiTestPath(test.id)}
-              variant="subtitle2"
-              fontWeight={600}
-              sx={{ color: 'primary.main', textDecoration: 'none', overflowWrap: 'anywhere', '&:hover': { textDecoration: 'underline' } }}
-            >
-              {test.name}
-            </Typography>
-            {csiName && (
-              <Typography variant="caption" color="text.secondary" data-testid={`ui-test-csi-${test.id}`}>
-                {csiName}
+          <Stack direction="row" spacing={0.75} alignItems="flex-start">
+            {/* Below sm the Type column is hidden, so the flask marks UI test rows beside the name (D7). */}
+            <Science
+              fontSize="small"
+              data-testid={`ui-test-name-icon-${test.id}`}
+              sx={{ display: { xs: 'block', sm: 'none' }, flexShrink: 0, mt: '1px', color: 'text.secondary' }}
+            />
+            <Stack sx={{ minWidth: 0 }}>
+              <Typography
+                component={RouterLink}
+                to={uiTestPath(test.id)}
+                variant="subtitle2"
+                fontWeight={600}
+                sx={{ color: 'primary.main', textDecoration: 'none', overflowWrap: 'anywhere', '&:hover': { textDecoration: 'underline' } }}
+              >
+                {test.name}
               </Typography>
-            )}
-            {test.description && (
-              <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
-                {test.description}
+              {csiName && (
+                <Typography variant="caption" color="text.secondary" data-testid={`ui-test-csi-${test.id}`}>
+                  {csiName}
+                </Typography>
+              )}
+              {test.description && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                  {test.description}
+                </Typography>
+              )}
+              {/* Below md the Last Execution column is hidden; its value shows here instead (own testid). */}
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                data-testid={`ui-test-last-run-caption-${test.id}`}
+                sx={{ display: { xs: 'block', md: 'none' } }}
+              >
+                Last run: {formatLastExecution(test.lastRunAt)}
               </Typography>
-            )}
+            </Stack>
           </Stack>
         </TableCell>
-        <TableCell>
+        <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <Science />
             <Typography variant="body2">UI Test</Typography>
@@ -84,6 +121,7 @@ const UiTestCatalogRow: React.FC<UiTestCatalogRowProps> = ({ row, onDeleted }) =
         <TableCell>
           <Chip
             size="small"
+            sx={compactChipSx}
             label={status.label}
             color={status.color}
             data-testid={`ui-test-status-${test.id}`}
@@ -95,14 +133,16 @@ const UiTestCatalogRow: React.FC<UiTestCatalogRowProps> = ({ row, onDeleted }) =
           </Typography>
         </TableCell>
         <TableCell align="right">
-          <Stack direction="row" spacing={1} justifyContent="flex-end">
+          <Stack direction="row" spacing={{ xs: 0, sm: 1 }} justifyContent="flex-end">
             <Tooltip title="Run in Studio">
-              <IconButton size="small" onClick={() => navigate(uiTestEditorPath(test.id, { autorun: true }))}>
+              <IconButton size="small" sx={compactIconButtonSx} data-testid={`ui-test-run-${test.id}`} onClick={() => navigate(uiTestEditorPath(test.id, { autorun: true }))}>
                 <PlayArrow />
               </IconButton>
             </Tooltip>
             <IconButton
               size="small"
+              sx={compactIconButtonSx}
+              data-testid={`ui-test-more-${test.id}`}
               aria-label={`More actions for ${test.name}`}
               aria-haspopup="menu"
               onClick={(event) => setMenuAnchor(event.currentTarget)}

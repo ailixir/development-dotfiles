@@ -108,6 +108,25 @@ function readStoredPrefs(): StoredCatalogPrefs {
   }
 }
 
+/**
+ * Compact cell controls below `sm` so the phone table (checkbox, name, status, actions) fits 390 px.
+ * From `sm` up the values are MUI's own defaults, so the desktop layout is unchanged. Same values as the
+ * UI test rows in UiTestCatalogRow.tsx.
+ */
+const compactCheckboxSx = { p: { xs: 0.5, sm: 1.125 } } as const;
+const compactIconButtonSx = { p: { xs: '3px', sm: '5px' } } as const;
+const compactChipSx = {
+  fontSize: { xs: '0.6875rem', sm: '0.8125rem' },
+  // Below sm a long label ("Needs re-learn") wraps instead of widening the Status column.
+  height: { xs: 'auto', sm: 24 },
+  '& .MuiChip-label': {
+    px: { xs: 0.75, sm: 1 },
+    py: { xs: '2px', sm: 0 },
+    whiteSpace: { xs: 'normal', sm: 'nowrap' },
+    textAlign: { xs: 'center', sm: 'left' },
+  },
+} as const;
+
 const AllChecksPage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
@@ -413,7 +432,7 @@ const AllChecksPage: React.FC = () => {
       UNKNOWN: { color: 'default' as const, label: 'Unknown' },
     };
     const config = configs[status as keyof typeof configs] || configs.UNKNOWN;
-    return <Chip label={config.label} color={config.color} size="small" />;
+    return <Chip label={config.label} color={config.color} size="small" sx={compactChipSx} />;
   };
 
   if (error) {
@@ -574,12 +593,16 @@ const AllChecksPage: React.FC = () => {
           <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}` }}>
         {(loading === 'loading' || uiTestCatalog.loading) && <LinearProgress />}
         
-        <TableContainer>
-          <Table size="small">
+        <TableContainer data-testid="all-checks-table-container">
+          <Table
+            size="small"
+            sx={{ '& .MuiTableCell-root:not(.MuiTableCell-paddingCheckbox)': { px: { xs: 1, sm: 2 } } }}
+          >
             <TableHead>
                 <TableRow>
                   <TableCell padding="checkbox">
                     <Checkbox
+                      sx={compactCheckboxSx}
                       indeterminate={!allVisibleSelected && someVisibleSelected}
                       checked={allVisibleSelected}
                       onChange={(e) => toggleSelectAllVisible(e.target.checked)}
@@ -588,7 +611,7 @@ const AllChecksPage: React.FC = () => {
                     />
                   </TableCell>
                 <TableCell>Check Name</TableCell>
-                <TableCell>Type</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Type</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Last Execution</TableCell>
                 <TableCell align="right">Actions</TableCell>
@@ -612,9 +635,10 @@ const AllChecksPage: React.FC = () => {
                 }
                 const check = row.check;
                 return (
-                  <TableRow key={`check-${check.id}`} hover>
+                  <TableRow key={`check-${check.id}`} hover data-testid={`check-row-${check.id}`}>
                     <TableCell padding="checkbox">
                       <Checkbox
+                        sx={compactCheckboxSx}
                         checked={selectedIds.includes(check.id)}
                         onChange={() => toggleRow(check.id)}
                         inputProps={{ 'aria-label': `select ${check.name}` }}
@@ -627,7 +651,7 @@ const AllChecksPage: React.FC = () => {
                           to={`/checks/details/${check.id}`}
                           variant="subtitle2"
                           fontWeight={600}
-                          sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                          sx={{ color: 'primary.main', textDecoration: 'none', overflowWrap: 'anywhere', '&:hover': { textDecoration: 'underline' } }}
                         >
                           {check.name}
                         </Typography>
@@ -636,19 +660,28 @@ const AllChecksPage: React.FC = () => {
                             {check.description}
                           </Typography>
                         )}
+                        {/* Below md the Last Execution column is hidden; its value shows here instead. */}
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          data-testid={`check-last-run-caption-${check.id}`}
+                          sx={{ display: { xs: 'block', md: 'none' } }}
+                        >
+                          Last run: {check.lastExecution ? new Date(check.lastExecution).toLocaleString() : 'Never'}
+                        </Typography>
                       </Stack>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                       <Stack direction="row" alignItems="center" spacing={1}>
                         {getTypeIcon(check.type)}
                         <Typography variant="body2">{check.type}</Typography>
                       </Stack>
                     </TableCell>
                     <TableCell>
-                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <Stack direction="row" alignItems="center" flexWrap="wrap" gap={0.5}>
                         {getStatusChip(check.status)}
                         {!isSourceEnabled(check.type) && (
-                          <Chip label="Source disabled" size="small" variant="outlined" color="default" />
+                          <Chip label="Source disabled" size="small" variant="outlined" color="default" sx={compactChipSx} />
                         )}
                       </Stack>
                     </TableCell>
@@ -661,9 +694,11 @@ const AllChecksPage: React.FC = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Stack direction="row" spacing={1}>
+                      <Stack direction="row" spacing={{ xs: 0, sm: 1 }} justifyContent="flex-end">
                         <IconButton
                           size="small"
+                          sx={compactIconButtonSx}
+                          data-testid={`check-execute-${check.id}`}
                           onClick={() => handleExecuteCheck(check.id)}
                           title={isSourceEnabled(check.type) ? 'Execute Now' : 'Source disabled'}
                           disabled={executingChecks.includes(check.id) || !isSourceEnabled(check.type)}
@@ -677,6 +712,8 @@ const AllChecksPage: React.FC = () => {
                         {/* Stop/Start schedule icon hidden per request */}
                         <IconButton
                           size="small"
+                          sx={compactIconButtonSx}
+                          data-testid={`check-more-${check.id}`}
                           onClick={(e) => handleMenuClick(e, check.id)}
                         >
                           <MoreVert />
@@ -692,6 +729,12 @@ const AllChecksPage: React.FC = () => {
 
             <TablePagination
               component="div"
+              data-testid="all-checks-pagination"
+              sx={{
+                // Below sm the rows-per-page selector is hidden so the arrows are not clipped.
+                '& .MuiTablePagination-selectLabel': { display: { xs: 'none', sm: 'block' } },
+                '& .MuiTablePagination-input': { display: { xs: 'none', sm: 'inline-flex' } },
+              }}
               count={filteredRows.length}
               page={page}
               onPageChange={(_, newPage) => setPage(newPage)}

@@ -291,9 +291,14 @@ export type GuidedStartAction = 'learnFromFirstStep' | 'openVariables';
 export interface GuidedStartFeedbackView {
   readonly title: string | null;
   readonly lines: readonly string[];
-  /** The code exactly as it arrived, for a refusal this page has no wording for. */
+  /** The code exactly as it arrived, shown as a secondary "Reference" line. */
   readonly code: string | null;
   readonly action: GuidedStartAction | null;
+  /**
+   * Learning could not start and nothing was started (`RUNTIME_INCOMPATIBLE`). The Run control shows
+   * its caption beside Run while this holds (STUDIO-UNIFY-001.5 AC-01).
+   */
+  readonly unavailable: boolean;
 }
 
 const POLICY_MESSAGE_KEYS = {
@@ -311,7 +316,13 @@ function narrativeView(narrative: {
   readonly explanation: string;
   readonly whoClearsIt: string;
 }): GuidedStartFeedbackView {
-  return { title: narrative.title, lines: [narrative.explanation, narrative.whoClearsIt], code: null, action: null };
+  return {
+    title: narrative.title,
+    lines: [narrative.explanation, narrative.whoClearsIt],
+    code: null,
+    action: null,
+    unavailable: false,
+  };
 }
 
 function undeclaredView(code: string): GuidedStartFeedbackView {
@@ -320,14 +331,15 @@ function undeclaredView(code: string): GuidedStartFeedbackView {
 
 /**
  * `RUNTIME_INCOMPATIBLE` (D-11): learning could not start, no cause and no remedy, then the code as
- * it arrived. The replay narrative is not reused: its "Save the test again" is no remedy here (W5 UX-01).
+ * it arrived as a "Reference" line (the caption beside Run says what to do next). The replay narrative is not reused: its "Save the test again" is no remedy here (W5 UX-01).
  */
 function runtimeIncompatibleView(code: string): GuidedStartFeedbackView {
   return {
     title: null,
-    lines: [guidedCopy('guidedStartUnavailable'), guidedCopy('reasonShownBelow')],
+    lines: [guidedCopy('guidedStartUnavailable')],
     code,
     action: null,
+    unavailable: true,
   };
 }
 
@@ -342,6 +354,7 @@ export function guidedStartFeedbackView(input: GuidedStartFeedbackInput): Guided
     lines,
     code: null,
     action,
+    unavailable: false,
   });
 
   if (error !== null) {
@@ -413,9 +426,13 @@ export function GuidedStartFeedback({
           variant="caption"
           component="p"
           data-testid="guided-start-feedback-code"
-          sx={{ fontFamily: 'monospace', mt: 0.5, overflowWrap: 'anywhere' }}
+          color="text.secondary"
+          sx={{ mt: 0.5, overflowWrap: 'anywhere' }}
         >
-          {view.code}
+          {guidedCopy('referenceLabel')}{' '}
+          <Box component="span" sx={{ fontFamily: 'monospace', userSelect: 'all' }}>
+            {view.code}
+          </Box>
         </Typography>
       )}
       {view.action !== null && (
