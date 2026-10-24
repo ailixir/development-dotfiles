@@ -219,6 +219,16 @@ studio:
     # STUDIO_GUIDED_AUTHORING_TRANSLATION_CONTROLLER_ORIGIN (https only).
     translation:
       controller-token-file: ${STUDIO_GUIDED_CONTROLLER_TOKEN_FILE:${studio.guided-authoring.controller-token-file:}}
+      # Base delay before a definite-transient provider retry (connection refused/reset, HTTP 429/503,
+      # or a pre-response stall). The retry is a new persisted, charged attempt in the same
+      # three-proposal pool; the delay before attempt n is base << (n-2). 0..30000.
+      transient-backoff-millis: ${STUDIO_GUIDED_TRANSIENT_BACKOFF_MILLIS:2000}
+      # Longest one provider send may wait for its response (a total-call cap), 1..600. The cap only
+      # takes effect while it is shorter than the call budget left after authentication
+      # (call-seconds, default 60). A send that receives no response headers within the cap is
+      # abandoned as a TRANSPORT_STALL and retried as a new charged attempt.
+      # A call budget at or below the cap makes every overrun a terminal TIMEOUT instead.
+      send-timeout-seconds: ${STUDIO_GUIDED_SEND_TIMEOUT_SECONDS:50}
     # STUDIO-OBS-014 AC-3 (ruling AR-2 b): sanitized observations, model output and the publication
     # copies of never-published sessions are pruned this long after a terminal session's expiry.
     # Same default as studio.execution.evidence-retention, so video and observations age out
@@ -228,12 +238,13 @@ studio:
       pruner-delay-ms: 3600000
       batch-size: 100
     # STUDIO-OBS-014 AC-8 (ruling AR-2 c): per-CSI limits on top of the per-session ceilings above.
-    # Daily defaults hold 156 calls at the 4096 per-call reservation, about 12 ten-step base learns or
-    # 6.5 full-envelope sessions (MODEL-SIZING ruling 2026-10-18; OBS-009 T4 recalibrates).
+    # Daily model tokens are unlimited by default (0 = no gate, no cap; user decision 2026-10-23, access
+    # control is left to the future RBAC). Set the env var to a positive number to cap one environment;
+    # a cap must hold one full per-session ceiling. max-concurrent-sessions is a load limit, unchanged.
     csi-budget:
       max-concurrent-sessions: ${STUDIO_GUIDED_CSI_MAX_CONCURRENT:3}
-      daily-model-input-tokens: ${STUDIO_GUIDED_CSI_DAILY_INPUT_TOKENS:5242880}
-      daily-model-output-tokens: ${STUDIO_GUIDED_CSI_DAILY_OUTPUT_TOKENS:640000}
+      daily-model-input-tokens: ${STUDIO_GUIDED_CSI_DAILY_INPUT_TOKENS:0}
+      daily-model-output-tokens: ${STUDIO_GUIDED_CSI_DAILY_OUTPUT_TOKENS:0}
     # STUDIO-OBS-014 AC-1/AC-5 (rulings AR-2 f, h): governed observation policy. No approver group
     # by default, so every approval is refused (fail closed until OBS-010 provisions one).
     policy:
@@ -373,7 +384,6 @@ studio:
     sse:
       heartbeat: ${STUDIO_SSE_HEARTBEAT:15s}
       lifetime: ${STUDIO_SSE_LIFETIME:60s}
-      read-interval: ${STUDIO_SSE_READ_INTERVAL:750ms}
       # The same 500-1000 ms budget, as a plain millis value for the scheduler annotation.
       read-interval-ms: ${STUDIO_SSE_READ_INTERVAL_MS:750}
       authorization-refresh: ${STUDIO_SSE_AUTH_REFRESH:30s}

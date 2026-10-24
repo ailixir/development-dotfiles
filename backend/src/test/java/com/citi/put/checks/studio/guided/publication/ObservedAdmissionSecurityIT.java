@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import com.citi.put.checks.config.ChecksExceptionHandler;
 import com.citi.put.checks.config.StudioInternalSecurityConfig;
 import com.citi.put.checks.studio.StudioExecutionProperties;
+import com.citi.put.checks.studio.dispatch.DispatchAuthorization;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.internal.AdmissionCasService;
@@ -174,8 +175,8 @@ class ObservedAdmissionSecurityIT {
     }
 
     @Bean
-    GuidedPublicationAuthorization authority() {
-      return mock(GuidedPublicationAuthorization.class);
+    DispatchAuthorization authority() {
+      return mock(DispatchAuthorization.class);
     }
 
     @Bean
@@ -205,7 +206,7 @@ class ObservedAdmissionSecurityIT {
         JdbcTemplate jdbc,
         ObservedRevisionVerifier verifier,
         ObservedReplayPins pins,
-        GuidedPublicationAuthorization authority,
+        DispatchAuthorization authority,
         com.citi.put.checks.studio.dispatch.StudioReferenceResolver references,
         ObservedReplayProperties properties,
         StudioExecutionProperties execution) {
@@ -247,7 +248,7 @@ class ObservedAdmissionSecurityIT {
   @Autowired private StrictInternalBodyReader reader;
   @Autowired private com.citi.put.checks.studio.dispatch.StudioReferenceResolver references;
   @Autowired private ObservedRevisionVerifier verifier;
-  @Autowired private GuidedPublicationAuthorization authority;
+  @Autowired private DispatchAuthorization authority;
   @MockBean private ProgressReportService progress;
   @MockBean private ExecutionControlService control;
   private final HttpClient http =

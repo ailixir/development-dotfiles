@@ -24,6 +24,16 @@ public final class GuidedProposalValidator {
   }
 
   public ObjectNode admitPlan(JsonNode session, JsonNode response, JsonNode learningWindow) {
+    return admitPlan(session, response, learningWindow, null);
+  }
+
+  /**
+   * @param manifestSteps the source manifest's {@code sourceSteps} ({@code stepId} and authored
+   *     {@code text}); the only place a {@code scopeIntent} phrase may come from. Null admits no
+   *     qualified obligation.
+   */
+  public ObjectNode admitPlan(
+      JsonNode session, JsonNode response, JsonNode learningWindow, JsonNode manifestSteps) {
     ObjectNode plan = contracts.object();
     for (String field : java.util.List.of("sourceReferences", "obligations", "needs")) {
       plan.set(field, response.path(field).deepCopy());
@@ -103,10 +113,57 @@ public final class GuidedProposalValidator {
               || !item.path("referenceIndex").isNull() != !item.path("needId").isNull(),
           "MISSING_SOURCE",
           409);
+      requireScopeIntent(plan, item, kind, hasReference, manifestSteps);
       obligation.put("obligationId", UUID.randomUUID().toString());
     }
     require(counts.keySet().equals(steps), "INVALID_CONTRACT", 422);
     return plan;
+  }
+
+  /**
+   * Round 057: {@code scopeIntent} names a containing region and is the model's reading of the
+   * author's own words, so the server only accepts it where the step text says it. Every refusal is
+   * repairable ({@code INVALID_CONTRACT}).
+   */
+  private static void requireScopeIntent(
+      JsonNode plan, JsonNode item, String kind, boolean hasReference, JsonNode manifestSteps) {
+    JsonNode scope = item.path("scopeIntent");
+    if (scope.isNull() || scope.isMissingNode()) {
+      return;
+    }
+    require(scope.isTextual(), "INVALID_CONTRACT", 422);
+    String phrase = scope.asText(), target = item.path("targetIntent").asText();
+    boolean nodeTarget =
+        Set.of("click", "press", "hover", "check", "uncheck", "fill", "selectOption", "read")
+                .contains(kind)
+            || kind.equals("assert")
+                && Set.of("visible", "containsText", "hasValue")
+                    .contains(item.path("predicate").asText());
+    boolean secretFill =
+        kind.equals("fill")
+            && hasReference
+            && plan.path("sourceReferences")
+                .get(item.path("referenceIndex").asInt())
+                .path("kind")
+                .asText()
+                .equals("secretRef");
+    String text = null;
+    if (manifestSteps != null) {
+      for (JsonNode step : manifestSteps) {
+        if (step.path("stepId").equals(item.path("stepId")) && step.path("text").isTextual()) {
+          text = step.path("text").asText();
+        }
+      }
+    }
+    require(
+        nodeTarget
+            && !secretFill
+            && text != null
+            && GuidedActionGuard.containsPhrase(text, phrase)
+            && !GuidedActionGuard.containsPhrase(target, phrase)
+            && !target.equalsIgnoreCase(phrase),
+        "INVALID_CONTRACT",
+        422);
   }
 
   public void sourceMeaning(JsonNode session, JsonNode meaning) {
@@ -170,7 +227,16 @@ public final class GuidedProposalValidator {
   /** Refinement preserves every admitted occurrence; new work is a required private read only. */
   public ObjectNode refinePlan(
       JsonNode session, JsonNode progress, JsonNode old, JsonNode response) {
-    ObjectNode next = admitPlan(session, response);
+    return refinePlan(session, progress, old, response, null);
+  }
+
+  public ObjectNode refinePlan(
+      JsonNode session,
+      JsonNode progress,
+      JsonNode old,
+      JsonNode response,
+      JsonNode manifestSteps) {
+    ObjectNode next = admitPlan(session, response, null, manifestSteps);
     require(
         next.path("sourceReferences").equals(old.path("sourceReferences")),
         "REVISION_CONFLICT",
@@ -236,11 +302,33 @@ public final class GuidedProposalValidator {
       JsonNode context,
       JsonNode originalAttempt,
       long currentPlanRevision) {
-    require(
+    return materializeAction(
+        session,
+        progress,
+        obligation,
+        selection,
+        context,
+        originalAttempt,
+        currentPlanRevision,
+        GuidedRefusalDiagnostics.Capture.NONE);
+  }
+
+  public ObjectNode materializeAction(
+      JsonNode session,
+      JsonNode progress,
+      JsonNode obligation,
+      JsonNode selection,
+      JsonNode context,
+      JsonNode originalAttempt,
+      long currentPlanRevision,
+      GuidedRefusalDiagnostics.Capture capture) {
+    GuidedRefusalDiagnostics.requireCaptured(
         originalAttempt.path("planRevision").asLong(-1) == currentPlanRevision,
         "REVISION_CONFLICT",
-        409);
-    require(
+        409,
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_ORIGINAL_AUTHORITY);
+    GuidedRefusalDiagnostics.requireCaptured(
         originalAttempt.path("scope").equals(session.path("scope"))
             && originalAttempt.path("scopeHash").equals(session.path("scopeHash"))
             && originalAttempt
@@ -252,39 +340,54 @@ public final class GuidedProposalValidator {
                 .path("fence")
                 .equals(session.path("owner").path("fence")),
         "STALE_FENCE",
-        409);
+        409,
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_ORIGINAL_AUTHORITY);
     for (String field :
         java.util.List.of("documentId", "generation", "executionEvidence", "stepIndex")) {
       JsonNode value =
           progress.has(field)
               ? progress.path(field)
               : com.fasterxml.jackson.databind.node.NullNode.instance;
-      require(originalAttempt.path(field).equals(value), "STALE_GENERATION", 409);
+      GuidedRefusalDiagnostics.requireCaptured(
+          originalAttempt.path(field).equals(value),
+          "STALE_GENERATION",
+          409,
+          capture,
+          GuidedRefusalDiagnostics.Gate.NEXT_ORIGINAL_AUTHORITY);
     }
-    require(
+    GuidedRefusalDiagnostics.requireCaptured(
         originalAttempt.path("expectedContextRevision").equals(context.path("contextRevision"))
             && originalAttempt
                 .path("expectedAuthoredInputsHash")
                 .equals(context.path("authoredInputsHash")),
         "REVISION_CONFLICT",
-        409);
+        409,
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_ORIGINAL_AUTHORITY);
     JsonNode step = session.path("sourceSteps").get(progress.path("stepIndex").asInt());
-    require(
+    GuidedRefusalDiagnostics.requireCaptured(
         step != null && step.path("stepId").equals(obligation.path("stepId")),
         "BINDING_ORDER",
-        422);
-    require(
+        422,
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_CURRENT_AUTHORED_STEP);
+    GuidedRefusalDiagnostics.requireCaptured(
         selection.isObject()
             && selection.size() == 2
             && selection.has("target")
             && selection.has("operation"),
         "INVALID_CONTRACT",
-        422);
+        422,
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_SELECTION_SHAPE);
     JsonNode selectedTarget = selection.path("target");
-    require(
+    GuidedRefusalDiagnostics.requireCaptured(
         !selectedTarget.has("documentId") && !selectedTarget.has("generation"),
         "INVALID_CONTRACT",
-        422);
+        422,
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_SELECTION_SHAPE);
     ObjectNode proposal = contracts.object().put("schemaVersion", 3);
     proposal.set("sessionId", session.path("sessionId"));
     proposal.set("scopeHash", session.path("scopeHash"));
@@ -304,7 +407,13 @@ public final class GuidedProposalValidator {
     target.set("generation", progress.path("generation"));
     proposal.set("target", target);
     proposal.set("operation", selection.path("operation"));
-    contracts.validate("v3/action", proposal);
+    GuidedRefusalDiagnostics.call(
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_MATERIALIZE_CONTRACT_CALL,
+        () -> {
+          contracts.validate("v3/action", proposal);
+          return null;
+        });
     return proposal;
   }
 
@@ -315,28 +424,60 @@ public final class GuidedProposalValidator {
       JsonNode obligation,
       JsonNode proposal,
       JsonNode context) {
-    contracts.validate("v3/action", proposal);
-    require(
+    action(
+        session,
+        progress,
+        plan,
+        obligation,
+        proposal,
+        context,
+        GuidedRefusalDiagnostics.Capture.NONE);
+  }
+
+  public void action(
+      JsonNode session,
+      JsonNode progress,
+      JsonNode plan,
+      JsonNode obligation,
+      JsonNode proposal,
+      JsonNode context,
+      GuidedRefusalDiagnostics.Capture capture) {
+    GuidedRefusalDiagnostics.call(
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_ACTION_CONTRACT_CALL,
+        () -> {
+          contracts.validate("v3/action", proposal);
+          return null;
+        });
+    GuidedRefusalDiagnostics.requireCaptured(
         proposal.path("sessionId").equals(session.path("sessionId"))
             && proposal.path("scopeHash").equals(session.path("scopeHash"))
             && proposal.path("coordinate").path("stepId").equals(obligation.path("stepId"))
             && proposal.path("coordinate").path("ordinal").equals(obligation.path("occurrence"))
             && proposal.path("operation").path("kind").equals(obligation.path("operationKind")),
         "INVALID_CONTRACT",
-        422);
-    require(
+        422,
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_ACTION_MEANING);
+    GuidedRefusalDiagnostics.requireCaptured(
         proposal.path("generation").equals(progress.path("generation"))
             && proposal.path("evidenceHash").equals(progress.path("evidenceHash"))
             && proposal.path("executionEvidence").equals(progress.path("executionEvidence")),
         "STALE_GENERATION",
-        409);
+        409,
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_ACTION_EVIDENCE);
     JsonNode target = proposal.path("target");
     if (!java.util.Set.of("page", "passwordControl").contains(target.path("kind").asText())) {
       JsonNode locator = target.path("locator");
       String name =
           locator.path(locator.path("kind").asText().equals("role") ? "name" : "value").asText();
-      require(
-          name.equalsIgnoreCase(obligation.path("targetIntent").asText()), "INVALID_CONTRACT", 422);
+      GuidedRefusalDiagnostics.requireCaptured(
+          name.equalsIgnoreCase(obligation.path("targetIntent").asText()),
+          "INVALID_CONTRACT",
+          422,
+          capture,
+          GuidedRefusalDiagnostics.Gate.NEXT_TARGET_INTENT);
     }
     JsonNode operation = proposal.path("operation");
     String kind = operation.path("kind").asText();
@@ -350,7 +491,7 @@ public final class GuidedProposalValidator {
           inputId = input.path("inputId").asText();
         }
       }
-      require(
+      GuidedRefusalDiagnostics.requireCaptured(
           !inputId.isBlank()
               && (kind.equals("navigate")
                   ? operation.path("destinationInputId").asText().equals(inputId)
@@ -363,27 +504,48 @@ public final class GuidedProposalValidator {
                                   : "authoredLiteral")
                       && value.path("sourceInputId").asText().equals(inputId)),
           "INVALID_CONTRACT",
-          422);
+          422,
+          capture,
+          GuidedRefusalDiagnostics.Gate.NEXT_AUTHORED_SOURCE);
     }
     if (value.path("kind").asText().equals("secretRef")) {
-      require(
+      GuidedRefusalDiagnostics.requireCaptured(
           kind.equals("fill") && target.path("kind").asText().equals("passwordControl"),
           "POLICY_DENIED",
-          422);
+          422,
+          capture,
+          GuidedRefusalDiagnostics.Gate.NEXT_SECRET_POLICY);
       JsonNode input =
-          com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder.unique(
-              context.path("authoredInputs").path("inputs"),
-              "inputId",
-              value.path("sourceInputId").asText());
-      require(
+          GuidedRefusalDiagnostics.call(
+              capture,
+              GuidedRefusalDiagnostics.Gate.NEXT_SECRET_POLICY,
+              () ->
+                  com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder.unique(
+                      context.path("authoredInputs").path("inputs"),
+                      "inputId",
+                      value.path("sourceInputId").asText()));
+      GuidedRefusalDiagnostics.requireCaptured(
           input.path("kind").asText().equals("secretRef")
               && input.path("sourceStepId").equals(proposal.path("coordinate").path("stepId"))
               && input.path("intendedSlot").asText().equals("fill.value"),
           "REFERENCE_MISMATCH",
-          422);
-      refusePasswordFieldCount(progress);
+          422,
+          capture,
+          GuidedRefusalDiagnostics.Gate.NEXT_SECRET_POLICY);
+      GuidedRefusalDiagnostics.call(
+          capture,
+          GuidedRefusalDiagnostics.Gate.NEXT_SECRET_POLICY,
+          () -> {
+            refusePasswordFieldCount(progress);
+            return null;
+          });
     } else {
-      require(!target.path("kind").asText().equals("passwordControl"), "POLICY_DENIED", 422);
+      GuidedRefusalDiagnostics.requireCaptured(
+          !target.path("kind").asText().equals("passwordControl"),
+          "POLICY_DENIED",
+          422,
+          capture,
+          GuidedRefusalDiagnostics.Gate.NEXT_SECRET_POLICY);
     }
     if (!obligation.path("needId").isNull()) {
       String binding = "";
@@ -392,20 +554,24 @@ public final class GuidedProposalValidator {
           binding = need.path("bindingId").asText();
         }
       }
-      require(
+      GuidedRefusalDiagnostics.requireCaptured(
           !binding.isBlank()
               && (kind.equals("read")
                   ? operation.path("bindingId").asText().equals(binding)
                   : value.path("kind").asText().equals("binding")
                       && value.path("bindingId").asText().equals(binding)),
           "BINDING_ORDER",
-          422);
+          422,
+          capture,
+          GuidedRefusalDiagnostics.Gate.NEXT_BINDING_MEANING);
     }
     if (kind.equals("assert")) {
-      require(
+      GuidedRefusalDiagnostics.requireCaptured(
           operation.path("predicate").equals(obligation.path("predicate")),
           "INVALID_CONTRACT",
-          422);
+          422,
+          capture,
+          GuidedRefusalDiagnostics.Gate.NEXT_ASSERTION_PREDICATE);
     }
   }
 

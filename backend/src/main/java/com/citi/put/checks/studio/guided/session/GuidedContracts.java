@@ -118,8 +118,10 @@ public final class GuidedContracts {
       "dace2f2b43be2052997f7fff9c970b18e81b0f7b1931baba5ffd3a07f24f476b";
   // STUDIO-OBS-014 C2a re-epochs replay-validation: ObservedQuestionContext.question $refs
   // clarification.schema.json, which gained labelSource/role/region and two enum values.
+  // STUDIO-OBS-009 round 057 re-epochs it again: every accepted-plan obligation gained the required
+  // nullable scopeIntent (region-qualified step labels; user decision).
   private static final String REPLAY_VALIDATION_SCHEMA_EPOCH =
-      "21d620f377f1d1635fb3c78db2687a299a2980c79f202532217a95456e26e599";
+      "d4d60c1248a7bb4cb0338ce38de51da248b49ebb4bc94dc9d3964d81683fccdf";
 
   private static final String LEDGER_SCHEMA_EPOCH =
       "b1a71bd543c51f4eaebd849f99139d077e475caf3ca90efa84a4c9d9d062b80d";

@@ -295,10 +295,10 @@ public class GuidedSecretLoginMigrationTest {
       assertThat(
               db.jdbc.queryForObject(
                   "SELECT max(version::int) FROM flyway_schema_history", Integer.class))
-          .isEqualTo(22);
+          .isEqualTo(23);
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT count(*) FROM flyway_schema_history WHERE version::int > 22",
+                  "SELECT count(*) FROM flyway_schema_history WHERE version::int > 23",
                   Integer.class))
           .isZero();
       assertThat(Files.exists(Path.of("db/cutover"))).isFalse();

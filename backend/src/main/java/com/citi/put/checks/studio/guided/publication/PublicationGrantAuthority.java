@@ -16,13 +16,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /** Fresh Core authority, explicitly separate for active publication and immutable receipt reads. */
-public final class GuidedPublicationAuthorization {
+public final class PublicationGrantAuthority {
   private final CoreServiceClient core;
   private final CsiOwnershipEvaluator ownership;
   private final Clock clock;
   private final GuidedPublicationProperties properties;
 
-  public GuidedPublicationAuthorization(
+  public PublicationGrantAuthority(
       CoreServiceClient core,
       CsiOwnershipEvaluator ownership,
       Clock clock,

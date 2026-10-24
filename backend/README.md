@@ -116,6 +116,14 @@ both the API and the worker.
 fails visibly when Vertex configuration, credentials, or the model are unavailable. There is no
 passthrough, recorded response, or offline success path.
 
+**Vertex and proxy routing (user clarification, 2026-10-21).** Use Vertex directly for current
+integration work. `STUDIO_GATEWAY_ENDPOINT` is the existing SDK base-URL argument: it can point to
+Vertex directly or to an owner-supplied Vertex-compatible proxy. The provider remains `vertex`,
+using the same client and model request/response contract. Gateway operation and its billing belong
+to the external owners; no separate gateway provider or administration feature is needed here.
+Direct Vertex validation can proceed independently of proxy availability; it establishes results
+for the route actually exercised.
+
 **Ports.** `DEV_BACKEND_PORT`, `DEV_FRONTEND_PORT` and `DEV_STUDIO_RUNNER_PORT` move the three
 listeners (defaults 8080, 5173, 8090). With a non-default frontend port, `dev.sh` adds that origin to
 `CHECKS_CORS_ALLOWED_ORIGINS`, because otherwise every browser POST gets `403 Invalid CORS request`.

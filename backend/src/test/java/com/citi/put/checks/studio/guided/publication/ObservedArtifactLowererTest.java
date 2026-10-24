@@ -12,6 +12,8 @@ import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTes
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.citi.put.checks.studio.dispatch.DispatchAuthorization;
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -114,37 +116,40 @@ class ObservedArtifactLowererTest {
         .thenReturn(java.net.http.HttpClient.Redirect.NEVER);
     var tokenCalls = new java.util.concurrent.atomic.AtomicInteger();
     var client =
-        new ObservedValidationClient(
+        new HttpRunnerDispatchClient(
             java.net.URI.create("http://localhost"),
             http,
             () -> {
               tokenCalls.incrementAndGet();
               return "controlled-local-token";
             },
-            checked,
-            new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608));
+            checked);
     org.mockito.Mockito.clearInvocations(http);
     var now = Instant.parse("2026-10-12T12:00:00Z");
     var expired =
         new PublicationBudget(
             now.minusMillis(1), java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
-    assertThatThrownBy(() -> client.validate(request, expired)).hasMessage("EXPIRED");
+    assertThatThrownBy(() -> client.validate(request, expired, 8388608, 15000))
+        .hasMessage("EXPIRED");
     assertThat(tokenCalls.get()).isEqualTo(1);
-    assertThatThrownBy(() -> client.validate(request.deepCopy().put("unexpected", true), expired))
+    assertThatThrownBy(
+            () ->
+                client.validate(
+                    request.deepCopy().put("unexpected", true), expired, 8388608, 15000))
         .hasMessage("INVALID_CONTRACT");
     assertThat(tokenCalls.get()).isEqualTo(1);
     var tight =
-        new ObservedValidationClient(
+        new HttpRunnerDispatchClient(
             java.net.URI.create("http://localhost"),
             http,
             () -> {
               tokenCalls.incrementAndGet();
               return "controlled-local-token";
             },
-            checked,
-            new GuidedPublicationProperties(true, 3, 15000, 5000, 1));
+            checked);
     org.mockito.Mockito.clearInvocations(http);
-    assertThatThrownBy(() -> tight.validate(request, expired)).hasMessage("BUDGET_EXCEEDED");
+    assertThatThrownBy(() -> tight.validate(request, expired, 1, 15000))
+        .hasMessage("BUDGET_EXCEEDED");
     assertThat(tokenCalls.get()).isEqualTo(1);
     org.mockito.Mockito.verifyNoInteractions(http);
   }
@@ -162,18 +167,14 @@ class ObservedArtifactLowererTest {
     org.mockito.Mockito.when(http.followRedirects())
         .thenReturn(java.net.http.HttpClient.Redirect.NEVER);
     var client =
-        new ObservedValidationClient(
-            java.net.URI.create("http://localhost"),
-            http,
-            () -> "controlled-local-token",
-            checked,
-            new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608));
+        new HttpRunnerDispatchClient(
+            java.net.URI.create("http://localhost"), http, () -> "controlled-local-token", checked);
     var now = Instant.parse("2026-10-12T12:00:00Z");
     var expired =
         new PublicationBudget(
             now.minusMillis(1), java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
     org.mockito.Mockito.clearInvocations(http);
-    assertThatThrownBy(() -> client.validate(checked.object(), expired))
+    assertThatThrownBy(() -> client.validate(checked.object(), expired, 8388608, 15000))
         .hasMessage("INVALID_CONTRACT");
     // Existing void-path refusal stub must still win over an already-expired budget.
     org.mockito.Mockito.doThrow(new GuidedSessionException("INVALID_CONTRACT", 422))
@@ -182,7 +183,7 @@ class ObservedArtifactLowererTest {
             org.mockito.ArgumentMatchers.eq("v3/replay-validation"),
             org.mockito.ArgumentMatchers.any());
     org.mockito.Mockito.clearInvocations(http);
-    assertThatThrownBy(() -> client.validate(checked.object(), expired))
+    assertThatThrownBy(() -> client.validate(checked.object(), expired, 8388608, 15000))
         .hasMessage("INVALID_CONTRACT");
     org.mockito.Mockito.verify(checked, org.mockito.Mockito.times(2))
         .validate(
@@ -386,7 +387,7 @@ class ObservedArtifactLowererTest {
             })
         .when(access)
         .checkCurrent(org.mockito.ArgumentMatchers.any());
-    var validator = org.mockito.Mockito.mock(ObservedValidationClient.class);
+    var validator = org.mockito.Mockito.mock(HttpRunnerDispatchClient.class);
     var publisher =
         new GuidedPlanPublisher(
             sessions,
@@ -398,7 +399,7 @@ class ObservedArtifactLowererTest {
             checked,
             pins,
             validator,
-            org.mockito.Mockito.mock(GuidedPublicationAuthorization.class),
+            org.mockito.Mockito.mock(DispatchAuthorization.class),
             access,
             new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608),
             new ObservedReplayProperties(
@@ -1061,7 +1062,7 @@ class ObservedArtifactLowererTest {
     }
     // Current unchanged independently authored choice vector, not the reconstructed manifest.
     assertThat(independent.path("hashes").path("artifactHash").asText())
-        .isEqualTo("d846a0ca41fa432dd9ac7e87bf6d7cb36c37d96fc5fd64dee6d0ad1815dbb7b8");
+        .isEqualTo("b4a66254ffed31ef2f21ba08cd1d555faa19471064e1558c3dd4b503699deae3");
     assertThat(hash(candidate.artifact()))
         .isEqualTo(independent.path("hashes").path("artifactHash").asText());
     assertThat(

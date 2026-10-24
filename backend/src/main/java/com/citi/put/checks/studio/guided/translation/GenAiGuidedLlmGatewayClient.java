@@ -32,9 +32,25 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
 
   @Override
   public GuidedModelResponse propose(GuidedModelRequest request, GuidedCallBudget budget) {
+    return propose(request, budget, GuidedRefusalDiagnostics.Capture.NONE);
+  }
+
+  @Override
+  public GuidedModelResponse propose(
+      GuidedModelRequest request,
+      GuidedCallBudget budget,
+      GuidedRefusalDiagnostics.Capture capture) {
     var properties = transport.properties();
     Integer inputTokens = null;
     Integer outputTokens = null;
+    // Stage flags classify a failure into a closed persisted token; no message is ever read.
+    boolean authenticating = false;
+    boolean generating = false;
+    boolean usageFailed = false;
+    // Decided before the send: the per-send cap is strictly the shortest limit on that send.
+    boolean capBound = false;
+    // Whether the single network send received response headers (closed boolean from the lease).
+    boolean responseStarted = false;
     try {
       budget.remaining();
       String payload = payload(request);
@@ -57,29 +73,44 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
         if (lease == null) {
           return result(GuidedModelResponse.Code.BUSY, null, null);
         }
+        authenticating = true;
         lease.authenticate();
+        authenticating = false;
         Duration left = budget.remaining();
-        int timeout =
-            (int)
-                Math.max(
-                    1,
-                    Math.min(
-                        Integer.MAX_VALUE,
-                        Math.min(left.toMillis(), properties.requestTimeout().toMillis())));
+        long otherLimit = Math.min(left.toMillis(), properties.requestTimeout().toMillis());
+        long cap = budget.sendCap() == null ? Long.MAX_VALUE : budget.sendCap().toMillis();
+        capBound = cap < otherLimit;
+        int timeout = (int) Math.max(1, Math.min(Integer.MAX_VALUE, Math.min(otherLimit, cap)));
         boolean system = properties.providerFeatures().systemInstruction();
-        GenerateContentResponse raw =
-            lease.generate(
-                system ? payload : request.outputContract() + "\n\n" + payload,
-                config(request, timeout, system),
-                true);
-        Usage usage = reportedUsage(raw);
+        generating = true;
+        GenerateContentResponse raw;
+        try {
+          raw =
+              lease.generate(
+                  system ? payload : request.outputContract() + "\n\n" + payload,
+                  config(request, timeout, system),
+                  true);
+        } finally {
+          responseStarted = lease.responseStarted();
+        }
+        generating = false;
+        Usage usage;
+        try {
+          usage = reportedUsage(raw);
+        } catch (RuntimeException failure) {
+          usageFailed = true;
+          GuidedRefusalDiagnostics.record(capture, GuidedRefusalDiagnostics.Gate.ADAPTER_USAGE);
+          throw failure;
+        }
         inputTokens = usage.input();
         outputTokens = usage.output();
         if (raw.candidates().isEmpty() || raw.candidates().get().size() != 1) {
+          GuidedRefusalDiagnostics.record(capture, GuidedRefusalDiagnostics.Gate.ADAPTER_CANDIDATE);
           return result(GuidedModelResponse.Code.INVALID_RESPONSE, inputTokens, outputTokens);
         }
         var candidate = raw.candidates().get().getFirst();
         if (!candidate.finishReason().map(Object::toString).filter("STOP"::equals).isPresent()) {
+          GuidedRefusalDiagnostics.record(capture, GuidedRefusalDiagnostics.Gate.ADAPTER_FINISH);
           return result(GuidedModelResponse.Code.INVALID_RESPONSE, inputTokens, outputTokens);
         }
         List<Part> parts = candidate.content().flatMap(Content::parts).orElse(List.of());
@@ -95,6 +126,7 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
               || part.codeExecutionResult().isPresent()
               || part.inlineData().isPresent()
               || part.fileData().isPresent()) {
+            GuidedRefusalDiagnostics.record(capture, GuidedRefusalDiagnostics.Gate.ADAPTER_CONTENT);
             return result(GuidedModelResponse.Code.INVALID_RESPONSE, inputTokens, outputTokens);
           }
           String fragment = part.text().get();
@@ -106,7 +138,11 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
         }
         // Avoid SDK text()/finish helpers: they may log provider prose for unusual responses.
         try {
-          var proposal = parser.parse(request, text.toString().getBytes(StandardCharsets.UTF_8));
+          byte[] response = text.toString().getBytes(StandardCharsets.UTF_8);
+          var proposal =
+              capture == GuidedRefusalDiagnostics.Capture.NONE
+                  ? parser.parse(request, response)
+                  : parser.parse(request, response, capture);
           budget.remaining();
           return new GuidedModelResponse(
               GuidedModelResponse.Code.OK, proposal, inputTokens, outputTokens, properties.model());
@@ -128,16 +164,59 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
       }
       boolean timeout =
           failure instanceof CancellationException || GenAiGatewayTransport.isTimeout(failure);
+      // Read before remaining(), which itself marks an elapsed deadline as cancelled.
+      boolean cancelledEarlier = budget.cancelled();
+      boolean deadlineHit = false;
       try {
         budget.remaining();
       } catch (CancellationException cancelled) {
-        timeout = true;
+        deadlineHit = true;
       }
-      return result(
-          timeout ? GuidedModelResponse.Code.TIMEOUT : GuidedModelResponse.Code.TRANSPORT,
+      if (timeout && generating && capBound && !responseStarted && !cancelledEarlier) {
+        // The cap was the binding limit, it expired, and no response headers had arrived: a
+        // pre-response stall. The coordinator may make a fresh, fully charged attempt. A timeout
+        // after headers (mid-body), with a non-binding cap, or after a cancellation stays TIMEOUT.
+        return new GuidedModelResponse(
+            GuidedModelResponse.Code.TRANSPORT,
+            null,
+            inputTokens,
+            outputTokens,
+            transport.properties().model(),
+            GuidedModelResponse.Reason.TRANSPORT_STALL);
+      }
+      if (timeout || deadlineHit) {
+        return result(GuidedModelResponse.Code.TIMEOUT, inputTokens, outputTokens);
+      }
+      GuidedModelResponse.Reason reason =
+          authenticating
+              ? GuidedModelResponse.Reason.TRANSPORT_CREDENTIAL
+              : usageFailed
+                  ? GuidedModelResponse.Reason.TRANSPORT_USAGE
+                  : generating
+                      ? transportReason(failure)
+                      : GuidedModelResponse.Reason.TRANSPORT_OTHER;
+      return new GuidedModelResponse(
+          GuidedModelResponse.Code.TRANSPORT,
+          null,
           inputTokens,
-          outputTokens);
+          outputTokens,
+          transport.properties().model(),
+          reason);
     }
+  }
+
+  /** Buckets a send failure by exception type and integer HTTP status only. */
+  private static GuidedModelResponse.Reason transportReason(Throwable failure) {
+    return switch (GenAiGatewayTransport.transportFailure(failure)) {
+      case CONNECT -> GuidedModelResponse.Reason.TRANSPORT_CONNECT;
+      case HTTP_429 -> GuidedModelResponse.Reason.TRANSPORT_HTTP_429;
+      case HTTP_503 -> GuidedModelResponse.Reason.TRANSPORT_HTTP_503;
+      case HTTP_400 -> GuidedModelResponse.Reason.TRANSPORT_HTTP_400;
+      case HTTP_401_403 -> GuidedModelResponse.Reason.TRANSPORT_HTTP_401_403;
+      case HTTP_4XX -> GuidedModelResponse.Reason.TRANSPORT_HTTP_4XX;
+      case HTTP_5XX -> GuidedModelResponse.Reason.TRANSPORT_HTTP_5XX;
+      case OTHER -> GuidedModelResponse.Reason.TRANSPORT_OTHER;
+    };
   }
 
   private String payload(GuidedModelRequest request) throws JsonProcessingException {

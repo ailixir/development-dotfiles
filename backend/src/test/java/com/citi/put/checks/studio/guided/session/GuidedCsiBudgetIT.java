@@ -51,6 +51,9 @@ class GuidedCsiBudgetIT {
   static void properties(DynamicPropertyRegistry registry) {
     ObservedPublicationFixture.register(registry);
     registry.add("studio.guided-authoring.csi-budget.max-concurrent-sessions", () -> "1");
+    // The default is unlimited (user decision 2026-10-23); these tests exercise the finite cap.
+    registry.add("studio.guided-authoring.csi-budget.daily-model-input-tokens", () -> "5242880");
+    registry.add("studio.guided-authoring.csi-budget.daily-model-output-tokens", () -> "640000");
     registry.add(
         "studio.guided-authoring.translation.applications",
         () -> ObservedPublicationFixture.APPLICATION);
@@ -233,6 +236,36 @@ class GuidedCsiBudgetIT {
             () -> new GuidedCsiBudgetProperties(0, 5_242_880, 640_000).requireFits(session))
         .isInstanceOf(IllegalStateException.class);
     new GuidedCsiBudgetProperties(3, 5_242_880, 640_000).requireFits(session);
+  }
+
+  @Test
+  void unlimitedDailyTokensNeverRefuseAndANegativeValueIsRefusedAtStartup() {
+    var unlimited = new GuidedCsiBudgetProperties(3, 0, 0);
+    var session = new GuidedSessionProperties(true, Map.of());
+    unlimited.requireFits(session);
+    assertThatThrownBy(() -> new GuidedCsiBudgetProperties(3, -1, 0).requireFits(session))
+        .isInstanceOf(IllegalStateException.class);
+
+    String spent = "C" + UUID.randomUUID().toString().substring(0, 12);
+    new StudioExecutionFixtures(jdbc).seedCsi(spent, owner);
+    jdbc.update(
+        "INSERT INTO studio_guided_csi_token_days(csi_id,budget_day,input_tokens,output_tokens)"
+            + " VALUES (?,(clock_timestamp() AT TIME ZONE 'UTC')::date,?,?)",
+        spent,
+        limits.dailyModelInputTokens() * 10,
+        limits.dailyModelOutputTokens() * 10);
+    var open = new GuidedCsiBudget(jdbc, unlimited);
+    var tx =
+        new org.springframework.transaction.support.TransactionTemplate(
+            new org.springframework.jdbc.datasource.DataSourceTransactionManager(dataSource));
+    tx.executeWithoutResult(s -> open.admitStart(spent));
+    assertThat(charge(tx, () -> open.charge(spent, 1_000_000, 1_000_000)))
+        .as("no gate, no cap: far past the finite default")
+        .isTrue();
+    var capped = new GuidedCsiBudget(jdbc, new GuidedCsiBudgetProperties(3, 5_242_880, 640_000));
+    assertThatThrownBy(() -> tx.executeWithoutResult(s -> capped.admitStart(spent)))
+        .as("the same day is refused under a finite cap")
+        .isInstanceOf(GuidedSessionException.class);
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────

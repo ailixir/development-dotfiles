@@ -1,4 +1,4 @@
-package com.citi.put.checks.studio.guided.publication;
+package com.citi.put.checks.studio.dispatch;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -15,6 +15,9 @@ import com.citi.put.checks.security.CoreServiceClient;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
+import com.citi.put.checks.studio.guided.publication.GuidedPublicationProperties;
+import com.citi.put.checks.studio.guided.publication.PublicationContracts;
+import com.citi.put.checks.studio.guided.publication.PublicationGrantAuthority;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,12 +36,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 /**
  * Real uncached Core HTTP calls; cached BFF ownership cannot replace current publication authority.
  */
-class GuidedPublicationAuthorizationIT {
+class DispatchAuthorizationIT {
   private static final String COOKIE = "synthetic-core-cookie-only";
   private final GuidedContracts contracts = new GuidedContracts();
   private final Instant now = Instant.parse("2026-10-09T12:00:00.123456789Z");
   private WireMockServer core;
-  private GuidedPublicationAuthorization authorization;
+  private ProvisionalDispatchAuthorization authorization;
   private BffAuthenticationToken owner;
   private MockHttpServletRequest request;
 
@@ -46,8 +49,8 @@ class GuidedPublicationAuthorizationIT {
   void start() {
     core = new WireMockServer(WireMockConfiguration.options().dynamicPort());
     core.start();
-    authorization =
-        new GuidedPublicationAuthorization(
+    var authority =
+        new PublicationGrantAuthority(
             new CoreServiceClient(
                 new CoreServiceProperties(
                     core.baseUrl(), new CoreServiceProperties.Timeout(500, 500)),
@@ -56,6 +59,11 @@ class GuidedPublicationAuthorizationIT {
             Clock.fixed(now, ZoneOffset.UTC),
             new GuidedPublicationProperties(
                 true, 3, 15000, 5000, PublicationContracts.MAX_VALIDATION_BYTES));
+    authorization = new ProvisionalDispatchAuthorization(null, null);
+    var beans = new org.springframework.beans.factory.support.DefaultListableBeanFactory();
+    beans.registerSingleton("publicationGrantAuthority", authority);
+    authorization.initializePublicationAuthority(
+        beans.getBeanProvider(PublicationGrantAuthority.class));
     owner =
         new BffAuthenticationToken(
             new UserIdentity(
@@ -189,5 +197,26 @@ class GuidedPublicationAuthorizationIT {
           .isInstanceOf(GuidedSessionException.class)
           .hasMessage("INVALID_CONTRACT");
     }
+  }
+
+  @Test
+  void workerWithoutPublicationCollaboratorRefusesEveryPublicationOperation() {
+    var worker = new ProvisionalDispatchAuthorization(null, null);
+    var beans = new org.springframework.beans.factory.support.DefaultListableBeanFactory();
+    worker.initializePublicationAuthority(beans.getBeanProvider(PublicationGrantAuthority.class));
+    for (org.assertj.core.api.ThrowableAssert.ThrowingCallable operation :
+        List.<org.assertj.core.api.ThrowableAssert.ThrowingCallable>of(
+            () -> worker.fresh(owner, request, "owner", "1234", true),
+            () -> worker.authorizePublication(owner, request, null, null),
+            () -> worker.authorizeReceiptRead(owner, request, receipt()))) {
+      assertThatThrownBy(operation)
+          .isInstanceOfSatisfying(
+              GuidedSessionException.class,
+              failure -> {
+                assertThat(failure.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
+                assertThat(failure.status()).isEqualTo(409);
+              });
+    }
+    core.verify(0, getRequestedFor(urlEqualTo("/api/v1/users/me")));
   }
 }

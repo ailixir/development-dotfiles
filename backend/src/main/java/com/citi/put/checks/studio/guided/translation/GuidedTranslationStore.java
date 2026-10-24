@@ -2,6 +2,8 @@ package com.citi.put.checks.studio.guided.translation;
 
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
+import com.citi.put.checks.studio.guided.diagnostics.GuidedGuardProvenance;
+import com.citi.put.checks.studio.guided.diagnostics.GuidedGuardProvenance.Guard;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -409,21 +411,35 @@ public final class GuidedTranslationStore {
         409);
   }
 
+  /**
+   * What an acquisition waits for: the bare label, plus the qualifying region and the pinned
+   * locator when the obligation has them. An unqualified obligation keeps its original value.
+   */
+  static JsonNode acquisitionTarget(JsonNode obligation) {
+    boolean qualified = obligation.path("scopeIntent").isTextual();
+    if (!qualified && !obligation.has("selectedLocator")) {
+      return obligation.path("targetIntent");
+    }
+    var identity =
+        com.fasterxml.jackson.databind.node.JsonNodeFactory.instance
+            .arrayNode()
+            .add(obligation.path("targetIntent"));
+    if (qualified) {
+      identity.add(obligation.path("scopeIntent"));
+    }
+    if (obligation.has("selectedLocator")) {
+      identity.add(obligation.path("selectedLocator"));
+    }
+    return identity;
+  }
+
   private static void acquisitionIdentity(
       ObjectNode active, JsonNode session, JsonNode state, JsonNode obligation) {
     active
         .put("planRevision", state.path("planRevision").asText())
         .put("planHash", GuidedContracts.hash(state.path("plan")))
         .put("obligationId", obligation.path("obligationId").asText())
-        .put(
-            "targetIntentHash",
-            GuidedContracts.hash(
-                obligation.has("selectedLocator")
-                    ? com.fasterxml.jackson.databind.node.JsonNodeFactory.instance
-                        .arrayNode()
-                        .add(obligation.path("targetIntent"))
-                        .add(obligation.path("selectedLocator"))
-                    : obligation.path("targetIntent")));
+        .put("targetIntentHash", GuidedContracts.hash(acquisitionTarget(obligation)));
     active.set("workerId", session.path("owner").path("workerId"));
     active.set("ownerFence", session.path("owner").path("fence"));
   }
@@ -451,6 +467,8 @@ public final class GuidedTranslationStore {
       require(reserved > 0 && reserved <= active.path("usedMs").asLong(), "INVALID_CONTRACT", 422);
       if (now.isBefore(acquisitionInstant(window, "lastCheckedAt"))
           || !acquisitionInstant(window, "deadline").isAfter(now)) {
+        GuidedGuardProvenance.observe(
+            Guard.ACQUISITION_WINDOW, () -> current.document().path("sessionId").asText());
         saveAcquisition(current, marker);
         return acquisitionResult(AcquisitionDisposition.REFUSED, "BUDGET_EXCEEDED");
       }
@@ -497,6 +515,8 @@ public final class GuidedTranslationStore {
                           current.document().path("owner").path("leaseExpiresAt").asText()))
                   .toMillis());
       if (remaining <= 0) {
+        GuidedGuardProvenance.observe(
+            Guard.ACQUISITION_REMAINING, () -> current.document().path("sessionId").asText());
         saveAcquisition(current, marker);
         return acquisitionResult(AcquisitionDisposition.REFUSED, "BUDGET_EXCEEDED");
       }
@@ -526,6 +546,8 @@ public final class GuidedTranslationStore {
         || limits.path("maxSanitizedEvidenceBytesTotal").asLong()
                 - counts.path("sanitizedEvidenceBytes").asLong()
             < limits.path("maxObservationBytes").asLong()) {
+      GuidedGuardProvenance.observe(
+          Guard.ACQUISITION_POLL_LIMITS, () -> current.document().path("sessionId").asText());
       saveAcquisition(current, marker);
       return acquisitionResult(AcquisitionDisposition.REFUSED, "BUDGET_EXCEEDED");
     }
@@ -608,6 +630,8 @@ public final class GuidedTranslationStore {
         409);
     if (!acquisitionInstant(window, "deadline").isAfter(now)
         || now.isBefore(acquisitionInstant(window, "lastCheckedAt"))) {
+      GuidedGuardProvenance.observe(
+          Guard.ACQUISITION_SETTLEMENT_WINDOW, () -> current.document().path("sessionId").asText());
       saveAcquisition(current, marker);
       return acquisitionResult(AcquisitionDisposition.REFUSED, "BUDGET_EXCEEDED");
     }
@@ -1083,6 +1107,41 @@ public final class GuidedTranslationStore {
     return !rows.isEmpty() && rows.getFirst();
   }
 
+  /**
+   * Closed persisted rejection reasons: every provider-result token plus the guided codes an apply
+   * refusal may carry. This Java allowlist is the authority for membership; the V23 CHECK only
+   * bounds the shape.
+   */
+  private static final Set<String> APPLY_REASONS =
+      Set.of(
+          "INVALID_CONTRACT",
+          "REFERENCE_MISMATCH",
+          "BINDING_ORDER",
+          "POLICY_DENIED",
+          "MISSING_SOURCE",
+          "INSUFFICIENT_EVIDENCE",
+          "EVIDENCE_MISMATCH",
+          "RUNTIME_INCOMPATIBLE",
+          "STALE_GENERATION",
+          "REVISION_CONFLICT",
+          "BUDGET_EXCEEDED");
+
+  private static final Set<String> REJECTION_REASONS;
+
+  static {
+    var reasons = new java.util.HashSet<>(APPLY_REASONS);
+    reasons.add("APPLY_OTHER");
+    for (GuidedModelResponse.Reason reason : GuidedModelResponse.Reason.values()) {
+      reasons.add(reason.name());
+    }
+    REJECTION_REASONS = Set.copyOf(reasons);
+  }
+
+  /** Maps an apply-side refusal code to its closed reason; anything unlisted is APPLY_OTHER. */
+  static String applyRejectionReason(String refusalCode) {
+    return refusalCode != null && APPLY_REASONS.contains(refusalCode) ? refusalCode : "APPLY_OTHER";
+  }
+
   public void finishAttempt(
       String sessionId,
       String attemptId,
@@ -1090,10 +1149,29 @@ public final class GuidedTranslationStore {
       JsonNode safeResult,
       Integer inputTokens,
       Integer outputTokens) {
+    finishAttempt(sessionId, attemptId, status, safeResult, inputTokens, outputTokens, null);
+  }
+
+  /**
+   * @param rejectionReason a closed token, allowed only with status REJECTED; null otherwise
+   */
+  public void finishAttempt(
+      String sessionId,
+      String attemptId,
+      String status,
+      JsonNode safeResult,
+      Integer inputTokens,
+      Integer outputTokens,
+      String rejectionReason) {
     transaction();
     requireNotPruned(sessionId);
     require(
         Set.of("APPLIED", "REJECTED", "SUPERSEDED", "UNKNOWN_CALL").contains(status),
+        "INVALID_CONTRACT",
+        422);
+    require(
+        rejectionReason == null
+            || status.equals("REJECTED") && REJECTION_REASONS.contains(rejectionReason),
         "INVALID_CONTRACT",
         422);
     usage(inputTokens, outputTokens);
@@ -1102,10 +1180,11 @@ public final class GuidedTranslationStore {
     }
     var rows =
         jdbc.query(
-            "SELECT status,safe_result::text,input_tokens,output_tokens FROM"
+            "SELECT status,safe_result::text,input_tokens,output_tokens,rejection_reason FROM"
                 + " studio_guided_model_attempts WHERE session_id=? AND attempt_id=?",
             (rs, n) -> {
               ObjectNode row = contracts.object().put("status", rs.getString(1));
+              row.put("reason", rs.getString(5));
               row.set(
                   "result",
                   rs.getString(2) == null
@@ -1138,19 +1217,24 @@ public final class GuidedTranslationStore {
               && java.util.Objects.equals(
                   old.path("input").isNull() ? null : old.path("input").asInt(), inputTokens)
               && java.util.Objects.equals(
-                  old.path("output").isNull() ? null : old.path("output").asInt(), outputTokens),
+                  old.path("output").isNull() ? null : old.path("output").asInt(), outputTokens)
+              && java.util.Objects.equals(
+                  old.path("reason").isNull() ? null : old.path("reason").asText(),
+                  rejectionReason),
           "IDEMPOTENCY_CONFLICT",
           409);
       return;
     }
     jdbc.update(
         "UPDATE studio_guided_model_attempts SET"
-            + " status=?,safe_result=?::jsonb,input_tokens=?,output_tokens=?,updated_at=clock_timestamp()"
+            + " status=?,safe_result=?::jsonb,input_tokens=?,output_tokens=?,rejection_reason=?,"
+            + "updated_at=clock_timestamp()"
             + " WHERE session_id=? AND attempt_id=?",
         status,
         safeResult == null || safeResult.isNull() ? null : safeResult.toString(),
         inputTokens,
         outputTokens,
+        rejectionReason,
         sessionId,
         attemptId);
   }
@@ -1378,8 +1462,8 @@ public final class GuidedTranslationStore {
         "SELECT t.session_id FROM studio_guided_translation_state t JOIN studio_guided_sessions s"
             + " USING(session_id) WHERE t.continuation NOT IN"
             + " ('AWAITING_CLARIFICATION','FINALIZING','STOPPED') AND s.state NOT IN"
-            + " ('SUCCEEDED','PUBLICATION_CONFLICT','FAILED','UNKNOWN_OUTCOME','CANCELLED','EXPIRED',"
-            + "'AWAITING_CLARIFICATION')"
+            + " ('SUCCEEDED','PUBLICATION_CONFLICT','FAILED','UNKNOWN_OUTCOME',"
+            + "'CANCELLED','EXPIRED','AWAITING_CLARIFICATION')"
             + " AND s.expires_at>clock_timestamp() ORDER BY t.updated_at,t.session_id LIMIT ?",
         String.class,
         limit);

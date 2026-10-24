@@ -34,6 +34,11 @@ class GuidedTranslationMigrationTest {
     final GuidedClarificationContextStore questions;
 
     Database() {
+      this(null);
+    }
+
+    /** {@code atV22} runs on a populated V22 schema, before V23 is applied. */
+    Database(java.util.function.Consumer<Database> atV22) {
       postgres.start();
       source =
           new DriverManagerDataSource(
@@ -52,7 +57,71 @@ class GuidedTranslationMigrationTest {
       store = new GuidedTranslationStore(jdbc, C);
       questions = new GuidedClarificationContextStore(jdbc, C);
       seed("existing");
+      if (atV22 != null) {
+        Flyway.configure()
+            .dataSource(source)
+            .locations("classpath:db/migration")
+            .target("22")
+            .load()
+            .migrate();
+        atV22.accept(this);
+      }
       Flyway.configure().dataSource(source).locations("classpath:db/migration").load().migrate();
+    }
+
+    GuidedTranslationStore.Attempt reserve(ObjectNode doc, String request, int number) {
+      return tx.execute(
+          s -> {
+            sessions.lock(doc.path("sessionId").asText());
+            return store.reserveAttempt(
+                doc,
+                request,
+                number,
+                "SOURCE_PLAN",
+                "b".repeat(64),
+                0,
+                50,
+                10,
+                "translator",
+                Instant.now().plusSeconds(90));
+          });
+    }
+
+    void claim(ObjectNode doc, GuidedTranslationStore.Attempt attempt) {
+      tx.executeWithoutResult(
+          s -> {
+            sessions.lock(doc.path("sessionId").asText());
+            assertThat(
+                    store.claimSend(
+                        doc.path("sessionId").asText(),
+                        attempt.attemptId(),
+                        "translator",
+                        Instant.now()))
+                .isTrue();
+          });
+    }
+
+    void finish(
+        ObjectNode doc, GuidedTranslationStore.Attempt attempt, String status, String reason) {
+      tx.executeWithoutResult(
+          s -> {
+            sessions.lock(doc.path("sessionId").asText());
+            store.finishAttempt(
+                doc.path("sessionId").asText(),
+                attempt.attemptId(),
+                status,
+                null,
+                null,
+                null,
+                reason);
+          });
+    }
+
+    String reasonOf(GuidedTranslationStore.Attempt attempt) {
+      return jdbc.queryForObject(
+          "SELECT rejection_reason FROM studio_guided_model_attempts WHERE attempt_id=?",
+          String.class,
+          attempt.attemptId());
     }
 
     ObjectNode seed(String id) {
@@ -172,6 +241,7 @@ class GuidedTranslationMigrationTest {
         .put("occurrence", 0)
         .put("operationKind", "click")
         .put("targetIntent", "Submit")
+        .putNull("scopeIntent")
         .putNull("referenceIndex")
         .putNull("needId")
         .putNull("predicate");
@@ -488,6 +558,91 @@ class GuidedTranslationMigrationTest {
       assertThat(
               db.tx.execute(s -> db.store.obligation("s", OBLIGATION)).path("admissionId").asText())
           .isEqualTo("admission");
+    }
+  }
+
+  /** Round 053 obligation 10: V22 to V23 keeps every existing attempt, with no reason. */
+  @Test
+  void v23UpgradeKeepsExistingAttemptsWithNoRejectionReason() {
+    ObjectNode[] old = new ObjectNode[1];
+    try (Database db =
+        new Database(
+            before -> {
+              old[0] = before.seed("old");
+              before.init(old[0]);
+              var attempt = before.reserve(old[0], "old-request", 1);
+              before.claim(old[0], attempt);
+              // V22 has no reason column: the pre-V23 terminal transition is the V19 six-column
+              // form.
+              before.jdbc.update(
+                  "UPDATE studio_guided_model_attempts SET status='REJECTED',"
+                      + "updated_at=clock_timestamp() WHERE attempt_id=?",
+                  attempt.attemptId());
+            })) {
+      assertThat(
+              db.jdbc.queryForList(
+                  "SELECT status||'/'||COALESCE(rejection_reason,'NULL') FROM"
+                      + " studio_guided_model_attempts WHERE session_id='old'",
+                  String.class))
+          .containsExactly("REJECTED/NULL");
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT data_type||'/'||character_maximum_length||'/'||is_nullable FROM"
+                      + " information_schema.columns WHERE table_name='studio_guided_model_attempts'"
+                      + " AND column_name='rejection_reason'",
+                  String.class))
+          .isEqualTo("character varying/40/YES");
+    }
+  }
+
+  /** Round 053 obligation 11: the reason is idempotent, conflict-checked and allowlisted. */
+  @Test
+  void finishAttemptRecordsTheClosedReasonIdempotentlyAndRefusesUnknownTokens() {
+    try (Database db = new Database()) {
+      ObjectNode doc = db.seed("s");
+      db.init(doc);
+      var attempt = db.reserve(doc, "r", 1);
+      db.claim(doc, attempt);
+      assertThatThrownBy(() -> db.finish(doc, attempt, "REJECTED", "NOT_A_REASON"))
+          .hasMessageContaining("INVALID_CONTRACT");
+      assertThatThrownBy(() -> db.finish(doc, attempt, "APPLIED", "TRANSPORT_HTTP_503"))
+          .hasMessageContaining("INVALID_CONTRACT");
+      assertThatThrownBy(() -> db.finish(doc, attempt, "REJECTED", "transport_http_503"))
+          .hasMessageContaining("INVALID_CONTRACT");
+      assertThat(db.reasonOf(attempt)).isNull();
+      db.finish(doc, attempt, "REJECTED", "TRANSPORT_HTTP_503");
+      assertThat(db.reasonOf(attempt)).isEqualTo("TRANSPORT_HTTP_503");
+      db.finish(doc, attempt, "REJECTED", "TRANSPORT_HTTP_503");
+      assertThatThrownBy(() -> db.finish(doc, attempt, "REJECTED", "TRANSPORT_HTTP_429"))
+          .hasMessageContaining("IDEMPOTENCY_CONFLICT");
+      assertThatThrownBy(() -> db.finish(doc, attempt, "REJECTED", null))
+          .hasMessageContaining("IDEMPOTENCY_CONFLICT");
+      assertThat(db.reasonOf(attempt)).isEqualTo("TRANSPORT_HTTP_503");
+    }
+  }
+
+  @Test
+  void everyProviderReasonAndApplyRefusalCodeIsAcceptedAndAnythingElseMapsToApplyOther() {
+    try (Database db = new Database()) {
+      ObjectNode doc = db.seed("s");
+      db.init(doc);
+      int number = 0;
+      for (var reason : GuidedModelResponse.Reason.values()) {
+        // One live attempt at a time: each is finished before the next is reserved.
+        var attempt = db.reserve(doc, "r-" + reason, 1);
+        db.claim(doc, attempt);
+        db.finish(doc, attempt, "REJECTED", reason.name());
+        assertThat(db.reasonOf(attempt)).isEqualTo(reason.name());
+        number++;
+      }
+      assertThat(number).isEqualTo(GuidedModelResponse.Reason.values().length);
+      assertThat(GuidedTranslationStore.applyRejectionReason("REFERENCE_MISMATCH"))
+          .isEqualTo("REFERENCE_MISMATCH");
+      assertThat(GuidedTranslationStore.applyRejectionReason("INVALID_CONTRACT"))
+          .isEqualTo("INVALID_CONTRACT");
+      assertThat(GuidedTranslationStore.applyRejectionReason("a provider sentence with <var>"))
+          .isEqualTo("APPLY_OTHER");
+      assertThat(GuidedTranslationStore.applyRejectionReason(null)).isEqualTo("APPLY_OTHER");
     }
   }
 

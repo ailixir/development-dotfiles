@@ -9,6 +9,7 @@ import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.citi.put.checks.studio.gateway.GenAiGatewayTransport;
@@ -18,7 +19,6 @@ import com.citi.put.checks.studio.guided.bridge.GuidedBindingStore;
 import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
 import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
 import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
 import com.citi.put.checks.studio.guided.translation.CredentialPatternScreen;
 import com.citi.put.checks.studio.guided.translation.GenAiGuidedLlmGatewayClient;
 import com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore;
@@ -36,8 +36,6 @@ import com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationService;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
 import com.citi.put.checks.studio.support.RunnerProcessHarness;
-import com.citi.put.checks.studio.support.RunnerTestTls;
-import com.citi.put.checks.studio.support.RunnerTestTls.Identity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -50,16 +48,10 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
-import java.security.Signature;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -70,10 +62,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import javax.net.ssl.SSLContext;
 import javax.sql.DataSource;
-import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -95,7 +84,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * STUDIO-OBS-015 (aria-bridge-ruling01 §4): the joined bridge cases that need a positive admission,
@@ -121,50 +109,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
       "spring.jpa.hibernate.ddl-auto=none"
     })
 class GuidedBridgePlannedIT {
-  static final GuidedContracts CONTRACTS = new GuidedContracts();
-  static final PostgreSQLContainer<?> DATABASE = new PostgreSQLContainer<>("postgres:15-alpine");
-  static final Path TEMP;
-  static final Path DIST;
-  static final RunnerTestTls RUNNER_TLS;
-
-  /** The backend's identity toward the runner: also the guided runner client's context. */
-  static final SSLContext TLS;
-
-  /** What the runner (a worker calling the backend, or a double standing in for it) presents. */
-  static final SSLContext RUNNER_SIDE;
-
-  static final KeyPair ISSUER;
-  static final int RUNNER_PORT;
-  static final HttpServer APPLICATION;
-  static final AtomicInteger NAVIGATIONS = new AtomicInteger(), CONNECTIONS = new AtomicInteger();
-  static final AtomicReference<String> RECEIPT = new AtomicReference<>();
-  static final String CAPTURE = "  independent-" + UUID.randomUUID() + "-é😀  ";
-  static final String PASSWORD_ECHO = "password-canary-" + UUID.randomUUID();
-  static final String ORDINARY_ECHO = "  ordinary-canary-" + UUID.randomUUID() + "  ";
-  static final AtomicInteger ECHO_NAVIGATIONS = new AtomicInteger(),
-      TOGGLE_ATTEMPTS = new AtomicInteger();
-  static volatile boolean privacyEcho, nativeToggle;
-  static final String CONFIG_INPUT = "configured-" + UUID.randomUUID();
-  static final String ORIGIN;
-  static volatile boolean replaceTarget,
-      wideSession,
-      genericRead,
-      belowFold,
-      multiStep,
-      dropCompletionCallbacks;
-  static volatile boolean failClaims, corruptClaimResponse;
-  static final java.util.concurrent.atomic.AtomicBoolean HOLD_NEXT_REFRESH =
-      new java.util.concurrent.atomic.AtomicBoolean();
-  static volatile CountDownLatch refreshCallbackHeld = new CountDownLatch(1),
-      releaseRefreshCallback = new CountDownLatch(1);
-  static volatile long slowNavigationMillis;
-  static final java.util.concurrent.atomic.AtomicBoolean HOLD_NEXT_CLAIM =
-      new java.util.concurrent.atomic.AtomicBoolean();
-  static volatile CountDownLatch claimResponseCaptured = new CountDownLatch(1);
-  static volatile CountDownLatch releaseClaimResponse = new CountDownLatch(1);
-  static final AtomicInteger MUTATIONS = new AtomicInteger();
-  static final AtomicInteger CLICK_RECEIPTS = new AtomicInteger();
-  static final AtomicInteger FILL_RECEIPTS = new AtomicInteger();
+  static final GuidedBridgeFixture ENV;
 
   // aria-bridge-ruling01 N5: the controlled model provider (R-2). It only selects.
   static final HttpServer PROVIDER;
@@ -183,199 +128,21 @@ class GuidedBridgePlannedIT {
 
   static {
     try {
-      TEMP = Files.createTempDirectory("guided-bridge-planned-");
-      // STUDIO-OBS-009 AC-12 i: no private copy of dist. The harness spawns the real folded entry
-      // point and records the digest of what it spawned; the sole rebuild is the F-merge's.
-      DIST = RunnerProcessHarness.defaultDistDirectory().toAbsolutePath().normalize();
-      ObjectNode workerEvidence = CONTRACTS.object().put("snapshot", DIST.toString());
-      workerEvidence.put("distDigest", RunnerProcessHarness.distDigestOf(DIST));
-      ObjectNode hashes = workerEvidence.putObject("sha256");
-      for (String relative :
-          List.of(
-              "main.js",
-              "run/browser.js",
-              "guided/runtime.js",
-              "guided/transport.js",
-              "guided/schemas.json")) {
-        hashes.put(
-            relative,
-            HexFormat.of()
-                .formatHex(
-                    MessageDigest.getInstance("SHA-256")
-                        .digest(Files.readAllBytes(DIST.resolve(relative)))));
-      }
-      hashes.put(
-          "scripts/browser-provenance.mjs",
-          HexFormat.of()
-              .formatHex(
-                  MessageDigest.getInstance("SHA-256")
-                      .digest(
-                          Files.readAllBytes(
-                              Path.of("../studio-runner/scripts/browser-provenance.mjs")))));
-      Files.writeString(
-          Path.of("/tmp/studio-obs015-bridge-planned-worker.json"), workerEvidence.toString());
-      // One test CA (lane D3.0): the runner and the backend certificates chain to it, the runner
-      // pins
-      // the backend certificate, and the backend trusts only the CA.
-      RUNNER_TLS = RunnerTestTls.shared();
-      TLS = RUNNER_TLS.backendTls().sslContext();
-      RUNNER_SIDE =
-          RUNNER_TLS.serverContext(
-              Identity.RUNNER, RUNNER_TLS.trustStore(), RUNNER_TLS.trustStorePasswordFile());
-      var generator = KeyPairGenerator.getInstance("RSA");
-      generator.initialize(2048);
-      ISSUER = generator.generateKeyPair();
-      Files.writeString(
-          TEMP.resolve("issuer.pub"),
-          "-----BEGIN PUBLIC KEY-----\n"
-              + Base64.getMimeEncoder(64, new byte[] {10})
-                  .encodeToString(ISSUER.getPublic().getEncoded())
-              + "\n-----END PUBLIC KEY-----\n");
-      // AC-12 h: an exclusive bind on both loopback families, outside the database range.
-      RUNNER_PORT = RunnerProcessHarness.exclusivelyFreePort();
-      APPLICATION = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-      ORIGIN = "http://127.0.0.1:" + APPLICATION.getAddress().getPort();
-      APPLICATION.createContext(
-          "/connect",
-          exchange -> {
-            CONNECTIONS.incrementAndGet();
-            byte[] body = "controlled-public-fixture-account".getBytes(StandardCharsets.UTF_8);
-            exchange.sendResponseHeaders(200, body.length);
-            exchange.getResponseBody().write(body);
-            exchange.close();
-          });
-      APPLICATION.createContext(
-          "/start",
-          exchange -> {
-            NAVIGATIONS.incrementAndGet();
-            if (slowNavigationMillis > 0) {
-              try {
-                Thread.sleep(slowNavigationMillis);
-              } catch (InterruptedException failure) {
-                Thread.currentThread().interrupt();
-              }
-            }
-            String html =
-                "<html><body><main aria-label='Operations'><output aria-label='Order number' "
-                    + "data-testid='source'>"
-                    + CAPTURE
-                    + "</output></main><input aria-label='Destination' data-testid='destination' "
-                    + "oninput=\"fetch('/receipt',{method:'POST',body:this.value})\"><button "
-                    + "data-testid='replace' onclick=\"document.querySelector('[data-testid=destin"
-                    + "ation]').outerHTML='<input data-testid=destination "
-                    + "aria-label=Destination>'\">Replace</button><script>setInterval(async()=>{if"
-                    + "(await (await fetch('/mutation')).text()==='yes'){document.querySelector('["
-                    + "data-testid=destination]').outerHTML='<input data-testid=destination "
-                    + "aria-label=Destination>';await "
-                    + "fetch('/mutated',{method:'POST'});}},25)</script></body></html>";
-            if (genericRead) {
-              html =
-                  "<html><body><main aria-label='Operations'>"
-                      + "<output aria-label='Order reference'>"
-                      + CAPTURE
-                      + "</output>"
-                      + "<label>Destination<textarea oninput=\"fetch('/receipt',"
-                      + "{method:'POST',body:this.value})\"></textarea></label>"
-                      + "</main></body></html>";
-            }
-            if (privacyEcho) {
-              html =
-                  "<html><body><input type='password' aria-label='Login secret' value='"
-                      + PASSWORD_ECHO
-                      + "'><input aria-label='Ordinary input' value='"
-                      + ORDINARY_ECHO
-                      + "'></body></html>";
-            }
-            if (nativeToggle) {
-              html =
-                  "<html><body><input type='checkbox' aria-label='Prevented toggle' "
-                      + "onclick=\"event.preventDefault();fetch('/toggle',{method:'POST'})\">"
-                      + "<input type='radio' checked aria-label='Selected radio' "
-                      + "onclick=\"fetch('/toggle',{method:'POST'})\"></body></html>";
-            }
-            if (belowFold) {
-              html =
-                  html.replace(
-                      "</body>",
-                      "<div style='height:2200px'></div>"
-                          + "<button aria-label='Continue' onclick=\"fetch('/clicked',"
-                          + "{method:'POST'})\">Continue</button></body>");
-            }
-            byte[] body = html.getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
-            exchange.sendResponseHeaders(200, body.length);
-            exchange.getResponseBody().write(body);
-            exchange.close();
-          });
-      APPLICATION.createContext(
-          "/echo",
-          exchange -> {
-            ECHO_NAVIGATIONS.incrementAndGet();
-            byte[] bytes =
-                ("<html><body><button>"
-                        + PASSWORD_ECHO
-                        + "</button><button>"
-                        + ORDINARY_ECHO.strip()
-                        + "</button></body></html>")
-                    .getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
-            exchange.sendResponseHeaders(200, bytes.length);
-            exchange.getResponseBody().write(bytes);
-            exchange.close();
-          });
-      APPLICATION.createContext(
-          "/toggle",
-          exchange -> {
-            TOGGLE_ATTEMPTS.incrementAndGet();
-            exchange.sendResponseHeaders(204, -1);
-            exchange.close();
-          });
-      APPLICATION.createContext(
-          "/receipt",
-          exchange -> {
-            FILL_RECEIPTS.incrementAndGet();
-            RECEIPT.set(
-                new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
-            exchange.sendResponseHeaders(204, -1);
-            exchange.close();
-          });
-      APPLICATION.createContext(
-          "/mutation",
-          exchange -> {
-            byte[] body = (replaceTarget ? "yes" : "no").getBytes(StandardCharsets.UTF_8);
-            exchange.sendResponseHeaders(200, body.length);
-            exchange.getResponseBody().write(body);
-            exchange.close();
-          });
-      APPLICATION.createContext(
-          "/mutated",
-          exchange -> {
-            replaceTarget = false;
-            MUTATIONS.incrementAndGet();
-            exchange.sendResponseHeaders(204, -1);
-            exchange.close();
-          });
-      APPLICATION.createContext(
-          "/clicked",
-          exchange -> {
-            if (exchange.getRequestMethod().equals("POST")) {
-              CLICK_RECEIPTS.incrementAndGet();
-            }
-            exchange.sendResponseHeaders(204, -1);
-            exchange.close();
-          });
+      ENV =
+          new GuidedBridgeFixture(
+              "guided-bridge-planned-", Path.of("/tmp/studio-obs015-bridge-planned-worker.json"));
       PROVIDER = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
       PROVIDER.createContext(
           "/",
           exchange -> {
             try {
               JsonNode wire =
-                  CONTRACTS.parse(
+                  ENV.contracts.parse(
                       new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
               JsonNode request =
-                  CONTRACTS.parse(
+                  ENV.contracts.parse(
                       wire.path("contents").get(0).path("parts").get(0).path("text").asText());
-              ObjectNode envelope = CONTRACTS.object();
+              ObjectNode envelope = ENV.contracts.object();
               envelope
                   .putArray("candidates")
                   .addObject()
@@ -401,15 +168,7 @@ class GuidedBridgePlannedIT {
             }
           });
       PROVIDER.start();
-      APPLICATION.start();
-      DATABASE.start();
-      // STUDIO-OBS-012A / ADR-SC-005 D-B: the re-baselined schema head (core V1–V11 + V12–V18).
-      Flyway.configure()
-          .dataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword())
-          .locations("classpath:db/migration")
-          .target("22") // STUDIO-OBS-014 S3: governance tables (V19) at head
-          .load()
-          .migrate();
+      ENV.start();
     } catch (Exception failure) {
       throw new ExceptionInInitializerError(failure);
     }
@@ -417,13 +176,7 @@ class GuidedBridgePlannedIT {
 
   @DynamicPropertySource
   static void properties(DynamicPropertyRegistry registry) {
-    RunnerProcessHarness.backendServerSslProperties(RUNNER_TLS)
-        .forEach((name, value) -> registry.add(name, () -> value));
-    registry.add(
-        "studio.guided-authoring.service-public-key",
-        () -> Base64.getEncoder().encodeToString(ISSUER.getPublic().getEncoded()));
-    registry.add("studio.guided-authoring.service-issuer", () -> "fixture-issuer");
-    registry.add("studio.guided-authoring.mtls-required", () -> true);
+    ENV.properties(registry);
   }
 
   /**
@@ -444,85 +197,34 @@ class GuidedBridgePlannedIT {
     @Bean
     org.springframework.boot.web.servlet.FilterRegistrationBean<jakarta.servlet.Filter>
         completionFault() {
-      jakarta.servlet.Filter filter =
-          (request, response, chain) -> {
-            String uri = ((jakarta.servlet.http.HttpServletRequest) request).getRequestURI();
-            var http = (jakarta.servlet.http.HttpServletResponse) response;
-            String callbackKey =
-                ((jakarta.servlet.http.HttpServletRequest) request).getHeader("Idempotency-Key");
-            if (uri.endsWith("/observations")
-                && callbackKey != null
-                && callbackKey.startsWith("oref-")
-                && HOLD_NEXT_REFRESH.compareAndSet(true, false)) {
-              refreshCallbackHeld.countDown();
-              try {
-                releaseRefreshCallback.await(10, TimeUnit.SECONDS);
-              } catch (InterruptedException failure) {
-                Thread.currentThread().interrupt();
-              }
-            }
-            if (dropCompletionCallbacks && (uri.endsWith("/outcomes") || uri.endsWith("/lifecycle"))
-                || failClaims && uri.endsWith("/claim")) {
-              http.setStatus(503);
-              return;
-            }
-            if (uri.endsWith("/claim") && (corruptClaimResponse || HOLD_NEXT_CLAIM.get())) {
-              var buffered = new org.springframework.web.util.ContentCachingResponseWrapper(http);
-              chain.doFilter(request, buffered);
-              if (buffered.getStatus() == 202 && corruptClaimResponse) {
-                ObjectNode grant =
-                    (ObjectNode)
-                        CONTRACTS.parse(
-                            new String(buffered.getContentAsByteArray(), StandardCharsets.UTF_8));
-                grant
-                    .withObject("/owner")
-                    .put("fence", grant.path("owner").path("fence").asInt() + 1);
-                byte[] changed = grant.toString().getBytes(StandardCharsets.UTF_8);
-                buffered.resetBuffer();
-                buffered.setContentLength(changed.length);
-                buffered.getOutputStream().write(changed);
-              }
-              if (buffered.getStatus() == 202 && HOLD_NEXT_CLAIM.compareAndSet(true, false)) {
-                claimResponseCaptured.countDown();
-                try {
-                  releaseClaimResponse.await(15, TimeUnit.SECONDS);
-                } catch (InterruptedException failure) {
-                  Thread.currentThread().interrupt();
-                }
-              }
-              buffered.copyBodyToResponse();
-              return;
-            }
-            chain.doFilter(request, response);
-          };
-      return new org.springframework.boot.web.servlet.FilterRegistrationBean<>(filter);
+      return ENV.completionFault();
     }
 
     @Bean
     DataSource dataSource() {
       return new DriverManagerDataSource(
-          DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword());
+          ENV.database.getJdbcUrl(), ENV.database.getUsername(), ENV.database.getPassword());
     }
 
     @Bean
     GuidedContracts contracts() {
-      return CONTRACTS;
+      return ENV.contracts;
     }
 
     /** JDBC and JPA (StudioRepository.findByIdForUpdate) share one transaction. */
     @Bean
     GuidedSessionRepository repository(JdbcTemplate jdbc, PlatformTransactionManager manager) {
-      return new GuidedSessionRepository(jdbc, new TransactionTemplate(manager), CONTRACTS);
+      return new GuidedSessionRepository(jdbc, new TransactionTemplate(manager), ENV.contracts);
     }
 
     @Bean
     GuidedTranslationStore translationStore(JdbcTemplate jdbc) {
-      return new GuidedTranslationStore(jdbc, CONTRACTS);
+      return new GuidedTranslationStore(jdbc, ENV.contracts);
     }
 
     @Bean
     GuidedClarificationContextStore questions(JdbcTemplate jdbc) {
-      return new GuidedClarificationContextStore(jdbc, CONTRACTS);
+      return new GuidedClarificationContextStore(jdbc, ENV.contracts);
     }
 
     @Bean
@@ -533,17 +235,17 @@ class GuidedBridgePlannedIT {
 
     @Bean
     GuidedSourceSnapshotRepository snapshots(StudioRepository repository) {
-      return new GuidedSourceSnapshotRepository(repository, CONTRACTS);
+      return new GuidedSourceSnapshotRepository(repository, ENV.contracts);
     }
 
     @Bean
     GuidedSourceClassifier classifier(GuidedTranslationProperties props) {
-      return new GuidedSourceClassifier(CONTRACTS, props, new CredentialPatternScreen());
+      return new GuidedSourceClassifier(ENV.contracts, props, new CredentialPatternScreen());
     }
 
     @Bean
     GuidedSourceInputResolver inputs() {
-      return new GuidedSourceInputResolver(CONTRACTS);
+      return new GuidedSourceInputResolver(ENV.contracts);
     }
 
     @Bean
@@ -553,7 +255,7 @@ class GuidedBridgePlannedIT {
 
     private com.citi.put.checks.studio.guided.publication.ObservedReplayPins fixturePins() {
       var policy =
-          CONTRACTS
+          ENV.contracts
               .object()
               .put("version", 1)
               .put("policyId", "fixture-policy")
@@ -561,11 +263,11 @@ class GuidedBridgePlannedIT {
               .put("applicationId", "orders")
               .put("environment", "fixture")
               .put("entryPolicyId", "blank");
-      policy.putArray("allowedOrigins").add(ORIGIN);
+      policy.putArray("allowedOrigins").add(ENV.origin);
       policy.putArray("rules");
       policy.putNull("applicationPolicy");
       return new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
-          CONTRACTS,
+          ENV.contracts,
           new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
               true, 30000, 1048576, 4194304, 2097152, "[]", "[" + policy + "]", 1280, 720));
     }
@@ -593,7 +295,7 @@ class GuidedBridgePlannedIT {
 
     @Bean
     GuidedMaterializationService materialization(JdbcTemplate jdbc) {
-      return new GuidedMaterializationService(jdbc, CONTRACTS);
+      return new GuidedMaterializationService(jdbc, ENV.contracts);
     }
 
     @Bean
@@ -607,22 +309,22 @@ class GuidedBridgePlannedIT {
       var service =
           new GuidedSessionService(
               repository,
-              CONTRACTS,
+              ENV.contracts,
               access,
               new GuidedSessionProperties(true, Map.of()),
               Clock.systemUTC());
       service.installBridge(
           materialization,
-          new GuidedPreparationStore(jdbc, CONTRACTS),
-          new GuidedBindingStore(jdbc, CONTRACTS, materialization),
-          new GuidedAssignmentStore(jdbc, CONTRACTS));
+          new GuidedPreparationStore(jdbc, ENV.contracts),
+          new GuidedBindingStore(jdbc, ENV.contracts, materialization),
+          new GuidedAssignmentStore(jdbc, ENV.contracts));
       service.installTranslation(store, questions);
       service.installEvidence(
           new com.citi.put.checks.studio.guided.evidence.RecordedGuidedEvidenceProjection(
               new com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceRepository(jdbc),
               new com.citi.put.checks.studio.guided.evidence.GuidedRecordingProperties(null),
               false,
-              CONTRACTS));
+              ENV.contracts));
       // STUDIO-OBS-014 S3: one uniform governed policy for the class (ar-mounted-rules B14); the
       // migrated reads rely on its business-read grant.
       com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
@@ -631,25 +333,25 @@ class GuidedBridgePlannedIT {
           "CSI-123",
           "orders",
           "fixture",
-          java.util.List.of(ORIGIN),
+          java.util.List.of(ENV.origin),
           governedPolicy());
       return service;
     }
 
     @Bean
-    GuidedRunnerClient runner() {
-      return new GuidedRunnerClient(
-          URI.create("https://127.0.0.1:" + RUNNER_PORT),
-          TLS,
+    HttpRunnerDispatchClient runner() {
+      return new HttpRunnerDispatchClient(
+          URI.create("https://127.0.0.1:" + ENV.runnerPort),
+          ENV.tls,
           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
-          CONTRACTS);
+          ENV.contracts);
     }
 
     @Bean
     GuidedDispatchService dispatch(
         GuidedSessionService sessions,
         GuidedMaterializationService materialization,
-        GuidedRunnerClient runner) {
+        HttpRunnerDispatchClient runner) {
       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
       sessions.installStopSender(dispatch::stop);
       return dispatch;
@@ -676,7 +378,7 @@ class GuidedBridgePlannedIT {
 
     @Bean
     GuidedLlmGatewayClient gateway(GenAiGatewayTransport transport) {
-      return new GenAiGuidedLlmGatewayClient(transport, new GuidedResponseParser(CONTRACTS));
+      return new GenAiGuidedLlmGatewayClient(transport, new GuidedResponseParser(ENV.contracts));
     }
 
     @Bean
@@ -698,10 +400,10 @@ class GuidedBridgePlannedIT {
               questions,
               dispatch,
               gateway,
-              CONTRACTS,
-              new GuidedPromptAssembler(CONTRACTS),
+              ENV.contracts,
+              new GuidedPromptAssembler(ENV.contracts),
               inputs,
-              new GuidedProposalValidator(CONTRACTS),
+              new GuidedProposalValidator(ENV.contracts),
               new GuidedDependencyPlanner(sessions),
               properties,
               Clock.systemUTC());
@@ -717,28 +419,7 @@ class GuidedBridgePlannedIT {
    * behaves as "no grants" there.
    */
   static ObjectNode governedPolicy() {
-    ObjectNode policy =
-        CONTRACTS
-            .object()
-            .put("policyRuleId", "structural-policy")
-            .put("allowStructuralDiscovery", true);
-    ObjectNode grant =
-        CONTRACTS.object().put("policyRuleId", "business-read").put("origin", ORIGIN);
-    grant
-        .putObject("region")
-        .put("kind", "role")
-        .put("role", "main")
-        .put("name", "Operations")
-        .put("exact", true);
-    grant.putObject("visibleText").put("classification", "permittedBusinessData");
-    grant
-        .putObject("controlValue")
-        .put("classification", "nonsecretApproved")
-        .putArray("types")
-        .add("text")
-        .add("textarea");
-    policy.putArray("readGrants").add(grant);
-    return policy;
+    return ENV.governedPolicy();
   }
 
   /**
@@ -752,7 +433,7 @@ class GuidedBridgePlannedIT {
     String kind = request.path("kind").asText();
     PROVIDER_KINDS.add(kind);
     ObjectNode response =
-        CONTRACTS
+        ENV.contracts
             .object()
             .put("schemaVersion", 3)
             .put("kind", kind)
@@ -807,12 +488,13 @@ class GuidedBridgePlannedIT {
   static ObjectNode obligation(
       String step, int occurrence, String kind, String target, Integer reference, String need) {
     ObjectNode item =
-        CONTRACTS
+        ENV.contracts
             .object()
             .put("stepId", step)
             .put("occurrence", occurrence)
             .put("operationKind", kind)
             .put("targetIntent", target)
+            .putNull("scopeIntent")
             .putNull("predicate");
     if (reference == null) {
       item.putNull("referenceIndex");
@@ -830,7 +512,7 @@ class GuidedBridgePlannedIT {
   /** The single authored step; the configuration case declares and references a plain input. */
   static String sourceText() {
     return "Visit "
-        + ORIGIN
+        + ENV.origin
         + "/start then copy the displayed order into Destination and type fixture-input."
         + (configuredInput ? " Use <var config>." : "");
   }
@@ -840,7 +522,7 @@ class GuidedBridgePlannedIT {
   @Autowired GuidedSessionRepository repository;
   @Autowired GuidedMaterializationService materialization;
   @Autowired GuidedDispatchService dispatch;
-  @Autowired GuidedRunnerClient runner;
+  @Autowired HttpRunnerDispatchClient runner;
   @Autowired JdbcTemplate jdbc;
   @Autowired DataSource fixtureDataSource;
   @Autowired GuidedTranslationStore store;
@@ -866,52 +548,12 @@ class GuidedBridgePlannedIT {
 
   @BeforeEach
   void startWorker(org.junit.jupiter.api.TestInfo testInfo) throws Exception {
-    String testName = testInfo.getTestMethod().orElseThrow().getName();
-    privacyEcho =
-        testName.equals(
-            "uncapturedPasswordAndInputEchoesStayPrivateAcrossActualDocumentNavigation");
-    nativeToggle =
-        testName.equals("preventedNativeToggleNeverCommitsSuccessOrRetries")
-            || testName.equals("nativeRadioUncheckIsRefusedBeforeAnyBrowserAttempt");
-    ECHO_NAVIGATIONS.set(0);
-    TOGGLE_ATTEMPTS.set(0);
-    genericRead =
-        testInfo
-            .getTestMethod()
-            .orElseThrow()
-            .getName()
-            .equals("configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules");
-    belowFold =
-        testInfo
-            .getTestMethod()
-            .orElseThrow()
-            .getName()
-            .equals("belowFoldClickUsesNativeRevealAndOneReceipt");
-    CLICK_RECEIPTS.set(0);
-    FILL_RECEIPTS.set(0);
-    multiStep =
-        testInfo
-            .getTestMethod()
-            .orElseThrow()
-            .getName()
-            .equals("freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer");
-    genericRead = genericRead || multiStep;
-    String isolatedDatabase = "bridge_" + UUID.randomUUID().toString().replace("-", "");
-    var admin =
-        new DriverManagerDataSource(
-            DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword());
-    new JdbcTemplate(admin).execute("CREATE DATABASE " + isolatedDatabase);
-    ((DriverManagerDataSource) fixtureDataSource)
-        .setUrl(DATABASE.getJdbcUrl().replace(DATABASE.getDatabaseName(), isolatedDatabase));
-    Flyway.configure()
-        .dataSource(fixtureDataSource)
-        .locations("classpath:db/migration")
-        .load()
-        .migrate();
+    String testName = ENV.prepareScenario(testInfo);
+    ENV.isolateDatabase(fixtureDataSource);
     // STUDIO-OBS-014 S3b: each test runs on a freshly migrated isolated database, so the class's
     // approved governed policy is seeded here; the bean-time seed only reached the base database.
     com.citi.put.checks.studio.support.ObservedPublicationFixture.seedPolicy(
-        jdbc, "CSI-123", "orders", "fixture", List.of(ORIGIN), governedPolicy(), "ALLOW");
+        jdbc, "CSI-123", "orders", "fixture", List.of(ENV.origin), governedPolicy(), "ALLOW");
     // aria-bridge-ruling01 N6: the real source of truth is one ui_tests row (planning IT shape).
     configuredInput =
         testName.equals("authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly");
@@ -939,97 +581,56 @@ class GuidedBridgePlannedIT {
         testId,
         mapper.writeValueAsString(List.of(sourceText())),
         configuredInput
-            ? "[{\"name\":\"config\",\"kind\":\"plain\",\"value\":\"" + CONFIG_INPUT + "\"}]"
+            ? "[{\"name\":\"config\",\"kind\":\"plain\",\"value\":\"" + ENV.configInput + "\"}]"
             : "[]",
         mapper.writeValueAsString(authoring),
         mapper.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of())));
-    HOLD_NEXT_REFRESH.set(false);
-    refreshCallbackHeld = new CountDownLatch(1);
-    releaseRefreshCallback = new CountDownLatch(1);
-    dropCompletionCallbacks = false;
-    failClaims = false;
-    corruptClaimResponse = false;
-    slowNavigationMillis = 0;
-    HOLD_NEXT_CLAIM.set(false);
-    claimResponseCaptured = new CountDownLatch(1);
-    releaseClaimResponse = new CountDownLatch(1);
-    NAVIGATIONS.set(0);
-    CONNECTIONS.set(0);
-    RECEIPT.set(null);
-    replaceTarget = false;
-    wideSession = false;
-    MUTATIONS.set(0);
-    Files.writeString(
-        TEMP.resolve("worker.jwt"), token("owning-worker", "worker-1", "studio-guided-controller"));
-    Path journal = Files.createTempDirectory(TEMP, "journal-");
+    ENV.resetWorkerState();
+    Path journal = ENV.prepareWorkerJournal();
     // STUDIO-OBS-014 S3 (RK-2, ar-mounted-rules): the worker is given neither `rules` nor
     // `applicationPolicy`; the class's governed policy (governedPolicy()) is frozen into each
     // session and reaches the worker in the hash-bound context. This record is what the runner was
     // configured with (no secret); the runner refuses any key it does not enumerate.
     ObjectNode config =
-        CONTRACTS
+        ENV.contracts
             .object()
             .put("workerId", "worker-1")
             .put("host", "127.0.0.1")
-            .put("port", RUNNER_PORT)
+            .put("port", ENV.runnerPort)
             .put("journalDirectory", journal.toString())
             .put("controllerIssuer", "fixture-issuer")
             .put("controllerSubject", "controller-1")
             .put("callbackBaseUrl", "https://localhost:" + backendPort);
-    Files.writeString(TEMP.resolve("worker.json"), config.toString());
+    Files.writeString(ENV.temp.resolve("worker.json"), config.toString());
     // STUDIO-OBS-009 AC-3 / AC-12 h: the one folded entry point over TLS, spawned and reaped by the
     // harness. STUDIO-OBS-013/014 S3: a per-class object store, never a shared default directory.
-    workerHarness =
-        RunnerProcessHarness.builder(RUNNER_TLS)
-            .port(RUNNER_PORT)
-            .workDirectory(Files.createTempDirectory(TEMP, "runner-"))
-            .callbackBaseUrl("https://localhost:" + backendPort)
-            .env(RunnerProcessHarness.KEY_OBJECT_STORE_DIR, TEMP.resolve("objects").toString())
-            .guided(
-                new RunnerProcessHarness.Guided(
-                    "worker-1",
-                    journal,
-                    "fixture-issuer",
-                    "controller-1",
-                    TEMP.resolve("issuer.pub"),
-                    "https://localhost:" + backendPort,
-                    TEMP.resolve("worker.jwt")))
-            .start();
+    workerHarness = ENV.startWorker(journal, backendPort);
     workerHarness.awaitReady(Duration.ofSeconds(60));
   }
 
   @AfterEach
   void closeWorker() throws Exception {
-    releaseClaimResponse.countDown();
-    releaseRefreshCallback.countDown();
+    ENV.releaseClaimResponse.countDown();
+    ENV.releaseRefreshCallback.countDown();
     var harness = workerHarness;
     workerHarness = null;
-    if (harness != null) {
-      // AC-11 k / I-T1: stop the runner and everything it left. The privacy oracle reads the log
-      // first; then a clean exit is asserted (exit 0, no force within the guided grace) and no
-      // survivor.
-      var report = harness.teardown();
-      assertThat(Files.readString(harness.logFile()))
-          .doesNotContain(CAPTURE, PASSWORD_ECHO, ORDINARY_ECHO.strip());
-      report.assertNoSurvivors();
-      report.assertCleanExit();
-    }
+    ENV.closeWorker(harness);
     // aria-bridge-ruling01 §4.5: the controlled model only ever plans and selects.
     assertThat(PROVIDER_KINDS).isSubsetOf("SOURCE_PLAN", "NEXT_ACTION");
   }
 
   @AfterAll
   static void close() {
-    APPLICATION.stop(0);
+    ENV.application.stop(0);
     PROVIDER.stop(0);
-    DATABASE.stop();
+    ENV.database.stop();
   }
 
   @Test
   void realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch() throws Exception {
     String id = plannedSession(planDataflow());
-    assertThat(CONNECTIONS.get()).isEqualTo(1);
-    assertThat(NAVIGATIONS.get()).isZero();
+    assertThat(ENV.connections.get()).isEqualTo(1);
+    assertThat(ENV.navigations.get()).isZero();
     JsonNode blank = progress(id).path("executionEvidence");
     assertThat(blank.path("origin").isNull()).isTrue();
     assertThat(blank.path("kind").asText()).isEqualTo("initialBlank");
@@ -1038,17 +639,17 @@ class GuidedBridgePlannedIT {
     JsonNode navigateAssociation = reserve(id, navigate);
     JsonNode first = admit(id, navigateAssociation);
     JsonNode firstConsumed = advance(id, first, "first");
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(ENV.navigations.get()).isEqualTo(1);
     assertThat(progress(id).path("executionEvidence").path("kind").asText())
         .isEqualTo("observedDocument");
     assertThat(advance(id, first, "first").path("dispatchCount").asInt()).isEqualTo(1);
     assertThat(advance(id, first, "new-key").path("dispatchCount").asInt()).isEqualTo(1);
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(ENV.navigations.get()).isEqualTo(1);
     String binding = bindingId(id, "order");
     ObjectNode premature = proposal(id, 1, "fill", "destination");
     premature
         .withObject("/operation")
-        .set("value", CONTRACTS.object().put("kind", "binding").put("bindingId", binding));
+        .set("value", ENV.contracts.object().put("kind", "binding").put("bindingId", binding));
     // Negative probe (R-4): a hand-crafted consumer before its producer is refused.
     JsonNode refusedOrder =
         post(
@@ -1065,7 +666,7 @@ class GuidedBridgePlannedIT {
         .put("bindingId", binding)
         .set(
             "recipe",
-            CONTRACTS
+            ENV.contracts
                 .object()
                 .put("kind", "visibleText")
                 .put("classification", "permittedBusinessData")
@@ -1081,13 +682,13 @@ class GuidedBridgePlannedIT {
     ObjectNode callback = materialization.identity(sessions.runnerContext(controller, id, 1));
     callback.set(
         "ledger",
-        CONTRACTS.parse(
+        ENV.contracts.parse(
             jdbc.queryForObject(
                 "SELECT document::text FROM studio_guided_actions WHERE admission_id=?",
                 String.class,
                 readLedger.path("admission").path("admissionId").asText())));
     JsonNode receipt =
-        CONTRACTS
+        ENV.contracts
             .parse(
                 jdbc.queryForObject(
                     "SELECT document::text FROM studio_guided_producers WHERE session_id=?",
@@ -1116,7 +717,7 @@ class GuidedBridgePlannedIT {
         token("owning-worker", "worker-1", "studio-guided-controller"),
         409);
     ObjectNode valueLeak = callback.deepCopy();
-    valueLeak.withObject("/availability").put("value", CAPTURE);
+    valueLeak.withObject("/availability").put("value", ENV.capture);
     JsonNode refused =
         post(
             id,
@@ -1125,14 +726,77 @@ class GuidedBridgePlannedIT {
             "private-value",
             token("owning-worker", "worker-1", "studio-guided-controller"),
             422);
-    assertThat(refused.toString()).doesNotContain(CAPTURE);
+    assertThat(refused.toString()).doesNotContain(ENV.capture);
     ObjectNode fill = proposal(id, 2, "fill", "destination");
     fill.withObject("/operation")
-        .set("value", CONTRACTS.object().put("kind", "binding").put("bindingId", binding));
+        .set("value", ENV.contracts.object().put("kind", "binding").put("bindingId", binding));
     JsonNode fillLedger = admit(id, reserve(id, fill));
     advance(id, fillLedger, "fill");
-    await(() -> RECEIPT.get() != null, 5000);
-    assertThat(RECEIPT.get()).isEqualTo(CAPTURE);
+
+    long styleScope008BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+    class BridgePoll1 {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          if (!(!(ENV.receipt.get() != null) && System.nanoTime() < styleScope008BridgeDeadline)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
+    }
+    var styleScope008BridgePoll = new BridgePoll1();
+    if (!styleScope008BridgePoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("GuidedBridgePlannedIT: application fill receipt")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(Duration.ZERO)
+            .pollInterval(Duration.ofMillis(25))
+            .atMost(Duration.ofNanos(Math.max(1L, styleScope008BridgeDeadline - System.nanoTime())))
+            .until(
+                () -> {
+                  if (styleScope008BridgePoll.initialAwaitTick) {
+                    styleScope008BridgePoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return styleScope008BridgePoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+        if (!styleScope008BridgePoll.terminal) {
+          styleScope008BridgePoll.step();
+        }
+      }
+    }
+    if (styleScope008BridgePoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (styleScope008BridgePoll.failure instanceof Error error) {
+      throw error;
+    }
+    assertThat(ENV.receipt.get() != null).isTrue();
+
+    assertThat(ENV.receipt.get()).isEqualTo(ENV.capture);
     assertThat(
             jdbc.queryForObject(
                 "SELECT count(*) FROM studio_guided_consumer_edges WHERE session_id=?",
@@ -1144,28 +808,92 @@ class GuidedBridgePlannedIT {
             "SELECT string_agg(document::text,'') FROM studio_guided_producers WHERE session_id=?",
             String.class,
             id);
-    assertThat(persisted).doesNotContain(CAPTURE, "valueHash", "length", "sample");
+    assertThat(persisted).doesNotContain(ENV.capture, "valueHash", "length", "sample");
     JsonNode admittedNavigate = navigateAssociation.path("proposal");
     assertThat(
             GuidedContracts.hash(
-                CONTRACTS.object().set("coordinate", admittedNavigate.path("coordinate"))))
+                ENV.contracts.object().set("coordinate", admittedNavigate.path("coordinate"))))
         .hasSize(64);
     assertThat(firstConsumed.path("operationHash").asText())
         .isEqualTo(operationHash(admittedNavigate));
     ObjectNode fake = (ObjectNode) admittedNavigate.deepCopy();
-    fake.withObject("/executionEvidence").put("origin", ORIGIN);
+    fake.withObject("/executionEvidence").put("origin", ENV.origin);
     assertThat(operationHash(fake)).isNotEqualTo(operationHash(admittedNavigate));
     sessions.cancel(
         user,
         id,
         "cancel",
-        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
-    await(() -> progress(id).path("teardownStatus").asText().equals("CONFIRMED"), 5000);
+        ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
+
+    long styleScope009BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+    class BridgePoll2 {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
+              && System.nanoTime() < styleScope009BridgeDeadline)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
+    }
+    var styleScope009BridgePoll = new BridgePoll2();
+    if (!styleScope009BridgePoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("GuidedBridgePlannedIT: teardown confirmed")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(Duration.ZERO)
+            .pollInterval(Duration.ofMillis(25))
+            .atMost(Duration.ofNanos(Math.max(1L, styleScope009BridgeDeadline - System.nanoTime())))
+            .until(
+                () -> {
+                  if (styleScope009BridgePoll.initialAwaitTick) {
+                    styleScope009BridgePoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return styleScope009BridgePoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+        if (!styleScope009BridgePoll.terminal) {
+          styleScope009BridgePoll.step();
+        }
+      }
+    }
+    if (styleScope009BridgePoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (styleScope009BridgePoll.failure instanceof Error error) {
+      throw error;
+    }
+    assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
+
     assertThatThrownBy(() -> sessions.runnerContext(controller, id, 1)).hasMessage("CANCELLED");
     // ar-mounted-rules qaOracle (3), moved from the retired configured-region case: the mounted
     // worker.json carries neither `rules` nor `applicationPolicy`; the read above was authorized by
     // the governed policy alone.
-    JsonNode mounted = CONTRACTS.parse(Files.readString(TEMP.resolve("worker.json")));
+    JsonNode mounted = ENV.contracts.parse(Files.readString(ENV.temp.resolve("worker.json")));
     assertThat(mounted.has("rules")).isFalse();
     assertThat(mounted.has("applicationPolicy")).isFalse();
     // aria-bridge-ruling01 §4.3: compensating DB oracle for the retired private-echo case.
@@ -1174,7 +902,7 @@ class GuidedBridgePlannedIT {
                 "SELECT string_agg(response::text,'') FROM studio_guided_commands WHERE namespace=?",
                 String.class,
                 id))
-        .doesNotContain(CAPTURE.strip());
+        .doesNotContain(ENV.capture.strip());
   }
 
   @Test
@@ -1200,7 +928,7 @@ class GuidedBridgePlannedIT {
     assertThat(admissions.get(0).path("admission")).isEqualTo(admissions.get(1).path("admission"));
     assertThat(actionCount(id)).isEqualTo(1);
     advance(id, admissions.get(0), "once");
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(ENV.navigations.get()).isEqualTo(1);
   }
 
   @Test
@@ -1214,7 +942,7 @@ class GuidedBridgePlannedIT {
             () -> dispatch.dispatch(controller, id, 1, "same", request),
             () -> dispatch.dispatch(controller, id, 1, "other", request));
     assertThat(results).hasSize(3);
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(ENV.navigations.get()).isEqualTo(1);
     assertThat(
             jdbc.queryForObject(
                 "SELECT count(*) FROM studio_guided_commands WHERE route='v2-consume'",
@@ -1246,7 +974,7 @@ class GuidedBridgePlannedIT {
     // Simulated controller death after commit/before send. Restart/status/cache has no permit.
     new GuidedDispatchService(sessions, materialization, runner)
         .dispatch(controller, id, 1, "after-restart", request);
-    assertThat(NAVIGATIONS.get()).isZero();
+    assertThat(ENV.navigations.get()).isZero();
     sessions.lostAcknowledgment(id);
     assertThat(action(id).path("state").asText()).isEqualTo("UNKNOWN_OUTCOME");
     assertThatThrownBy(() -> sessions.consume(controller, id, 1, "late", request))
@@ -1273,7 +1001,7 @@ class GuidedBridgePlannedIT {
           .hasMessageContaining("Unable to commit")
           .rootCause()
           .hasMessageContaining("injected commit failure");
-      assertThat(NAVIGATIONS.get()).isZero();
+      assertThat(ENV.navigations.get()).isZero();
       assertThat(action(id).path("dispatchCount").asInt()).isZero();
       assertThat(
               jdbc.queryForObject(
@@ -1285,7 +1013,7 @@ class GuidedBridgePlannedIT {
       jdbc.execute("DROP FUNCTION bridge_fail_commit()");
     }
     dispatch.dispatch(controller, id, 1, "after-rollback", request);
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(ENV.navigations.get()).isEqualTo(1);
   }
 
   @Test
@@ -1327,7 +1055,7 @@ class GuidedBridgePlannedIT {
       assertThatThrownBy(() -> consume.get(5, TimeUnit.SECONDS))
           .hasCauseInstanceOf(GuidedSessionException.class);
     }
-    assertThat(NAVIGATIONS.get()).isZero();
+    assertThat(ENV.navigations.get()).isZero();
     assertThat(action(id).path("dispatchCount").asInt()).isZero();
     jdbc.update("UPDATE ui_tests SET source_revision=1 WHERE id=?", testId);
     jdbc.update(
@@ -1335,19 +1063,24 @@ class GuidedBridgePlannedIT {
     assertThatThrownBy(
             () -> dispatch.dispatch(controller, id, 1, "configuration-revision", request))
         .hasMessage("REVISION_CONFLICT");
-    assertThat(NAVIGATIONS.get()).isZero();
+    assertThat(ENV.navigations.get()).isZero();
     assertThat(action(id).path("dispatchCount").asInt()).isZero();
     jdbc.update("UPDATE ui_tests SET configuration_revision=1 WHERE id=?", testId);
     // A direct controller allocation call (precedent: planning IT, ReplayIT) is not obligation
     // authority; the planner already allocated this need at bootstrap.
-    ObjectNode need = CONTRACTS.object().put("needId", "order").put("producerStepId", stepId(id));
+    ObjectNode need =
+        ENV.contracts.object().put("needId", "order").put("producerStepId", stepId(id));
     need.putArray("consumers")
-        .add(CONTRACTS.object().put("stepId", stepId(id)).put("argumentSlot", "fill.value"));
+        .add(ENV.contracts.object().put("stepId", stepId(id)).put("argumentSlot", "fill.value"));
     JsonNode allocation = sessions.allocateBinding(controller, id, 1, "allocate", need);
     assertThat(allocation.path("bindingId").asText()).isEqualTo(bindingId(id, "order"));
     ObjectNode more = need.deepCopy();
     ((com.fasterxml.jackson.databind.node.ArrayNode) more.path("consumers"))
-        .add(CONTRACTS.object().put("stepId", stepId(id)).put("argumentSlot", "assert.expected"));
+        .add(
+            ENV.contracts
+                .object()
+                .put("stepId", stepId(id))
+                .put("argumentSlot", "assert.expected"));
     assertThat(sessions.allocateBinding(controller, id, 1, "append", more).path("bindingId"))
         .isEqualTo(allocation.path("bindingId"));
     assertThatThrownBy(() -> sessions.allocateBinding(controller, id, 1, "erase", need))
@@ -1377,13 +1110,79 @@ class GuidedBridgePlannedIT {
     fill.withObject("/operation")
         .set(
             "value",
-            CONTRACTS.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
+            ENV.contracts
+                .object()
+                .put("kind", "authoredLiteral")
+                .put("sourceInputId", inputId(id, 1)));
     JsonNode admitted = admit(id, reserve(id, fill));
-    replaceTarget = true;
-    await(() -> MUTATIONS.get() > 0, 5000);
+    ENV.replaceTarget = true;
+
+    long styleScope010BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+    class BridgePoll3 {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          if (!(!(ENV.mutations.get() > 0) && System.nanoTime() < styleScope010BridgeDeadline)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
+    }
+    var styleScope010BridgePoll = new BridgePoll3();
+    if (!styleScope010BridgePoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("GuidedBridgePlannedIT: DOM replacement receipt")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(Duration.ZERO)
+            .pollInterval(Duration.ofMillis(25))
+            .atMost(Duration.ofNanos(Math.max(1L, styleScope010BridgeDeadline - System.nanoTime())))
+            .until(
+                () -> {
+                  if (styleScope010BridgePoll.initialAwaitTick) {
+                    styleScope010BridgePoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return styleScope010BridgePoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+        if (!styleScope010BridgePoll.terminal) {
+          styleScope010BridgePoll.step();
+        }
+      }
+    }
+    if (styleScope010BridgePoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (styleScope010BridgePoll.failure instanceof Error error) {
+      throw error;
+    }
+    assertThat(ENV.mutations.get() > 0).isTrue();
+
     advance(id, admitted, "stale-target");
     JsonNode result =
-        CONTRACTS.parse(
+        ENV.contracts.parse(
             jdbc.queryForObject(
                 "SELECT document::text FROM studio_guided_actions WHERE admission_id=?",
                 String.class,
@@ -1391,8 +1190,8 @@ class GuidedBridgePlannedIT {
     assertThat(result.path("dispatchCount").asInt()).isEqualTo(1);
     assertThat(result.path("state").asText()).isEqualTo("FAILED");
     assertThat(result.path("outcomeCode").asText()).isEqualTo("TARGET_CHANGED");
-    assertThat(RECEIPT.get()).isNull();
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(ENV.receipt.get()).isNull();
+    assertThat(ENV.navigations.get()).isEqualTo(1);
   }
 
   @Test
@@ -1404,7 +1203,7 @@ class GuidedBridgePlannedIT {
         .put("bindingId", bindingId(id, "order"))
         .set(
             "recipe",
-            CONTRACTS
+            ENV.contracts
                 .object()
                 .put("kind", "visibleText")
                 .put("classification", "permittedBusinessData")
@@ -1422,12 +1221,79 @@ class GuidedBridgePlannedIT {
       jdbc.execute("DROP TRIGGER bridge_fail_producer ON studio_guided_producers");
       jdbc.execute("DROP FUNCTION bridge_fail_producer()");
     }
-    await(
-        () ->
+
+    long styleScope011BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+    class BridgePollProducerRollback {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          if (!(!(jdbc.queryForObject(
+                      "SELECT state FROM studio_guided_sessions WHERE session_id=?",
+                      String.class,
+                      id)
+                  .equals("UNKNOWN_OUTCOME"))
+              && System.nanoTime() < styleScope011BridgeDeadline)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
+    }
+    var styleScope011BridgePoll = new BridgePollProducerRollback();
+    if (!styleScope011BridgePoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("GuidedBridgePlannedIT: producer rollback unknown outcome")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(Duration.ZERO)
+            .pollInterval(Duration.ofMillis(25))
+            .atMost(Duration.ofNanos(Math.max(1L, styleScope011BridgeDeadline - System.nanoTime())))
+            .until(
+                () -> {
+                  if (styleScope011BridgePoll.initialAwaitTick) {
+                    styleScope011BridgePoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return styleScope011BridgePoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+        if (!styleScope011BridgePoll.terminal) {
+          styleScope011BridgePoll.step();
+        }
+      }
+    }
+    if (styleScope011BridgePoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (styleScope011BridgePoll.failure instanceof Error error) {
+      throw error;
+    }
+    assertThat(
             jdbc.queryForObject(
                     "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id)
-                .equals("UNKNOWN_OUTCOME"),
-        5000);
+                .equals("UNKNOWN_OUTCOME"))
+        .isTrue();
+
     assertThat(
             jdbc.queryForObject(
                 "SELECT count(*) FROM studio_guided_producers WHERE session_id=?",
@@ -1435,7 +1301,7 @@ class GuidedBridgePlannedIT {
                 id))
         .isZero();
     JsonNode stored =
-        CONTRACTS.parse(
+        ENV.contracts.parse(
             jdbc.queryForObject(
                 "SELECT document::text FROM studio_guided_actions WHERE admission_id=?",
                 String.class,
@@ -1444,8 +1310,8 @@ class GuidedBridgePlannedIT {
     assertThatThrownBy(
             () -> dispatch.dispatch(controller, id, 1, "retry", advanceRequest(id, admission)))
         .hasMessage("UNKNOWN_OUTCOME");
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
-    assertThat(RECEIPT.get()).isNull();
+    assertThat(ENV.navigations.get()).isEqualTo(1);
+    assertThat(ENV.receipt.get()).isNull();
   }
 
   @Test
@@ -1453,25 +1319,88 @@ class GuidedBridgePlannedIT {
     String id = plannedSession(planConfig());
     JsonNode input = input(id, 1);
     assertThat(input.path("provenance").path("referenceKind").asText()).isEqualTo("configuration");
-    assertThat(input.path("value").asText()).isEqualTo(CONFIG_INPUT);
+    assertThat(input.path("value").asText()).isEqualTo(ENV.configInput);
     advance(id, admit(id, reserve(id, navigation(id))), "navigate");
     ObjectNode fill = proposal(id, 1, "fill", "destination");
     fill.withObject("/operation")
         .set(
             "value",
-            CONTRACTS
+            ENV.contracts
                 .object()
                 .put("kind", "authoredLiteral")
                 .put("sourceInputId", input.path("inputId").asText()));
     advance(id, admit(id, reserve(id, fill)), "configured-fill");
-    await(() -> RECEIPT.get() != null, 5000);
-    assertThat(RECEIPT.get()).isEqualTo(CONFIG_INPUT);
+
+    long styleScope012BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+    class BridgePoll4 {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          if (!(!(ENV.receipt.get() != null) && System.nanoTime() < styleScope012BridgeDeadline)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
+    }
+    var styleScope012BridgePoll = new BridgePoll4();
+    if (!styleScope012BridgePoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("GuidedBridgePlannedIT: application fill receipt")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(Duration.ZERO)
+            .pollInterval(Duration.ofMillis(25))
+            .atMost(Duration.ofNanos(Math.max(1L, styleScope012BridgeDeadline - System.nanoTime())))
+            .until(
+                () -> {
+                  if (styleScope012BridgePoll.initialAwaitTick) {
+                    styleScope012BridgePoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return styleScope012BridgePoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+        if (!styleScope012BridgePoll.terminal) {
+          styleScope012BridgePoll.step();
+        }
+      }
+    }
+    if (styleScope012BridgePoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (styleScope012BridgePoll.failure instanceof Error error) {
+      throw error;
+    }
+    assertThat(ENV.receipt.get() != null).isTrue();
+
+    assertThat(ENV.receipt.get()).isEqualTo(ENV.configInput);
     assertThat(
             jdbc.queryForObject(
                 "SELECT string_agg(document::text,'') FROM studio_guided_actions WHERE session_id=?",
                 String.class,
                 id))
-        .doesNotContain(CONFIG_INPUT);
+        .doesNotContain(ENV.configInput);
   }
 
   @Test
@@ -1483,7 +1412,10 @@ class GuidedBridgePlannedIT {
     fill.withObject("/operation")
         .set(
             "value",
-            CONTRACTS.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
+            ENV.contracts
+                .object()
+                .put("kind", "authoredLiteral")
+                .put("sourceInputId", inputId(id, 1)));
     JsonNode second = admit(id, reserve(id, fill));
     sessions.consume(controller, id, 1, "second", advanceRequest(id, second));
     sessions.lostAcknowledgment(id, first.path("admission").path("admissionId").asText());
@@ -1516,7 +1448,7 @@ class GuidedBridgePlannedIT {
         .put("bindingId", binding)
         .set(
             "recipe",
-            CONTRACTS
+            ENV.contracts
                 .object()
                 .put("kind", "visibleText")
                 .put("classification", "permittedBusinessData")
@@ -1537,7 +1469,71 @@ class GuidedBridgePlannedIT {
             "SELECT document::text FROM studio_guided_producers WHERE session_id=?",
             String.class,
             id);
-    await(() -> Instant.now().isAfter(firstLease.plusMillis(500)), 35000);
+
+    long styleScope013BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(35000);
+    class BridgePoll5 {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          if (!(!(Instant.now().isAfter(firstLease.plusMillis(500)))
+              && System.nanoTime() < styleScope013BridgeDeadline)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
+    }
+    var styleScope013BridgePoll = new BridgePoll5();
+    if (!styleScope013BridgePoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("GuidedBridgePlannedIT: first lease plus 500 ms")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(Duration.ZERO)
+            .pollInterval(Duration.ofMillis(25))
+            .atMost(Duration.ofNanos(Math.max(1L, styleScope013BridgeDeadline - System.nanoTime())))
+            .until(
+                () -> {
+                  if (styleScope013BridgePoll.initialAwaitTick) {
+                    styleScope013BridgePoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return styleScope013BridgePoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+        if (!styleScope013BridgePoll.terminal) {
+          styleScope013BridgePoll.step();
+        }
+      }
+    }
+    if (styleScope013BridgePoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (styleScope013BridgePoll.failure instanceof Error error) {
+      throw error;
+    }
+    assertThat(Instant.now().isAfter(firstLease.plusMillis(500))).isTrue();
+
     assertThat(session(id).path("state").asText()).isEqualTo("AWAITING_CLARIFICATION");
     assertThat(session(id).path("owner").path("fence").asInt()).isEqualTo(1);
     assertThat(Instant.parse(session(id).path("owner").path("leaseExpiresAt").asText()))
@@ -1551,7 +1547,7 @@ class GuidedBridgePlannedIT {
                 id))
         .isEqualTo(producer);
     assertThat(claimCount(id)).isGreaterThanOrEqualTo(3);
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(ENV.navigations.get()).isEqualTo(1);
     // The planner's assignment key (GuidedTranslationService.plan), so the duplicate keeps meaning.
     JsonNode duplicate = dispatch.assign(controller, id, "translation-assignment", "worker-1");
     assertThat(duplicate.path("assignment")).isEqualTo(assignment(id));
@@ -1565,10 +1561,73 @@ class GuidedBridgePlannedIT {
         });
     ObjectNode fill = proposal(id, 2, "fill", "destination");
     fill.withObject("/operation")
-        .set("value", CONTRACTS.object().put("kind", "binding").put("bindingId", binding));
+        .set("value", ENV.contracts.object().put("kind", "binding").put("bindingId", binding));
     advance(id, admit(id, reserve(id, fill)), "fill-after-renewal");
-    await(() -> RECEIPT.get() != null, 5000);
-    assertThat(RECEIPT.get()).isEqualTo(CAPTURE);
+
+    long styleScope014BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+    class BridgePoll6 {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          if (!(!(ENV.receipt.get() != null) && System.nanoTime() < styleScope014BridgeDeadline)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
+    }
+    var styleScope014BridgePoll = new BridgePoll6();
+    if (!styleScope014BridgePoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("GuidedBridgePlannedIT: application fill receipt")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(Duration.ZERO)
+            .pollInterval(Duration.ofMillis(25))
+            .atMost(Duration.ofNanos(Math.max(1L, styleScope014BridgeDeadline - System.nanoTime())))
+            .until(
+                () -> {
+                  if (styleScope014BridgePoll.initialAwaitTick) {
+                    styleScope014BridgePoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return styleScope014BridgePoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+        if (!styleScope014BridgePoll.terminal) {
+          styleScope014BridgePoll.step();
+        }
+      }
+    }
+    if (styleScope014BridgePoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (styleScope014BridgePoll.failure instanceof Error error) {
+      throw error;
+    }
+    assertThat(ENV.receipt.get() != null).isTrue();
+
+    assertThat(ENV.receipt.get()).isEqualTo(ENV.capture);
   }
 
   @Test
@@ -1576,21 +1635,85 @@ class GuidedBridgePlannedIT {
     String id = plannedSession(planNav());
     advance(id, admit(id, reserve(id, navigation(id))), "navigate");
     ObjectNode oldContext = sessions.runnerContext(controller, id, 1);
-    HOLD_NEXT_CLAIM.set(true);
-    assertThat(claimResponseCaptured.await(15, TimeUnit.SECONDS)).isTrue();
+    ENV.holdNextClaim.set(true);
+    assertThat(ENV.claimResponseCaptured.await(15, TimeUnit.SECONDS)).isTrue();
     sessions.cancel(
         user,
         id,
         "cancel-delayed-renewal",
-        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
-    await(() -> progress(id).path("teardownStatus").asText().equals("CONFIRMED"), 5000);
-    releaseClaimResponse.countDown();
+        ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
+
+    long styleScope015BridgeDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(5000);
+    class BridgePoll7 {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          if (!(!(progress(id).path("teardownStatus").asText().equals("CONFIRMED"))
+              && System.nanoTime() < styleScope015BridgeDeadline)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
+    }
+    var styleScope015BridgePoll = new BridgePoll7();
+    if (!styleScope015BridgePoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("GuidedBridgePlannedIT: teardown confirmed")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(Duration.ZERO)
+            .pollInterval(Duration.ofMillis(25))
+            .atMost(Duration.ofNanos(Math.max(1L, styleScope015BridgeDeadline - System.nanoTime())))
+            .until(
+                () -> {
+                  if (styleScope015BridgePoll.initialAwaitTick) {
+                    styleScope015BridgePoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return styleScope015BridgePoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException bridgeTimeout) {
+        if (!styleScope015BridgePoll.terminal) {
+          styleScope015BridgePoll.step();
+        }
+      }
+    }
+    if (styleScope015BridgePoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (styleScope015BridgePoll.failure instanceof Error error) {
+      throw error;
+    }
+    assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
+
+    ENV.releaseClaimResponse.countDown();
     Thread.sleep(200);
     assertThatThrownBy(() -> runner.send("assign", assignment(id), "assignment"))
         .hasMessage("UNKNOWN_OUTCOME");
     assertThatThrownBy(() -> runner.send("context", oldContext)).hasMessage("UNKNOWN_OUTCOME");
     assertThat(session(id).path("state").asText()).isEqualTo("CANCELLED");
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(ENV.navigations.get()).isEqualTo(1);
   }
 
   @Test
@@ -1601,10 +1724,10 @@ class GuidedBridgePlannedIT {
     int before = session(id).path("counters").path("observations").asInt();
     var proxy = com.sun.net.httpserver.HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
     proxy.setHttpsConfigurator(
-        new com.sun.net.httpserver.HttpsConfigurator(RUNNER_SIDE) {
+        new com.sun.net.httpserver.HttpsConfigurator(ENV.runnerSide) {
           @Override
           public void configure(com.sun.net.httpserver.HttpsParameters parameters) {
-            var ssl = RUNNER_SIDE.getDefaultSSLParameters();
+            var ssl = ENV.runnerSide.getDefaultSSLParameters();
             ssl.setNeedClientAuth(true);
             parameters.setSSLParameters(ssl);
           }
@@ -1615,7 +1738,7 @@ class GuidedBridgePlannedIT {
         exchange -> {
           try {
             JsonNode body =
-                CONTRACTS.parse(
+                ENV.contracts.parse(
                     new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
             runner.send("observe", body, exchange.getRequestHeaders().getFirst("Idempotency-Key"));
             requests.incrementAndGet();
@@ -1630,11 +1753,11 @@ class GuidedBridgePlannedIT {
     proxy.start();
     try {
       var faultClient =
-          new GuidedRunnerClient(
+          new HttpRunnerDispatchClient(
               URI.create("https://localhost:" + proxy.getAddress().getPort()),
-              TLS,
+              ENV.tls,
               () -> token("backend-controller", "controller-1", "studio-guided-runner"),
-              CONTRACTS);
+              ENV.contracts);
       var faultDispatch = new GuidedDispatchService(sessions, materialization, faultClient);
       JsonNode result = faultDispatch.observe(controller, id, 1, "lost-refresh-response", request);
       assertThat(result.path("observation")).isEqualTo(progress(id).path("observation"));
@@ -1642,7 +1765,7 @@ class GuidedBridgePlannedIT {
           .isEqualTo(result);
       assertThat(requests.get()).isEqualTo(1);
       assertThat(session(id).path("counters").path("observations").asInt()).isEqualTo(before + 1);
-      assertThat(NAVIGATIONS.get()).isEqualTo(1);
+      assertThat(ENV.navigations.get()).isEqualTo(1);
     } finally {
       proxy.stop(0);
     }
@@ -1694,7 +1817,10 @@ class GuidedBridgePlannedIT {
     fill.withObject("/operation")
         .set(
             "value",
-            CONTRACTS.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
+            ENV.contracts
+                .object()
+                .put("kind", "authoredLiteral")
+                .put("sourceInputId", inputId(id, 1)));
     admit(id, reserve(id, fill));
     // The refusal below is attributable to the active admission, not to a stale generation.
     assertThat(progress(id).path("generation").asInt())
@@ -1705,11 +1831,11 @@ class GuidedBridgePlannedIT {
         user,
         id,
         "cancel",
-        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+        ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
     assertThatThrownBy(() -> dispatch.observe(controller, id, 1, "after-cancel", request))
         .hasMessage("CANCELLED");
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
-    assertThat(FILL_RECEIPTS.get()).isZero();
+    assertThat(ENV.navigations.get()).isEqualTo(1);
+    assertThat(ENV.fillReceipts.get()).isZero();
   }
 
   @Test
@@ -1726,7 +1852,7 @@ class GuidedBridgePlannedIT {
     assertThat(session(id).path("counters").path("observations").asInt())
         .isEqualTo(observations + 1);
     assertThat(actionCount(id)).isEqualTo(1);
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
+    assertThat(ENV.navigations.get()).isEqualTo(1);
   }
 
   @Test
@@ -1735,7 +1861,7 @@ class GuidedBridgePlannedIT {
     advance(id, admit(id, reserve(id, navigation(id))), "navigate");
     ObjectNode request = refreshRequest(id);
     int generation = progress(id).path("generation").asInt();
-    HOLD_NEXT_REFRESH.set(true);
+    ENV.holdNextRefresh.set(true);
     try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
       var collecting =
           executor.submit(
@@ -1747,7 +1873,7 @@ class GuidedBridgePlannedIT {
                   return failure.getMessage();
                 }
               });
-      assertThat(refreshCallbackHeld.await(5, TimeUnit.SECONDS)).isTrue();
+      assertThat(ENV.refreshCallbackHeld.await(5, TimeUnit.SECONDS)).isTrue();
       assertThat(session(id).path("state").asText()).isEqualTo("OBSERVING");
       assertThatThrownBy(
               () -> dispatch.observe(controller, id, 1, "different-inflight-key", request))
@@ -1756,15 +1882,15 @@ class GuidedBridgePlannedIT {
           user,
           id,
           "cancel-refresh",
-          CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
-      releaseRefreshCallback.countDown();
+          ENV.contracts.object().put("schemaVersion", 3).put("reason", "userRequested"));
+      ENV.releaseRefreshCallback.countDown();
       assertThat(collecting.get(10, TimeUnit.SECONDS))
           .isIn("CANCELLED", "UNKNOWN_OUTCOME", "STALE_FENCE");
     }
     assertThat(session(id).path("state").asText()).isEqualTo("CANCELLED");
     assertThat(progress(id).path("generation").asInt()).isEqualTo(generation);
-    assertThat(NAVIGATIONS.get()).isEqualTo(1);
-    assertThat(FILL_RECEIPTS.get()).isZero();
+    assertThat(ENV.navigations.get()).isEqualTo(1);
+    assertThat(ENV.fillReceipts.get()).isZero();
   }
 
   int actionCount(String id) {
@@ -1773,7 +1899,7 @@ class GuidedBridgePlannedIT {
   }
 
   JsonNode action(String id) {
-    return CONTRACTS.parse(
+    return ENV.contracts.parse(
         jdbc.queryForObject(
             "SELECT document::text FROM studio_guided_actions WHERE session_id=? ORDER BY "
                 + "ordinal LIMIT 1",
@@ -1788,7 +1914,7 @@ class GuidedBridgePlannedIT {
   }
 
   ObjectNode advanceRequest(String id, JsonNode ledger) {
-    return CONTRACTS
+    return ENV.contracts
         .object()
         .put("schemaVersion", 3)
         .put("sessionId", id)
@@ -1820,7 +1946,7 @@ class GuidedBridgePlannedIT {
   }
 
   JsonNode session(String id) {
-    return CONTRACTS.parse(
+    return ENV.contracts.parse(
         jdbc.queryForObject(
             "SELECT document::text FROM studio_guided_sessions WHERE session_id=?",
             String.class,
@@ -1828,7 +1954,7 @@ class GuidedBridgePlannedIT {
   }
 
   JsonNode assignment(String id) {
-    return CONTRACTS.parse(
+    return ENV.contracts.parse(
         jdbc.queryForObject(
             "SELECT intent::text FROM studio_guided_assignments WHERE session_id=?",
             String.class,
@@ -1853,12 +1979,12 @@ class GuidedBridgePlannedIT {
     var connection =
         HttpClient.newHttpClient()
             .send(
-                HttpRequest.newBuilder(URI.create(ORIGIN + "/connect")).GET().build(),
+                HttpRequest.newBuilder(URI.create(ENV.origin + "/connect")).GET().build(),
                 HttpResponse.BodyHandlers.ofString());
     assertThat(connection.statusCode()).isEqualTo(200);
     assertThat(connection.body()).isEqualTo("controlled-public-fixture-account");
     ObjectNode start =
-        CONTRACTS
+        ENV.contracts
             .object()
             .put("schemaVersion", 3)
             .put("testId", testId.toString())
@@ -1875,7 +2001,7 @@ class GuidedBridgePlannedIT {
     return repository.transaction(
         () -> {
           var session = repository.lock(id);
-          return CONTRACTS
+          return ENV.contracts
               .object()
               .put("schemaVersion", 3)
               .put("sessionId", id)
@@ -1899,7 +2025,7 @@ class GuidedBridgePlannedIT {
   }
 
   ObjectNode span(String kind, String slot, int start, int end) {
-    return CONTRACTS
+    return ENV.contracts
         .object()
         .put("referenceKind", "sourceSpan")
         .put("sourceRevision", "1")
@@ -1912,7 +2038,7 @@ class GuidedBridgePlannedIT {
 
   /** The authored navigation destination. */
   ObjectNode destinationReference() {
-    return span("destination", "navigate.destination", 6, 6 + (ORIGIN + "/start").length());
+    return span("destination", "navigate.destination", 6, 6 + (ENV.origin + "/start").length());
   }
 
   /** The authored literal {@code fixture-input}. */
@@ -1922,7 +2048,7 @@ class GuidedBridgePlannedIT {
   }
 
   ObjectNode planTemplate(List<ObjectNode> references, List<ObjectNode> obligations) {
-    ObjectNode plan = CONTRACTS.object();
+    ObjectNode plan = ENV.contracts.object();
     references.forEach(plan.putArray("sourceReferences")::add);
     obligations.forEach(plan.putArray("obligations")::add);
     plan.putArray("needs");
@@ -2042,7 +2168,7 @@ class GuidedBridgePlannedIT {
           .as("reserve only after prior actions settle")
           .isEqualTo("SUCCEEDED");
     }
-    ObjectNode action = CONTRACTS.object();
+    ObjectNode action = ENV.contracts.object();
     ObjectNode target = hand.path("target").deepCopy();
     target.remove(List.of("documentId", "generation"));
     action.set("target", target);
@@ -2066,10 +2192,10 @@ class GuidedBridgePlannedIT {
             questions,
             stopped,
             gateway,
-            CONTRACTS,
-            new GuidedPromptAssembler(CONTRACTS),
+            ENV.contracts,
+            new GuidedPromptAssembler(ENV.contracts),
             inputs,
-            new GuidedProposalValidator(CONTRACTS),
+            new GuidedProposalValidator(ENV.contracts),
             new GuidedDependencyPlanner(sessions),
             properties,
             Clock.systemUTC());
@@ -2119,7 +2245,7 @@ class GuidedBridgePlannedIT {
     JsonNode evidence = progress(id).path("executionEvidence");
     ObjectNode context = sessions.runnerContext(controller, id, 1);
     ObjectNode p =
-        CONTRACTS
+        ENV.contracts
             .object()
             .put("schemaVersion", 3)
             .put("sessionId", id)
@@ -2158,7 +2284,7 @@ class GuidedBridgePlannedIT {
     return post(
         id,
         "advance",
-        CONTRACTS
+        ENV.contracts
             .object()
             .put("schemaVersion", 3)
             .put("sessionId", id)
@@ -2174,7 +2300,7 @@ class GuidedBridgePlannedIT {
       throws Exception {
     var response =
         HttpClient.newBuilder()
-            .sslContext(RUNNER_SIDE)
+            .sslContext(ENV.runnerSide)
             .build()
             .send(
                 HttpRequest.newBuilder(
@@ -2194,11 +2320,11 @@ class GuidedBridgePlannedIT {
                     .build(),
                 HttpResponse.BodyHandlers.ofString());
     assertThat(response.statusCode()).as("%s: %s", route, response.body()).isEqualTo(expected);
-    return CONTRACTS.parse(response.body());
+    return ENV.contracts.parse(response.body());
   }
 
   JsonNode progress(String id) {
-    return CONTRACTS.parse(
+    return ENV.contracts.parse(
         jdbc.queryForObject(
             "SELECT progress::text FROM studio_guided_sessions WHERE session_id=?",
             String.class,
@@ -2206,11 +2332,11 @@ class GuidedBridgePlannedIT {
   }
 
   static ObjectNode versions() {
-    return (ObjectNode) CONTRACTS.parse("{\"contract\":3}");
+    return (ObjectNode) ENV.contracts.parse("{\"contract\":3}");
   }
 
   static String operationHash(JsonNode proposal) {
-    ObjectNode identity = CONTRACTS.object();
+    ObjectNode identity = ENV.contracts.object();
     identity.set("coordinate", proposal.path("coordinate"));
     identity.set("origin", proposal.path("executionEvidence").path("origin"));
     identity.set(
@@ -2223,45 +2349,6 @@ class GuidedBridgePlannedIT {
   }
 
   static String token(String role, String subject, String audience) {
-    try {
-      long now = Instant.now().getEpochSecond();
-      String header =
-          Base64.getUrlEncoder()
-              .withoutPadding()
-              .encodeToString(
-                  "{\"alg\":\"RS256\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
-      String claims =
-          CONTRACTS
-              .object()
-              .put("iss", "fixture-issuer")
-              .put("sub", subject)
-              .put("aud", audience)
-              .put("role", role)
-              .put("iat", now)
-              .put("exp", now + 300)
-              .toString();
-      String signed =
-          header
-              + "."
-              + Base64.getUrlEncoder()
-                  .withoutPadding()
-                  .encodeToString(claims.getBytes(StandardCharsets.UTF_8));
-      Signature signature = Signature.getInstance("SHA256withRSA");
-      signature.initSign(ISSUER.getPrivate());
-      signature.update(signed.getBytes(StandardCharsets.US_ASCII));
-      return signed
-          + "."
-          + Base64.getUrlEncoder().withoutPadding().encodeToString(signature.sign());
-    } catch (Exception failure) {
-      throw new IllegalStateException(failure);
-    }
-  }
-
-  static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
-    long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
-    while (!condition.getAsBoolean() && System.nanoTime() < end) {
-      Thread.sleep(25);
-    }
-    assertThat(condition.getAsBoolean()).isTrue();
+    return ENV.token(role, subject, audience);
   }
 }

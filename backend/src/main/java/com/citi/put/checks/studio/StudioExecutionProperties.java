@@ -138,8 +138,7 @@ public record StudioExecutionProperties(
   }
 
   /** Dispatcher budget on the worker profile (§5.4). */
-  public record Dispatcher(
-      Boolean enabled, Integer threads, Integer batchSize, Duration lease, Duration pollInterval) {
+  public record Dispatcher(Boolean enabled, Integer threads, Integer batchSize, Duration lease) {
 
     public boolean enabledOrDefault() {
       return enabled == null || enabled;
@@ -155,10 +154,6 @@ public record StudioExecutionProperties(
 
     public Duration leaseOrDefault() {
       return lease == null ? Duration.ofSeconds(60) : lease;
-    }
-
-    public Duration pollIntervalOrDefault() {
-      return pollInterval == null ? Duration.ofSeconds(2) : pollInterval;
     }
   }
 
@@ -194,7 +189,6 @@ public record StudioExecutionProperties(
   public record Sse(
       Duration heartbeat,
       Duration lifetime,
-      Duration readInterval,
       Duration authorizationRefresh,
       Integer maxStreamsPerUser,
       Integer maxStreamsPerPod,
@@ -207,10 +201,6 @@ public record StudioExecutionProperties(
 
     public Duration lifetimeOrDefault() {
       return lifetime == null ? Duration.ofSeconds(60) : lifetime;
-    }
-
-    public Duration readIntervalOrDefault() {
-      return readInterval == null ? Duration.ofMillis(750) : readInterval;
     }
 
     public Duration authorizationRefreshOrDefault() {
@@ -279,7 +269,7 @@ public record StudioExecutionProperties(
   }
 
   public Dispatcher dispatcherOrDefault() {
-    return dispatcher == null ? new Dispatcher(null, null, null, null, null) : dispatcher;
+    return dispatcher == null ? new Dispatcher(null, null, null, null) : dispatcher;
   }
 
   public Callback callbackOrDefault() {
@@ -287,6 +277,6 @@ public record StudioExecutionProperties(
   }
 
   public Sse sseOrDefault() {
-    return sse == null ? new Sse(null, null, null, null, null, null, null, null) : sse;
+    return sse == null ? new Sse(null, null, null, null, null, null, null) : sse;
   }
 }

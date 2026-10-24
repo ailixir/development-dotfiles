@@ -4,6 +4,7 @@ import static com.citi.put.checks.studio.guided.session.GuidedSessionException.r
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.translation.GuidedProposalValidator;
+import com.citi.put.checks.studio.guided.translation.GuidedQualifiedLabel;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -648,7 +649,7 @@ public final class GuidedPlanBuilder {
       JsonNode obligation) {
     ObjectNode effective = PublicationContracts.copy(obligation);
     if (!prepared.has("observedChoice")) {
-      return effective;
+      return qualifiedEffective(effective, prepared, observations);
     }
     JsonNode witness = prepared.path("observedChoice");
     PublicationContracts.bounded(witness, 262144);
@@ -861,6 +862,40 @@ public final class GuidedPlanBuilder {
     effective.put(
         "targetIntent",
         locator.path(locator.path("kind").asText().equals("role") ? "name" : "value").asText());
+    effective.set("selectedLocator", locator.deepCopy());
+    return effective;
+  }
+
+  /**
+   * Round 057: with no human choice, a qualified obligation (non-null scopeIntent) is resolved by
+   * the same rule admission used: the proposed node is the only node of that name in that region,
+   * and its locator is one of its hints and unique in the evidence observation. The effective
+   * obligation then has the accepted-choice shape, so the unchanged target-intent check applies.
+   */
+  private ObjectNode qualifiedEffective(
+      ObjectNode effective, JsonNode prepared, Map<String, JsonNode> observations) {
+    if (!effective.path("scopeIntent").isTextual()) {
+      return effective;
+    }
+    JsonNode proposal = prepared.path("proposal"), target = proposal.path("target");
+    JsonNode entry = observations.get(prepared.path("observationHash").asText());
+    require(entry != null, "EVIDENCE_MISMATCH", 422);
+    JsonNode observation = entry.path("observation");
+    require(
+        target.path("documentId").equals(observation.path("documentId"))
+            && target.path("generation").equals(observation.path("generation")),
+        "EVIDENCE_MISMATCH",
+        422);
+    JsonNode locator =
+        GuidedQualifiedLabel.qualifiedLocator(
+            observation,
+            observation.path("documentId"),
+            observation.path("generation"),
+            effective,
+            target,
+            "OPERATION_MISMATCH",
+            422);
+    effective.put("targetIntent", GuidedQualifiedLabel.locatorLabel(locator));
     effective.set("selectedLocator", locator.deepCopy());
     return effective;
   }

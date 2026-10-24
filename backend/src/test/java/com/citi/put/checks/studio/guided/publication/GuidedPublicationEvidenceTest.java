@@ -113,6 +113,7 @@ class GuidedPublicationEvidenceTest {
               .put("occurrence", 0)
               .put("operationKind", "navigate")
               .put("targetIntent", "Open")
+              .putNull("scopeIntent")
               .put("referenceIndex", 0)
               .putNull("needId")
               .putNull("predicate");

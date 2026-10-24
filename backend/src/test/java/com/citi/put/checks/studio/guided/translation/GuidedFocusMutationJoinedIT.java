@@ -8,6 +8,7 @@ import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.citi.put.checks.studio.gateway.GenAiGatewayTransport;
@@ -17,7 +18,6 @@ import com.citi.put.checks.studio.guided.bridge.GuidedBindingStore;
 import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
 import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
 import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedInternalController;
 import com.citi.put.checks.studio.guided.session.GuidedInternalSecurity;
@@ -414,7 +414,7 @@ class GuidedFocusMutationJoinedIT {
       Flyway.configure()
           .dataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword())
           .locations("classpath:db/migration")
-          .target("22") // STUDIO-OBS-014 S3: governance tables (V19) at head
+          .target("23") // STUDIO-OBS-014 S3: governance tables (V19) at head
           .load()
           .migrate();
     } catch (Exception failure) {
@@ -644,8 +644,8 @@ class GuidedFocusMutationJoinedIT {
     }
 
     @Bean
-    GuidedRunnerClient runner() {
-      return new GuidedRunnerClient(
+    HttpRunnerDispatchClient runner() {
+      return new HttpRunnerDispatchClient(
           URI.create("https://127.0.0.1:" + RUNNER_PORT),
           TLS,
           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
@@ -656,7 +656,7 @@ class GuidedFocusMutationJoinedIT {
     GuidedDispatchService dispatch(
         GuidedSessionService sessions,
         GuidedMaterializationService materialization,
-        GuidedRunnerClient runner) {
+        HttpRunnerDispatchClient runner) {
       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
       sessions.installStopSender(dispatch::stop);
       return dispatch;
@@ -838,6 +838,7 @@ class GuidedFocusMutationJoinedIT {
             .put("occurrence", occurrence)
             .put("operationKind", kind)
             .put("targetIntent", target)
+            .putNull("scopeIntent")
             .putNull("predicate");
     if (reference == null) {
       item.putNull("referenceIndex");
@@ -865,7 +866,7 @@ class GuidedFocusMutationJoinedIT {
   @Autowired GuidedSessionRepository repository;
   @Autowired GuidedMaterializationService materialization;
   @Autowired GuidedDispatchService dispatch;
-  @Autowired GuidedRunnerClient runner;
+  @Autowired HttpRunnerDispatchClient runner;
   @Autowired JdbcTemplate jdbc;
   @Autowired DataSource fixtureDataSource;
   @Autowired GuidedTranslationStore store;
@@ -1605,9 +1606,71 @@ class GuidedFocusMutationJoinedIT {
 
   static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
-    while (!condition.getAsBoolean() && System.nanoTime() < end) {
-      Thread.sleep(25);
+
+    class ItsPollGuidedFocusMutationJoinedITcondition {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+
+          if (!(!condition.getAsBoolean() && System.nanoTime() < end)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
     }
+    var itsPoll = new ItsPollGuidedFocusMutationJoinedITcondition();
+    if (!itsPoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("IT-S GuidedFocusMutationJoinedIT-condition")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(java.time.Duration.ZERO)
+            .pollInterval(java.time.Duration.ofMillis(25))
+            .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
+            .until(
+                () -> {
+                  if (itsPoll.initialAwaitTick) {
+                    itsPoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return itsPoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+        // Preserve the original last guard/observation and its assertion/error mapping.
+        if (!itsPoll.terminal) {
+          itsPoll.step();
+        }
+      }
+    }
+    if (itsPoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (itsPoll.failure instanceof Error error) {
+      throw error;
+    }
+
     assertThat(condition.getAsBoolean()).isTrue();
   }
 }

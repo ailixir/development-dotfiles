@@ -5,7 +5,6 @@ import com.citi.put.checks.studio.dto.ExecutionStatus;
 import com.citi.put.checks.studio.internal.dto.RunOutcome;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The explicit runner-outcome to API-vocabulary table (AC-16).
@@ -31,12 +30,6 @@ public final class RunnerOutcomeCodes {
 
   /** The runner's cancel outcome; mapped only against a recorded request (ADR-002 §29). */
   private static final String RUNNER_CANCELLED = "CANCELLED";
-
-  /**
-   * Codes the API assigns and a runner must never be able to obtain. Read from the enumeration
-   * rather than copied, so a future addition cannot be missed here.
-   */
-  private static final Set<String> API_ASSIGNED = ExecutionErrorCode.values();
 
   private RunnerOutcomeCodes() {}
 
@@ -89,11 +82,5 @@ public final class RunnerOutcomeCodes {
           : revoked ? ExecutionErrorCode.AUTHORIZATION_REVOKED : null;
     }
     return RUNNER_CODE_TO_API_CODE.get(normalized);
-  }
-
-  /** True when a runner emitted a code the API reserves for itself — recorded, never applied. */
-  public static boolean isApiAssigned(String runnerErrorCode) {
-    return runnerErrorCode != null
-        && API_ASSIGNED.contains(runnerErrorCode.toUpperCase(Locale.ROOT));
   }
 }

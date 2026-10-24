@@ -10,14 +10,7 @@ public final class SecretAlreadyExistsException extends RuntimeException {
 
   private static final long serialVersionUID = 1L;
 
-  private final String secretName;
-
   public SecretAlreadyExistsException(String secretName) {
     super("A secret named '" + secretName + "' already exists for this test");
-    this.secretName = secretName;
-  }
-
-  public String getSecretName() {
-    return secretName;
   }
 }

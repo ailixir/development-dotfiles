@@ -70,8 +70,9 @@ public class GuidedCsiBudget {
     if (!today.isEmpty()) {
       long input = ((Number) today.getFirst().get("input_tokens")).longValue();
       long output = ((Number) today.getFirst().get("output_tokens")).longValue();
-      if (input >= properties.dailyModelInputTokens()
-          || output >= properties.dailyModelOutputTokens()) {
+      if (input >= GuidedCsiBudgetProperties.limitOrUnbounded(properties.dailyModelInputTokens())
+          || output
+              >= GuidedCsiBudgetProperties.limitOrUnbounded(properties.dailyModelOutputTokens())) {
         throw dailyExhausted(((Number) today.getFirst().get("retry")).intValue());
       }
     }
@@ -93,9 +94,9 @@ public class GuidedCsiBudget {
             outputCeiling,
             csiId,
             inputCeiling,
-            properties.dailyModelInputTokens(),
+            GuidedCsiBudgetProperties.limitOrUnbounded(properties.dailyModelInputTokens()),
             outputCeiling,
-            properties.dailyModelOutputTokens())
+            GuidedCsiBudgetProperties.limitOrUnbounded(properties.dailyModelOutputTokens()))
         == 1;
   }
 

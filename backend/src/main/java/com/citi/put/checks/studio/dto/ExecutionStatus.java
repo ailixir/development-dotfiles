@@ -17,15 +17,9 @@ public final class ExecutionStatus {
   public static final String FAILED = "FAILED";
   public static final String ERROR = "ERROR";
 
-  private static final Set<String> CANONICAL = Set.of(PENDING, RUNNING, PASSED, FAILED, ERROR);
-
   private static final Set<String> TERMINAL = Set.of(PASSED, FAILED, ERROR);
 
   private ExecutionStatus() {}
-
-  public static boolean isCanonical(String status) {
-    return status != null && CANONICAL.contains(status);
-  }
 
   public static boolean isTerminal(String status) {
     return status != null && TERMINAL.contains(status);

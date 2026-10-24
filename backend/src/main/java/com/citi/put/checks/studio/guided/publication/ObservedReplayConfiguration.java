@@ -15,7 +15,7 @@ public class ObservedReplayConfiguration {
       GuidedContracts contracts,
       ObservedRevisionVerifier verifier,
       ObservedReplayPins pins,
-      GuidedPublicationAuthorization authorization,
+      com.citi.put.checks.studio.dispatch.DispatchAuthorization authorization,
       ObservedReplayProperties properties) {
     return new ObservedReplayAuthorizer(
         jdbc, contracts, verifier, pins, authorization, properties, new DatabaseClock(jdbc));

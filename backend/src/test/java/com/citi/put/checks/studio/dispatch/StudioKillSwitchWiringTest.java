@@ -249,7 +249,7 @@ class StudioKillSwitchWiringTest {
                     null,
                     null,
                     null,
-                    new StudioExecutionProperties.Dispatcher(false, null, null, null, null),
+                    new StudioExecutionProperties.Dispatcher(false, null, null, null),
                     null,
                     null)
                 .dispatcherOrDefault()

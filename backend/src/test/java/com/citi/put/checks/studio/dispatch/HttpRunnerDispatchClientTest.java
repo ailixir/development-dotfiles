@@ -398,4 +398,105 @@ class HttpRunnerDispatchClientTest {
   private static RunJob job() {
     return RunJobFixtures.conformingJob();
   }
+
+  @Test
+  void foldedValidationUsesItsOwnEndpointCredentialAndPerCallByteLimit() throws Exception {
+    var contracts =
+        org.mockito.Mockito.mock(com.citi.put.checks.studio.guided.session.GuidedContracts.class);
+    var mapper = new ObjectMapper();
+    var request =
+        mapper
+            .createObjectNode()
+            .put("attemptId", "attempt")
+            .put("claimId", "claim")
+            .put("snapshotHash", "snapshot")
+            .put("basisHash", "basis");
+    request.putObject("requiredProfile");
+    request.putObject("requiredBuild");
+    var verdict = request.deepCopy();
+    verdict.set("profile", request.path("requiredProfile"));
+    verdict.set("build", request.path("requiredBuild"));
+    org.mockito.Mockito.when(contracts.validateAndCanonical("v3/replay-validation", request))
+        .thenReturn("{}");
+    org.mockito.Mockito.when(contracts.parseWire(org.mockito.ArgumentMatchers.any(byte[].class)))
+        .thenReturn(verdict);
+    client.initializeOperations(
+        StudioRunnerTls.unconfigured(),
+        contracts,
+        new org.springframework.mock.env.MockEnvironment());
+    wireMock.stubFor(
+        post(urlPathEqualTo("/v2/validate-observed"))
+            .willReturn(aResponse().withStatus(200).withBody("{}")));
+    var budget =
+        new com.citi.put.checks.studio.guided.publication.PublicationBudget(
+            java.time.Instant.now().plusSeconds(5), java.time.Clock.systemUTC());
+    assertThat(client.validate(request, budget, 2, 500)).isEqualTo(verdict);
+    wireMock.verify(
+        1,
+        postRequestedFor(urlPathEqualTo("/v2/validate-observed"))
+            .withHeader(
+                "Authorization",
+                com.github.tomakehurst.wiremock.client.WireMock.equalTo(
+                    "Bearer test-runner-token")));
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> client.validate(request, budget, 1, 500))
+        .hasMessage("BUDGET_EXCEEDED");
+    wireMock.verify(1, postRequestedFor(urlPathEqualTo("/v2/validate-observed")));
+  }
+
+  @Test
+  void absentRunnerOriginDoesNotBorrowDispatchBaseUrlForGuidedOperations() {
+    var contracts = new com.citi.put.checks.studio.guided.session.GuidedContracts();
+    client.initializeOperations(
+        StudioRunnerTls.unconfigured(),
+        contracts,
+        new org.springframework.mock.env.MockEnvironment());
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                client.send(
+                    "context", new ObjectMapper().createObjectNode().put("sessionId", "session")))
+        .isInstanceOfSatisfying(
+            com.citi.put.checks.studio.guided.session.GuidedSessionException.class,
+            failure -> {
+              assertThat(failure.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
+              assertThat(failure.status()).isEqualTo(409);
+            });
+    assertThat(wireMock.getAllServeEvents()).isEmpty();
+  }
+
+  @Test
+  void foldedClientPreservesEachTransportConnectTimeoutAndHttpVersion() {
+    var contracts = new com.citi.put.checks.studio.guided.session.GuidedContracts();
+    var configured =
+        new HttpRunnerDispatchClient(
+            new ObjectMapper(),
+            new StudioExecutionProperties(
+                true, null, null, null, Duration.ofMillis(500), null, null, null, null, null, null),
+            new StudioRunnerProperties(
+                "http://localhost:" + wireMock.port(), "test-runner-token", Duration.ofSeconds(2)),
+            StudioRunnerTls.unconfigured(),
+            contracts,
+            java.net.URI.create("https://unconfigured.invalid"),
+            () -> "guided-token");
+    var dispatch =
+        (HttpClient)
+            org.springframework.test.util.ReflectionTestUtils.getField(configured, "httpClient");
+    var validation =
+        (HttpClient)
+            org.springframework.test.util.ReflectionTestUtils.getField(
+                configured, "validationClient");
+    var guided =
+        (HttpClient)
+            org.springframework.test.util.ReflectionTestUtils.getField(configured, "guidedClient");
+    assertThat(dispatch.connectTimeout()).contains(Duration.ofMillis(500));
+    assertThat(dispatch.version()).isEqualTo(HttpClient.newHttpClient().version());
+    assertThat(validation.connectTimeout()).contains(Duration.ofSeconds(2));
+    assertThat(validation.version()).isEqualTo(HttpClient.Version.HTTP_1_1);
+    assertThat(guided.connectTimeout()).contains(Duration.ofSeconds(5));
+    assertThat(guided.version()).isEqualTo(HttpClient.Version.HTTP_1_1);
+    assertThat(
+            List.of(
+                dispatch.followRedirects(), validation.followRedirects(), guided.followRedirects()))
+        .containsOnly(HttpClient.Redirect.NEVER);
+  }
 }

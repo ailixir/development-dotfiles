@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.guided.bridge;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.http.HttpResponse;
@@ -18,7 +19,10 @@ class GuidedOwnedBufferBoundaryTest {
   /** The real accepted-body bound, read from {@code BoundedResponse.LIMIT} (not hard-coded). */
   private static final int LIMIT = limit("$BoundedResponse", "LIMIT");
 
-  /** The real definite-refusal reply bound, read from {@code GuidedRunnerClient.REFUSAL_LIMIT}. */
+  /**
+   * The real definite-refusal reply bound, read from {@code
+   * HttpRunnerDispatchClient.REFUSAL_LIMIT}.
+   */
   private static final int REFUSAL_LIMIT = limit("", "REFUSAL_LIMIT");
 
   @Test
@@ -129,7 +133,7 @@ class GuidedOwnedBufferBoundaryTest {
   @Test
   void requestCloseWaitsForOwnedReadMonitorAndRefusesSubsequentReads() throws Exception {
     byte[] owned = new byte[] {101, 102, 103};
-    Class<?> type = Class.forName(GuidedRunnerClient.class.getName() + "$OwnedRequestBody");
+    Class<?> type = Class.forName(HttpRunnerDispatchClient.class.getName() + "$OwnedRequestBody");
     var constructor = type.getDeclaredConstructor(byte[].class);
     constructor.setAccessible(true);
     InputStream stream = (InputStream) constructor.newInstance((Object) owned);
@@ -171,7 +175,7 @@ class GuidedOwnedBufferBoundaryTest {
   }
 
   private static Object response(int limit) throws Exception {
-    Class<?> type = Class.forName(GuidedRunnerClient.class.getName() + "$BoundedResponse");
+    Class<?> type = Class.forName(HttpRunnerDispatchClient.class.getName() + "$BoundedResponse");
     var constructor = type.getDeclaredConstructor(boolean.class, int.class);
     constructor.setAccessible(true);
     return constructor.newInstance(true, limit);
@@ -180,7 +184,7 @@ class GuidedOwnedBufferBoundaryTest {
   private static int limit(String nested, String name) {
     try {
       Field field =
-          Class.forName(GuidedRunnerClient.class.getName() + nested).getDeclaredField(name);
+          Class.forName(HttpRunnerDispatchClient.class.getName() + nested).getDeclaredField(name);
       field.setAccessible(true);
       return field.getInt(null);
     } catch (ReflectiveOperationException failure) {

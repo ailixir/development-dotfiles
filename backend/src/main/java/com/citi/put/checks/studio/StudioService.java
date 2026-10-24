@@ -386,17 +386,6 @@ public class StudioService {
     return response;
   }
 
-  /** Alias matching the existing update naming used by repository/service callers. */
-  @Transactional
-  public AuthoringV2Response updateAuthoring(
-      UUID id,
-      AuthoringV2Request authoring,
-      long sourceRevision,
-      long configurationRevision,
-      Authentication auth) {
-    return saveAuthoring(id, authoring, sourceRevision, configurationRevision, auth);
-  }
-
   /** Private metadata engine; the enclosing authoring transaction already owns the row. */
   private void updateMetadata(UITest test, UITestRequest request) {
     UUID id = test.getId();

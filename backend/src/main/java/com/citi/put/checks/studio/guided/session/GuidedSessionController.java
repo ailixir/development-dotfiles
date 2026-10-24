@@ -71,7 +71,9 @@ public class GuidedSessionController {
       }
     }
     JsonNode result = service.read(user, id, "result");
-    return ResponseEntity.status(result.has("outcome") ? 200 : 202).body(result);
+    return ResponseEntity.status(
+            GuidedSessionService.terminalOutcome(result.path("outcome").asText()) ? 200 : 202)
+        .body(result);
   }
 
   @GetMapping("/{id}/clarification")

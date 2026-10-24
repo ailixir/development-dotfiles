@@ -558,6 +558,7 @@ public final class GuidedPublicationEvidenceFixture {
                         exercise.operation().path("kind").asText().equals("fill")
                             ? "password"
                             : "page")
+                    .putNull("scopeIntent")
                     .putNull("needId");
             if (exercise.operation().path("kind").asText().equals("assert")) {
               meaning.put("predicate", "title");

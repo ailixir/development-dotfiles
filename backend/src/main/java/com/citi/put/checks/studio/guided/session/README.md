@@ -120,7 +120,7 @@ length or value digest appears in these records.
 
 `consume` rejects ambient transactions. Only its committed ADMITTED→DISPATCHING winner returns
 an ephemeral in-process `WonConsumption`; the command cache contains historical ledgers only.
-Neither same-key nor new-key replay sends again. `GuidedRunnerClient` makes one HTTPS POST with
+Neither same-key nor new-key replay sends again. `HttpRunnerDispatchClient` makes one HTTPS POST with
 redirects disabled, rejects enabling JDK retries of non-idempotent methods, uses a deployment TLS
 context, and reads the controller JWT from a mounted issuer-managed token file. Configure
 `studio.guided-authoring.runner-origin` and `controller-token-file` with JVM key/trust stores
@@ -200,7 +200,7 @@ timestamps. Undefined schema pointers fail closed instead of compiling a permiss
 
 ## OBS-005 production translation integration
 
-`GuidedProductionSessionAccess` now implements current source/revision checks and `StepVerifier` on the same access object. It locks current `ui_tests` through `StudioRepository.findByIdForUpdate`; immutable source/configuration manifests, planning revisions, one-send attempts, obligation associations and question meanings live in additive V32. OBS-006 joins successful original evidence into a deterministic replay artifact and immutable publication receipt under the original scoped Run and fresh Core authority; subsequent explicit Runs obtain fresh grants and recapture runtime values without either model gateway. `GuidedProductionSessionAccess.AccountAccess` remains the fail-closed OBS-007 account-provider handoff, so the implemented publication/replay mechanism does not imply production account connectivity or first guided-run recording.
+`GuidedProductionSessionAccess` now implements current source/revision checks and `StepVerifier` on the same access object. It locks current `ui_tests` through `StudioRepository.findByIdForUpdate`; immutable source/configuration manifests, planning revisions, one-send attempts, obligation associations and question meanings live in additive V32. OBS-006 joins successful original evidence into a deterministic replay artifact and immutable publication receipt under the original scoped Run and fresh Core authority; subsequent explicit Runs obtain fresh grants and recapture runtime values without either model gateway. `GuidedProductionSessionAccess` retains the fail-closed secret-use authorization boundary, so the implemented publication/replay mechanism does not imply production account connectivity or first guided-run recording.
 
 Enable the production composition with `studio.guided-authoring.translation.enabled=true`, approved `allow-authored-nonsecret=true`, explicit `applications`/`environments`, existing runner origin/controller-token configuration and HTTPS `translation.controller-origin`. The `studio.gateway` provider settings select the concrete guided gateway; there is no recorded-fixture production fallback. `translation.verify-steps` defaults false; enabling it adds a budgeted semantic opinion without bypassing deterministic completion. Default input/output ceilings remain unchanged. Missing enabled dependencies fail configuration rather than installing an unavailable translation implementation.
 

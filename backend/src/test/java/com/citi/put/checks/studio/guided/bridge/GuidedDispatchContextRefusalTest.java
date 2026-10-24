@@ -11,6 +11,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
@@ -40,8 +41,8 @@ import org.springframework.security.core.Authentication;
  * STUDIO-OBS-014, ar-2-r14-stops ruling 2, prepare/admit: a definite runner refusal of the context
  * re-push ends the session {@code FAILED RUNTIME_INCOMPATIBLE} before {@code prepare} is sent, so
  * no preparation, admission or ledger row can exist. An uncertain reply keeps today's {@code
- * UNKNOWN_OUTCOME} and fails nothing. Real {@link GuidedRunnerClient} over HTTPS against a stub
- * runner; the session service and materialization are test doubles.
+ * UNKNOWN_OUTCOME} and fails nothing. Real {@link HttpRunnerDispatchClient} over HTTPS against a
+ * stub runner; the session service and materialization are test doubles.
  */
 class GuidedDispatchContextRefusalTest {
 
@@ -74,7 +75,7 @@ class GuidedDispatchContextRefusalTest {
         });
     server.start();
     var runner =
-        new GuidedRunnerClient(
+        new HttpRunnerDispatchClient(
             URI.create("https://localhost:" + server.getAddress().getPort()),
             tls,
             () -> "synthetic-controller-token",

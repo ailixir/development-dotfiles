@@ -139,7 +139,13 @@ public final class GuidedPromptAssembler {
     }
     if (kind == GuidedModelRequest.Kind.SOURCE_PLAN) {
       var references = context.putArray("sourceReferences");
-      state.path("plan").path("sourceReferences").forEach(references::add);
+      if (state.hasNonNull("plan")) {
+        state.path("plan").path("sourceReferences").forEach(ref -> references.add(ref.deepCopy()));
+      } else if (!progress.has("learningWindow")
+          && selectedSources.isArray()
+          && selectedSources.isEmpty()) {
+        references.addAll(new GuidedAuthoredUriCandidates(contracts).candidates(session, manifest));
+      }
     }
     var obligations = context.putArray("obligations");
     for (JsonNode item : remaining) {
@@ -151,6 +157,7 @@ public final class GuidedPromptAssembler {
               "occurrence",
               "operationKind",
               "targetIntent",
+              "scopeIntent",
               "referenceIndex",
               "needId",
               "predicate")) {
@@ -553,6 +560,9 @@ public final class GuidedPromptAssembler {
                       "not",
                       "pattern",
                       "uniqueItems",
+                      // Large array caps can make Vertex reject its generation grammar (400).
+                      // The pinned local schema still enforces every cardinality limit.
+                      "maxItems",
                       "minLength",
                       "maxLength")
                   .contains(key)) {

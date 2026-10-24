@@ -6,8 +6,6 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 import com.citi.put.checks.ChecksApplication;
 import com.citi.put.checks.studio.StudioExecutionProperties;
-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
-import com.citi.put.checks.studio.guided.publication.ObservedValidationClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionConfiguration;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
@@ -76,8 +74,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *
  * <ul>
  *   <li>Submission ({@code POST /v2/runs}), cancel ({@code DELETE /v2/runs/{id}}) and bridge
- *       traffic ({@code GuidedRunnerClient}) succeed only with the CA-issued backend certificate
- *       and a runner that the CA issued.
+ *       traffic ({@code HttpRunnerDispatchClient}) succeed only with the CA-issued backend
+ *       certificate and a runner that the CA issued.
  *   <li>No certificate, a certificate the CA did not issue, a server the CA did not issue, a
  *       certificate for another host, and plaintext in either direction are each refused.
  *   <li>The bearer is still required over TLS.
@@ -234,7 +232,7 @@ class RunnerTlsClientCertIT {
 
     assertThat(refused.kind()).isEqualTo(DispatchOutcome.Kind.AMBIGUOUS);
     assertThat(bridge.getMessage()).isEqualTo("UNKNOWN_OUTCOME");
-    assertThat(GuidedRunnerClient.definiteContextRefusal(bridge)).isFalse();
+    assertThat(HttpRunnerDispatchClient.definiteContextRefusal(bridge)).isFalse();
     assertThat(elsewhere.calls()).hasValue(0);
     // The one different input: the same flow against a certificate that names this host.
     TlsPeer runner = start(Identity.RUNNER, true);
@@ -243,7 +241,7 @@ class RunnerTlsClientCertIT {
                 .send(RunJobFixtures.conformingJob())
                 .kind())
         .isEqualTo(DispatchOutcome.Kind.ACCEPTED);
-    assertThat(GuidedRunnerClient.definiteContextRefusal(contextPush(backend, runner.url())))
+    assertThat(HttpRunnerDispatchClient.definiteContextRefusal(contextPush(backend, runner.url())))
         .isTrue();
   }
 
@@ -255,7 +253,7 @@ class RunnerTlsClientCertIT {
 
     GuidedSessionException withBackend = contextPush(CA.backendTls(), runner.url());
     // The runner's closed refusal reached the client: the application layer was reached over mTLS.
-    assertThat(GuidedRunnerClient.definiteContextRefusal(withBackend)).isTrue();
+    assertThat(HttpRunnerDispatchClient.definiteContextRefusal(withBackend)).isTrue();
     assertThat(runner.calls()).hasValue(1);
     assertThat(runner.peers()).containsExactly(BACKEND_SUBJECT);
     assertThat(runner.requests())
@@ -271,7 +269,7 @@ class RunnerTlsClientCertIT {
 
     for (GuidedSessionException refused : List.of(noCertificate, rogueCertificate)) {
       assertThat(refused.getMessage()).isEqualTo("UNKNOWN_OUTCOME");
-      assertThat(GuidedRunnerClient.definiteContextRefusal(refused)).isFalse();
+      assertThat(HttpRunnerDispatchClient.definiteContextRefusal(refused)).isFalse();
     }
     assertThat(runner.calls()).as("neither refused call reached the runner").hasValue(1);
   }
@@ -471,8 +469,8 @@ class RunnerTlsClientCertIT {
 
     @Autowired StudioRunnerTls tls;
     @Autowired HttpRunnerDispatchClient dispatch;
-    @Autowired GuidedRunnerClient bridge;
-    @Autowired ObservedValidationClient validation;
+    @Autowired HttpRunnerDispatchClient bridge;
+    @Autowired HttpRunnerDispatchClient validation;
     @Autowired GuidedTranslationCoordinator coordinator;
 
     @Test
@@ -482,8 +480,8 @@ class RunnerTlsClientCertIT {
       for (Object client :
           List.of(
               field(dispatch, "httpClient"),
-              field(bridge, "client"),
-              field(validation, "client"),
+              field(bridge, "guidedClient"),
+              field(validation, "validationClient"),
               field(coordinator, "http"))) {
         assertThat(((HttpClient) client).sslContext()).isSameAs(tls.sslContext());
       }
@@ -491,7 +489,7 @@ class RunnerTlsClientCertIT {
       for (Object client :
           List.of(
               field(dispatch, "httpClient"),
-              field(validation, "client"),
+              field(validation, "validationClient"),
               field(coordinator, "http"))) {
         assertThat(((HttpClient) client).sslParameters().getEndpointIdentificationAlgorithm())
             .isEqualTo("HTTPS");
@@ -514,7 +512,7 @@ class RunnerTlsClientCertIT {
                           .put("ownerFence", 1)),
               GuidedSessionException.class);
 
-      assertThat(GuidedRunnerClient.definiteContextRefusal(refusal)).isTrue();
+      assertThat(HttpRunnerDispatchClient.definiteContextRefusal(refusal)).isTrue();
       assertThat(runner.peers()).containsOnly(BACKEND_SUBJECT);
       assertThat(runner.requests()).contains("POST /v2/runs");
     }
@@ -737,8 +735,8 @@ class RunnerTlsClientCertIT {
 
   /** One {@code context} push; the double answers a closed refusal the client classifies. */
   private static GuidedSessionException contextPush(StudioRunnerTls tls, String url) {
-    GuidedRunnerClient bridge =
-        new GuidedRunnerClient(
+    HttpRunnerDispatchClient bridge =
+        new HttpRunnerDispatchClient(
             URI.create(url),
             tls.sslContext(),
             () -> "synthetic-controller-token",

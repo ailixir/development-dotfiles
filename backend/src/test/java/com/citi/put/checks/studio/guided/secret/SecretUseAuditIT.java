@@ -1843,21 +1843,84 @@ class SecretUseAuditIT {
                         });
               });
       assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
-      boolean waited = false;
       long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-      while (System.nanoTime() < until) {
-        if (f.jdbc()
-                .queryForObject(
-                    ("SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() "
-                        + "AND pid<>pg_backend_pid() AND wait_event_type='Lock'"),
-                    Integer.class)
-            > 0) {
-          waited = true;
-          break;
+
+      class ItsPollSecretterminalrowlock {
+        Throwable failure;
+        boolean terminal;
+        boolean slept;
+        boolean initialAwaitTick = true;
+        boolean waited;
+
+        boolean step() {
+          if (terminal) {
+            return true;
+          }
+          try {
+            if (slept && Thread.interrupted()) {
+              throw new InterruptedException();
+            }
+
+            if (!(System.nanoTime() < until)) {
+              terminal = true;
+              return true;
+            }
+            if (f.jdbc()
+                    .queryForObject(
+                        ("SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() "
+                            + "AND pid<>pg_backend_pid() AND wait_event_type='Lock'"),
+                        Integer.class)
+                > 0) {
+              waited = true;
+              terminal = true;
+              return true;
+            }
+            if (Thread.interrupted()) {
+              throw new InterruptedException();
+            }
+            slept = true;
+            return false;
+
+          } catch (Throwable caught) {
+            failure = caught;
+            terminal = true;
+            return true;
+          }
         }
-        Thread.sleep(20);
       }
-      assertThat(waited).isTrue();
+      var itsPoll = new ItsPollSecretterminalrowlock();
+      if (!itsPoll.step()) {
+        try {
+          org.awaitility.Awaitility.await()
+              .alias("IT-S Secret-terminal-row-lock")
+              .pollInSameThread()
+              .dontCatchUncaughtExceptions()
+              .pollDelay(java.time.Duration.ZERO)
+              .pollInterval(java.time.Duration.ofMillis(20))
+              .atMost(java.time.Duration.ofNanos(Math.max(1L, until - System.nanoTime())))
+              .until(
+                  () -> {
+                    if (itsPoll.initialAwaitTick) {
+                      itsPoll.initialAwaitTick = false;
+                      return false;
+                    }
+                    return itsPoll.step();
+                  });
+        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+          // Preserve the original last guard/observation and its assertion/error mapping.
+          if (!itsPoll.terminal) {
+            itsPoll.step();
+          }
+        }
+      }
+      if (itsPoll.failure instanceof Exception exception) {
+        throw exception;
+      }
+      if (itsPoll.failure instanceof Error error) {
+        throw error;
+      }
+      assertThat(itsPoll.waited).isTrue();
+
       releaseWriter.countDown();
       assertThat(writer.get(10, TimeUnit.SECONDS)).isTrue();
       assertThat(terminal.get(10, TimeUnit.SECONDS)).isEqualTo(1);

@@ -19,13 +19,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public final class GuidedDispatchService {
   private final GuidedSessionService sessions;
   private final GuidedMaterializationService materialization;
-  private final GuidedRunnerClient runner;
+  private final com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient runner;
   private com.citi.put.checks.studio.dispatch.StudioReferenceResolver references;
 
   public GuidedDispatchService(
       GuidedSessionService sessions,
       GuidedMaterializationService materialization,
-      GuidedRunnerClient runner) {
+      com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient runner) {
     this.sessions = sessions;
     this.materialization = materialization;
     this.runner = runner;
@@ -144,7 +144,8 @@ public final class GuidedDispatchService {
     try {
       runner.send("context", context);
     } catch (RuntimeException failure) {
-      if (GuidedRunnerClient.definiteContextRefusal(failure)) {
+      if (com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.definiteContextRefusal(
+          failure)) {
         // ar-2-r14-stops ruling 2: the session ends FAILED RUNTIME_INCOMPATIBLE before prepare is
         // sent, so no preparation, admission or ledger row exists.
         sessions.failTranslation(controller, id, fence, "RUNTIME_INCOMPATIBLE");

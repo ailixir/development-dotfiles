@@ -2,18 +2,12 @@ package com.citi.put.checks.studio.guided.publication;
 
 import com.citi.put.checks.security.CoreServiceClient;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
-import com.citi.put.checks.studio.dispatch.StudioRunnerProperties;
-import com.citi.put.checks.studio.dispatch.StudioRunnerTls;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedPublicPresentationProjector;
 import com.citi.put.checks.studio.guided.session.GuidedSessionAccess;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -43,32 +37,12 @@ public class GuidedPublicationConfiguration {
   }
 
   @Bean
-  GuidedPublicationAuthorization publicationAuthorization(
+  PublicationGrantAuthority publicationGrantAuthority(
       CoreServiceClient core,
       CsiOwnershipEvaluator ownership,
-      GuidedPublicationProperties properties) {
-    return new GuidedPublicationAuthorization(core, ownership, Clock.systemUTC(), properties);
-  }
-
-  @Bean
-  ObservedValidationClient observedValidationClient(
-      StudioRunnerProperties runner,
-      GuidedContracts contracts,
       GuidedPublicationProperties properties,
-      StudioRunnerTls tls) {
-    HttpClient client =
-        tls.configure(HttpClient.newBuilder())
-            .followRedirects(HttpClient.Redirect.NEVER)
-            .connectTimeout(
-                runner.connectTimeout() == null ? Duration.ofSeconds(2) : runner.connectTimeout())
-            .version(HttpClient.Version.HTTP_1_1)
-            .build();
-    return new ObservedValidationClient(
-        runner.isConfigured() ? URI.create(runner.baseUrl()) : null,
-        client,
-        runner::serviceIdentityToken,
-        contracts,
-        properties);
+      JdbcTemplate jdbc) {
+    return new PublicationGrantAuthority(core, ownership, new DatabaseClock(jdbc), properties);
   }
 
   @Bean
@@ -80,11 +54,12 @@ public class GuidedPublicationConfiguration {
       GuidedPublicationRepository publications,
       GuidedContracts contracts,
       ObservedReplayPins pins,
-      ObservedValidationClient validator,
-      GuidedPublicationAuthorization authorization,
+      com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient validator,
+      com.citi.put.checks.studio.dispatch.DispatchAuthorization authorization,
       GuidedSessionAccess access,
       GuidedPublicationProperties properties,
-      ObservedReplayProperties replay) {
+      ObservedReplayProperties replay,
+      JdbcTemplate jdbc) {
     return new GuidedPlanPublisher(
         sessions,
         lifecycle,
@@ -98,7 +73,7 @@ public class GuidedPublicationConfiguration {
         access,
         properties,
         replay,
-        Clock.systemUTC());
+        new DatabaseClock(jdbc));
   }
 
   @Bean
@@ -107,7 +82,7 @@ public class GuidedPublicationConfiguration {
       GuidedPublicationRepository publications,
       GuidedSessionRepository sessions,
       GuidedSessionService guided,
-      GuidedPublicationAuthorization authorization,
+      com.citi.put.checks.studio.dispatch.DispatchAuthorization authorization,
       GuidedContracts contracts,
       com.citi.put.checks.studio.readiness.ExecutionReadinessService readiness,
       ObservedReplayProperties replay,

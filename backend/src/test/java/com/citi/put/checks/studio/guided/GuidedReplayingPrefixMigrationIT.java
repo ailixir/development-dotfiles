@@ -959,14 +959,14 @@ class GuidedReplayingPrefixMigrationIT {
   void freshV1ToV21HasExpectedHeadDescriptionAndNoPendingMigrations() throws Exception {
     assertThat(flyway(PG.getJdbcUrl(), null).info().pending()).isEmpty();
     try (Connection c = connect()) {
-      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("22");
+      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("23");
       assertThat(scalar(c, "SELECT description FROM flyway_schema_history WHERE version='21'"))
           .isEqualTo("guided session replaying prefix");
       assertThat(
               scalar(
                   c,
                   "SELECT count(*) FROM flyway_schema_history WHERE success AND version IS NOT NULL"))
-          .isEqualTo("22");
+          .isEqualTo("23");
     }
   }
 

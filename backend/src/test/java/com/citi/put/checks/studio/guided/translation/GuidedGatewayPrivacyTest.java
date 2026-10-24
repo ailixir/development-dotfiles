@@ -228,6 +228,7 @@ class GuidedGatewayPrivacyTest {
             .put("occurrence", 0)
             .put("operationKind", "click")
             .put("targetIntent", "Continue")
+            .putNull("scopeIntent")
             .putNull("referenceIndex")
             .putNull("needId")
             .putNull("predicate");
@@ -275,6 +276,72 @@ class GuidedGatewayPrivacyTest {
   private GenAiGuidedLlmGatewayClient client(GenAiGatewayTransport transport) {
     return new GenAiGuidedLlmGatewayClient(
         transport, new GuidedResponseParser(new GuidedContracts()));
+  }
+
+  @Test
+  void initialUriHintsUseClassifiedAuthoredSourceWithoutExportingSavedOrCapturedValues()
+      throws Exception {
+    ObjectNode draft =
+        GuidedSourceClassifierTest.current(
+            "Open https://example.test/public then use <var city> and <secret PASSWORD>");
+    ((ObjectNode) draft.path("authoring").path("steps").get(0)).put("id", STEP);
+    ((ObjectNode) draft.path("variables").get(0))
+        .put("value", "https://example.test/private-saved-canary");
+    draft
+        .withArray("variables")
+        .addObject()
+        .put("name", "PASSWORD")
+        .put("kind", "secretRef")
+        .put("secretId", "PASSWORD");
+    ObjectNode scope = GuidedSourceClassifierTest.scope();
+    scope.putArray("approvedOrigins").add("https://example.test");
+    ObjectNode manifest = GuidedSourceClassifierTest.classifier().classify(draft, scope);
+    ObjectNode session =
+        JSON.createObjectNode()
+            .put("sessionId", "uri-private-session")
+            .put("scopeHash", "a".repeat(64))
+            .put("capturedValue", "https://example.test/private-captured-canary")
+            .put("secretValue", "https://example.test/private-secret-canary");
+    session.set("scope", scope);
+    session.set("sourceSteps", manifest.path("sourceSteps"));
+    ObjectNode state = JSON.createObjectNode();
+    state.set("manifest", manifest);
+    GuidedModelRequest request =
+        new GuidedPromptAssembler(new GuidedContracts())
+            .assemble(
+                "uri-private-request",
+                1,
+                GuidedModelRequest.Kind.SOURCE_PLAN,
+                session,
+                JSON.createObjectNode(),
+                state,
+                JSON.createArrayNode(),
+                JSON.createArrayNode(),
+                JSON.createArrayNode(),
+                List.of(),
+                1024);
+    JsonNode refs = request.projection().document().path("sourceReferences");
+    assertThat(refs).hasSize(1);
+    assertThat(refs.get(0).path("startUtf16").asInt()).isEqualTo(5);
+    assertThat(refs.get(0).path("endUtf16").asInt()).isEqualTo(32);
+    assertThat(refs.get(0).has("value")).isFalse();
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .willReturn(okJson(provider(answer(request).toString()))));
+    try (var transport = new GenAiGatewayTransport(properties(server.baseUrl(), 65536, 65536))) {
+      assertThat(client(transport).propose(request, budget(Duration.ofSeconds(5))).code())
+          .isEqualTo(GuidedModelResponse.Code.OK);
+    }
+    String body = server.getAllServeEvents().getFirst().getRequest().getBodyAsString();
+    assertThat(body).contains("https://example.test/public");
+    assertThat(body)
+        .doesNotContain(
+            "private-saved-canary",
+            "private-captured-canary",
+            "private-secret-canary",
+            "configurationValues",
+            "<secret PASSWORD>");
+    server.verify(1, postRequestedFor(urlPathMatching(".*generateContent")));
   }
 
   @ParameterizedTest
@@ -378,9 +445,34 @@ class GuidedGatewayPrivacyTest {
     }
   }
 
+  static java.util.stream.Stream<org.junit.jupiter.params.provider.Arguments> statusReasons() {
+    var transport = GuidedModelResponse.Code.TRANSPORT;
+    var timeout = GuidedModelResponse.Code.TIMEOUT;
+    return java.util.stream.Stream.of(
+        org.junit.jupiter.params.provider.Arguments.of(
+            400, transport, GuidedModelResponse.Reason.TRANSPORT_HTTP_400),
+        org.junit.jupiter.params.provider.Arguments.of(
+            401, transport, GuidedModelResponse.Reason.TRANSPORT_HTTP_401_403),
+        org.junit.jupiter.params.provider.Arguments.of(
+            403, transport, GuidedModelResponse.Reason.TRANSPORT_HTTP_401_403),
+        org.junit.jupiter.params.provider.Arguments.of(
+            404, transport, GuidedModelResponse.Reason.TRANSPORT_HTTP_4XX),
+        org.junit.jupiter.params.provider.Arguments.of(
+            429, transport, GuidedModelResponse.Reason.TRANSPORT_HTTP_429),
+        org.junit.jupiter.params.provider.Arguments.of(
+            500, transport, GuidedModelResponse.Reason.TRANSPORT_HTTP_5XX),
+        org.junit.jupiter.params.provider.Arguments.of(
+            503, transport, GuidedModelResponse.Reason.TRANSPORT_HTTP_503),
+        org.junit.jupiter.params.provider.Arguments.of(
+            504, timeout, GuidedModelResponse.Reason.TIMEOUT));
+  }
+
+  /** Round 053 obligations 1-3: status to closed token, hostile canary, exactly one send. */
   @ParameterizedTest
-  @ValueSource(ints = {401, 429, 500, 503})
-  void maliciousErrorsAndRetryAfterNeverReissueOrLeak(int status) throws Exception {
+  @org.junit.jupiter.params.provider.MethodSource("statusReasons")
+  void maliciousErrorsAndRetryAfterNeverReissueOrLeak(
+      int status, GuidedModelResponse.Code expectedCode, GuidedModelResponse.Reason expectedReason)
+      throws Exception {
     String canary = "provider-prose-secret-canary";
     server.stubFor(
         post(urlPathMatching(".*generateContent"))
@@ -402,7 +494,8 @@ class GuidedGatewayPrivacyTest {
               .propose(
                   request(GuidedModelRequest.Kind.SOURCE_PLAN, projection(), 1),
                   budget(Duration.ofSeconds(5)));
-      assertThat(response.code()).isEqualTo(GuidedModelResponse.Code.TRANSPORT);
+      assertThat(response.code()).isEqualTo(expectedCode);
+      assertThat(response.reason()).isEqualTo(expectedReason);
       assertThat(response.toString()).doesNotContain(canary);
       assertThat(response.proposal()).isNull();
       assertThat(appender.list)
@@ -412,6 +505,97 @@ class GuidedGatewayPrivacyTest {
       appender.stop();
     }
     server.verify(1, postRequestedFor(urlPathMatching(".*generateContent")));
+  }
+
+  @Test
+  void connectionRefusedAndResetAreTheDefiniteConnectClass() throws Exception {
+    int closedPort;
+    try (var socket = new java.net.ServerSocket(0)) {
+      closedPort = socket.getLocalPort();
+    }
+    try (var transport =
+        new GenAiGatewayTransport(properties("http://127.0.0.1:" + closedPort, 65536, 65536))) {
+      var refused =
+          client(transport)
+              .propose(
+                  request(GuidedModelRequest.Kind.SOURCE_PLAN, projection(), 1),
+                  budget(Duration.ofSeconds(5)));
+      assertThat(refused.code()).isEqualTo(GuidedModelResponse.Code.TRANSPORT);
+      assertThat(refused.reason()).isEqualTo(GuidedModelResponse.Reason.TRANSPORT_CONNECT);
+      assertThat(refused.reason().definiteTransient()).isTrue();
+    }
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .willReturn(
+                aResponse()
+                    .withFault(
+                        com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER)));
+    try (var transport = new GenAiGatewayTransport(properties(server.baseUrl(), 65536, 65536))) {
+      var reset =
+          client(transport)
+              .propose(
+                  request(GuidedModelRequest.Kind.SOURCE_PLAN, projection(), 1),
+                  budget(Duration.ofSeconds(5)));
+      assertThat(reset.code()).isEqualTo(GuidedModelResponse.Code.TRANSPORT);
+      assertThat(reset.reason()).isEqualTo(GuidedModelResponse.Reason.TRANSPORT_CONNECT);
+    }
+    server.verify(1, postRequestedFor(urlPathMatching(".*generateContent")));
+  }
+
+  @Test
+  void aFailedCredentialRefreshIsTheCredentialClassAndSendsNoModelRequest() throws Exception {
+    var keys = java.security.KeyPairGenerator.getInstance("RSA");
+    keys.initialize(2048);
+    String pem =
+        "-----BEGIN PRIVATE KEY-----\n"
+            + java.util.Base64.getMimeEncoder(64, new byte[] {'\n'})
+                .encodeToString(keys.generateKeyPair().getPrivate().getEncoded())
+            + "\n-----END PRIVATE KEY-----\n";
+    ObjectNode account =
+        JSON.createObjectNode()
+            .put("type", "service_account")
+            .put("project_id", "synthetic-project")
+            .put("client_email", "synthetic@example.invalid")
+            .put("client_id", "synthetic-client")
+            .put("private_key_id", "synthetic-key")
+            .put("private_key", pem)
+            .put("token_uri", server.baseUrl() + "/token");
+    var file = temporary.resolve("synthetic-account.json");
+    java.nio.file.Files.writeString(file, account.toString());
+    var base = properties(server.baseUrl(), 65536, 65536);
+    var configured =
+        new StudioGatewayProperties(
+            base.endpoint(),
+            base.project(),
+            base.location(),
+            base.model(),
+            new StudioGatewayProperties.Credentials("service-account-file", file.toString()),
+            base.requestTimeout(),
+            base.maxConcurrency(),
+            base.maxInputBytes(),
+            base.maxOutputBytes(),
+            base.maxOutputTokens(),
+            base.thinkingLevel(),
+            base.providerFeatures());
+    server.stubFor(
+        post(urlPathMatching("/token"))
+            .willReturn(
+                aResponse()
+                    .withStatus(503)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"error\":\"provider-prose-secret-canary\"}")));
+    try (var transport = new GenAiGatewayTransport(configured)) {
+      var response =
+          client(transport)
+              .propose(
+                  request(GuidedModelRequest.Kind.SOURCE_PLAN, projection(), 1),
+                  budget(Duration.ofSeconds(5)));
+      assertThat(response.code()).isEqualTo(GuidedModelResponse.Code.TRANSPORT);
+      assertThat(response.reason()).isEqualTo(GuidedModelResponse.Reason.TRANSPORT_CREDENTIAL);
+      assertThat(response.reason().definiteTransient()).isFalse();
+      assertThat(response.toString()).doesNotContain("provider-prose-secret-canary");
+    }
+    server.verify(0, postRequestedFor(urlPathMatching(".*generateContent")));
   }
 
   @Test
@@ -517,8 +701,9 @@ class GuidedGatewayPrivacyTest {
             .willReturn(okJson(provider(answer(request).toString())).withFixedDelay(5000)));
     try (var transport = new GenAiGatewayTransport(properties(server.baseUrl(), 65536, 65536))) {
       long start = System.nanoTime();
-      assertThat(client(transport).propose(request, budget(Duration.ofMillis(150))).code())
-          .isEqualTo(GuidedModelResponse.Code.TIMEOUT);
+      var timedOut = client(transport).propose(request, budget(Duration.ofMillis(150)));
+      assertThat(timedOut.code()).isEqualTo(GuidedModelResponse.Code.TIMEOUT);
+      assertThat(timedOut.reason()).isEqualTo(GuidedModelResponse.Reason.TIMEOUT);
       assertThat(Duration.ofNanos(System.nanoTime() - start)).isLessThan(Duration.ofSeconds(2));
       server.verify(1, postRequestedFor(urlPathMatching(".*generateContent")));
       var cancelled = budget(Duration.ofSeconds(5));
@@ -689,6 +874,7 @@ class GuidedGatewayPrivacyTest {
       try (var transport = new GenAiGatewayTransport(properties(server.baseUrl(), 65536, 65536))) {
         var response = client(transport).propose(request, budget(Duration.ofSeconds(5)));
         assertThat(response.code()).isEqualTo(GuidedModelResponse.Code.TRANSPORT);
+        assertThat(response.reason()).isEqualTo(GuidedModelResponse.Reason.TRANSPORT_USAGE);
         assertThat(response.inputTokens()).isNull();
         assertThat(response.outputTokens()).isNull();
       }

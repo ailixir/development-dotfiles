@@ -3,6 +3,8 @@ package com.citi.put.checks.studio.guided.translation;
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
 import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
+import com.citi.put.checks.studio.guided.diagnostics.GuidedGuardProvenance;
+import com.citi.put.checks.studio.guided.diagnostics.GuidedGuardProvenance.Guard;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
@@ -33,6 +35,18 @@ public final class GuidedTranslationService {
   private final GuidedTranslationProperties properties;
   private final Clock clock;
   private final GuidedPromptAssembler.PreparationCapability preparationCapability;
+  private GuidedRefusalDiagnostics refusalDiagnostics = GuidedRefusalDiagnostics.configured();
+  private BackoffSleeper sleeper = Thread::sleep;
+
+  /** Test seam for the definite-transient backoff; production sleeps on the calling thread. */
+  @FunctionalInterface
+  public interface BackoffSleeper {
+    void sleep(long millis) throws InterruptedException;
+  }
+
+  public void useBackoffSleeper(BackoffSleeper replacement) {
+    sleeper = java.util.Objects.requireNonNull(replacement);
+  }
 
   public GuidedTranslationService(
       GuidedSessionService sessions,
@@ -206,11 +220,16 @@ public final class GuidedTranslationService {
               owner,
               key,
               GuidedModelRequest.Kind.SOURCE_PLAN,
-              (current, response, attemptIdentity) -> {
+              (current, response, attemptIdentity, capture) -> {
                 if (response.has("question")) {
                   return question(controller, current, response.path("question"), "source");
                 }
-                ObjectNode admitted = validator.admitPlan(current.document(), response);
+                ObjectNode admitted =
+                    validator.admitPlan(
+                        current.document(),
+                        response,
+                        null,
+                        store.state(id).path("manifest").path("sourceSteps"));
                 inputs.validate(
                     current.document(),
                     store.state(id).path("manifest"),
@@ -325,7 +344,7 @@ public final class GuidedTranslationService {
     try {
       acknowledgement = dispatch.pushContext(controller, id, fence);
     } catch (RuntimeException failure) {
-      if (com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.definiteContextRefusal(
+      if (com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.definiteContextRefusal(
           failure)) {
         // ar-2-r14-stops ruling 2: a definite refusal is terminal on first receipt, in this same
         // continuation, with no further delivery. Uncertain outcomes keep the bounded retry.
@@ -450,7 +469,7 @@ public final class GuidedTranslationService {
     try {
       dispatch.pushContext(controller, id, fence);
     } catch (RuntimeException failure) {
-      if (com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.definiteContextRefusal(
+      if (com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.definiteContextRefusal(
           failure)) {
         sessions.failTranslation(controller, id, fence, "RUNTIME_INCOMPATIBLE");
       }
@@ -968,47 +987,9 @@ public final class GuidedTranslationService {
             fence,
             key,
             GuidedModelRequest.Kind.NEXT_ACTION,
-            (current, response, attemptIdentity) -> {
-              if (response.path("status").asText().equals("CLARIFICATION")) {
-                return question(
-                    controller, current, response.path("question"), "observed", attemptIdentity);
-              }
-              if (response.path("status").asText().equals("COMPLETE")) {
-                return contracts.object().put("complete", true);
-              }
-              ObjectNode plan = (ObjectNode) store.state(id).path("plan");
-              validator.sourceSelections(current.document(), plan, sourceSelections(current));
-              String obligationId = response.path("obligationId").asText();
-              JsonNode obligation = validator.remaining(plan, obligationId);
-              ObjectNode existing = store.obligation(id, obligationId);
-              if (existing != null
-                  && !existing.path("admissionId").isNull()
-                  && !existing.path("admissionId").asText().isBlank()) {
-                return existing;
-              }
-              ObjectNode context = sessions.runnerContext(controller, id, fence);
-              JsonNode proposal =
-                  validator.materializeAction(
-                      current.document(),
-                      current.progress(),
-                      obligation,
-                      response.path("action"),
-                      context,
-                      attemptIdentity,
-                      store.state(id).path("planRevision").asLong());
-              validator.action(
-                  current.document(),
-                  current.progress(),
-                  plan,
-                  effectiveObligation(current, obligation, proposal),
-                  proposal,
-                  context);
-              JsonNode confirmation =
-                  guardAction(controller, fence, current, obligation, proposal, attemptIdentity);
-              if (confirmation != null) {
-                return confirmation;
-              }
-              return store.reserveObligation(current.document(), obligationId, proposal);
+            (current, response, attemptIdentity, capture) -> {
+              return applyNextAction(
+                  controller, id, fence, current, response, attemptIdentity, capture);
             });
     if (result.path("complete").asBoolean()) {
       return complete(controller, id, fence, key + "-verify");
@@ -1017,6 +998,125 @@ public final class GuidedTranslationService {
       return admitAndDispatch(controller, id, fence, result);
     }
     return result;
+  }
+
+  private JsonNode applyNextAction(
+      Authentication controller,
+      String id,
+      long fence,
+      GuidedSessionRepository.Session current,
+      JsonNode response,
+      JsonNode attemptIdentity,
+      GuidedRefusalDiagnostics.Capture capture) {
+    if (response.path("status").asText().equals("CLARIFICATION")) {
+      return GuidedRefusalDiagnostics.call(
+          capture,
+          GuidedRefusalDiagnostics.Gate.NEXT_QUESTION_CALL,
+          () ->
+              question(
+                  controller, current, response.path("question"), "observed", attemptIdentity));
+    }
+    if (response.path("status").asText().equals("COMPLETE")) {
+      return contracts.object().put("complete", true);
+    }
+    ObjectNode plan =
+        GuidedRefusalDiagnostics.call(
+            capture,
+            GuidedRefusalDiagnostics.Gate.NEXT_PLAN_ACCESS_CALL,
+            () -> (ObjectNode) store.state(id).path("plan"));
+    GuidedRefusalDiagnostics.call(
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_SOURCE_SELECTION_CALL,
+        () -> {
+          validator.sourceSelections(current.document(), plan, sourceSelections(current));
+          return null;
+        });
+    String obligationId = response.path("obligationId").asText();
+    JsonNode obligation =
+        GuidedRefusalDiagnostics.call(
+            capture,
+            GuidedRefusalDiagnostics.Gate.NEXT_OBLIGATION_LOOKUP_CALL,
+            () -> validator.remaining(plan, obligationId));
+    ObjectNode existing =
+        GuidedRefusalDiagnostics.call(
+            capture,
+            GuidedRefusalDiagnostics.Gate.NEXT_ASSOCIATION_LOOKUP_CALL,
+            () -> store.obligation(id, obligationId));
+    if (existing != null
+        && !existing.path("admissionId").isNull()
+        && !existing.path("admissionId").asText().isBlank()) {
+      return existing;
+    }
+    ObjectNode context =
+        GuidedRefusalDiagnostics.call(
+            capture,
+            GuidedRefusalDiagnostics.Gate.NEXT_RUNNER_CONTEXT_CALL,
+            () -> sessions.runnerContext(controller, id, fence));
+    JsonNode proposal =
+        GuidedRefusalDiagnostics.call(
+            capture,
+            GuidedRefusalDiagnostics.Gate.NEXT_MATERIALIZE_CALL,
+            () ->
+                capture == GuidedRefusalDiagnostics.Capture.NONE
+                    ? validator.materializeAction(
+                        current.document(),
+                        current.progress(),
+                        obligation,
+                        response.path("action"),
+                        context,
+                        attemptIdentity,
+                        store.state(id).path("planRevision").asLong())
+                    : validator.materializeAction(
+                        current.document(),
+                        current.progress(),
+                        obligation,
+                        response.path("action"),
+                        context,
+                        attemptIdentity,
+                        store.state(id).path("planRevision").asLong(),
+                        capture));
+    GuidedRefusalDiagnostics.call(
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_VALIDATE_ACTION_CALL,
+        () -> {
+          if (capture == GuidedRefusalDiagnostics.Capture.NONE) {
+            validator.action(
+                current.document(),
+                current.progress(),
+                plan,
+                GuidedRefusalDiagnostics.call(
+                    capture,
+                    GuidedRefusalDiagnostics.Gate.NEXT_EFFECTIVE_CHOICE_CALL,
+                    () -> effectiveObligation(current, obligation, proposal)),
+                proposal,
+                context);
+          } else {
+            validator.action(
+                current.document(),
+                current.progress(),
+                plan,
+                GuidedRefusalDiagnostics.call(
+                    capture,
+                    GuidedRefusalDiagnostics.Gate.NEXT_EFFECTIVE_CHOICE_CALL,
+                    () -> effectiveObligation(current, obligation, proposal)),
+                proposal,
+                context,
+                capture);
+          }
+          return null;
+        });
+    JsonNode confirmation =
+        GuidedRefusalDiagnostics.call(
+            capture,
+            GuidedRefusalDiagnostics.Gate.NEXT_POLICY_CALL,
+            () -> guardAction(controller, fence, current, obligation, proposal, attemptIdentity));
+    if (confirmation != null) {
+      return confirmation;
+    }
+    return GuidedRefusalDiagnostics.call(
+        capture,
+        GuidedRefusalDiagnostics.Gate.NEXT_RESERVATION_CALL,
+        () -> store.reserveObligation(current.document(), obligationId, proposal));
   }
 
   public JsonNode context(Authentication controller, String id, long fence, JsonNode command) {
@@ -1083,12 +1183,16 @@ public final class GuidedTranslationService {
         fence,
         key,
         GuidedModelRequest.Kind.SOURCE_PLAN,
-        (current, response, attemptIdentity) -> {
+        (current, response, attemptIdentity, capture) -> {
           require(!response.has("question"), "INVALID_CONTRACT", 422);
           ObjectNode state = store.state(id);
           ObjectNode refined =
               validator.refinePlan(
-                  current.document(), current.progress(), state.path("plan"), response);
+                  current.document(),
+                  current.progress(),
+                  state.path("plan"),
+                  response,
+                  state.path("manifest").path("sourceSteps"));
           validator.sourceSelections(current.document(), refined, sourceSelections(current));
           dependencies.validate(current.document(), refined);
           dependencies.allocate(controller, current.document(), refined);
@@ -1121,12 +1225,17 @@ public final class GuidedTranslationService {
         fence,
         key,
         GuidedModelRequest.Kind.SOURCE_PLAN,
-        (current, response, attemptIdentity) -> {
+        (current, response, attemptIdentity, capture) -> {
           if (response.has("question")) {
             return question(controller, current, response.path("question"), "source");
           }
           JsonNode window = repository.incremental().learningWindow(current.document());
-          ObjectNode selected = validator.admitPlan(current.document(), response, window);
+          ObjectNode selected =
+              validator.admitPlan(
+                  current.document(),
+                  response,
+                  window,
+                  store.state(id).path("manifest").path("sourceSteps"));
           inputs.validate(
               current.document(),
               store.state(id).path("manifest"),
@@ -1185,7 +1294,7 @@ public final class GuidedTranslationService {
     try {
       dispatch.pushContext(controller, id, fence);
     } catch (RuntimeException failure) {
-      if (com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.definiteContextRefusal(
+      if (com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.definiteContextRefusal(
           failure)) {
         sessions.failTranslation(controller, id, fence, "RUNTIME_INCOMPATIBLE");
       }
@@ -1241,7 +1350,7 @@ public final class GuidedTranslationService {
     try {
       dispatch.pushContext(controller, id, fence);
     } catch (RuntimeException failure) {
-      if (com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.closedContextRefusal(
+      if (com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.closedContextRefusal(
           failure)) {
         sessions.translationTransaction(
             controller,
@@ -1266,7 +1375,7 @@ public final class GuidedTranslationService {
     return new GuidedSessionException(
         "RUNTIME_INCOMPATIBLE",
         409,
-        com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.CONTEXT_REFUSED,
+        com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.CONTEXT_REFUSED,
         false,
         null);
   }
@@ -1431,8 +1540,14 @@ public final class GuidedTranslationService {
   @FunctionalInterface
   private interface ModelApplication {
     JsonNode apply(
-        GuidedSessionRepository.Session current, JsonNode response, JsonNode originalAttempt);
+        GuidedSessionRepository.Session current,
+        JsonNode response,
+        JsonNode originalAttempt,
+        GuidedRefusalDiagnostics.Capture capture);
   }
+
+  /** Fixed settlement margin between a send deadline and its attempt lease. Not configurable. */
+  static final java.time.Duration SETTLE_MARGIN = java.time.Duration.ofSeconds(2);
 
   private record Reserved(
       GuidedModelRequest request,
@@ -1549,6 +1664,7 @@ public final class GuidedTranslationService {
                     bytes = wireBound.toString().getBytes(StandardCharsets.UTF_8).length + 2048;
                   }
                   if (bytes > properties.maxInputBytes()) {
+                    GuidedGuardProvenance.observe(Guard.REQUEST_INPUT_SIZE, () -> id);
                     sessions.failTranslation(controller, id, fence, "BUDGET_EXCEEDED");
                     return null;
                   }
@@ -1569,9 +1685,14 @@ public final class GuidedTranslationService {
                   Instant deadline = clock.instant().plusSeconds(properties.callSeconds());
                   Instant hard =
                       Instant.parse(freshInputOwner.document().path("expiresAt").asText());
-                  if (deadline.isAfter(hard)) {
-                    deadline = hard;
+                  // The lease outlives the send deadline by a fixed margin, so a send that reaches
+                  // its deadline is still the current attempt when it settles (REJECTED/TIMEOUT,
+                  // never SUPERSEDED). Both are clamped to the session's absolute expiry.
+                  Instant latestDeadline = hard.minus(SETTLE_MARGIN);
+                  if (deadline.isAfter(latestDeadline)) {
+                    deadline = latestDeadline;
                   }
+                  Instant leaseUntil = deadline.plus(SETTLE_MARGIN);
                   var attempt =
                       store.reserveAttempt(
                           freshInputOwner.document(),
@@ -1591,7 +1712,7 @@ public final class GuidedTranslationService {
                           bytes,
                           request.maxOutputTokens(),
                           translator,
-                          deadline);
+                          leaseUntil);
                   if (attempt.send()) {
                     sessions.reserveModel(
                         controller,
@@ -1655,13 +1776,27 @@ public final class GuidedTranslationService {
               });
       require(send != -1, "BUDGET_EXCEEDED", 429);
       require(send == 1, "IDEMPOTENCY_CONFLICT", 409);
+      GuidedRefusalDiagnostics.Attempt diagnostic = refusalDiagnostics.attempt(reserved.attempt());
       GuidedModelResponse response;
       try {
         response =
-            gateway.propose(reserved.request(), new GuidedCallBudget(reserved.deadline(), clock));
+            diagnostic.enabled()
+                ? gateway.propose(
+                    reserved.request(),
+                    new GuidedCallBudget(reserved.deadline(), clock, sendCap()),
+                    diagnostic)
+                : gateway.propose(
+                    reserved.request(),
+                    new GuidedCallBudget(reserved.deadline(), clock, sendCap()));
       } catch (RuntimeException failure) {
         response =
-            new GuidedModelResponse(GuidedModelResponse.Code.TRANSPORT, null, null, null, null);
+            new GuidedModelResponse(
+                GuidedModelResponse.Code.TRANSPORT,
+                null,
+                null,
+                null,
+                null,
+                GuidedModelResponse.Reason.TRANSPORT_ADAPTER_FAULT);
       }
       final GuidedModelResponse received = response;
       try {
@@ -1707,7 +1842,9 @@ public final class GuidedTranslationService {
                         "REJECTED",
                         null,
                         received.inputTokens(),
-                        received.outputTokens());
+                        received.outputTokens(),
+                        received.reason().name());
+                    diagnostic.rejectedAfterCommit(false);
                     return contracts.object().put("rejected", true);
                   }
                   if (received.proposal().path("status").asText().equals("UNSUPPORTED")) {
@@ -1747,7 +1884,16 @@ public final class GuidedTranslationService {
                   authority.set(
                       "expectedAuthoredInputsHash",
                       reserved.request().projection().document().path("authoredInputsHash"));
-                  JsonNode result = apply.apply(fresh, received.proposal(), authority);
+                  diagnostic.enterApplication();
+                  JsonNode result =
+                      apply.apply(
+                          fresh,
+                          received.proposal(),
+                          authority,
+                          kind == GuidedModelRequest.Kind.NEXT_ACTION && diagnostic.enabled()
+                              ? diagnostic
+                              : GuidedRefusalDiagnostics.Capture.NONE);
+                  diagnostic.applicationReturned();
                   store.finishAttempt(
                       id,
                       reserved.attempt().attemptId(),
@@ -1788,7 +1934,9 @@ public final class GuidedTranslationService {
                         "REJECTED",
                         null,
                         received.inputTokens(),
-                        received.outputTokens());
+                        received.outputTokens(),
+                        GuidedTranslationStore.applyRejectionReason(failure.getMessage()));
+                    diagnostic.rejectedAfterCommit(true);
                     return true;
                   });
         } catch (GuidedSessionException noAuthority) {
@@ -1827,6 +1975,14 @@ public final class GuidedTranslationService {
         stopRejected(controller, id, fence, failure);
         throw failure;
       }
+      // Round 053 (b), extended by round 067: a definite-transient provider failure (refused/reset,
+      // HTTP 429/503, or a pre-response stall at the per-send cap) may be followed by a new
+      // persisted, charged attempt in the same three-proposal pool. The
+      // REJECTED row above is committed and no transaction is open here; the next iteration
+      // re-runs every guard (lock, fence, deadline, source revision, budget fit, reservation).
+      if (received.reason().definiteTransient() && index < 3 && backoffBeforeAttempt(index + 1)) {
+        continue;
+      }
       if (received.code() != GuidedModelResponse.Code.INVALID_RESPONSE || index == 3) {
         sessions.failTranslation(controller, id, fence, "INVALID_CONTRACT");
         throw new GuidedSessionException("INVALID_CONTRACT", 422);
@@ -1834,6 +1990,29 @@ public final class GuidedTranslationService {
       repairs.add("INVALID_RESPONSE");
     }
     throw new GuidedSessionException("BUDGET_EXCEEDED", 429);
+  }
+
+  private java.time.Duration sendCap() {
+    return java.time.Duration.ofSeconds(properties.sendTimeoutSeconds());
+  }
+
+  /**
+   * Waits {@code base << (attempt - 2)} before a definite-transient retry.
+   *
+   * @return false when the wait was interrupted, so the caller ends in today's terminal branch
+   */
+  private boolean backoffBeforeAttempt(int attempt) {
+    long delay = (long) properties.transientBackoffMillis() << (attempt - 2);
+    if (delay <= 0) {
+      return true;
+    }
+    try {
+      sleeper.sleep(delay);
+      return true;
+    } catch (InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+      return false;
+    }
   }
 
   private void reconcile(Authentication controller, String id, long fence) {
@@ -2147,7 +2326,7 @@ public final class GuidedTranslationService {
     return result;
   }
 
-  private ObjectNode effectiveObligation(
+  ObjectNode effectiveObligation(
       GuidedSessionRepository.Session current, JsonNode obligation, JsonNode action) {
     ObjectNode effective = ((ObjectNode) obligation).deepCopy();
     boolean selectedAlready = false;
@@ -2178,6 +2357,23 @@ public final class GuidedTranslationService {
             locator.path(locator.path("kind").asText().equals("role") ? "name" : "value").asText());
         effective.set("selectedLocator", locator);
       }
+    }
+    // Round 057: a qualified label ("Open in Primary workspace") is a second source of the
+    // effective obligation. An accepted observed choice wins; otherwise the proposed node must be
+    // the only candidate and carry a locator unique in the observation.
+    if (!selectedAlready && action != null && obligation.path("scopeIntent").isTextual()) {
+      JsonNode progress = current.progress();
+      JsonNode locator =
+          GuidedQualifiedLabel.qualifiedLocator(
+              progress.path("observation"),
+              progress.path("documentId"),
+              progress.path("generation"),
+              obligation,
+              action.path("target"),
+              "INVALID_CONTRACT",
+              422);
+      effective.put("targetIntent", GuidedQualifiedLabel.locatorLabel(locator));
+      effective.set("selectedLocator", locator.deepCopy());
     }
     return effective;
   }
@@ -2296,6 +2492,12 @@ public final class GuidedTranslationService {
             validator.remaining(
                 store.state(current.document().path("sessionId").asText()).path("plan"),
                 meaning.path("obligationId").asText());
+        GuidedQualifiedLabel.requireQuestionChoice(
+            current.progress().path("observation"),
+            current.progress().path("documentId"),
+            current.progress().path("generation"),
+            disputed,
+            node.path("nodeId").asText());
         JsonNode currentStep =
             current
                 .document()
@@ -2335,11 +2537,9 @@ public final class GuidedTranslationService {
               .put("labelSource", labelSource);
       if (pageNode != null) {
         emitted.put("role", pageNode.path("role").asText());
-        emitted.set(
-            "region",
-            pageNode.path("regionId").isTextual()
-                ? pageNode.path("regionId")
-                : com.fasterxml.jackson.databind.node.NullNode.instance);
+        // Region IDs are relationships, not display labels. Use only the admitted snapshot's
+        // unique eligible region name; it remains untrusted PAGE presentation, never authority.
+        emitted.set("region", observedRegionName(current.progress(), pageNode));
       }
       emitted.setAll(
           java.util.Map.of(
@@ -2375,6 +2575,17 @@ public final class GuidedTranslationService {
       // outer call handler then commits received usage in a separate settlement transaction.
       throw new GuidedSessionException("EVIDENCE_MISMATCH", 422);
     }
+  }
+
+  private static JsonNode observedRegionName(JsonNode progress, JsonNode pageNode) {
+    if (progress == null || pageNode == null) {
+      return com.fasterxml.jackson.databind.node.NullNode.instance;
+    }
+    return GuidedQualifiedLabel.regionName(
+        progress.path("observation"),
+        progress.path("documentId"),
+        progress.path("generation"),
+        pageNode);
   }
 
   private JsonNode questionCapture(
@@ -2482,7 +2693,7 @@ public final class GuidedTranslationService {
         fence,
         key,
         GuidedModelRequest.Kind.VERIFY_STEP,
-        (current, verification, attemptIdentity) -> {
+        (current, verification, attemptIdentity, capture) -> {
           String step =
               current
                   .document()
@@ -2573,6 +2784,17 @@ public final class GuidedTranslationService {
     }
     String intent = obligation.path("targetIntent").asText();
     JsonNode selected = obligation.path("selectedLocator");
+    if (selected.isMissingNode() && obligation.path("scopeIntent").isTextual()) {
+      // Round 057: the author named a region. A region that matches nothing never falls back to
+      // the unqualified match; the passive wait ends in the existing acquisition refusal.
+      return !GuidedQualifiedLabel.candidates(
+              observation,
+              progress.path("documentId"),
+              progress.path("generation"),
+              intent,
+              obligation.path("scopeIntent").asText())
+          .isEmpty();
+    }
     for (JsonNode node : observation.path("nodes")) {
       if (selected.isMissingNode() && intent.equalsIgnoreCase(node.path("name").asText())) {
         return true;
@@ -2729,7 +2951,10 @@ public final class GuidedTranslationService {
       GuidedTranslationStore.AcquisitionClaim claim,
       long startedNanos) {
     long remaining = claim.remainingMs() * 1_000_000L - (System.nanoTime() - startedNanos);
-    require(remaining > 0, "BUDGET_EXCEEDED", 429);
+    require(
+        GuidedGuardProvenance.passing(remaining > 0, Guard.PASSIVE_REMAINING, () -> id),
+        "BUDGET_EXCEEDED",
+        429);
     var task =
         new java.util.concurrent.FutureTask<JsonNode>(
             () -> dispatch.observe(controller, id, fence, claim.key(), claim.request()));
@@ -2739,9 +2964,11 @@ public final class GuidedTranslationService {
           Math.min(remaining, java.time.Duration.ofSeconds(15).toNanos()),
           java.util.concurrent.TimeUnit.NANOSECONDS);
     } catch (java.util.concurrent.TimeoutException timeout) {
+      GuidedGuardProvenance.observe(Guard.PASSIVE_WAIT_TIMEOUT, () -> id);
       throw new GuidedSessionException("BUDGET_EXCEEDED", 429);
     } catch (InterruptedException interrupted) {
       Thread.currentThread().interrupt();
+      GuidedGuardProvenance.observe(Guard.PASSIVE_WAIT_INTERRUPTED, () -> id);
       throw new GuidedSessionException("BUDGET_EXCEEDED", 429);
     } catch (java.util.concurrent.ExecutionException failed) {
       if (failed.getCause() instanceof GuidedSessionException refusal) {

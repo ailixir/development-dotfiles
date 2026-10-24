@@ -9,7 +9,7 @@ import java.time.Instant;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * Network proof is authenticated by GuidedRunnerClient before this short persistence transaction.
+ * Network proof is authenticated by the runner transport before this short persistence transaction.
  */
 public final class GuidedPreparationStore {
   private final JdbcTemplate jdbc;

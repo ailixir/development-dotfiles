@@ -80,6 +80,7 @@ class GuidedBootstrapPlanHistoryIT {
           .put("occurrence", at)
           .put("operationKind", at == 0 ? "read" : "fill")
           .put("targetIntent", at == 0 ? "Order reference" : "Destination")
+          .putNull("scopeIntent")
           .putNull("referenceIndex")
           .put("needId", "order")
           .putNull("predicate");

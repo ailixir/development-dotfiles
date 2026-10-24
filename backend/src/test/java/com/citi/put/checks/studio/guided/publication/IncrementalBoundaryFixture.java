@@ -121,6 +121,7 @@ final class IncrementalBoundaryFixture {
                   index == 0
                       ? "page"
                       : "Proceed" + "é".repeat(addedBytes / 2) + (addedBytes % 2 == 0 ? "" : "e"));
+      obligation.putNull("scopeIntent");
       if (index == 0) {
         obligation.put("referenceIndex", 0);
       } else {

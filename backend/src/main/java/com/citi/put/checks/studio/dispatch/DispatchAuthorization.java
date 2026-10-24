@@ -25,6 +25,34 @@ public interface DispatchAuthorization {
    */
   String recheck(UUID executionId, UUID testId, String csiId, String principal);
 
+  default com.citi.put.checks.security.BffAuthenticationToken fresh(
+      org.springframework.security.core.Authentication caller,
+      jakarta.servlet.http.HttpServletRequest request,
+      String expectedPrincipal,
+      String csiId,
+      boolean execution) {
+    throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+        "RUNTIME_INCOMPATIBLE", 409);
+  }
+
+  default com.citi.put.checks.studio.guided.publication.PublicationContracts.Grant
+      authorizePublication(
+          org.springframework.security.core.Authentication caller,
+          jakarta.servlet.http.HttpServletRequest request,
+          com.citi.put.checks.studio.guided.publication.PublicationContracts.Snapshot snapshot,
+          com.fasterxml.jackson.databind.JsonNode currentSession) {
+    throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+        "RUNTIME_INCOMPATIBLE", 409);
+  }
+
+  default void authorizeReceiptRead(
+      org.springframework.security.core.Authentication caller,
+      jakarta.servlet.http.HttpServletRequest request,
+      com.citi.put.checks.studio.guided.publication.PublicationContracts.Receipt receipt) {
+    throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+        "RUNTIME_INCOMPATIBLE", 409);
+  }
+
   /** The dispatcher observed the caller's authorization to be gone (AC-13a). */
   class AuthorizationRevokedException extends RuntimeException {
 

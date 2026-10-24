@@ -44,6 +44,7 @@ public final class GenAiGatewayTransport implements AutoCloseable {
     private final boolean boundedWire;
     private final List<AutoCloseable> removals = new ArrayList<>();
     private int networkSends;
+    private volatile boolean responseStarted;
 
     private Attempt(Budget budget, String token, boolean boundedWire) {
       this.budget = budget;
@@ -144,6 +145,9 @@ public final class GenAiGatewayTransport implements AutoCloseable {
                   }
                   attempt.budget.remaining();
                   var response = chain.proceed(chain.request());
+                  // Response headers arrived: a later timeout is mid-body, not a pre-response
+                  // stall.
+                  attempt.responseStarted = true;
                   // OkHttp may automatically repeat a 503 carrying Retry-After: 0 even with
                   // retryOnConnectionFailure=false. Return the original status to the caller,
                   // but remove that follow-up trigger; the transport never resends.
@@ -208,6 +212,7 @@ public final class GenAiGatewayTransport implements AutoCloseable {
     private String token;
     private boolean authenticated;
     private boolean closed;
+    private boolean responseStarted;
 
     private Lease(Budget budget) {
       this.budget = budget;
@@ -231,6 +236,14 @@ public final class GenAiGatewayTransport implements AutoCloseable {
       authenticated = true;
     }
 
+    /**
+     * Whether the last {@link #generate} call received response headers before it ended. A closed
+     * boolean only: no header, status or body data is exposed.
+     */
+    public boolean responseStarted() {
+      return responseStarted;
+    }
+
     /** Exactly one SDK invocation; its HTTP layer is independently limited to one network send. */
     public GenerateContentResponse generate(
         String payload, GenerateContentConfig config, boolean boundedWire) {
@@ -246,6 +259,7 @@ public final class GenAiGatewayTransport implements AutoCloseable {
         budget.remaining();
         return result;
       } finally {
+        responseStarted = attempt.responseStarted;
         attempt.removals.forEach(GenAiGatewayTransport::unregister);
         active.remove();
       }
@@ -287,6 +301,26 @@ public final class GenAiGatewayTransport implements AutoCloseable {
 
   public static boolean isTimeout(Throwable error) {
     return GatewayFailureClassifier.outcomeFor(error) == GatewayOutcome.TIMEOUT;
+  }
+
+  /**
+   * Closed class of a non-timeout transport failure. {@code CONNECT}, {@code HTTP_429} and {@code
+   * HTTP_503} are the Story 10.5 AC-4 definite-transient classes; nothing else may be repeated.
+   */
+  public enum TransportFailure {
+    CONNECT,
+    HTTP_429,
+    HTTP_503,
+    HTTP_400,
+    HTTP_401_403,
+    HTTP_4XX,
+    HTTP_5XX,
+    OTHER
+  }
+
+  /** Callers must check {@link #isTimeout} first; reads only the integer status and types. */
+  public static TransportFailure transportFailure(Throwable error) {
+    return GatewayFailureClassifier.transportFailureFor(error);
   }
 
   @Override

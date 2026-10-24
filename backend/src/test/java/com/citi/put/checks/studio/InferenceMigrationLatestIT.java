@@ -97,7 +97,7 @@ class InferenceMigrationLatestIT {
       try (Connection c = connect(url)) {
         assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history"))
             .isEqualTo(info.current().getVersion().getVersion())
-            .isEqualTo("22");
+            .isEqualTo("23");
         // V19 and V20 are the forward-only guided migrations, by name; the deleted staged cutover
         // V19 (studio inference candidate identity) never reaches a supported database.
         assertThat(
@@ -109,7 +109,8 @@ class InferenceMigrationLatestIT {
                 "19:guided governance",
                 "20:guided session recording",
                 "21:guided session replaying prefix",
-                "22:execution replay failure");
+                "22:execution replay failure",
+                "23:guided attempt rejection reason");
         assertThat(
                 scalar(
                     c,

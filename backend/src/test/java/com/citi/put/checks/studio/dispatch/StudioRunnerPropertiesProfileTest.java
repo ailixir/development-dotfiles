@@ -8,16 +8,21 @@ import com.citi.put.checks.studio.StudioExecutionProperties;
 import com.citi.put.checks.studio.guided.session.GuidedSessionConfiguration;
 import com.citi.put.checks.studio.support.RunnerTestTls;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.InetAddress;
 import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.Http11NioProtocol;
+import org.apache.tomcat.util.net.SSLHostConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.context.properties.bind.BindException;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
@@ -401,6 +406,67 @@ class StudioRunnerPropertiesProfileTest {
   }
 
   // ---- the API pod's guided connector ----
+
+  @Test
+  void theGuidedConnectorHonorsTheExplicitServerAddressAndRetainsMutualTls() {
+    connectorContext("local")
+        .withPropertyValues(with("studio.guided-authoring.connector.port=8443"))
+        .withPropertyValues("server.address=127.0.0.1")
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
+              customizer(context).customize(factory);
+              Connector connector = factory.getAdditionalTomcatConnectors().iterator().next();
+              assertThat(((Http11NioProtocol) connector.getProtocolHandler()).getAddress())
+                  .isEqualTo(InetAddress.getByAddress(new byte[] {127, 0, 0, 1}));
+              assertMutualTls(connector);
+            });
+  }
+
+  @Test
+  void theGuidedConnectorPreservesTheUnspecifiedDeployedAddressAndMutualTls() {
+    connectorContext("prod")
+        .withPropertyValues(with("studio.guided-authoring.connector.port=8443"))
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
+              customizer(context).customize(factory);
+              Connector connector = factory.getAdditionalTomcatConnectors().iterator().next();
+              assertThat(((Http11NioProtocol) connector.getProtocolHandler()).getAddress())
+                  .isNull();
+              assertMutualTls(connector);
+            });
+  }
+
+  @Test
+  void aMalformedExplicitAddressCannotFallBackToAnUnspecifiedGuidedBind() {
+    connectorContext("local")
+        .withPropertyValues(with("studio.guided-authoring.connector.port=8443"))
+        .withPropertyValues("server.address=::invalid")
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
+              assertThatThrownBy(() -> customizer(context).customize(factory))
+                  .isInstanceOf(BindException.class)
+                  .hasMessageContaining("server.address");
+              assertThat(factory.getAdditionalTomcatConnectors()).isEmpty();
+            });
+  }
+
+  private static void assertMutualTls(Connector connector) {
+    assertThat(connector.getScheme()).isEqualTo("https");
+    assertThat(connector.getSecure()).isTrue();
+    var protocol = (Http11NioProtocol) connector.getProtocolHandler();
+    assertThat(protocol.isSSLEnabled()).isTrue();
+    assertThat(connector.findSslHostConfigs()).hasSize(1);
+    SSLHostConfig host = connector.findSslHostConfigs()[0];
+    assertThat(host.getProtocols()).containsExactlyInAnyOrder("TLSv1.2", "TLSv1.3");
+    assertThat(host.getCertificateVerification())
+        .isEqualTo(SSLHostConfig.CertificateVerification.REQUIRED);
+  }
 
   @Test
   void theGuidedConnectorIsAddedOnlyWhenAPortIsSetAndNeverOnAWorker() {

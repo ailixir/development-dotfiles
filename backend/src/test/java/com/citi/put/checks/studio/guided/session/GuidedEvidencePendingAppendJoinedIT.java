@@ -9,6 +9,7 @@ import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.StudioExecutionProperties;
 import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.citi.put.checks.studio.evidence.LocalVideoObjectStore;
@@ -20,7 +21,6 @@ import com.citi.put.checks.studio.guided.bridge.GuidedBindingStore;
 import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
 import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
 import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
 import com.citi.put.checks.studio.guided.evidence.GuidedRecordingKeys;
 import com.citi.put.checks.studio.guided.evidence.GuidedRecordingProperties;
 import com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceInternalController;
@@ -501,8 +501,8 @@ class GuidedEvidencePendingAppendJoinedIT {
     }
 
     @Bean
-    GuidedRunnerClient runner() {
-      return new GuidedRunnerClient(
+    HttpRunnerDispatchClient runner() {
+      return new HttpRunnerDispatchClient(
           URI.create("https://127.0.0.1:" + RUNNER_PORT),
           TLS,
           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
@@ -513,7 +513,7 @@ class GuidedEvidencePendingAppendJoinedIT {
     GuidedDispatchService dispatch(
         GuidedSessionService sessions,
         GuidedMaterializationService materialization,
-        GuidedRunnerClient runner) {
+        HttpRunnerDispatchClient runner) {
       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
       sessions.installStopSender(dispatch::stop);
       return dispatch;
@@ -653,6 +653,7 @@ class GuidedEvidencePendingAppendJoinedIT {
             .put("occurrence", occurrence)
             .put("operationKind", kind)
             .put("targetIntent", target)
+            .putNull("scopeIntent")
             .putNull("predicate");
     if (reference == null) {
       item.putNull("referenceIndex");
@@ -1030,9 +1031,71 @@ class GuidedEvidencePendingAppendJoinedIT {
   /** Waits for the V20 fact; the failure names what the runner did (its log is value-free). */
   void awaitRecording(String id) throws Exception {
     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(90_000);
-    while (recordingRows(id) != 1 && System.nanoTime() < end) {
-      Thread.sleep(50);
+
+    class ItsPollEvidencerecording {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+
+          if (!(recordingRows(id) != 1 && System.nanoTime() < end)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
     }
+    var styleScope088ItsPoll = new ItsPollEvidencerecording();
+    if (!styleScope088ItsPoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("IT-S Evidence-recording")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(java.time.Duration.ZERO)
+            .pollInterval(java.time.Duration.ofMillis(50))
+            .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
+            .until(
+                () -> {
+                  if (styleScope088ItsPoll.initialAwaitTick) {
+                    styleScope088ItsPoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return styleScope088ItsPoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+        // Preserve the original last guard/observation and its assertion/error mapping.
+        if (!styleScope088ItsPoll.terminal) {
+          styleScope088ItsPoll.step();
+        }
+      }
+    }
+    if (styleScope088ItsPoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (styleScope088ItsPoll.failure instanceof Error error) {
+      throw error;
+    }
+
     assertThat(recordingRows(id))
         .as(
             "no recording fact: session state="
@@ -1436,9 +1499,71 @@ class GuidedEvidencePendingAppendJoinedIT {
 
   static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
     long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
-    while (!condition.getAsBoolean() && System.nanoTime() < end) {
-      Thread.sleep(25);
+
+    class ItsPollGuidedEvidencePendingAppendJoinedITcondition {
+      Throwable failure;
+      boolean terminal;
+      boolean slept;
+      boolean initialAwaitTick = true;
+
+      boolean step() {
+        if (terminal) {
+          return true;
+        }
+        try {
+          if (slept && Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+
+          if (!(!condition.getAsBoolean() && System.nanoTime() < end)) {
+            terminal = true;
+            return true;
+          }
+          if (Thread.interrupted()) {
+            throw new InterruptedException();
+          }
+          slept = true;
+          return false;
+
+        } catch (Throwable caught) {
+          failure = caught;
+          terminal = true;
+          return true;
+        }
+      }
     }
+    var styleScope089ItsPoll = new ItsPollGuidedEvidencePendingAppendJoinedITcondition();
+    if (!styleScope089ItsPoll.step()) {
+      try {
+        org.awaitility.Awaitility.await()
+            .alias("IT-S GuidedEvidencePendingAppendJoinedIT-condition")
+            .pollInSameThread()
+            .dontCatchUncaughtExceptions()
+            .pollDelay(java.time.Duration.ZERO)
+            .pollInterval(java.time.Duration.ofMillis(25))
+            .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
+            .until(
+                () -> {
+                  if (styleScope089ItsPoll.initialAwaitTick) {
+                    styleScope089ItsPoll.initialAwaitTick = false;
+                    return false;
+                  }
+                  return styleScope089ItsPoll.step();
+                });
+      } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+        // Preserve the original last guard/observation and its assertion/error mapping.
+        if (!styleScope089ItsPoll.terminal) {
+          styleScope089ItsPoll.step();
+        }
+      }
+    }
+    if (styleScope089ItsPoll.failure instanceof Exception exception) {
+      throw exception;
+    }
+    if (styleScope089ItsPoll.failure instanceof Error error) {
+      throw error;
+    }
+
     assertThat(condition.getAsBoolean()).isTrue();
   }
 }

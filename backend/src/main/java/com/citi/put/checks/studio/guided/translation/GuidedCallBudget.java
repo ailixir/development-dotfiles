@@ -14,9 +14,28 @@ public final class GuidedCallBudget {
   private final AtomicBoolean cancelled = new AtomicBoolean();
   private final CopyOnWriteArrayList<Runnable> cancellations = new CopyOnWriteArrayList<>();
 
+  private final Duration sendCap;
+
   public GuidedCallBudget(Instant deadline, Clock clock) {
+    this(deadline, clock, null);
+  }
+
+  /**
+   * @param sendCap longest a single provider send may wait for its response, or null for none
+   */
+  public GuidedCallBudget(Instant deadline, Clock clock, Duration sendCap) {
     this.deadline = java.util.Objects.requireNonNull(deadline);
     this.clock = java.util.Objects.requireNonNull(clock);
+    this.sendCap = sendCap;
+  }
+
+  public Duration sendCap() {
+    return sendCap;
+  }
+
+  /** True once the call was cancelled or its deadline was observed; never reads the clock. */
+  public boolean cancelled() {
+    return cancelled.get();
   }
 
   public Duration remaining() {

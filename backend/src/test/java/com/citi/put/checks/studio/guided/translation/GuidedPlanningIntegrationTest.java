@@ -8,6 +8,7 @@ import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.citi.put.checks.studio.gateway.GenAiGatewayTransport;
@@ -17,7 +18,6 @@ import com.citi.put.checks.studio.guided.bridge.GuidedBindingStore;
 import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
 import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
 import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
-import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
 import com.citi.put.checks.studio.guided.translation.CredentialPatternScreen;
 import com.citi.put.checks.studio.guided.translation.GenAiGuidedLlmGatewayClient;
 import com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore;
@@ -458,8 +458,8 @@ class GuidedPlanningIntegrationTest {
     }
 
     @Bean
-    GuidedRunnerClient runner() {
-      return new GuidedRunnerClient(
+    HttpRunnerDispatchClient runner() {
+      return new HttpRunnerDispatchClient(
           URI.create("https://127.0.0.1:" + Environment.RUNNER_PORT),
           Environment.TLS,
           () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
@@ -470,7 +470,7 @@ class GuidedPlanningIntegrationTest {
     GuidedDispatchService dispatch(
         GuidedSessionService sessions,
         GuidedMaterializationService materialization,
-        GuidedRunnerClient runner) {
+        HttpRunnerDispatchClient runner) {
       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
       sessions.installStopSender(dispatch::stop);
       return dispatch;
@@ -2136,7 +2136,7 @@ class GuidedPlanningIntegrationTest {
             String.class,
             id);
     var realClient =
-        new GuidedRunnerClient(
+        new HttpRunnerDispatchClient(
             URI.create("https://127.0.0.1:" + Environment.RUNNER_PORT),
             Environment.TLS,
             () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
@@ -2179,7 +2179,8 @@ class GuidedPlanningIntegrationTest {
     var log = new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();
     log.start();
     var logger =
-        (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(GuidedRunnerClient.class);
+        (ch.qos.logback.classic.Logger)
+            org.slf4j.LoggerFactory.getLogger(HttpRunnerDispatchClient.class);
     logger.addAppender(log);
     try {
       var refusal =
@@ -2192,7 +2193,7 @@ class GuidedPlanningIntegrationTest {
       assertThat(refusal.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
       assertThat(refusal.status()).isEqualTo(409);
       assertThat(refusal.retryable()).isFalse();
-      assertThat(refusal.messageCode()).isEqualTo(GuidedRunnerClient.CONTEXT_REFUSED);
+      assertThat(refusal.messageCode()).isEqualTo(HttpRunnerDispatchClient.CONTEXT_REFUSED);
       assertThat(contextCalls.get()).isEqualTo(1);
       assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
       assertThat(log.list)
@@ -2329,7 +2330,7 @@ class GuidedPlanningIntegrationTest {
    * refuses the first bootstrap context with IDENTITY_MISMATCH. Exactly one context request is
    * made, the session is FAILED with errorCode RUNTIME_INCOMPATIBLE, the caller gets 409
    * retryable:false, and a second continuation makes zero runner (and zero model) requests and
-   * returns the terminal session. The real GuidedRunnerClient classifies the stub's reply.
+   * returns the terminal session. The real HttpRunnerDispatchClient classifies the stub's reply.
    */
   @Test
   void aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried() throws Exception {
@@ -2466,7 +2467,7 @@ class GuidedPlanningIntegrationTest {
       return new GuidedDispatchService(
           sessions,
           materialization,
-          new GuidedRunnerClient(
+          new HttpRunnerDispatchClient(
               URI.create("https://localhost:" + server.getAddress().getPort()),
               Environment.TLS,
               () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
@@ -3502,6 +3503,7 @@ class GuidedPlanningIntegrationTest {
             .put("occurrence", occurrence)
             .put("operationKind", kind)
             .put("targetIntent", target)
+            .putNull("scopeIntent")
             .putNull("predicate");
     if (reference == null) {
       item.putNull("referenceIndex");
@@ -3630,7 +3632,7 @@ class GuidedPlanningIntegrationTest {
         Flyway.configure()
             .dataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword())
             .locations("classpath:db/migration")
-            .target("22") // STUDIO-OBS-014 S3: governance tables (V19) at head
+            .target("23") // STUDIO-OBS-014 S3: governance tables (V19) at head
             .load()
             .migrate();
       } catch (Exception failure) {
@@ -3898,9 +3900,71 @@ class GuidedPlanningIntegrationTest {
 
     static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {
       long end = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
-      while (!condition.getAsBoolean() && System.nanoTime() < end) {
-        Thread.sleep(25);
+
+      class ItsPollGuidedPlanningIntegrationTestcondition {
+        Throwable failure;
+        boolean terminal;
+        boolean slept;
+        boolean initialAwaitTick = true;
+
+        boolean step() {
+          if (terminal) {
+            return true;
+          }
+          try {
+            if (slept && Thread.interrupted()) {
+              throw new InterruptedException();
+            }
+
+            if (!(!condition.getAsBoolean() && System.nanoTime() < end)) {
+              terminal = true;
+              return true;
+            }
+            if (Thread.interrupted()) {
+              throw new InterruptedException();
+            }
+            slept = true;
+            return false;
+
+          } catch (Throwable caught) {
+            failure = caught;
+            terminal = true;
+            return true;
+          }
+        }
       }
+      var itsPoll = new ItsPollGuidedPlanningIntegrationTestcondition();
+      if (!itsPoll.step()) {
+        try {
+          org.awaitility.Awaitility.await()
+              .alias("IT-S GuidedPlanningIntegrationTest-condition")
+              .pollInSameThread()
+              .dontCatchUncaughtExceptions()
+              .pollDelay(java.time.Duration.ZERO)
+              .pollInterval(java.time.Duration.ofMillis(25))
+              .atMost(java.time.Duration.ofNanos(Math.max(1L, end - System.nanoTime())))
+              .until(
+                  () -> {
+                    if (itsPoll.initialAwaitTick) {
+                      itsPoll.initialAwaitTick = false;
+                      return false;
+                    }
+                    return itsPoll.step();
+                  });
+        } catch (org.awaitility.core.ConditionTimeoutException itsTimeout) {
+          // Preserve the original last guard/observation and its assertion/error mapping.
+          if (!itsPoll.terminal) {
+            itsPoll.step();
+          }
+        }
+      }
+      if (itsPoll.failure instanceof Exception exception) {
+        throw exception;
+      }
+      if (itsPoll.failure instanceof Error error) {
+        throw error;
+      }
+
       assertThat(condition.getAsBoolean()).isTrue();
     }
   }

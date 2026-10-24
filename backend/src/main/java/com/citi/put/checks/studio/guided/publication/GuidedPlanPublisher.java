@@ -30,8 +30,8 @@ public final class GuidedPlanPublisher {
   private final GuidedPlanBuilder builder;
   private final ObservedArtifactLowerer lowerer;
   private final ObservedReplayPins pins;
-  private final ObservedValidationClient validator;
-  private final GuidedPublicationAuthorization authorization;
+  private final com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient validator;
+  private final com.citi.put.checks.studio.dispatch.DispatchAuthorization authorization;
   private final GuidedSessionAccess access;
   private final GuidedPublicationProperties properties;
   private final ObservedReplayProperties replay;
@@ -52,8 +52,8 @@ public final class GuidedPlanPublisher {
       GuidedPublicationRepository publications,
       GuidedContracts contracts,
       ObservedReplayPins pins,
-      ObservedValidationClient validator,
-      GuidedPublicationAuthorization authorization,
+      com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient validator,
+      com.citi.put.checks.studio.dispatch.DispatchAuthorization authorization,
       GuidedSessionAccess access,
       GuidedPublicationProperties properties,
       ObservedReplayProperties replay,
@@ -133,7 +133,10 @@ public final class GuidedPlanPublisher {
         try {
           verdict =
               validator.validate(
-                  outgoing, new PublicationBudget(attempt.validationDeadline(), clock));
+                  outgoing,
+                  new PublicationBudget(attempt.validationDeadline(), clock),
+                  properties.maxValidationBytes(),
+                  properties.validationTimeoutMs());
         } catch (GuidedSessionException failure) {
           sessions.transaction(
               () -> {

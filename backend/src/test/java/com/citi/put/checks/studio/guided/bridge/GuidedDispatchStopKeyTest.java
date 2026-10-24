@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,7 +23,7 @@ import org.mockito.ArgumentCaptor;
  */
 class GuidedDispatchStopKeyTest {
   private final GuidedContracts contracts = new GuidedContracts();
-  private final GuidedRunnerClient runner = mock(GuidedRunnerClient.class);
+  private final HttpRunnerDispatchClient runner = mock(HttpRunnerDispatchClient.class);
   private final GuidedMaterializationService materialization =
       mock(GuidedMaterializationService.class);
   private final GuidedDispatchService dispatch =

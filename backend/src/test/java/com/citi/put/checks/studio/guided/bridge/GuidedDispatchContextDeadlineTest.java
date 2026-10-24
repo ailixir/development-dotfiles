@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,7 +30,7 @@ class GuidedDispatchContextDeadlineTest {
   private final GuidedContracts contracts = new GuidedContracts();
   private final Authentication controller = mock(Authentication.class);
   private final GuidedSessionService sessions = mock(GuidedSessionService.class);
-  private final GuidedRunnerClient runner = mock(GuidedRunnerClient.class);
+  private final HttpRunnerDispatchClient runner = mock(HttpRunnerDispatchClient.class);
   private final GuidedDispatchService dispatch =
       new GuidedDispatchService(sessions, mock(GuidedMaterializationService.class), runner);
   private final ObjectNode context =

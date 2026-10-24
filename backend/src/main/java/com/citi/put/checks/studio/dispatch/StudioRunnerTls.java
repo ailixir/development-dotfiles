@@ -308,8 +308,8 @@ public final class StudioRunnerTls {
   }
 
   /**
-   * The dedicated context for {@link HttpClient.Builder#sslContext}, or for {@code
-   * GuidedRunnerClient}'s constructor.
+   * The dedicated context for {@link HttpClient.Builder#sslContext}, or for the folded guided
+   * transport.
    *
    * @return the context built from {@link Settings} only
    */

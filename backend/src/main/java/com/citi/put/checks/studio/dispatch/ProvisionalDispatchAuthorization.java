@@ -25,6 +25,53 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProvisionalDispatchAuthorization implements DispatchAuthorization {
 
+  private org.springframework.beans.factory.ObjectProvider<
+          com.citi.put.checks.studio.guided.publication.PublicationGrantAuthority>
+      publication;
+
+  @Autowired
+  public void initializePublicationAuthority(
+      org.springframework.beans.factory.ObjectProvider<
+              com.citi.put.checks.studio.guided.publication.PublicationGrantAuthority>
+          publication) {
+    this.publication = publication;
+  }
+
+  private com.citi.put.checks.studio.guided.publication.PublicationGrantAuthority publication() {
+    var authority = publication == null ? null : publication.getIfAvailable();
+    com.citi.put.checks.studio.guided.session.GuidedSessionException.require(
+        authority != null, "RUNTIME_INCOMPATIBLE", 409);
+    return authority;
+  }
+
+  @Override
+  public com.citi.put.checks.security.BffAuthenticationToken fresh(
+      org.springframework.security.core.Authentication caller,
+      jakarta.servlet.http.HttpServletRequest request,
+      String expectedPrincipal,
+      String csiId,
+      boolean execution) {
+    return publication().fresh(caller, request, expectedPrincipal, csiId, execution);
+  }
+
+  @Override
+  public com.citi.put.checks.studio.guided.publication.PublicationContracts.Grant
+      authorizePublication(
+          org.springframework.security.core.Authentication caller,
+          jakarta.servlet.http.HttpServletRequest request,
+          com.citi.put.checks.studio.guided.publication.PublicationContracts.Snapshot snapshot,
+          com.fasterxml.jackson.databind.JsonNode currentSession) {
+    return publication().authorizePublication(caller, request, snapshot, currentSession);
+  }
+
+  @Override
+  public void authorizeReceiptRead(
+      org.springframework.security.core.Authentication caller,
+      jakarta.servlet.http.HttpServletRequest request,
+      com.citi.put.checks.studio.guided.publication.PublicationContracts.Receipt receipt) {
+    publication().authorizeReceiptRead(caller, request, receipt);
+  }
+
   private final StudioRepository tests;
   private final CsiRepository csis;
   private StudioScheduledDispatchAuthorization scheduled;

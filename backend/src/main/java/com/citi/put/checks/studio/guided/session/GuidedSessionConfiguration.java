@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import org.apache.tomcat.util.net.SSLHostConfig;
 import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -100,47 +102,9 @@ public class GuidedSessionConfiguration {
   }
 
   @Bean
-  @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
-      name = "studio.guided-authoring.runner-origin")
-  com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient guidedRunnerClient(
-      @org.springframework.beans.factory.annotation.Value(
-              "${studio.guided-authoring.runner-origin}")
-          String origin,
-      @org.springframework.beans.factory.annotation.Value(
-              "${studio.guided-authoring.controller-token-file}")
-          String tokenFile,
-      GuidedContracts contracts,
-      StudioRunnerTls tls) {
-    return new com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient(
-        java.net.URI.create(origin),
-        tls.sslContext(),
-        () -> {
-          try {
-            return java.nio.file.Files.readString(java.nio.file.Path.of(tokenFile)).strip();
-          } catch (java.io.IOException failure) {
-            throw new GuidedSessionException("UNAUTHENTICATED", 401);
-          }
-        },
-        contracts);
-  }
-
-  @Bean
-  @ConditionalOnMissingBean(com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.class)
-  com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient unavailableGuidedRunnerClient(
-      GuidedContracts contracts, StudioRunnerTls tls) {
-    return new com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient(
-        java.net.URI.create("https://unconfigured.invalid"),
-        tls.sslContext(),
-        () -> {
-          throw new GuidedSessionException("RUNTIME_INCOMPATIBLE", 409);
-        },
-        contracts);
-  }
-
-  @Bean
   com.citi.put.checks.studio.guided.bridge.GuidedDispatchService guidedDispatchService(
       GuidedSessionService sessions,
-      com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient runner,
+      com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient runner,
       JdbcTemplate jdbc,
       GuidedContracts contracts,
       com.citi.put.checks.studio.dispatch.StudioReferenceResolver references) {
@@ -327,6 +291,11 @@ public class GuidedSessionConfiguration {
       tls.requireServerIdentity();
       return factory -> {
         Connector connector = connector(port, settings);
+        Binder.get(environment)
+            .bind("server.address", InetAddress.class)
+            .ifBound(
+                address ->
+                    ((Http11NioProtocol) connector.getProtocolHandler()).setAddress(address));
         scope.getFilter().attach(connector);
         factory.addAdditionalTomcatConnectors(connector);
       };

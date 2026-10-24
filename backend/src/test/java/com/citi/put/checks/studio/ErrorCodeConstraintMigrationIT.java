@@ -70,7 +70,7 @@ class ErrorCodeConstraintMigrationIT {
    * forward-only guided V19 (governance, STUDIO-OBS-014) and V20 (session recording,
    * STUDIO-OBS-013). Neither V19 nor V20 names this constraint; V13 stays its only definition.
    */
-  private static final String HEAD = "22";
+  private static final String HEAD = "23";
 
   /**
    * The vocabulary V13 constrains: the API's whole enumeration, one set (the re-baseline installs

@@ -494,6 +494,7 @@ class ObservedCoRunIT {
               .put("occurrence", 0)
               .put("operationKind", "navigate")
               .put("targetIntent", "page")
+              .putNull("scopeIntent")
               .putNull("predicate")
               .putNull("needId")
               .put("referenceIndex", 0);

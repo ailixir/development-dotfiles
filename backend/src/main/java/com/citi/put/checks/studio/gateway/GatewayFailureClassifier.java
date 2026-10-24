@@ -11,10 +11,13 @@ import java.util.concurrent.TimeoutException;
 /**
  * Decides whether a failure may be retried and which audit outcome it maps to (Story 10.5, AC-4).
  *
- * <p>Only definite transport failures are retryable. A timeout is never retried: the request may
- * already have been executed and billed, and the caller's budget caps total work. Ambiguous 5xx —
- * anything the gateway answered with after it started producing a response — is likewise not
- * retried, because a repeat would double the cost without changing the odds.
+ * <p>Only definite transport failures are retryable. A timeout is never retried here: the request
+ * may already have been executed and billed, and the caller's budget caps total work. The one
+ * exception sits outside this class: the guided coordinator may repeat a pre-response stall (the
+ * per-send cap expired before any response headers) as a new, fully charged attempt; that decision
+ * uses the transport's closed {@code responseStarted} flag, and this classifier is unchanged.
+ * Ambiguous 5xx — anything the gateway answered with after it started producing a response — is
+ * likewise not retried, because a repeat would double the cost without changing the odds.
  */
 final class GatewayFailureClassifier {
 
@@ -28,18 +31,52 @@ final class GatewayFailureClassifier {
     if (isTimeout(throwable)) {
       return false;
     }
+    return switch (transportFailureFor(throwable)) {
+      case CONNECT, HTTP_429, HTTP_503 -> true;
+      default -> false;
+    };
+  }
+
+  /**
+   * Buckets a non-timeout transport failure into a closed class. Reads only the integer {@code
+   * ApiException.code()} and exception types; no message, body or header leaves this method except
+   * the existing reset check on a socket exception.
+   *
+   * @param throwable the failure raised by the SDK
+   * @return the first matching class on the cause chain, otherwise {@code OTHER}
+   */
+  static GenAiGatewayTransport.TransportFailure transportFailureFor(Throwable throwable) {
     for (Throwable current = throwable; current != null; current = current.getCause()) {
       if (current instanceof ApiException apiException) {
-        return apiException.code() == 429 || apiException.code() == 503;
+        int code = apiException.code();
+        if (code == 429) {
+          return GenAiGatewayTransport.TransportFailure.HTTP_429;
+        }
+        if (code == 503) {
+          return GenAiGatewayTransport.TransportFailure.HTTP_503;
+        }
+        if (code == 400) {
+          return GenAiGatewayTransport.TransportFailure.HTTP_400;
+        }
+        if (code == 401 || code == 403) {
+          return GenAiGatewayTransport.TransportFailure.HTTP_401_403;
+        }
+        if (code >= 400 && code < 500) {
+          return GenAiGatewayTransport.TransportFailure.HTTP_4XX;
+        }
+        if (code >= 500 && code < 600) {
+          return GenAiGatewayTransport.TransportFailure.HTTP_5XX;
+        }
+        return GenAiGatewayTransport.TransportFailure.OTHER;
       }
       if (current instanceof ConnectException) {
-        return true;
+        return GenAiGatewayTransport.TransportFailure.CONNECT;
       }
       if (current instanceof SocketException socketException && isReset(socketException)) {
-        return true;
+        return GenAiGatewayTransport.TransportFailure.CONNECT;
       }
     }
-    return false;
+    return GenAiGatewayTransport.TransportFailure.OTHER;
   }
 
   /**

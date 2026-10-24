@@ -25,7 +25,7 @@ public final class GuidedPublicationResultProjector {
   private final GuidedPublicationRepository publications;
   private final GuidedSessionRepository sessions;
   private final GuidedSessionService guided;
-  private final GuidedPublicationAuthorization authorization;
+  private final com.citi.put.checks.studio.dispatch.DispatchAuthorization authorization;
   private final GuidedContracts contracts;
   private final ExecutionReadinessService readiness;
   private final ObservedReplayProperties replay;
@@ -37,7 +37,7 @@ public final class GuidedPublicationResultProjector {
       GuidedPublicationRepository publications,
       GuidedSessionRepository sessions,
       GuidedSessionService guided,
-      GuidedPublicationAuthorization authorization,
+      com.citi.put.checks.studio.dispatch.DispatchAuthorization authorization,
       GuidedContracts contracts,
       ExecutionReadinessService readiness,
       ObservedReplayProperties replay,
@@ -128,63 +128,12 @@ public final class GuidedPublicationResultProjector {
   private ObjectNode result(
       GuidedSessionRepository.Session current, PublicationContracts.Receipt receipt) {
     JsonNode session = current.document();
-    String id = text(session, "sessionId"), state = text(session, "state");
-    ObjectNode result =
-        contracts
-            .object()
-            .put("schemaVersion", 3)
-            .put("sessionId", id)
-            .put("executionId", id)
-            .put("scopeHash", text(session, "scopeHash"))
-            .put("mode", "guided")
-            .put("outcome", state)
-            .put("learnedFromThisRun", receipt != null)
-            .put("replayVerified", false)
-            .put("scheduleActivated", false);
-    boolean completed =
-        current.progress().path("stepIndex").asInt(-1) == session.path("sourceSteps").size()
-            && sessions.effectiveActions(id).stream()
-                .allMatch(a -> a.path("state").asText().equals("SUCCEEDED"));
-    result.put("assertionsPassed", completed);
-    // Learned-from-execution evidence: the guided run's own recording. It never sets
-    // replayVerified and is never conflated with replay evidence.
-    ObjectNode boundary = sessions.incremental().relearnedFrom(id);
-    if (boundary == null) {
-      result.putNull("relearnedFrom");
-    } else {
-      result.set("relearnedFrom", boundary);
-    }
-    evidence.project(id, state).writeTo(result, id);
-    // P2/P3: one shared projection of this session's own facts; it never reads the current head.
-    result.set("progress", presentation.progress(current));
-    result.set("explanation", presentation.explanation(current));
-    if (current.progress().path("errorCode").isTextual()) {
-      result.set("errorCode", current.progress().path("errorCode"));
-    } else {
-      result.putNull("errorCode");
-    }
-    if (current.progress().path("errorCode").asText().equals("LOGIN_REQUIRED")) {
-      result.set("detail", current.progress().path("detail"));
-      result
-          .putObject("failure")
-          .put("code", "LOGIN_REQUIRED")
-          .set("detail", current.progress().path("detail"));
-    }
-    ObjectNode publication = result.putObject("publication"),
-        ready = result.putObject("currentReadiness");
-    if (receipt == null) {
-      publication
-          .put(
-              "status",
-              state.equals("PUBLICATION_CONFLICT")
-                  ? "CONFLICT"
-                  : java.util.Set.of("FAILED", "CANCELLED", "EXPIRED", "UNKNOWN_OUTCOME")
-                          .contains(state)
-                      ? "REFUSED"
-                      : "PENDING")
-          .putNull("receipt");
-      ready.putNull("revisionId").put("ready", false).put("code", "NOT_PUBLISHED");
-    } else {
+    String id = text(session, "sessionId");
+    ObjectNode result = guided.projectResult(current, true, evidence, presentation);
+    result.put("learnedFromThisRun", receipt != null);
+    ObjectNode publication = (ObjectNode) result.path("publication"),
+        ready = (ObjectNode) result.path("currentReadiness");
+    if (receipt != null) {
       JsonNode proof = receipt.document();
       publication.put("status", "PUBLISHED").set("receipt", proof.path("publicReceipt"));
       UUID revisionId = UUID.fromString(text(proof, "revisionId")),

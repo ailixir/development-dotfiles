@@ -46,7 +46,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * rights (no SECURITY DEFINER), foreign-key checks and views run with their owner's rights.
  *
  * <p>Evidence copy of {@link #PREPARED_GRANT} and {@link #PREPARED_COLUMN_GRANT}: {@code
- * docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/runtime-role-grants-v19-v22.sql}.
+ * docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/runtime-role-grants-v19-v23.sql}.
  */
 class GuidedRuntimeRolePrivilegeIT {
   private static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:15-alpine");
@@ -60,9 +60,9 @@ class GuidedRuntimeRolePrivilegeIT {
       List.of("SELECT", "INSERT", "UPDATE", "REFERENCES");
 
   /**
-   * The delta grant for a non-owner runtime role (API and worker pods). Apply after V22 with {@code
+   * The delta grant for a non-owner runtime role (API and worker pods). Apply after V23 with {@code
    * psql -v runtime_role=<role>}. Least privilege: exactly what the application SQL and the
-   * invoker-rights trigger/function bodies use; no DELETE or TRUNCATE on any V19–V22 relation.
+   * invoker-rights trigger/function bodies use; no DELETE or TRUNCATE on any V19–V23 relation.
    */
   static final String PREPARED_GRANT =
       """
@@ -116,6 +116,8 @@ class GuidedRuntimeRolePrivilegeIT {
        replay_failure_login_steps_present), UPDATE (replay_failure_code, replay_failure_step_id,
        replay_failure_step_index, replay_failure_login_steps_present)
        ON ui_test_executions TO :"runtime_role";
+      GRANT SELECT (rejection_reason), UPDATE (rejection_reason)
+       ON studio_guided_model_attempts TO :"runtime_role";
       """;
 
   /** Relations V19 through the head create: name to "version kind". */
@@ -175,7 +177,9 @@ class GuidedRuntimeRolePrivilegeIT {
           Map.entry("ui_test_executions.replay_failure_step_id", Set.of("SELECT", "UPDATE")),
           Map.entry("ui_test_executions.replay_failure_step_index", Set.of("SELECT", "UPDATE")),
           Map.entry(
-              "ui_test_executions.replay_failure_login_steps_present", Set.of("SELECT", "UPDATE")));
+              "ui_test_executions.replay_failure_login_steps_present", Set.of("SELECT", "UPDATE")),
+          // V23 (round 053): the closed rejection reason, read and written by finishAttempt.
+          Map.entry("studio_guided_model_attempts.rejection_reason", Set.of("SELECT", "UPDATE")));
 
   private final List<String> databases = new ArrayList<>();
   private final List<String> roles = new ArrayList<>();

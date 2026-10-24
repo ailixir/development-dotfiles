@@ -7,7 +7,6 @@ import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 /** Server provenance and exact source slicing; no model-created bytes or trust flags. */
 public final class GuidedSourceInputResolver {
@@ -63,19 +62,5 @@ public final class GuidedSourceInputResolver {
       require(seen.add(GuidedContracts.hash(reference)), "INVALID_CONTRACT", 422);
       validator.resolve(session, sources(session, manifest), reference);
     }
-  }
-
-  /** Safe correlation is provenance based; private values never enter the result. */
-  public Map<Integer, String> allocationIds(JsonNode references, JsonNode context) {
-    Map<Integer, String> result = new LinkedHashMap<>();
-    for (int index = 0; index < references.size(); index++) {
-      for (JsonNode input : context.path("authoredInputs").path("inputs")) {
-        if (input.path("provenance").equals(references.get(index))) {
-          result.put(index, input.path("inputId").asText());
-        }
-      }
-      require(result.containsKey(index), "MISSING_SOURCE", 409);
-    }
-    return Map.copyOf(result);
   }
 }

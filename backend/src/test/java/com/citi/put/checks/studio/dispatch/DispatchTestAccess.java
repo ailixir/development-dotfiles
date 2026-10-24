@@ -1,0 +1,11 @@
+package com.citi.put.checks.studio.dispatch;
+
+/** Test-only access to the package-private owned-byte observer; no production SPI is added. */
+public final class DispatchTestAccess {
+  private DispatchTestAccess() {}
+
+  public static void observeRequestBytes(
+      HttpRunnerDispatchClient client, java.util.function.Consumer<byte[]> observer) {
+    client.observeRequestBytes(observer);
+  }
+}

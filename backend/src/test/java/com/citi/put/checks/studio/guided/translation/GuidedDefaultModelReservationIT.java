@@ -127,7 +127,7 @@ class GuidedDefaultModelReservationIT {
     Flyway.configure()
         .dataSource(source)
         .locations("classpath:db/migration")
-        .target("22") // STUDIO-OBS-014 S3: governance tables (V19) at head
+        .target("23") // STUDIO-OBS-014 S3: governance tables (V19) at head
         .load()
         .migrate();
     context = new AnnotationConfigApplicationContext();

@@ -411,6 +411,7 @@ public final class LegacyV20ConfirmedBaseFixture {
                       .put("occurrence", 0)
                       .put("operationKind", "navigate")
                       .put("targetIntent", "page")
+                      .putNull("scopeIntent")
                       .put("referenceIndex", 0)
                       .putNull("needId")
                       .putNull("predicate");
@@ -799,7 +800,7 @@ public final class LegacyV20ConfirmedBaseFixture {
     assertThat(
             jdbc.queryForObject(
                 "SELECT max(version::int) FROM flyway_schema_history WHERE success", Integer.class))
-        .isEqualTo(22);
+        .isEqualTo(23);
     assertThat(row(jdbc, "ui_test_revisions", "id", seed.baseRevisionId()))
         .isEqualTo(seed.immutableBaseRowBytes());
     assertThat(row(jdbc, "studio_guided_publications", "session_id", seed.sessionId()))

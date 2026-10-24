@@ -17,11 +17,15 @@ import com.citi.put.checks.studio.guided.session.GuidedSessionProperties;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.BindException;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -74,6 +78,35 @@ class GuidedTranslationDefaultsTest {
     assertThat(application.getBean(GuidedPlanPublisher.class)).isNotNull();
     assertThat(application.getBean(ObservedReplayAuthorization.class)).isNotNull();
     assertThat(application.getBean(ObservedRevisionVerifier.class)).isNotNull();
+  }
+
+  /** Round 067 (Candidate B): the per-send cap defaults to 50 s and the yml entry is bound. */
+  @Test
+  void sendTimeoutDefaultsToFiftySecondsUnderTheSixtySecondCallBudget() throws Exception {
+    var properties = application.getBean(GuidedTranslationProperties.class);
+    assertThat(properties.sendTimeoutSeconds()).isEqualTo(50);
+    assertThat(properties.callSeconds()).isEqualTo(60);
+    assertThat(bindSendTimeout(null).sendTimeoutSeconds()).isEqualTo(50);
+    assertThat(
+            Files.readString(Path.of("src/main/resources/application.yml"))
+                .contains("send-timeout-seconds: ${STUDIO_GUIDED_SEND_TIMEOUT_SECONDS:50}"))
+        .isTrue();
+    assertThat(bindSendTimeout("1").sendTimeoutSeconds()).isEqualTo(1);
+    assertThat(bindSendTimeout("600").sendTimeoutSeconds()).isEqualTo(600);
+    assertThatThrownBy(() -> bindSendTimeout("0")).isInstanceOf(BindException.class);
+    assertThatThrownBy(() -> bindSendTimeout("601")).isInstanceOf(BindException.class);
+  }
+
+  /** Binds with one unrelated key so the record's own {@code @DefaultValue}s apply. */
+  private static GuidedTranslationProperties bindSendTimeout(String seconds) {
+    Map<String, String> source = new java.util.HashMap<>();
+    source.put("studio.guided-authoring.translation.worker-id", "worker-1");
+    if (seconds != null) {
+      source.put("studio.guided-authoring.translation.send-timeout-seconds", seconds);
+    }
+    return new Binder(new MapConfigurationPropertySource(source))
+        .bind("studio.guided-authoring.translation", GuidedTranslationProperties.class)
+        .get();
   }
 
   @Nested

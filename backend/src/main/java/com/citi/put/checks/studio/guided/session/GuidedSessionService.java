@@ -4,6 +4,8 @@ import static com.citi.put.checks.studio.guided.session.GuidedSessionException.r
 
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+import com.citi.put.checks.studio.guided.diagnostics.GuidedGuardProvenance;
+import com.citi.put.checks.studio.guided.diagnostics.GuidedGuardProvenance.Guard;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
@@ -32,11 +34,22 @@ public final class GuidedSessionService {
   private static final Set<String> TEARDOWNS_IN_FLIGHT =
       java.util.concurrent.ConcurrentHashMap.newKeySet();
 
+  /** Reservations cover queued and running attempts, so a redrive cannot queue an id twice. */
+  private static final Set<String> TEARDOWNS_QUEUED =
+      java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+  private static final java.time.Duration TEARDOWN_SHED_WARN_INTERVAL =
+      java.time.Duration.ofMinutes(15);
+  private final java.util.concurrent.atomic.AtomicLong shedTeardowns =
+      new java.util.concurrent.atomic.AtomicLong();
+  private final java.util.concurrent.atomic.AtomicReference<Instant> nextShedReport =
+      new java.util.concurrent.atomic.AtomicReference<>(Instant.MIN);
+
   /**
    * STUDIO-OBS-015 H8: blocking stop sends (up to 15 s each) never run on the common pool. A full
    * queue discards the attempt; the durable request stays for the reaper's re-drive.
    */
-  private final java.util.concurrent.ThreadPoolExecutor teardowns = teardownExecutor();
+  private java.util.concurrent.ThreadPoolExecutor teardowns = teardownExecutor();
 
   /** STUDIO-OBS-015 aria-warn-ruling01: earliest instant of the next past-window count. */
   private final java.util.concurrent.atomic.AtomicReference<Instant> nextAbandonedReport =
@@ -63,6 +76,24 @@ public final class GuidedSessionService {
   private java.util.function.BiConsumer<ObjectNode, String> stopSender;
   private PublicationLifecycle publication;
   private java.util.function.BooleanSupplier executionEnabled = () -> true;
+
+  private record PublicationProjectionPolicy(
+      java.util.function.BooleanSupplier enabled,
+      java.util.function.Predicate<String> baseExists) {}
+
+  private volatile PublicationProjectionPolicy publicationProjectionPolicy =
+      new PublicationProjectionPolicy(() -> true, id -> false);
+
+  /** Installs both existing publication facts together; manual compositions keep enabled=true. */
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  void installPublicationProperties(
+      com.citi.put.checks.studio.guided.publication.GuidedPublicationProperties configured,
+      com.citi.put.checks.studio.guided.publication.GuidedPublicationBaseRepository bases) {
+    var properties = java.util.Objects.requireNonNull(configured);
+    var repository = java.util.Objects.requireNonNull(bases);
+    publicationProjectionPolicy =
+        new PublicationProjectionPolicy(properties::enabled, id -> repository.find(id).isPresent());
+  }
 
   public void installExecutionEnabled(java.util.function.BooleanSupplier enabled) {
     this.executionEnabled = enabled;
@@ -229,6 +260,7 @@ public final class GuidedSessionService {
             || counters.path("modelOutputTokens").asLong()
                 > session.document().path("limits").path("maxModelOutputTokensTotal").asLong();
     if (over && !terminal(session)) {
+      GuidedGuardProvenance.observe(Guard.LATE_USAGE_LIMITS, () -> id);
       session.progress().put("errorCode", "BUDGET_EXCEEDED");
       stop(session, "FAILED");
       return false;
@@ -254,6 +286,8 @@ public final class GuidedSessionService {
             > limits.path("maxModelInputTokensTotal").asLong()
         || counters.path("modelOutputTokens").asLong() + output
             > limits.path("maxModelOutputTokensTotal").asLong()) {
+      GuidedGuardProvenance.observe(
+          Guard.SESSION_RESERVATION_LIMITS, () -> session.document().path("sessionId").asText());
       session.progress().put("errorCode", "BUDGET_EXCEEDED");
       stop(session, "FAILED");
       return false;
@@ -263,6 +297,8 @@ public final class GuidedSessionService {
     // session FAILED BUDGET_EXCEEDED on the same path as the per-session ceilings above.
     require(csiBudget != null, "RUNTIME_INCOMPATIBLE", 409);
     if (!csiBudget.charge(session.document().path("scope").path("csiId").asText(), input, output)) {
+      GuidedGuardProvenance.observe(
+          Guard.CSI_DAILY_CHARGE, () -> session.document().path("sessionId").asText());
       session.progress().put("errorCode", "BUDGET_EXCEEDED");
       stop(session, "FAILED");
       return false;
@@ -757,9 +793,6 @@ public final class GuidedSessionService {
           access.checkUser(user, session.document());
           access.checkCurrent(session.document());
           if (projection.equals("result")) {
-            if (!terminal(session)) {
-              return view(session);
-            }
             return result(session);
           }
           if (projection.equals("clarification")) {
@@ -1195,13 +1228,20 @@ public final class GuidedSessionService {
               GuidedContracts.canonical(observation).getBytes(StandardCharsets.UTF_8);
           int bytes = canonicalObservation.length;
           require(
-              bytes <= limits.path("maxObservationBytes").asInt()
-                  && observation.path("nodes").size() <= limits.path("maxObservationNodes").asInt(),
+              GuidedGuardProvenance.passing(
+                  bytes <= limits.path("maxObservationBytes").asInt()
+                      && observation.path("nodes").size()
+                          <= limits.path("maxObservationNodes").asInt(),
+                  Guard.OBSERVATION_SHAPE,
+                  () -> id),
               "BUDGET_EXCEEDED",
               429);
           for (JsonNode node : observation.path("nodes")) {
             require(
-                node.path("depth").asInt() <= limits.path("maxObservationDepth").asInt(),
+                GuidedGuardProvenance.passing(
+                    node.path("depth").asInt() <= limits.path("maxObservationDepth").asInt(),
+                    Guard.OBSERVATION_DEPTH,
+                    () -> id),
                 "BUDGET_EXCEEDED",
                 429);
           }
@@ -1217,8 +1257,13 @@ public final class GuidedSessionService {
             }
           }
           require(origin, "ORIGIN_NOT_ALLOWED", 403);
-          reserve(session, "observations", 1, "maxObservations");
-          reserve(session, "sanitizedEvidenceBytes", bytes, "maxSanitizedEvidenceBytesTotal");
+          reserve(session, "observations", 1, "maxObservations", Guard.OBSERVATION_COUNT_RESERVE);
+          reserve(
+              session,
+              "sanitizedEvidenceBytes",
+              bytes,
+              "maxSanitizedEvidenceBytesTotal",
+              Guard.OBSERVATION_EVIDENCE_RESERVE);
           String observationHash = hashObservationBytes(canonicalObservation);
           session
               .progress()
@@ -1600,6 +1645,7 @@ public final class GuidedSessionService {
                   > session.document().path("limits").path("maxModelInputTokensTotal").asLong()
               || chargedOutput
                   > session.document().path("limits").path("maxModelOutputTokensTotal").asLong()) {
+            GuidedGuardProvenance.observe(Guard.SETTLEMENT_USAGE_LIMITS, () -> id);
             // A gateway that exceeds its reservation cannot be made safe by rolling usage back.
             session.progress().put("errorCode", "BUDGET_EXCEEDED");
             stop(session, "FAILED");
@@ -1636,7 +1682,7 @@ public final class GuidedSessionService {
     }
     Instant now = clock.instant();
     for (String id : repository.pendingTeardowns(now, window, batch)) {
-      if (TEARDOWNS_IN_FLIGHT.contains(id)) {
+      if (TEARDOWNS_IN_FLIGHT.contains(id) || TEARDOWNS_QUEUED.contains(id)) {
         continue;
       }
       JsonNode request = repository.transaction(() -> repository.teardownRequest(id));
@@ -1647,7 +1693,7 @@ public final class GuidedSessionService {
       }
       ObjectNode target = (ObjectNode) request.path("target");
       String reason = request.path("reason").asText();
-      teardowns.execute(() -> teardownAttempt(id, target, reason));
+      queueTeardown(id, target, reason);
     }
   }
 
@@ -2103,9 +2149,12 @@ public final class GuidedSessionService {
           JsonNode counts = session.document().path("counters"),
               limits = session.document().path("limits");
           require(
-              counts.path("observations").asLong() < limits.path("maxObservations").asLong()
-                  && counts.path("sanitizedEvidenceBytes").asLong()
-                      < limits.path("maxSanitizedEvidenceBytesTotal").asLong(),
+              GuidedGuardProvenance.passing(
+                  counts.path("observations").asLong() < limits.path("maxObservations").asLong()
+                      && counts.path("sanitizedEvidenceBytes").asLong()
+                          < limits.path("maxSanitizedEvidenceBytesTotal").asLong(),
+                  Guard.OBSERVATION_REFRESH_LIMITS,
+                  () -> id),
               "BUDGET_EXCEEDED",
               429);
           ObjectNode intent = contracts.object().put("callbackKey", callbackKey);
@@ -2703,7 +2752,7 @@ public final class GuidedSessionService {
                   @Override
                   public void afterCompletion(int status) {
                     if (status == STATUS_COMMITTED) {
-                      teardowns.execute(() -> teardownAttempt(sessionId, sent, reason));
+                      queueTeardown(sessionId, sent, reason);
                     }
                   }
                 });
@@ -2791,7 +2840,57 @@ public final class GuidedSessionService {
     return TEARDOWNS_IN_FLIGHT.contains(id);
   }
 
-  private static java.util.concurrent.ThreadPoolExecutor teardownExecutor() {
+  /** Test seam: replace an unused executor without changing production pool or queue sizes. */
+  void installTeardownExecutor(java.util.concurrent.ThreadPoolExecutor executor) {
+    require(
+        executor != null && !executor.isShutdown() && teardowns.getTaskCount() == 0,
+        "RUNTIME_INCOMPATIBLE",
+        409);
+    executor.setRejectedExecutionHandler(this::teardownRejected);
+    var previous = teardowns;
+    teardowns = executor;
+    previous.shutdown();
+  }
+
+  /**
+   * A reservation stays held through the attempt; rejected attempts release it for the next tick.
+   */
+  private void queueTeardown(String id, ObjectNode target, String reason) {
+    if (!TEARDOWNS_QUEUED.add(id)) {
+      return;
+    }
+    if (TEARDOWNS_IN_FLIGHT.contains(id)) {
+      TEARDOWNS_QUEUED.remove(id);
+      return;
+    }
+    try {
+      teardowns.execute(
+          () -> {
+            try {
+              teardownAttempt(id, target, reason);
+            } finally {
+              TEARDOWNS_QUEUED.remove(id);
+            }
+          });
+    } catch (java.util.concurrent.RejectedExecutionException rejected) {
+      // The rejection handler recorded the shed. Only the volatile reservation is removed.
+      TEARDOWNS_QUEUED.remove(id);
+    }
+  }
+
+  private void teardownRejected(
+      Runnable attempt, java.util.concurrent.ThreadPoolExecutor executor) {
+    shedTeardowns.incrementAndGet();
+    Instant now = clock.instant();
+    Instant due = nextShedReport.get();
+    if (!now.isBefore(due)
+        && nextShedReport.compareAndSet(due, now.plus(TEARDOWN_SHED_WARN_INTERVAL))) {
+      LOG.warn("Guided teardown executor shed: {} attempt(s)", shedTeardowns.getAndSet(0));
+    }
+    throw new java.util.concurrent.RejectedExecutionException("Guided teardown executor saturated");
+  }
+
+  private java.util.concurrent.ThreadPoolExecutor teardownExecutor() {
     var executor =
         new java.util.concurrent.ThreadPoolExecutor(
             2,
@@ -2804,7 +2903,7 @@ public final class GuidedSessionService {
               thread.setDaemon(true);
               return thread;
             },
-            new java.util.concurrent.ThreadPoolExecutor.DiscardPolicy());
+            this::teardownRejected);
     executor.allowCoreThreadTimeOut(true);
     return executor;
   }
@@ -2832,10 +2931,22 @@ public final class GuidedSessionService {
 
   private static void reserve(
       GuidedSessionRepository.Session session, String counter, int amount, String maximum) {
+    reserve(session, counter, amount, maximum, null);
+  }
+
+  private static void reserve(
+      GuidedSessionRepository.Session session,
+      String counter,
+      int amount,
+      String maximum,
+      Guard guard) {
     ObjectNode counters = (ObjectNode) session.document().path("counters");
     long next = counters.path(counter).asLong() + amount;
     require(
-        amount >= 0 && next <= session.document().path("limits").path(maximum).asLong(),
+        GuidedGuardProvenance.passing(
+            amount >= 0 && next <= session.document().path("limits").path(maximum).asLong(),
+            guard,
+            () -> session.document().path("sessionId").asText()),
         "BUDGET_EXCEEDED",
         429);
     counters.put(counter, next);
@@ -2857,8 +2968,12 @@ public final class GuidedSessionService {
     return s.document().path("state").asText();
   }
 
+  static boolean terminalOutcome(String outcome) {
+    return TERMINAL.contains(outcome);
+  }
+
   private static boolean terminal(GuidedSessionRepository.Session s) {
-    return TERMINAL.contains(state(s));
+    return terminalOutcome(state(s));
   }
 
   private ObjectNode view(GuidedSessionRepository.Session current) {
@@ -2879,6 +2994,19 @@ public final class GuidedSessionService {
   }
 
   private ObjectNode result(GuidedSessionRepository.Session session) {
+    return projectResult(session, false, evidence, presentation());
+  }
+
+  /**
+   * One result projection under the caller's session lock, after its authority check. The base flag
+   * preserves the existing receipt-path defaults; it never grants read or publication authority.
+   * Evidence and presentation are the caller's installed projections, not reconstructed literals.
+   */
+  public ObjectNode projectResult(
+      GuidedSessionRepository.Session session,
+      boolean publicationBase,
+      com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection installedEvidence,
+      GuidedPublicPresentationProjector installedPresentation) {
     String id = session.document().path("sessionId").asText(), state = state(session);
     ObjectNode out =
         contracts
@@ -2888,41 +3016,57 @@ public final class GuidedSessionService {
             .put("executionId", id)
             .put("scopeHash", session.document().path("scopeHash").asText())
             .put("mode", "guided")
-            .put("outcome", state)
-            .put(
-                "assertionsPassed",
-                session.progress().path("stepIndex").asInt()
-                        == session.document().path("sourceSteps").size()
-                    && repository.effectiveActions(id).stream()
-                        .allMatch(a -> a.path("state").asText().equals("SUCCEEDED")))
-            .put("learnedFromThisRun", false)
-            .put("replayVerified", false)
-            .put("scheduleActivated", false);
+            .put("outcome", state);
+    boolean completed =
+        session.progress().path("stepIndex").asInt(publicationBase ? -1 : 0)
+                == session.document().path("sourceSteps").size()
+            && repository.effectiveActions(id).stream()
+                .allMatch(a -> a.path("state").asText().equals("SUCCEEDED"));
+    // Preserve each existing path's JSON member order as well as its values.
+    if (!publicationBase) {
+      out.put("assertionsPassed", completed);
+    }
+    out.put("learnedFromThisRun", false)
+        .put("replayVerified", false)
+        .put("scheduleActivated", false);
+    if (publicationBase) {
+      out.put("assertionsPassed", completed);
+    }
     ObjectNode boundary = incremental.relearnedFrom(id);
     if (boundary == null) {
       out.putNull("relearnedFrom");
     } else {
       out.set("relearnedFrom", boundary);
     }
-    out.putObject("publication")
+    var publicationPolicy = publicationProjectionPolicy;
+    ObjectNode publicationProjection = contracts.object();
+    publicationProjection
         .put(
             "status",
             state.equals("PUBLICATION_CONFLICT")
                 ? "CONFLICT"
                 : Set.of("FAILED", "CANCELLED", "EXPIRED", "UNKNOWN_OUTCOME").contains(state)
+                        || (!publicationBase
+                            && !publicationPolicy.enabled().getAsBoolean()
+                            && state.equals("SUCCEEDED")
+                            && !publicationPolicy.baseExists().test(id))
                     ? "REFUSED"
                     : "PENDING")
         .putNull("receipt");
-    out.putObject("currentReadiness")
-        .putNull("revisionId")
-        .put("ready", false)
-        .put("code", "NOT_PUBLISHED");
+    ObjectNode readinessProjection = contracts.object();
+    readinessProjection.putNull("revisionId").put("ready", false).put("code", "NOT_PUBLISHED");
+    if (!publicationBase) {
+      out.set("publication", publicationProjection);
+      out.set("currentReadiness", readinessProjection);
+    }
     // Learned-from-execution evidence (STUDIO-OBS-013): actionTimings + evidence.video.
-    evidence.project(id, state).writeTo(out, id);
+    installedEvidence.project(id, state).writeTo(out, id);
     // STUDIO-OBS-008 P2/P3: the same projection the receipt-backed result publishes.
-    out.set("progress", presentation().progress(session));
-    out.set("explanation", presentation().explanation(session));
-    if (session.progress().has("errorCode")) {
+    out.set("progress", installedPresentation.progress(session));
+    out.set("explanation", installedPresentation.explanation(session));
+    if (publicationBase
+        ? session.progress().path("errorCode").isTextual()
+        : session.progress().has("errorCode")) {
       out.set("errorCode", session.progress().path("errorCode"));
     } else {
       out.putNull("errorCode");
@@ -2932,6 +3076,10 @@ public final class GuidedSessionService {
       out.putObject("failure")
           .put("code", "LOGIN_REQUIRED")
           .set("detail", session.progress().path("detail"));
+    }
+    if (publicationBase) {
+      out.set("publication", publicationProjection);
+      out.set("currentReadiness", readinessProjection);
     }
     contracts.validate("v3/result", out);
     return out;

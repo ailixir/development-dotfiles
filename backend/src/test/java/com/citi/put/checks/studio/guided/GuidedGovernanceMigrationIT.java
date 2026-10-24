@@ -256,7 +256,7 @@ class GuidedGovernanceMigrationIT {
 
   // ── AR-2 d: the replaced attempt guard ─────────────────────────────────────────────────────
 
-  /** The 16 columns other than safe_result, read from the head schema (never a kept list). */
+  /** The 17 columns other than safe_result, read from the head schema (never a kept list). */
   @Test
   void onAPrunedSessionEveryOtherAttemptColumnStaysImmutable() throws SQLException {
     try (Connection c = transaction()) {
@@ -284,6 +284,7 @@ class GuidedGovernanceMigrationIT {
               "status",
               "input_tokens",
               "output_tokens",
+              "rejection_reason",
               "created_at",
               "updated_at");
       List<String> accepted = new ArrayList<>();
@@ -420,6 +421,77 @@ class GuidedGovernanceMigrationIT {
           c,
           "UPDATE studio_guided_model_attempts SET safe_result=NULL" + where,
           "guided attempt transition refused");
+      c.rollback();
+    }
+  }
+
+  /**
+   * Round 053 (a), V23: the one UPDATE that finishes an attempt as REJECTED may set the closed
+   * reason; the terminal row then refuses any change of it, and the reason cannot ride along with a
+   * change to any other guarded column.
+   */
+  @Test
+  void rejectionReasonIsSetOnlyByTheTerminalTransitionAndNeverChangesAfterwards()
+      throws SQLException {
+    try (Connection c = transaction()) {
+      String live = session(c, "ACTING", "60 days", "{}");
+      attempt(c, live, "r", "CALLING", "NULL");
+      String where = " WHERE session_id='" + live + "'";
+      assertThat(
+              scalar(
+                  c, "SELECT rejection_reason IS NULL FROM studio_guided_model_attempts" + where))
+          .isEqualTo("t");
+      reject(
+          c,
+          "UPDATE studio_guided_model_attempts SET status='REJECTED',rejection_reason='TIMEOUT',"
+              + "translator_id='other',updated_at=clock_timestamp()"
+              + where,
+          "guided attempt transition refused");
+      exec(
+          c,
+          "UPDATE studio_guided_model_attempts SET status='REJECTED',"
+              + "rejection_reason='TRANSPORT_HTTP_503',input_tokens=1,output_tokens=2,"
+              + "updated_at=clock_timestamp()"
+              + where);
+      assertThat(scalar(c, "SELECT rejection_reason FROM studio_guided_model_attempts" + where))
+          .isEqualTo("TRANSPORT_HTTP_503");
+      reject(
+          c,
+          "UPDATE studio_guided_model_attempts SET rejection_reason='TIMEOUT'" + where,
+          "guided attempt transition refused");
+      reject(
+          c,
+          "UPDATE studio_guided_model_attempts SET rejection_reason=NULL" + where,
+          "guided attempt transition refused");
+      reject(
+          c,
+          "UPDATE studio_guided_model_attempts SET input_tokens=5" + where,
+          "guided attempt transition refused");
+      c.rollback();
+    }
+  }
+
+  @Test
+  void rejectionReasonCheckRefusesANonRejectedRowAndAMalformedToken() throws SQLException {
+    try (Connection c = transaction()) {
+      String live = session(c, "ACTING", "60 days", "{}");
+      attempt(c, live, "r", "CALLING", "NULL");
+      String where = " WHERE session_id='" + live + "'";
+      reject(
+          c,
+          "UPDATE studio_guided_model_attempts SET status='APPLIED',safe_result='{\"m\":1}',"
+              + "rejection_reason='TIMEOUT',updated_at=clock_timestamp()"
+              + where,
+          "violates check constraint");
+      for (String malformed : List.of("timeout", "BAD TOKEN", "", "A".repeat(41))) {
+        reject(
+            c,
+            "UPDATE studio_guided_model_attempts SET status='REJECTED',rejection_reason='"
+                + malformed
+                + "',updated_at=clock_timestamp()"
+                + where,
+            malformed.length() > 40 ? "value too long" : "violates check constraint");
+      }
       c.rollback();
     }
   }
@@ -971,16 +1043,25 @@ class GuidedGovernanceMigrationIT {
     flyway(url, null).migrate();
     flyway(url, null).validate();
     try (Connection c = connect(url)) {
-      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("22");
+      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("23");
       assertThat(
               scalar(
                   c,
-                  "SELECT (to_jsonb(s)-'pruned_at')::text||to_jsonb(a)::text FROM"
+                  "SELECT (to_jsonb(s)-'pruned_at')::text||(to_jsonb(a)-'rejection_reason')::text FROM"
                       + " studio_guided_sessions s JOIN studio_guided_model_attempts a USING(session_id)"
                       + " WHERE session_id='"
                       + id
                       + "'"))
           .isEqualTo(before);
+      // V23 adds one nullable column and backfills nothing: the upgraded attempt has no reason.
+      assertThat(
+              scalar(
+                  c,
+                  "SELECT rejection_reason IS NULL FROM studio_guided_model_attempts WHERE"
+                      + " session_id='"
+                      + id
+                      + "'"))
+          .isEqualTo("t");
       assertThat(
               scalar(
                   c,

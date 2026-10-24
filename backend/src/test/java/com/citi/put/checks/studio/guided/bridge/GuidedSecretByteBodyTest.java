@@ -3,6 +3,8 @@ package com.citi.put.checks.studio.guided.bridge;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.citi.put.checks.studio.dispatch.DispatchTestAccess;
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.secrets.SecretValue;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -61,7 +63,7 @@ class GuidedSecretByteBodyTest {
     server.start();
     try {
       var client =
-          new GuidedRunnerClient(
+          new HttpRunnerDispatchClient(
               URI.create("https://localhost:" + server.getAddress().getPort()),
               tls,
               () -> "synthetic-controller-token",
@@ -69,7 +71,7 @@ class GuidedSecretByteBodyTest {
       for (int reply : new int[] {200, 503}) {
         status.set(reply);
         var bytes = new AtomicReference<byte[]>();
-        client.observeRequestBytes(bytes::set);
+        DispatchTestAccess.observeRequestBytes(client, bytes::set);
         char[] chars = canary.toCharArray();
         var secret = new SecretValue(chars);
         if (reply == 200) {
@@ -176,12 +178,12 @@ class GuidedSecretByteBodyTest {
     var failed = new AtomicReference<Throwable>();
     var interrupted = new java.util.concurrent.atomic.AtomicBoolean();
     var client =
-        new GuidedRunnerClient(
+        new HttpRunnerDispatchClient(
             URI.create("https://localhost:" + server.getAddress().getPort()),
             tls,
             () -> "synthetic-controller-token",
             contracts);
-    client.observeRequestBytes(owned::set);
+    DispatchTestAccess.observeRequestBytes(client, owned::set);
     long started = System.nanoTime();
     Thread caller =
         Thread.ofVirtual()

@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.citi.put.checks.ChecksApplication;
 import com.citi.put.checks.security.CoreServiceClient;
 import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.citi.put.checks.studio.gateway.StudioGatewayProperties;
@@ -233,7 +234,7 @@ class ObservedProfileDriftTest {
                 GuidedPlanPublisher.class,
                 GuidedPublicationController.class,
                 GuidedPublicationResultProjector.class,
-                ObservedValidationClient.class,
+                HttpRunnerDispatchClient.class,
                 ObservedRevisionVerifier.class,
                 ObservedReplayAuthorization.class,
                 ExecutionReadinessService.class,

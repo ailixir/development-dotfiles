@@ -109,7 +109,7 @@ class ObservedGrantClockIT {
   private record Event(String kind, Instant value) {}
 
   @SpyBean private JdbcTemplate jdbc;
-  @SpyBean private GuidedPublicationAuthorization accounts;
+  @SpyBean private PublicationGrantAuthority accounts;
   @SpyBean private ObservedReplayAuthorizer authorizer;
   @Autowired private StudioService studio;
   @Autowired private StudioAcceptanceService acceptance;

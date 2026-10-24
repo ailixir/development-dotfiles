@@ -94,6 +94,7 @@ class GuidedTranslationTest {
               .put("occurrence", 0)
               .put("operationKind", "click")
               .put("targetIntent", "Confirmation")
+              .putNull("scopeIntent")
               .putNull("referenceIndex")
               .putNull("needId")
               .putNull("predicate");
@@ -841,6 +842,7 @@ class GuidedTranslationTest {
             .put("operationKind", "fill")
             .put("referenceIndex", 0)
             .put("targetIntent", "password")
+            .putNull("scopeIntent")
             .putNull("needId")
             .putNull("predicate");
     ObjectNode plan = c.object();
@@ -1212,6 +1214,7 @@ class GuidedTranslationTest {
             .put("occurrence", 0)
             .put("operationKind", "navigate")
             .put("targetIntent", "page")
+            .putNull("scopeIntent")
             .put("referenceIndex", 0)
             .putNull("needId")
             .putNull("predicate");
@@ -1329,6 +1332,7 @@ class GuidedTranslationTest {
           .put("occurrence", 0)
           .put("operationKind", "click")
           .put("targetIntent", "Submit")
+          .putNull("scopeIntent")
           .putNull("referenceIndex")
           .putNull("needId")
           .putNull("predicate");

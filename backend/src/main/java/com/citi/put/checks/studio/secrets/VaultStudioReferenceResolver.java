@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 
@@ -243,10 +242,5 @@ public class VaultStudioReferenceResolver implements StudioReferenceResolver {
 
   private static void erase(StudioVaultProvider.VaultEntry entry) {
     Arrays.fill(entry.value(), '\0');
-  }
-
-  /** Visible so a test can assert which provider a running context actually selected (AC-9). */
-  public Optional<String> providerName() {
-    return Optional.ofNullable(vault.name());
   }
 }

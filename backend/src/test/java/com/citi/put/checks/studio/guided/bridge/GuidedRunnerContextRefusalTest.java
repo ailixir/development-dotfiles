@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.sun.net.httpserver.HttpsConfigurator;
@@ -45,7 +46,7 @@ class GuidedRunnerContextRefusalTest {
   private final AtomicReference<Integer> status = new AtomicReference<>(409);
   private final ListAppender<ILoggingEvent> logs = new ListAppender<>();
   private HttpsServer server;
-  private GuidedRunnerClient client;
+  private HttpRunnerDispatchClient client;
 
   @BeforeEach
   void start() throws Exception {
@@ -65,18 +66,18 @@ class GuidedRunnerContextRefusalTest {
         });
     server.start();
     client =
-        new GuidedRunnerClient(
+        new HttpRunnerDispatchClient(
             URI.create("https://localhost:" + server.getAddress().getPort()),
             tls,
             () -> "synthetic-controller-token",
             contracts);
     logs.start();
-    ((Logger) LoggerFactory.getLogger(GuidedRunnerClient.class)).addAppender(logs);
+    ((Logger) LoggerFactory.getLogger(HttpRunnerDispatchClient.class)).addAppender(logs);
   }
 
   @AfterEach
   void stop() {
-    ((Logger) LoggerFactory.getLogger(GuidedRunnerClient.class)).detachAppender(logs);
+    ((Logger) LoggerFactory.getLogger(HttpRunnerDispatchClient.class)).detachAppender(logs);
     server.stop(0);
   }
 
@@ -87,7 +88,7 @@ class GuidedRunnerContextRefusalTest {
       assertThat(refusal.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
       assertThat(refusal.status()).isEqualTo(409);
       assertThat(refusal.retryable()).isFalse();
-      assertThat(GuidedRunnerClient.definiteContextRefusal(refusal)).isTrue();
+      assertThat(HttpRunnerDispatchClient.definiteContextRefusal(refusal)).isTrue();
     }
     assertThat(logs.list).hasSize(2);
     assertThat(logs.list.getFirst().getFormattedMessage()).contains("IDENTITY_MISMATCH");
@@ -101,9 +102,9 @@ class GuidedRunnerContextRefusalTest {
     assertThat(busy.getMessage()).isEqualTo("UNKNOWN_OUTCOME");
     assertThat(busy.status()).isEqualTo(409);
     assertThat(busy.retryable()).isFalse();
-    assertThat(busy.messageCode()).isEqualTo(GuidedRunnerClient.CONTEXT_CLOSED_REFUSAL);
-    assertThat(GuidedRunnerClient.definiteContextRefusal(busy)).isFalse();
-    assertThat(GuidedRunnerClient.closedContextRefusal(busy)).isTrue();
+    assertThat(busy.messageCode()).isEqualTo(HttpRunnerDispatchClient.CONTEXT_CLOSED_REFUSAL);
+    assertThat(HttpRunnerDispatchClient.definiteContextRefusal(busy)).isFalse();
+    assertThat(HttpRunnerDispatchClient.closedContextRefusal(busy)).isTrue();
     assertThat(logs.list).hasSize(1);
     assertThat(logs.list.getFirst().getFormattedMessage()).contains("BUSY");
     for (String body :
@@ -117,15 +118,15 @@ class GuidedRunnerContextRefusalTest {
       assertThat(refusal.getMessage())
           .as(body.length() > 60 ? "oversize" : body)
           .isEqualTo("UNKNOWN_OUTCOME");
-      assertThat(GuidedRunnerClient.definiteContextRefusal(refusal)).isFalse();
-      assertThat(GuidedRunnerClient.closedContextRefusal(refusal)).isFalse();
+      assertThat(HttpRunnerDispatchClient.definiteContextRefusal(refusal)).isFalse();
+      assertThat(HttpRunnerDispatchClient.closedContextRefusal(refusal)).isFalse();
     }
     status.set(503);
     var unavailable = refused("context", "{\"code\":\"IDENTITY_MISMATCH\"}");
     assertThat(unavailable.getMessage())
         .as("only a 409 can be a definite refusal")
         .isEqualTo("UNKNOWN_OUTCOME");
-    assertThat(GuidedRunnerClient.closedContextRefusal(unavailable)).isFalse();
+    assertThat(HttpRunnerDispatchClient.closedContextRefusal(unavailable)).isFalse();
     assertThat(logs.list).as("only the closed BUSY refusal is logged").hasSize(1);
     assertThat(rendered()).doesNotContain(CANARY);
   }
@@ -134,7 +135,7 @@ class GuidedRunnerContextRefusalTest {
   void aPrepareRefusalIsNeverWidenedIntoADefiniteOne() {
     var refusal = refused("prepare", "{\"code\":\"IDENTITY_MISMATCH\"}");
     assertThat(refusal.getMessage()).isEqualTo("UNKNOWN_OUTCOME");
-    assertThat(GuidedRunnerClient.definiteContextRefusal(refusal)).isFalse();
+    assertThat(HttpRunnerDispatchClient.definiteContextRefusal(refusal)).isFalse();
   }
 
   private GuidedSessionException refused(String operation, String body) {
